@@ -16,6 +16,15 @@ function findActionLabel(
   return selectedAction?.label ?? 'Событие';
 }
 
+function formatSelectedTitle(
+  actions: QuickAddPanelProps['actions'],
+  selectedActionId: string,
+): string {
+  const label = findActionLabel(actions, selectedActionId);
+
+  return `Добавить ${label.toLowerCase()}`;
+}
+
 export function QuickAddPanel({
   actions,
   onBack,
@@ -27,9 +36,6 @@ export function QuickAddPanel({
 }: QuickAddPanelProps) {
   const titleId = useId();
   const panelRef = useRef<HTMLElement>(null);
-  const selectedLabel = selectedActionId
-    ? findActionLabel(actions, selectedActionId)
-    : null;
 
   useEffect(() => {
     if (!open) {
@@ -87,7 +93,7 @@ export function QuickAddPanel({
       <section
         aria-labelledby={titleId}
         aria-modal="true"
-        className="relative z-10 w-full max-w-lg rounded-t-3xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10 outline-none sm:rounded-3xl"
+        className="relative z-10 flex max-h-[min(92dvh,calc(100dvh-env(safe-area-inset-bottom)))] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10 outline-none sm:rounded-3xl"
         ref={panelRef}
         role="dialog"
         tabIndex={-1}
@@ -96,20 +102,31 @@ export function QuickAddPanel({
           {selectedActionId ? (
             <button
               aria-label="Назад к выбору типа"
-              className="grid size-10 shrink-0 place-items-center rounded-xl border border-slate-200 text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+              className="grid size-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
               onClick={onBack}
               type="button"
             >
-              <span aria-hidden="true" className="text-lg leading-none">
-                ←
-              </span>
+              <svg
+                aria-hidden="true"
+                className="size-5"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M15 18l-6-6 6-6"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                />
+              </svg>
             </button>
           ) : null}
 
           <div className="min-w-0 flex-1">
             <h2 className="text-lg font-bold text-slate-950" id={titleId}>
               {selectedActionId
-                ? `Добавить: ${selectedLabel}`
+                ? formatSelectedTitle(actions, selectedActionId)
                 : 'Добавить событие'}
             </h2>
             {!selectedActionId ? (

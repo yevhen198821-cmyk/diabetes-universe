@@ -11,6 +11,7 @@ import {
   getCurrentTimeString,
   parseGlucoseInput,
 } from '../../lib/quick-add/format-glucose';
+import { triggerSelectionHaptic } from '../../lib/quick-add/trigger-selection-haptic';
 
 interface GlucoseQuickAddFormProps {
   readonly onCancel: () => void;
@@ -31,6 +32,19 @@ function createInitialState(): GlucoseFormState {
   };
 }
 
+function openNativeTimePicker(input: HTMLInputElement): void {
+  if ('showPicker' in input && typeof input.showPicker === 'function') {
+    try {
+      input.showPicker();
+      return;
+    } catch {
+      // showPicker can throw if not supported in the current context.
+    }
+  }
+
+  input.focus();
+}
+
 export function GlucoseQuickAddForm({
   onCancel,
   onSubmit,
@@ -39,6 +53,7 @@ export function GlucoseQuickAddForm({
     useState<GlucoseFormState>(createInitialState);
   const [valueError, setValueError] = useState<string | null>(null);
   const [contextSheetOpen, setContextSheetOpen] = useState(false);
+  const hasValue = formState.value.trim().length > 0;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -63,101 +78,125 @@ export function GlucoseQuickAddForm({
     onCancel();
   };
 
+  const handleContextSelect = (option: string) => {
+    setFormState((current) => ({
+      ...current,
+      context: option,
+    }));
+    setContextSheetOpen(false);
+    triggerSelectionHaptic();
+  };
+
   return (
     <form
-      className="space-y-5 px-5 py-5 sm:px-6 sm:py-6"
+      className="flex min-h-0 flex-col overflow-hidden"
       onSubmit={handleSubmit}
     >
-      <div>
-        <label className={formLabel} htmlFor="quick-add-glucose-value">
-          Уровень глюкозы
-        </label>
-        <div className="relative mt-2">
+      <div className="min-h-0 space-y-5 overflow-x-hidden overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
+        <div>
+          <label className={formLabel} htmlFor="quick-add-glucose-value">
+            Уровень глюкозы
+          </label>
+          <div className="relative mt-2">
+            <input
+              aria-describedby={
+                valueError ? 'quick-add-glucose-value-error' : undefined
+              }
+              aria-invalid={valueError ? true : undefined}
+              autoComplete="off"
+              className={`${formField} pr-24 ${
+                hasValue ? 'font-semibold text-slate-950' : 'text-slate-900'
+              }`}
+              enterKeyHint="done"
+              id="quick-add-glucose-value"
+              inputMode="decimal"
+              name="value"
+              onChange={(event) => {
+                setValueError(null);
+                setFormState((current) => ({
+                  ...current,
+                  value: event.target.value,
+                }));
+              }}
+              placeholder="6,4"
+              required
+              type="text"
+              value={formState.value}
+            />
+            <span
+              className={`pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium ${
+                hasValue ? 'text-slate-500' : 'text-slate-400'
+              }`}
+            >
+              ммоль/л
+            </span>
+          </div>
+          {valueError ? (
+            <p
+              className="mt-2 text-sm text-rose-600"
+              id="quick-add-glucose-value-error"
+            >
+              {valueError}
+            </p>
+          ) : null}
+        </div>
+
+        <div>
+          <label className={formLabel} htmlFor="quick-add-glucose-time">
+            Время
+          </label>
           <input
-            aria-describedby={
-              valueError ? 'quick-add-glucose-value-error' : undefined
-            }
-            aria-invalid={valueError ? true : undefined}
-            autoComplete="off"
-            className={`${formField} pr-24`}
-            id="quick-add-glucose-value"
-            inputMode="decimal"
-            name="value"
+            className={`${formField} mt-2 appearance-auto text-slate-950`}
+            id="quick-add-glucose-time"
+            name="time"
             onChange={(event) => {
-              setValueError(null);
               setFormState((current) => ({
                 ...current,
-                value: event.target.value,
+                time: event.target.value,
               }));
             }}
-            placeholder="6,4"
+            onClick={(event) => {
+              openNativeTimePicker(event.currentTarget);
+            }}
             required
-            type="text"
-            value={formState.value}
+            step={60}
+            type="time"
+            value={formState.time}
           />
-          <span className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium text-slate-500">
-            ммоль/л
-          </span>
         </div>
-        {valueError ? (
-          <p
-            className="mt-2 text-sm text-rose-600"
-            id="quick-add-glucose-value-error"
+
+        <div>
+          <span className={formLabel} id="quick-add-glucose-context-label">
+            Контекст измерения
+          </span>
+          <button
+            aria-haspopup="dialog"
+            aria-labelledby="quick-add-glucose-context-label quick-add-glucose-context-value"
+            className={`${formField} mt-2 flex items-center justify-between text-left font-medium text-slate-950`}
+            onClick={() => setContextSheetOpen(true)}
+            type="button"
           >
-            {valueError}
-          </p>
-        ) : null}
+            <span id="quick-add-glucose-context-value">
+              {formState.context}
+            </span>
+            <ChevronDown
+              aria-hidden="true"
+              className="text-slate-400"
+              size={18}
+            />
+          </button>
+        </div>
       </div>
 
-      <div>
-        <label className={formLabel} htmlFor="quick-add-glucose-time">
-          Время
-        </label>
-        <input
-          className={`${formField} mt-2 appearance-auto`}
-          id="quick-add-glucose-time"
-          name="time"
-          onChange={(event) => {
-            setFormState((current) => ({
-              ...current,
-              time: event.target.value,
-            }));
-          }}
-          required
-          type="time"
-          value={formState.time}
-        />
-      </div>
-
-      <div>
-        <span className={formLabel} id="quick-add-glucose-context-label">
-          Контекст измерения
-        </span>
+      <div className="flex shrink-0 gap-3 border-t border-slate-100 bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
         <button
-          aria-haspopup="dialog"
-          aria-labelledby="quick-add-glucose-context-label quick-add-glucose-context-value"
-          className={`${formField} mt-2 flex items-center justify-between text-left`}
-          onClick={() => setContextSheetOpen(true)}
-          type="button"
-        >
-          <span id="quick-add-glucose-context-value">{formState.context}</span>
-          <ChevronDown
-            aria-hidden="true"
-            className="text-slate-400"
-            size={18}
-          />
-        </button>
-      </div>
-
-      <div className="flex gap-3 pt-1">
-        <button
-          className="h-12 flex-1 basis-0 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+          className="h-12 min-w-0 flex-1 basis-0 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
           onClick={handleCancel}
           type="button"
         >
           Отмена
         </button>
-        <Button className="h-12 flex-1 basis-0" type="submit">
+        <Button className="h-12 min-w-0 flex-1 basis-0" type="submit">
           Сохранить
         </Button>
       </div>
@@ -173,7 +212,7 @@ export function GlucoseQuickAddForm({
           <div
             aria-labelledby="quick-add-glucose-context-sheet-title"
             aria-modal="true"
-            className="relative z-10 w-full max-w-lg rounded-t-3xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/15 sm:rounded-3xl"
+            className="relative z-10 w-full max-w-lg rounded-t-3xl border border-slate-200 bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl shadow-slate-900/15 sm:rounded-3xl"
             role="dialog"
           >
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200 sm:hidden" />
@@ -191,13 +230,7 @@ export function GlucoseQuickAddForm({
                   <button
                     className="flex min-h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-left text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
                     key={option}
-                    onClick={() => {
-                      setFormState((current) => ({
-                        ...current,
-                        context: option,
-                      }));
-                      setContextSheetOpen(false);
-                    }}
+                    onClick={() => handleContextSelect(option)}
                     type="button"
                   >
                     <span>{option}</span>
