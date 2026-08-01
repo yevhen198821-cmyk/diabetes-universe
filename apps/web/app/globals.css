@@ -36,3 +36,15 @@ button,
 input {
   font: inherit;
 }
+
+.timeline-content {
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+}
+
+.timeline-fab {
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+}
+
+::selection {
+  background: rgb(45 212 191 / 0.25);
+}

@@ -6,43 +6,35 @@ interface TimelineListProps {
   readonly events: readonly TimelineEvent[];
 }
 
+const todayLabel = new Intl.DateTimeFormat('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+}).format(new Date());
+
 export function TimelineList({ events }: TimelineListProps) {
   return (
-    <section aria-labelledby="events-title" className="min-w-0">
-      <div className="mb-5 flex items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold tracking-wider text-teal-700 uppercase dark:text-teal-300">
-            Сегодня
-          </p>
-          <h2
-            className="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white"
-            id="events-title"
-          >
-            Лента событий
-          </h2>
-        </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          Новые события сверху
-        </p>
+    <section aria-labelledby="timeline-title" className="min-w-0">
+      <div className="mb-4 flex items-center gap-3">
+        <h2
+          className="shrink-0 text-sm font-semibold text-slate-600"
+          id="timeline-title"
+        >
+          Сегодня
+        </h2>
+        <p className="shrink-0 text-sm text-slate-500">{todayLabel}</p>
+        <div aria-hidden="true" className="h-px flex-1 bg-slate-200" />
       </div>
 
-      <div className="relative space-y-4">
-        <div
-          aria-hidden="true"
-          className="absolute top-8 bottom-8 left-[21px] w-px bg-slate-200 sm:left-[29px] dark:bg-slate-800"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute top-8 bottom-[18%] left-[21px] w-px bg-gradient-to-b from-teal-400/80 via-teal-400/35 to-transparent sm:left-[29px]"
-        />
-        {events.map((event) => (
-          <TimelineEventCard
-            event={event}
-            key={event.id}
-            showLinkedLabel={event.id === 'glucose-1015'}
-          />
+      <ul className="space-y-2.5">
+        {events.map((event, index) => (
+          <li key={event.id}>
+            <TimelineEventCard
+              event={event}
+              isLast={index === events.length - 1}
+            />
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 }
