@@ -1,6 +1,7 @@
 import type { TimelineEvent } from '@diabetes-universe/types';
+import { EventCard } from '@diabetes-universe/ui';
 
-import { TimelineEventCard } from './timeline-event-card';
+import { mapTimelineEventToCard } from './timeline-event-card.mapper';
 
 interface TimelineListProps {
   readonly events: readonly TimelineEvent[];
@@ -26,14 +27,21 @@ export function TimelineList({ events }: TimelineListProps) {
       </div>
 
       <ul className="space-y-2.5">
-        {events.map((event, index) => (
-          <li key={event.id}>
-            <TimelineEventCard
-              event={event}
-              isLast={index === events.length - 1}
-            />
-          </li>
-        ))}
+        {events.map((event, index) => {
+          const eventCardProps = mapTimelineEventToCard(event);
+
+          return (
+            <li className="relative pl-10 sm:pl-12" key={event.id}>
+              <div
+                aria-hidden="true"
+                className={`absolute top-0 left-[15px] w-0.5 bg-slate-300 sm:left-[17px] ${
+                  index === events.length - 1 ? 'h-7' : 'bottom-0'
+                }`}
+              />
+              <EventCard {...eventCardProps} variant="compact" />
+            </li>
+          );
+        })}
       </ul>
     </section>
   );
