@@ -3,6 +3,7 @@
 import type { GlucoseQuickAddEntry } from '@diabetes-universe/types';
 import {
   QuickAddFormActions,
+  QuickAddFormLayout,
   QuickAddOptionSheet,
 } from '@diabetes-universe/ui';
 import { ChevronDown } from 'lucide-react';
@@ -77,11 +78,8 @@ export function GlucoseQuickAddForm({
   };
 
   return (
-    <form
-      className="flex min-h-0 flex-col overflow-hidden"
-      onSubmit={handleSubmit}
-    >
-      <div className="min-h-0 space-y-5 overflow-x-hidden overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
+    <QuickAddFormLayout onSubmit={handleSubmit}>
+      <QuickAddFormLayout.Body>
         <div>
           <label className={formLabel} htmlFor="quick-add-glucose-value">
             Уровень глюкозы
@@ -175,9 +173,11 @@ export function GlucoseQuickAddForm({
             />
           </button>
         </div>
-      </div>
+      </QuickAddFormLayout.Body>
 
-      <QuickAddFormActions onCancel={handleCancel} />
+      <QuickAddFormLayout.Footer>
+        <QuickAddFormActions inline onCancel={handleCancel} />
+      </QuickAddFormLayout.Footer>
 
       {contextSheetOpen ? (
         <QuickAddOptionSheet
@@ -188,6 +188,6 @@ export function GlucoseQuickAddForm({
           title="Контекст измерения"
         />
       ) : null}
-    </form>
+    </QuickAddFormLayout>
   );
 }

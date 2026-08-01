@@ -2,6 +2,7 @@ import { Button } from '../../button';
 
 export interface QuickAddFormActionsProps {
   readonly cancelLabel?: string;
+  readonly inline?: boolean;
   readonly submitLabel?: string;
   readonly submitDisabled?: boolean;
   readonly onCancel: () => void;
@@ -9,12 +10,13 @@ export interface QuickAddFormActionsProps {
 
 export function QuickAddFormActions({
   cancelLabel = 'Отмена',
+  inline = false,
   onCancel,
   submitDisabled = false,
   submitLabel = 'Сохранить',
 }: QuickAddFormActionsProps) {
-  return (
-    <div className="flex shrink-0 gap-3 border-t border-slate-100 bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
+  const actions = (
+    <>
       <button
         className="h-12 min-w-0 flex-1 basis-0 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
         onClick={onCancel}
@@ -29,6 +31,16 @@ export function QuickAddFormActions({
       >
         {submitLabel}
       </Button>
+    </>
+  );
+
+  if (inline) {
+    return actions;
+  }
+
+  return (
+    <div className="flex shrink-0 gap-3 border-t border-slate-100 bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
+      {actions}
     </div>
   );
 }

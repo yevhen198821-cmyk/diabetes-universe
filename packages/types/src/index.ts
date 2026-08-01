@@ -18,6 +18,9 @@ export type {
 export type {
   GlucoseQuickAddEntry,
   InsulinQuickAddEntry,
+  NutritionEntryMode,
+  NutritionProductEntry,
+  NutritionQuickAddEntry,
   QuickAddAction,
   QuickAddCategory,
 } from './quick-add';
