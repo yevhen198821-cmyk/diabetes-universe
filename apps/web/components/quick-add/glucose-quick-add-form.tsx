@@ -1,8 +1,11 @@
 'use client';
 
 import type { GlucoseQuickAddEntry } from '@diabetes-universe/types';
-import { Button, haptics } from '@diabetes-universe/ui';
-import { Check, ChevronDown } from 'lucide-react';
+import {
+  QuickAddFormActions,
+  QuickAddOptionSheet,
+} from '@diabetes-universe/ui';
+import { ChevronDown } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
 import { formField, formLabel } from '../timeline/ui-styles';
@@ -11,6 +14,7 @@ import {
   getCurrentTimeString,
   parseGlucoseInput,
 } from '../../lib/quick-add/format-glucose';
+import { openNativeTimePicker } from '../../lib/quick-add/open-native-time-picker';
 
 interface GlucoseQuickAddFormProps {
   readonly onCancel: () => void;
@@ -29,19 +33,6 @@ function createInitialState(): GlucoseFormState {
     time: getCurrentTimeString(),
     value: '',
   };
-}
-
-function openNativeTimePicker(input: HTMLInputElement): void {
-  if ('showPicker' in input && typeof input.showPicker === 'function') {
-    try {
-      input.showPicker();
-      return;
-    } catch {
-      // showPicker can throw if not supported in the current context.
-    }
-  }
-
-  input.focus();
 }
 
 export function GlucoseQuickAddForm({
@@ -83,7 +74,6 @@ export function GlucoseQuickAddForm({
       context: option,
     }));
     setContextSheetOpen(false);
-    haptics.selection();
   };
 
   return (
@@ -187,65 +177,16 @@ export function GlucoseQuickAddForm({
         </div>
       </div>
 
-      <div className="flex shrink-0 gap-3 border-t border-slate-100 bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
-        <button
-          className="h-12 min-w-0 flex-1 basis-0 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-          onClick={handleCancel}
-          type="button"
-        >
-          Отмена
-        </button>
-        <Button className="h-12 min-w-0 flex-1 basis-0" type="submit">
-          Сохранить
-        </Button>
-      </div>
+      <QuickAddFormActions onCancel={handleCancel} />
 
       {contextSheetOpen ? (
-        <div className="fixed inset-0 z-[70] flex items-end justify-center sm:p-6">
-          <button
-            aria-label="Закрыть выбор контекста"
-            className="absolute inset-0 bg-slate-950/30 backdrop-blur-[1px]"
-            onClick={() => setContextSheetOpen(false)}
-            type="button"
-          />
-          <div
-            aria-labelledby="quick-add-glucose-context-sheet-title"
-            aria-modal="true"
-            className="relative z-10 w-full max-w-lg rounded-t-3xl border border-slate-200 bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl shadow-slate-900/15 sm:rounded-3xl"
-            role="dialog"
-          >
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200 sm:hidden" />
-            <h3
-              className="text-base font-bold text-slate-950"
-              id="quick-add-glucose-context-sheet-title"
-            >
-              Контекст измерения
-            </h3>
-            <div className="mt-4 space-y-2">
-              {glucoseContextOptions.map((option) => {
-                const selected = option === formState.context;
-
-                return (
-                  <button
-                    className="flex min-h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-left text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-                    key={option}
-                    onClick={() => handleContextSelect(option)}
-                    type="button"
-                  >
-                    <span>{option}</span>
-                    {selected ? (
-                      <Check
-                        aria-hidden="true"
-                        className="text-teal-700"
-                        size={18}
-                      />
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+        <QuickAddOptionSheet
+          onClose={() => setContextSheetOpen(false)}
+          onSelect={handleContextSelect}
+          options={glucoseContextOptions}
+          selectedValue={formState.context}
+          title="Контекст измерения"
+        />
       ) : null}
     </form>
   );

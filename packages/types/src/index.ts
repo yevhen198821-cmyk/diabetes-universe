@@ -17,6 +17,7 @@ export type {
 } from './timeline';
 export type {
   GlucoseQuickAddEntry,
+  InsulinQuickAddEntry,
   QuickAddAction,
   QuickAddCategory,
 } from './quick-add';
