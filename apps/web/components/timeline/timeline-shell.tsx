@@ -4,6 +4,7 @@ import type {
   GlucoseQuickAddEntry,
   InsulinQuickAddEntry,
   LastGlucose,
+  NutritionQuickAddEntry,
   TimelineEvent,
 } from '@diabetes-universe/types';
 import { useState } from 'react';
@@ -19,6 +20,7 @@ import {
   sortTimelineEvents,
 } from '../../lib/quick-add/create-glucose-timeline-event';
 import { createInsulinTimelineEvent } from '../../lib/quick-add/create-insulin-timeline-event';
+import { createNutritionTimelineEvent } from '../../lib/quick-add/create-nutrition-timeline-event';
 import { formatGlucoseValue } from '../../lib/quick-add/format-glucose';
 import { DaySummaryPanel } from './day-summary-panel';
 import { LastGlucoseCard } from './last-glucose-card';
@@ -54,6 +56,14 @@ export function TimelineShell() {
     );
   };
 
+  const handleNutritionSubmit = (entry: NutritionQuickAddEntry) => {
+    const newEvent = createNutritionTimelineEvent(entry);
+
+    setEvents((currentEvents) =>
+      sortTimelineEvents([...currentEvents, newEvent]),
+    );
+  };
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-950">
       <TopBar />
@@ -73,6 +83,7 @@ export function TimelineShell() {
       <QuickAddRoot
         onGlucoseSubmit={handleGlucoseSubmit}
         onInsulinSubmit={handleInsulinSubmit}
+        onNutritionSubmit={handleNutritionSubmit}
       />
     </div>
   );

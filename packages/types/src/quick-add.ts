@@ -24,3 +24,23 @@ export interface InsulinQuickAddEntry {
   readonly time: string;
   readonly context?: string;
 }
+
+export type NutritionEntryMode = 'manual' | 'products';
+
+export interface NutritionProductEntry {
+  readonly id: string;
+  readonly productId: string;
+  readonly productName: string;
+  readonly weightGrams: number;
+  readonly carbsPer100Grams: number;
+  readonly calculatedCarbsGrams: number;
+}
+
+export interface NutritionQuickAddEntry {
+  readonly mode: NutritionEntryMode;
+  readonly mealType: string;
+  readonly carbohydratesGrams: number;
+  readonly time: string;
+  readonly note?: string;
+  readonly products?: readonly NutritionProductEntry[];
+}

@@ -31,6 +31,11 @@ const eventMappings: Record<TimelineEventKind, EventMapping> = {
     icon: CookingPot,
     unit: 'г углеводов',
   },
+  nutrition: {
+    cardType: 'nutrition',
+    icon: CookingPot,
+    unit: 'г углеводов',
+  },
   activity: {
     cardType: 'activity',
     icon: Activity,
