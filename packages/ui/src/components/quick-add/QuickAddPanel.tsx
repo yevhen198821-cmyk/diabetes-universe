@@ -23,6 +23,7 @@ export function QuickAddPanel({
   onSelectAction,
   open,
   selectedActionId,
+  selectedContent,
 }: QuickAddPanelProps) {
   const titleId = useId();
   const panelRef = useRef<HTMLElement>(null);
@@ -131,12 +132,14 @@ export function QuickAddPanel({
         </div>
 
         {selectedActionId ? (
-          <div className="px-5 py-8 sm:px-6">
-            <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-600">
-              Форма ввода появится в следующем этапе. Сейчас доступен только
-              выбор типа события.
-            </p>
-          </div>
+          (selectedContent ?? (
+            <div className="px-5 py-8 sm:px-6">
+              <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-600">
+                Форма ввода появится в следующем этапе. Сейчас доступен только
+                выбор типа события.
+              </p>
+            </div>
+          ))
         ) : (
           <div className="grid grid-cols-2 gap-3 px-5 py-5 sm:gap-4 sm:px-6 sm:py-6">
             {actions.map((action) => (

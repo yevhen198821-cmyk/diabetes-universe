@@ -11,3 +11,9 @@ export interface QuickAddAction {
   readonly label: string;
   readonly description: string;
 }
+
+export interface GlucoseQuickAddEntry {
+  readonly valueMmol: number;
+  readonly time: string;
+  readonly context: string;
+}

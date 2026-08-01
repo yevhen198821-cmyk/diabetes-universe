@@ -1,9 +1,23 @@
+'use client';
+
+import type {
+  GlucoseQuickAddEntry,
+  LastGlucose,
+  TimelineEvent,
+} from '@diabetes-universe/types';
+import { useState } from 'react';
+
 import {
   daySummary,
-  lastGlucose,
+  lastGlucose as initialLastGlucose,
   nextStep,
-  timelineEvents,
+  timelineEvents as initialTimelineEvents,
 } from '../../lib/mocks/timeline';
+import {
+  createGlucoseTimelineEvent,
+  sortTimelineEvents,
+} from '../../lib/quick-add/create-glucose-timeline-event';
+import { formatGlucoseValue } from '../../lib/quick-add/format-glucose';
 import { DaySummaryPanel } from './day-summary-panel';
 import { LastGlucoseCard } from './last-glucose-card';
 import { NextStepPanel } from './next-step-panel';
@@ -12,6 +26,24 @@ import { TimelineList } from './timeline-list';
 import { TopBar } from './top-bar';
 
 export function TimelineShell() {
+  const [events, setEvents] = useState<readonly TimelineEvent[]>(
+    initialTimelineEvents,
+  );
+  const [lastGlucose, setLastGlucose] =
+    useState<LastGlucose>(initialLastGlucose);
+
+  const handleGlucoseSubmit = (entry: GlucoseQuickAddEntry) => {
+    const newEvent = createGlucoseTimelineEvent(entry);
+
+    setEvents((currentEvents) =>
+      sortTimelineEvents([...currentEvents, newEvent]),
+    );
+    setLastGlucose({
+      time: entry.time,
+      value: formatGlucoseValue(entry.valueMmol),
+    });
+  };
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-950">
       <TopBar />
@@ -21,14 +53,14 @@ export function TimelineShell() {
         <LastGlucoseCard glucose={lastGlucose} />
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start">
-          <TimelineList events={timelineEvents} />
+          <TimelineList events={events} />
           <div className="lg:sticky lg:top-24">
             <DaySummaryPanel summary={daySummary} />
           </div>
         </div>
       </main>
 
-      <QuickAddRoot />
+      <QuickAddRoot onGlucoseSubmit={handleGlucoseSubmit} />
     </div>
   );
 }
