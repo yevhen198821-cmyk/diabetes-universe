@@ -9,8 +9,10 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@diabetes-universe/types": "workspace:*",
     "@diabetes-universe/ui": "workspace:*",
     "@tailwindcss/postcss": "^4.3.3",
+    "lucide-react": "^1.28.0",
     "next": "^16.2.12",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
