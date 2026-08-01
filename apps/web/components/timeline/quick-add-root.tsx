@@ -10,13 +10,7 @@ export function QuickAddRoot() {
   const [open, setOpen] = useState(false);
   const [selectedActionId, setSelectedActionId] = useState<string | null>(null);
 
-  const handleToggle = () => {
-    if (open) {
-      setOpen(false);
-      setSelectedActionId(null);
-      return;
-    }
-
+  const handleOpen = () => {
     setOpen(true);
   };
 
@@ -27,7 +21,7 @@ export function QuickAddRoot() {
 
   return (
     <>
-      <FloatingActionButton isOpen={open} onClick={handleToggle} />
+      {!open ? <FloatingActionButton onClick={handleOpen} /> : null}
       <QuickAddPanel
         actions={quickAddActions}
         onBack={() => setSelectedActionId(null)}
