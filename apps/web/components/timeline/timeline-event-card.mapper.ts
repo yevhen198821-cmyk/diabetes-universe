@@ -3,7 +3,7 @@ import type {
   TimelineEventKind,
 } from '@diabetes-universe/types';
 import type { EventCardProps, EventCardType } from '@diabetes-universe/ui';
-import { Activity, CookingPot, Droplets, Syringe } from 'lucide-react';
+import { Activity, CookingPot, Droplets, Pill, Syringe } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { createElement } from 'react';
 
@@ -36,6 +36,11 @@ const eventMappings: Record<TimelineEventKind, EventMapping> = {
     icon: CookingPot,
     unit: 'г углеводов',
   },
+  medication: {
+    cardType: 'medication',
+    icon: Pill,
+    unit: '',
+  },
   activity: {
     cardType: 'activity',
     icon: Activity,
@@ -53,6 +58,7 @@ export function mapTimelineEventToCard(
   event: TimelineEvent,
 ): TimelineEventCardProps {
   const mapping = eventMappings[event.kind];
+  const unit = event.unit ?? mapping.unit;
 
   return {
     context: event.context,
@@ -63,7 +69,7 @@ export function mapTimelineEventToCard(
     time: event.time,
     title: event.title,
     type: mapping.cardType,
-    unit: mapping.unit,
-    value: removeUnit(event.value, mapping.unit),
+    unit,
+    value: removeUnit(event.value, unit),
   };
 }

@@ -44,3 +44,17 @@ export interface NutritionQuickAddEntry {
   readonly note?: string;
   readonly products?: readonly NutritionProductEntry[];
 }
+
+export interface MedicationReference {
+  readonly id: string;
+  readonly name: string;
+}
+
+export interface MedicationQuickAddEntry {
+  readonly medication: MedicationReference;
+  readonly dose: number;
+  readonly unit: string;
+  readonly time: string;
+  readonly context?: string;
+  readonly note?: string;
+}
