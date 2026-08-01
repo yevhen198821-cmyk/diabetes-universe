@@ -15,4 +15,8 @@ export type {
   TimelineEvent,
   TimelineEventKind,
 } from './timeline';
-export type { QuickAddAction, QuickAddCategory } from './quick-add';
+export type {
+  GlucoseQuickAddEntry,
+  QuickAddAction,
+  QuickAddCategory,
+} from './quick-add';

@@ -12,3 +12,4 @@ export type {
   QuickAddActionItem,
   QuickAddPanelProps,
 } from './components/quick-add';
+export { haptics } from './lib/haptics';

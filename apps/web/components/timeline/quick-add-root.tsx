@@ -1,12 +1,18 @@
 'use client';
 
+import type { GlucoseQuickAddEntry } from '@diabetes-universe/types';
 import { QuickAddPanel } from '@diabetes-universe/ui';
 import { useState } from 'react';
 
+import { GlucoseQuickAddForm } from '../quick-add/glucose-quick-add-form';
 import { quickAddActions } from '../../lib/quick-add/actions';
 import { FloatingActionButton } from './floating-action-button';
 
-export function QuickAddRoot() {
+interface QuickAddRootProps {
+  readonly onGlucoseSubmit?: (entry: GlucoseQuickAddEntry) => void;
+}
+
+export function QuickAddRoot({ onGlucoseSubmit }: QuickAddRootProps) {
   const [open, setOpen] = useState(false);
   const [selectedActionId, setSelectedActionId] = useState<string | null>(null);
 
@@ -19,6 +25,23 @@ export function QuickAddRoot() {
     setSelectedActionId(null);
   };
 
+  const handleGlucoseSubmit = (entry: GlucoseQuickAddEntry) => {
+    onGlucoseSubmit?.(entry);
+    handleClose();
+  };
+
+  const handleGlucoseCancel = () => {
+    setSelectedActionId(null);
+  };
+
+  const selectedContent =
+    selectedActionId === 'glucose' && onGlucoseSubmit ? (
+      <GlucoseQuickAddForm
+        onCancel={handleGlucoseCancel}
+        onSubmit={handleGlucoseSubmit}
+      />
+    ) : undefined;
+
   return (
     <>
       {!open ? <FloatingActionButton onClick={handleOpen} /> : null}
@@ -29,6 +52,7 @@ export function QuickAddRoot() {
         onSelectAction={setSelectedActionId}
         open={open}
         selectedActionId={selectedActionId}
+        selectedContent={selectedContent}
       />
     </>
   );

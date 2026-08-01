@@ -14,6 +14,7 @@ export interface QuickAddPanelProps {
   readonly open: boolean;
   readonly actions: readonly QuickAddActionItem[];
   readonly selectedActionId: string | null;
+  readonly selectedContent?: ReactNode;
   readonly onClose: () => void;
   readonly onSelectAction: (actionId: string) => void;
   readonly onBack: () => void;
