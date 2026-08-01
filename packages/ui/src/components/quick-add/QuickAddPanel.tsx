@@ -119,16 +119,18 @@ export function QuickAddPanel({
             ) : null}
           </div>
 
-          <button
-            aria-label="Закрыть"
-            className="grid size-10 shrink-0 place-items-center rounded-xl border border-slate-200 text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-            onClick={onClose}
-            type="button"
-          >
-            <span aria-hidden="true" className="text-lg leading-none">
-              ×
-            </span>
-          </button>
+          {!selectedActionId ? (
+            <button
+              aria-label="Закрыть"
+              className="grid size-10 shrink-0 place-items-center rounded-xl border border-slate-200 text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+              onClick={onClose}
+              type="button"
+            >
+              <span aria-hidden="true" className="text-lg leading-none">
+                ×
+              </span>
+            </button>
+          ) : null}
         </div>
 
         {selectedActionId ? (
