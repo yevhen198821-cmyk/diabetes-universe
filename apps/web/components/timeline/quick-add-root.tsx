@@ -30,9 +30,16 @@ export function QuickAddRoot({ onGlucoseSubmit }: QuickAddRootProps) {
     handleClose();
   };
 
+  const handleGlucoseCancel = () => {
+    setSelectedActionId(null);
+  };
+
   const selectedContent =
     selectedActionId === 'glucose' && onGlucoseSubmit ? (
-      <GlucoseQuickAddForm onSubmit={handleGlucoseSubmit} />
+      <GlucoseQuickAddForm
+        onCancel={handleGlucoseCancel}
+        onSubmit={handleGlucoseSubmit}
+      />
     ) : undefined;
 
   return (

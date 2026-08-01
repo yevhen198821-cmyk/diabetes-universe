@@ -12,6 +12,7 @@ import {
 } from '../../lib/quick-add/format-glucose';
 
 interface GlucoseQuickAddFormProps {
+  readonly onCancel: () => void;
   readonly onSubmit: (entry: GlucoseQuickAddEntry) => void;
 }
 
@@ -29,7 +30,10 @@ function createInitialState(): GlucoseFormState {
   };
 }
 
-export function GlucoseQuickAddForm({ onSubmit }: GlucoseQuickAddFormProps) {
+export function GlucoseQuickAddForm({
+  onCancel,
+  onSubmit,
+}: GlucoseQuickAddFormProps) {
   const [formState, setFormState] =
     useState<GlucoseFormState>(createInitialState);
   const [valueError, setValueError] = useState<string | null>(null);
@@ -49,6 +53,12 @@ export function GlucoseQuickAddForm({ onSubmit }: GlucoseQuickAddFormProps) {
       time: formState.time,
       valueMmol: parsedValue,
     });
+  };
+
+  const handleCancel = () => {
+    setFormState(createInitialState());
+    setValueError(null);
+    onCancel();
   };
 
   return (
@@ -141,9 +151,18 @@ export function GlucoseQuickAddForm({ onSubmit }: GlucoseQuickAddFormProps) {
         </select>
       </div>
 
-      <Button className="w-full" type="submit">
-        Сохранить
-      </Button>
+      <div className="flex gap-3 pt-1">
+        <button
+          className="h-12 flex-1 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+          onClick={handleCancel}
+          type="button"
+        >
+          Отмена
+        </button>
+        <Button className="h-12 flex-1" type="submit">
+          Сохранить
+        </Button>
+      </div>
     </form>
   );
 }
