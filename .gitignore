@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build output
+.next/
+dist/
+out/
+.turbo/
+
+# Test output
+coverage/
+
+# Environment files
+.env
+.env.*.local
+
+# Local environment
+.env.local
+
+# Tooling and operating system files
+*.tsbuildinfo
+.DS_Store
+*.log
+**/next-env.d.ts
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.cache/
+tmp/
+temp/
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
