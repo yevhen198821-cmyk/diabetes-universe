@@ -3,13 +3,7 @@
  * Aligns with user-created EventCard types.
  */
 export type QuickAddCategory =
-  | 'glucose'
-  | 'insulin'
-  | 'nutrition'
-  | 'activity'
-  | 'medication'
-  | 'note'
-  | 'reminder';
+  'glucose' | 'insulin' | 'nutrition' | 'activity' | 'medication' | 'note';
 
 export interface QuickAddAction {
   readonly id: string;

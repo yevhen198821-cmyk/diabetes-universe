@@ -2,7 +2,6 @@ import type { QuickAddAction } from '@diabetes-universe/types';
 import type { QuickAddActionItem } from '@diabetes-universe/ui';
 import {
   Activity,
-  Bell,
   CookingPot,
   Droplets,
   Pill,
@@ -49,12 +48,6 @@ const quickAddActionDefinitions: readonly QuickAddAction[] = [
     label: 'Заметка',
     description: 'Добавить самочувствие или контекст',
   },
-  {
-    id: 'reminder',
-    category: 'reminder',
-    label: 'Напоминание',
-    description: 'Запланировать действие',
-  },
 ];
 
 const quickAddIcons: Record<QuickAddAction['category'], LucideIcon> = {
@@ -64,7 +57,6 @@ const quickAddIcons: Record<QuickAddAction['category'], LucideIcon> = {
   activity: Activity,
   medication: Pill,
   note: StickyNote,
-  reminder: Bell,
 };
 
 export const quickAddActions: readonly QuickAddActionItem[] =
