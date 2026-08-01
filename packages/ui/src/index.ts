@@ -16,6 +16,7 @@ export {
 export type {
   QuickAddActionItem,
   QuickAddFormActionsProps,
+  QuickAddOptionGroup,
   QuickAddOptionSheetProps,
   QuickAddPanelProps,
 } from './components/quick-add';

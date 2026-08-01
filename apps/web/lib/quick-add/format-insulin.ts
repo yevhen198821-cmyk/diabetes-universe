@@ -5,13 +5,16 @@ export function formatInsulinDose(units: number): string {
   });
 }
 
-export function parseInsulinDoseInput(raw: string): number | null {
-  const normalized = raw.trim().replace(',', '.');
+const INSULIN_DOSE_PATTERN = /^\d+(?:[.,]\d+)?$/;
 
-  if (!normalized) {
+export function parseInsulinDoseInput(raw: string): number | null {
+  const trimmed = raw.trim();
+
+  if (!trimmed || !INSULIN_DOSE_PATTERN.test(trimmed)) {
     return null;
   }
 
+  const normalized = trimmed.replace(',', '.');
   const value = Number(normalized);
 
   if (!Number.isFinite(value) || value <= 0 || value > 100) {

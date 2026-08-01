@@ -9,7 +9,7 @@ import { ChevronDown } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
 import { insulinContextOptions } from '../../lib/quick-add/insulin-context-options';
-import { insulinPreparationOptions } from '../../lib/quick-add/insulin-preparation-options';
+import { insulinPreparationOptionGroups } from '../../lib/quick-add/insulin-preparation-options';
 import { getCurrentTimeString } from '../../lib/quick-add/format-glucose';
 import { parseInsulinDoseInput } from '../../lib/quick-add/format-insulin';
 import { openNativeTimePicker } from '../../lib/quick-add/open-native-time-picker';
@@ -98,7 +98,7 @@ export function InsulinQuickAddForm({
             type="button"
           >
             <span id="quick-add-insulin-preparation-value">
-              {formState.preparation || 'Выберите препарат'}
+              {formState.preparation || 'Выберите инсулин'}
             </span>
             <ChevronDown
               aria-hidden="true"
@@ -194,7 +194,7 @@ export function InsulinQuickAddForm({
             type="button"
           >
             <span id="quick-add-insulin-context-value">
-              {formState.context || 'Не выбран'}
+              {formState.context || 'Выберите контекст'}
             </span>
             <ChevronDown
               aria-hidden="true"
@@ -212,6 +212,7 @@ export function InsulinQuickAddForm({
 
       {preparationSheetOpen ? (
         <QuickAddOptionSheet
+          groups={insulinPreparationOptionGroups}
           onClose={() => setPreparationSheetOpen(false)}
           onSelect={(preparation) => {
             setFormState((current) => ({
@@ -220,7 +221,6 @@ export function InsulinQuickAddForm({
             }));
             setPreparationSheetOpen(false);
           }}
-          options={insulinPreparationOptions}
           selectedValue={formState.preparation || undefined}
           title="Препарат"
         />
