@@ -1,4 +1,4 @@
-export type TimelineEventKind = 'glucose' | 'meal' | 'insulin';
+export type TimelineEventKind = 'glucose' | 'meal' | 'insulin' | 'activity';
 
 export interface TimelineEvent {
   readonly id: string;
