@@ -5,9 +5,9 @@ import {
   timelineEvents,
 } from '../../lib/mocks/timeline';
 import { DaySummaryPanel } from './day-summary-panel';
-import { FloatingActionButton } from './floating-action-button';
 import { LastGlucoseCard } from './last-glucose-card';
 import { NextStepPanel } from './next-step-panel';
+import { QuickAddRoot } from './quick-add-root';
 import { TimelineList } from './timeline-list';
 import { TopBar } from './top-bar';
 
@@ -28,7 +28,7 @@ export function TimelineShell() {
         </div>
       </main>
 
-      <FloatingActionButton />
+      <QuickAddRoot />
     </div>
   );
 }

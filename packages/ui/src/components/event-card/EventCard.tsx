@@ -1,50 +1,7 @@
 import type { ReactNode } from 'react';
 
-import type {
-  EventCardProps,
-  EventCardStatus,
-  EventCardType,
-} from './EventCard.types';
-
-interface EventAppearance {
-  readonly accent: string;
-  readonly fallbackIcon: string;
-}
-
-const appearances: Record<EventCardType, EventAppearance> = {
-  glucose: {
-    accent: 'bg-sky-500/10 text-sky-600',
-    fallbackIcon: 'G',
-  },
-  insulin: {
-    accent: 'bg-rose-500/10 text-rose-600',
-    fallbackIcon: 'I',
-  },
-  nutrition: {
-    accent: 'bg-amber-500/10 text-amber-600',
-    fallbackIcon: 'N',
-  },
-  activity: {
-    accent: 'bg-emerald-500/10 text-emerald-600',
-    fallbackIcon: 'A',
-  },
-  medication: {
-    accent: 'bg-violet-500/10 text-violet-600',
-    fallbackIcon: 'M',
-  },
-  reminder: {
-    accent: 'bg-orange-500/10 text-orange-600',
-    fallbackIcon: 'R',
-  },
-  note: {
-    accent: 'bg-slate-500/10 text-slate-600',
-    fallbackIcon: 'N',
-  },
-  ai_insight: {
-    accent: 'bg-teal-500/10 text-teal-700',
-    fallbackIcon: 'AI',
-  },
-};
+import { eventTypeAppearances } from '../../theme/event-type-appearance';
+import type { EventCardProps, EventCardStatus } from './EventCard.types';
 
 const statusLabels: Record<EventCardStatus, string> = {
   default: '',
@@ -90,7 +47,7 @@ export function EventCard({
   value,
   variant = 'standard',
 }: EventCardProps) {
-  const { accent, fallbackIcon } = appearances[type];
+  const { accent, fallbackIcon } = eventTypeAppearances[type];
   const statusLabel = statusLabels[status];
   const ariaLabel = [time, title, value, unit, context, statusLabel]
     .filter(Boolean)
