@@ -94,6 +94,10 @@ function getProductRowCarbs(row: NutritionProductRowState): number | null {
   return calculateNutritionProductCarbs(weightGrams, row.carbsPer100Grams);
 }
 
+function isProductRowEmpty(row: NutritionProductRowState): boolean {
+  return row.productId.length === 0 && row.weight.trim().length === 0;
+}
+
 function isProductRowValid(row: NutritionProductRowState): boolean {
   return getProductRowCarbs(row) !== null && row.productId.length > 0;
 }
@@ -154,18 +158,21 @@ export function NutritionQuickAddForm({
   );
   const manualCarbsHasValue = formState.manualCarbs.trim().length > 0;
   const manualCarbsInvalid = manualCarbsHasValue && parsedManualCarbs === null;
-  const productRowsValid = formState.productRows.every(isProductRowValid);
-  const productEntries = formState.productRows
+  const activeProductRows = formState.productRows.filter(
+    (row) => !isProductRowEmpty(row),
+  );
+  const productRowsValid = activeProductRows.every(isProductRowValid);
+  const productEntries = activeProductRows
     .map(buildProductEntry)
     .filter((entry): entry is NutritionProductEntry => entry !== null);
-  const productsTotalCarbs = getProductsTotalCarbs(formState.productRows);
+  const productsTotalCarbs = getProductsTotalCarbs(activeProductRows);
   const canSubmitManual =
     formState.mealType.length > 0 &&
     parsedManualCarbs !== null &&
     formState.time.length > 0;
   const canSubmitProducts =
     formState.mealType.length > 0 &&
-    productEntries.length > 0 &&
+    activeProductRows.length > 0 &&
     productRowsValid &&
     productsTotalCarbs > 0 &&
     formState.time.length > 0;

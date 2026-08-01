@@ -14,7 +14,11 @@ function QuickAddFormLayoutRoot({
   onSubmit,
 }: QuickAddFormLayoutProps) {
   return (
-    <form className="flex min-h-0 flex-col overflow-hidden" onSubmit={onSubmit}>
+    <form
+      className="flex min-h-0 flex-col overflow-hidden"
+      noValidate
+      onSubmit={onSubmit}
+    >
       {children}
     </form>
   );
