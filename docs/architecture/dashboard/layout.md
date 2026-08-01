@@ -1,4 +1,4 @@
-# Reminders Overview
+# Dashboard Layout
 
 ## Purpose
 
@@ -7,6 +7,8 @@
 <!-- Allowed values: Draft | Approved | Deprecated -->
 
 ## Responsibility
+
+## Layout Goals
 
 ## Dependencies
 
