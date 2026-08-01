@@ -9,6 +9,11 @@ export type {
 } from './components/event-card';
 export {
   QuickAddActionButton,
+  QuickAddFormPreview,
+  QuickAddNumberWithUnitField,
+  QuickAddSelectField,
+  QuickAddTextAreaField,
+  QuickAddTimeField,
   QuickAddFormActions,
   QuickAddFormLayout,
   QuickAddOptionSheet,
@@ -16,11 +21,18 @@ export {
 } from './components/quick-add';
 export type {
   QuickAddActionItem,
+  QuickAddFormPreviewProps,
   QuickAddFormActionsProps,
   QuickAddFormLayoutProps,
   QuickAddFormLayoutSectionProps,
+  QuickAddNumberWithUnitFieldProps,
+  QuickAddOption,
   QuickAddOptionGroup,
+  QuickAddOptionItem,
   QuickAddOptionSheetProps,
   QuickAddPanelProps,
+  QuickAddSelectFieldProps,
+  QuickAddTextAreaFieldProps,
+  QuickAddTimeFieldProps,
 } from './components/quick-add';
 export { haptics } from './lib/haptics';

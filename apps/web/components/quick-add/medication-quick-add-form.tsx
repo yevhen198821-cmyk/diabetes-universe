@@ -5,23 +5,28 @@ import type {
   MedicationReference,
 } from '@diabetes-universe/types';
 import {
+  QuickAddFormPreview,
   QuickAddFormActions,
   QuickAddFormLayout,
+  QuickAddNumberWithUnitField,
   QuickAddOptionSheet,
+  QuickAddSelectField,
+  QuickAddTextAreaField,
+  QuickAddTimeField,
 } from '@diabetes-universe/ui';
-import { ChevronDown } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
 import { medicationContextOptions } from '../../lib/quick-add/medication-context-options';
 import {
   findMedicationDemoOptionByName,
-  medicationDemoOptionNames,
+  medicationDemoSheetOptions,
 } from '../../lib/quick-add/medication-demo-options';
 import { medicationUnitOptions } from '../../lib/quick-add/medication-unit-options';
 import { getCurrentTimeString } from '../../lib/quick-add/format-glucose';
-import { parseMedicationDoseInput } from '../../lib/quick-add/format-medication';
-import { openNativeTimePicker } from '../../lib/quick-add/open-native-time-picker';
-import { formField, formLabel } from '../timeline/ui-styles';
+import {
+  formatMedicationDose,
+  parseMedicationDoseInput,
+} from '../../lib/quick-add/format-medication';
 
 const NOTE_COUNTER_THRESHOLD = 160;
 const NOTE_MAX_LENGTH = 200;
@@ -63,12 +68,28 @@ export function MedicationQuickAddForm({
   const [contextSheetOpen, setContextSheetOpen] = useState(false);
   const parsedDose = parseMedicationDoseInput(formState.dose);
   const hasDose = formState.dose.trim().length > 0;
-  const showNoteCounter = formState.note.length >= NOTE_COUNTER_THRESHOLD;
+  const doseValidationError =
+    doseError ??
+    (hasDose && parsedDose === null
+      ? 'Введите дозу больше 0 и не более 100000'
+      : null);
   const canSubmit =
     formState.medication !== null &&
     parsedDose !== null &&
     formState.unit.length > 0 &&
     formState.time.length > 0;
+  const selectedMedicationOption = formState.medication
+    ? findMedicationDemoOptionByName(formState.medication.name)
+    : undefined;
+  const previewPrimary =
+    canSubmit && formState.medication && parsedDose !== null
+      ? `${formState.medication.name} · ${formatMedicationDose(parsedDose)} ${
+          formState.unit
+        }`
+      : '';
+  const previewSecondary = formState.context
+    ? `${formState.time} · ${formState.context}`
+    : formState.time;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -103,165 +124,80 @@ export function MedicationQuickAddForm({
   return (
     <QuickAddFormLayout onSubmit={handleSubmit}>
       <QuickAddFormLayout.Body>
-        <div>
-          <span className={formLabel} id="quick-add-medication-name-label">
-            Препарат
-          </span>
-          <button
-            aria-haspopup="dialog"
-            aria-labelledby="quick-add-medication-name-label quick-add-medication-name-value"
-            className={`${formField} mt-2 flex items-center justify-between text-left font-medium ${
-              formState.medication ? 'text-slate-950' : 'text-slate-400'
-            }`}
-            onClick={() => setMedicationSheetOpen(true)}
-            type="button"
-          >
-            <span id="quick-add-medication-name-value">
-              {formState.medication?.name || 'Выберите лекарство'}
-            </span>
-            <ChevronDown
-              aria-hidden="true"
-              className="text-slate-400"
-              size={18}
-            />
-          </button>
-        </div>
+        <QuickAddSelectField
+          description={selectedMedicationOption?.form}
+          id="quick-add-medication-name"
+          label="Препарат"
+          onClick={() => setMedicationSheetOpen(true)}
+          placeholder="Выберите лекарство"
+          value={formState.medication?.name}
+        />
 
-        <div>
-          <label className={formLabel} htmlFor="quick-add-medication-dose">
-            Доза
-          </label>
-          <input
-            aria-describedby={
-              doseError ? 'quick-add-medication-dose-error' : undefined
-            }
-            aria-invalid={doseError ? true : undefined}
-            autoComplete="off"
-            className={`${formField} mt-2 ${
-              hasDose ? 'font-semibold text-slate-950' : 'text-slate-900'
-            }`}
-            enterKeyHint="done"
-            id="quick-add-medication-dose"
-            inputMode="decimal"
-            name="dose"
-            onChange={(event) => {
-              setDoseError(null);
-              setFormState((current) => ({
-                ...current,
-                dose: event.target.value,
-              }));
-            }}
-            placeholder="500"
-            required
-            type="text"
-            value={formState.dose}
+        <QuickAddNumberWithUnitField
+          error={doseValidationError}
+          id="quick-add-medication-dose"
+          label="Доза"
+          name="dose"
+          onUnitClick={() => setUnitSheetOpen(true)}
+          onValueChange={(dose) => {
+            setDoseError(null);
+            setFormState((current) => ({
+              ...current,
+              dose,
+            }));
+          }}
+          placeholder="0"
+          required
+          unitPlaceholder="Единица"
+          unitValue={formState.unit || undefined}
+          value={formState.dose}
+        />
+
+        <QuickAddTimeField
+          id="quick-add-medication-time"
+          label="Время"
+          name="time"
+          onChange={(time) => {
+            setFormState((current) => ({
+              ...current,
+              time,
+            }));
+          }}
+          required
+          value={formState.time}
+        />
+
+        <QuickAddSelectField
+          id="quick-add-medication-context"
+          label="Контекст"
+          onClick={() => setContextSheetOpen(true)}
+          placeholder="Выберите контекст"
+          value={formState.context || undefined}
+        />
+
+        <QuickAddTextAreaField
+          counterThreshold={NOTE_COUNTER_THRESHOLD}
+          id="quick-add-medication-note"
+          label="Заметка"
+          maxLength={NOTE_MAX_LENGTH}
+          name="note"
+          onChange={(note) => {
+            setFormState((current) => ({
+              ...current,
+              note,
+            }));
+          }}
+          placeholder="Например, после завтрака"
+          value={formState.note}
+        />
+
+        {canSubmit ? (
+          <QuickAddFormPreview
+            primaryText={previewPrimary}
+            secondaryText={previewSecondary}
+            title="Запись"
           />
-          {doseError ? (
-            <p
-              className="mt-2 text-sm text-rose-600"
-              id="quick-add-medication-dose-error"
-            >
-              {doseError}
-            </p>
-          ) : null}
-        </div>
-
-        <div>
-          <span className={formLabel} id="quick-add-medication-unit-label">
-            Единица измерения
-          </span>
-          <button
-            aria-haspopup="dialog"
-            aria-labelledby="quick-add-medication-unit-label quick-add-medication-unit-value"
-            className={`${formField} mt-2 flex items-center justify-between text-left font-medium ${
-              formState.unit ? 'text-slate-950' : 'text-slate-400'
-            }`}
-            onClick={() => setUnitSheetOpen(true)}
-            type="button"
-          >
-            <span id="quick-add-medication-unit-value">
-              {formState.unit || 'Выберите единицу'}
-            </span>
-            <ChevronDown
-              aria-hidden="true"
-              className="text-slate-400"
-              size={18}
-            />
-          </button>
-        </div>
-
-        <div>
-          <label className={formLabel} htmlFor="quick-add-medication-time">
-            Время
-          </label>
-          <input
-            className={`${formField} mt-2 appearance-auto text-slate-950`}
-            id="quick-add-medication-time"
-            name="time"
-            onChange={(event) => {
-              setFormState((current) => ({
-                ...current,
-                time: event.target.value,
-              }));
-            }}
-            onClick={(event) => {
-              openNativeTimePicker(event.currentTarget);
-            }}
-            required
-            step={60}
-            type="time"
-            value={formState.time}
-          />
-        </div>
-
-        <div>
-          <span className={formLabel} id="quick-add-medication-context-label">
-            Контекст
-          </span>
-          <button
-            aria-haspopup="dialog"
-            aria-labelledby="quick-add-medication-context-label quick-add-medication-context-value"
-            className={`${formField} mt-2 flex items-center justify-between text-left font-medium ${
-              formState.context ? 'text-slate-950' : 'text-slate-400'
-            }`}
-            onClick={() => setContextSheetOpen(true)}
-            type="button"
-          >
-            <span id="quick-add-medication-context-value">
-              {formState.context || 'Выберите контекст'}
-            </span>
-            <ChevronDown
-              aria-hidden="true"
-              className="text-slate-400"
-              size={18}
-            />
-          </button>
-        </div>
-
-        <div>
-          <label className={formLabel} htmlFor="quick-add-medication-note">
-            Заметка
-          </label>
-          <textarea
-            className={`${formField} mt-2 min-h-24 resize-none py-3`}
-            id="quick-add-medication-note"
-            maxLength={NOTE_MAX_LENGTH}
-            name="note"
-            onChange={(event) => {
-              setFormState((current) => ({
-                ...current,
-                note: event.target.value,
-              }));
-            }}
-            placeholder="Добавьте заметку"
-            value={formState.note}
-          />
-          {showNoteCounter ? (
-            <p className="mt-1 text-right text-xs text-slate-500">
-              {formState.note.length}/{NOTE_MAX_LENGTH}
-            </p>
-          ) : null}
-        </div>
+        ) : null}
       </QuickAddFormLayout.Body>
 
       <QuickAddFormLayout.Footer>
@@ -276,18 +212,20 @@ export function MedicationQuickAddForm({
         <QuickAddOptionSheet
           onClose={() => setMedicationSheetOpen(false)}
           onSelect={(medicationName) => {
-            const medication = findMedicationDemoOptionByName(medicationName);
+            const medicationOption =
+              findMedicationDemoOptionByName(medicationName);
 
-            if (medication) {
+            if (medicationOption) {
               setFormState((current) => ({
                 ...current,
-                medication,
+                medication: medicationOption.medication,
+                unit: current.unit || medicationOption.suggestedUnit || '',
               }));
             }
 
             setMedicationSheetOpen(false);
           }}
-          options={medicationDemoOptionNames}
+          options={medicationDemoSheetOptions}
           selectedValue={formState.medication?.name}
           title="Лекарство"
         />

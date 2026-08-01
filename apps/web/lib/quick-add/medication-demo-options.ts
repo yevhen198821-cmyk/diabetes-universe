@@ -1,39 +1,72 @@
 import type { MedicationReference } from '@diabetes-universe/types';
+import type { QuickAddOptionItem } from '@diabetes-universe/ui';
 
-export const medicationDemoOptions: readonly MedicationReference[] = [
+export interface MedicationDemoOption {
+  readonly medication: MedicationReference;
+  readonly form?: string;
+  readonly suggestedUnit?: string;
+}
+
+export const medicationDemoOptions: readonly MedicationDemoOption[] = [
   {
-    id: 'metformin',
-    name: 'Метформин',
+    form: 'таблетки',
+    medication: {
+      id: 'metformin',
+      name: 'Метформин',
+    },
+    suggestedUnit: 'мг',
   },
   {
-    id: 'jardiance',
-    name: 'Jardiance',
+    form: 'таблетки',
+    medication: {
+      id: 'jardiance',
+      name: 'Jardiance',
+    },
+    suggestedUnit: 'мг',
   },
   {
-    id: 'forxiga',
-    name: 'Forxiga',
+    form: 'таблетки',
+    medication: {
+      id: 'forxiga',
+      name: 'Forxiga',
+    },
+    suggestedUnit: 'мг',
   },
   {
-    id: 'ozempic',
-    name: 'Ozempic',
+    form: 'инъекция',
+    medication: {
+      id: 'ozempic',
+      name: 'Ozempic',
+    },
+    suggestedUnit: 'мл',
   },
   {
-    id: 'mounjaro',
-    name: 'Mounjaro',
+    form: 'инъекция',
+    medication: {
+      id: 'mounjaro',
+      name: 'Mounjaro',
+    },
+    suggestedUnit: 'мл',
   },
   {
-    id: 'other',
-    name: 'Другое',
+    medication: {
+      id: 'other',
+      name: 'Другое',
+    },
   },
 ];
 
-export const medicationDemoOptionNames: readonly string[] =
-  medicationDemoOptions.map((medication) => medication.name);
+export const medicationDemoSheetOptions: readonly QuickAddOptionItem[] =
+  medicationDemoOptions.map((option) => ({
+    description: option.form,
+    label: option.medication.name,
+    value: option.medication.name,
+  }));
 
 export function findMedicationDemoOptionByName(
   medicationName: string,
-): MedicationReference | undefined {
+): MedicationDemoOption | undefined {
   return medicationDemoOptions.find(
-    (medication) => medication.name === medicationName,
+    (option) => option.medication.name === medicationName,
   );
 }
