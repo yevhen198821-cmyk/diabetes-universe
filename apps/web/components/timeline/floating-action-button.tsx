@@ -1,13 +1,29 @@
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 
-export function FloatingActionButton() {
+interface FloatingActionButtonProps {
+  readonly isOpen?: boolean;
+  readonly onClick?: () => void;
+}
+
+export function FloatingActionButton({
+  isOpen = false,
+  onClick,
+}: FloatingActionButtonProps) {
   return (
     <button
-      aria-label="Добавить"
-      className="timeline-fab fixed right-4 z-40 grid size-12 place-items-center rounded-full bg-teal-700 text-white shadow-md shadow-teal-900/15 transition hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 active:scale-95 sm:right-6"
+      aria-expanded={isOpen}
+      aria-label={isOpen ? 'Закрыть быстрое добавление' : 'Быстрое добавление'}
+      className={`timeline-fab fixed right-4 grid size-12 place-items-center rounded-full bg-teal-700 text-white shadow-md shadow-teal-900/15 transition hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 active:scale-95 sm:right-6 ${
+        isOpen ? 'z-[60]' : 'z-40'
+      }`}
+      onClick={onClick}
       type="button"
     >
-      <Plus aria-hidden="true" size={24} strokeWidth={2.25} />
+      {isOpen ? (
+        <X aria-hidden="true" size={24} strokeWidth={2.25} />
+      ) : (
+        <Plus aria-hidden="true" size={24} strokeWidth={2.25} />
+      )}
     </button>
   );
 }

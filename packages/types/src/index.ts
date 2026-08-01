@@ -15,3 +15,4 @@ export type {
   TimelineEvent,
   TimelineEventKind,
 } from './timeline';
+export type { QuickAddAction, QuickAddCategory } from './quick-add';
