@@ -17,3 +17,10 @@ export interface GlucoseQuickAddEntry {
   readonly time: string;
   readonly context: string;
 }
+
+export interface InsulinQuickAddEntry {
+  readonly preparation: string;
+  readonly doseUnits: number;
+  readonly time: string;
+  readonly context?: string;
+}

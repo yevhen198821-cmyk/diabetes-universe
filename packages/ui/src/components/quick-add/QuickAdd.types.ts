@@ -19,3 +19,17 @@ export interface QuickAddPanelProps {
   readonly onSelectAction: (actionId: string) => void;
   readonly onBack: () => void;
 }
+
+export interface QuickAddOptionGroup<TValue extends string = string> {
+  readonly label?: string;
+  readonly options: readonly TValue[];
+}
+
+export interface QuickAddOptionSheetProps<TValue extends string = string> {
+  readonly groups?: readonly QuickAddOptionGroup<TValue>[];
+  readonly onClose: () => void;
+  readonly onSelect: (value: TValue) => void;
+  readonly options?: readonly TValue[];
+  readonly selectedValue?: TValue;
+  readonly title: string;
+}
