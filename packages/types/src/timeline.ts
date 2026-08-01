@@ -1,5 +1,4 @@
-export type TimelineEventKind =
-  'glucose' | 'activity' | 'meal' | 'insulin' | 'note';
+export type TimelineEventKind = 'glucose' | 'meal' | 'insulin';
 
 export interface TimelineEvent {
   readonly id: string;
@@ -7,15 +6,20 @@ export interface TimelineEvent {
   readonly kind: TimelineEventKind;
   readonly title: string;
   readonly value: string;
-  readonly details: string;
-  readonly expandedDetails: readonly string[];
-  readonly linked: boolean;
+  readonly context: string;
 }
 
 export interface DaySummary {
-  readonly glucose: string;
-  readonly events: number;
-  readonly carbohydrates: string;
-  readonly insulin: string;
-  readonly activity: string;
+  readonly timeInRange: string;
+}
+
+export interface LastGlucose {
+  readonly value: string;
+  readonly time: string;
+}
+
+export interface NextStep {
+  readonly title: string;
+  readonly description: string;
+  readonly actionLabel: string;
 }
