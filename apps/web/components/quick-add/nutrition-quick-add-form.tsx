@@ -9,7 +9,7 @@ import {
   QuickAddFormActions,
   QuickAddOptionSheet,
 } from '@diabetes-universe/ui';
-import { ChevronDown, Trash2 } from 'lucide-react';
+import { ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
 import {
@@ -21,6 +21,7 @@ import { getCurrentTimeString } from '../../lib/quick-add/format-glucose';
 import {
   calculateNutritionProductCarbs,
   formatNutritionCarbs,
+  formatNutritionCarbsPer100Grams,
   parseNutritionDecimalInput,
 } from '../../lib/quick-add/format-nutrition';
 import { openNativeTimePicker } from '../../lib/quick-add/open-native-time-picker';
@@ -370,7 +371,7 @@ export function NutritionQuickAddForm({
               </p>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               {formState.productRows.map((row, index) => {
                 const rowCarbs = getProductRowCarbs(row);
                 const weightHasValue = row.weight.trim().length > 0;
@@ -384,7 +385,7 @@ export function NutritionQuickAddForm({
                 return (
                   <section
                     aria-label={`Продукт ${index + 1}`}
-                    className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                    className="space-y-2 rounded-2xl bg-slate-50/80 p-3"
                     key={row.id}
                   >
                     <div>
@@ -395,18 +396,36 @@ export function NutritionQuickAddForm({
                         Продукт
                       </span>
                       <button
+                        aria-describedby={
+                          row.carbsPer100Grams !== null
+                            ? `quick-add-nutrition-product-${row.id}-carbs`
+                            : undefined
+                        }
                         aria-haspopup="dialog"
                         aria-labelledby={`quick-add-nutrition-product-${row.id}-label quick-add-nutrition-product-${row.id}-value`}
-                        className={`${formField} mt-2 flex items-center justify-between bg-white text-left font-medium ${
+                        className={`mt-1.5 flex min-h-14 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 text-left text-sm font-medium transition hover:border-slate-300 focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:outline-none ${
                           row.productName ? 'text-slate-950' : 'text-slate-400'
                         }`}
                         onClick={() => setSelectedProductRowId(row.id)}
                         type="button"
                       >
                         <span
+                          className="min-w-0 pr-3"
                           id={`quick-add-nutrition-product-${row.id}-value`}
                         >
-                          {row.productName || 'Выберите продукт'}
+                          <span className="block truncate">
+                            {row.productName || 'Выберите продукт'}
+                          </span>
+                          {row.carbsPer100Grams !== null ? (
+                            <span
+                              className="mt-0.5 block truncate text-xs font-normal text-slate-500"
+                              id={`quick-add-nutrition-product-${row.id}-carbs`}
+                            >
+                              {formatNutritionCarbsPer100Grams(
+                                row.carbsPer100Grams,
+                              )}
+                            </span>
+                          ) : null}
                         </span>
                         <ChevronDown
                           aria-hidden="true"
@@ -416,15 +435,15 @@ export function NutritionQuickAddForm({
                       </button>
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_8rem]">
+                    <div className="grid grid-cols-[minmax(0,1fr)_6.5rem] gap-2">
                       <div>
                         <label
                           className={formLabel}
                           htmlFor={`quick-add-nutrition-weight-${row.id}`}
                         >
-                          Вес порции
+                          Вес порции, г
                         </label>
-                        <div className="relative mt-2">
+                        <div className="relative mt-1.5">
                           <input
                             aria-describedby={
                               weightInvalid
@@ -473,7 +492,7 @@ export function NutritionQuickAddForm({
 
                       <div>
                         <span className={formLabel}>Углеводы</span>
-                        <p className="mt-2 flex h-11 items-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-950">
+                        <p className="mt-1.5 flex h-11 items-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-950">
                           {rowCarbs === null
                             ? '—'
                             : `${formatNutritionCarbs(rowCarbs)} г`}
@@ -483,7 +502,7 @@ export function NutritionQuickAddForm({
 
                     {formState.productRows.length > 1 ? (
                       <button
-                        className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+                        className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2 text-sm font-semibold text-slate-500 transition hover:bg-rose-50 hover:text-rose-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
                         onClick={() => {
                           setFormState((current) => ({
                             ...current,
@@ -503,12 +522,17 @@ export function NutritionQuickAddForm({
               })}
             </div>
 
-            <div className="rounded-2xl border border-teal-100 bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-900">
-              Итого углеводов: {formatNutritionCarbs(productsTotalCarbs)} г
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+              <span className="text-sm font-medium text-slate-600">
+                Всего углеводов
+              </span>
+              <span className="text-xl font-bold text-slate-950">
+                {formatNutritionCarbs(productsTotalCarbs)} г
+              </span>
             </div>
 
             <button
-              className="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={formState.productRows.length >= MAX_PRODUCT_ROWS}
               onClick={() => {
                 setFormState((current) => ({
@@ -518,7 +542,8 @@ export function NutritionQuickAddForm({
               }}
               type="button"
             >
-              Добавить продукт
+              <Plus aria-hidden="true" size={16} />
+              Добавить ещё продукт
             </button>
           </div>
         )}
@@ -562,7 +587,7 @@ export function NutritionQuickAddForm({
                 note: event.target.value,
               }));
             }}
-            placeholder="Например, домашняя овсянка с ягодами"
+            placeholder="Добавьте заметку"
             value={formState.note}
           />
           {showNoteCounter ? (

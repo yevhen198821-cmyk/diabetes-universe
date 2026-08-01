@@ -32,3 +32,9 @@ export function formatNutritionCarbs(carbsGrams: number): string {
     minimumFractionDigits: 0,
   });
 }
+
+export function formatNutritionCarbsPer100Grams(
+  carbsPer100Grams: number,
+): string {
+  return `${formatNutritionCarbs(carbsPer100Grams)} г углеводов / 100 г`;
+}
