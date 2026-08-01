@@ -9,6 +9,7 @@ import {
   QuickAddFormActions,
   QuickAddFormLayout,
   QuickAddOptionSheet,
+  QuickAddTimeField,
 } from '@diabetes-universe/ui';
 import { ChevronDown, Plus, Trash2 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
@@ -25,7 +26,6 @@ import {
   formatNutritionCarbsPer100Grams,
   parseNutritionDecimalInput,
 } from '../../lib/quick-add/format-nutrition';
-import { openNativeTimePicker } from '../../lib/quick-add/open-native-time-picker';
 import { formField, formLabel } from '../timeline/ui-styles';
 
 const MAX_MANUAL_CARBS_GRAMS = 500;
@@ -546,29 +546,19 @@ export function NutritionQuickAddForm({
           </div>
         )}
 
-        <div>
-          <label className={formLabel} htmlFor="quick-add-nutrition-time">
-            Время
-          </label>
-          <input
-            className={`${formField} mt-2 appearance-auto text-slate-950`}
-            id="quick-add-nutrition-time"
-            name="time"
-            onChange={(event) => {
-              setFormState((current) => ({
-                ...current,
-                time: event.target.value,
-              }));
-            }}
-            onClick={(event) => {
-              openNativeTimePicker(event.currentTarget);
-            }}
-            required
-            step={60}
-            type="time"
-            value={formState.time}
-          />
-        </div>
+        <QuickAddTimeField
+          id="quick-add-nutrition-time"
+          label="Время"
+          name="time"
+          onChange={(time) => {
+            setFormState((current) => ({
+              ...current,
+              time,
+            }));
+          }}
+          required
+          value={formState.time}
+        />
 
         <div>
           <label className={formLabel} htmlFor="quick-add-nutrition-note">

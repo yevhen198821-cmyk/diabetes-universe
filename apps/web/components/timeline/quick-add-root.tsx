@@ -3,6 +3,7 @@
 import type {
   GlucoseQuickAddEntry,
   InsulinQuickAddEntry,
+  MedicationQuickAddEntry,
   NutritionQuickAddEntry,
 } from '@diabetes-universe/types';
 import { haptics, QuickAddPanel } from '@diabetes-universe/ui';
@@ -11,6 +12,7 @@ import { useRef, useState } from 'react';
 
 import { GlucoseQuickAddForm } from '../quick-add/glucose-quick-add-form';
 import { InsulinQuickAddForm } from '../quick-add/insulin-quick-add-form';
+import { MedicationQuickAddForm } from '../quick-add/medication-quick-add-form';
 import { NutritionQuickAddForm } from '../quick-add/nutrition-quick-add-form';
 import { quickAddActions } from '../../lib/quick-add/actions';
 import { FloatingActionButton } from './floating-action-button';
@@ -18,12 +20,14 @@ import { FloatingActionButton } from './floating-action-button';
 interface QuickAddRootProps {
   readonly onGlucoseSubmit?: (entry: GlucoseQuickAddEntry) => void;
   readonly onInsulinSubmit?: (entry: InsulinQuickAddEntry) => void;
+  readonly onMedicationSubmit?: (entry: MedicationQuickAddEntry) => void;
   readonly onNutritionSubmit?: (entry: NutritionQuickAddEntry) => void;
 }
 
 export function QuickAddRoot({
   onGlucoseSubmit,
   onInsulinSubmit,
+  onMedicationSubmit,
   onNutritionSubmit,
 }: QuickAddRootProps) {
   const [open, setOpen] = useState(false);
@@ -74,6 +78,19 @@ export function QuickAddRoot({
     setSelectedActionId(null);
   };
 
+  const handleMedicationSubmit = (entry: MedicationQuickAddEntry) => {
+    onMedicationSubmit?.(entry);
+    haptics.success();
+    handleClose();
+    requestAnimationFrame(() => {
+      fabRef.current?.focus();
+    });
+  };
+
+  const handleMedicationCancel = () => {
+    setSelectedActionId(null);
+  };
+
   let selectedContent: ReactNode;
 
   if (selectedActionId === 'glucose' && onGlucoseSubmit) {
@@ -99,6 +116,15 @@ export function QuickAddRoot({
       <NutritionQuickAddForm
         onCancel={handleNutritionCancel}
         onSubmit={handleNutritionSubmit}
+      />
+    );
+  }
+
+  if (selectedActionId === 'medication' && onMedicationSubmit) {
+    selectedContent = (
+      <MedicationQuickAddForm
+        onCancel={handleMedicationCancel}
+        onSubmit={handleMedicationSubmit}
       />
     );
   }

@@ -1,5 +1,5 @@
 export type TimelineEventKind =
-  'glucose' | 'meal' | 'nutrition' | 'insulin' | 'activity';
+  'glucose' | 'meal' | 'nutrition' | 'insulin' | 'medication' | 'activity';
 
 export interface TimelineEvent {
   readonly id: string;
@@ -7,6 +7,7 @@ export interface TimelineEvent {
   readonly kind: TimelineEventKind;
   readonly title: string;
   readonly value: string;
+  readonly unit?: string;
   readonly context: string;
   readonly note?: string;
 }

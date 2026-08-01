@@ -18,6 +18,8 @@ export type {
 export type {
   GlucoseQuickAddEntry,
   InsulinQuickAddEntry,
+  MedicationQuickAddEntry,
+  MedicationReference,
   NutritionEntryMode,
   NutritionProductEntry,
   NutritionQuickAddEntry,

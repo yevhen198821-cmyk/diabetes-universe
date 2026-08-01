@@ -20,16 +20,25 @@ export interface QuickAddPanelProps {
   readonly onBack: () => void;
 }
 
+export interface QuickAddOptionItem<TValue extends string = string> {
+  readonly value: TValue;
+  readonly label: string;
+  readonly description?: string;
+}
+
+export type QuickAddOption<TValue extends string = string> =
+  TValue | QuickAddOptionItem<TValue>;
+
 export interface QuickAddOptionGroup<TValue extends string = string> {
   readonly label?: string;
-  readonly options: readonly TValue[];
+  readonly options: readonly QuickAddOption<TValue>[];
 }
 
 export interface QuickAddOptionSheetProps<TValue extends string = string> {
   readonly groups?: readonly QuickAddOptionGroup<TValue>[];
   readonly onClose: () => void;
   readonly onSelect: (value: TValue) => void;
-  readonly options?: readonly TValue[];
+  readonly options?: readonly QuickAddOption<TValue>[];
   readonly selectedValue?: TValue;
   readonly title: string;
 }

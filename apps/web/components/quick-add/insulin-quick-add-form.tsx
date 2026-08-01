@@ -5,6 +5,7 @@ import {
   QuickAddFormActions,
   QuickAddFormLayout,
   QuickAddOptionSheet,
+  QuickAddTimeField,
 } from '@diabetes-universe/ui';
 import { ChevronDown } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
@@ -13,7 +14,6 @@ import { insulinContextOptions } from '../../lib/quick-add/insulin-context-optio
 import { insulinPreparationOptionGroups } from '../../lib/quick-add/insulin-preparation-options';
 import { getCurrentTimeString } from '../../lib/quick-add/format-glucose';
 import { parseInsulinDoseInput } from '../../lib/quick-add/format-insulin';
-import { openNativeTimePicker } from '../../lib/quick-add/open-native-time-picker';
 import { formField, formLabel } from '../timeline/ui-styles';
 
 interface InsulinQuickAddFormProps {
@@ -154,29 +154,19 @@ export function InsulinQuickAddForm({
           ) : null}
         </div>
 
-        <div>
-          <label className={formLabel} htmlFor="quick-add-insulin-time">
-            Время
-          </label>
-          <input
-            className={`${formField} mt-2 appearance-auto text-slate-950`}
-            id="quick-add-insulin-time"
-            name="time"
-            onChange={(event) => {
-              setFormState((current) => ({
-                ...current,
-                time: event.target.value,
-              }));
-            }}
-            onClick={(event) => {
-              openNativeTimePicker(event.currentTarget);
-            }}
-            required
-            step={60}
-            type="time"
-            value={formState.time}
-          />
-        </div>
+        <QuickAddTimeField
+          id="quick-add-insulin-time"
+          label="Время"
+          name="time"
+          onChange={(time) => {
+            setFormState((current) => ({
+              ...current,
+              time,
+            }));
+          }}
+          required
+          value={formState.time}
+        />
 
         <div>
           <span className={formLabel} id="quick-add-insulin-context-label">
