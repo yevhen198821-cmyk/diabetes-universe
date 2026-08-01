@@ -14,11 +14,24 @@ coverage/
 .env
 .env.*.local
 
+# Local environment
+.env.local
+
 # Tooling and operating system files
 *.tsbuildinfo
 .DS_Store
 *.log
 **/next-env.d.ts
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.cache/
+tmp/
+temp/
 
 # Editors
 .idea/
