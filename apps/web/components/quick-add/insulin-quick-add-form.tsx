@@ -3,6 +3,7 @@
 import type { InsulinQuickAddEntry } from '@diabetes-universe/types';
 import {
   QuickAddFormActions,
+  QuickAddFormLayout,
   QuickAddOptionSheet,
 } from '@diabetes-universe/ui';
 import { ChevronDown } from 'lucide-react';
@@ -79,11 +80,8 @@ export function InsulinQuickAddForm({
   };
 
   return (
-    <form
-      className="flex min-h-0 flex-col overflow-hidden"
-      onSubmit={handleSubmit}
-    >
-      <div className="min-h-0 space-y-5 overflow-x-hidden overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
+    <QuickAddFormLayout onSubmit={handleSubmit}>
+      <QuickAddFormLayout.Body>
         <div>
           <span className={formLabel} id="quick-add-insulin-preparation-label">
             Препарат
@@ -203,12 +201,15 @@ export function InsulinQuickAddForm({
             />
           </button>
         </div>
-      </div>
+      </QuickAddFormLayout.Body>
 
-      <QuickAddFormActions
-        onCancel={handleCancel}
-        submitDisabled={!canSubmit}
-      />
+      <QuickAddFormLayout.Footer>
+        <QuickAddFormActions
+          inline
+          onCancel={handleCancel}
+          submitDisabled={!canSubmit}
+        />
+      </QuickAddFormLayout.Footer>
 
       {preparationSheetOpen ? (
         <QuickAddOptionSheet
@@ -241,6 +242,6 @@ export function InsulinQuickAddForm({
           title="Контекст"
         />
       ) : null}
-    </form>
+    </QuickAddFormLayout>
   );
 }

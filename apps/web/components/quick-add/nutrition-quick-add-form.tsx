@@ -7,6 +7,7 @@ import type {
 } from '@diabetes-universe/types';
 import {
   QuickAddFormActions,
+  QuickAddFormLayout,
   QuickAddOptionSheet,
 } from '@diabetes-universe/ui';
 import { ChevronDown, Plus, Trash2 } from 'lucide-react';
@@ -242,11 +243,8 @@ export function NutritionQuickAddForm({
   };
 
   return (
-    <form
-      className="flex min-h-0 flex-col overflow-hidden"
-      onSubmit={handleSubmit}
-    >
-      <div className="min-h-0 space-y-5 overflow-x-hidden overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
+    <QuickAddFormLayout onSubmit={handleSubmit}>
+      <QuickAddFormLayout.Body>
         <fieldset>
           <legend className="sr-only">Способ добавления углеводов</legend>
           <div className="grid grid-cols-2 rounded-2xl border border-slate-200 bg-slate-100 p-1">
@@ -596,12 +594,15 @@ export function NutritionQuickAddForm({
             </p>
           ) : null}
         </div>
-      </div>
+      </QuickAddFormLayout.Body>
 
-      <QuickAddFormActions
-        onCancel={handleCancel}
-        submitDisabled={!canSubmit}
-      />
+      <QuickAddFormLayout.Footer>
+        <QuickAddFormActions
+          inline
+          onCancel={handleCancel}
+          submitDisabled={!canSubmit}
+        />
+      </QuickAddFormLayout.Footer>
 
       {mealSheetOpen ? (
         <QuickAddOptionSheet
@@ -628,6 +629,6 @@ export function NutritionQuickAddForm({
           title="Продукт"
         />
       ) : null}
-    </form>
+    </QuickAddFormLayout>
   );
 }

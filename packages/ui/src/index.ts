@@ -10,12 +10,15 @@ export type {
 export {
   QuickAddActionButton,
   QuickAddFormActions,
+  QuickAddFormLayout,
   QuickAddOptionSheet,
   QuickAddPanel,
 } from './components/quick-add';
 export type {
   QuickAddActionItem,
   QuickAddFormActionsProps,
+  QuickAddFormLayoutProps,
+  QuickAddFormLayoutSectionProps,
   QuickAddOptionGroup,
   QuickAddOptionSheetProps,
   QuickAddPanelProps,
