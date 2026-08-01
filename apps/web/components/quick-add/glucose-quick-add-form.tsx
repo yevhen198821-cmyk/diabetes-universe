@@ -1,7 +1,7 @@
 'use client';
 
 import type { GlucoseQuickAddEntry } from '@diabetes-universe/types';
-import { Button } from '@diabetes-universe/ui';
+import { Button, haptics } from '@diabetes-universe/ui';
 import { Check, ChevronDown } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
@@ -11,7 +11,6 @@ import {
   getCurrentTimeString,
   parseGlucoseInput,
 } from '../../lib/quick-add/format-glucose';
-import { triggerSelectionHaptic } from '../../lib/quick-add/trigger-selection-haptic';
 
 interface GlucoseQuickAddFormProps {
   readonly onCancel: () => void;
@@ -84,7 +83,7 @@ export function GlucoseQuickAddForm({
       context: option,
     }));
     setContextSheetOpen(false);
-    triggerSelectionHaptic();
+    haptics.selection();
   };
 
   return (
