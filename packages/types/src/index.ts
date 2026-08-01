@@ -7,3 +7,5 @@
 export type Brand<TValue, TBrand extends string> = TValue & {
   readonly __brand: TBrand;
 };
+
+export type { DaySummary, TimelineEvent, TimelineEventKind } from './timeline';

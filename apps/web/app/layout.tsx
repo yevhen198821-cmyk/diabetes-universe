@@ -4,8 +4,8 @@ import type { ReactNode } from 'react';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Diabetes Universe',
-  description: 'A trusted digital health ecosystem.',
+  title: 'Timeline | Diabetes Universe',
+  description: 'Демонстрационный Timeline событий Diabetes Universe.',
 };
 
 type RootLayoutProps = Readonly<{
@@ -14,7 +14,7 @@ type RootLayoutProps = Readonly<{
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en">
+    <html lang="ru" suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );
