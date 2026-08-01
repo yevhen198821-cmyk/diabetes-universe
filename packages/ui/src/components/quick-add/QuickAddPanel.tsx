@@ -109,7 +109,7 @@ export function QuickAddPanel({
             <h2 className="text-lg font-bold text-slate-950" id={titleId}>
               {selectedActionId
                 ? `Добавить: ${selectedLabel}`
-                : 'Быстрое добавление'}
+                : 'Добавить событие'}
             </h2>
             {!selectedActionId ? (
               <p className="mt-0.5 text-sm text-slate-500">

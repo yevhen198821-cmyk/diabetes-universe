@@ -19,16 +19,16 @@ const quickAddActionDefinitions: readonly QuickAddAction[] = [
     description: 'Записать уровень сахара',
   },
   {
+    id: 'nutrition',
+    category: 'nutrition',
+    label: 'Питание',
+    description: 'Записать приём пищи',
+  },
+  {
     id: 'insulin',
     category: 'insulin',
     label: 'Инсулин',
     description: 'Записать дозу инсулина',
-  },
-  {
-    id: 'nutrition',
-    category: 'nutrition',
-    label: 'Еда',
-    description: 'Записать приём пищи',
   },
   {
     id: 'activity',
@@ -39,7 +39,7 @@ const quickAddActionDefinitions: readonly QuickAddAction[] = [
   {
     id: 'medication',
     category: 'medication',
-    label: 'Лекарство',
+    label: 'Лекарства',
     description: 'Записать приём препарата',
   },
   {
