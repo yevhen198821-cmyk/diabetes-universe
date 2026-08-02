@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 export interface DashboardShellProps {
+  readonly aiInsight: ReactNode;
   readonly children?: ReactNode;
   readonly daySummary: ReactNode;
   readonly header: ReactNode;
@@ -10,6 +11,7 @@ export interface DashboardShellProps {
 }
 
 export function DashboardShell({
+  aiInsight,
   children,
   daySummary,
   header,
@@ -28,6 +30,7 @@ export function DashboardShell({
         {lastGlucose}
         {daySummary}
         {recentEvents}
+        {aiInsight}
         {children}
       </main>
     </div>
