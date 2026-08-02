@@ -156,10 +156,20 @@ ApplicationRuntimeGate (ready)
 - E2E SPA navigation continuity tests
 - integration tests
 
+## Dashboard header localization (I18N-02A) — Feature Complete ✅
+
+Location: `components/dashboard/dashboard-header*`, `dashboard-header-labels.ts`
+
+First vertical product migration to the approved Localization and Formatting
+Platform stack through production hooks.
+
 ### Implemented (I18N-02A)
 
-- Dashboard Header localized via `useLocalization()` and `useFormatter()`
-- selective `dashboard` namespace preload
+- `DashboardHeader` copy via `useLocalization()` and date via `useFormatter()`
+- English canonical `dashboard` namespace (7 keys) via `@diabetes-universe/locales`
+- selective application preload: `common` + `dashboard`
+- pure presentation model boundary (`dashboard-header-model.ts`)
+- unit, integration, and E2E coverage
 - architecture: `docs/architecture/localization/dashboard-header-migration.md`
 
 ### Not implemented (I18N-02B+)

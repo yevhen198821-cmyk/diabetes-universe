@@ -7,7 +7,7 @@ presentation, and the desktop entry point to Quick Add.
 
 ## Status
 
-Approved
+Approved — localized via I18N-02A (Feature Complete)
 
 ## Responsibility
 

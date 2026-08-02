@@ -1,5 +1,34 @@
 # Changelog
 
+## Dashboard Header Localization — Feature Complete
+
+Дата: 2026-08-02
+
+Завершено:
+
+- Dashboard Header Localization Migration (I18N-02A) — `apps/web/components/dashboard/dashboard-header*`
+- первый вертикальный product migration slice на `useLocalization()`, `useFormatter()`, `usePresentationContext()`
+- English canonical `dashboard` namespace (7 Header keys) в `@diabetes-universe/locales`
+- selective application preload: `common` + `dashboard`
+- `dashboard-header-labels.ts` и pure presentation model boundary
+- unit, integration, and E2E coverage (`dashboard-header-i18n.spec.ts`)
+- architecture documentation и Engineering Audit (preload, technical debt, known limitations)
+- merge: PR #22 (`411a40b` → `117967c` on `main`)
+- web tests: 303 total; E2E: 23 total
+
+Не входит в этот этап:
+
+- remaining Dashboard blocks (I18N-02B+)
+- Timeline и Quick Add product source migration
+- `uk`, `de`, `ru` professional translations
+- locale switch UI, cookie persistence
+- ICU MessageFormat interpolation
+- route-aware preload orchestration
+
+Статус:
+
+Dashboard Header Localization (I18N-02A) — Feature Complete ✅
+
 ## Application Platform Integration — Feature Complete
 
 Дата: 2026-08-02
