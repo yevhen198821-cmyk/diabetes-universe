@@ -340,6 +340,15 @@ graph TD
 - Versioning policy для Infrastructure Adapters при breaking changes в contracts?
 - Физическая структура monorepo для Infrastructure Adapters (отдельный ADR)?
 
+## Implementation notes
+
+- **CR-01 (2026-08-02):** `@diabetes-universe/platform` реализует Platform
+  Runtime Foundation — runtime aggregate (`createPlatformRuntime()`), не
+  Composition Root. `@diabetes-universe/platform-web` реализует первый
+  environment-specific Composition Root для Web: adapter selection, readiness
+  orchestration (`whenReady()` + selective preload), final aggregation.
+  `apps/web` bootstrap, React Provider и hooks остаются отдельным этапом.
+
 ## Date
 
 2026-08-02

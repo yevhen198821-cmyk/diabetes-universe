@@ -46,6 +46,7 @@ Infrastructure adapter implementations live in
 - `hasTranslation()` — sync key presence check
 - `getBundle()` — async bundle load; populates cache
 - `getSupportedLocales()`, `getDefaultLocale()`, `getNamespaces()`
+- `whenReady()` — resolves when locale registry is loaded; shared lifecycle promise
 - Bundle cache with locale-chain key-level fallback
 
 ### Platform Readiness
@@ -56,7 +57,7 @@ strategy (preload, route-based, on-demand, etc.).
 
 ### Tests
 
-- Runtime unit tests in `src/runtime/localization-platform.test.mjs` (9 tests)
+- Runtime unit tests in `src/runtime/localization-platform.test.mjs` (15 tests)
 
 ## Not implemented yet
 
@@ -67,7 +68,6 @@ strategy (preload, route-based, on-demand, etc.).
 - locale switching / language switcher
 - CDN / OTA remote bundles
 - cache invalidation strategy
-- `whenReady()` API
 
 These are planned for future sprints.
 

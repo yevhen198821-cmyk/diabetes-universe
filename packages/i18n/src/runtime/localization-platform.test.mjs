@@ -3,10 +3,25 @@ import test from 'node:test';
 
 import { createLocalizationPlatform } from './create-localization-platform.ts';
 import { createReadyLocalizationPlatform } from './testing/create-ready-localization-platform.mjs';
+import {
+  createCountingRegistryLoader,
+  createRejectingRegistryLoader,
+  createStalledFirstRegistryLoader,
+} from './testing/registry-loader-test-doubles.mjs';
 import { createTestPlatformInput } from './testing/test-platform-input.mjs';
 
 /** @param {string} value */
 function asTranslationKey(value) {
+  return value;
+}
+
+/** @param {string} value */
+function asLocaleCode(value) {
+  return value;
+}
+
+/** @param {string} value */
+function asNamespace(value) {
   return value;
 }
 
@@ -18,6 +33,7 @@ test('createLocalizationPlatform returns a LocalizationPlatform instance', () =>
   assert.equal(platform.fallbackPolicy, input.fallbackPolicy);
   assert.equal(typeof platform.translate, 'function');
   assert.equal(typeof platform.getBundle, 'function');
+  assert.equal(typeof platform.whenReady, 'function');
 });
 
 test('translate returns a value for an existing key', async () => {
@@ -139,4 +155,107 @@ test('getNamespaces uses metadata from LocaleRegistryLoader', async () => {
     'validation',
     'errors',
   ]);
+});
+
+test('whenReady() resolves after successful registry load', async () => {
+  const platform = createLocalizationPlatform(createTestPlatformInput());
+
+  await platform.whenReady();
+
+  assert.equal(platform.getDefaultLocale(), 'en-GB');
+});
+
+test('whenReady() does not trigger a second registry loader call', async () => {
+  const registry = {
+    platformDefaultLocale: asLocaleCode('en-GB'),
+    languageDefaults: [
+      { language: 'en', defaultLocale: asLocaleCode('en-GB') },
+    ],
+    namespaces: [asNamespace('common')],
+  };
+  const localeRegistryLoader = createCountingRegistryLoader(registry);
+  const platform = createLocalizationPlatform({
+    ...createTestPlatformInput(),
+    localeRegistryLoader,
+  });
+
+  await platform.whenReady();
+  await platform.whenReady();
+
+  assert.equal(localeRegistryLoader.loadCallCount, 1);
+});
+
+test('multiple whenReady() calls await the same lifecycle promise', async () => {
+  const registry = {
+    platformDefaultLocale: asLocaleCode('en-GB'),
+    languageDefaults: [
+      { language: 'en', defaultLocale: asLocaleCode('en-GB') },
+    ],
+    namespaces: [asNamespace('common')],
+  };
+  const localeRegistryLoader = createStalledFirstRegistryLoader(registry);
+  const platform = createLocalizationPlatform({
+    ...createTestPlatformInput(),
+    localeRegistryLoader,
+  });
+
+  const firstReady = platform.whenReady();
+  const secondReady = platform.whenReady();
+
+  let settled = false;
+  Promise.all([firstReady, secondReady]).then(() => {
+    settled = true;
+  });
+
+  await new Promise((resolve) => {
+    setTimeout(resolve, 0);
+  });
+  assert.equal(settled, false);
+
+  localeRegistryLoader.releaseFirstPendingLoad();
+  await Promise.all([firstReady, secondReady]);
+
+  assert.equal(platform.getDefaultLocale(), 'en-GB');
+  assert.equal(localeRegistryLoader.loadCallCount, 1);
+});
+
+test('whenReady() enables registry-dependent methods after await', async () => {
+  const platform = createLocalizationPlatform(createTestPlatformInput());
+
+  await platform.whenReady();
+
+  assert.equal(platform.getDefaultLocale(), 'en-GB');
+  assert.ok(platform.getSupportedLocales().length > 0);
+});
+
+test('whenReady() rejects when registry loader fails', async () => {
+  const platform = createLocalizationPlatform({
+    ...createTestPlatformInput(),
+    localeRegistryLoader: createRejectingRegistryLoader(
+      'Registry load failed.',
+    ),
+  });
+
+  await assert.rejects(() => platform.whenReady(), /Registry load failed/);
+});
+
+test('whenReady() does not load translation bundles', async () => {
+  let bundleLoadCount = 0;
+  const platform = createLocalizationPlatform({
+    ...createTestPlatformInput(),
+    bundleLoader: {
+      async load(request) {
+        bundleLoadCount += 1;
+        return {
+          locale: request.locale,
+          namespace: request.namespace,
+          entries: {},
+        };
+      },
+    },
+  });
+
+  await platform.whenReady();
+
+  assert.equal(bundleLoadCount, 0);
 });
