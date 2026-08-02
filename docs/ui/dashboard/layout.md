@@ -67,15 +67,15 @@ history controls.
 
 ## Block Order
 
-| Order | Block | Layout role |
-| --- | --- | --- |
-| 1 | Header | Page identity and viewport-specific global action |
-| 2 | Next Action | Primary full-width content block |
-| 3 | Last Glucose | Current-status card |
-| 4 | Day Summary | Current-day summary card |
-| 5 | Recent Events | Bounded recent-activity preview |
-| 6 | AI Insight | Secondary supporting card |
-| 7 | Quick Add | Event-capture entry point |
+| Order | Block         | Layout role                                       |
+| ----- | ------------- | ------------------------------------------------- |
+| 1     | Header        | Page identity and viewport-specific global action |
+| 2     | Next Action   | Primary full-width content block                  |
+| 3     | Last Glucose  | Current-status card                               |
+| 4     | Day Summary   | Current-day summary card                          |
+| 5     | Recent Events | Bounded recent-activity preview                   |
+| 6     | AI Insight    | Secondary supporting card                         |
+| 7     | Quick Add     | Event-capture entry point                         |
 
 The semantic reading order must follow this sequence. Responsive placement may
 put Last Glucose beside Day Summary and Recent Events beside AI Insight, but it
@@ -107,11 +107,11 @@ alignment.
 
 ### Horizontal Padding
 
-| Viewport | Left and right padding |
-| --- | --- |
-| 320–639 px | 16 px |
-| 640–1023 px | 24 px |
-| 1024 px and wider | 24 px |
+| Viewport          | Left and right padding |
+| ----------------- | ---------------------- |
+| 320–639 px        | 16 px                  |
+| 640–1023 px       | 24 px                  |
+| 1024 px and wider | 24 px                  |
 
 Safe-area insets are added to these minimum values when required by the device.
 
@@ -125,11 +125,11 @@ Safe-area insets are added to these minimum values when required by the device.
 
 ### Section Spacing
 
-| Viewport | Vertical space between grid rows |
-| --- | --- |
-| 320–639 px | 16 px |
-| 640–1023 px | 20 px |
-| 1024 px and wider | 24 px |
+| Viewport          | Vertical space between grid rows |
+| ----------------- | -------------------------------- |
+| 320–639 px        | 16 px                            |
+| 640–1023 px       | 20 px                            |
+| 1024 px and wider | 24 px                            |
 
 No block may add an external margin that changes this screen-level rhythm.
 Spacing inside a block belongs to that block's UI specification.
@@ -371,11 +371,11 @@ new global empty-state block.
 
 ## Responsive Rules
 
-| Range | Content grid | Page padding | Gap | Quick Add entry |
-| --- | --- | --- | --- | --- |
-| 320–639 px | 1 column | 16 px | 16 px | FAB |
-| 640–1023 px | 2 columns | 24 px | 20 px | FAB |
-| 1024 px and wider | 12 columns | 24 px | 24 px | Header action button |
+| Range             | Content grid | Page padding | Gap   | Quick Add entry      |
+| ----------------- | ------------ | ------------ | ----- | -------------------- |
+| 320–639 px        | 1 column     | 16 px        | 16 px | FAB                  |
+| 640–1023 px       | 2 columns    | 24 px        | 20 px | FAB                  |
+| 1024 px and wider | 12 columns   | 24 px        | 24 px | Header action button |
 
 Additional rules:
 
