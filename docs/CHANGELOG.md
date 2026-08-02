@@ -1,5 +1,33 @@
 # Changelog
 
+## Thin Next.js Platform Bootstrap — Feature Complete
+
+Дата: 2026-08-02
+
+Завершено:
+
+- Thin Next.js Platform Bootstrap (CR-02) — `apps/web/lib/platform/`
+- ADR-0012 — User Time Zone Policy (Option C: required explicit IANA time zone)
+- `createRequestPlatformRuntime()` — server-only canonical entry point
+- `RequestPlatformBootstrapResult` — discriminated contract (`ready` | `time-zone-required`)
+- request-derived locale resolution (Wave 1: `en-GB`, `uk-UA`, `de-DE`, `ru-RU`)
+- plain `WebPlatformConfig` assembly and per-call `createWebPlatformRuntime()` delegation
+- SSR isolation tests and hydration boundary documentation
+- bootstrap tests: 35 (205 total web tests)
+
+Не входит в этот этап:
+
+- React Provider и hooks (CR-03)
+- cookie scheme wiring и browser IANA first-visit detection
+- production route invocation
+- Dashboard, Timeline, Quick Add migration
+- locale switch UI
+- full translations integration across UI
+
+Статус:
+
+Thin Next.js Platform Bootstrap — Feature Complete ✅
+
 ## Platform Runtime & Web Composition Root Foundation — Feature Complete
 
 Дата: 2026-08-02
@@ -18,8 +46,7 @@
 
 Не входит в этот этап:
 
-- Next.js bootstrap в `apps/web`
-- cookies, headers и URL locale detection
+- cookies и URL locale detection (beyond Composition Root contracts)
 - React Provider и hooks
 - Dashboard, Timeline, Quick Add migration
 - locale switch UI

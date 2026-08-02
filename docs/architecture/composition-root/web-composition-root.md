@@ -13,7 +13,7 @@ It does not change ADR-0011 semantics.
 ## Status
 
 Approved — `@diabetes-universe/platform-web` implemented (CR-01C); thin Next.js
-bootstrap implemented (CR-02, user time zone policy per
+bootstrap Feature Complete (CR-02, user time zone policy per
 [ADR-0012](../../adr/0012-user-time-zone-policy.md)); Presentation Integration
 Layer deferred
 
@@ -141,7 +141,7 @@ Location: `apps/web/lib/platform/`
 - passing the assembled `PlatformRuntime` to Application or Presentation
   Integration Layer.
 
-### Implemented (CR-02)
+### Implemented (CR-02) — Feature Complete
 
 - server-only `createRequestPlatformRuntime()` entry point;
 - request-derived locale resolution (`cookie` when a scheme exists,
@@ -408,7 +408,7 @@ Types referenced above come from Platform Contracts (`@diabetes-universe/i18n`,
 | --------------------------------- | ------------------------------------------------ |
 | `@diabetes-universe/platform`     | CR-01A — implemented                             |
 | `@diabetes-universe/platform-web` | CR-01C — implemented                             |
-| `apps/web` bootstrap              | CR-02 — implemented (time zone per ADR-0012)     |
+| `apps/web` bootstrap              | CR-02 — Feature Complete                         |
 | React Provider + hooks            | CR-03 — separate Presentation Integration sprint |
 
 Dashboard, Timeline, and Quick Add migration are out of scope for the initial

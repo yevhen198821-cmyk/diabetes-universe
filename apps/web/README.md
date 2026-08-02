@@ -2,7 +2,7 @@
 
 Next.js application for Diabetes Universe.
 
-## Platform bootstrap (CR-02)
+## Platform bootstrap (CR-02) — Feature Complete ✅
 
 Thin server-only bootstrap in `lib/platform/` wires Next.js request context to
 `@diabetes-universe/platform-web`:
