@@ -46,7 +46,7 @@ Bootstrap must **not**:
   default.
 
 When no valid explicit time zone is available, bootstrap returns
-`{ status: 'time-zone-required' }` and must not create `PlatformRuntime` with a
+`{ status: 'time-zone-required', seed }` and must not create `PlatformRuntime` with a
 guessed value.
 
 ### Approved time zone sources
@@ -84,8 +84,14 @@ an exceptional error. `createRequestPlatformRuntime()` returns a discriminated
 `RequestPlatformBootstrapResult`:
 
 - `{ status: 'ready', runtime }` when `PlatformRuntime` is created;
-- `{ status: 'time-zone-required' }` when no valid explicit IANA time zone is
+- `{ status: 'time-zone-required', seed }` when no valid explicit IANA time zone is
   available.
+
+`ServerPresentationSeed` carries immutable server-resolved locale preferences
+(language, locale, hour cycle, optional numbering system and calendar) from the
+same canonical locale resolution used by the ready flow. It must not contain
+time zone, `PlatformRuntime`, localization/formatting services, translation
+bundles, medical data, or browser objects.
 
 Infrastructure and configuration errors from `createWebPlatformRuntime()`
 continue to reject the returned promise. Bootstrap does not create partial

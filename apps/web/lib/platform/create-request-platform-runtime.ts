@@ -5,6 +5,7 @@ import { ensureServerOnly } from './ensure-server-only';
 import type { RequestPlatformBootstrapResult } from './request-platform-bootstrap-result';
 import type { RequestPresentationContext } from './request-presentation-context';
 import { resolveRequestTimeZone } from './resolve-request-time-zone';
+import { createServerPresentationSeed } from './server-presentation-seed';
 
 const MODULE_NAME = 'createRequestPlatformRuntime';
 
@@ -34,7 +35,10 @@ export async function createRequestPlatformRuntime(
   const explicitTimeZone = resolveRequestTimeZone(context);
 
   if (explicitTimeZone === null) {
-    return { status: 'time-zone-required' };
+    return {
+      status: 'time-zone-required',
+      seed: createServerPresentationSeed(context),
+    };
   }
 
   const config = createWebPlatformConfig(context, explicitTimeZone);

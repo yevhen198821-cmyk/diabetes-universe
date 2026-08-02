@@ -150,7 +150,7 @@ Location: `apps/web/lib/platform/`
   [ADR-0012](../../adr/0012-user-time-zone-policy.md) — validated cookie as
   current server source; no server default, no locale-derived guess;
 - `RequestPlatformBootstrapResult` discriminated contract (`ready` |
-  `time-zone-required`);
+  `time-zone-required` + `ServerPresentationSeed`);
 - immutable `WebPlatformConfig` assembly when explicit time zone is present;
 - per-request / per-call `PlatformRuntime` via `createWebPlatformRuntime()` when
   explicit time zone is present;
@@ -166,6 +166,10 @@ Location: `apps/web/lib/platform/`
 - cookie scheme wiring and browser IANA first-visit detection;
 - React Provider, hooks, and client context snapshot API;
 - production bootstrap invocation on live routes.
+
+`ServerPresentationSeed` is now produced on `time-zone-required` bootstrap so
+client presentation orchestration can combine canonical server locale resolution
+with browser IANA detection without a separate non-canonical locale input.
 
 ### Not responsible for
 

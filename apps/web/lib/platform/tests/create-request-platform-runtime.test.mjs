@@ -26,7 +26,12 @@ test('createRequestPlatformRuntime returns time-zone-required when explicit time
     acceptLanguage: 'en-GB',
   });
 
-  assert.deepEqual(result, { status: 'time-zone-required' });
+  assert.equal(result.status, 'time-zone-required');
+  assert.equal(result.seed.language, 'en');
+  assert.equal(result.seed.locale, 'en-GB');
+  assert.equal(result.seed.hourCycle, 'h23');
+  assert.equal(Object.isFrozen(result.seed), true);
+  assert.equal('timeZone' in result.seed, false);
 });
 
 test('createRequestPlatformRuntime returns time-zone-required for an invalid cookie time zone', async () => {
@@ -35,7 +40,48 @@ test('createRequestPlatformRuntime returns time-zone-required for an invalid coo
     cookieTimeZone: 'Not/A_TimeZone',
   });
 
-  assert.deepEqual(result, { status: 'time-zone-required' });
+  assert.equal(result.status, 'time-zone-required');
+  assert.equal(result.seed.locale, 'en-GB');
+  assert.equal('timeZone' in result.seed, false);
+});
+
+test('time-zone-required seed preserves cookie locale priority over Accept-Language', async () => {
+  const result = await createRequestPlatformRuntime({
+    cookieLocale: 'de-DE',
+    acceptLanguage: 'en-GB',
+  });
+
+  assert.equal(result.status, 'time-zone-required');
+  assert.equal(result.seed.locale, 'de-DE');
+  assert.equal(result.seed.language, 'de');
+});
+
+test('time-zone-required seed preserves Accept-Language locale when cookie is absent', async () => {
+  const result = await createRequestPlatformRuntime({
+    acceptLanguage: 'uk-UA',
+  });
+
+  assert.equal(result.status, 'time-zone-required');
+  assert.equal(result.seed.locale, 'uk-UA');
+  assert.equal(result.seed.language, 'uk');
+});
+
+test('time-zone-required seed preserves default en-GB locale when no locale input exists', async () => {
+  const result = await createRequestPlatformRuntime({});
+
+  assert.equal(result.status, 'time-zone-required');
+  assert.equal(result.seed.locale, 'en-GB');
+  assert.equal(result.seed.language, 'en');
+});
+
+test('time-zone-required seed does not contain timeZone', async () => {
+  const result = await createRequestPlatformRuntime({
+    acceptLanguage: 'de-DE',
+  });
+
+  assert.equal(result.status, 'time-zone-required');
+  assert.equal('timeZone' in result.seed, false);
+  assert.equal('runtime' in result, false);
 });
 
 test('createRequestPlatformRuntime returns ready with PlatformRuntime for a valid cookie time zone', async () => {
