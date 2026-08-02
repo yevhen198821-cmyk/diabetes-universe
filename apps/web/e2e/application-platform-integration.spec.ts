@@ -43,7 +43,7 @@ test('dashboard to timeline client navigation preserves timeline store state', a
 
   await expect(daySummary.getByText('4 ЕД')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Добавить событие' }).click();
+  await page.getByRole('button', { name: 'Add event' }).click();
   await page
     .getByRole('button', { name: 'Инсулин. Записать дозу инсулина' })
     .click();

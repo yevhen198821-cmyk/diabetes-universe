@@ -5,7 +5,7 @@ import type { WebPlatformConfig } from '@diabetes-universe/platform-web';
 import type { PresentationContext } from '../presentation/presentation-context';
 import { isValidTimeZone } from '../resolve-request-time-zone';
 import {
-  WEB_PLATFORM_BOOTSTRAP_PRELOAD_NAMESPACE,
+  WEB_PLATFORM_APPLICATION_PRELOAD_NAMESPACES,
   WEB_PLATFORM_FALLBACK_POLICY,
 } from '../web-platform-defaults';
 
@@ -67,7 +67,7 @@ export function createWebPlatformConfigFromPresentationContext(
   assertContextConsistency(localeContext, formattingContext);
 
   const preload = Object.freeze({
-    namespaces: Object.freeze([WEB_PLATFORM_BOOTSTRAP_PRELOAD_NAMESPACE]),
+    namespaces: WEB_PLATFORM_APPLICATION_PRELOAD_NAMESPACES,
     locales: Object.freeze([context.locale]),
   });
 

@@ -3,7 +3,9 @@ import test from 'node:test';
 
 import { createWebPlatformConfig } from '../create-web-platform-config.ts';
 import {
+  WEB_PLATFORM_APPLICATION_PRELOAD_NAMESPACES,
   WEB_PLATFORM_BOOTSTRAP_PRELOAD_NAMESPACE,
+  WEB_PLATFORM_DASHBOARD_PRELOAD_NAMESPACE,
   WEB_PLATFORM_DEFAULT_HOUR_CYCLE,
   WEB_PLATFORM_DEFAULT_LOCALE,
   WEB_PLATFORM_FALLBACK_POLICY,
@@ -45,16 +47,23 @@ test('createWebPlatformConfig keeps resource FallbackPolicy separate from user p
   );
 });
 
-test('createWebPlatformConfig declares minimal preload scope for bootstrap verification', () => {
+test('createWebPlatformConfig declares application preload scope for bootstrap and dashboard header', () => {
   const config = createWebPlatformConfig(
     { acceptLanguage: 'en-GB', cookieTimeZone: 'Europe/London' },
     'Europe/London',
   );
 
   assert.deepEqual(config.preload, {
-    namespaces: [WEB_PLATFORM_BOOTSTRAP_PRELOAD_NAMESPACE],
+    namespaces: [
+      WEB_PLATFORM_BOOTSTRAP_PRELOAD_NAMESPACE,
+      WEB_PLATFORM_DASHBOARD_PRELOAD_NAMESPACE,
+    ],
     locales: ['en-GB'],
   });
+  assert.deepEqual(
+    config.preload.namespaces,
+    WEB_PLATFORM_APPLICATION_PRELOAD_NAMESPACES,
+  );
 });
 
 test('createWebPlatformConfig rejects invalid explicit time zone for developer misuse', () => {

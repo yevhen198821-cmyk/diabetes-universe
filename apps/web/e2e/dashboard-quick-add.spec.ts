@@ -16,7 +16,7 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
 
   await expect(daySummary.getByText('4 ЕД')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Добавить событие' }).click();
+  await page.getByRole('button', { name: 'Add event' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Добавить событие' }),
   ).toBeVisible();

@@ -48,6 +48,20 @@ export const WEB_PLATFORM_FALLBACK_POLICY = Object.freeze({
 export const WEB_PLATFORM_BOOTSTRAP_PRELOAD_NAMESPACE = asNamespace('common');
 
 /**
+ * Dashboard namespace preloaded for the migrated Dashboard Header vertical slice.
+ */
+export const WEB_PLATFORM_DASHBOARD_PRELOAD_NAMESPACE =
+  asNamespace('dashboard');
+
+/**
+ * Application preload scope for production bootstrap.
+ */
+export const WEB_PLATFORM_APPLICATION_PRELOAD_NAMESPACES = Object.freeze([
+  WEB_PLATFORM_BOOTSTRAP_PRELOAD_NAMESPACE,
+  WEB_PLATFORM_DASHBOARD_PRELOAD_NAMESPACE,
+]);
+
+/**
  * Canonical default locale per supported language (Localization Platform v1.0).
  */
 export const WEB_PLATFORM_LANGUAGE_DEFAULT_LOCALES = Object.freeze({
