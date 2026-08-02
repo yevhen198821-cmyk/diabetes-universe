@@ -1,5 +1,37 @@
 # Changelog
 
+## Dashboard Next Action Localization — Feature Complete
+
+Дата: 2026-08-02
+
+Завершено:
+
+- Dashboard Next Action Localization Migration (I18N-02B1) — `apps/web/components/dashboard/dashboard-next-action*`
+- второй вертикальный Dashboard migration slice на `useLocalization()`
+- structural `NextStepSource` demo data (`type: 'insulin'`, `priority: 'high'`) без presentation strings в mocks
+- localized presentation via `resolveDashboardNextActionDemoStep()` в container boundary
+- English canonical `dashboard.nextAction.*` keys (8) в `@diabetes-universe/locales`
+- additive product contract: `NextStepSource`, `NextStepActionType`, `NextStepPriority` в `@diabetes-universe/types`
+- pure presentation model boundary; preload без изменений (`common` + `dashboard`)
+- unit, integration, resource, and E2E coverage (`dashboard-next-action-i18n.spec.ts`)
+- architecture documentation и Engineering Audit
+- squash merge: PR #23 (`88308ee` → `2679af8` on `main`)
+- web tests: 312 total; E2E: 24 total
+
+Не входит в этот этап:
+
+- Dashboard Header (I18N-02A — уже Feature Complete)
+- Last Glucose, Day Summary, Recent Events, AI Insight (I18N-02B2+)
+- Timeline и Quick Add product source migration
+- `uk`, `de`, `ru` professional translations
+- locale switch UI, cookie persistence
+- ICU MessageFormat interpolation
+- route-aware preload orchestration
+
+Статус:
+
+Dashboard Next Action Localization (I18N-02B1) — Feature Complete ✅
+
 ## Dashboard Header Localization — Feature Complete
 
 Дата: 2026-08-02

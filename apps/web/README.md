@@ -172,7 +172,7 @@ Platform stack through production hooks.
 - unit, integration, and E2E coverage
 - architecture: `docs/architecture/localization/dashboard-header-migration.md`
 
-## Dashboard next action localization (I18N-02B1) — Implementation Complete ✅
+## Dashboard next action localization (I18N-02B1) — Feature Complete ✅
 
 Location: `components/dashboard/dashboard-next-action*`, `dashboard-next-action-labels.ts`
 

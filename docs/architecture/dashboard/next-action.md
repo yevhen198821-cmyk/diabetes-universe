@@ -7,7 +7,7 @@ dominant content card after the Header.
 
 ## Status
 
-Approved — localized via I18N-02B1 (Ready for Review)
+Approved — localized via I18N-02B1 (Feature Complete)
 
 ## Responsibility
 
