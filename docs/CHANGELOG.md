@@ -1,5 +1,40 @@
 # Changelog
 
+## Platform Formatting Foundation — Feature Complete
+
+Дата: 2026-08-02
+
+Завершено:
+
+- Platform Formatting Foundation (FMT-01)
+- Пакет: `@diabetes-universe/formatting`
+- Platform Contracts
+- PlatformFormatter Runtime implementation
+- `createPlatformFormatter()`
+- Date / Time / DateTime formatting
+- Number formatting
+- Percentage formatting
+- Currency formatting
+- Relative Time formatting
+- Duration formatting
+- Range formatting
+- Measurement formatting
+- Runtime cache (Intl formatter instances only)
+- Runtime tests (170)
+
+Не входит в этот этап:
+
+- Date/time parsing beyond `DateLike` contract validation
+- Medical unit conversion
+- Formatting Infrastructure Adapter
+- Composition Root wiring
+- React hooks и UI integration
+- Lint/CI enforcement of the formatting single entry point
+
+Статус:
+
+Platform Formatting Foundation — Feature Complete ✅
+
 ## Localization Platform Foundation — Feature Complete
 
 Дата: 2026-08-02

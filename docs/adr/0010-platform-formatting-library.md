@@ -2,7 +2,7 @@
 
 ## Status
 
-Approved — архитектура утверждена; реализация FMT-01 ещё не выполнена
+Approved — Platform Formatting Foundation (FMT-01) Feature Complete
 
 ## Context
 
@@ -25,8 +25,10 @@ locale-aware форматирования presentation-значений (дат�
 Утверждённое физическое размещение: отдельный пакет **`@diabetes-universe/formatting`**
 (`packages/formatting`).
 
-> **Статус реализации:** пакет **ещё не создан**. Данный ADR фиксирует только
-> архитектурное решение. Реализация — sprint FMT-01.
+> **Статус реализации:** пакет `@diabetes-universe/formatting` реализован. Sprint
+> FMT-01 (Platform Formatting Foundation) завершён — Platform Contracts, Intl-backed
+> runtime и tests. Composition Root wiring, Formatting Infrastructure Adapter и
+> интеграция с Web/React остаются отдельными этапами.
 
 ### Formatting Single Entry Point
 
@@ -65,12 +67,12 @@ Formatting получает уже вычисленное display-ready знач
 
 ### Negative
 
-- Дополнительный пакет и sprint FMT-01 до появления runtime.
+- Дополнительный пакет в monorepo.
 - Требуется discipline: не обходить Single Entry Point.
 
 ### Neutral
 
-- Конкретные API formatting library определяются при реализации FMT-01.
+- API formatting library зафиксирован в FMT-01 (см. `packages/formatting`).
 - Интеграция с React hooks — отдельное решение поверх formatting contracts.
 
 ## Alternatives
