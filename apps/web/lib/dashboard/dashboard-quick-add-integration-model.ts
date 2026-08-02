@@ -55,6 +55,7 @@ export interface DashboardTimelineState {
 
 export interface DashboardQuickAddIntegrationOptions {
   readonly aiInsight?: DashboardDerivedAiInsight | null;
+  readonly formatDaySummaryDisplayDate?: (referenceTime: Date) => string;
   readonly formatLastGlucoseDisplayTime?: (dateTime: string) => string;
   readonly locale?: string;
   readonly referenceTime?: Date;
@@ -74,52 +75,32 @@ const DEFAULT_LOCALE = 'ru-RU';
 
 function createDashboardDayLabel(
   currentDate: Date,
-  locale: string,
-  timeZone?: string,
+  timeZone: string | undefined,
+  formatDaySummaryDisplayDate: (referenceTime: Date) => string,
 ): Pick<DashboardDerivedDaySummary, 'dayDate' | 'displayDayLabel'> | null {
   if (Number.isNaN(currentDate.getTime())) {
     return null;
   }
 
-  try {
-    const normalizedLocale = locale.trim();
-    const normalizedTimeZone = timeZone?.trim();
-    const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf([
-      normalizedLocale,
-    ]);
+  const dayDate = getTimelineCalendarDateKey(
+    currentDate.toISOString(),
+    timeZone?.trim() || undefined,
+  );
 
-    if (supportedLocales.length === 0) {
-      return null;
-    }
-
-    const displayDayLabel = new Intl.DateTimeFormat(normalizedLocale, {
-      day: 'numeric',
-      month: 'long',
-      timeZone: normalizedTimeZone || undefined,
-      weekday: 'long',
-    }).format(currentDate);
-    const dayDate = getTimelineCalendarDateKey(
-      currentDate.toISOString(),
-      normalizedTimeZone || undefined,
-    );
-
-    if (!dayDate) {
-      return null;
-    }
-
-    const trimmedLabel = displayDayLabel.trim();
-
-    if (trimmedLabel.length === 0) {
-      return null;
-    }
-
-    return {
-      dayDate,
-      displayDayLabel: trimmedLabel,
-    };
-  } catch {
+  if (!dayDate) {
     return null;
   }
+
+  const displayDayLabel = formatDaySummaryDisplayDate(currentDate).trim();
+
+  if (displayDayLabel.length === 0) {
+    return null;
+  }
+
+  return {
+    dayDate,
+    displayDayLabel,
+  };
 }
 
 function deriveLastGlucose(
@@ -150,12 +131,20 @@ function deriveLastGlucose(
 function deriveDaySummary(
   events: readonly TimelineEvent[],
   referenceTime: Date,
-  locale: string,
   timeZone: string | undefined,
   remindersCompleted: number,
   remindersTotal: number,
+  formatDaySummaryDisplayDate?: (referenceTime: Date) => string,
 ): DashboardDerivedDaySummary | null {
-  const dayLabel = createDashboardDayLabel(referenceTime, locale, timeZone);
+  if (!formatDaySummaryDisplayDate) {
+    return null;
+  }
+
+  const dayLabel = createDashboardDayLabel(
+    referenceTime,
+    timeZone,
+    formatDaySummaryDisplayDate,
+  );
 
   if (!dayLabel) {
     return null;
@@ -213,10 +202,10 @@ export function deriveDashboardQuickAddBlocks(
     daySummary: deriveDaySummary(
       state.events,
       referenceTime,
-      locale,
       timeZone,
       remindersCompleted,
       remindersTotal,
+      options.formatDaySummaryDisplayDate,
     ),
     lastGlucose: deriveLastGlucose(
       state.events,

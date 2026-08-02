@@ -200,10 +200,18 @@ Location: `components/dashboard/dashboard-last-glucose*`
 - architecture: `docs/architecture/localization/dashboard-last-glucose-migration.md`
 - squash merge: PR #24 (`5bf6925` → `ef9a7e0` on `main`)
 
+## Dashboard day summary localization (I18N-02B3) — Architecture Audit
+
+Location: `components/dashboard/dashboard-day-summary*`
+
+Architectural audit complete; implementation not started. See
+`docs/architecture/localization/dashboard-day-summary-migration.md`.
+
 ### Not implemented (I18N-02B3+)
 
 - cookie scheme wiring and `PresentationPersistence` adapter
-- remaining Dashboard block hook migration (Day Summary, Recent Events, AI Insight)
+- Day Summary hook migration (I18N-02B3 — audit only)
+- remaining Dashboard block hook migration (Recent Events, AI Insight)
 - Timeline, Quick Add hook migration
 - locale switch UI
 - full glucose value formatting via `formatMeasurement()` (deferred until structural glucose contract)

@@ -7,7 +7,7 @@ neutral Dashboard status information beside Last Glucose.
 
 ## Status
 
-Approved
+Approved — I18N-02B3 architecture audit complete (implementation pending)
 
 ## Responsibility
 

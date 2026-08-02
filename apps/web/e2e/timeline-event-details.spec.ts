@@ -95,7 +95,7 @@ test('timeline event delete requires confirmation and updates Dashboard', async 
 
   await page.getByRole('link', { name: 'На главную' }).click();
   await expect(
-    page.getByRole('region', { name: 'Сводка дня' }).getByText('0 ЕД'),
+    page.getByRole('region', { name: 'Day summary' }).getByText('0 ЕД'),
   ).toBeVisible();
 });
 

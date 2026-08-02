@@ -1,3 +1,5 @@
+import type { DashboardDaySummaryLabels } from './dashboard-day-summary-labels';
+
 export interface DashboardDaySummaryData {
   readonly dayDate: string;
   readonly displayDayLabel: string;
@@ -7,6 +9,12 @@ export interface DashboardDaySummaryData {
   readonly remindersTotal: number;
   readonly totalCarbohydrates: string;
   readonly totalInsulin: string;
+}
+
+export interface DashboardDaySummaryFormattedMetrics {
+  readonly glucoseMeasurements: string;
+  readonly medicationDoses: string;
+  readonly reminders: string;
 }
 
 interface DashboardDaySummaryLoadingProps {
@@ -50,76 +58,7 @@ export interface DashboardDaySummaryViewModel {
   readonly state: 'empty' | 'error' | 'loading' | 'ready';
 }
 
-export const dashboardDaySummaryLabels = {
-  defaultEmpty: 'Данные за сегодня пока недоступны.',
-  defaultError: 'Не удалось загрузить сводку дня.',
-  eyebrow: 'Текущий день',
-  glucoseMeasurements: 'Измерения глюкозы',
-  loading: 'Загрузка сводки дня',
-  medicationDoses: 'Приёмы лекарств',
-  reminders: 'Напоминания',
-  title: 'Сводка дня',
-  totalCarbohydrates: 'Суммарные углеводы',
-  totalInsulin: 'Суммарный инсулин',
-  unavailable: 'Сводка дня недоступна.',
-} as const;
-
 const DAY_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-
-export function createDashboardDaySummaryDayLabel(
-  currentDate: Date,
-  locale: string,
-  timeZone: string,
-): Pick<DashboardDaySummaryData, 'dayDate' | 'displayDayLabel'> | null {
-  if (Number.isNaN(currentDate.getTime())) {
-    return null;
-  }
-
-  try {
-    const normalizedLocale = locale.trim();
-    const normalizedTimeZone = timeZone.trim();
-    const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf([
-      normalizedLocale,
-    ]);
-
-    if (supportedLocales.length === 0 || normalizedTimeZone.length === 0) {
-      return null;
-    }
-
-    const displayDayLabel = new Intl.DateTimeFormat(normalizedLocale, {
-      day: 'numeric',
-      month: 'long',
-      timeZone: normalizedTimeZone,
-      weekday: 'long',
-    }).format(currentDate);
-    const dateParts = new Intl.DateTimeFormat('en-US-u-ca-gregory-nu-latn', {
-      day: '2-digit',
-      month: '2-digit',
-      timeZone: normalizedTimeZone,
-      year: 'numeric',
-    }).formatToParts(currentDate);
-    const day = dateParts.find((part) => part.type === 'day')?.value;
-    const month = dateParts.find((part) => part.type === 'month')?.value;
-    const year = dateParts.find((part) => part.type === 'year')?.value;
-
-    if (!day || !month || !year) {
-      return null;
-    }
-
-    const trimmedLabel = displayDayLabel.trim();
-
-    if (trimmedLabel.length === 0) {
-      return null;
-    }
-
-    return {
-      dayDate: `${year.padStart(4, '0')}-${month}-${day}`,
-      displayDayLabel: trimmedLabel,
-    };
-  } catch {
-    return null;
-  }
-}
 
 function isValidDayDate(dayDate: string): boolean {
   if (!DAY_DATE_PATTERN.test(dayDate)) {
@@ -138,14 +77,6 @@ function isValidDayDate(dayDate: string): boolean {
 
 function isNonNegativeInteger(value: number): boolean {
   return Number.isInteger(value) && value >= 0;
-}
-
-function formatCount(value: number): string {
-  return String(value);
-}
-
-function formatReminders(completed: number, total: number): string {
-  return `${completed} / ${total}`;
 }
 
 function normalizeReadySummary(
@@ -184,39 +115,41 @@ function normalizeReadySummary(
 
 function createReadyMetrics(
   summary: DashboardDaySummaryData,
+  labels: DashboardDaySummaryLabels,
+  formattedMetrics: DashboardDaySummaryFormattedMetrics,
 ): Pick<DashboardDaySummaryViewModel, 'primaryMetrics' | 'secondaryMetrics'> {
   return {
     primaryMetrics: [
       {
-        label: dashboardDaySummaryLabels.glucoseMeasurements,
-        value: formatCount(summary.glucoseMeasurements),
+        label: labels.glucoseMeasurements,
+        value: formattedMetrics.glucoseMeasurements,
       },
       {
-        label: dashboardDaySummaryLabels.totalInsulin,
+        label: labels.totalInsulin,
         value: summary.totalInsulin,
       },
       {
-        label: dashboardDaySummaryLabels.totalCarbohydrates,
+        label: labels.totalCarbohydrates,
         value: summary.totalCarbohydrates,
       },
     ],
     secondaryMetrics: [
       {
-        label: dashboardDaySummaryLabels.medicationDoses,
-        value: formatCount(summary.medicationDoses),
+        label: labels.medicationDoses,
+        value: formattedMetrics.medicationDoses,
       },
       {
-        label: dashboardDaySummaryLabels.reminders,
-        value: formatReminders(
-          summary.remindersCompleted,
-          summary.remindersTotal,
-        ),
+        label: labels.reminders,
+        value: formattedMetrics.reminders,
       },
     ],
   };
 }
 
-function createEmptyViewModel(message: string): DashboardDaySummaryViewModel {
+function createEmptyViewModel(
+  labels: DashboardDaySummaryLabels,
+  message: string,
+): DashboardDaySummaryViewModel {
   return {
     dayDate: null,
     displayDayLabel: null,
@@ -230,6 +163,8 @@ function createEmptyViewModel(message: string): DashboardDaySummaryViewModel {
 
 export function createDashboardDaySummaryViewModel(
   props: DashboardDaySummaryProps,
+  labels: DashboardDaySummaryLabels,
+  formattedMetrics?: DashboardDaySummaryFormattedMetrics,
 ): DashboardDaySummaryViewModel {
   switch (props.state) {
     case 'loading':
@@ -237,8 +172,7 @@ export function createDashboardDaySummaryViewModel(
         dayDate: null,
         displayDayLabel: null,
         isLoading: true,
-        message:
-          props.loadingLabel?.trim() || dashboardDaySummaryLabels.loading,
+        message: props.loadingLabel?.trim() || labels.loading,
         primaryMetrics: [],
         secondaryMetrics: [],
         state: props.state,
@@ -246,11 +180,11 @@ export function createDashboardDaySummaryViewModel(
     case 'ready': {
       const summary = normalizeReadySummary(props.summary);
 
-      if (!summary) {
-        return createEmptyViewModel(dashboardDaySummaryLabels.unavailable);
+      if (!summary || !formattedMetrics) {
+        return createEmptyViewModel(labels, labels.unavailable);
       }
 
-      const metrics = createReadyMetrics(summary);
+      const metrics = createReadyMetrics(summary, labels, formattedMetrics);
 
       return {
         dayDate: summary.dayDate,
@@ -266,8 +200,7 @@ export function createDashboardDaySummaryViewModel(
         dayDate: null,
         displayDayLabel: null,
         isLoading: false,
-        message:
-          props.message?.trim() || dashboardDaySummaryLabels.defaultEmpty,
+        message: props.message?.trim() || labels.defaultEmpty,
         primaryMetrics: [],
         secondaryMetrics: [],
         state: props.state,
@@ -277,8 +210,7 @@ export function createDashboardDaySummaryViewModel(
         dayDate: null,
         displayDayLabel: null,
         isLoading: false,
-        message:
-          props.message?.trim() || dashboardDaySummaryLabels.defaultError,
+        message: props.message?.trim() || labels.defaultError,
         primaryMetrics: [],
         secondaryMetrics: [],
         state: props.state,

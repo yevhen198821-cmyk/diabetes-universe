@@ -17,7 +17,7 @@ test('dashboard next action renders localized English copy and opens insulin qui
   ).toBeVisible();
   await expect(page.getByText('Следующее действие')).toHaveCount(0);
 
-  const daySummary = page.getByRole('region', { name: 'Сводка дня' });
+  const daySummary = page.getByRole('region', { name: 'Day summary' });
 
   await page.getByRole('button', { name: 'Add', exact: true }).click();
   await expect(

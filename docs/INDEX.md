@@ -22,6 +22,7 @@
 - [Dashboard Header Localization Migration (I18N-02A)](architecture/localization/dashboard-header-migration.md) — Feature Complete
 - [Dashboard Next Action Localization Migration (I18N-02B1)](architecture/localization/dashboard-next-action-migration.md) — Feature Complete
 - [Dashboard Last Glucose Localization Migration (I18N-02B2)](architecture/localization/dashboard-last-glucose-migration.md) — Feature Complete
+- [Dashboard Day Summary Localization Migration (I18N-02B3)](architecture/localization/dashboard-day-summary-migration.md) — Architecture Audit
 - [@diabetes-universe/web](../apps/web/README.md) — thin Next.js bootstrap (CR-02, Feature Complete)
 - [@diabetes-universe/platform-web](../packages/platform-web/README.md)
 - [Navigation](architecture/navigation/overview.md) — routes `/`, `/timeline`, `/dashboard` redirect

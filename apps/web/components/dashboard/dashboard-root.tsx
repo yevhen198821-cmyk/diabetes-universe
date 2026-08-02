@@ -67,6 +67,10 @@ export function DashboardRoot() {
       formatter.formatTime(dateTime, { timeStyle: 'short' }),
     [formatter],
   );
+  const formatDaySummaryDisplayDate = useMemo(
+    () => (date: Date) => formatter.formatDate(date, { dateStyle: 'full' }),
+    [formatter],
+  );
 
   const derivedBlocks = useMemo(
     () =>
@@ -74,6 +78,7 @@ export function DashboardRoot() {
         { events },
         {
           aiInsight: mockAiInsight,
+          formatDaySummaryDisplayDate,
           formatLastGlucoseDisplayTime,
           locale: DASHBOARD_LOCALE,
           referenceTime,
@@ -82,7 +87,13 @@ export function DashboardRoot() {
           timeZone: dashboardTimeZone,
         },
       ),
-    [dashboardTimeZone, events, formatLastGlucoseDisplayTime, referenceTime],
+    [
+      dashboardTimeZone,
+      events,
+      formatDaySummaryDisplayDate,
+      formatLastGlucoseDisplayTime,
+      referenceTime,
+    ],
   );
 
   const returnFocusRef =
