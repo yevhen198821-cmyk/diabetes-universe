@@ -100,14 +100,14 @@ Element hierarchy:
 
 ## Spacing and Sizing
 
-| Element                 | Rule                          |
-| ----------------------- | ----------------------------- |
-| Card padding            | 20 px (`p-5`)                 |
-| Card corner radius      | 16 px (`rounded-2xl`)         |
-| Icon container          | 44 × 44 px (`size-11`)        |
-| Header gap              | 16 px (`gap-4`)               |
-| Event list gap          | 12 px (`space-y-3`)           |
-| View-all minimum height | 44 px (`min-h-11`)            |
+| Element                 | Rule                   |
+| ----------------------- | ---------------------- |
+| Card padding            | 20 px (`p-5`)          |
+| Card corner radius      | 16 px (`rounded-2xl`)  |
+| Icon container          | 44 × 44 px (`size-11`) |
+| Header gap              | 16 px (`gap-4`)        |
+| Event list gap          | 12 px (`space-y-3`)    |
+| View-all minimum height | 44 px (`min-h-11`)     |
 
 ## Typography
 

@@ -184,10 +184,7 @@ function normalizeReadySummary(
 
 function createReadyMetrics(
   summary: DashboardDaySummaryData,
-): Pick<
-  DashboardDaySummaryViewModel,
-  'primaryMetrics' | 'secondaryMetrics'
-> {
+): Pick<DashboardDaySummaryViewModel, 'primaryMetrics' | 'secondaryMetrics'> {
   return {
     primaryMetrics: [
       {

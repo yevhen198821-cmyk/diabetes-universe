@@ -199,16 +199,14 @@ export function createDashboardAiInsightViewModel(
       return {
         insight: null,
         isLoading: false,
-        message:
-          props.message?.trim() || dashboardAiInsightLabels.defaultEmpty,
+        message: props.message?.trim() || dashboardAiInsightLabels.defaultEmpty,
         state: props.state,
       };
     case 'error':
       return {
         insight: null,
         isLoading: false,
-        message:
-          props.message?.trim() || dashboardAiInsightLabels.defaultError,
+        message: props.message?.trim() || dashboardAiInsightLabels.defaultError,
         state: props.state,
       };
   }

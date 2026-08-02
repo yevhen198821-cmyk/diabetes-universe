@@ -15,22 +15,22 @@ content.
 
 ### Typed Inputs
 
-| Input           | Type                               | Required | Purpose                                                      |
-| --------------- | ---------------------------------- | -------- | ------------------------------------------------------------ |
-| `state`         | `loading \| ready \| empty \| error` | Yes    | Selects the block presentation state                         |
-| `glucose`       | `DashboardLastGlucoseMeasurement`  | Yes in `ready` | Supplies value, display time, and machine datetime |
-| `loadingLabel`  | `string`                           | No       | Overrides the default loading announcement                   |
-| `message`       | `string`                           | No in `empty` / `error` | Supplies user-facing empty or error copy      |
-| `referenceTime` | `Date`                             | No       | Evaluates staleness deterministically in tests and owners     |
-| `staleAfterMs`  | `number`                           | No       | Overrides the default stale threshold                        |
+| Input           | Type                                 | Required                | Purpose                                                   |
+| --------------- | ------------------------------------ | ----------------------- | --------------------------------------------------------- |
+| `state`         | `loading \| ready \| empty \| error` | Yes                     | Selects the block presentation state                      |
+| `glucose`       | `DashboardLastGlucoseMeasurement`    | Yes in `ready`          | Supplies value, display time, and machine datetime        |
+| `loadingLabel`  | `string`                             | No                      | Overrides the default loading announcement                |
+| `message`       | `string`                             | No in `empty` / `error` | Supplies user-facing empty or error copy                  |
+| `referenceTime` | `Date`                               | No                      | Evaluates staleness deterministically in tests and owners |
+| `staleAfterMs`  | `number`                             | No                      | Overrides the default stale threshold                     |
 
 `DashboardLastGlucoseMeasurement` contains:
 
-| Field         | Type     | Rule                                                                 |
-| ------------- | -------- | -------------------------------------------------------------------- |
-| `value`       | `string` | Trimmed non-empty display value including units when supplied        |
-| `displayTime` | `string` | Trimmed non-empty localized or formatted time shown to the user      |
-| `dateTime`    | `string` | Trimmed non-empty ISO 8601 machine-readable measurement instant      |
+| Field         | Type     | Rule                                                            |
+| ------------- | -------- | --------------------------------------------------------------- |
+| `value`       | `string` | Trimmed non-empty display value including units when supplied   |
+| `displayTime` | `string` | Trimmed non-empty localized or formatted time shown to the user |
+| `dateTime`    | `string` | Trimmed non-empty ISO 8601 machine-readable measurement instant |
 
 `DashboardLastGlucoseMeasurement` may be created before render from:
 
@@ -49,12 +49,12 @@ The factory returns:
 
 ### States
 
-| State     | Required behavior                                                                 |
-| --------- | --------------------------------------------------------------------------------- |
-| `loading` | Preserve card geometry and announce loading without plausible glucose values        |
-| `ready`   | Show value, display time, and machine datetime; mark stale measurements locally   |
-| `empty`   | Communicate that no measurement is available without fabricating a value            |
-| `error`   | Show a user-facing failure message without showing stale or fabricated values       |
+| State     | Required behavior                                                               |
+| --------- | ------------------------------------------------------------------------------- |
+| `loading` | Preserve card geometry and announce loading without plausible glucose values    |
+| `ready`   | Show value, display time, and machine datetime; mark stale measurements locally |
+| `empty`   | Communicate that no measurement is available without fabricating a value        |
+| `error`   | Show a user-facing failure message without showing stale or fabricated values   |
 
 ### Fallback Rules
 

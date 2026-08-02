@@ -14,34 +14,34 @@ loading, missing, or unavailable and does not block other Dashboard content.
 
 ### Typed Inputs
 
-| Input          | Type                               | Required | Purpose                                           |
-| -------------- | ---------------------------------- | -------- | ------------------------------------------------- |
-| `state`        | `loading \| ready \| empty \| error` | Yes    | Selects the block presentation state              |
-| `events`       | `DashboardRecentEventSource[]`     | Yes in `ready` | Supplies candidate recent events          |
-| `viewAllHref`  | `string`                           | Yes in `ready` | Supplies navigation target for **Все события** |
-| `loadingLabel` | `string`                           | No       | Overrides the default loading announcement        |
-| `message`      | `string`                           | No in `empty` / `error` | Supplies user-facing empty or error copy |
+| Input          | Type                                 | Required                | Purpose                                        |
+| -------------- | ------------------------------------ | ----------------------- | ---------------------------------------------- |
+| `state`        | `loading \| ready \| empty \| error` | Yes                     | Selects the block presentation state           |
+| `events`       | `DashboardRecentEventSource[]`       | Yes in `ready`          | Supplies candidate recent events               |
+| `viewAllHref`  | `string`                             | Yes in `ready`          | Supplies navigation target for **Все события** |
+| `loadingLabel` | `string`                             | No                      | Overrides the default loading announcement     |
+| `message`      | `string`                             | No in `empty` / `error` | Supplies user-facing empty or error copy       |
 
 `DashboardRecentEventSource` contains:
 
-| Field         | Type                           | Rule                                                       |
-| ------------- | ------------------------------ | ---------------------------------------------------------- |
-| `id`          | `string`                       | Trimmed non-empty stable event identifier                  |
-| `category`    | `DashboardRecentEventCategory` | One of `insulin`, `nutrition`, `medication`, `activity`    |
-| `title`       | `string`                       | Trimmed non-empty event title                              |
-| `value`       | `string`                       | Trimmed non-empty primary display value                    |
-| `unit`        | `string`                       | Trimmed display unit; may be empty when not applicable     |
-| `context`     | `string`                       | Trimmed contextual text; may be empty                      |
-| `displayTime` | `string`                       | Trimmed non-empty visible event time                       |
-| `dateTime`    | `string`                       | Trimmed non-empty ISO 8601 instant used for sorting        |
+| Field         | Type                           | Rule                                                    |
+| ------------- | ------------------------------ | ------------------------------------------------------- |
+| `id`          | `string`                       | Trimmed non-empty stable event identifier               |
+| `category`    | `DashboardRecentEventCategory` | One of `insulin`, `nutrition`, `medication`, `activity` |
+| `title`       | `string`                       | Trimmed non-empty event title                           |
+| `value`       | `string`                       | Trimmed non-empty primary display value                 |
+| `unit`        | `string`                       | Trimmed display unit; may be empty when not applicable  |
+| `context`     | `string`                       | Trimmed contextual text; may be empty                   |
+| `displayTime` | `string`                       | Trimmed non-empty visible event time                    |
+| `dateTime`    | `string`                       | Trimmed non-empty ISO 8601 instant used for sorting     |
 
 ### States
 
 | State     | Required behavior                                                         |
 | --------- | ------------------------------------------------------------------------- |
-| `loading` | Preserve card geometry and announce loading without plausible event cards   |
-| `ready`   | Show up to four sorted previews and the **Все события** navigation action   |
-| `empty`   | Communicate that no recent events are available without fabricated cards    |
+| `loading` | Preserve card geometry and announce loading without plausible event cards |
+| `ready`   | Show up to four sorted previews and the **Все события** navigation action |
+| `empty`   | Communicate that no recent events are available without fabricated cards  |
 | `error`   | Show a user-facing failure message without fabricated cards               |
 
 ### Selection Rules

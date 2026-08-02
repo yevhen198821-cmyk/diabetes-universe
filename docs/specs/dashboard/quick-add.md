@@ -15,47 +15,47 @@ demo state.
 
 ### Entry Points
 
-| Viewport            | Entry point                               | Rule                                      |
-| ------------------- | ----------------------------------------- | ----------------------------------------- |
-| 320–1023 px         | FAB **Добавить событие**                  | Visible, opens shared Quick Add           |
-| 1024 px and wider   | Header button **Добавить событие**        | Visible, opens shared Quick Add           |
-| 1024 px and wider   | Desktop FAB                               | Must not be rendered                      |
+| Viewport          | Entry point                        | Rule                            |
+| ----------------- | ---------------------------------- | ------------------------------- |
+| 320–1023 px       | FAB **Добавить событие**           | Visible, opens shared Quick Add |
+| 1024 px and wider | Header button **Добавить событие** | Visible, opens shared Quick Add |
+| 1024 px and wider | Desktop FAB                        | Must not be rendered            |
 
 ### Shared Quick Add Contract
 
 Dashboard uses the existing `QuickAddHost` with:
 
-| Input / callback         | Purpose                                           |
-| ------------------------ | ------------------------------------------------- |
-| `open`                   | Controlled open state                             |
-| `onOpenChange`           | Updates controlled open state                     |
-| `onRequestOpen`          | Guarded open request from FAB or Header           |
-| `showFloatingActionButton` | Renders mobile/tablet FAB only when true       |
-| `floatingActionButtonClassName` | Applies Dashboard safe-area positioning |
-| `returnFocusRef`         | Restores focus after close                        |
-| `onGlucoseSubmit`        | Successful glucose save callback                  |
-| `onInsulinSubmit`        | Successful insulin save callback                  |
-| `onNutritionSubmit`      | Successful nutrition save callback                |
-| `onMedicationSubmit`     | Successful medication save callback               |
+| Input / callback                | Purpose                                  |
+| ------------------------------- | ---------------------------------------- |
+| `open`                          | Controlled open state                    |
+| `onOpenChange`                  | Updates controlled open state            |
+| `onRequestOpen`                 | Guarded open request from FAB or Header  |
+| `showFloatingActionButton`      | Renders mobile/tablet FAB only when true |
+| `floatingActionButtonClassName` | Applies Dashboard safe-area positioning  |
+| `returnFocusRef`                | Restores focus after close               |
+| `onGlucoseSubmit`               | Successful glucose save callback         |
+| `onInsulinSubmit`               | Successful insulin save callback         |
+| `onNutritionSubmit`             | Successful nutrition save callback       |
+| `onMedicationSubmit`            | Successful medication save callback      |
 
 ### Open-State Rules
 
-| Rule | Behavior                                                         |
-| ---- | ---------------------------------------------------------------- |
-| 1    | First open request sets `open = true`                            |
-| 2    | Repeated requests while open are ignored                         |
-| 3    | Repeated requests during opening lock are ignored                |
-| 4    | Header desktop action is disabled while open                     |
-| 5    | FAB is hidden while open                                         |
+| Rule | Behavior                                          |
+| ---- | ------------------------------------------------- |
+| 1    | First open request sets `open = true`             |
+| 2    | Repeated requests while open are ignored          |
+| 3    | Repeated requests during opening lock are ignored |
+| 4    | Header desktop action is disabled while open      |
+| 5    | FAB is hidden while open                          |
 
 ### Save and Close Rules
 
-| Scenario                     | Quick Add state | Dashboard data                |
-| ---------------------------- | --------------- | ----------------------------- |
-| Successful submit            | Closes          | Updates affected blocks       |
-| Cancel within form           | Stays open      | Unchanged                     |
-| Dismiss/backdrop/`Escape`    | Closes          | Unchanged                     |
-| Validation error on submit   | Stays open      | Unchanged                     |
+| Scenario                   | Quick Add state | Dashboard data          |
+| -------------------------- | --------------- | ----------------------- |
+| Successful submit          | Closes          | Updates affected blocks |
+| Cancel within form         | Stays open      | Unchanged               |
+| Dismiss/backdrop/`Escape`  | Closes          | Unchanged               |
+| Validation error on submit | Stays open      | Unchanged               |
 
 Affected blocks after successful save:
 

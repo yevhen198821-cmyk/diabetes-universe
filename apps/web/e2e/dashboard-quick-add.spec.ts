@@ -15,9 +15,7 @@ test('dashboard quick add updates dashboard and timeline still works', async ({
 
   await expect(daySummary.getByText('4 ЕД')).toBeVisible();
 
-  await page
-    .getByRole('button', { name: 'Добавить событие' })
-    .click();
+  await page.getByRole('button', { name: 'Добавить событие' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Добавить событие' }),
   ).toBeVisible();
@@ -48,9 +46,7 @@ test('dashboard quick add updates dashboard and timeline still works', async ({
   await expect(page.getByRole('heading', { name: 'Сегодня' })).toBeVisible();
   await expect(page.getByText('6,4 ммоль/л').first()).toBeVisible();
 
-  await page
-    .getByRole('button', { name: 'Добавить событие' })
-    .click();
+  await page.getByRole('button', { name: 'Добавить событие' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Добавить событие' }),
   ).toBeVisible();

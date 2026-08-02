@@ -28,10 +28,7 @@ test('creates ready state with a single confirmed insight', () => {
   assert.equal(model.insight.id, 'insight-1015');
   assert.equal(model.insight.title, 'После завтрака');
   assert.equal(model.insight.relatedEventCount, 2);
-  assert.equal(
-    model.insight.relatedEventsLabel,
-    'Связанные записи: 2',
-  );
+  assert.equal(model.insight.relatedEventsLabel, 'Связанные записи: 2');
   assert.equal(model.insight.disclaimer, dashboardAiInsightLabels.disclaimer);
 });
 
@@ -170,10 +167,7 @@ test('creates error state with the default message when none is supplied', () =>
 
 test('exposes stable approved labels', () => {
   assert.equal(dashboardAiInsightLabels.title, 'ИИ-объяснение');
-  assert.equal(
-    dashboardAiInsightLabels.eyebrow,
-    'Автоматическое объяснение',
-  );
+  assert.equal(dashboardAiInsightLabels.eyebrow, 'Автоматическое объяснение');
   assert.equal(
     dashboardAiInsightLabels.disclaimer,
     'Не является диагнозом или назначением лечения.',

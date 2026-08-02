@@ -106,17 +106,17 @@ Element hierarchy:
 
 ## Spacing and Sizing
 
-| Element            | Rule                          |
-| ------------------ | ----------------------------- |
-| Card padding       | 20 px (`p-5`)                 |
-| Card corner radius | 16 px (`rounded-2xl`)         |
-| Icon container     | 44 × 44 px (`size-11`)        |
-| Header gap         | 16 px (`gap-4`)               |
-| Primary metric gap | 12 px (`gap-3`)               |
-| Secondary gap      | 12 px (`gap-3`)               |
-| Primary value size | 18 px bold                    |
-| Secondary value size | 16 px bold                  |
-| Label size         | 12 px primary, 11 px secondary |
+| Element              | Rule                           |
+| -------------------- | ------------------------------ |
+| Card padding         | 20 px (`p-5`)                  |
+| Card corner radius   | 16 px (`rounded-2xl`)          |
+| Icon container       | 44 × 44 px (`size-11`)         |
+| Header gap           | 16 px (`gap-4`)                |
+| Primary metric gap   | 12 px (`gap-3`)                |
+| Secondary gap        | 12 px (`gap-3`)                |
+| Primary value size   | 18 px bold                     |
+| Secondary value size | 16 px bold                     |
+| Label size           | 12 px primary, 11 px secondary |
 
 ## Typography
 

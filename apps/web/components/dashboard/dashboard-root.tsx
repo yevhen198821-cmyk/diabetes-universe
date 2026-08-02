@@ -10,7 +10,10 @@ import {
   deriveDashboardQuickAddBlocks,
   type DashboardDemoState,
 } from '../../lib/dashboard/dashboard-quick-add-integration-model';
-import { nextStep, timelineEvents as initialTimelineEvents } from '../../lib/mocks/timeline';
+import {
+  nextStep,
+  timelineEvents as initialTimelineEvents,
+} from '../../lib/mocks/timeline';
 import {
   closeQuickAdd,
   createQuickAddOpeningLock,
@@ -193,7 +196,9 @@ export function DashboardRoot() {
           );
         }}
         onNutritionSubmit={(entry) => {
-          setDemoState((current) => applyNutritionQuickAddEntry(current, entry));
+          setDemoState((current) =>
+            applyNutritionQuickAddEntry(current, entry),
+          );
         }}
         onOpenChange={handleQuickAddOpenChange}
         onRequestOpen={() => requestOpen('fab')}

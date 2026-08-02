@@ -120,7 +120,10 @@ test('omits activity when no activity event is supplied', () => {
     medicationMorning,
   ]);
 
-  assert.equal(events.some((event) => event.category === 'activity'), false);
+  assert.equal(
+    events.some((event) => event.category === 'activity'),
+    false,
+  );
   assert.equal(events.length, 3);
 });
 
@@ -189,7 +192,10 @@ test('does not expose timeline, filter, search, edit, or delete fields', () => {
   assert.equal('search' in model, false);
   assert.equal('onEdit' in model, false);
   assert.equal('onDelete' in model, false);
-  assert.equal(model.events.every((event) => !('onClick' in event)), true);
+  assert.equal(
+    model.events.every((event) => !('onClick' in event)),
+    true,
+  );
 });
 
 test('creates loading state with the default accessible label', () => {

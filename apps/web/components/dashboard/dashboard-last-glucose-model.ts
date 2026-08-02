@@ -129,9 +129,7 @@ function normalizeReadyMeasurement(
   };
 }
 
-function createEmptyViewModel(
-  message: string,
-): DashboardLastGlucoseViewModel {
+function createEmptyViewModel(message: string): DashboardLastGlucoseViewModel {
   return {
     dateTime: null,
     displayTime: null,
@@ -182,7 +180,8 @@ export function createDashboardLastGlucoseViewModel(
         return createEmptyViewModel(dashboardLastGlucoseLabels.unavailable);
       }
 
-      const referenceTime = props.referenceTime ?? options.referenceTime ?? new Date();
+      const referenceTime =
+        props.referenceTime ?? options.referenceTime ?? new Date();
       const staleAfterMs =
         props.staleAfterMs ?? DEFAULT_LAST_GLUCOSE_STALE_AFTER_MS;
       const isStale = isMeasurementStale(

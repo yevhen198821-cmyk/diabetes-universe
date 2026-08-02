@@ -81,10 +81,10 @@ Element hierarchy:
 
 ## Responsive Behavior
 
-| Range             | Entry point                         | FAB visibility |
-| ----------------- | ----------------------------------- | -------------- |
-| 320–1023 px       | Fixed FAB                           | Visible        |
-| 1024 px and wider | Header **Добавить событие** button  | Hidden         |
+| Range             | Entry point                        | FAB visibility |
+| ----------------- | ---------------------------------- | -------------- |
+| 320–1023 px       | Fixed FAB                          | Visible        |
+| 1024 px and wider | Header **Добавить событие** button | Hidden         |
 
 Additional rules:
 
@@ -94,13 +94,13 @@ Additional rules:
 
 ## Spacing and Sizing
 
-| Element                     | Rule                                                |
-| --------------------------- | --------------------------------------------------- |
-| FAB size                    | 48 × 48 px (`size-12`)                              |
-| Mobile FAB offset           | 16 px plus safe-area insets                         |
-| Tablet FAB offset           | 24 px plus safe-area insets                         |
-| Header action minimum size  | 44 × 44 px                                          |
-| Desktop action padding      | Shared `Button` spacing                             |
+| Element                    | Rule                        |
+| -------------------------- | --------------------------- |
+| FAB size                   | 48 × 48 px (`size-12`)      |
+| Mobile FAB offset          | 16 px plus safe-area insets |
+| Tablet FAB offset          | 24 px plus safe-area insets |
+| Header action minimum size | 44 × 44 px                  |
+| Desktop action padding     | Shared `Button` spacing     |
 
 ## Dependencies
 

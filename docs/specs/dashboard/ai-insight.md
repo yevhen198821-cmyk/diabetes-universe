@@ -15,23 +15,23 @@ Dashboard content.
 
 ### Typed Inputs
 
-| Input          | Type                               | Required | Purpose                                    |
-| -------------- | ---------------------------------- | -------- | ------------------------------------------ |
-| `state`        | `loading \| ready \| empty \| error` | Yes    | Selects the block presentation state       |
-| `insight`      | `DashboardAiInsightData`           | Yes in `ready` | Supplies one confirmed AI Insight    |
-| `loadingLabel` | `string`                           | No       | Overrides the default loading announcement |
-| `message`      | `string`                           | No in `empty` / `error` | Supplies user-facing copy     |
+| Input          | Type                                 | Required                | Purpose                                    |
+| -------------- | ------------------------------------ | ----------------------- | ------------------------------------------ |
+| `state`        | `loading \| ready \| empty \| error` | Yes                     | Selects the block presentation state       |
+| `insight`      | `DashboardAiInsightData`             | Yes in `ready`          | Supplies one confirmed AI Insight          |
+| `loadingLabel` | `string`                             | No                      | Overrides the default loading announcement |
+| `message`      | `string`                             | No in `empty` / `error` | Supplies user-facing copy                  |
 
 `DashboardAiInsightData` contains:
 
-| Field             | Type       | Rule                                                       |
-| ----------------- | ---------- | ---------------------------------------------------------- |
-| `id`              | `string`   | Trimmed non-empty stable insight identifier                |
-| `title`           | `string`   | Trimmed non-empty short headline                           |
-| `summary`         | `string`   | Trimmed non-empty neutral explanation                      |
-| `displayTime`     | `string`   | Trimmed non-empty visible generation time                  |
-| `generatedAt`     | `string`   | Trimmed non-empty ISO 8601 generation instant              |
-| `relatedEventIds` | `string[]` | Trimmed confirmed related event identifiers; may be empty  |
+| Field             | Type       | Rule                                                      |
+| ----------------- | ---------- | --------------------------------------------------------- |
+| `id`              | `string`   | Trimmed non-empty stable insight identifier               |
+| `title`           | `string`   | Trimmed non-empty short headline                          |
+| `summary`         | `string`   | Trimmed non-empty neutral explanation                     |
+| `displayTime`     | `string`   | Trimmed non-empty visible generation time                 |
+| `generatedAt`     | `string`   | Trimmed non-empty ISO 8601 generation instant             |
+| `relatedEventIds` | `string[]` | Trimmed confirmed related event identifiers; may be empty |
 
 ### Future AI Engine Contract
 
@@ -54,12 +54,12 @@ No engine implementation is required in v1.0.
 
 ### States
 
-| State     | Required behavior                                                         |
-| --------- | ------------------------------------------------------------------------- |
+| State     | Required behavior                                                           |
+| --------- | --------------------------------------------------------------------------- |
 | `loading` | Preserve card geometry and announce loading without plausible insight text  |
 | `ready`   | Show one confirmed insight, disclaimer, and related-event reference         |
 | `empty`   | Communicate that no insight is available without fabricating an explanation |
-| `error`   | Show a user-facing failure message without fabricated insight text        |
+| `error`   | Show a user-facing failure message without fabricated insight text          |
 
 ### Fallback Rules
 

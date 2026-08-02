@@ -6,7 +6,10 @@ import type {
   TimelineEvent,
 } from '@diabetes-universe/types';
 
-import { createGlucoseTimelineEvent, sortTimelineEvents } from '../quick-add/create-glucose-timeline-event';
+import {
+  createGlucoseTimelineEvent,
+  sortTimelineEvents,
+} from '../quick-add/create-glucose-timeline-event';
 import { createInsulinTimelineEvent } from '../quick-add/create-insulin-timeline-event';
 import { createMedicationTimelineEvent } from '../quick-add/create-medication-timeline-event';
 import { createNutritionTimelineEvent } from '../quick-add/create-nutrition-timeline-event';

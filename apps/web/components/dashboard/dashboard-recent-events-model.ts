@@ -1,10 +1,7 @@
 import type { EventCardType } from '@diabetes-universe/ui';
 
 export type DashboardRecentEventCategory =
-  | 'activity'
-  | 'insulin'
-  | 'medication'
-  | 'nutrition';
+  'activity' | 'insulin' | 'medication' | 'nutrition';
 
 export interface DashboardRecentEventSource {
   readonly category: DashboardRecentEventCategory;
@@ -87,15 +84,13 @@ export const dashboardRecentEventsLabels = {
   viewAll: 'Все события',
 } as const;
 
-const categoryToCardType: Record<
-  DashboardRecentEventCategory,
-  EventCardType
-> = {
-  activity: 'activity',
-  insulin: 'insulin',
-  medication: 'medication',
-  nutrition: 'nutrition',
-};
+const categoryToCardType: Record<DashboardRecentEventCategory, EventCardType> =
+  {
+    activity: 'activity',
+    insulin: 'insulin',
+    medication: 'medication',
+    nutrition: 'nutrition',
+  };
 
 function isValidIsoDateTime(dateTime: string): boolean {
   return !Number.isNaN(Date.parse(dateTime));
@@ -170,7 +165,9 @@ export function selectDashboardRecentEvents(
 
     const existing = latestByCategory.get(event.category);
     const eventTimestamp = Date.parse(event.dateTime);
-    const existingTimestamp = existing ? Date.parse(existing.dateTime) : Number.NaN;
+    const existingTimestamp = existing
+      ? Date.parse(existing.dateTime)
+      : Number.NaN;
 
     if (!existing || eventTimestamp > existingTimestamp) {
       latestByCategory.set(event.category, event);
@@ -178,7 +175,9 @@ export function selectDashboardRecentEvents(
   }
 
   return [...latestByCategory.values()]
-    .sort((left, right) => Date.parse(right.dateTime) - Date.parse(left.dateTime))
+    .sort(
+      (left, right) => Date.parse(right.dateTime) - Date.parse(left.dateTime),
+    )
     .slice(0, DASHBOARD_RECENT_EVENTS_MAX_CARDS)
     .map(toRecentEventCard);
 }

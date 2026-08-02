@@ -138,7 +138,9 @@ test('does not expose charts, comparisons, tir, gmi, or ai fields', () => {
   assert.equal('chart' in model, false);
   assert.equal('aiInsight' in model, false);
   assert.equal(
-    model.primaryMetrics.some((metric) => /tir|gmi|диапазон/i.test(metric.label)),
+    model.primaryMetrics.some((metric) =>
+      /tir|gmi|диапазон/i.test(metric.label),
+    ),
     false,
   );
 });

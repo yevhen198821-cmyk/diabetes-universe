@@ -5,14 +5,18 @@ import { createElement } from 'react';
 
 import type { DashboardRecentEventCard } from './dashboard-recent-events-model';
 
-type DashboardRecentEventCardProps = Omit<EventCardProps, 'onClick' | 'variant'>;
+type DashboardRecentEventCardProps = Omit<
+  EventCardProps,
+  'onClick' | 'variant'
+>;
 
-const categoryIcons: Record<DashboardRecentEventCard['category'], LucideIcon> = {
-  activity: Activity,
-  insulin: Syringe,
-  medication: Pill,
-  nutrition: CookingPot,
-};
+const categoryIcons: Record<DashboardRecentEventCard['category'], LucideIcon> =
+  {
+    activity: Activity,
+    insulin: Syringe,
+    medication: Pill,
+    nutrition: CookingPot,
+  };
 
 export function mapDashboardRecentEventToCard(
   event: DashboardRecentEventCard,

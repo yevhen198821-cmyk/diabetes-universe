@@ -96,14 +96,14 @@ Element hierarchy:
 
 ## Spacing and Sizing
 
-| Element            | Rule                          |
-| ------------------ | ----------------------------- |
-| Card padding       | 20 px (`p-5`)                 |
-| Card corner radius | 16 px (`rounded-2xl`)         |
-| Icon container     | 44 × 44 px (`size-11`)        |
-| Header gap         | 16 px (`gap-4`)               |
-| Preview top margin | 16 px (`mt-4`)                |
-| Disclaimer size    | 12 px                         |
+| Element            | Rule                   |
+| ------------------ | ---------------------- |
+| Card padding       | 20 px (`p-5`)          |
+| Card corner radius | 16 px (`rounded-2xl`)  |
+| Icon container     | 44 × 44 px (`size-11`) |
+| Header gap         | 16 px (`gap-4`)        |
+| Preview top margin | 16 px (`mt-4`)         |
+| Disclaimer size    | 12 px                  |
 
 ## Typography
 

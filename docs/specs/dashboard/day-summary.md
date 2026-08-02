@@ -14,12 +14,12 @@ loading, missing, or unavailable and does not block other Dashboard content.
 
 ### Typed Inputs
 
-| Input          | Type                               | Required | Purpose                                           |
-| -------------- | ---------------------------------- | -------- | ------------------------------------------------- |
-| `state`        | `loading \| ready \| empty \| error` | Yes    | Selects the block presentation state              |
-| `summary`      | `DashboardDaySummaryData`          | Yes in `ready` | Supplies current-day metrics              |
-| `loadingLabel` | `string`                           | No       | Overrides the default loading announcement        |
-| `message`      | `string`                           | No in `empty` / `error` | Supplies user-facing empty or error copy |
+| Input          | Type                                 | Required                | Purpose                                    |
+| -------------- | ------------------------------------ | ----------------------- | ------------------------------------------ |
+| `state`        | `loading \| ready \| empty \| error` | Yes                     | Selects the block presentation state       |
+| `summary`      | `DashboardDaySummaryData`            | Yes in `ready`          | Supplies current-day metrics               |
+| `loadingLabel` | `string`                             | No                      | Overrides the default loading announcement |
+| `message`      | `string`                             | No in `empty` / `error` | Supplies user-facing empty or error copy   |
 
 `DashboardDaySummaryData` contains:
 

@@ -108,16 +108,16 @@ Element hierarchy:
 
 ## Spacing and Sizing
 
-| Element              | Rule                                      |
-| -------------------- | ----------------------------------------- |
-| Card padding         | 20 px (`p-5`)                             |
-| Card corner radius   | 16 px (`rounded-2xl`)                     |
-| Icon container       | 44 × 44 px (`size-11`)                    |
-| Content gap          | 16 px (`gap-4`)                           |
-| Title size           | 18 px bold                                |
-| Value size           | 20 px bold                                |
-| Display time size    | 14 px, tabular nums                       |
-| Stale note size      | 12 px                                     |
+| Element            | Rule                   |
+| ------------------ | ---------------------- |
+| Card padding       | 20 px (`p-5`)          |
+| Card corner radius | 16 px (`rounded-2xl`)  |
+| Icon container     | 44 × 44 px (`size-11`) |
+| Content gap        | 16 px (`gap-4`)        |
+| Title size         | 18 px bold             |
+| Value size         | 20 px bold             |
+| Display time size  | 14 px, tabular nums    |
+| Stale note size    | 12 px                  |
 
 ## Typography
 
