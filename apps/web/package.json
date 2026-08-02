@@ -6,8 +6,14 @@
     "build": "next build",
     "dev": "next dev",
     "start": "next start",
-    "test": "node --no-warnings --experimental-strip-types --test",
-    "test:dashboard-header": "node --no-warnings --experimental-strip-types --test components/dashboard/dashboard-header-model.test.mjs",
+    "test": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test 'components/**/*.test.mjs' 'lib/**/*.test.mjs'",
+    "test:dashboard-header": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test components/dashboard/dashboard-header-model.test.mjs",
+    "test:dashboard-day-summary": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test components/dashboard/dashboard-day-summary-model.test.mjs",
+    "test:dashboard-last-glucose": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test components/dashboard/dashboard-last-glucose-model.test.mjs",
+    "test:dashboard-ai-insight": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test components/dashboard/dashboard-ai-insight-model.test.mjs",
+    "test:dashboard-next-action": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test components/dashboard/dashboard-next-action-model.test.mjs",
+    "test:dashboard-quick-add": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test lib/dashboard/dashboard-quick-add-integration-model.test.mjs lib/quick-add/quick-add-controller-model.test.mjs",
+    "test:dashboard-recent-events": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test components/dashboard/dashboard-recent-events-model.test.mjs",
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {

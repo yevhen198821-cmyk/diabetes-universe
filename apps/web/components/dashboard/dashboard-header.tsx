@@ -3,7 +3,7 @@
 import { Button } from '@diabetes-universe/ui';
 import { Plus, UserRound } from 'lucide-react';
 import Image from 'next/image';
-import { useState, type ReactNode } from 'react';
+import { useState, type ReactNode, type RefObject } from 'react';
 
 import {
   createDashboardHeaderViewModel,
@@ -16,7 +16,9 @@ const avatarTargetClassName =
 const desktopActionClassName =
   'hidden min-h-11 items-center justify-center gap-2 lg:inline-flex';
 
-export type DashboardHeaderProps = DashboardHeaderModelInput;
+export interface DashboardHeaderProps extends DashboardHeaderModelInput {
+  readonly addEventButtonRef?: RefObject<HTMLButtonElement | null>;
+}
 
 function DashboardAvatar({
   avatarInitials,
@@ -88,7 +90,10 @@ function DashboardAvatar({
   );
 }
 
-export function DashboardHeader(props: DashboardHeaderProps) {
+export function DashboardHeader({
+  addEventButtonRef,
+  ...props
+}: DashboardHeaderProps) {
   const viewModel = createDashboardHeaderViewModel(props);
   const dateContent = viewModel.dateLabel ?? viewModel.dateUnavailableLabel;
 
@@ -138,6 +143,7 @@ export function DashboardHeader(props: DashboardHeaderProps) {
             className={`${desktopActionClassName} dark:bg-teal-500 dark:text-slate-950 dark:hover:bg-teal-400 dark:focus-visible:outline-teal-400`}
             disabled={viewModel.addEventDisabled}
             onClick={viewModel.onAddEvent}
+            ref={addEventButtonRef}
             type="button"
           >
             <Plus aria-hidden="true" size={18} />

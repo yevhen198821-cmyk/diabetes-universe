@@ -45,6 +45,18 @@ input {
   bottom: calc(1rem + env(safe-area-inset-bottom));
 }
 
+.dashboard-fab {
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  right: max(1rem, env(safe-area-inset-right));
+}
+
+@media (min-width: 640px) {
+  .dashboard-fab {
+    bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    right: max(1.5rem, env(safe-area-inset-right));
+  }
+}
+
 ::selection {
   background: rgb(45 212 191 / 0.25);
 }

@@ -12,9 +12,11 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
+    "test:e2e": "playwright test",
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.2.12",
     "prettier": "^3.9.6",

@@ -1,7 +1,7 @@
 # Dashboard Layout UI Specification
 
 - **Version:** 1.0
-- **Status:** Draft
+- **Status:** Approved
 
 ## Purpose
 
