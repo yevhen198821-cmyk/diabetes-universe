@@ -6,6 +6,8 @@ import { deriveDashboardQuickAddBlocks } from './dashboard-quick-add-integration
 
 const referenceTime = new Date('2026-08-02T10:00:00.000Z');
 
+const formatDaySummaryDisplayDate = () => 'Sunday, 2 August 2026';
+
 const formatUtcShortTime = (dateTime) => {
   const date = new Date(dateTime);
 
@@ -45,6 +47,7 @@ test('deriveLastGlucose invokes formatter callback exactly once with event dateT
       ],
     },
     {
+      formatDaySummaryDisplayDate,
       formatLastGlucoseDisplayTime: (dateTime) => {
         callCount += 1;
         receivedDateTime = dateTime;
@@ -76,6 +79,7 @@ test('derives last glucose from shared timeline events', () => {
       ],
     },
     {
+      formatDaySummaryDisplayDate,
       formatLastGlucoseDisplayTime: formatUtcShortTime,
       referenceTime,
       timeZone: 'UTC',
@@ -127,6 +131,7 @@ test('derives day summary only from today events', () => {
       ],
     },
     {
+      formatDaySummaryDisplayDate,
       referenceTime,
       timeZone: 'UTC',
     },
@@ -151,6 +156,7 @@ test('updates day summary and recent events after insulin save', () => {
       ],
     },
     {
+      formatDaySummaryDisplayDate,
       referenceTime,
       timeZone: 'UTC',
     },
@@ -192,7 +198,7 @@ test('derives recent event sources that can be sorted by latest event time', () 
         },
       ],
     },
-    { referenceTime, timeZone: 'Europe/Moscow' },
+    { formatDaySummaryDisplayDate, referenceTime, timeZone: 'Europe/Moscow' },
   );
   const selected = selectDashboardRecentEvents(blocks.recentEvents);
 

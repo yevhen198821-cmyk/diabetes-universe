@@ -12,7 +12,7 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
   await expect(
     page.getByRole('heading', { name: 'Last glucose' }),
   ).toBeVisible();
-  const daySummary = page.getByRole('region', { name: 'Сводка дня' });
+  const daySummary = page.getByRole('region', { name: 'Day summary' });
 
   await expect(daySummary.getByText('4 ЕД')).toBeVisible();
 
@@ -86,7 +86,7 @@ test('next action opens insulin quick add directly and updates dashboard', async
 
   await waitForApplicationReady(page);
 
-  const daySummary = page.getByRole('region', { name: 'Сводка дня' });
+  const daySummary = page.getByRole('region', { name: 'Day summary' });
 
   await expect(page.getByText('Next action')).toBeVisible();
   await expect(

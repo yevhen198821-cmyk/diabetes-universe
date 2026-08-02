@@ -39,7 +39,7 @@ test('dashboard to timeline client navigation preserves timeline store state', a
   await page.goto('/');
   await waitForApplicationReady(page);
 
-  const daySummary = page.getByRole('region', { name: 'Сводка дня' });
+  const daySummary = page.getByRole('region', { name: 'Day summary' });
 
   await expect(daySummary.getByText('4 ЕД')).toBeVisible();
 

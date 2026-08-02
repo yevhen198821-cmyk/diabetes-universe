@@ -1,15 +1,25 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import {
-  createDashboardDaySummaryDayLabel,
-  createDashboardDaySummaryViewModel,
-  dashboardDaySummaryLabels,
-} from './dashboard-day-summary-model.ts';
+import { createDashboardDaySummaryViewModel } from './dashboard-day-summary-model.ts';
+
+const labels = {
+  defaultEmpty: "Today's summary is not available yet.",
+  defaultError: 'Could not load the day summary.',
+  eyebrow: 'Current day',
+  glucoseMeasurements: 'Glucose measurements',
+  loading: 'Loading day summary',
+  medicationDoses: 'Medication doses',
+  reminders: 'Reminders',
+  title: 'Day summary',
+  totalCarbohydrates: 'Total carbohydrates',
+  totalInsulin: 'Total insulin',
+  unavailable: 'Day summary unavailable.',
+};
 
 const validSummary = {
   dayDate: '2026-08-02',
-  displayDayLabel: 'воскресенье, 2 августа',
+  displayDayLabel: 'Sunday, 2 August 2026',
   glucoseMeasurements: 4,
   medicationDoses: 2,
   remindersCompleted: 1,
@@ -18,17 +28,28 @@ const validSummary = {
   totalInsulin: '12 ЕД',
 };
 
+const formattedMetrics = {
+  glucoseMeasurements: '4',
+  medicationDoses: '2',
+  reminders: '1 / 3',
+};
+
 test('creates ready state with primary and secondary metrics', () => {
-  const model = createDashboardDaySummaryViewModel({
-    state: 'ready',
-    summary: validSummary,
-  });
+  const model = createDashboardDaySummaryViewModel(
+    {
+      state: 'ready',
+      summary: validSummary,
+    },
+    labels,
+    formattedMetrics,
+  );
 
   assert.equal(model.state, 'ready');
   assert.equal(model.dayDate, '2026-08-02');
-  assert.equal(model.displayDayLabel, 'воскресенье, 2 августа');
+  assert.equal(model.displayDayLabel, 'Sunday, 2 August 2026');
   assert.equal(model.primaryMetrics.length, 3);
   assert.equal(model.secondaryMetrics.length, 2);
+  assert.equal(model.primaryMetrics[0]?.label, 'Glucose measurements');
   assert.equal(model.primaryMetrics[0]?.value, '4');
   assert.equal(model.primaryMetrics[1]?.value, '12 ЕД');
   assert.equal(model.primaryMetrics[2]?.value, '120 г');
@@ -38,98 +59,111 @@ test('creates ready state with primary and secondary metrics', () => {
 });
 
 test('normalizes ready summary values without changing their meaning', () => {
-  const model = createDashboardDaySummaryViewModel({
-    state: 'ready',
-    summary: {
-      dayDate: ' 2026-08-02 ',
-      displayDayLabel: ' воскресенье, 2 августа ',
-      glucoseMeasurements: 4,
-      medicationDoses: 2,
-      remindersCompleted: 1,
-      remindersTotal: 3,
-      totalCarbohydrates: ' 120 г ',
-      totalInsulin: ' 12 ЕД ',
+  const model = createDashboardDaySummaryViewModel(
+    {
+      state: 'ready',
+      summary: {
+        dayDate: ' 2026-08-02 ',
+        displayDayLabel: ' Sunday, 2 August 2026 ',
+        glucoseMeasurements: 4,
+        medicationDoses: 2,
+        remindersCompleted: 1,
+        remindersTotal: 3,
+        totalCarbohydrates: ' 120 г ',
+        totalInsulin: ' 12 ЕД ',
+      },
     },
-  });
+    labels,
+    formattedMetrics,
+  );
 
   assert.equal(model.state, 'ready');
   assert.equal(model.dayDate, '2026-08-02');
-  assert.equal(model.totalInsulin, undefined);
   assert.equal(model.primaryMetrics[1]?.value, '12 ЕД');
 });
 
 test('downgrades invalid dayDate to the safe empty fallback', () => {
-  const model = createDashboardDaySummaryViewModel({
-    state: 'ready',
-    summary: {
-      ...validSummary,
-      dayDate: '2026-13-40',
+  const model = createDashboardDaySummaryViewModel(
+    {
+      state: 'ready',
+      summary: {
+        ...validSummary,
+        dayDate: '2026-13-40',
+      },
     },
-  });
+    labels,
+    formattedMetrics,
+  );
 
   assert.equal(model.state, 'empty');
-  assert.equal(model.message, dashboardDaySummaryLabels.unavailable);
+  assert.equal(model.message, labels.unavailable);
   assert.equal(model.primaryMetrics.length, 0);
 });
 
 test('downgrades empty display totals to the safe empty fallback', () => {
-  const model = createDashboardDaySummaryViewModel({
-    state: 'ready',
-    summary: {
-      ...validSummary,
-      totalInsulin: '   ',
+  const model = createDashboardDaySummaryViewModel(
+    {
+      state: 'ready',
+      summary: {
+        ...validSummary,
+        totalInsulin: '   ',
+      },
     },
-  });
+    labels,
+    formattedMetrics,
+  );
 
   assert.equal(model.state, 'empty');
-  assert.equal(model.message, dashboardDaySummaryLabels.unavailable);
+  assert.equal(model.message, labels.unavailable);
 });
 
 test('downgrades reminders completed above total to the safe empty fallback', () => {
-  const model = createDashboardDaySummaryViewModel({
-    state: 'ready',
-    summary: {
-      ...validSummary,
-      remindersCompleted: 4,
-      remindersTotal: 3,
+  const model = createDashboardDaySummaryViewModel(
+    {
+      state: 'ready',
+      summary: {
+        ...validSummary,
+        remindersCompleted: 4,
+        remindersTotal: 3,
+      },
     },
-  });
-
-  assert.equal(model.state, 'empty');
-  assert.equal(model.message, dashboardDaySummaryLabels.unavailable);
-});
-
-test('creates a machine-readable dayDate separate from the display label', () => {
-  const dayLabel = createDashboardDaySummaryDayLabel(
-    new Date('2026-08-02T10:00:00+03:00'),
-    'ru-RU',
-    'Europe/Moscow',
+    labels,
+    formattedMetrics,
   );
 
-  assert.ok(dayLabel);
-  assert.equal(dayLabel.dayDate, '2026-08-02');
-  assert.match(dayLabel.displayDayLabel, /август/i);
+  assert.equal(model.state, 'empty');
+  assert.equal(model.message, labels.unavailable);
+});
 
-  const model = createDashboardDaySummaryViewModel({
-    state: 'ready',
-    summary: {
-      ...validSummary,
-      dayDate: dayLabel.dayDate,
-      displayDayLabel: dayLabel.displayDayLabel,
+test('keeps machine-readable dayDate separate from the display label', () => {
+  const model = createDashboardDaySummaryViewModel(
+    {
+      state: 'ready',
+      summary: {
+        ...validSummary,
+        dayDate: '2026-08-02',
+        displayDayLabel: 'Sunday, 2 August 2026',
+      },
     },
-  });
+    labels,
+    formattedMetrics,
+  );
 
   assert.equal(model.state, 'ready');
-  assert.equal(model.dayDate, dayLabel.dayDate);
-  assert.equal(model.displayDayLabel, dayLabel.displayDayLabel);
+  assert.equal(model.dayDate, '2026-08-02');
+  assert.equal(model.displayDayLabel, 'Sunday, 2 August 2026');
   assert.notEqual(model.dayDate, model.displayDayLabel);
 });
 
 test('does not expose charts, comparisons, tir, gmi, or ai fields', () => {
-  const model = createDashboardDaySummaryViewModel({
-    state: 'ready',
-    summary: validSummary,
-  });
+  const model = createDashboardDaySummaryViewModel(
+    {
+      state: 'ready',
+      summary: validSummary,
+    },
+    labels,
+    formattedMetrics,
+  );
 
   assert.equal(model.state, 'ready');
   assert.equal('timeInRange' in model, false);
@@ -146,18 +180,26 @@ test('does not expose charts, comparisons, tir, gmi, or ai fields', () => {
 });
 
 test('accepts zero counts when the owner supplies valid current-day totals', () => {
-  const model = createDashboardDaySummaryViewModel({
-    state: 'ready',
-    summary: {
-      ...validSummary,
-      glucoseMeasurements: 0,
-      medicationDoses: 0,
-      remindersCompleted: 0,
-      remindersTotal: 0,
-      totalCarbohydrates: '0 г',
-      totalInsulin: '0 ЕД',
+  const model = createDashboardDaySummaryViewModel(
+    {
+      state: 'ready',
+      summary: {
+        ...validSummary,
+        glucoseMeasurements: 0,
+        medicationDoses: 0,
+        remindersCompleted: 0,
+        remindersTotal: 0,
+        totalCarbohydrates: '0 г',
+        totalInsulin: '0 ЕД',
+      },
     },
-  });
+    labels,
+    {
+      glucoseMeasurements: '0',
+      medicationDoses: '0',
+      reminders: '0 / 0',
+    },
+  );
 
   assert.equal(model.state, 'ready');
   assert.equal(model.primaryMetrics[0]?.value, '0');
@@ -165,40 +207,40 @@ test('accepts zero counts when the owner supplies valid current-day totals', () 
 });
 
 test('creates loading state with the default accessible label', () => {
-  const model = createDashboardDaySummaryViewModel({ state: 'loading' });
+  const model = createDashboardDaySummaryViewModel(
+    { state: 'loading' },
+    labels,
+  );
 
   assert.equal(model.state, 'loading');
   assert.equal(model.isLoading, true);
-  assert.equal(model.message, dashboardDaySummaryLabels.loading);
+  assert.equal(model.message, labels.loading);
   assert.equal(model.primaryMetrics.length, 0);
 });
 
 test('creates empty state with the default message when none is supplied', () => {
-  const model = createDashboardDaySummaryViewModel({ state: 'empty' });
+  const model = createDashboardDaySummaryViewModel({ state: 'empty' }, labels);
 
   assert.equal(model.state, 'empty');
-  assert.equal(model.message, dashboardDaySummaryLabels.defaultEmpty);
+  assert.equal(model.message, labels.defaultEmpty);
 });
 
 test('creates error state with the default message when none is supplied', () => {
-  const model = createDashboardDaySummaryViewModel({ state: 'error' });
+  const model = createDashboardDaySummaryViewModel({ state: 'error' }, labels);
 
   assert.equal(model.state, 'error');
-  assert.equal(model.message, dashboardDaySummaryLabels.defaultError);
+  assert.equal(model.message, labels.defaultError);
 });
 
-test('exposes stable approved labels', () => {
-  assert.equal(dashboardDaySummaryLabels.title, 'Сводка дня');
-  assert.equal(dashboardDaySummaryLabels.eyebrow, 'Текущий день');
-  assert.equal(
-    dashboardDaySummaryLabels.glucoseMeasurements,
-    'Измерения глюкозы',
+test('downgrades ready state without formatted metrics to unavailable empty', () => {
+  const model = createDashboardDaySummaryViewModel(
+    {
+      state: 'ready',
+      summary: validSummary,
+    },
+    labels,
   );
-  assert.equal(dashboardDaySummaryLabels.totalInsulin, 'Суммарный инсулин');
-  assert.equal(
-    dashboardDaySummaryLabels.totalCarbohydrates,
-    'Суммарные углеводы',
-  );
-  assert.equal(dashboardDaySummaryLabels.medicationDoses, 'Приёмы лекарств');
-  assert.equal(dashboardDaySummaryLabels.reminders, 'Напоминания');
+
+  assert.equal(model.state, 'empty');
+  assert.equal(model.message, labels.unavailable);
 });

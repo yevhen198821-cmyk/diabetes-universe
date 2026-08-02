@@ -1,8 +1,14 @@
-import { CalendarDays } from 'lucide-react';
+'use client';
 
+import { CalendarDays } from 'lucide-react';
+import { useMemo } from 'react';
+
+import { useFormatter } from '../../lib/platform/react/use-formatter';
+import { useLocalization } from '../../lib/platform/react/use-localization';
+import { resolveDashboardDaySummaryLabels } from './dashboard-day-summary-labels';
 import {
   createDashboardDaySummaryViewModel,
-  dashboardDaySummaryLabels,
+  type DashboardDaySummaryFormattedMetrics,
   type DashboardDaySummaryProps,
 } from './dashboard-day-summary-model';
 
@@ -54,8 +60,42 @@ function MetricList({
   );
 }
 
+function createFormattedMetrics(
+  summary: DashboardDaySummaryProps & { state: 'ready' },
+  formatter: ReturnType<typeof useFormatter>,
+): DashboardDaySummaryFormattedMetrics {
+  const formattedCompleted = formatter.formatNumber(
+    summary.summary.remindersCompleted,
+  );
+  const formattedTotal = formatter.formatNumber(summary.summary.remindersTotal);
+
+  return {
+    glucoseMeasurements: formatter.formatNumber(
+      summary.summary.glucoseMeasurements,
+    ),
+    medicationDoses: formatter.formatNumber(summary.summary.medicationDoses),
+    reminders: `${formattedCompleted} / ${formattedTotal}`,
+  };
+}
+
 export function DashboardDaySummary(props: DashboardDaySummaryProps) {
-  const viewModel = createDashboardDaySummaryViewModel(props);
+  const localization = useLocalization();
+  const formatter = useFormatter();
+  const labels = useMemo(
+    () => resolveDashboardDaySummaryLabels(localization),
+    [localization],
+  );
+  const formattedMetrics = useMemo(() => {
+    if (props.state !== 'ready') {
+      return undefined;
+    }
+
+    return createFormattedMetrics(props, formatter);
+  }, [formatter, props]);
+  const viewModel = useMemo(
+    () => createDashboardDaySummaryViewModel(props, labels, formattedMetrics),
+    [formattedMetrics, labels, props],
+  );
   const isError = viewModel.state === 'error';
 
   return (
@@ -71,7 +111,7 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
       {viewModel.state === 'loading' ? (
         <>
           <h2 className="sr-only" id={titleId}>
-            {dashboardDaySummaryLabels.title}
+            {labels.title}
           </h2>
           <span className="sr-only" role="status">
             {viewModel.message}
@@ -105,13 +145,13 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                {dashboardDaySummaryLabels.eyebrow}
+                {labels.eyebrow}
               </p>
               <h2
                 className="mt-0.5 text-lg font-bold text-slate-950 dark:text-slate-50"
                 id={titleId}
               >
-                {dashboardDaySummaryLabels.title}
+                {labels.title}
               </h2>
               <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
                 <time dateTime={viewModel.dayDate ?? undefined}>
@@ -149,7 +189,7 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
               className="text-lg font-bold text-slate-950 dark:text-slate-50"
               id={titleId}
             >
-              {dashboardDaySummaryLabels.title}
+              {labels.title}
             </h2>
             <p
               className={`mt-2 text-sm ${
