@@ -3,21 +3,31 @@
 import { Button } from '@diabetes-universe/ui';
 import { Plus, UserRound } from 'lucide-react';
 import Image from 'next/image';
-import { useState, type ReactNode, type RefObject } from 'react';
+import { useMemo, useState, type ReactNode, type RefObject } from 'react';
 
+import { useFormatter } from '../../lib/platform/react/use-formatter';
+import { useLocalization } from '../../lib/platform/react/use-localization';
+import { usePresentationContext } from '../../lib/platform/react/use-presentation-context';
+import { getTimelineCalendarDateKey } from '../../lib/timeline/timeline-date-time';
 import {
+  createDashboardHeaderDate,
   createDashboardHeaderViewModel,
   getDashboardAvatarImageUrl,
   type DashboardHeaderModelInput,
 } from './dashboard-header-model';
+import { resolveDashboardHeaderLabels } from './dashboard-header-labels';
 
 const avatarTargetClassName =
   'grid size-11 shrink-0 place-items-center overflow-hidden rounded-full';
 const desktopActionClassName =
   'hidden min-h-11 items-center justify-center gap-2 lg:inline-flex';
 
-export interface DashboardHeaderProps extends DashboardHeaderModelInput {
+export interface DashboardHeaderProps extends Omit<
+  DashboardHeaderModelInput,
+  'date' | 'labels'
+> {
   readonly addEventButtonRef?: RefObject<HTMLButtonElement | null>;
+  readonly referenceTime?: Date;
 }
 
 function DashboardAvatar({
@@ -92,9 +102,38 @@ function DashboardAvatar({
 
 export function DashboardHeader({
   addEventButtonRef,
+  referenceTime,
   ...props
 }: DashboardHeaderProps) {
-  const viewModel = createDashboardHeaderViewModel(props);
+  const localization = useLocalization();
+  const formatter = useFormatter();
+  const { locale, timeZone } = usePresentationContext();
+  const resolvedReferenceTime = useMemo(
+    () => referenceTime ?? new Date(),
+    [referenceTime],
+  );
+  const labels = useMemo(
+    () => resolveDashboardHeaderLabels(localization),
+    [localization],
+  );
+  const headerDate = useMemo(
+    () =>
+      createDashboardHeaderDate({
+        currentDate: resolvedReferenceTime,
+        formatCalendarDateKey: (date) =>
+          getTimelineCalendarDateKey(date.toISOString(), timeZone),
+        formatDisplayDate: (date) =>
+          formatter.formatDate(date, { dateStyle: 'full' }),
+        locale,
+        timeZone,
+      }),
+    [formatter, locale, resolvedReferenceTime, timeZone],
+  );
+  const viewModel = createDashboardHeaderViewModel({
+    ...props,
+    date: headerDate,
+    labels,
+  });
   const dateContent = viewModel.dateLabel ?? viewModel.dateUnavailableLabel;
 
   return (
@@ -122,7 +161,7 @@ export function DashboardHeader({
           />
         ) : viewModel.dateLabel && viewModel.dateTime ? (
           <time
-            aria-label={`${viewModel.currentDateLabel}: ${viewModel.dateLabel}`}
+            aria-label={viewModel.currentDateAriaLabel ?? undefined}
             className="col-span-2 row-start-2 min-w-0 text-sm font-medium text-slate-600 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center dark:text-slate-300"
             dateTime={viewModel.dateTime}
           >

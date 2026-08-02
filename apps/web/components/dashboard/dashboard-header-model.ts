@@ -1,3 +1,5 @@
+import type { DashboardHeaderLabels } from './dashboard-header-labels';
+
 export type DashboardHeaderState = 'error' | 'loading' | 'ready';
 
 export interface DashboardHeaderDate {
@@ -16,6 +18,7 @@ export interface DashboardHeaderModelInput {
   readonly addEventDisabled?: boolean;
   readonly date: DashboardHeaderDate | null;
   readonly errorMessage?: string;
+  readonly labels: DashboardHeaderLabels;
   readonly onAddEvent: () => void;
   readonly onAvatarClick?: () => void;
   readonly state: DashboardHeaderState;
@@ -28,6 +31,7 @@ export interface DashboardHeaderViewModel {
   readonly avatarInitials: string | null;
   readonly avatarLabel: string;
   readonly avatarUrl: string | null;
+  readonly currentDateAriaLabel: string | null;
   readonly currentDateLabel: string;
   readonly dateLabel: string | null;
   readonly dateTime: string | null;
@@ -41,60 +45,47 @@ export interface DashboardHeaderViewModel {
   readonly productName: string;
 }
 
-export const dashboardHeaderLabels = {
-  addEvent: 'Добавить событие',
-  avatar: 'Профиль пользователя',
-  avatarAction: 'Открыть профиль',
-  currentDate: 'Текущая дата',
-  dateUnavailable: 'Дата недоступна',
-  defaultError: 'Не удалось загрузить данные заголовка.',
-  loading: 'Загрузка данных заголовка',
-  productName: 'Diabetes Universe',
-} as const;
+export interface DashboardHeaderDateInput {
+  readonly currentDate: Date;
+  readonly formatCalendarDateKey: (date: Date) => string | null;
+  readonly formatDisplayDate: (date: Date) => string;
+  readonly locale: string;
+  readonly timeZone: string;
+}
 
-export function createDashboardHeaderDate(
-  currentDate: Date,
-  locale: string,
-  timeZone: string,
-): DashboardHeaderDate | null {
+export function createDashboardHeaderDate({
+  currentDate,
+  formatCalendarDateKey,
+  formatDisplayDate,
+  locale,
+  timeZone,
+}: DashboardHeaderDateInput): DashboardHeaderDate | null {
   if (Number.isNaN(currentDate.getTime())) {
     return null;
   }
 
-  try {
-    const normalizedLocale = locale.trim();
-    const normalizedTimeZone = timeZone.trim();
-    const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf([
-      normalizedLocale,
-    ]);
+  const normalizedLocale = locale.trim();
+  const normalizedTimeZone = timeZone.trim();
 
-    if (supportedLocales.length === 0) {
+  if (normalizedLocale.length === 0 || normalizedTimeZone.length === 0) {
+    return null;
+  }
+
+  try {
+    const dateTime = formatCalendarDateKey(currentDate);
+
+    if (!dateTime) {
       return null;
     }
 
-    const label = new Intl.DateTimeFormat(normalizedLocale, {
-      day: 'numeric',
-      month: 'long',
-      timeZone: normalizedTimeZone,
-      weekday: 'long',
-      year: 'numeric',
-    }).format(currentDate);
-    const dateParts = new Intl.DateTimeFormat('en-US-u-ca-gregory-nu-latn', {
-      day: '2-digit',
-      month: '2-digit',
-      timeZone: normalizedTimeZone,
-      year: 'numeric',
-    }).formatToParts(currentDate);
-    const day = dateParts.find((part) => part.type === 'day')?.value;
-    const month = dateParts.find((part) => part.type === 'month')?.value;
-    const year = dateParts.find((part) => part.type === 'year')?.value;
+    const label = formatDisplayDate(currentDate).trim();
 
-    if (!day || !month || !year) {
+    if (label.length === 0) {
       return null;
     }
 
     return {
-      dateTime: `${year.padStart(4, '0')}-${month}-${day}`,
+      dateTime,
       label,
       locale: normalizedLocale,
       timeZone: normalizedTimeZone,
@@ -149,19 +140,19 @@ export function createDashboardHeaderViewModel({
   addEventDisabled = false,
   date,
   errorMessage,
+  labels,
   onAddEvent,
   onAvatarClick,
   state,
   user,
 }: DashboardHeaderModelInput): DashboardHeaderViewModel {
   const displayName = user?.displayName?.trim() || null;
-  const avatarLabelPrefix = onAvatarClick
-    ? dashboardHeaderLabels.avatarAction
-    : dashboardHeaderLabels.avatar;
+  const avatarLabelPrefix = onAvatarClick ? labels.avatarAction : labels.avatar;
+  const dateLabel = state === 'loading' ? null : (date?.label ?? null);
 
   return {
     addEventDisabled,
-    addEventLabel: dashboardHeaderLabels.addEvent,
+    addEventLabel: labels.addEvent,
     avatarInitials: getDashboardAvatarInitials(displayName, date?.locale),
     avatarLabel: displayName
       ? `${avatarLabelPrefix}: ${displayName}`
@@ -170,19 +161,19 @@ export function createDashboardHeaderViewModel({
       state === 'ready' && user?.avatarUrl?.trim()
         ? user.avatarUrl.trim()
         : null,
-    currentDateLabel: dashboardHeaderLabels.currentDate,
-    dateLabel: state === 'loading' ? null : (date?.label ?? null),
+    currentDateAriaLabel:
+      dateLabel === null ? null : `${labels.currentDate}: ${dateLabel}`,
+    currentDateLabel: labels.currentDate,
+    dateLabel,
     dateTime: state === 'loading' ? null : (date?.dateTime ?? null),
-    dateUnavailableLabel: dashboardHeaderLabels.dateUnavailable,
+    dateUnavailableLabel: labels.dateUnavailable,
     errorMessage:
-      state === 'error'
-        ? errorMessage?.trim() || dashboardHeaderLabels.defaultError
-        : null,
+      state === 'error' ? errorMessage?.trim() || labels.defaultError : null,
     isError: state === 'error',
     isLoading: state === 'loading',
-    loadingLabel: dashboardHeaderLabels.loading,
+    loadingLabel: labels.loading,
     onAddEvent,
     onAvatarClick,
-    productName: dashboardHeaderLabels.productName,
+    productName: labels.productName,
   };
 }

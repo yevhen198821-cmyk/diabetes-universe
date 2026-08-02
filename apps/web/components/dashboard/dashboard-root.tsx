@@ -23,7 +23,6 @@ import { QuickAddHost } from '../quick-add/quick-add-host';
 import { DashboardAiInsight } from './dashboard-ai-insight';
 import { DashboardDaySummary } from './dashboard-day-summary';
 import { DashboardHeader } from './dashboard-header';
-import { createDashboardHeaderDate } from './dashboard-header-model';
 import { DashboardLastGlucose } from './dashboard-last-glucose';
 import { DashboardNextAction } from './dashboard-next-action';
 import { DashboardRecentEvents } from './dashboard-recent-events';
@@ -53,16 +52,6 @@ export function DashboardRoot() {
   const dashboardTimeZone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
     [],
-  );
-
-  const headerDate = useMemo(
-    () =>
-      createDashboardHeaderDate(
-        referenceTime,
-        DASHBOARD_LOCALE,
-        dashboardTimeZone,
-      ),
-    [dashboardTimeZone, referenceTime],
   );
 
   const derivedBlocks = useMemo(
@@ -143,8 +132,8 @@ export function DashboardRoot() {
           <DashboardHeader
             addEventButtonRef={headerActionRef}
             addEventDisabled={quickAddState.isOpen}
-            date={headerDate}
             onAddEvent={() => requestOpen('header')}
+            referenceTime={referenceTime}
             state="ready"
             user={{ displayName: 'Анна Иванова' }}
           />

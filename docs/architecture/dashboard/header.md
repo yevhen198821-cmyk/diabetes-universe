@@ -16,8 +16,8 @@ Approved
   instant, locale, and time zone.
 - Represent the current user through an avatar image, initials, or generic
   fallback.
-- Expose the desktop “Добавить событие” action without owning the Quick Add
-  panel.
+- Expose the desktop Quick Add entry through localized Header copy without owning
+  the Quick Add panel.
 - Keep Header failures local so they do not block the remaining Dashboard.
 - Preserve the approved Header geometry across loading, ready, and error
   states.

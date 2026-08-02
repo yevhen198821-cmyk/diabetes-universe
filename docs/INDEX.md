@@ -19,6 +19,7 @@
 - [Presentation Context Foundation](architecture/presentation/presentation-context.md) — CR-03A, Feature Complete
 - [React Platform Provider Foundation](architecture/presentation/react-platform-provider.md) — CR-03B, Feature Complete
 - [Application Platform Integration](architecture/presentation/application-platform-integration.md) — CR-03C, Feature Complete (ADR-0013)
+- [Dashboard Header Localization Migration (I18N-02A)](architecture/localization/dashboard-header-migration.md)
 - [@diabetes-universe/web](../apps/web/README.md) — thin Next.js bootstrap (CR-02, Feature Complete)
 - [@diabetes-universe/platform-web](../packages/platform-web/README.md)
 - [Navigation](architecture/navigation/overview.md) — routes `/`, `/timeline`, `/dashboard` redirect

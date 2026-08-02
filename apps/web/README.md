@@ -156,10 +156,17 @@ ApplicationRuntimeGate (ready)
 - E2E SPA navigation continuity tests
 - integration tests
 
-### Not implemented (I18N-02+)
+### Implemented (I18N-02A)
+
+- Dashboard Header localized via `useLocalization()` and `useFormatter()`
+- selective `dashboard` namespace preload
+- architecture: `docs/architecture/localization/dashboard-header-migration.md`
+
+### Not implemented (I18N-02B+)
 
 - cookie scheme wiring and `PresentationPersistence` adapter
-- Dashboard, Timeline, Quick Add hook migration
+- remaining Dashboard block hook migration
+- Timeline, Quick Add hook migration
 - locale switch UI
 
 ## Architecture references
