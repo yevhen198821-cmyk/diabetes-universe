@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 export interface DashboardShellProps {
   readonly children?: ReactNode;
+  readonly daySummary: ReactNode;
   readonly header: ReactNode;
   readonly lastGlucose: ReactNode;
   readonly nextAction: ReactNode;
@@ -9,6 +10,7 @@ export interface DashboardShellProps {
 
 export function DashboardShell({
   children,
+  daySummary,
   header,
   lastGlucose,
   nextAction,
@@ -22,6 +24,7 @@ export function DashboardShell({
       >
         {nextAction}
         {lastGlucose}
+        {daySummary}
         {children}
       </main>
     </div>
