@@ -6,6 +6,8 @@
     "build": "next build",
     "dev": "next dev",
     "start": "next start",
+    "test": "node --no-warnings --experimental-strip-types --test",
+    "test:dashboard-header": "node --no-warnings --experimental-strip-types --test components/dashboard/dashboard-header-model.test.mjs",
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
