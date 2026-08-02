@@ -1,7 +1,12 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
-import { AppProviders } from './providers';
+import { createRequestPlatformRuntime } from '../lib/platform';
+import { ApplicationRuntimeGate } from '../lib/platform/integration/application-runtime-gate';
+import {
+  createApplicationPlatformBootstrap,
+  type ApplicationPlatformBootstrap,
+} from '../lib/platform/integration/server';
 
 import './globals.css';
 
@@ -17,11 +22,27 @@ type RootLayoutProps = Readonly<{
   children: ReactNode;
 }>;
 
-export default function RootLayout({ children }: RootLayoutProps) {
+function resolveDocumentLanguage(
+  bootstrap: ApplicationPlatformBootstrap,
+): string {
+  if (bootstrap.status === 'ready') {
+    return bootstrap.snapshot.language;
+  }
+
+  return bootstrap.seed.language;
+}
+
+export default async function RootLayout({ children }: RootLayoutProps) {
+  const bootstrap = createApplicationPlatformBootstrap(
+    await createRequestPlatformRuntime(),
+  );
+
   return (
-    <html lang="ru" suppressHydrationWarning>
+    <html lang={resolveDocumentLanguage(bootstrap)} suppressHydrationWarning>
       <body>
-        <AppProviders>{children}</AppProviders>
+        <ApplicationRuntimeGate bootstrap={bootstrap}>
+          {children}
+        </ApplicationRuntimeGate>
       </body>
     </html>
   );

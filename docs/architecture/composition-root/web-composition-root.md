@@ -16,7 +16,9 @@ Approved — `@diabetes-universe/platform-web` implemented (CR-01C); thin Next.j
 bootstrap Feature Complete (CR-02, user time zone policy per
 [ADR-0012](../../adr/0012-user-time-zone-policy.md)); Presentation Context
 Foundation Feature Complete (CR-03A); React Platform Provider Foundation
-Feature Complete (CR-03B); route wiring and persistence (CR-03C) deferred
+Feature Complete (CR-03B); Application Platform Integration implementation
+complete — ready for review (CR-03C, [ADR-0013](../../adr/0013-web-client-runtime-ownership.md));
+I18N-02 product migration deferred
 
 ## Stage
 
@@ -409,14 +411,15 @@ Types referenced above come from Platform Contracts (`@diabetes-universe/i18n`,
 
 ## Future implementation boundaries
 
-| Package / location                | Stage                                               |
-| --------------------------------- | --------------------------------------------------- |
-| `@diabetes-universe/platform`     | CR-01A — implemented                                |
-| `@diabetes-universe/platform-web` | CR-01C — implemented                                |
-| `apps/web` bootstrap              | CR-02 — Feature Complete                            |
-| `apps/web` presentation           | CR-03A — Feature Complete                           |
-| `apps/web` react integration      | CR-03B — Feature Complete (not wired to routes yet) |
-| Route wiring + persistence        | CR-03C — deferred                                   |
+| Package / location                | Stage                                                          |
+| --------------------------------- | -------------------------------------------------------------- |
+| `@diabetes-universe/platform`     | CR-01A — implemented                                           |
+| `@diabetes-universe/platform-web` | CR-01C — implemented                                           |
+| `apps/web` bootstrap              | CR-02 — Feature Complete                                       |
+| `apps/web` presentation           | CR-03A — Feature Complete                                      |
+| `apps/web` react integration      | CR-03B — Feature Complete                                      |
+| Application platform integration  | CR-03C — Implementation Complete — Ready for Review (ADR-0013) |
+| Product I18N migration            | I18N-02 — deferred                                             |
 
 Dashboard, Timeline, and Quick Add migration are out of scope for the initial
 Web Composition Root implementation.

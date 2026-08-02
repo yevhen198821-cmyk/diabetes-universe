@@ -129,7 +129,8 @@ Option B (fail-fast nested guard) was **not** selected.
 | `createTestPlatformRuntime`    | test-only (uses Composition Root)        |
 | `createRequestPlatformRuntime` | server-only; must not import React layer |
 
-Production routes do not mount `PlatformProvider` in CR-03B.
+Production routes now mount `ApplicationRuntimeGate` from the root layout.
+Product modules are not wired to platform hooks yet (I18N-02).
 
 Browser time-zone resolver (`presentation/client.ts`) is not part of the CR-03B
 runtime path.
@@ -190,10 +191,16 @@ Provider and hooks do not:
 
 `PlatformRuntime` is passed only within the React tree.
 
-## Future CR-03C integration
+## CR-03C integration (implemented per ADR-0013)
 
-CR-03C will wire server bootstrap, client presentation bootstrap, persistence,
-and `PlatformProvider` into Next.js routes without redesigning CR-03B hooks.
+CR-03C wires server bootstrap, serializable application boundary transport, and
+`ApplicationRuntimeGate` into `apps/web/app/layout.tsx`. The gate creates client
+runtime and passes the exact reference to `PlatformProvider`. CR-03B hooks
+remain unchanged. See
+[Application Platform Integration](application-platform-integration.md) and
+[ADR-0013](../../adr/0013-web-client-runtime-ownership.md).
+
+## Future I18N-02 integration
 
 ## Definition of Done
 

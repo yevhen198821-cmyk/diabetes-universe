@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { waitForApplicationReady } from './support/wait-for-application-ready';
+
 const openEvent = async (page: Page, name: RegExp | string) => {
   const card = page.getByRole('button', { name }).first();
 
@@ -12,6 +14,7 @@ test('timeline event details open, close with Escape, and return focus', async (
   page,
 }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   const card = await openEvent(page, /Открыть событие: Метформин/);
 
@@ -102,6 +105,7 @@ test('timeline closes details when edited event leaves search results', async ({
   page,
 }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   const search = page.getByLabel('Поиск событий');
 

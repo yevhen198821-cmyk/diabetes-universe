@@ -198,10 +198,19 @@ Forbidden:
 - `PlatformRuntime` creation in CR-03A client orchestration;
 - separate non-canonical server locale input in client bootstrap.
 
-## Future CR-03C integration
+## CR-03C integration (implemented per ADR-0013)
 
-CR-03C will wire server bootstrap, client presentation bootstrap, persistence,
-and `PlatformProvider` into Next.js routes. CR-03B hooks remain unchanged.
+CR-03C wires server bootstrap, serializable `ApplicationPlatformBootstrap`, and
+`ApplicationRuntimeGate` into the root layout. The gate owns client-realm runtime
+assembly and mounts `PlatformProvider` only when runtime is ready. Cookie
+persistence remains deferred. See
+[Application Platform Integration](application-platform-integration.md) and
+[ADR-0013](../../adr/0013-web-client-runtime-ownership.md).
+
+## Future I18N-02 integration
+
+I18N-02 will migrate Dashboard, Timeline, and Quick Add to platform hooks.
+CR-03C keeps product modules on existing local/mock state.
 
 ## Architecture references
 
