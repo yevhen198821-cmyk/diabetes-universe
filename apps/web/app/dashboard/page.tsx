@@ -1,5 +1,5 @@
-import { DashboardRoot } from '../../components/dashboard/dashboard-root';
+import { redirect } from 'next/navigation';
 
 export default function DashboardPage() {
-  return <DashboardRoot />;
+  redirect('/');
 }

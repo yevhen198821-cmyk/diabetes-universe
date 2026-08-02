@@ -35,6 +35,7 @@ function EventIcon({
 }
 
 export function EventCard({
+  ariaLabel: providedAriaLabel,
   context,
   icon,
   onClick,
@@ -49,9 +50,9 @@ export function EventCard({
 }: EventCardProps) {
   const { accent, fallbackIcon } = eventTypeAppearances[type];
   const statusLabel = statusLabels[status];
-  const ariaLabel = [time, title, value, unit, context, statusLabel]
-    .filter(Boolean)
-    .join(', ');
+  const ariaLabel =
+    providedAriaLabel ??
+    [time, title, value, unit, context, statusLabel].filter(Boolean).join(', ');
   const isCompact = variant === 'compact';
 
   const compactContent = (
@@ -132,6 +133,7 @@ export function EventCard({
   if (onClick) {
     return (
       <button
+        aria-haspopup="dialog"
         aria-label={ariaLabel}
         className={`${className} cursor-pointer hover:border-slate-300 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700`}
         onClick={onClick}

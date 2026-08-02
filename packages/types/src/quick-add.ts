@@ -9,6 +9,7 @@ export interface QuickAddAction {
   readonly id: string;
   readonly category: QuickAddCategory;
   readonly label: string;
+  readonly addTitle: string;
   readonly description: string;
 }
 
@@ -57,4 +58,17 @@ export interface MedicationQuickAddEntry {
   readonly time: string;
   readonly context?: string;
   readonly note?: string;
+}
+
+export interface ActivityQuickAddEntry {
+  readonly activityType: string;
+  readonly durationMinutes: number;
+  readonly time: string;
+  readonly note?: string;
+}
+
+export interface NoteQuickAddEntry {
+  readonly title?: string;
+  readonly text: string;
+  readonly time: string;
 }

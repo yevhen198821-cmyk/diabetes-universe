@@ -5,7 +5,7 @@ import { useEffect, useId, useRef } from 'react';
 import { QuickAddActionButton } from './QuickAddActionButton';
 import type { QuickAddPanelProps } from './QuickAdd.types';
 
-function findActionLabel(
+function findActionAddTitle(
   actions: QuickAddPanelProps['actions'],
   selectedActionId: string,
 ): string {
@@ -13,16 +13,7 @@ function findActionLabel(
     (action) => action.id === selectedActionId,
   );
 
-  return selectedAction?.label ?? 'Событие';
-}
-
-function formatSelectedTitle(
-  actions: QuickAddPanelProps['actions'],
-  selectedActionId: string,
-): string {
-  const label = findActionLabel(actions, selectedActionId);
-
-  return `Добавить ${label.toLowerCase()}`;
+  return selectedAction?.addTitle ?? 'Добавить событие';
 }
 
 export function QuickAddPanel({
@@ -126,7 +117,7 @@ export function QuickAddPanel({
           <div className="min-w-0 flex-1">
             <h2 className="text-lg font-bold text-slate-950" id={titleId}>
               {selectedActionId
-                ? formatSelectedTitle(actions, selectedActionId)
+                ? findActionAddTitle(actions, selectedActionId)
                 : 'Добавить событие'}
             </h2>
             {!selectedActionId ? (

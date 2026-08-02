@@ -1,5 +1,6 @@
 import { EventCard } from '@diabetes-universe/ui';
 import { History } from 'lucide-react';
+import Link from 'next/link';
 
 import { mapDashboardRecentEventToCard } from './dashboard-recent-events-card.mapper';
 import {
@@ -63,12 +64,12 @@ export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
                 {dashboardRecentEventsLabels.title}
               </h2>
             </div>
-            <a
+            <Link
               className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-              href={viewModel.viewAllHref ?? undefined}
+              href={viewModel.viewAllHref ?? '/timeline'}
             >
               {viewModel.viewAllLabel}
-            </a>
+            </Link>
           </div>
           <ul className="mt-4 space-y-3">
             {viewModel.events.map((event) => (

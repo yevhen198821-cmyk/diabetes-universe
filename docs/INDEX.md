@@ -13,8 +13,8 @@
 ## Architecture
 
 - [Architecture Overview](architecture/README.md)
-- [Navigation](architecture/navigation/overview.md)
-- [Dashboard Overview](architecture/dashboard/overview.md)
+- [Navigation](architecture/navigation/overview.md) — routes `/`, `/timeline`, `/dashboard` redirect
+- [Dashboard Overview](architecture/dashboard/overview.md) — home screen at `/`
 - [Dashboard Layout](architecture/dashboard/layout.md)
 - [Dashboard Header](architecture/dashboard/header.md)
 - [Dashboard Next Action](architecture/dashboard/next-action.md)
@@ -25,7 +25,16 @@
 - [Dashboard Quick Add Integration](architecture/dashboard/quick-add-integration.md)
 - [Dashboard States](architecture/dashboard/states.md)
 - [Dashboard Responsive Behavior](architecture/dashboard/responsive.md)
-- [Timeline](architecture/timeline/overview.md)
+- [Timeline Overview](architecture/timeline/overview.md) — event journal at `/timeline`
+- [Timeline List](architecture/timeline/list.md)
+- [Timeline Search and Filters](architecture/timeline/search-filter.md)
+- [Timeline Event Details](architecture/timeline/event-details.md)
+- [Timeline Event Editing](architecture/timeline/event-editing.md)
+- [Timeline Event Deletion](architecture/timeline/event-deletion.md)
+- [Timeline Pagination](architecture/timeline/pagination.md)
+- [Timeline States](architecture/timeline/states.md)
+- [Timeline Shared State](architecture/timeline/shared-state.md)
+- [Timeline Quick Add Integration](architecture/timeline/quick-add-integration.md)
 - [Analytics](architecture/analytics/overview.md)
 - [AI](architecture/ai/overview.md)
 - [Recipes](architecture/recipes/overview.md)
@@ -46,6 +55,13 @@
 - [Dashboard Recent Events](specs/dashboard/recent-events.md)
 - [Dashboard AI Insight](specs/dashboard/ai-insight.md)
 - [Dashboard Quick Add](specs/dashboard/quick-add.md)
+- [Timeline List](specs/timeline/list.md)
+- [Timeline Search and Filters](specs/timeline/search-filter.md)
+- [Timeline Event Details](specs/timeline/event-details.md)
+- [Timeline Event Editing](specs/timeline/event-editing.md)
+- [Timeline Event Deletion](specs/timeline/event-deletion.md)
+- [Timeline Pagination](specs/timeline/pagination.md)
+- [Timeline States](specs/timeline/states.md)
 
 ## UX and UI
 
@@ -59,6 +75,13 @@
 - [Dashboard Recent Events UI](ui/dashboard/recent-events.md)
 - [Dashboard AI Insight UI](ui/dashboard/ai-insight.md)
 - [Dashboard Quick Add UI](ui/dashboard/quick-add.md)
+- [Timeline List UI](ui/timeline/list.md)
+- [Timeline Search and Filters UI](ui/timeline/search-filter.md)
+- [Timeline Event Details UI](ui/timeline/event-details.md)
+- [Timeline Event Editing UI](ui/timeline/event-editing.md)
+- [Timeline Event Deletion UI](ui/timeline/event-deletion.md)
+- [Timeline Pagination UI](ui/timeline/pagination.md)
+- [Timeline States UI](ui/timeline/states.md)
 
 ## Design System
 
@@ -77,7 +100,7 @@
 - [Data Overview](data/README.md)
 - [Domain Model](data/domain-model.md)
 - [User Entity](data/entities/user.md)
-- [Timeline Entity](data/entities/timeline.md)
+- [Timeline Entity](data/entities/timeline.md) — approved `TimelineEvent` contract
 - [Glucose Entity](data/entities/glucose.md)
 - [Insulin Entity](data/entities/insulin.md)
 - [Nutrition Entity](data/entities/nutrition.md)

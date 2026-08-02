@@ -138,7 +138,7 @@ Element hierarchy:
 
 ## Notes
 
-- Visual baseline follows the Timeline `LastGlucoseCard` ready layout.
-- Dark-theme styles are required even though the Timeline reference is
-  light-only.
+- Visual baseline is Dashboard-owned; Timeline no longer renders a Last Glucose
+  card.
+- Dark-theme styles are required for Dashboard.
 - The Dashboard shell mounts this block immediately after Next Action.

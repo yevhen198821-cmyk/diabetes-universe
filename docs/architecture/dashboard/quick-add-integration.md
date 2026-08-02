@@ -48,3 +48,7 @@ Approved
 - Mobile and tablet use `dashboard-fab` with safe-area offsets.
 - Desktop Header disables its action while Quick Add is open.
 - Focus returns to the Header button or FAB based on the last open trigger.
+- Next Action uses `requestOpen('next-action', 'insulin')` to open the insulin
+  form directly.
+- Activity and note submit handlers call `createActivityTimelineEvent` and
+  `createNoteTimelineEvent`, then `addEvent`.

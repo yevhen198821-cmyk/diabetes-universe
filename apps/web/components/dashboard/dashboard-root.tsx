@@ -2,25 +2,23 @@
 
 import { useMemo, useRef, useState } from 'react';
 
+import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model';
+import { nextStep } from '../../lib/mocks/timeline';
+import { createActivityTimelineEvent } from '../../lib/quick-add/create-activity-timeline-event';
+import { createGlucoseTimelineEvent } from '../../lib/quick-add/create-glucose-timeline-event';
+import { createInsulinTimelineEvent } from '../../lib/quick-add/create-insulin-timeline-event';
+import { createMedicationTimelineEvent } from '../../lib/quick-add/create-medication-timeline-event';
+import { createNoteTimelineEvent } from '../../lib/quick-add/create-note-timeline-event';
+import { createNutritionTimelineEvent } from '../../lib/quick-add/create-nutrition-timeline-event';
 import {
-  applyGlucoseQuickAddEntry,
-  applyInsulinQuickAddEntry,
-  applyMedicationQuickAddEntry,
-  applyNutritionQuickAddEntry,
-  deriveDashboardQuickAddBlocks,
-  type DashboardDemoState,
-} from '../../lib/dashboard/dashboard-quick-add-integration-model';
-import {
-  nextStep,
-  timelineEvents as initialTimelineEvents,
-} from '../../lib/mocks/timeline';
-import {
-  closeQuickAdd,
-  createQuickAddOpeningLock,
+  closeQuickAddController,
+  createInitialQuickAddControllerState,
+  createQuickAddOpenRequest,
   releaseQuickAddOpeningLock,
-  requestQuickAddOpen,
+  type QuickAddOpenCategory,
   type QuickAddOpenTrigger,
 } from '../../lib/quick-add/quick-add-controller-model';
+import { useTimelineStore } from '../../lib/timeline/timeline-store';
 import { QuickAddHost } from '../quick-add/quick-add-host';
 import { DashboardAiInsight } from './dashboard-ai-insight';
 import { DashboardDaySummary } from './dashboard-day-summary';
@@ -32,73 +30,72 @@ import { DashboardRecentEvents } from './dashboard-recent-events';
 import { DashboardShell } from './dashboard-shell';
 
 const DASHBOARD_LOCALE = 'ru-RU';
-const DASHBOARD_TIME_ZONE = 'Europe/Moscow';
 
 const mockAiInsight = {
   displayTime: '10:20',
   generatedAt: '2026-08-02T07:20:00.000Z',
   id: 'insight-demo',
-  relatedEventIds: ['glucose-0800', 'meal-0820'],
+  relatedEventIds: ['glucose-0800', 'nutrition-0820'],
   summary:
     'После завтрака значение глюкозы было выше обычного уровня по вашим записям.',
   title: 'После завтрака',
 } as const;
 
 export function DashboardRoot() {
-  const [demoState, setDemoState] = useState<DashboardDemoState>({
-    events: initialTimelineEvents,
-  });
-  const [quickAddState, setQuickAddState] = useState({
-    isOpen: false,
-    isOpeningLocked: false,
-    lastOpenTrigger: null as QuickAddOpenTrigger | null,
-  });
+  const { addEvent, events } = useTimelineStore();
+  const [quickAddState, setQuickAddState] = useState(
+    createInitialQuickAddControllerState,
+  );
   const headerActionRef = useRef<HTMLButtonElement>(null);
   const fabRef = useRef<HTMLButtonElement>(null);
+  const nextActionRef = useRef<HTMLButtonElement>(null);
   const referenceTime = useMemo(() => new Date(), []);
+  const dashboardTimeZone = useMemo(
+    () => Intl.DateTimeFormat().resolvedOptions().timeZone,
+    [],
+  );
 
   const headerDate = useMemo(
     () =>
       createDashboardHeaderDate(
         referenceTime,
         DASHBOARD_LOCALE,
-        DASHBOARD_TIME_ZONE,
+        dashboardTimeZone,
       ),
-    [referenceTime],
+    [dashboardTimeZone, referenceTime],
   );
 
   const derivedBlocks = useMemo(
     () =>
-      deriveDashboardQuickAddBlocks(demoState, {
-        aiInsight: mockAiInsight,
-        locale: DASHBOARD_LOCALE,
-        referenceTime,
-        remindersCompleted: 1,
-        remindersTotal: 3,
-        timeZone: DASHBOARD_TIME_ZONE,
-      }),
-    [demoState, referenceTime],
+      deriveDashboardQuickAddBlocks(
+        { events },
+        {
+          aiInsight: mockAiInsight,
+          locale: DASHBOARD_LOCALE,
+          referenceTime,
+          remindersCompleted: 1,
+          remindersTotal: 3,
+          timeZone: dashboardTimeZone,
+        },
+      ),
+    [dashboardTimeZone, events, referenceTime],
   );
 
   const returnFocusRef =
-    quickAddState.lastOpenTrigger === 'header' ? headerActionRef : fabRef;
+    quickAddState.lastOpenTrigger === 'header'
+      ? headerActionRef
+      : quickAddState.lastOpenTrigger === 'next-action'
+        ? nextActionRef
+        : fabRef;
 
-  const requestOpen = (trigger: QuickAddOpenTrigger) => {
+  const requestOpen = (
+    trigger: QuickAddOpenTrigger,
+    category: QuickAddOpenCategory | null = null,
+  ) => {
     setQuickAddState((current) => {
-      if (requestQuickAddOpen(current) === 'ignored') {
-        return current;
-      }
+      const nextState = createQuickAddOpenRequest(current, trigger, category);
 
-      const nextState = createQuickAddOpeningLock(current);
-
-      if (!nextState) {
-        return current;
-      }
-
-      return {
-        ...nextState,
-        lastOpenTrigger: trigger,
-      };
+      return nextState ?? current;
     });
   };
 
@@ -111,13 +108,11 @@ export function DashboardRoot() {
             isOpen: true,
           }),
           lastOpenTrigger: current.lastOpenTrigger,
+          openCategory: current.openCategory,
         };
       }
 
-      return {
-        ...closeQuickAdd(),
-        lastOpenTrigger: current.lastOpenTrigger,
-      };
+      return closeQuickAddController(current);
     });
   };
 
@@ -168,8 +163,9 @@ export function DashboardRoot() {
         nextAction={
           <DashboardNextAction
             action={nextStep}
+            actionButtonRef={nextActionRef}
             actionDisabled={quickAddState.isOpen}
-            onAction={() => undefined}
+            onAction={() => requestOpen('next-action', 'insulin')}
             state="ready"
           />
         }
@@ -177,32 +173,35 @@ export function DashboardRoot() {
           <DashboardRecentEvents
             events={derivedBlocks.recentEvents}
             state="ready"
-            viewAllHref="/"
+            viewAllHref="/timeline"
           />
         }
       />
       <QuickAddHost
         floatingActionButtonClassName="dashboard-fab lg:hidden"
         floatingActionButtonRef={fabRef}
+        onActivitySubmit={(entry) => {
+          addEvent(createActivityTimelineEvent(entry));
+        }}
         onGlucoseSubmit={(entry) => {
-          setDemoState((current) => applyGlucoseQuickAddEntry(current, entry));
+          addEvent(createGlucoseTimelineEvent(entry));
         }}
         onInsulinSubmit={(entry) => {
-          setDemoState((current) => applyInsulinQuickAddEntry(current, entry));
+          addEvent(createInsulinTimelineEvent(entry));
         }}
         onMedicationSubmit={(entry) => {
-          setDemoState((current) =>
-            applyMedicationQuickAddEntry(current, entry),
-          );
+          addEvent(createMedicationTimelineEvent(entry));
+        }}
+        onNoteSubmit={(entry) => {
+          addEvent(createNoteTimelineEvent(entry));
         }}
         onNutritionSubmit={(entry) => {
-          setDemoState((current) =>
-            applyNutritionQuickAddEntry(current, entry),
-          );
+          addEvent(createNutritionTimelineEvent(entry));
         }}
         onOpenChange={handleQuickAddOpenChange}
         onRequestOpen={() => requestOpen('fab')}
         open={quickAddState.isOpen}
+        openCategory={quickAddState.openCategory}
         returnFocusRef={returnFocusRef}
         showFloatingActionButton
       />

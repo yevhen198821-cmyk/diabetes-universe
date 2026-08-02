@@ -43,3 +43,5 @@ Approved
 
 - The ready action may be disabled by the owner while Quick Add is open.
 - Empty and error states do not expose an action button.
+- The Dashboard demo wires the insulin CTA to Quick Add through
+  `requestOpen('next-action', 'insulin')`, opening the insulin form directly.

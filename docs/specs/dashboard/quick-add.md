@@ -37,6 +37,9 @@ Dashboard uses the existing `QuickAddHost` with:
 | `onInsulinSubmit`               | Successful insulin save callback         |
 | `onNutritionSubmit`             | Successful nutrition save callback       |
 | `onMedicationSubmit`            | Successful medication save callback      |
+| `onActivitySubmit`              | Successful activity save callback        |
+| `onNoteSubmit`                  | Successful note save callback            |
+| `openCategory`                  | Optional preselected category on open    |
 
 ### Open-State Rules
 
@@ -63,17 +66,21 @@ Affected blocks after successful save:
 - Insulin: Day Summary insulin total, Recent Events insulin preview
 - Nutrition: Day Summary carbohydrate total, Recent Events nutrition preview
 - Medication: Day Summary medication count, Recent Events medication preview
+- Activity: Recent Events activity preview when present
+- Note: no Dashboard block refresh beyond shared Timeline store
 
 ### Controller Model
 
 `quick-add-controller-model.ts` defines:
 
 - `requestQuickAddOpen`
+- `createQuickAddOpenRequest`
 - `createQuickAddOpeningLock`
 - `releaseQuickAddOpeningLock`
 - `closeQuickAdd`
 - `shouldApplyQuickAddSave`
 - `shouldKeepQuickAddOpenAfterSubmit`
+- `openCategory` for direct form open from Next Action or future CTAs
 
 ### Dashboard State Integration
 
@@ -137,3 +144,7 @@ Affected blocks after successful save:
 8. Focus returns to the opening control after close.
 9. Safe-area offsets are preserved for the Dashboard FAB.
 10. No duplicate Quick Add framework is introduced.
+11. Next Action insulin CTA opens the insulin form directly through
+    `openCategory`.
+12. Activity and note saves create canonical Timeline events through shared
+    create helpers.
