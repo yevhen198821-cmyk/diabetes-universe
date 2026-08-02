@@ -1,5 +1,7 @@
 import type { NextStep } from '@diabetes-universe/types';
 
+import type { DashboardNextActionLabels } from './dashboard-next-action-labels';
+
 export interface DashboardNextActionMessage {
   readonly description?: string;
   readonly title: string;
@@ -44,12 +46,9 @@ export interface DashboardNextActionViewModel {
   readonly title: string | null;
 }
 
-export const dashboardNextActionLabels = {
-  loading: 'Загрузка следующего действия',
-} as const;
-
 export function createDashboardNextActionViewModel(
   props: DashboardNextActionProps,
+  labels: DashboardNextActionLabels,
 ): DashboardNextActionViewModel {
   switch (props.state) {
     case 'loading':
@@ -59,8 +58,7 @@ export function createDashboardNextActionViewModel(
         description: null,
         isLoading: true,
         state: props.state,
-        statusLabel:
-          props.loadingLabel?.trim() || dashboardNextActionLabels.loading,
+        statusLabel: props.loadingLabel?.trim() || labels.loading,
         title: null,
       };
     case 'ready':

@@ -1,7 +1,7 @@
 import type {
   DaySummary,
   LastGlucose,
-  NextStep,
+  NextStepSource,
   TimelineEvent,
 } from '@diabetes-universe/types';
 
@@ -16,10 +16,9 @@ export const daySummary: DaySummary = {
   timeInRange: '92%',
 };
 
-export const nextStep: NextStep = {
-  actionLabel: 'Добавить',
-  description: 'Добавить инсулин',
-  title: 'Следующее действие',
+export const nextStepSource: NextStepSource = {
+  priority: 'high',
+  type: 'insulin',
 };
 
 const historyNoteEvents: readonly TimelineEvent[] = Array.from(

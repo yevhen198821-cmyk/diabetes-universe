@@ -62,6 +62,7 @@ documented architecture decision and an explicit product requirement.
 
 - [Localization Platform Overview](localization/overview.md)
 - [Dashboard Header Localization Migration (I18N-02A)](localization/dashboard-header-migration.md) — Feature Complete
+- [Dashboard Next Action Localization Migration (I18N-02B1)](localization/dashboard-next-action-migration.md) — Ready for Review
 - [Platform Readiness](localization/platform-readiness.md)
 - [Web Composition Root](composition-root/web-composition-root.md)
 - [Presentation Context Foundation](presentation/presentation-context.md) — CR-03A, Feature Complete

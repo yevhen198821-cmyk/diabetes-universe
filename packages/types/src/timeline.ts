@@ -26,8 +26,20 @@ export interface LastGlucose {
   readonly time: string;
 }
 
+export type NextStepActionType = 'insulin';
+
+export type NextStepPriority = 'high' | 'normal';
+
+/**
+ * Structural next-step data without localized presentation copy.
+ */
+export interface NextStepSource {
+  readonly priority: NextStepPriority;
+  readonly type: NextStepActionType;
+}
+
 export interface NextStep {
-  readonly title: string;
-  readonly description: string;
   readonly actionLabel: string;
+  readonly description: string;
+  readonly title: string;
 }
