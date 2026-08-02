@@ -2,7 +2,7 @@
 
 ## Status
 
-Implementation Complete — Ready for Review
+Approved — Feature Complete (merged via PR #24)
 
 ## Purpose
 
@@ -495,7 +495,7 @@ domain/Timeline structural glucose contract.
 | Field      | Value                                           |
 | ---------- | ----------------------------------------------- |
 | Stage      | I18N-02B2 — Dashboard Last Glucose Localization |
-| Phase      | **Implementation Complete — Ready for Review**  |
+| Phase      | **Feature Complete** (merged via PR #24)        |
 | Base       | `main` @ `297e5d5`                              |
 | Branch     | `feature/i18n-dashboard-last-glucose`           |
 | Unit tests | **324** web (+12)                               |

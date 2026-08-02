@@ -8,7 +8,7 @@ Timeline history.
 
 ## Status
 
-Approved — I18N-02B2 implementation complete (ready for review)
+Approved — I18N-02B2 Feature Complete (merged via PR #24)
 
 ## Responsibility
 

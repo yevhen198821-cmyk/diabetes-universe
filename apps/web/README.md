@@ -188,19 +188,25 @@ Second vertical Dashboard migration to Platform Localization.
 - unit, integration, resource, and E2E coverage
 - architecture: `docs/architecture/localization/dashboard-next-action-migration.md`
 
-## Dashboard last glucose localization (I18N-02B2) — Architecture Audit
+## Dashboard last glucose localization (I18N-02B2) — Feature Complete
 
 Location: `components/dashboard/dashboard-last-glucose*`
 
-Architectural audit complete; implementation not started. See
-`docs/architecture/localization/dashboard-last-glucose-migration.md`.
+- English canonical `dashboard.lastGlucose.*` keys (7)
+- localized labels via `useLocalization()` + `dashboard-last-glucose-labels.ts`
+- display time formatted once at container boundary via `useFormatter().formatTime()`
+- `TimelineEvent.value` pass-through (transitional mixed-language UI)
+- unit, integration, resource, and E2E coverage (`dashboard-last-glucose-i18n.spec.ts`)
+- architecture: `docs/architecture/localization/dashboard-last-glucose-migration.md`
+- squash merge: PR #24 (`5bf6925` → `ef9a7e0` on `main`)
 
-### Not implemented (I18N-02B2+)
+### Not implemented (I18N-02B3+)
 
 - cookie scheme wiring and `PresentationPersistence` adapter
-- remaining Dashboard block hook migration (I18N-02B2+)
+- remaining Dashboard block hook migration (Day Summary, Recent Events, AI Insight)
 - Timeline, Quick Add hook migration
 - locale switch UI
+- full glucose value formatting via `formatMeasurement()` (deferred until structural glucose contract)
 
 ## Architecture references
 

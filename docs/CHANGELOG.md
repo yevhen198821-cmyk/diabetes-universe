@@ -1,5 +1,38 @@
 # Changelog
 
+## Dashboard Last Glucose Localization — Feature Complete
+
+Дата: 2026-08-02
+
+Завершено:
+
+- Dashboard Last Glucose Localization Migration (I18N-02B2) — `apps/web/components/dashboard/dashboard-last-glucose*`
+- третий вертикальный Dashboard migration slice: `useLocalization()` (view) + `useFormatter()` (container)
+- English canonical `dashboard.lastGlucose.*` keys (7) в `@diabetes-universe/locales`
+- display time via single `PlatformFormatter.formatTime()` call at `dashboard-root` → `deriveLastGlucose` boundary
+- transitional glucose value contract: `TimelineEvent.value` pass-through (no `formatMeasurement()`)
+- pure presentation model boundary; preload без изменений (`common` + `dashboard`)
+- unit, integration, resource, and E2E coverage (`dashboard-last-glucose-i18n.spec.ts`)
+- architecture documentation и Engineering Audit
+- squash merge: PR #24 (`5bf6925` → `ef9a7e0` on `main`)
+- web tests: 326 total; E2E: 25 total
+
+Не входит в этот этап:
+
+- Dashboard Header (I18N-02A — Feature Complete)
+- Dashboard Next Action (I18N-02B1 — Feature Complete)
+- Day Summary, Recent Events, AI Insight (I18N-02B3+)
+- Timeline и Quick Add product source migration
+- `formatMeasurement()` / structural glucose contract
+- `uk`, `de`, `ru` professional translations
+- locale switch UI, cookie persistence
+- ICU MessageFormat interpolation
+- route-aware preload orchestration
+
+Статус:
+
+Dashboard Last Glucose Localization (I18N-02B2) — Feature Complete ✅
+
 ## Dashboard Next Action Localization — Feature Complete
 
 Дата: 2026-08-02
