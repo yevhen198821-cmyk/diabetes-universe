@@ -58,4 +58,9 @@ documented architecture decision and an explicit product requirement.
 - Reproducible builds
 - Minimal dependency surface
 
+## Platform modules
+
+- [Localization Platform Overview](localization/overview.md)
+- [Platform Readiness](localization/platform-readiness.md)
+
 ## Notes

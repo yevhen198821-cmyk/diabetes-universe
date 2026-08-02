@@ -1,5 +1,34 @@
 # Changelog
 
+## Localization Platform Foundation — Feature Complete
+
+Дата: 2026-08-02
+
+Завершено:
+
+- Localization Platform Foundation (Platform Foundation v1.0)
+- Пакеты: `@diabetes-universe/i18n`, `@diabetes-universe/locales`,
+  `@diabetes-universe/i18n-locales`
+- ADR-0009 (Localization Platform), ADR-0010 (Platform Formatting Library),
+  ADR-0011 (Platform Infrastructure Layer)
+- Runtime v1.0: `createLocalizationPlatform()`, `translate()`, `hasTranslation()`,
+  bundle cache, injected loader interfaces
+- Platform Readiness (архитектурное определение)
+- Infrastructure adapters вынесены из contract layer (I18N-06)
+- Runtime tests (9) и adapter tests (5)
+
+Не входит в этот этап:
+
+- ICU MessageFormat runtime
+- React Provider, hooks, Next.js integration
+- UI migration приложения на Localization Platform
+- locale switching
+- CDN / OTA
+
+Статус:
+
+Localization Platform Foundation — Feature Complete ✅
+
 ## Timeline Feature Complete
 
 Дата: 2026-08-02

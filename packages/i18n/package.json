@@ -1,0 +1,14 @@
+{
+  "name": "@diabetes-universe/i18n",
+  "version": "0.0.0",
+  "private": true,
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test 'src/**/*.test.mjs'",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {}
+}
