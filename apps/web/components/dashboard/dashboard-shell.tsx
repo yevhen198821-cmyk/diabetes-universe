@@ -6,6 +6,7 @@ export interface DashboardShellProps {
   readonly header: ReactNode;
   readonly lastGlucose: ReactNode;
   readonly nextAction: ReactNode;
+  readonly recentEvents: ReactNode;
 }
 
 export function DashboardShell({
@@ -14,6 +15,7 @@ export function DashboardShell({
   header,
   lastGlucose,
   nextAction,
+  recentEvents,
 }: DashboardShellProps) {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
@@ -25,6 +27,7 @@ export function DashboardShell({
         {nextAction}
         {lastGlucose}
         {daySummary}
+        {recentEvents}
         {children}
       </main>
     </div>
