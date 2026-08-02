@@ -409,12 +409,13 @@ Types referenced above come from Platform Contracts (`@diabetes-universe/i18n`,
 
 ## Future implementation boundaries
 
-| Package / location                | Stage                                            |
-| --------------------------------- | ------------------------------------------------ |
-| `@diabetes-universe/platform`     | CR-01A — implemented                             |
-| `@diabetes-universe/platform-web` | CR-01C — implemented                             |
-| `apps/web` bootstrap              | CR-02 — Feature Complete                         |
-| React Provider + hooks            | CR-03 — separate Presentation Integration sprint |
+| Package / location                | Stage                                             |
+| --------------------------------- | ------------------------------------------------- |
+| `@diabetes-universe/platform`     | CR-01A — implemented                              |
+| `@diabetes-universe/platform-web` | CR-01C — implemented                              |
+| `apps/web` bootstrap              | CR-02 — Feature Complete                          |
+| `apps/web` presentation           | CR-03A — Feature Complete                         |
+| React Provider + hooks            | CR-03B — separate Presentation Integration sprint |
 
 Dashboard, Timeline, and Quick Add migration are out of scope for the initial
 Web Composition Root implementation.
