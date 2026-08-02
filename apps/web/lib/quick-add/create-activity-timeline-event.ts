@@ -19,7 +19,7 @@ export function createActivityTimelineEvent(
     note: note || undefined,
     source: 'manual',
     title: entry.activityType,
-    unit: 'минут',
+    unit: 'мин',
     value: formatActivityDuration(entry.durationMinutes),
   };
 }

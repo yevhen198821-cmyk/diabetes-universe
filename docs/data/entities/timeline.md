@@ -197,7 +197,41 @@ Stage 7 migration changes:
 
 ## Out of scope
 
-- Quick Add forms for `activity` and `note`
 - reminder and `ai_insight` as Timeline events
 - backend/API implementation
 - type-specific nested payloads per event kind
+
+## Quick Add mapping
+
+### Activity
+
+`ActivityQuickAddEntry` creates:
+
+| Field      | Value                          |
+| ---------- | ------------------------------ |
+| `kind`     | `activity`                     |
+| `source`   | `manual`                       |
+| `title`    | selected activity type         |
+| `value`    | duration as string             |
+| `unit`     | `мин`                          |
+| `note`     | optional user note             |
+| `dateTime` | ISO 8601 from approved utility |
+
+Validation: `activityType` required; `durationMinutes` integer in `1..1440`;
+`time` required; `note` max 200 characters.
+
+### Note
+
+`NoteQuickAddEntry` creates:
+
+| Field      | Value                           |
+| ---------- | ------------------------------- |
+| `kind`     | `note`                          |
+| `source`   | `manual`                        |
+| `title`    | user title or `Заметка`         |
+| `value`    | note text                       |
+| `note`     | omitted to avoid duplicate body |
+| `dateTime` | ISO 8601 from approved utility  |
+
+Validation: trimmed `text` required; `text` max 500; `title` max 80; `time`
+required.

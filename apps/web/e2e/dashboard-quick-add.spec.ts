@@ -109,6 +109,10 @@ test('next action opens insulin quick add directly and updates dashboard', async
   await expect(
     page.getByRole('button', { name: 'Добавить', exact: true }),
   ).toBeFocused();
+
+  await page.getByRole('link', { name: 'Все события' }).click();
+  await expect(page).toHaveURL('/timeline');
+  await expect(page.getByText('2 ЕД').first()).toBeVisible();
 });
 
 test('timeline groups demo events and avoids mobile horizontal scroll', async ({

@@ -67,7 +67,7 @@ export interface ActivityQuickAddEntry {
 }
 
 export interface NoteQuickAddEntry {
-  readonly title: string;
+  readonly title?: string;
   readonly text: string;
   readonly time: string;
 }

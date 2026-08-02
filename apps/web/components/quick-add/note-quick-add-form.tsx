@@ -4,18 +4,19 @@ import type { NoteQuickAddEntry } from '@diabetes-universe/types';
 import {
   QuickAddFormActions,
   QuickAddFormLayout,
-  QuickAddOptionSheet,
-  QuickAddSelectField,
   QuickAddTextAreaField,
   QuickAddTimeField,
 } from '@diabetes-universe/ui';
 import { useState, type FormEvent } from 'react';
 
 import { getCurrentTimeString } from '../../lib/quick-add/format-glucose';
-import { noteTitleOptions } from '../../lib/quick-add/note-title-options';
+import {
+  NOTE_TEXT_MAX_LENGTH,
+  NOTE_TITLE_MAX_LENGTH,
+  validateNoteQuickAddEntry,
+} from '../../lib/quick-add/validate-note-quick-add';
 
 const TEXT_COUNTER_THRESHOLD = 160;
-const TEXT_MAX_LENGTH = 500;
 
 interface NoteQuickAddFormProps {
   readonly onCancel: () => void;
@@ -42,60 +43,85 @@ export function NoteQuickAddForm({
 }: NoteQuickAddFormProps) {
   const [formState, setFormState] = useState<NoteFormState>(createInitialState);
   const [textError, setTextError] = useState<string | null>(null);
-  const [titleSheetOpen, setTitleSheetOpen] = useState(false);
+  const [titleError, setTitleError] = useState<string | null>(null);
   const trimmedText = formState.text.trim();
-  const canSubmit =
-    formState.title.length > 0 &&
-    trimmedText.length > 0 &&
-    formState.time.length > 0;
+  const canSubmit = trimmedText.length > 0 && formState.time.length > 0;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (trimmedText.length === 0) {
-      setTextError('Введите текст заметки');
-      return;
-    }
-
-    if (trimmedText.length > TEXT_MAX_LENGTH) {
-      setTextError('Заметка должна быть не длиннее 500 символов');
-      return;
-    }
-
-    if (!formState.title || !formState.time) {
-      return;
-    }
-
-    onSubmit({
-      text: trimmedText,
+    const entry: NoteQuickAddEntry = {
+      text: formState.text,
       time: formState.time,
-      title: formState.title,
-    });
+      title: formState.title.trim() || undefined,
+    };
+    const validationError = validateNoteQuickAddEntry(entry);
+
+    if (validationError) {
+      if (validationError.includes('Заголовок')) {
+        setTitleError(validationError);
+      } else {
+        setTextError(validationError);
+      }
+      return;
+    }
+
+    onSubmit(entry);
   };
 
   const handleCancel = () => {
     setFormState(createInitialState());
     setTextError(null);
+    setTitleError(null);
     onCancel();
   };
 
   return (
     <QuickAddFormLayout onSubmit={handleSubmit}>
       <QuickAddFormLayout.Body>
-        <QuickAddSelectField
-          id="quick-add-note-title"
-          label="Тема"
-          onClick={() => setTitleSheetOpen(true)}
-          placeholder="Выберите тему"
-          value={formState.title || undefined}
-        />
+        <div>
+          <label
+            className="block text-sm font-medium text-slate-700"
+            htmlFor="quick-add-note-title"
+          >
+            Заголовок
+          </label>
+          <input
+            aria-describedby={
+              titleError ? 'quick-add-note-title-error' : undefined
+            }
+            aria-invalid={titleError ? true : undefined}
+            autoComplete="off"
+            className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none"
+            id="quick-add-note-title"
+            maxLength={NOTE_TITLE_MAX_LENGTH}
+            name="title"
+            onChange={(event) => {
+              setTitleError(null);
+              setFormState((current) => ({
+                ...current,
+                title: event.target.value,
+              }));
+            }}
+            placeholder="Необязательно"
+            value={formState.title}
+          />
+          {titleError ? (
+            <p
+              className="mt-1 text-sm text-rose-600"
+              id="quick-add-note-title-error"
+            >
+              {titleError}
+            </p>
+          ) : null}
+        </div>
 
         <QuickAddTextAreaField
           counterThreshold={TEXT_COUNTER_THRESHOLD}
           error={textError}
           id="quick-add-note-text"
           label="Текст заметки"
-          maxLength={TEXT_MAX_LENGTH}
+          maxLength={NOTE_TEXT_MAX_LENGTH}
           name="text"
           onChange={(text) => {
             setTextError(null);
@@ -130,22 +156,6 @@ export function NoteQuickAddForm({
           submitDisabled={!canSubmit}
         />
       </QuickAddFormLayout.Footer>
-
-      {titleSheetOpen ? (
-        <QuickAddOptionSheet
-          onClose={() => setTitleSheetOpen(false)}
-          onSelect={(title) => {
-            setFormState((current) => ({
-              ...current,
-              title,
-            }));
-            setTitleSheetOpen(false);
-          }}
-          options={noteTitleOptions}
-          selectedValue={formState.title || undefined}
-          title="Тема заметки"
-        />
-      ) : null}
     </QuickAddFormLayout>
   );
 }

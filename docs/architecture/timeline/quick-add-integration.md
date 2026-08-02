@@ -58,6 +58,46 @@ The integration must preserve:
 - Dashboard Next Action can open Quick Add with a preselected category through
   the shared controller `openCategory` API.
 
+### Activity validation
+
+- `activityType` is required.
+- `durationMinutes` must be an integer greater than 0 and not more than 1440.
+- `time` is required.
+- `note` is optional and limited to 200 characters.
+
+Resulting event:
+
+- `kind: activity`
+- `source: manual`
+- `title`: selected activity type
+- `value`: duration
+- `unit`: `мин`
+- `note`: optional
+- `dateTime`: ISO 8601 from approved temporal utility
+
+### Note validation
+
+- `text` is required after trim and limited to 500 characters.
+- `title` is optional and limited to 80 characters.
+- `time` is required.
+
+Resulting event:
+
+- `kind: note`
+- `source: manual`
+- `title`: user title or `Заметка`
+- `value`: note text
+- `note`: omitted to avoid duplicate body
+- `dateTime`: ISO 8601 from approved temporal utility
+
+### Responsive behavior
+
+- Mobile category grid uses two columns with equal-height cards.
+- Six categories fit without horizontal scroll; the panel scrolls vertically
+  when needed.
+- Footer and safe-area padding remain visible.
+- FAB hides while Quick Add is open.
+
 ### Screen-specific behavior
 
 Dashboard keeps its Quick Add opening lock and desktop/mobile triggers.

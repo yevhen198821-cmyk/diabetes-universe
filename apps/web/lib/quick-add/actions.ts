@@ -46,7 +46,7 @@ const quickAddActionDefinitions: readonly QuickAddAction[] = [
     id: 'note',
     category: 'note',
     label: 'Заметка',
-    description: 'Добавить самочувствие или контекст',
+    description: 'Добавить запись',
   },
 ];
 

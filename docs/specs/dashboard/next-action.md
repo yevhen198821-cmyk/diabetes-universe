@@ -45,6 +45,8 @@ content.
 - The ready action calls `onAction` exactly once per activation while enabled.
 - Empty and error states do not expose `onAction`.
 - The block does not decide what the action does.
+- In the current Dashboard demo, the ready action opens Quick Add with the
+  insulin form preselected through the shared `openCategory` API.
 
 ## User Flow
 
@@ -52,8 +54,10 @@ content.
 2. In ready state, the user reads the recommended next step and optional action
    label.
 3. The user activates the action button when enabled.
-4. If no action is available, the user reads the empty-state message.
-5. If the action cannot be loaded, the user reads the error-state message in
+4. When the demo next step is insulin, one click opens the insulin Quick Add
+   form directly without showing the category grid.
+5. If no action is available, the user reads the empty-state message.
+6. If the action cannot be loaded, the user reads the error-state message in
    the same card area.
 
 ## Business Rules
@@ -61,6 +65,8 @@ content.
 - The block is the only dominant Dashboard content card.
 - Ready content comes from the shared `NextStep` contract.
 - The block does not open Quick Add unless the owner wires `onAction` to do so.
+- The Dashboard owner wires the insulin demo CTA to `requestOpen('next-action',
+'insulin')`.
 - The owner may disable the ready action while Quick Add is open.
 - Empty and error states preserve the approved grid position.
 
@@ -95,3 +101,5 @@ content.
 4. Loading, empty, and error states preserve card placement and geometry.
 5. Empty and error states do not expose an action button.
 6. The block does not fetch or rank actions on its own.
+7. The insulin demo CTA opens the insulin Quick Add form in one click without
+   showing the category grid.

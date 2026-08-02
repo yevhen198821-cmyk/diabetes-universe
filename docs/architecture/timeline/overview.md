@@ -132,7 +132,8 @@ Dashboard but does not share Dashboard block composition.
   selectors after edit/delete.
 - Inline edit/delete buttons, swipe actions, and API persistence are not part
   of Timeline Feature Complete.
-- Activity and note Quick Add categories remain Stage 1 stubs without save flow.
+- Quick Add supports all six MVP categories with save flow on Dashboard and
+  Timeline.
 
 ### Pagination and Load More (Stage 7)
 

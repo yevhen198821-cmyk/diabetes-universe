@@ -102,5 +102,7 @@ Element hierarchy:
 
 ## Notes
 
-- `DashboardRoot` currently supplies a no-op `onAction` callback in the demo
-  screen while Quick Add entry remains owned by Header and FAB.
+- `DashboardRoot` wires the insulin demo CTA to `requestOpen('next-action',
+'insulin')`, which opens the insulin Quick Add form directly.
+- The ready action may be disabled by the owner while Quick Add is open.
+- Empty and error states do not expose an action button.

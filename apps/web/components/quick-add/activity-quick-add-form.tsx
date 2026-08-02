@@ -13,7 +13,11 @@ import { useState, type FormEvent } from 'react';
 
 import { activityTypeOptions } from '../../lib/quick-add/activity-type-options';
 import { getCurrentTimeString } from '../../lib/quick-add/format-glucose';
-import { parseActivityDurationInput } from '../../lib/quick-add/format-activity';
+import {
+  ACTIVITY_DURATION_MAX_MINUTES,
+  parseActivityDurationInput,
+  validateActivityQuickAddEntry,
+} from '../../lib/quick-add/format-activity';
 
 const NOTE_COUNTER_THRESHOLD = 160;
 const NOTE_MAX_LENGTH = 200;
@@ -52,7 +56,7 @@ export function ActivityQuickAddForm({
   const durationValidationError =
     durationError ??
     (hasDuration && parsedDuration === null
-      ? 'Введите длительность от 1 до 600 минут'
+      ? `Введите продолжительность от 1 до ${ACTIVITY_DURATION_MAX_MINUTES} минут`
       : null);
   const canSubmit =
     formState.activityType.length > 0 &&
@@ -63,22 +67,26 @@ export function ActivityQuickAddForm({
     event.preventDefault();
 
     if (parsedDuration === null) {
-      setDurationError('Введите длительность от 1 до 600 минут');
+      setDurationError(
+        `Введите продолжительность от 1 до ${ACTIVITY_DURATION_MAX_MINUTES} минут`,
+      );
       return;
     }
 
-    if (!formState.activityType || !formState.time) {
-      return;
-    }
-
-    const note = formState.note.trim();
-
-    onSubmit({
+    const entry: ActivityQuickAddEntry = {
       activityType: formState.activityType,
       durationMinutes: parsedDuration,
-      note: note || undefined,
+      note: formState.note.trim() || undefined,
       time: formState.time,
-    });
+    };
+    const validationError = validateActivityQuickAddEntry(entry);
+
+    if (validationError) {
+      setDurationError(validationError);
+      return;
+    }
+
+    onSubmit(entry);
   };
 
   const handleCancel = () => {
@@ -92,9 +100,9 @@ export function ActivityQuickAddForm({
       <QuickAddFormLayout.Body>
         <QuickAddSelectField
           id="quick-add-activity-type"
-          label="Тип активности"
+          label="Вид активности"
           onClick={() => setActivitySheetOpen(true)}
-          placeholder="Выберите активность"
+          placeholder="Выберите вид активности"
           value={formState.activityType || undefined}
         />
 
@@ -103,7 +111,7 @@ export function ActivityQuickAddForm({
             className="block text-sm font-medium text-slate-700"
             htmlFor="quick-add-activity-duration"
           >
-            Длительность
+            Продолжительность, мин
           </label>
           <div className="relative mt-2">
             <input
@@ -169,7 +177,7 @@ export function ActivityQuickAddForm({
               note,
             }));
           }}
-          placeholder="Например, после обеда"
+          placeholder="Необязательно"
           value={formState.note}
         />
       </QuickAddFormLayout.Body>
@@ -194,7 +202,7 @@ export function ActivityQuickAddForm({
           }}
           options={activityTypeOptions}
           selectedValue={formState.activityType || undefined}
-          title="Активность"
+          title="Вид активности"
         />
       ) : null}
     </QuickAddFormLayout>
