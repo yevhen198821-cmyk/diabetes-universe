@@ -2,23 +2,26 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
-  DASHBOARD_AVATAR_TARGET_CLASS_NAME,
-  DASHBOARD_DESKTOP_ACTION_CLASS_NAME,
+  createDashboardHeaderDate,
   createDashboardHeaderViewModel,
   dashboardHeaderLabels,
-  formatDashboardDate,
-  getDashboardAvatarInitials,
+  getDashboardAvatarImageUrl,
 } from './dashboard-header-model.ts';
 
 const currentDate = new Date('2026-08-01T18:30:00.000Z');
+const formattedDate = createDashboardHeaderDate(
+  currentDate,
+  'ru-RU',
+  'Europe/Moscow',
+);
+
+assert.ok(formattedDate);
 
 function createInput(overrides = {}) {
   return {
-    currentDate,
-    locale: 'ru-RU',
+    date: formattedDate,
     onAddEvent: () => {},
     state: 'ready',
-    timeZone: 'Europe/Moscow',
     user: {
       avatarUrl: 'https://example.com/avatar.png',
       displayName: 'Алексей Петров',
@@ -27,26 +30,52 @@ function createInput(overrides = {}) {
   };
 }
 
-test('creates the ready state with localized date and supplied avatar', () => {
+test('creates the ready state with a preformatted deterministic date', () => {
   const model = createDashboardHeaderViewModel(createInput());
 
   assert.equal(model.isLoading, false);
   assert.equal(model.isError, false);
-  assert.equal(
-    model.dateLabel,
-    new Intl.DateTimeFormat('ru-RU', {
-      day: 'numeric',
-      month: 'long',
-      timeZone: 'Europe/Moscow',
-      weekday: 'long',
-      year: 'numeric',
-    }).format(currentDate),
-  );
+  assert.equal(model.dateLabel, formattedDate.label);
+  assert.equal(model.dateTime, '2026-08-01');
   assert.equal(model.avatarUrl, 'https://example.com/avatar.png');
   assert.equal(model.avatarInitials, 'АП');
 });
 
-test('creates a non-blocking loading state', () => {
+test('formats with the supplied locale and time zone', () => {
+  const instant = new Date('2026-01-01T01:00:00.000Z');
+  const losAngelesDate = createDashboardHeaderDate(
+    instant,
+    'en-US',
+    'America/Los_Angeles',
+  );
+  const tokyoDate = createDashboardHeaderDate(instant, 'ja-JP', 'Asia/Tokyo');
+
+  assert.ok(losAngelesDate);
+  assert.ok(tokyoDate);
+  assert.equal(losAngelesDate.dateTime, '2025-12-31');
+  assert.equal(tokyoDate.dateTime, '2026-01-01');
+  assert.equal(losAngelesDate.locale, 'en-US');
+  assert.equal(losAngelesDate.timeZone, 'America/Los_Angeles');
+  assert.notEqual(losAngelesDate.label, tokyoDate.label);
+});
+
+test('rejects invalid dates, time zones, and unsupported locales', () => {
+  assert.equal(
+    createDashboardHeaderDate(currentDate, 'en-US', 'Invalid/Zone'),
+    null,
+  );
+  assert.equal(
+    createDashboardHeaderDate(new Date('invalid'), 'en-US', 'UTC'),
+    null,
+  );
+  assert.equal(createDashboardHeaderDate(currentDate, 'zz-ZZ', 'UTC'), null);
+  assert.equal(
+    createDashboardHeaderDate(currentDate, 'not_a_locale', 'UTC'),
+    null,
+  );
+});
+
+test('creates a non-blocking loading state with stable actions', () => {
   const onAddEvent = () => {};
   const model = createDashboardHeaderViewModel(
     createInput({ onAddEvent, state: 'loading' }),
@@ -54,14 +83,15 @@ test('creates a non-blocking loading state', () => {
 
   assert.equal(model.isLoading, true);
   assert.equal(model.dateLabel, null);
+  assert.equal(model.dateTime, null);
   assert.equal(model.avatarUrl, null);
   assert.equal(model.errorMessage, null);
   assert.equal(model.onAddEvent, onAddEvent);
 });
 
-test('creates an error fallback without removing header actions', () => {
+test('creates custom and default error fallbacks without removing actions', () => {
   let addEventCalls = 0;
-  const model = createDashboardHeaderViewModel(
+  const customErrorModel = createDashboardHeaderViewModel(
     createInput({
       errorMessage: 'Данные пользователя временно недоступны.',
       onAddEvent: () => {
@@ -70,16 +100,26 @@ test('creates an error fallback without removing header actions', () => {
       state: 'error',
     }),
   );
+  const defaultErrorModel = createDashboardHeaderViewModel(
+    createInput({ state: 'error' }),
+  );
 
-  assert.equal(model.isError, true);
-  assert.equal(model.errorMessage, 'Данные пользователя временно недоступны.');
-  assert.equal(model.avatarUrl, null);
+  assert.equal(customErrorModel.isError, true);
+  assert.equal(
+    customErrorModel.errorMessage,
+    'Данные пользователя временно недоступны.',
+  );
+  assert.equal(customErrorModel.avatarUrl, null);
+  assert.equal(
+    defaultErrorModel.errorMessage,
+    dashboardHeaderLabels.defaultError,
+  );
 
-  model.onAddEvent();
+  customErrorModel.onAddEvent();
   assert.equal(addEventCalls, 1);
 });
 
-test('uses initials and then a generic fallback when avatar data is missing', () => {
+test('handles missing name and missing avatar independently', () => {
   const initialsModel = createDashboardHeaderViewModel(
     createInput({
       user: {
@@ -88,67 +128,80 @@ test('uses initials and then a generic fallback when avatar data is missing', ()
       },
     }),
   );
-  const genericModel = createDashboardHeaderViewModel(
-    createInput({ user: null }),
+  const missingDataModel = createDashboardHeaderViewModel(
+    createInput({
+      user: {
+        avatarUrl: null,
+        displayName: null,
+      },
+    }),
   );
 
   assert.equal(initialsModel.avatarUrl, null);
   assert.equal(initialsModel.avatarInitials, 'AL');
-  assert.equal(genericModel.avatarUrl, null);
-  assert.equal(genericModel.avatarInitials, null);
+  assert.equal(missingDataModel.avatarUrl, null);
+  assert.equal(missingDataModel.avatarInitials, null);
+  assert.equal(missingDataModel.avatarLabel, dashboardHeaderLabels.avatar);
 });
 
-test('preserves desktop action and avatar callbacks', () => {
+test('prevents repeated avatar image failures and accepts a changed URL', () => {
+  const firstUrl = 'https://example.com/avatar.png';
+  const secondUrl = 'https://example.com/avatar-2.png';
+
+  assert.equal(getDashboardAvatarImageUrl(` ${firstUrl} `, null), firstUrl);
+  assert.equal(getDashboardAvatarImageUrl(firstUrl, firstUrl), null);
+  assert.equal(getDashboardAvatarImageUrl(secondUrl, firstUrl), secondUrl);
+  assert.equal(getDashboardAvatarImageUrl(null, firstUrl), null);
+});
+
+test('preserves required and optional callbacks and disabled action state', () => {
   let addEventCalls = 0;
   let avatarCalls = 0;
-  const model = createDashboardHeaderViewModel(
+  const staticAvatarModel = createDashboardHeaderViewModel(
     createInput({
+      addEventDisabled: true,
       onAddEvent: () => {
         addEventCalls += 1;
       },
+    }),
+  );
+  const interactiveAvatarModel = createDashboardHeaderViewModel(
+    createInput({
       onAvatarClick: () => {
         avatarCalls += 1;
       },
     }),
   );
 
-  model.onAddEvent();
-  model.onAvatarClick?.();
+  staticAvatarModel.onAddEvent();
+  interactiveAvatarModel.onAvatarClick?.();
 
   assert.equal(addEventCalls, 1);
   assert.equal(avatarCalls, 1);
+  assert.equal(staticAvatarModel.addEventDisabled, true);
+  assert.equal(staticAvatarModel.onAvatarClick, undefined);
+  assert.equal(
+    staticAvatarModel.avatarLabel,
+    'Профиль пользователя: Алексей Петров',
+  );
+  assert.equal(
+    interactiveAvatarModel.avatarLabel,
+    'Открыть профиль: Алексей Петров',
+  );
 });
 
-test('provides accessible labels without hardcoding user data', () => {
+test('provides accessible labels for actions, date, loading, and fallback', () => {
   const interactiveModel = createDashboardHeaderViewModel(
     createInput({ onAvatarClick: () => {} }),
   );
-  const staticModel = createDashboardHeaderViewModel(createInput());
+  const noUserModel = createDashboardHeaderViewModel(
+    createInput({ user: null }),
+  );
 
   assert.equal(interactiveModel.addEventLabel, 'Добавить событие');
   assert.equal(interactiveModel.avatarLabel, 'Открыть профиль: Алексей Петров');
-  assert.equal(staticModel.avatarLabel, 'Профиль пользователя: Алексей Петров');
+  assert.equal(noUserModel.avatarLabel, 'Профиль пользователя');
   assert.equal(interactiveModel.currentDateLabel, 'Текущая дата');
   assert.equal(interactiveModel.loadingLabel, 'Загрузка данных заголовка');
-});
-
-test('uses the supplied locale and time zone and safely handles invalid values', () => {
-  const instant = new Date('2026-01-01T01:00:00.000Z');
-  const losAngelesDate = formatDashboardDate(
-    instant,
-    'en-US',
-    'America/Los_Angeles',
-  );
-  const tokyoDate = formatDashboardDate(instant, 'ja-JP', 'Asia/Tokyo');
-
-  assert.notEqual(losAngelesDate, tokyoDate);
-  assert.equal(formatDashboardDate(instant, 'en-US', 'Invalid/Zone'), null);
-  assert.equal(getDashboardAvatarInitials('élise durand', 'fr-FR'), 'ÉD');
-});
-
-test('defines desktop-only action visibility and 44px avatar target', () => {
-  assert.match(DASHBOARD_DESKTOP_ACTION_CLASS_NAME, /\bhidden\b/);
-  assert.match(DASHBOARD_DESKTOP_ACTION_CLASS_NAME, /\blg:inline-flex\b/);
-  assert.match(DASHBOARD_AVATAR_TARGET_CLASS_NAME, /\bsize-11\b/);
-  assert.equal(dashboardHeaderLabels.addEvent, 'Добавить событие');
+  assert.equal(interactiveModel.dateUnavailableLabel, 'Дата недоступна');
 });

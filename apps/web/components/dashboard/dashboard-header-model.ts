@@ -1,22 +1,29 @@
 export type DashboardHeaderState = 'error' | 'loading' | 'ready';
 
+export interface DashboardHeaderDate {
+  readonly dateTime: string;
+  readonly label: string;
+  readonly locale: string;
+  readonly timeZone: string;
+}
+
 export interface DashboardHeaderUser {
   readonly avatarUrl?: string | null;
   readonly displayName?: string | null;
 }
 
 export interface DashboardHeaderModelInput {
-  readonly currentDate: Date;
+  readonly addEventDisabled?: boolean;
+  readonly date: DashboardHeaderDate | null;
   readonly errorMessage?: string;
-  readonly locale: string;
   readonly onAddEvent: () => void;
   readonly onAvatarClick?: () => void;
   readonly state: DashboardHeaderState;
-  readonly timeZone: string;
   readonly user: DashboardHeaderUser | null;
 }
 
 export interface DashboardHeaderViewModel {
+  readonly addEventDisabled: boolean;
   readonly addEventLabel: string;
   readonly avatarInitials: string | null;
   readonly avatarLabel: string;
@@ -34,12 +41,6 @@ export interface DashboardHeaderViewModel {
   readonly productName: string;
 }
 
-export const DASHBOARD_DESKTOP_ACTION_CLASS_NAME =
-  'hidden min-h-11 items-center justify-center gap-2 lg:inline-flex';
-
-export const DASHBOARD_AVATAR_TARGET_CLASS_NAME =
-  'grid size-11 shrink-0 place-items-center overflow-hidden rounded-full';
-
 export const dashboardHeaderLabels = {
   addEvent: 'Добавить событие',
   avatar: 'Профиль пользователя',
@@ -51,23 +52,53 @@ export const dashboardHeaderLabels = {
   productName: 'Diabetes Universe',
 } as const;
 
-export function formatDashboardDate(
+export function createDashboardHeaderDate(
   currentDate: Date,
   locale: string,
   timeZone: string,
-): string | null {
+): DashboardHeaderDate | null {
   if (Number.isNaN(currentDate.getTime())) {
     return null;
   }
 
   try {
-    return new Intl.DateTimeFormat(locale, {
+    const normalizedLocale = locale.trim();
+    const normalizedTimeZone = timeZone.trim();
+    const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf([
+      normalizedLocale,
+    ]);
+
+    if (supportedLocales.length === 0) {
+      return null;
+    }
+
+    const label = new Intl.DateTimeFormat(normalizedLocale, {
       day: 'numeric',
       month: 'long',
-      timeZone,
+      timeZone: normalizedTimeZone,
       weekday: 'long',
       year: 'numeric',
     }).format(currentDate);
+    const dateParts = new Intl.DateTimeFormat('en-US-u-ca-gregory-nu-latn', {
+      day: '2-digit',
+      month: '2-digit',
+      timeZone: normalizedTimeZone,
+      year: 'numeric',
+    }).formatToParts(currentDate);
+    const day = dateParts.find((part) => part.type === 'day')?.value;
+    const month = dateParts.find((part) => part.type === 'month')?.value;
+    const year = dateParts.find((part) => part.type === 'year')?.value;
+
+    if (!day || !month || !year) {
+      return null;
+    }
+
+    return {
+      dateTime: `${year.padStart(4, '0')}-${month}-${day}`,
+      label,
+      locale: normalizedLocale,
+      timeZone: normalizedTimeZone,
+    };
   } catch {
     return null;
   }
@@ -75,7 +106,7 @@ export function formatDashboardDate(
 
 export function getDashboardAvatarInitials(
   displayName: string | null | undefined,
-  locale: string,
+  locale?: string,
 ): string | null {
   const nameParts = displayName?.trim().split(/\s+/).filter(Boolean) ?? [];
 
@@ -92,31 +123,46 @@ export function getDashboardAvatarInitials(
     .join('');
 
   try {
+    if (!locale) {
+      return initials.toUpperCase();
+    }
+
     return initials.toLocaleUpperCase(locale);
   } catch {
     return initials.toUpperCase();
   }
 }
 
+export function getDashboardAvatarImageUrl(
+  avatarUrl: string | null,
+  failedAvatarUrl: string | null,
+): string | null {
+  const normalizedAvatarUrl = avatarUrl?.trim() || null;
+  const normalizedFailedUrl = failedAvatarUrl?.trim() || null;
+
+  return normalizedAvatarUrl && normalizedAvatarUrl !== normalizedFailedUrl
+    ? normalizedAvatarUrl
+    : null;
+}
+
 export function createDashboardHeaderViewModel({
-  currentDate,
+  addEventDisabled = false,
+  date,
   errorMessage,
-  locale,
   onAddEvent,
   onAvatarClick,
   state,
-  timeZone,
   user,
 }: DashboardHeaderModelInput): DashboardHeaderViewModel {
   const displayName = user?.displayName?.trim() || null;
-  const validDate = Number.isNaN(currentDate.getTime()) ? null : currentDate;
   const avatarLabelPrefix = onAvatarClick
     ? dashboardHeaderLabels.avatarAction
     : dashboardHeaderLabels.avatar;
 
   return {
+    addEventDisabled,
     addEventLabel: dashboardHeaderLabels.addEvent,
-    avatarInitials: getDashboardAvatarInitials(displayName, locale),
+    avatarInitials: getDashboardAvatarInitials(displayName, date?.locale),
     avatarLabel: displayName
       ? `${avatarLabelPrefix}: ${displayName}`
       : avatarLabelPrefix,
@@ -125,11 +171,8 @@ export function createDashboardHeaderViewModel({
         ? user.avatarUrl.trim()
         : null,
     currentDateLabel: dashboardHeaderLabels.currentDate,
-    dateLabel:
-      state === 'loading'
-        ? null
-        : formatDashboardDate(currentDate, locale, timeZone),
-    dateTime: validDate?.toISOString() ?? null,
+    dateLabel: state === 'loading' ? null : (date?.label ?? null),
+    dateTime: state === 'loading' ? null : (date?.dateTime ?? null),
     dateUnavailableLabel: dashboardHeaderLabels.dateUnavailable,
     errorMessage:
       state === 'error'

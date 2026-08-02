@@ -6,11 +6,15 @@ import Image from 'next/image';
 import { useState, type ReactNode } from 'react';
 
 import {
-  DASHBOARD_AVATAR_TARGET_CLASS_NAME,
-  DASHBOARD_DESKTOP_ACTION_CLASS_NAME,
   createDashboardHeaderViewModel,
+  getDashboardAvatarImageUrl,
   type DashboardHeaderModelInput,
 } from './dashboard-header-model';
+
+const avatarTargetClassName =
+  'grid size-11 shrink-0 place-items-center overflow-hidden rounded-full';
+const desktopActionClassName =
+  'hidden min-h-11 items-center justify-center gap-2 lg:inline-flex';
 
 export type DashboardHeaderProps = DashboardHeaderModelInput;
 
@@ -28,8 +32,11 @@ function DashboardAvatar({
   readonly onAvatarClick?: () => void;
 }) {
   const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null);
-  const showAvatarImage = avatarUrl !== null && avatarUrl !== failedAvatarUrl;
-  const avatarClassName = `${DASHBOARD_AVATAR_TARGET_CLASS_NAME} border border-slate-200 bg-slate-100 text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100`;
+  const visibleAvatarUrl = getDashboardAvatarImageUrl(
+    avatarUrl,
+    failedAvatarUrl,
+  );
+  const avatarClassName = `${avatarTargetClassName} border border-slate-200 bg-slate-100 text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100`;
 
   if (isLoading) {
     return (
@@ -42,15 +49,15 @@ function DashboardAvatar({
 
   let content: ReactNode;
 
-  if (showAvatarImage) {
+  if (visibleAvatarUrl) {
     content = (
       <Image
         alt=""
         className="size-full object-cover"
         height={44}
-        onError={() => setFailedAvatarUrl(avatarUrl)}
+        onError={() => setFailedAvatarUrl(visibleAvatarUrl)}
         sizes="44px"
-        src={avatarUrl}
+        src={visibleAvatarUrl}
         unoptimized
         width={44}
       />
@@ -90,7 +97,7 @@ export function DashboardHeader(props: DashboardHeaderProps) {
       aria-busy={viewModel.isLoading}
       className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 pt-[env(safe-area-inset-top)] text-slate-950 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:text-slate-50"
     >
-      <div className="mx-auto grid min-h-16 max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-4 py-3 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:px-6 lg:min-h-[4.5rem]">
+      <div className="mx-auto grid min-h-16 max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-[4.5rem]">
         <div className="flex min-w-0 items-center gap-3">
           <span
             aria-hidden="true"
@@ -128,7 +135,8 @@ export function DashboardHeader(props: DashboardHeaderProps) {
         <div className="col-start-2 row-start-1 flex items-center gap-2 sm:col-start-3">
           <Button
             aria-label={viewModel.addEventLabel}
-            className={`${DASHBOARD_DESKTOP_ACTION_CLASS_NAME} dark:bg-teal-500 dark:text-slate-950 dark:hover:bg-teal-400 dark:focus-visible:outline-teal-400`}
+            className={`${desktopActionClassName} dark:bg-teal-500 dark:text-slate-950 dark:hover:bg-teal-400 dark:focus-visible:outline-teal-400`}
+            disabled={viewModel.addEventDisabled}
             onClick={viewModel.onAddEvent}
             type="button"
           >

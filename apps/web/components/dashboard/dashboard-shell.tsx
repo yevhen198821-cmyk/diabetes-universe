@@ -1,20 +1,16 @@
-'use client';
-
 import type { ReactNode } from 'react';
-
-import { DashboardHeader, type DashboardHeaderProps } from './dashboard-header';
 
 export interface DashboardShellProps {
   readonly children?: ReactNode;
-  readonly header: DashboardHeaderProps;
+  readonly header: ReactNode;
 }
 
 export function DashboardShell({ children, header }: DashboardShellProps) {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
-      <DashboardHeader {...header} />
+    <div className="min-h-screen bg-slate-50 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
+      {header}
       <main
-        className="mx-auto grid max-w-6xl gap-4 px-4 py-6 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:gap-5 sm:px-6 sm:py-8 lg:gap-6 lg:pb-10"
+        className="mx-auto grid max-w-6xl grid-cols-1 gap-4 py-6 pr-[max(1rem,env(safe-area-inset-right))] pb-[calc(6rem+env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] sm:grid-cols-2 sm:gap-5 sm:py-8 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:grid-cols-12 lg:gap-6 lg:pb-10"
         id="dashboard-content"
       >
         {children}
