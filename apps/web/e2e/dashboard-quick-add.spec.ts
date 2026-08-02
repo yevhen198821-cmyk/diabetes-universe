@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+import { waitForApplicationReady } from './support/wait-for-application-ready';
+
 test('dashboard quick add updates shared timeline state', async ({ page }) => {
   await page.goto('/');
 
@@ -82,6 +84,8 @@ test('next action opens insulin quick add directly and updates dashboard', async
 }) => {
   await page.goto('/');
 
+  await waitForApplicationReady(page);
+
   const daySummary = page.getByRole('region', { name: 'Сводка дня' });
 
   await expect(page.getByText('Следующее действие')).toBeVisible();
@@ -141,6 +145,7 @@ test('timeline search and filters combine without changing store', async ({
   page,
 }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   const search = page.getByLabel('Поиск событий');
 
@@ -168,6 +173,7 @@ test('timeline search and filters combine without changing store', async ({
   await expect(page.getByText('NovoRapid').first()).toBeVisible();
 
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
   await page.keyboard.press('Tab');
   await page.keyboard.press('Tab');
   await expect(search).toBeFocused();

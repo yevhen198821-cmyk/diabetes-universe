@@ -69,8 +69,9 @@ time, calendar filters).
 
 ### Integration status
 
-Bootstrap is covered by integration tests in `lib/platform/tests/`. Production
-routes do not invoke the bootstrap until CR-03 provides explicit time zone input.
+Bootstrap is covered by integration tests in `lib/platform/tests/` and
+`lib/platform/integration/tests/`. Root layout invokes server bootstrap and
+mounts `ApplicationRuntimeGate` per CR-03C (ADR-0013).
 
 ### Implemented (CR-02)
 
@@ -111,7 +112,7 @@ it does not accept a separate server locale input.
 
 ### Not implemented (CR-03C+)
 
-- route integration and cookie persistence
+- cookie persistence adapter
 - UI migration (Dashboard, Timeline, Quick Add)
 
 ## React platform provider foundation (CR-03B) — Feature Complete ✅
@@ -119,25 +120,55 @@ it does not accept a separate server locale input.
 Location: `lib/platform/react/`
 
 Provides `PlatformProvider` and read-only hooks for consuming an already
-assembled `PlatformRuntime`. Production routes and product modules are not wired
-to the provider yet.
+assembled `PlatformRuntime`.
 
 Public API: `lib/platform/react/index.ts`
 
 Test utilities: `lib/platform/react/testing/`
 
-### Not implemented (CR-03C+)
+## Application platform integration (CR-03C) — Implementation Complete — Ready for Review
 
-- `apps/web/app/layout.tsx` provider wiring
-- server bootstrap invocation on routes
-- persistence and hydration snapshot wiring
-- Dashboard, Timeline, Quick Add migration
+Location: `lib/platform/integration/`
+
+Root layout invokes `createRequestPlatformRuntime()`, maps the result to
+`ApplicationPlatformBootstrap`, and mounts `ApplicationRuntimeGate`, which owns
+client-realm runtime assembly per [ADR-0013](../../docs/adr/0013-web-client-runtime-ownership.md).
+
+Provider order when runtime is ready:
+
+```text
+ApplicationRuntimeGate (ready)
+  └── PlatformProvider
+        └── AppProviders
+              └── TimelineStoreProvider
+                    └── routes
+```
+
+### Implemented (CR-03C)
+
+- root layout server bootstrap invocation
+- serializable `ApplicationPlatformBootstrap` boundary
+- `ApplicationRuntimeGate` lifecycle (pending / unavailable / error / ready)
+- client runtime assembly from `PresentationSnapshot` / client presentation bootstrap
+- equivalence contract assertions
+- lifecycle mount tests (`happy-dom`)
+- application readiness marker (`data-platform-status="ready"`)
+- E2E SPA navigation continuity tests
+- integration tests
+
+### Not implemented (I18N-02+)
+
+- cookie scheme wiring and `PresentationPersistence` adapter
+- Dashboard, Timeline, Quick Add hook migration
+- locale switch UI
 
 ## Architecture references
 
 - [Presentation Context Foundation](../../docs/architecture/presentation/presentation-context.md)
 - [React Platform Provider Foundation](../../docs/architecture/presentation/react-platform-provider.md)
+- [Application Platform Integration](../../docs/architecture/presentation/application-platform-integration.md)
 
 - [ADR-0012 — User Time Zone Policy](../../docs/adr/0012-user-time-zone-policy.md)
+- [ADR-0013 — Web Client Runtime Ownership and Bootstrap Gate](../../docs/adr/0013-web-client-runtime-ownership.md)
 - [Web Composition Root](../../docs/architecture/composition-root/web-composition-root.md)
 - [@diabetes-universe/platform-web](../../packages/platform-web/README.md)
