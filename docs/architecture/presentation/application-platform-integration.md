@@ -2,7 +2,7 @@
 
 ## Status
 
-Approved — CR-03C implementation complete, ready for review per [ADR-0013](../../adr/0013-web-client-runtime-ownership.md)
+Approved — CR-03C Feature Complete per [ADR-0013](../../adr/0013-web-client-runtime-ownership.md)
 
 ## Purpose
 

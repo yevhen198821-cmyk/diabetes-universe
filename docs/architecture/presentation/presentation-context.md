@@ -198,7 +198,7 @@ Forbidden:
 - `PlatformRuntime` creation in CR-03A client orchestration;
 - separate non-canonical server locale input in client bootstrap.
 
-## CR-03C integration (implemented per ADR-0013)
+## CR-03C integration (Feature Complete per ADR-0013)
 
 CR-03C wires server bootstrap, serializable `ApplicationPlatformBootstrap`, and
 `ApplicationRuntimeGate` into the root layout. The gate owns client-realm runtime

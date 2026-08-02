@@ -1,5 +1,29 @@
 # Changelog
 
+## Application Platform Integration — Feature Complete
+
+Дата: 2026-08-02
+
+Завершено:
+
+- Application Platform Integration (CR-03C) — `apps/web/lib/platform/integration/`
+- ADR-0013 — Web Client Runtime Ownership and Bootstrap Gate
+- `ApplicationRuntimeGate` — client-realm runtime assembly and product single-mount policy
+- serializable `ApplicationPlatformBootstrap` server → client boundary
+- readiness marker `data-platform-status="ready"` for E2E/lifecycle contracts
+- root layout server bootstrap invocation and `<html lang>` from snapshot/seed
+- integration tests: 28; web tests: 298 total; E2E: 22 total
+
+Не входит в этот этап:
+
+- cookie persistence adapter and `PresentationPersistence` wiring
+- Dashboard, Timeline, Quick Add hook migration (I18N-02)
+- locale switch UI
+
+Статус:
+
+Application Platform Integration — Feature Complete ✅
+
 ## React Platform Provider Foundation — Feature Complete
 
 Дата: 2026-08-02

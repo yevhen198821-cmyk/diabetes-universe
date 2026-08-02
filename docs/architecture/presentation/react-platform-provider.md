@@ -191,7 +191,7 @@ Provider and hooks do not:
 
 `PlatformRuntime` is passed only within the React tree.
 
-## CR-03C integration (implemented per ADR-0013)
+## CR-03C integration (Feature Complete per ADR-0013)
 
 CR-03C wires server bootstrap, serializable application boundary transport, and
 `ApplicationRuntimeGate` into `apps/web/app/layout.tsx`. The gate creates client
