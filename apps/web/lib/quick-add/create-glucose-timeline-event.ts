@@ -3,25 +3,22 @@ import type {
   TimelineEvent,
 } from '@diabetes-universe/types';
 
+import { createIsoDateTimeFromLocalTime } from '../timeline/timeline-date-time';
 import { formatGlucoseValue } from './format-glucose';
 
 export function createGlucoseTimelineEvent(
   entry: GlucoseQuickAddEntry,
 ): TimelineEvent {
   const value = formatGlucoseValue(entry.valueMmol);
+  const dateTime = createIsoDateTimeFromLocalTime(entry.time);
 
   return {
     context: entry.context,
+    dateTime,
     id: `glucose-${entry.time.replace(':', '')}-${crypto.randomUUID()}`,
     kind: 'glucose',
-    time: entry.time,
+    source: 'manual',
     title: 'Глюкоза',
     value,
   };
-}
-
-export function sortTimelineEvents(
-  events: readonly TimelineEvent[],
-): TimelineEvent[] {
-  return [...events].sort((left, right) => left.time.localeCompare(right.time));
 }

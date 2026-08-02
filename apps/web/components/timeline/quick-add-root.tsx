@@ -11,20 +11,26 @@ import { useRef, useState } from 'react';
 import { QuickAddHost } from '../quick-add/quick-add-host';
 
 interface QuickAddRootProps {
+  readonly onOpenChange?: (open: boolean) => void;
   readonly onGlucoseSubmit?: (entry: GlucoseQuickAddEntry) => void;
   readonly onInsulinSubmit?: (entry: InsulinQuickAddEntry) => void;
   readonly onMedicationSubmit?: (entry: MedicationQuickAddEntry) => void;
   readonly onNutritionSubmit?: (entry: NutritionQuickAddEntry) => void;
+  readonly open?: boolean;
 }
 
 export function QuickAddRoot({
+  onOpenChange,
   onGlucoseSubmit,
   onInsulinSubmit,
   onMedicationSubmit,
   onNutritionSubmit,
+  open,
 }: QuickAddRootProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const fabRef = useRef<HTMLButtonElement>(null);
+  const isOpen = open ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
 
   return (
     <QuickAddHost
@@ -35,7 +41,7 @@ export function QuickAddRoot({
       onMedicationSubmit={onMedicationSubmit}
       onNutritionSubmit={onNutritionSubmit}
       onOpenChange={setOpen}
-      open={open}
+      open={isOpen}
       returnFocusRef={fabRef}
       showFloatingActionButton
     />

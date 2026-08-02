@@ -1,5 +1,5 @@
-import { TimelineShell } from '../components/timeline/timeline-shell';
+import { DashboardRoot } from '../components/dashboard/dashboard-root';
 
 export default function HomePage() {
-  return <TimelineShell />;
+  return <DashboardRoot />;
 }

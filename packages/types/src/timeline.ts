@@ -1,15 +1,20 @@
 export type TimelineEventKind =
-  'glucose' | 'meal' | 'nutrition' | 'insulin' | 'medication' | 'activity';
+  'glucose' | 'insulin' | 'nutrition' | 'medication' | 'activity' | 'note';
+
+export type TimelineEventSource = 'manual' | 'demo' | 'device' | 'import';
 
 export interface TimelineEvent {
   readonly id: string;
-  readonly time: string;
   readonly kind: TimelineEventKind;
+  readonly dateTime: string;
   readonly title: string;
   readonly value: string;
   readonly unit?: string;
-  readonly context: string;
+  readonly context?: string;
   readonly note?: string;
+  readonly source?: TimelineEventSource;
+  readonly createdAt?: string;
+  readonly updatedAt?: string;
 }
 
 export interface DaySummary {

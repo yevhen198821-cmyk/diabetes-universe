@@ -14,6 +14,7 @@ export type {
   NextStep,
   TimelineEvent,
   TimelineEventKind,
+  TimelineEventSource,
 } from './timeline';
 export type {
   GlucoseQuickAddEntry,

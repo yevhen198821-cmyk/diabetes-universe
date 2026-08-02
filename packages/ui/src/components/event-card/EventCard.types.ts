@@ -16,6 +16,7 @@ export type EventCardStatus =
   'default' | 'completed' | 'scheduled' | 'missed' | 'error';
 
 export interface EventCardProps {
+  readonly ariaLabel?: string;
   readonly type: EventCardType;
   readonly time: string;
   readonly title: string;

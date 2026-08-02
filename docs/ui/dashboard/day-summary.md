@@ -137,6 +137,6 @@ Element hierarchy:
 
 ## Notes
 
-- Visual baseline differs from the Timeline `DaySummaryPanel`, which exposes
-  time in range and is not reused on the Dashboard.
+- Visual baseline is Dashboard-owned; Timeline no longer renders a Day Summary
+  panel.
 - The Dashboard shell mounts this block immediately after Last Glucose.

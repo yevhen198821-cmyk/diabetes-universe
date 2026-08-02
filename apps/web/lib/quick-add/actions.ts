@@ -1,17 +1,10 @@
 import type { QuickAddAction } from '@diabetes-universe/types';
 import type { QuickAddActionItem } from '@diabetes-universe/ui';
-import {
-  Activity,
-  CookingPot,
-  Droplets,
-  Pill,
-  StickyNote,
-  Syringe,
-} from 'lucide-react';
+import { CookingPot, Droplets, Pill, Syringe } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { createElement } from 'react';
 
-const quickAddActionDefinitions: readonly QuickAddAction[] = [
+const quickAddActionDefinitions = [
   {
     id: 'glucose',
     category: 'glucose',
@@ -36,27 +29,16 @@ const quickAddActionDefinitions: readonly QuickAddAction[] = [
     label: 'Лекарство',
     description: 'Записать приём препарата',
   },
-  {
-    id: 'activity',
-    category: 'activity',
-    label: 'Активность',
-    description: 'Записать движение или тренировку',
-  },
-  {
-    id: 'note',
-    category: 'note',
-    label: 'Заметка',
-    description: 'Добавить самочувствие или контекст',
-  },
-];
+] as const satisfies readonly QuickAddAction[];
 
-const quickAddIcons: Record<QuickAddAction['category'], LucideIcon> = {
+const quickAddIcons: Record<
+  (typeof quickAddActionDefinitions)[number]['category'],
+  LucideIcon
+> = {
   glucose: Droplets,
   insulin: Syringe,
-  nutrition: CookingPot,
-  activity: Activity,
   medication: Pill,
-  note: StickyNote,
+  nutrition: CookingPot,
 };
 
 export const quickAddActions: readonly QuickAddActionItem[] =

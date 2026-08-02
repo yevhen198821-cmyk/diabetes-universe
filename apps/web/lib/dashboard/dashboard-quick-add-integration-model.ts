@@ -1,21 +1,19 @@
-import type {
-  GlucoseQuickAddEntry,
-  InsulinQuickAddEntry,
-  MedicationQuickAddEntry,
-  NutritionQuickAddEntry,
-  TimelineEvent,
-} from '@diabetes-universe/types';
+import type { TimelineEvent } from '@diabetes-universe/types';
 
-import {
-  createGlucoseTimelineEvent,
-  sortTimelineEvents,
-} from '../quick-add/create-glucose-timeline-event';
-import { createInsulinTimelineEvent } from '../quick-add/create-insulin-timeline-event';
-import { createMedicationTimelineEvent } from '../quick-add/create-medication-timeline-event';
-import { createNutritionTimelineEvent } from '../quick-add/create-nutrition-timeline-event';
-import { formatGlucoseValue } from '../quick-add/format-glucose';
 import { formatInsulinDose } from '../quick-add/format-insulin';
 import { formatNutritionCarbs } from '../quick-add/format-nutrition';
+import {
+  formatTimelineDisplayTime,
+  getTimelineCalendarDateKey,
+} from '../timeline/timeline-date-time';
+import {
+  getLatestGlucoseEvent,
+  getRecentTimelineEvents,
+  getTodayInsulinTotal,
+  getTodayMedicationCount,
+  getTodayNutritionTotal,
+  getTodayTimelineEvents,
+} from '../timeline/timeline-selectors';
 
 export interface DashboardDerivedAiInsight {
   readonly displayTime: string;
@@ -54,7 +52,7 @@ export interface DashboardDerivedRecentEvent {
   readonly value: string;
 }
 
-export interface DashboardDemoState {
+export interface DashboardTimelineState {
   readonly events: readonly TimelineEvent[];
 }
 
@@ -75,53 +73,11 @@ export interface DashboardQuickAddIntegrationResult {
 }
 
 const DEFAULT_LOCALE = 'ru-RU';
-const DEFAULT_TIME_ZONE = 'Europe/Moscow';
-
-function createEventDateTime(time: string, referenceTime: Date): string | null {
-  const [hours, minutes] = time.split(':').map((part) => Number(part));
-
-  if (!Number.isInteger(hours) || !Number.isInteger(minutes)) {
-    return null;
-  }
-
-  const eventDate = new Date(referenceTime);
-  eventDate.setHours(hours, minutes, 0, 0);
-
-  if (Number.isNaN(eventDate.getTime())) {
-    return null;
-  }
-
-  return eventDate.toISOString();
-}
-
-function parseInsulinUnits(value: string): number {
-  const match = value.trim().match(/^([\d.,]+)/);
-
-  if (!match) {
-    return 0;
-  }
-
-  const parsed = Number(match[1].replace(',', '.'));
-
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function parseCarbohydrateGrams(value: string): number {
-  const match = value.trim().match(/^([\d.,]+)/);
-
-  if (!match) {
-    return 0;
-  }
-
-  const parsed = Number(match[1].replace(',', '.'));
-
-  return Number.isFinite(parsed) ? parsed : 0;
-}
 
 function createDashboardDayLabel(
   currentDate: Date,
   locale: string,
-  timeZone: string,
+  timeZone?: string,
 ): Pick<DashboardDerivedDaySummary, 'dayDate' | 'displayDayLabel'> | null {
   if (Number.isNaN(currentDate.getTime())) {
     return null;
@@ -129,32 +85,27 @@ function createDashboardDayLabel(
 
   try {
     const normalizedLocale = locale.trim();
-    const normalizedTimeZone = timeZone.trim();
+    const normalizedTimeZone = timeZone?.trim();
     const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf([
       normalizedLocale,
     ]);
 
-    if (supportedLocales.length === 0 || normalizedTimeZone.length === 0) {
+    if (supportedLocales.length === 0) {
       return null;
     }
 
     const displayDayLabel = new Intl.DateTimeFormat(normalizedLocale, {
       day: 'numeric',
       month: 'long',
-      timeZone: normalizedTimeZone,
+      timeZone: normalizedTimeZone || undefined,
       weekday: 'long',
     }).format(currentDate);
-    const dateParts = new Intl.DateTimeFormat('en-US-u-ca-gregory-nu-latn', {
-      day: '2-digit',
-      month: '2-digit',
-      timeZone: normalizedTimeZone,
-      year: 'numeric',
-    }).formatToParts(currentDate);
-    const day = dateParts.find((part) => part.type === 'day')?.value;
-    const month = dateParts.find((part) => part.type === 'month')?.value;
-    const year = dateParts.find((part) => part.type === 'year')?.value;
+    const dayDate = getTimelineCalendarDateKey(
+      currentDate.toISOString(),
+      normalizedTimeZone || undefined,
+    );
 
-    if (!day || !month || !year) {
+    if (!dayDate) {
       return null;
     }
 
@@ -165,7 +116,7 @@ function createDashboardDayLabel(
     }
 
     return {
-      dayDate: `${year.padStart(4, '0')}-${month}-${day}`,
+      dayDate,
       displayDayLabel: trimmedLabel,
     };
   } catch {
@@ -173,89 +124,30 @@ function createDashboardDayLabel(
   }
 }
 
-function mapTimelineEventToRecentEventSource(
-  event: TimelineEvent,
-  referenceTime: Date,
-): DashboardDerivedRecentEvent | null {
-  const dateTime = createEventDateTime(event.time, referenceTime);
-
-  if (!dateTime) {
-    return null;
-  }
-
-  switch (event.kind) {
-    case 'insulin':
-      return {
-        category: 'insulin',
-        context: event.context,
-        dateTime,
-        displayTime: event.time,
-        id: event.id,
-        title: event.title,
-        unit: 'ЕД',
-        value: parseInsulinUnits(event.value).toString(),
-      };
-    case 'meal':
-    case 'nutrition':
-      return {
-        category: 'nutrition',
-        context: event.context,
-        dateTime,
-        displayTime: event.time,
-        id: event.id,
-        title: event.title,
-        unit: 'г углеводов',
-        value: parseCarbohydrateGrams(event.value).toString(),
-      };
-    case 'medication':
-      return {
-        category: 'medication',
-        context: event.context,
-        dateTime,
-        displayTime: event.time,
-        id: event.id,
-        title: event.title,
-        unit: event.unit ?? '',
-        value: event.value,
-      };
-    case 'activity':
-      return {
-        category: 'activity',
-        context: event.context,
-        dateTime,
-        displayTime: event.time,
-        id: event.id,
-        title: event.title,
-        unit: event.unit ?? 'минут',
-        value: event.value,
-      };
-    default:
-      return null;
-  }
-}
-
 function deriveLastGlucose(
   events: readonly TimelineEvent[],
-  referenceTime: Date,
+  locale: string,
+  timeZone?: string,
 ): DashboardDerivedLastGlucose | null {
-  const glucoseEvents = events.filter((event) => event.kind === 'glucose');
+  const latestGlucose = getLatestGlucoseEvent(events);
 
-  if (glucoseEvents.length === 0) {
+  if (!latestGlucose) {
     return null;
   }
 
-  const latestGlucose = [...glucoseEvents].sort((left, right) =>
-    right.time.localeCompare(left.time),
-  )[0];
-  const dateTime = createEventDateTime(latestGlucose.time, referenceTime);
+  const displayTime = formatTimelineDisplayTime(
+    latestGlucose.dateTime,
+    locale,
+    timeZone,
+  );
 
-  if (!dateTime) {
+  if (displayTime === '--:--') {
     return null;
   }
 
   return {
-    dateTime,
-    displayTime: latestGlucose.time,
+    dateTime: latestGlucose.dateTime,
+    displayTime,
     value: latestGlucose.value,
   };
 }
@@ -264,7 +156,7 @@ function deriveDaySummary(
   events: readonly TimelineEvent[],
   referenceTime: Date,
   locale: string,
-  timeZone: string,
+  timeZone: string | undefined,
   remindersCompleted: number,
   remindersTotal: number,
 ): DashboardDerivedDaySummary | null {
@@ -274,18 +166,25 @@ function deriveDaySummary(
     return null;
   }
 
-  const glucoseMeasurements = events.filter(
+  const todayEvents = getTodayTimelineEvents(events, referenceTime, timeZone);
+  const glucoseMeasurements = todayEvents.filter(
     (event) => event.kind === 'glucose',
   ).length;
-  const medicationDoses = events.filter(
-    (event) => event.kind === 'medication',
-  ).length;
-  const totalInsulinUnits = events
-    .filter((event) => event.kind === 'insulin')
-    .reduce((total, event) => total + parseInsulinUnits(event.value), 0);
-  const totalCarbohydrateGrams = events
-    .filter((event) => event.kind === 'meal' || event.kind === 'nutrition')
-    .reduce((total, event) => total + parseCarbohydrateGrams(event.value), 0);
+  const medicationDoses = getTodayMedicationCount(
+    events,
+    referenceTime,
+    timeZone,
+  );
+  const totalInsulinUnits = getTodayInsulinTotal(
+    events,
+    referenceTime,
+    timeZone,
+  );
+  const totalCarbohydrateGrams = getTodayNutritionTotal(
+    events,
+    referenceTime,
+    timeZone,
+  );
 
   return {
     dayDate: dayLabel.dayDate,
@@ -300,18 +199,19 @@ function deriveDaySummary(
 }
 
 export function deriveDashboardQuickAddBlocks(
-  state: DashboardDemoState,
+  state: DashboardTimelineState,
   options: DashboardQuickAddIntegrationOptions = {},
 ): DashboardQuickAddIntegrationResult {
   const referenceTime = options.referenceTime ?? new Date();
   const locale = options.locale ?? DEFAULT_LOCALE;
-  const timeZone = options.timeZone ?? DEFAULT_TIME_ZONE;
+  const timeZone = options.timeZone?.trim() || undefined;
   const remindersCompleted = options.remindersCompleted ?? 0;
   const remindersTotal = options.remindersTotal ?? 0;
 
-  const recentEvents = state.events
-    .map((event) => mapTimelineEventToRecentEventSource(event, referenceTime))
-    .filter((event): event is DashboardDerivedRecentEvent => event !== null);
+  const recentEvents = getRecentTimelineEvents(state.events, {
+    locale,
+    timeZone,
+  });
 
   return {
     aiInsight: options.aiInsight ?? null,
@@ -323,72 +223,7 @@ export function deriveDashboardQuickAddBlocks(
       remindersCompleted,
       remindersTotal,
     ),
-    lastGlucose: deriveLastGlucose(state.events, referenceTime),
+    lastGlucose: deriveLastGlucose(state.events, locale, timeZone),
     recentEvents,
-  };
-}
-
-export function applyGlucoseQuickAddEntry(
-  state: DashboardDemoState,
-  entry: GlucoseQuickAddEntry,
-): DashboardDemoState {
-  return {
-    events: sortTimelineEvents([
-      ...state.events,
-      createGlucoseTimelineEvent(entry),
-    ]),
-  };
-}
-
-export function applyInsulinQuickAddEntry(
-  state: DashboardDemoState,
-  entry: InsulinQuickAddEntry,
-): DashboardDemoState {
-  return {
-    events: sortTimelineEvents([
-      ...state.events,
-      createInsulinTimelineEvent(entry),
-    ]),
-  };
-}
-
-export function applyNutritionQuickAddEntry(
-  state: DashboardDemoState,
-  entry: NutritionQuickAddEntry,
-): DashboardDemoState {
-  return {
-    events: sortTimelineEvents([
-      ...state.events,
-      createNutritionTimelineEvent(entry),
-    ]),
-  };
-}
-
-export function applyMedicationQuickAddEntry(
-  state: DashboardDemoState,
-  entry: MedicationQuickAddEntry,
-): DashboardDemoState {
-  return {
-    events: sortTimelineEvents([
-      ...state.events,
-      createMedicationTimelineEvent(entry),
-    ]),
-  };
-}
-
-export function createLastGlucoseMeasurementFromEntry(
-  entry: GlucoseQuickAddEntry,
-  referenceTime: Date = new Date(),
-): DashboardDerivedLastGlucose | null {
-  const dateTime = createEventDateTime(entry.time, referenceTime);
-
-  if (!dateTime) {
-    return null;
-  }
-
-  return {
-    dateTime,
-    displayTime: entry.time,
-    value: formatGlucoseValue(entry.valueMmol),
   };
 }

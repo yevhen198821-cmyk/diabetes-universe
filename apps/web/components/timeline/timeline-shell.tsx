@@ -3,99 +3,285 @@
 import type {
   GlucoseQuickAddEntry,
   InsulinQuickAddEntry,
-  LastGlucose,
   MedicationQuickAddEntry,
   NutritionQuickAddEntry,
   TimelineEvent,
 } from '@diabetes-universe/types';
-import { useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
-import {
-  daySummary,
-  lastGlucose as initialLastGlucose,
-  nextStep,
-  timelineEvents as initialTimelineEvents,
-} from '../../lib/mocks/timeline';
-import {
-  createGlucoseTimelineEvent,
-  sortTimelineEvents,
-} from '../../lib/quick-add/create-glucose-timeline-event';
+import { createGlucoseTimelineEvent } from '../../lib/quick-add/create-glucose-timeline-event';
 import { createInsulinTimelineEvent } from '../../lib/quick-add/create-insulin-timeline-event';
 import { createMedicationTimelineEvent } from '../../lib/quick-add/create-medication-timeline-event';
 import { createNutritionTimelineEvent } from '../../lib/quick-add/create-nutrition-timeline-event';
-import { formatGlucoseValue } from '../../lib/quick-add/format-glucose';
-import { DaySummaryPanel } from './day-summary-panel';
-import { LastGlucoseCard } from './last-glucose-card';
-import { NextStepPanel } from './next-step-panel';
+import { compareTimelineDateTime } from '../../lib/timeline/timeline-date-time';
+import { useTimelineStore } from '../../lib/timeline/timeline-store';
+import { createTimelineListModel } from './timeline-list-model';
 import { QuickAddRoot } from './quick-add-root';
 import { TimelineList } from './timeline-list';
+import {
+  TimelineEventDetail,
+  type TimelineEventDetailMode,
+} from './timeline-event-detail';
+import { TimelineLoadMore } from './timeline-load-more';
+import { createTimelinePaginationModel } from './timeline-pagination-model';
+import {
+  createTimelineSearchFilterModel,
+  type TimelineEventFilter,
+} from './timeline-search-filter-model';
+import { TimelineToolbar } from './timeline-toolbar';
 import { TopBar } from './top-bar';
 
+const TIMELINE_PAGE_SIZE = 20;
+
+function sortTimelineEventsNewestFirst(
+  events: readonly TimelineEvent[],
+): readonly TimelineEvent[] {
+  return [...events].sort((left, right) => {
+    const comparison = compareTimelineDateTime(right.dateTime, left.dateTime);
+
+    if (comparison !== 0) {
+      return comparison;
+    }
+
+    return left.id.localeCompare(right.id);
+  });
+}
+
 export function TimelineShell() {
-  const [events, setEvents] = useState<readonly TimelineEvent[]>(
-    initialTimelineEvents,
+  const { addEvent, deleteEvent, error, events, status, updateEvent } =
+    useTimelineStore();
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState<TimelineEventFilter>('all');
+  const [visibleCount, setVisibleCount] = useState(TIMELINE_PAGE_SIZE);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [detailMode, setDetailMode] = useState<TimelineEventDetailMode>('view');
+  const [returnFocusElement, setReturnFocusElement] =
+    useState<HTMLElement | null>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const referenceDate = useMemo(() => new Date(), []);
+  const timeZone = useMemo(
+    () => Intl.DateTimeFormat().resolvedOptions().timeZone,
+    [],
   );
-  const [lastGlucose, setLastGlucose] =
-    useState<LastGlucose>(initialLastGlucose);
+  const displayOrderedEvents = useMemo(
+    () => sortTimelineEventsNewestFirst(events),
+    [events],
+  );
+  const searchFilterModel = useMemo(
+    () =>
+      createTimelineSearchFilterModel(displayOrderedEvents, {
+        filter: activeFilter,
+        query,
+      }),
+    [activeFilter, displayOrderedEvents, query],
+  );
+  const paginationModel = useMemo(
+    () =>
+      createTimelinePaginationModel({
+        events: searchFilterModel.filteredEvents,
+        pageSize: TIMELINE_PAGE_SIZE,
+        visibleCount,
+      }),
+    [searchFilterModel.filteredEvents, visibleCount],
+  );
+  const listModel = useMemo(
+    () =>
+      createTimelineListModel({
+        error,
+        events: paginationModel.visibleEvents,
+        hasActiveCriteria: searchFilterModel.hasActiveCriteria,
+        referenceDate,
+        status,
+        timeZone,
+        totalSourceEventCount: events.length,
+      }),
+    [
+      error,
+      events.length,
+      paginationModel.visibleEvents,
+      referenceDate,
+      searchFilterModel.hasActiveCriteria,
+      status,
+      timeZone,
+    ],
+  );
+  const showToolbar = status === 'ready' && events.length > 0;
+  const selectedEvent =
+    selectedEventId !== null
+      ? events.find((event) => event.id === selectedEventId)
+      : undefined;
 
-  const handleGlucoseSubmit = (entry: GlucoseQuickAddEntry) => {
-    const newEvent = createGlucoseTimelineEvent(entry);
+  const resetCriteria = () => {
+    setQuery('');
+    setActiveFilter('all');
+    setVisibleCount(TIMELINE_PAGE_SIZE);
+  };
 
-    setEvents((currentEvents) =>
-      sortTimelineEvents([...currentEvents, newEvent]),
-    );
-    setLastGlucose({
-      time: entry.time,
-      value: formatGlucoseValue(entry.valueMmol),
+  const handleQueryChange = (nextQuery: string) => {
+    setQuery(nextQuery);
+    setVisibleCount(TIMELINE_PAGE_SIZE);
+  };
+
+  const handleFilterChange = (nextFilter: TimelineEventFilter) => {
+    setActiveFilter(nextFilter);
+    setVisibleCount(TIMELINE_PAGE_SIZE);
+  };
+
+  const handleLoadMore = () => {
+    setVisibleCount(paginationModel.nextVisibleCount);
+  };
+
+  const focusTimelineHeading = () => {
+    requestAnimationFrame(() => {
+      headingRef.current?.focus();
     });
   };
 
-  const handleInsulinSubmit = (entry: InsulinQuickAddEntry) => {
-    const newEvent = createInsulinTimelineEvent(entry);
+  const closeDetails = () => {
+    setSelectedEventId(null);
+    setDetailMode('view');
 
-    setEvents((currentEvents) =>
-      sortTimelineEvents([...currentEvents, newEvent]),
+    requestAnimationFrame(() => {
+      if (returnFocusElement && document.contains(returnFocusElement)) {
+        returnFocusElement.focus();
+        return;
+      }
+
+      headingRef.current?.focus();
+    });
+  };
+
+  const handleOpenEvent = (eventId: string, trigger: HTMLElement) => {
+    setReturnFocusElement(trigger);
+    setSelectedEventId(eventId);
+    setDetailMode('view');
+  };
+
+  const handleUpdateEvent = (event: TimelineEvent) => {
+    updateEvent(event);
+
+    const nextEvents = sortTimelineEventsNewestFirst(
+      events.map((existingEvent) =>
+        existingEvent.id === event.id ? event : existingEvent,
+      ),
     );
+    const nextSearchFilterModel = createTimelineSearchFilterModel(nextEvents, {
+      filter: activeFilter,
+      query,
+    });
+    const nextPaginationModel = createTimelinePaginationModel({
+      events: nextSearchFilterModel.filteredEvents,
+      pageSize: TIMELINE_PAGE_SIZE,
+      visibleCount,
+    });
+    const isStillVisible = nextPaginationModel.visibleEvents.some(
+      (visibleEvent) => visibleEvent.id === event.id,
+    );
+
+    if (!isStillVisible) {
+      setSelectedEventId(null);
+      setDetailMode('view');
+      requestAnimationFrame(() => {
+        const searchInput = document.getElementById('timeline-search');
+
+        if (searchInput instanceof HTMLElement) {
+          searchInput.focus();
+          return;
+        }
+
+        headingRef.current?.focus();
+      });
+    }
+  };
+
+  const handleDeleteEvent = (eventId: string) => {
+    deleteEvent(eventId);
+    setSelectedEventId(null);
+    setDetailMode('view');
+    focusTimelineHeading();
+  };
+
+  const handleGlucoseSubmit = (entry: GlucoseQuickAddEntry) => {
+    addEvent(createGlucoseTimelineEvent(entry));
+  };
+
+  const handleInsulinSubmit = (entry: InsulinQuickAddEntry) => {
+    addEvent(createInsulinTimelineEvent(entry));
   };
 
   const handleNutritionSubmit = (entry: NutritionQuickAddEntry) => {
-    const newEvent = createNutritionTimelineEvent(entry);
-
-    setEvents((currentEvents) =>
-      sortTimelineEvents([...currentEvents, newEvent]),
-    );
+    addEvent(createNutritionTimelineEvent(entry));
   };
 
   const handleMedicationSubmit = (entry: MedicationQuickAddEntry) => {
-    const newEvent = createMedicationTimelineEvent(entry);
-
-    setEvents((currentEvents) =>
-      sortTimelineEvents([...currentEvents, newEvent]),
-    );
+    addEvent(createMedicationTimelineEvent(entry));
   };
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-950">
       <TopBar />
 
-      <main className="timeline-content mx-auto max-w-6xl space-y-5 px-4 py-6 sm:px-6 lg:py-8">
-        <NextStepPanel nextStep={nextStep} />
-        <LastGlucoseCard glucose={lastGlucose} />
-
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start">
-          <TimelineList events={events} />
-          <div className="lg:sticky lg:top-24">
-            <DaySummaryPanel summary={daySummary} />
-          </div>
+      <main className="timeline-content mx-auto max-w-3xl space-y-6 px-4 pt-6 pb-24 sm:px-6 lg:pt-8">
+        <div>
+          <p className="text-sm font-medium text-slate-500">Журнал событий</p>
+          <h1
+            className="mt-1 text-2xl font-bold text-slate-950 focus:outline-none"
+            ref={headingRef}
+            tabIndex={-1}
+          >
+            Timeline
+          </h1>
         </div>
+
+        {showToolbar ? (
+          <TimelineToolbar
+            model={searchFilterModel}
+            onFilterChange={handleFilterChange}
+            onQueryChange={handleQueryChange}
+            onReset={resetCriteria}
+            query={query}
+          />
+        ) : null}
+
+        <TimelineList
+          model={listModel}
+          onAddEvent={() => setQuickAddOpen(true)}
+          onOpenEvent={handleOpenEvent}
+          onResetCriteria={resetCriteria}
+        />
+
+        {status === 'ready' && paginationModel.hasMore ? (
+          <TimelineLoadMore
+            addedCount={
+              paginationModel.nextVisibleCount - paginationModel.visibleCount
+            }
+            ariaControls="timeline-events-list"
+            onLoadMore={handleLoadMore}
+            remainingCount={paginationModel.remainingCount}
+          />
+        ) : null}
       </main>
 
       <QuickAddRoot
+        onOpenChange={setQuickAddOpen}
         onGlucoseSubmit={handleGlucoseSubmit}
         onInsulinSubmit={handleInsulinSubmit}
         onMedicationSubmit={handleMedicationSubmit}
         onNutritionSubmit={handleNutritionSubmit}
+        open={quickAddOpen}
       />
+
+      {selectedEvent ? (
+        <TimelineEventDetail
+          event={selectedEvent}
+          mode={detailMode}
+          onClose={closeDetails}
+          onDelete={handleDeleteEvent}
+          onModeChange={setDetailMode}
+          onUpdate={handleUpdateEvent}
+        />
+      ) : null}
     </div>
   );
 }
