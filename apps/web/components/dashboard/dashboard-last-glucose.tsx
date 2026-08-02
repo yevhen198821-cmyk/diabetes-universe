@@ -69,10 +69,15 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
             </p>
             <time
               className="mt-0.5 block text-sm text-slate-500 tabular-nums dark:text-slate-400"
-              dateTime={viewModel.time ?? undefined}
+              dateTime={viewModel.dateTime ?? undefined}
             >
-              {viewModel.time}
+              {viewModel.displayTime}
             </time>
+            {viewModel.isStale && viewModel.staleMessage ? (
+              <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                {viewModel.staleMessage}
+              </p>
+            ) : null}
           </div>
         </div>
       ) : null}
