@@ -35,7 +35,8 @@ The integration must preserve:
 
 1. User submits a supported Quick Add form.
 2. The form emits a Quick Add entry.
-3. The screen handler calls the matching create helper:
+3. The screen handler calls the matching create helper when the category has a
+   save flow:
    - `createGlucoseTimelineEvent`
    - `createInsulinTimelineEvent`
    - `createNutritionTimelineEvent`
@@ -49,9 +50,11 @@ The integration must preserve:
 - Create helpers remain the source of `TimelineEvent` construction.
 - Timeline store stores events only.
 - Timeline store does not store Quick Add open state.
+- Quick Add exposes all six MVP categories in the action picker.
 - Activity and note are valid domain kinds for display, search, filtering,
-  details, edit, and delete. Activity Quick Add and Note Quick Add are explicitly
-  not in scope for Timeline Feature Complete.
+  details, edit, and delete.
+- Activity and note Quick Add categories show the Stage 1 placeholder form and do
+  not write to the shared store yet.
 
 ### Screen-specific behavior
 

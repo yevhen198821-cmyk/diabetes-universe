@@ -6,8 +6,11 @@ import { AppProviders } from './providers';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Timeline | Diabetes Universe',
-  description: 'Демонстрационный Timeline событий Diabetes Universe.',
+  title: {
+    default: 'Diabetes Universe',
+    template: '%s | Diabetes Universe',
+  },
+  description: 'Демонстрационное приложение Diabetes Universe.',
 };
 
 type RootLayoutProps = Readonly<{

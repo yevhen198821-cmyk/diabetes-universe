@@ -130,8 +130,9 @@ Dashboard but does not share Dashboard block composition.
 - Successful delete calls shared store `deleteEvent`; undo is out of scope.
 - Dashboard Last Glucose, Day Summary, and Recent Events update through shared
   selectors after edit/delete.
-- Inline edit/delete buttons, swipe actions, Activity Quick Add, Note Quick Add,
-  and API persistence are not part of Timeline Feature Complete.
+- Inline edit/delete buttons, swipe actions, and API persistence are not part
+  of Timeline Feature Complete.
+- Activity and note Quick Add categories remain Stage 1 stubs without save flow.
 
 ### Pagination and Load More (Stage 7)
 
@@ -172,5 +173,7 @@ Dashboard but does not share Dashboard block composition.
 
 Out of scope:
 
-- Activity Quick Add — Not in scope
-- Note Quick Add — Not in scope
+- Activity and note Quick Add save flows — Stage 1 stubs only
+- Backend persistence
+- API cursor pagination
+- Dark mode activation

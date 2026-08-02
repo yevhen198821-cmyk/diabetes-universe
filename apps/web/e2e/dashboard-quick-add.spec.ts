@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 test('dashboard quick add updates shared timeline state', async ({ page }) => {
   await page.goto('/');
 
+  await expect(page).toHaveTitle(/Dashboard \| Diabetes Universe/);
   await expect(
     page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
   ).toBeVisible();
@@ -16,6 +17,26 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
   await page.getByRole('button', { name: 'Добавить событие' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Добавить событие' }),
+  ).toBeVisible();
+
+  const quickAddDialog = page.getByRole('dialog', { name: 'Добавить событие' });
+  await expect(
+    quickAddDialog.getByRole('button', { name: /Глюкоза/ }),
+  ).toBeVisible();
+  await expect(
+    quickAddDialog.getByRole('button', { name: /Инсулин/ }),
+  ).toBeVisible();
+  await expect(
+    quickAddDialog.getByRole('button', { name: /Питание/ }),
+  ).toBeVisible();
+  await expect(
+    quickAddDialog.getByRole('button', { name: /Лекарство/ }),
+  ).toBeVisible();
+  await expect(
+    quickAddDialog.getByRole('button', { name: /Активность/ }),
+  ).toBeVisible();
+  await expect(
+    quickAddDialog.getByRole('button', { name: /Заметка/ }),
   ).toBeVisible();
 
   await page
@@ -121,11 +142,19 @@ test('timeline search and filters combine without changing store', async ({
 test('timeline quick add updates shared dashboard state', async ({ page }) => {
   await page.goto('/timeline');
 
+  await expect(page).toHaveTitle(/Timeline \| Diabetes Universe/);
   await expect(
     page.getByRole('heading', { level: 1, name: 'Timeline' }),
   ).toBeVisible();
 
   await page.getByRole('button', { name: 'Добавить событие' }).click();
+  const quickAddDialog = page.getByRole('dialog', { name: 'Добавить событие' });
+  await expect(
+    quickAddDialog.getByRole('button', { name: /Активность/ }),
+  ).toBeVisible();
+  await expect(
+    quickAddDialog.getByRole('button', { name: /Заметка/ }),
+  ).toBeVisible();
   await page
     .getByRole('button', { name: 'Глюкоза. Записать уровень сахара' })
     .click();
