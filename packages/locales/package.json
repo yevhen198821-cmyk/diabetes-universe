@@ -1,0 +1,16 @@
+{
+  "name": "@diabetes-universe/locales",
+  "version": "0.0.0",
+  "private": true,
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@diabetes-universe/i18n": "workspace:*"
+  },
+  "devDependencies": {}
+}

@@ -18,12 +18,12 @@ Draft
 
 ## Layer roles
 
-| Layer | Architectural role |
-| --- | --- |
-| Localization Platform Contracts | Interfaces, types, runtime API (`TranslationBundleLoader`, `LocalizationPlatform`, …) |
-| Localization Data / Resources | Canonical messages, metadata, namespaces |
-| Localization Infrastructure Adapter | Concrete loader implementations (e.g. in-memory adapters) |
-| Composition Root | Adapter selection, `createLocalizationPlatform()` wiring, initialization strategy |
+| Layer                               | Architectural role                                                                    |
+| ----------------------------------- | ------------------------------------------------------------------------------------- |
+| Localization Platform Contracts     | Interfaces, types, runtime API (`TranslationBundleLoader`, `LocalizationPlatform`, …) |
+| Localization Data / Resources       | Canonical messages, metadata, namespaces                                              |
+| Localization Infrastructure Adapter | Concrete loader implementations (e.g. in-memory adapters)                             |
+| Composition Root                    | Adapter selection, `createLocalizationPlatform()` wiring, initialization strategy     |
 
 See [ADR-0011 — Platform Infrastructure Layer](../../adr/0011-platform-infrastructure-layer.md).
 
