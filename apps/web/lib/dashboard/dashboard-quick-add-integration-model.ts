@@ -2,10 +2,7 @@ import type { TimelineEvent } from '@diabetes-universe/types';
 
 import { formatInsulinDose } from '../quick-add/format-insulin';
 import { formatNutritionCarbs } from '../quick-add/format-nutrition';
-import {
-  formatTimelineDisplayTime,
-  getTimelineCalendarDateKey,
-} from '../timeline/timeline-date-time';
+import { getTimelineCalendarDateKey } from '../timeline/timeline-date-time';
 import {
   getLatestGlucoseEvent,
   getRecentTimelineEvents,
@@ -58,6 +55,7 @@ export interface DashboardTimelineState {
 
 export interface DashboardQuickAddIntegrationOptions {
   readonly aiInsight?: DashboardDerivedAiInsight | null;
+  readonly formatLastGlucoseDisplayTime?: (dateTime: string) => string;
   readonly locale?: string;
   readonly referenceTime?: Date;
   readonly remindersCompleted?: number;
@@ -126,22 +124,19 @@ function createDashboardDayLabel(
 
 function deriveLastGlucose(
   events: readonly TimelineEvent[],
-  locale: string,
-  timeZone?: string,
+  formatLastGlucoseDisplayTime?: (dateTime: string) => string,
 ): DashboardDerivedLastGlucose | null {
   const latestGlucose = getLatestGlucoseEvent(events);
 
-  if (!latestGlucose) {
+  if (!latestGlucose || !formatLastGlucoseDisplayTime) {
     return null;
   }
 
-  const displayTime = formatTimelineDisplayTime(
+  const displayTime = formatLastGlucoseDisplayTime(
     latestGlucose.dateTime,
-    locale,
-    timeZone,
-  );
+  ).trim();
 
-  if (displayTime === '--:--') {
+  if (displayTime.length === 0 || displayTime === '--:--') {
     return null;
   }
 
@@ -223,7 +218,10 @@ export function deriveDashboardQuickAddBlocks(
       remindersCompleted,
       remindersTotal,
     ),
-    lastGlucose: deriveLastGlucose(state.events, locale, timeZone),
+    lastGlucose: deriveLastGlucose(
+      state.events,
+      options.formatLastGlucoseDisplayTime,
+    ),
     recentEvents,
   };
 }

@@ -6,6 +6,61 @@ import { deriveDashboardQuickAddBlocks } from './dashboard-quick-add-integration
 
 const referenceTime = new Date('2026-08-02T10:00:00.000Z');
 
+const formatUtcShortTime = (dateTime) => {
+  const date = new Date(dateTime);
+
+  if (Number.isNaN(date.getTime())) {
+    return '--:--';
+  }
+
+  const hours = String(date.getUTCHours()).padStart(2, '0');
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+
+  return `${hours}:${minutes}`;
+};
+
+test('deriveLastGlucose invokes formatter callback exactly once with event dateTime', () => {
+  let callCount = 0;
+  let receivedDateTime = null;
+
+  const blocks = deriveDashboardQuickAddBlocks(
+    {
+      events: [
+        {
+          context: 'Перед завтраком',
+          dateTime: '2026-08-02T08:00:00.000Z',
+          id: 'glucose-0800',
+          kind: 'glucose',
+          title: 'Глюкоза',
+          value: '6,4 ммоль/л',
+        },
+        {
+          context: 'После завтрака',
+          dateTime: '2026-08-02T07:15:00.000Z',
+          id: 'glucose-1015',
+          kind: 'glucose',
+          title: 'Глюкоза',
+          value: '7,3 ммоль/л',
+        },
+      ],
+    },
+    {
+      formatLastGlucoseDisplayTime: (dateTime) => {
+        callCount += 1;
+        receivedDateTime = dateTime;
+        return '08:00';
+      },
+      referenceTime,
+      timeZone: 'UTC',
+    },
+  );
+
+  assert.equal(callCount, 1);
+  assert.equal(receivedDateTime, '2026-08-02T08:00:00.000Z');
+  assert.equal(blocks.lastGlucose?.dateTime, '2026-08-02T08:00:00.000Z');
+  assert.equal(blocks.lastGlucose?.displayTime, '08:00');
+});
+
 test('derives last glucose from shared timeline events', () => {
   const blocks = deriveDashboardQuickAddBlocks(
     {
@@ -21,6 +76,7 @@ test('derives last glucose from shared timeline events', () => {
       ],
     },
     {
+      formatLastGlucoseDisplayTime: formatUtcShortTime,
       referenceTime,
       timeZone: 'UTC',
     },

@@ -1,15 +1,27 @@
-import { Droplets } from 'lucide-react';
+'use client';
 
+import { Droplets } from 'lucide-react';
+import { useMemo } from 'react';
+
+import { useLocalization } from '../../lib/platform/react/use-localization';
+import { resolveDashboardLastGlucoseLabels } from './dashboard-last-glucose-labels';
 import {
   createDashboardLastGlucoseViewModel,
-  dashboardLastGlucoseLabels,
   type DashboardLastGlucoseProps,
 } from './dashboard-last-glucose-model';
 
 const titleId = 'dashboard-last-glucose-title';
 
 export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
-  const viewModel = createDashboardLastGlucoseViewModel(props);
+  const localization = useLocalization();
+  const labels = useMemo(
+    () => resolveDashboardLastGlucoseLabels(localization),
+    [localization],
+  );
+  const viewModel = useMemo(
+    () => createDashboardLastGlucoseViewModel(props, labels),
+    [labels, props],
+  );
   const isError = viewModel.state === 'error';
 
   return (
@@ -25,7 +37,7 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
       {viewModel.state === 'loading' ? (
         <>
           <h2 className="sr-only" id={titleId}>
-            {dashboardLastGlucoseLabels.title}
+            {labels.title}
           </h2>
           <span className="sr-only" role="status">
             {viewModel.message}
@@ -54,13 +66,13 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              {dashboardLastGlucoseLabels.eyebrow}
+              {labels.eyebrow}
             </p>
             <h2
               className="mt-0.5 text-lg font-bold text-slate-950 dark:text-slate-50"
               id={titleId}
             >
-              {dashboardLastGlucoseLabels.title}
+              {labels.title}
             </h2>
           </div>
           <div className="shrink-0 text-right">
@@ -103,7 +115,7 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
               className="text-lg font-bold text-slate-950 dark:text-slate-50"
               id={titleId}
             >
-              {dashboardLastGlucoseLabels.title}
+              {labels.title}
             </h2>
             <p
               className={`mt-2 text-sm ${
