@@ -5,10 +5,12 @@ export async function resolve(specifier, context, nextResolve) {
     !specifier.endsWith('.js') &&
     !specifier.endsWith('.mjs')
   ) {
-    try {
-      return await nextResolve(`${specifier}.ts`, context);
-    } catch {
-      // Fall through to the default resolver.
+    for (const candidate of [`${specifier}.ts`, `${specifier}/index.ts`]) {
+      try {
+        return await nextResolve(candidate, context);
+      } catch {
+        // Try the next candidate.
+      }
     }
   }
 
