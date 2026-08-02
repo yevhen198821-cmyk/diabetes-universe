@@ -1,41 +1,14 @@
 import type { FormattingContext } from '@diabetes-universe/formatting';
-import type {
-  HourCycle,
-  LocaleCode,
-  LocaleContext,
-} from '@diabetes-universe/i18n';
+import type { LocaleContext } from '@diabetes-universe/i18n';
 import type { WebPlatformConfig } from '@diabetes-universe/platform-web';
 
 import type { RequestPresentationContext } from './request-presentation-context';
-import {
-  resolveLanguageFromLocale,
-  resolveRequestLocale,
-} from './resolve-request-locale';
 import { isValidTimeZone } from './resolve-request-time-zone';
+import { createServerPresentationSeed } from './server-presentation-seed';
 import {
   WEB_PLATFORM_BOOTSTRAP_PRELOAD_NAMESPACE,
-  WEB_PLATFORM_DEFAULT_HOUR_CYCLE,
   WEB_PLATFORM_FALLBACK_POLICY,
-  WEB_PLATFORM_SUPPORTED_LOCALES,
-  type WebPlatformSupportedLocale,
 } from './web-platform-defaults';
-
-const HOUR_CYCLES = new Set<HourCycle>(['h12', 'h23']);
-const SUPPORTED_LOCALE_SET = new Set<string>(WEB_PLATFORM_SUPPORTED_LOCALES);
-
-function assertSupportedLocale(
-  locale: string,
-): asserts locale is WebPlatformSupportedLocale {
-  if (!SUPPORTED_LOCALE_SET.has(locale)) {
-    throw new Error('Web platform bootstrap locale is not supported.');
-  }
-}
-
-function assertValidHourCycle(hourCycle: HourCycle): void {
-  if (!HOUR_CYCLES.has(hourCycle)) {
-    throw new Error('Web platform bootstrap hourCycle is not supported.');
-  }
-}
 
 function assertValidNumberingSystem(numberingSystem: string | undefined): void {
   if (numberingSystem === undefined) {
@@ -106,24 +79,19 @@ export function createWebPlatformConfig(
   context: RequestPresentationContext,
   explicitTimeZone: string,
 ): WebPlatformConfig {
-  const locale = resolveRequestLocale(context);
-  const hourCycle = WEB_PLATFORM_DEFAULT_HOUR_CYCLE;
+  const seed = createServerPresentationSeed(context);
 
-  assertSupportedLocale(locale);
   assertExplicitTimeZone(explicitTimeZone);
-  assertValidHourCycle(hourCycle);
 
   const localeContext = Object.freeze({
-    language: resolveLanguageFromLocale(locale),
-    locale: locale as LocaleCode,
+    ...seed,
     timeZone: explicitTimeZone,
-    hourCycle,
   }) satisfies LocaleContext;
 
   const formattingContext = Object.freeze({
-    locale: locale as LocaleCode,
+    locale: seed.locale,
     timeZone: explicitTimeZone,
-    hourCycle,
+    hourCycle: seed.hourCycle,
   }) satisfies FormattingContext;
 
   assertValidNumberingSystem((localeContext as LocaleContext).numberingSystem);
@@ -135,7 +103,7 @@ export function createWebPlatformConfig(
 
   const preload = Object.freeze({
     namespaces: Object.freeze([WEB_PLATFORM_BOOTSTRAP_PRELOAD_NAMESPACE]),
-    locales: Object.freeze([locale as LocaleCode]),
+    locales: Object.freeze([seed.locale]),
   });
 
   if (preload.namespaces.length === 0 || preload.locales.length === 0) {

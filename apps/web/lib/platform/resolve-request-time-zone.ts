@@ -1,21 +1,11 @@
+import { isValidIanaTimeZone } from './is-valid-iana-time-zone';
 import type { RequestPresentationContext } from './request-presentation-context';
 
 /**
  * Validates an IANA time zone identifier without deriving it from locale.
  */
 export function isValidTimeZone(timeZone: string): boolean {
-  const normalized = timeZone.trim();
-
-  if (normalized.length === 0) {
-    return false;
-  }
-
-  try {
-    Intl.DateTimeFormat(undefined, { timeZone: normalized });
-    return true;
-  } catch {
-    return false;
-  }
+  return isValidIanaTimeZone(timeZone);
 }
 
 function normalizeExplicitTimeZone(

@@ -16,6 +16,7 @@
 - [Localization Platform Overview](architecture/localization/overview.md)
 - [Platform Readiness](architecture/localization/platform-readiness.md)
 - [Web Composition Root](architecture/composition-root/web-composition-root.md)
+- [Presentation Context Foundation](architecture/presentation/presentation-context.md) — CR-03A
 - [@diabetes-universe/web](../apps/web/README.md) — thin Next.js bootstrap (CR-02, Feature Complete)
 - [@diabetes-universe/platform-web](../packages/platform-web/README.md)
 - [Navigation](architecture/navigation/overview.md) — routes `/`, `/timeline`, `/dashboard` redirect

@@ -1,5 +1,7 @@
 import type { PlatformRuntime } from '@diabetes-universe/platform';
 
+import type { ServerPresentationSeed } from './server-presentation-seed';
+
 /**
  * Discriminated bootstrap result for per-request Platform Runtime creation.
  *
@@ -13,4 +15,5 @@ export type RequestPlatformBootstrapResult =
     }
   | {
       readonly status: 'time-zone-required';
+      readonly seed: ServerPresentationSeed;
     };

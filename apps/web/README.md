@@ -31,8 +31,12 @@ request presentation context and returns a discriminated
 Per [ADR-0012](../../docs/adr/0012-user-time-zone-policy.md):
 
 - `{ status: 'ready', runtime }` when a valid explicit IANA time zone is present;
-- `{ status: 'time-zone-required' }` on first visit or invalid cookie input;
+- `{ status: 'time-zone-required', seed }` on first visit or invalid cookie input;
 - infrastructure/configuration errors still reject the returned promise.
+
+`ServerPresentationSeed` carries immutable server-resolved locale preferences from
+the same canonical locale resolution used by the ready flow. It does not contain
+time zone, runtime, or browser objects.
 
 Bootstrap does not guess time zone and does not create partial `PlatformRuntime`
 instances.
@@ -78,18 +82,44 @@ routes do not invoke the bootstrap until CR-03 provides explicit time zone input
 - per-request runtime creation via `createWebPlatformRuntime()` when ready
 - SSR isolation tests
 - hydration boundary documentation
+- `ServerPresentationSeed` on `time-zone-required` bootstrap
 
 ### Not implemented
 
-- React Provider (CR-03)
-- hooks (CR-03)
-- client runtime / serializable context snapshot API (CR-03)
+- React Provider (CR-03B)
+- hooks (CR-03B)
 - cookie scheme wiring
+- route integration and cookie persistence
 - UI migration (Dashboard, Timeline, Quick Add)
 - locale switcher
 - full translations integration across UI
 
+## Presentation context foundation (CR-03A) — implemented
+
+Location: `lib/platform/presentation/`
+
+Provides immutable `PresentationContext`, serializable `PresentationSnapshot`,
+client-only browser time zone resolution, first-visit orchestration, and future
+persistence contract. UI pages do not consume this layer yet.
+
+Public API:
+
+- isomorphic: `lib/platform/presentation/index.ts`
+- client-only: `lib/platform/presentation/client.ts`
+- bootstrap seed: `ServerPresentationSeed` in `lib/platform/index.ts`
+
+Client bootstrap consumes `RequestPlatformBootstrapResult.seed` on first visit;
+it does not accept a separate server locale input.
+
+### Not implemented (CR-03B+)
+
+- React Provider and hooks
+- route integration and cookie persistence
+- UI migration (Dashboard, Timeline, Quick Add)
+
 ## Architecture references
+
+- [Presentation Context Foundation](../../docs/architecture/presentation/presentation-context.md)
 
 - [ADR-0012 — User Time Zone Policy](../../docs/adr/0012-user-time-zone-policy.md)
 - [Web Composition Root](../../docs/architecture/composition-root/web-composition-root.md)
