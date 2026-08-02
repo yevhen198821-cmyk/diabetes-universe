@@ -8,7 +8,7 @@ Timeline history.
 
 ## Status
 
-Approved
+Approved — I18N-02B2 implementation complete (ready for review)
 
 ## Responsibility
 
@@ -54,4 +54,6 @@ Approved
   value.
 - mmol/L and mg/dL values are display strings prepared by their owner; the
   block does not convert units.
+- I18N-02B2 audit: see
+  [Dashboard Last Glucose Localization Migration](../localization/dashboard-last-glucose-migration.md).
 - Empty ready inputs downgrade to the approved empty state rather than throwing.

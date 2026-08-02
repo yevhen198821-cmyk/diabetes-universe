@@ -1,3 +1,5 @@
+import type { DashboardLastGlucoseLabels } from './dashboard-last-glucose-labels';
+
 export interface DashboardLastGlucoseMeasurement {
   readonly dateTime: string;
   readonly displayTime: string;
@@ -48,59 +50,6 @@ export interface DashboardLastGlucoseViewModelOptions {
 }
 
 export const DEFAULT_LAST_GLUCOSE_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
-
-export const dashboardLastGlucoseLabels = {
-  defaultError: 'Не удалось загрузить последнее измерение.',
-  defaultEmpty: 'Измерений пока нет.',
-  eyebrow: 'Последнее измерение',
-  loading: 'Загрузка последнего измерения глюкозы',
-  stale: 'Измерение устарело.',
-  title: 'Последняя глюкоза',
-  unavailable: 'Последнее измерение недоступно.',
-} as const;
-
-export function createDashboardLastGlucoseMeasurement(
-  measuredAt: Date,
-  locale: string,
-  timeZone: string,
-  value: string,
-): DashboardLastGlucoseMeasurement | null {
-  const normalizedValue = value.trim();
-
-  if (Number.isNaN(measuredAt.getTime()) || normalizedValue.length === 0) {
-    return null;
-  }
-
-  try {
-    const normalizedLocale = locale.trim();
-    const normalizedTimeZone = timeZone.trim();
-    const supportedLocales = Intl.DateTimeFormat.supportedLocalesOf([
-      normalizedLocale,
-    ]);
-
-    if (supportedLocales.length === 0 || normalizedTimeZone.length === 0) {
-      return null;
-    }
-
-    const displayTime = new Intl.DateTimeFormat(normalizedLocale, {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: normalizedTimeZone,
-    }).format(measuredAt);
-
-    if (displayTime.trim().length === 0) {
-      return null;
-    }
-
-    return {
-      dateTime: measuredAt.toISOString(),
-      displayTime: displayTime.trim(),
-      value: normalizedValue,
-    };
-  } catch {
-    return null;
-  }
-}
 
 function isValidIsoDateTime(dateTime: string): boolean {
   return !Number.isNaN(Date.parse(dateTime));
@@ -158,6 +107,7 @@ function isMeasurementStale(
 
 export function createDashboardLastGlucoseViewModel(
   props: DashboardLastGlucoseProps,
+  labels: DashboardLastGlucoseLabels,
   options: DashboardLastGlucoseViewModelOptions = {},
 ): DashboardLastGlucoseViewModel {
   switch (props.state) {
@@ -167,8 +117,7 @@ export function createDashboardLastGlucoseViewModel(
         displayTime: null,
         isLoading: true,
         isStale: false,
-        message:
-          props.loadingLabel?.trim() || dashboardLastGlucoseLabels.loading,
+        message: props.loadingLabel?.trim() || labels.loading,
         staleMessage: null,
         state: props.state,
         value: null,
@@ -177,7 +126,7 @@ export function createDashboardLastGlucoseViewModel(
       const measurement = normalizeReadyMeasurement(props.glucose);
 
       if (!measurement) {
-        return createEmptyViewModel(dashboardLastGlucoseLabels.unavailable);
+        return createEmptyViewModel(labels.unavailable);
       }
 
       const referenceTime =
@@ -196,7 +145,7 @@ export function createDashboardLastGlucoseViewModel(
         isLoading: false,
         isStale,
         message: null,
-        staleMessage: isStale ? dashboardLastGlucoseLabels.stale : null,
+        staleMessage: isStale ? labels.stale : null,
         state: props.state,
         value: measurement.value,
       };
@@ -207,8 +156,7 @@ export function createDashboardLastGlucoseViewModel(
         displayTime: null,
         isLoading: false,
         isStale: false,
-        message:
-          props.message?.trim() || dashboardLastGlucoseLabels.defaultEmpty,
+        message: props.message?.trim() || labels.defaultEmpty,
         staleMessage: null,
         state: props.state,
         value: null,
@@ -219,8 +167,7 @@ export function createDashboardLastGlucoseViewModel(
         displayTime: null,
         isLoading: false,
         isStale: false,
-        message:
-          props.message?.trim() || dashboardLastGlucoseLabels.defaultError,
+        message: props.message?.trim() || labels.defaultError,
         staleMessage: null,
         state: props.state,
         value: null,

@@ -49,9 +49,7 @@ test('timeline event edit updates Timeline and Dashboard selectors', async ({
   await page.getByRole('link', { name: 'На главную' }).click();
 
   await expect(
-    page
-      .getByRole('region', { name: 'Последняя глюкоза' })
-      .getByText('9,1 ммоль/л'),
+    page.getByRole('region', { name: 'Last glucose' }).getByText('9,1 ммоль/л'),
   ).toBeVisible();
   await expect(page.getByText('9,1 ммоль/л').first()).toBeVisible();
 });

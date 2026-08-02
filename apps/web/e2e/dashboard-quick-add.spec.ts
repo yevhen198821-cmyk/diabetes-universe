@@ -10,7 +10,7 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
     page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
   ).toBeVisible();
   await expect(
-    page.getByRole('heading', { name: 'Последняя глюкоза' }),
+    page.getByRole('heading', { name: 'Last glucose' }),
   ).toBeVisible();
   const daySummary = page.getByRole('region', { name: 'Сводка дня' });
 
@@ -221,9 +221,7 @@ test('timeline quick add updates shared dashboard state', async ({ page }) => {
     page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
   ).toBeVisible();
   await expect(
-    page
-      .getByRole('region', { name: 'Последняя глюкоза' })
-      .getByText('8,8 ммоль/л'),
+    page.getByRole('region', { name: 'Last glucose' }).getByText('8,8 ммоль/л'),
   ).toBeVisible();
 });
 

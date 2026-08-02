@@ -19,6 +19,7 @@ import {
   type QuickAddOpenTrigger,
 } from '../../lib/quick-add/quick-add-controller-model';
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
+import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { QuickAddHost } from '../quick-add/quick-add-host';
 import { DashboardAiInsight } from './dashboard-ai-insight';
@@ -44,6 +45,7 @@ const mockAiInsight = {
 
 export function DashboardRoot() {
   const localization = useLocalization();
+  const formatter = useFormatter();
   const { addEvent, events } = useTimelineStore();
   const [quickAddState, setQuickAddState] = useState(
     createInitialQuickAddControllerState,
@@ -60,6 +62,11 @@ export function DashboardRoot() {
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
     [],
   );
+  const formatLastGlucoseDisplayTime = useMemo(
+    () => (dateTime: string) =>
+      formatter.formatTime(dateTime, { timeStyle: 'short' }),
+    [formatter],
+  );
 
   const derivedBlocks = useMemo(
     () =>
@@ -67,6 +74,7 @@ export function DashboardRoot() {
         { events },
         {
           aiInsight: mockAiInsight,
+          formatLastGlucoseDisplayTime,
           locale: DASHBOARD_LOCALE,
           referenceTime,
           remindersCompleted: 1,
@@ -74,7 +82,7 @@ export function DashboardRoot() {
           timeZone: dashboardTimeZone,
         },
       ),
-    [dashboardTimeZone, events, referenceTime],
+    [dashboardTimeZone, events, formatLastGlucoseDisplayTime, referenceTime],
   );
 
   const returnFocusRef =
