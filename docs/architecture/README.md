@@ -1,5 +1,29 @@
 # Architecture
 
+## Purpose
+
+This section documents system structure, boundaries, responsibilities, and dependencies.
+
+## Status
+
+<!-- Allowed values: Draft | Approved | Deprecated -->
+
+## Responsibility
+
+Architecture documents define ownership and relationships between system areas.
+
+## Dependencies
+
+Architecture documentation depends on approved project requirements and architecture decisions.
+
+## What Belongs Here
+
+System boundaries, component responsibilities, dependencies, quality attributes, and architecture constraints belong here.
+
+## What Does Not Belong Here
+
+Feature acceptance criteria, visual design rules, source code, and transient implementation notes should not be stored here.
+
 ## System shape
 
 Diabetes Universe starts as a frontend monorepo. Turborepo coordinates tasks,
@@ -33,3 +57,5 @@ documented architecture decision and an explicit product requirement.
 - Explicit package ownership
 - Reproducible builds
 - Minimal dependency surface
+
+## Notes
