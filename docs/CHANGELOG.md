@@ -1,5 +1,32 @@
 # Changelog
 
+## React Platform Provider Foundation — Feature Complete
+
+Дата: 2026-08-02
+
+Завершено:
+
+- React Platform Provider Foundation (CR-03B) — `apps/web/lib/platform/react/`
+- `PlatformProvider` — supplies an already assembled `PlatformRuntime` via React Context
+- read-only hooks: `usePlatformRuntime`, `useLocalization`, `useFormatter`, `usePresentationContext`
+- internal fail-fast missing-provider guard (plain `Error`, not exported)
+- Option A nested-provider policy (nearest provider wins; no nested guard)
+- test utilities: `createTestPlatformRuntime`, `TestPlatformProvider`
+- architecture documentation (`react-platform-provider.md`)
+- react provider tests: 26; web tests: 268 total
+
+Не входит в этот этап:
+
+- route integration and `PlatformProvider` wiring in `app/layout.tsx`
+- server bootstrap invocation on routes
+- persistence, cookie adapter, and browser bootstrap consumers
+- Dashboard, Timeline, Quick Add migration
+- platform package public API changes
+
+Статус:
+
+React Platform Provider Foundation — Feature Complete ✅
+
 ## Presentation Context Foundation — Feature Complete
 
 Дата: 2026-08-02
