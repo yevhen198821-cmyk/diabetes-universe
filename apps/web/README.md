@@ -200,21 +200,26 @@ Location: `components/dashboard/dashboard-last-glucose*`
 - architecture: `docs/architecture/localization/dashboard-last-glucose-migration.md`
 - squash merge: PR #24 (`5bf6925` → `ef9a7e0` on `main`)
 
-## Dashboard day summary localization (I18N-02B3) — Architecture Audit
+## Dashboard day summary localization (I18N-02B3) — Feature Complete
 
 Location: `components/dashboard/dashboard-day-summary*`
 
-Architectural audit complete; implementation not started. See
-`docs/architecture/localization/dashboard-day-summary-migration.md`.
+- English canonical `dashboard.daySummary.*` keys (11)
+- localized labels via `useLocalization()` + `dashboard-day-summary-labels.ts`
+- display day label formatted once at container boundary via `useFormatter().formatDate()`
+- integer counters via `useFormatter().formatNumber()` in view boundary
+- transitional insulin/carbohydrate totals pass-through (no `formatMeasurement()`)
+- unit, integration, resource, and E2E coverage (`dashboard-day-summary-i18n.spec.ts`)
+- architecture: `docs/architecture/localization/dashboard-day-summary-migration.md`
+- squash merge: PR #25 (`9794c88` → `4140bda` on `main`)
 
-### Not implemented (I18N-02B3+)
+### Not implemented (I18N-02B4+)
 
 - cookie scheme wiring and `PresentationPersistence` adapter
-- Day Summary hook migration (I18N-02B3 — audit only)
 - remaining Dashboard block hook migration (Recent Events, AI Insight)
 - Timeline, Quick Add hook migration
 - locale switch UI
-- full glucose value formatting via `formatMeasurement()` (deferred until structural glucose contract)
+- full insulin/carbohydrate formatting via `formatMeasurement()` (deferred until structural measurement contract)
 
 ## Architecture references
 

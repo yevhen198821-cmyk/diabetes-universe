@@ -1,5 +1,41 @@
 # Changelog
 
+## Dashboard Day Summary Localization — Feature Complete
+
+Дата: 2026-08-02
+
+Завершено:
+
+- Dashboard Day Summary Localization Migration (I18N-02B3) — `apps/web/components/dashboard/dashboard-day-summary*`
+- четвёртый вертикальный Dashboard migration slice: `useLocalization()` (labels) + `useFormatter()` (counters + container date)
+- English canonical `dashboard.daySummary.*` keys (11) в `@diabetes-universe/locales`
+- display day label via single `PlatformFormatter.formatDate()` call at `dashboard-root` → `deriveDaySummary` boundary
+- integer counters via `PlatformFormatter.formatNumber()` (glucose, medication, reminders)
+- transitional insulin/carbohydrate totals pass-through (no `formatMeasurement()`)
+- day-boundary semantics preserved (`getTodayTimelineEvents`, `isSameLocalDay`, `getTimelineCalendarDateKey`)
+- pure presentation model boundary; preload без изменений (`common` + `dashboard`)
+- unit, integration, resource, and E2E coverage (`dashboard-day-summary-i18n.spec.ts`)
+- architecture documentation и Engineering Audit
+- squash merge: PR #25 (`9794c88` → `4140bda` on `main`)
+- web tests: 342 total; E2E: 26 total
+
+Не входит в этот этап:
+
+- Dashboard Header (I18N-02A — Feature Complete)
+- Dashboard Next Action (I18N-02B1 — Feature Complete)
+- Dashboard Last Glucose (I18N-02B2 — Feature Complete)
+- Recent Events, AI Insight (I18N-02B4+)
+- Timeline и Quick Add product source migration
+- `formatMeasurement()` / structural measurement contract
+- `uk`, `de`, `ru` professional translations
+- locale switch UI, cookie persistence
+- ICU MessageFormat interpolation
+- route-aware preload orchestration
+
+Статус:
+
+Dashboard Day Summary Localization (I18N-02B3) — Feature Complete ✅
+
 ## Dashboard Last Glucose Localization — Feature Complete
 
 Дата: 2026-08-02
@@ -21,7 +57,8 @@
 
 - Dashboard Header (I18N-02A — Feature Complete)
 - Dashboard Next Action (I18N-02B1 — Feature Complete)
-- Day Summary, Recent Events, AI Insight (I18N-02B3+)
+- Dashboard Day Summary (I18N-02B3 — Feature Complete)
+- Recent Events, AI Insight (I18N-02B4+)
 - Timeline и Quick Add product source migration
 - `formatMeasurement()` / structural glucose contract
 - `uk`, `de`, `ru` professional translations
@@ -54,7 +91,8 @@ Dashboard Last Glucose Localization (I18N-02B2) — Feature Complete ✅
 Не входит в этот этап:
 
 - Dashboard Header (I18N-02A — уже Feature Complete)
-- Last Glucose, Day Summary, Recent Events, AI Insight (I18N-02B2+)
+- Dashboard Day Summary (I18N-02B3 — Feature Complete)
+- Recent Events, AI Insight (I18N-02B4+)
 - Timeline и Quick Add product source migration
 - `uk`, `de`, `ru` professional translations
 - locale switch UI, cookie persistence

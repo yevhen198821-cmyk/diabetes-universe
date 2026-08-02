@@ -2,7 +2,7 @@
 
 ## Status
 
-Implementation Complete — Ready for Review
+Approved — Feature Complete (merged via PR #25)
 
 ## Purpose
 
@@ -776,9 +776,10 @@ structural measurement contract exists.
 | Field      | Value                                          |
 | ---------- | ---------------------------------------------- |
 | Stage      | I18N-02B3 — Dashboard Day Summary Localization |
-| Phase      | **Implementation Complete — Ready for Review** |
+| Phase      | **Feature Complete** (merged via PR #25)       |
 | Base       | `main` @ `531e20f`                             |
-| Branch     | `feature/i18n-dashboard-day-summary`           |
+| Merge      | `9794c88` → `4140bda` on `main`                |
+| Branch     | `feature/i18n-dashboard-day-summary` (deleted) |
 | Unit tests | **342** web (+16)                              |
 | E2E tests  | **26** (+1)                                    |
 
@@ -925,8 +926,8 @@ summary primitives only. No `LocalizationPlatform`, `PlatformFormatter`,
 ### 18. Git status
 
 ```
-Branch: feature/i18n-dashboard-day-summary
-Commit / push / PR: not performed (per task instructions)
+Squash merge: PR #25 (`9794c88` → `4140bda` on `main`)
+Branch: feature/i18n-dashboard-day-summary — deleted
 ```
 
 ### 19. Executive summary
