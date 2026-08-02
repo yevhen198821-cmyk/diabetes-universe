@@ -1,5 +1,33 @@
 # Changelog
 
+## Presentation Context Foundation — Feature Complete
+
+Дата: 2026-08-02
+
+Завершено:
+
+- Presentation Context Foundation (CR-03A) — `apps/web/lib/platform/presentation/`
+- `ServerPresentationSeed` в `RequestPlatformBootstrapResult` при `time-zone-required`
+- `PresentationContext` (alias `LocaleContext`) и `PresentationSnapshot` (version 1)
+- client-only `resolveBrowserTimeZone()` и `createClientPresentationBootstrapResult()`
+- validated snapshot create/restore и `PresentationPersistence` contract
+- consolidated IANA time zone validation (`is-valid-iana-time-zone.ts`)
+- split public API: isomorphic `presentation/index.ts`, client-only `presentation/client.ts`
+- architecture documentation и ADR-0012 implementation contract update
+- presentation tests: 33; web tests: 242 total
+
+Не входит в этот этап:
+
+- React Provider и hooks (CR-03B)
+- route integration и cookie persistence
+- Dashboard, Timeline, Quick Add migration
+- locale switch UI
+- production UI wiring
+
+Статус:
+
+Presentation Context Foundation — Feature Complete ✅
+
 ## Thin Next.js Platform Bootstrap — Feature Complete
 
 Дата: 2026-08-02

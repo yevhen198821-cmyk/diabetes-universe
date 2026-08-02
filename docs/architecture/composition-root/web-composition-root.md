@@ -14,8 +14,9 @@ It does not change ADR-0011 semantics.
 
 Approved — `@diabetes-universe/platform-web` implemented (CR-01C); thin Next.js
 bootstrap Feature Complete (CR-02, user time zone policy per
-[ADR-0012](../../adr/0012-user-time-zone-policy.md)); Presentation Integration
-Layer deferred
+[ADR-0012](../../adr/0012-user-time-zone-policy.md)); Presentation Context
+Foundation Feature Complete (CR-03A); React Presentation Integration (CR-03B)
+deferred
 
 ## Stage
 

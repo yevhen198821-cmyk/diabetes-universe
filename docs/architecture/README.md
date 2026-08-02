@@ -63,7 +63,7 @@ documented architecture decision and an explicit product requirement.
 - [Localization Platform Overview](localization/overview.md)
 - [Platform Readiness](localization/platform-readiness.md)
 - [Web Composition Root](composition-root/web-composition-root.md)
-- [Presentation Context Foundation](presentation/presentation-context.md) — CR-03A
+- [Presentation Context Foundation](presentation/presentation-context.md) — CR-03A, Feature Complete
 - [@diabetes-universe/web](../../../apps/web/README.md) — thin Next.js bootstrap (CR-02, Feature Complete)
 - [@diabetes-universe/platform-web](../../../packages/platform-web/README.md)
 
