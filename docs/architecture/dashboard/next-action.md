@@ -7,7 +7,7 @@ dominant content card after the Header.
 
 ## Status
 
-Approved
+Approved — localized via I18N-02B1 (Ready for Review)
 
 ## Responsibility
 
@@ -31,7 +31,8 @@ Approved
 - The block belongs to the web application because it composes Dashboard layout,
   approved copy, and owner-supplied action callbacks.
 - Ready content is supplied through the shared `NextStep` contract and an
-  `onAction` callback.
+  `onAction` callback. Demo presentation is resolved from structural
+  `NextStepSource` via localization; mocks contain no human-readable copy.
 - The block does not fetch data, call APIs, rank actions, or decide the next
   step.
 - The block does not open Quick Add by itself; the owner decides what the action
@@ -45,3 +46,5 @@ Approved
 - Empty and error states do not expose an action button.
 - The Dashboard demo wires the insulin CTA to Quick Add through
   `requestOpen('next-action', 'insulin')`, opening the insulin form directly.
+- I18N-02B1 audit: see
+  [Dashboard Next Action Localization Migration](../localization/dashboard-next-action-migration.md).

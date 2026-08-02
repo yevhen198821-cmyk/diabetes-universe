@@ -1,8 +1,10 @@
 'use client';
 
 import { Button } from '@diabetes-universe/ui';
-import type { RefObject } from 'react';
+import { useMemo, type RefObject } from 'react';
 
+import { useLocalization } from '../../lib/platform/react/use-localization';
+import { resolveDashboardNextActionLabels } from './dashboard-next-action-labels';
 import {
   createDashboardNextActionViewModel,
   type DashboardNextActionProps,
@@ -16,7 +18,12 @@ export function DashboardNextAction({
 }: DashboardNextActionProps & {
   readonly actionButtonRef?: RefObject<HTMLButtonElement | null>;
 }) {
-  const viewModel = createDashboardNextActionViewModel(props);
+  const localization = useLocalization();
+  const labels = useMemo(
+    () => resolveDashboardNextActionLabels(localization),
+    [localization],
+  );
+  const viewModel = createDashboardNextActionViewModel(props, labels);
   const isError = viewModel.state === 'error';
 
   return (

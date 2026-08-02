@@ -88,11 +88,11 @@ test('next action opens insulin quick add directly and updates dashboard', async
 
   const daySummary = page.getByRole('region', { name: 'Сводка дня' });
 
-  await expect(page.getByText('Следующее действие')).toBeVisible();
+  await expect(page.getByText('Next action')).toBeVisible();
   await expect(
-    page.getByRole('heading', { name: 'Добавить инсулин' }),
+    page.getByRole('heading', { name: 'Add insulin' }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Добавить', exact: true }).click();
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
 
   await expect(
     page.getByRole('dialog', { name: 'Добавить инсулин' }),
@@ -111,7 +111,7 @@ test('next action opens insulin quick add directly and updates dashboard', async
   ).toBeHidden();
   await expect(daySummary.getByText('6 ЕД')).toBeVisible();
   await expect(
-    page.getByRole('button', { name: 'Добавить', exact: true }),
+    page.getByRole('button', { name: 'Add', exact: true }),
   ).toBeFocused();
 
   await page.getByRole('link', { name: 'Все события' }).click();

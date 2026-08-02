@@ -172,10 +172,26 @@ Platform stack through production hooks.
 - unit, integration, and E2E coverage
 - architecture: `docs/architecture/localization/dashboard-header-migration.md`
 
-### Not implemented (I18N-02B+)
+## Dashboard next action localization (I18N-02B1) — Implementation Complete ✅
+
+Location: `components/dashboard/dashboard-next-action*`, `dashboard-next-action-labels.ts`
+
+Second vertical Dashboard migration to Platform Localization.
+
+### Implemented (I18N-02B1)
+
+- `DashboardNextAction` copy via `useLocalization()`
+- structural `NextStepSource` demo data (`lib/mocks/timeline.ts`)
+- localized presentation via `resolveDashboardNextActionDemoStep()`
+- English canonical `dashboard.nextAction.*` keys (8)
+- pure presentation model boundary
+- unit, integration, resource, and E2E coverage
+- architecture: `docs/architecture/localization/dashboard-next-action-migration.md`
+
+### Not implemented (I18N-02B2+)
 
 - cookie scheme wiring and `PresentationPersistence` adapter
-- remaining Dashboard block hook migration
+- remaining Dashboard block hook migration (I18N-02B2+)
 - Timeline, Quick Add hook migration
 - locale switch UI
 
