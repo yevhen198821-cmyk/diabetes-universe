@@ -32,6 +32,18 @@ importers:
 
   apps/web:
     dependencies:
+      '@diabetes-universe/formatting':
+        specifier: workspace:*
+        version: link:../../packages/formatting
+      '@diabetes-universe/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
+      '@diabetes-universe/platform':
+        specifier: workspace:*
+        version: link:../../packages/platform
+      '@diabetes-universe/platform-web':
+        specifier: workspace:*
+        version: link:../../packages/platform-web
       '@diabetes-universe/types':
         specifier: workspace:*
         version: link:../../packages/types

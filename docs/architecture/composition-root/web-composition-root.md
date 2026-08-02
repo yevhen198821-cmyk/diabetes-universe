@@ -13,7 +13,9 @@ It does not change ADR-0011 semantics.
 ## Status
 
 Approved — `@diabetes-universe/platform-web` implemented (CR-01C); thin Next.js
-bootstrap and Presentation Integration Layer deferred
+bootstrap implemented (CR-02, user time zone policy per
+[ADR-0012](../../adr/0012-user-time-zone-policy.md)); Presentation Integration
+Layer deferred
 
 ## Stage
 
@@ -127,7 +129,7 @@ Future package: `@diabetes-universe/platform-web` (`packages/platform-web`) —
 
 ## Thin Next.js Bootstrap
 
-Future location: `apps/web` (for example `apps/web/lib/platform/`)
+Location: `apps/web/lib/platform/`
 
 ### Responsible for
 
@@ -138,6 +140,32 @@ Future location: `apps/web` (for example `apps/web/lib/platform/`)
 - invoking Web Composition Root with that DTO;
 - passing the assembled `PlatformRuntime` to Application or Presentation
   Integration Layer.
+
+### Implemented (CR-02)
+
+- server-only `createRequestPlatformRuntime()` entry point;
+- request-derived locale resolution (`cookie` when a scheme exists,
+  `Accept-Language`, platform default);
+- required explicit IANA time zone per
+  [ADR-0012](../../adr/0012-user-time-zone-policy.md) — validated cookie as
+  current server source; no server default, no locale-derived guess;
+- `RequestPlatformBootstrapResult` discriminated contract (`ready` |
+  `time-zone-required`);
+- immutable `WebPlatformConfig` assembly when explicit time zone is present;
+- per-request / per-call `PlatformRuntime` via `createWebPlatformRuntime()` when
+  explicit time zone is present;
+- minimal `common` namespace preload for bootstrap translation-ready verification;
+- SSR isolation covered by integration tests;
+- hydration boundary documented (runtime stays server-side; serializable client
+  snapshot deferred to CR-03);
+- time-dependent SSR calculations forbidden until explicit user time zone is
+  available.
+
+### Deferred to CR-03
+
+- cookie scheme wiring and browser IANA first-visit detection;
+- React Provider, hooks, and client context snapshot API;
+- production bootstrap invocation on live routes.
 
 ### Not responsible for
 
@@ -346,8 +374,8 @@ PlatformRuntime
 
 ## Future WebPlatformConfig (preliminary)
 
-The following contract shape is a **preliminary** input for the next
-implementation stage. It is **not** an approved public API.
+The following contract shape is implemented by `@diabetes-universe/platform-web`
+and assembled by the thin Next.js bootstrap in `apps/web/lib/platform/`.
 
 ```typescript
 interface WebPlatformConfig {
@@ -376,12 +404,12 @@ Types referenced above come from Platform Contracts (`@diabetes-universe/i18n`,
 
 ## Future implementation boundaries
 
-| Package / location                | Stage                                    |
-| --------------------------------- | ---------------------------------------- |
-| `@diabetes-universe/platform`     | CR-01A — implemented                     |
-| `@diabetes-universe/platform-web` | CR-01C — implemented                     |
-| `apps/web` bootstrap              | deferred — not started                   |
-| React Provider + hooks            | separate Presentation Integration sprint |
+| Package / location                | Stage                                            |
+| --------------------------------- | ------------------------------------------------ |
+| `@diabetes-universe/platform`     | CR-01A — implemented                             |
+| `@diabetes-universe/platform-web` | CR-01C — implemented                             |
+| `apps/web` bootstrap              | CR-02 — implemented (time zone per ADR-0012)     |
+| React Provider + hooks            | CR-03 — separate Presentation Integration sprint |
 
 Dashboard, Timeline, and Quick Add migration are out of scope for the initial
 Web Composition Root implementation.
