@@ -2,3 +2,4 @@
 
 | Term | Definition |
 | ---- | ---------- |
+| **Platform Readiness** | Состояние, при котором все предусловия, необходимые для корректной работы синхронных методов Runtime, выполнены. Каким способом это состояние достигается (eager preload, selective preload, route-based preload, on-demand preparation и т.д.), определяется выбранной стратегией инициализации, за которую отвечает Composition Root. См. [Platform Readiness](../architecture/localization/platform-readiness.md). |
