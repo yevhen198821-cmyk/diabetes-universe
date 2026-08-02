@@ -173,7 +173,6 @@ Dashboard but does not share Dashboard block composition.
 
 Out of scope:
 
-- Activity and note Quick Add save flows — Stage 1 stubs only
 - Backend persistence
 - API cursor pagination
 - Dark mode activation

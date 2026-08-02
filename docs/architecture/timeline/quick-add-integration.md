@@ -41,6 +41,8 @@ The integration must preserve:
    - `createInsulinTimelineEvent`
    - `createNutritionTimelineEvent`
    - `createMedicationTimelineEvent`
+   - `createActivityTimelineEvent`
+   - `createNoteTimelineEvent`
 4. The screen calls `addEvent(event)` from `useTimelineStore`.
 5. The shared store sorts and deduplicates the event collection.
 6. Dashboard and Timeline re-render from the same `events` array.
@@ -53,8 +55,8 @@ The integration must preserve:
 - Quick Add exposes all six MVP categories in the action picker.
 - Activity and note are valid domain kinds for display, search, filtering,
   details, edit, and delete.
-- Activity and note Quick Add categories show the Stage 1 placeholder form and do
-  not write to the shared store yet.
+- Dashboard Next Action can open Quick Add with a preselected category through
+  the shared controller `openCategory` API.
 
 ### Screen-specific behavior
 

@@ -77,6 +77,40 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
   ).toBeVisible();
 });
 
+test('next action opens insulin quick add directly and updates dashboard', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  const daySummary = page.getByRole('region', { name: 'Сводка дня' });
+
+  await expect(page.getByText('Следующее действие')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Добавить инсулин' }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Добавить', exact: true }).click();
+
+  await expect(
+    page.getByRole('dialog', { name: 'Добавить инсулин' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('dialog', { name: 'Добавить событие' }),
+  ).toHaveCount(0);
+
+  await page.getByRole('button', { name: /Препарат/ }).click();
+  await page.getByRole('button', { name: 'NovoRapid' }).click();
+  await page.getByLabel('Доза').fill('2');
+  await page.getByRole('button', { name: 'Сохранить' }).click();
+
+  await expect(
+    page.getByRole('dialog', { name: 'Добавить инсулин' }),
+  ).toBeHidden();
+  await expect(daySummary.getByText('6 ЕД')).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Добавить', exact: true }),
+  ).toBeFocused();
+});
+
 test('timeline groups demo events and avoids mobile horizontal scroll', async ({
   page,
 }) => {

@@ -58,3 +58,16 @@ export interface MedicationQuickAddEntry {
   readonly context?: string;
   readonly note?: string;
 }
+
+export interface ActivityQuickAddEntry {
+  readonly activityType: string;
+  readonly durationMinutes: number;
+  readonly time: string;
+  readonly note?: string;
+}
+
+export interface NoteQuickAddEntry {
+  readonly title: string;
+  readonly text: string;
+  readonly time: string;
+}

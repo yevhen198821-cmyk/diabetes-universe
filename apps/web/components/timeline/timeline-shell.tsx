@@ -1,17 +1,21 @@
 'use client';
 
 import type {
+  ActivityQuickAddEntry,
   GlucoseQuickAddEntry,
   InsulinQuickAddEntry,
   MedicationQuickAddEntry,
+  NoteQuickAddEntry,
   NutritionQuickAddEntry,
   TimelineEvent,
 } from '@diabetes-universe/types';
 import { useMemo, useRef, useState } from 'react';
 
+import { createActivityTimelineEvent } from '../../lib/quick-add/create-activity-timeline-event';
 import { createGlucoseTimelineEvent } from '../../lib/quick-add/create-glucose-timeline-event';
 import { createInsulinTimelineEvent } from '../../lib/quick-add/create-insulin-timeline-event';
 import { createMedicationTimelineEvent } from '../../lib/quick-add/create-medication-timeline-event';
+import { createNoteTimelineEvent } from '../../lib/quick-add/create-note-timeline-event';
 import { createNutritionTimelineEvent } from '../../lib/quick-add/create-nutrition-timeline-event';
 import { compareTimelineDateTime } from '../../lib/timeline/timeline-date-time';
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
@@ -218,6 +222,14 @@ export function TimelineShell() {
     addEvent(createMedicationTimelineEvent(entry));
   };
 
+  const handleActivitySubmit = (entry: ActivityQuickAddEntry) => {
+    addEvent(createActivityTimelineEvent(entry));
+  };
+
+  const handleNoteSubmit = (entry: NoteQuickAddEntry) => {
+    addEvent(createNoteTimelineEvent(entry));
+  };
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-950">
       <TopBar />
@@ -264,10 +276,12 @@ export function TimelineShell() {
       </main>
 
       <QuickAddRoot
+        onActivitySubmit={handleActivitySubmit}
         onOpenChange={setQuickAddOpen}
         onGlucoseSubmit={handleGlucoseSubmit}
         onInsulinSubmit={handleInsulinSubmit}
         onMedicationSubmit={handleMedicationSubmit}
+        onNoteSubmit={handleNoteSubmit}
         onNutritionSubmit={handleNutritionSubmit}
         open={quickAddOpen}
       />

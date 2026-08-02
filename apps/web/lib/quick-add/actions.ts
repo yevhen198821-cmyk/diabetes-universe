@@ -40,7 +40,7 @@ const quickAddActionDefinitions: readonly QuickAddAction[] = [
     id: 'activity',
     category: 'activity',
     label: 'Активность',
-    description: 'Записать движение или тренировку',
+    description: 'Записать тренировку',
   },
   {
     id: 'note',

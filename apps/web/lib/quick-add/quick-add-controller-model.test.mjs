@@ -3,6 +3,9 @@ import test from 'node:test';
 
 import {
   closeQuickAdd,
+  closeQuickAddController,
+  createInitialQuickAddControllerState,
+  createQuickAddOpenRequest,
   createQuickAddOpeningLock,
   releaseQuickAddOpeningLock,
   requestQuickAddOpen,
@@ -35,6 +38,20 @@ test('allows the first open request and creates an opening lock', () => {
   assert.equal(nextState.isOpeningLocked, true);
 });
 
+test('opens Quick Add with a preselected category for Next Action', () => {
+  const nextState = createQuickAddOpenRequest(
+    createInitialQuickAddControllerState(),
+    'next-action',
+    'insulin',
+  );
+
+  assert.ok(nextState);
+  assert.equal(nextState.isOpen, true);
+  assert.equal(nextState.isOpeningLocked, true);
+  assert.equal(nextState.lastOpenTrigger, 'next-action');
+  assert.equal(nextState.openCategory, 'insulin');
+});
+
 test('releases the opening lock after the panel becomes open', () => {
   const released = releaseQuickAddOpeningLock({
     isOpen: true,
@@ -50,6 +67,19 @@ test('closes Quick Add and clears the opening lock', () => {
 
   assert.equal(closed.isOpen, false);
   assert.equal(closed.isOpeningLocked, false);
+});
+
+test('closes controller state and clears open category', () => {
+  const closed = closeQuickAddController({
+    isOpen: true,
+    isOpeningLocked: false,
+    lastOpenTrigger: 'next-action',
+    openCategory: 'insulin',
+  });
+
+  assert.equal(closed.isOpen, false);
+  assert.equal(closed.openCategory, null);
+  assert.equal(closed.lastOpenTrigger, 'next-action');
 });
 
 test('applies dashboard updates only after a successful save', () => {

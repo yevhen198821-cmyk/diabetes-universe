@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@diabetes-universe/ui';
+import type { RefObject } from 'react';
 
 import {
   createDashboardNextActionViewModel,
@@ -9,7 +10,12 @@ import {
 
 const titleId = 'dashboard-next-action-title';
 
-export function DashboardNextAction(props: DashboardNextActionProps) {
+export function DashboardNextAction({
+  actionButtonRef,
+  ...props
+}: DashboardNextActionProps & {
+  readonly actionButtonRef?: RefObject<HTMLButtonElement | null>;
+}) {
   const viewModel = createDashboardNextActionViewModel(props);
   const isError = viewModel.state === 'error';
 
@@ -54,6 +60,7 @@ export function DashboardNextAction(props: DashboardNextActionProps) {
               className="min-h-11 w-full shrink-0 sm:w-auto dark:bg-teal-500 dark:text-slate-950 dark:hover:bg-teal-400 dark:focus-visible:outline-teal-400"
               disabled={viewModel.actionDisabled}
               onClick={viewModel.onAction}
+              ref={actionButtonRef}
               type="button"
             >
               {viewModel.actionLabel}

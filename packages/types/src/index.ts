@@ -17,10 +17,12 @@ export type {
   TimelineEventSource,
 } from './timeline';
 export type {
+  ActivityQuickAddEntry,
   GlucoseQuickAddEntry,
   InsulinQuickAddEntry,
   MedicationQuickAddEntry,
   MedicationReference,
+  NoteQuickAddEntry,
   NutritionEntryMode,
   NutritionProductEntry,
   NutritionQuickAddEntry,
