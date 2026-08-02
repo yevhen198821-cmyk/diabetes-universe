@@ -51,9 +51,50 @@ sync calls in that context.
 - [ADR-0011 — Platform Infrastructure Layer](../../adr/0011-platform-infrastructure-layer.md)
 - [Localization Platform Overview](overview.md)
 
+## Readiness levels
+
+Composition Root and Application must distinguish these states explicitly:
+
+| Level                 | Meaning                                                                  | How it is achieved                             |
+| --------------------- | ------------------------------------------------------------------------ | ---------------------------------------------- |
+| **Runtime created**   | `PlatformRuntime` aggregate exists                                       | `createPlatformRuntime()`                      |
+| **Registry ready**    | `getDefaultLocale()`, `getSupportedLocales()`, `getNamespaces()` succeed | `await localization.whenReady()`               |
+| **Bundle ready**      | A specific `(locale, namespace)` pair is available in the bundle cache   | Successful `getBundle()` for that pair         |
+| **Translation-ready** | `translate()` / `hasTranslation()` succeed for keys in a declared scope  | Registry ready + bundle preload for that scope |
+
+### Registry ready
+
+After:
+
+```ts
+await localization.whenReady();
+```
+
+registry-dependent methods are guaranteed to work. `whenReady()` uses the single
+lifecycle promise created by `LocalizationPlatform` during initialization. It does
+not load translation bundles and does not trigger a second registry load.
+
+### Bundle ready
+
+After a successful `getBundle({ locale, namespace })`, that pair is available in
+the runtime bundle cache. Bundle readiness is scoped per pair.
+
+### Translation-ready
+
+For a declared preload scope, Composition Root awaits `localization.whenReady()`,
+preloads the required `(locale, namespace)` pairs, and only then returns
+`PlatformRuntime`. Sync `translate()` is guaranteed only for keys within that
+preloaded scope.
+
+Empty `preload.locales` or `preload.namespaces` arrays are valid configuration
+but do **not** make the runtime translation-ready. They are appropriate only when
+Application will not call sync translation until a later preparation step adds
+bundles.
+
+Application must not treat a returned runtime as translation-ready unless the
+preload scope covers the keys it will resolve synchronously.
+
 ## Notes
 
-- Runtime v1.0 does not expose a `whenReady()` API; readiness is enforced by
-  Composition Root wiring and Application lifecycle.
 - Diagnostic improvements for cache-miss vs key-miss scenarios are desirable but
   do not change this definition.

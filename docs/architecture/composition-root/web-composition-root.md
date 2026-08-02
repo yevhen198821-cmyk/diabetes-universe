@@ -12,7 +12,8 @@ It does not change ADR-0011 semantics.
 
 ## Status
 
-Approved — architecture documented; implementation deferred to CR-01B+
+Approved — `@diabetes-universe/platform-web` implemented (CR-01C); thin Next.js
+bootstrap and Presentation Integration Layer deferred
 
 ## Stage
 
@@ -33,7 +34,7 @@ Approved — architecture documented; implementation deferred to CR-01B+
 ```text
 Infrastructure Adapters
         ↓
-@diabetes-universe/platform-web   (future Web Composition Root)
+@diabetes-universe/platform-web
         ↓
 Localization Platform + Platform Formatter
         ↓
@@ -89,7 +90,8 @@ Package: `@diabetes-universe/platform` (`packages/platform`)
 
 ## Web Composition Root
 
-Future package: `@diabetes-universe/platform-web` (`packages/platform-web`)
+Future package: `@diabetes-universe/platform-web` (`packages/platform-web`) —
+**implemented (CR-01C/CR-01D)**.
 
 ### Responsible for
 
@@ -311,7 +313,34 @@ Per [Platform Readiness](../localization/platform-readiness.md):
 - `@diabetes-universe/platform` does **not** implement readiness.
 
 Composition Root prepares bundles; Localization Runtime performs sync lookup from
-cache. No new public readiness API is introduced by this document.
+cache.
+
+### Readiness levels (CR-01D)
+
+| Level             | Owner                            | Notes                                 |
+| ----------------- | -------------------------------- | ------------------------------------- |
+| Runtime created   | `createPlatformRuntime()`        | Aggregate exists                      |
+| Registry ready    | `LocalizationPlatform`           | `await localization.whenReady()`      |
+| Bundle ready      | `LocalizationPlatform.getBundle` | Scoped per `(locale, namespace)` pair |
+| Translation-ready | Composition Root + preload scope | Sync `translate()` for preloaded keys |
+
+Empty `preload` arrays are configuration-valid but not translation-ready.
+Application must not call sync translation until the required bundles are
+prepared.
+
+Web Composition Root readiness sequence:
+
+```text
+Localization runtime created
+        ↓
+await localization.whenReady()
+        ↓
+preload unique (locale, namespace) pairs
+        ↓
+createPlatformRuntime()
+        ↓
+PlatformRuntime
+```
 
 ---
 
@@ -350,8 +379,8 @@ Types referenced above come from Platform Contracts (`@diabetes-universe/i18n`,
 | Package / location                | Stage                                    |
 | --------------------------------- | ---------------------------------------- |
 | `@diabetes-universe/platform`     | CR-01A — implemented                     |
-| `@diabetes-universe/platform-web` | CR-01B+ — not started                    |
-| `apps/web` bootstrap              | CR-01B+ — not started                    |
+| `@diabetes-universe/platform-web` | CR-01C — implemented                     |
+| `apps/web` bootstrap              | deferred — not started                   |
 | React Provider + hooks            | separate Presentation Integration sprint |
 
 Dashboard, Timeline, and Quick Add migration are out of scope for the initial

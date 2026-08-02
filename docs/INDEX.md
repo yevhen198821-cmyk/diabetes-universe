@@ -16,6 +16,7 @@
 - [Localization Platform Overview](architecture/localization/overview.md)
 - [Platform Readiness](architecture/localization/platform-readiness.md)
 - [Web Composition Root](architecture/composition-root/web-composition-root.md)
+- [@diabetes-universe/platform-web](../packages/platform-web/README.md)
 - [Navigation](architecture/navigation/overview.md) — routes `/`, `/timeline`, `/dashboard` redirect
 - [Dashboard Overview](architecture/dashboard/overview.md) — home screen at `/`
 - [Dashboard Layout](architecture/dashboard/layout.md)

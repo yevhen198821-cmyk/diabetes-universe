@@ -112,6 +112,15 @@ strings**. Альтернативные форматы шаблонов (mustach
 
 Принят. См. Decision.
 
+## Implementation notes
+
+- **CR-01D (2026-08-02):** `LocalizationPlatform.whenReady()` реализован как
+  публичный registry readiness contract. Метод завершается после загрузки
+  `LocaleRegistry` во внутренний cache runtime и не гарантирует bundle или
+  translation readiness. Composition Root обязан вызывать `whenReady()` перед
+  registry-dependent методами и отдельно обеспечивать bundle preload для sync
+  `translate()`.
+
 ## Date
 
 2026-08-02

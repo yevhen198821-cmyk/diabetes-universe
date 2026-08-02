@@ -70,14 +70,9 @@ environment-specific Composition Root layer.
 
 ## Future Composition Root
 
-A future environment-specific Composition Root will:
-
-1. select Infrastructure Adapters;
-2. create `LocalizationPlatform`;
-3. create `PlatformFormatter`;
-4. ensure Platform Readiness;
-5. call `createPlatformRuntime()`;
-6. pass the assembled `PlatformRuntime` to the Application layer.
+Web Composition Root is implemented in `@diabetes-universe/platform-web`. This
+package remains the runtime aggregate step only. Mobile and Backend will follow
+the same pattern with their own environment-specific Composition Root packages.
 
 ## Implemented (CR-01A)
 
@@ -95,17 +90,17 @@ A future environment-specific Composition Root will:
 - input validation for required injected services
 - immutability and reference preservation guarantees
 
-## Not implemented yet
+## Not implemented in this package
 
-These responsibilities belong to a future environment-specific Composition
-Root, not to this package:
+These responsibilities belong to environment-specific Composition Root or
+Application layers, not to `@diabetes-universe/platform`:
 
-- Infrastructure Adapter wiring (InMemory loaders, remote adapters, …)
-- Web Composition Root
+- Infrastructure Adapter wiring (see `@diabetes-universe/platform-web` for Web)
 - React Provider / hooks
 - DI container
 - Platform Readiness preload orchestration
 - environment-specific configuration
+- Next.js bootstrap
 - Lint/CI enforcement of platform wiring single entry point
 
 ## Public API
@@ -133,8 +128,9 @@ supported.
 
 ## Related packages
 
-| Package                           | Role                                                   |
-| --------------------------------- | ------------------------------------------------------ |
-| `@diabetes-universe/i18n`         | Localization Platform contracts and runtime            |
-| `@diabetes-universe/formatting`   | Platform Formatting contracts and runtime              |
-| `@diabetes-universe/i18n-locales` | Localization Infrastructure Adapter (future CR wiring) |
+| Package                           | Role                                                |
+| --------------------------------- | --------------------------------------------------- |
+| `@diabetes-universe/i18n`         | Localization Platform contracts and runtime         |
+| `@diabetes-universe/formatting`   | Platform Formatting contracts and runtime           |
+| `@diabetes-universe/i18n-locales` | Localization Infrastructure Adapter                 |
+| `@diabetes-universe/platform-web` | Web Composition Root (adapter wiring and readiness) |

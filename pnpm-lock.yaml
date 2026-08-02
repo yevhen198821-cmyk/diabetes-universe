@@ -95,6 +95,21 @@ importers:
         specifier: workspace:*
         version: link:../i18n
 
+  packages/platform-web:
+    dependencies:
+      '@diabetes-universe/formatting':
+        specifier: workspace:*
+        version: link:../formatting
+      '@diabetes-universe/i18n':
+        specifier: workspace:*
+        version: link:../i18n
+      '@diabetes-universe/i18n-locales':
+        specifier: workspace:*
+        version: link:../i18n-locales
+      '@diabetes-universe/platform':
+        specifier: workspace:*
+        version: link:../platform
+
   packages/types: {}
 
   packages/ui:

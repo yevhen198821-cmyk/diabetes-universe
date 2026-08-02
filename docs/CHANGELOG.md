@@ -1,5 +1,36 @@
 # Changelog
 
+## Platform Runtime & Web Composition Root Foundation — Feature Complete
+
+Дата: 2026-08-02
+
+Завершено:
+
+- Platform Runtime Foundation (CR-01A) — `@diabetes-universe/platform`
+- Web Composition Root (CR-01C/CR-01D) — `@diabetes-universe/platform-web`
+- `createPlatformRuntime()` — immutable `PlatformRuntime` aggregate
+- `createWebPlatformRuntime()` — framework-independent Web Composition Root
+- `LocalizationPlatform.whenReady()` — registry readiness contract
+- selective bundle preload via `WebPlatformConfig.preload`
+- SSR-safe per-call runtime isolation
+- integration: Localization + Formatting + Platform Runtime
+- runtime tests: platform (6), platform-web (38), i18n (15, including `whenReady()`)
+
+Не входит в этот этап:
+
+- Next.js bootstrap в `apps/web`
+- cookies, headers и URL locale detection
+- React Provider и hooks
+- Dashboard, Timeline, Quick Add migration
+- locale switch UI
+- remote/CDN/OTA adapters
+- Backend Composition Root
+- Mobile Composition Root
+
+Статус:
+
+Platform Runtime & Web Composition Root Foundation — Feature Complete ✅
+
 ## Platform Formatting Foundation — Feature Complete
 
 Дата: 2026-08-02
@@ -50,7 +81,7 @@ Platform Formatting Foundation — Feature Complete ✅
   bundle cache, injected loader interfaces
 - Platform Readiness (архитектурное определение)
 - Infrastructure adapters вынесены из contract layer (I18N-06)
-- Runtime tests (9) и adapter tests (5)
+- Runtime tests (15) и adapter tests (5)
 
 Не входит в этот этап:
 

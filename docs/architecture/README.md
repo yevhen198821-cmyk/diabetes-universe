@@ -63,5 +63,6 @@ documented architecture decision and an explicit product requirement.
 - [Localization Platform Overview](localization/overview.md)
 - [Platform Readiness](localization/platform-readiness.md)
 - [Web Composition Root](composition-root/web-composition-root.md)
+- [@diabetes-universe/platform-web](../../../packages/platform-web/README.md)
 
 ## Notes

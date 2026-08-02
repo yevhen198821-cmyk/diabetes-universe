@@ -1,4 +1,5 @@
 import type { LocalizationPlatformCreateInput } from './localization-platform-create-input';
+import type { LocalizationPlatform } from './localization-platform';
 import type {
   createLocalizationPlatform,
   LocalizationPlatformFactory,
@@ -63,3 +64,12 @@ const createInput: LocalizationPlatformCreateInput = {
 
 void factory.createLocalizationPlatform(createInput);
 void createLocalizationPlatform(createInput);
+
+declare const platform: LocalizationPlatform;
+
+const readiness: Promise<void> = platform.whenReady();
+void readiness;
+
+const readyPlatform: LocalizationPlatform =
+  createLocalizationPlatform(createInput);
+void readyPlatform.whenReady();
