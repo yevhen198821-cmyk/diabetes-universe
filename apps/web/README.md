@@ -86,8 +86,6 @@ routes do not invoke the bootstrap until CR-03 provides explicit time zone input
 
 ### Not implemented
 
-- React Provider (CR-03B)
-- hooks (CR-03B)
 - cookie scheme wiring
 - route integration and cookie persistence
 - UI migration (Dashboard, Timeline, Quick Add)
@@ -111,15 +109,34 @@ Public API:
 Client bootstrap consumes `RequestPlatformBootstrapResult.seed` on first visit;
 it does not accept a separate server locale input.
 
-### Not implemented (CR-03B+)
+### Not implemented (CR-03C+)
 
-- React Provider and hooks
 - route integration and cookie persistence
 - UI migration (Dashboard, Timeline, Quick Add)
+
+## React platform provider foundation (CR-03B) — implemented
+
+Location: `lib/platform/react/`
+
+Provides `PlatformProvider` and read-only hooks for consuming an already
+assembled `PlatformRuntime`. Production routes and product modules are not wired
+to the provider yet.
+
+Public API: `lib/platform/react/index.ts`
+
+Test utilities: `lib/platform/react/testing/`
+
+### Not implemented (CR-03C+)
+
+- `apps/web/app/layout.tsx` provider wiring
+- server bootstrap invocation on routes
+- persistence and hydration snapshot wiring
+- Dashboard, Timeline, Quick Add migration
 
 ## Architecture references
 
 - [Presentation Context Foundation](../../docs/architecture/presentation/presentation-context.md)
+- [React Platform Provider Foundation](../../docs/architecture/presentation/react-platform-provider.md)
 
 - [ADR-0012 — User Time Zone Policy](../../docs/adr/0012-user-time-zone-policy.md)
 - [Web Composition Root](../../docs/architecture/composition-root/web-composition-root.md)

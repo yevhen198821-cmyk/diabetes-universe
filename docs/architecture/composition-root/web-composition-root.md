@@ -15,8 +15,8 @@ It does not change ADR-0011 semantics.
 Approved — `@diabetes-universe/platform-web` implemented (CR-01C); thin Next.js
 bootstrap Feature Complete (CR-02, user time zone policy per
 [ADR-0012](../../adr/0012-user-time-zone-policy.md)); Presentation Context
-Foundation Feature Complete (CR-03A); React Presentation Integration (CR-03B)
-deferred
+Foundation Feature Complete (CR-03A); React Platform Provider Foundation
+(CR-03B); route wiring and persistence (CR-03C) deferred
 
 ## Stage
 
@@ -409,13 +409,14 @@ Types referenced above come from Platform Contracts (`@diabetes-universe/i18n`,
 
 ## Future implementation boundaries
 
-| Package / location                | Stage                                             |
-| --------------------------------- | ------------------------------------------------- |
-| `@diabetes-universe/platform`     | CR-01A — implemented                              |
-| `@diabetes-universe/platform-web` | CR-01C — implemented                              |
-| `apps/web` bootstrap              | CR-02 — Feature Complete                          |
-| `apps/web` presentation           | CR-03A — Feature Complete                         |
-| React Provider + hooks            | CR-03B — separate Presentation Integration sprint |
+| Package / location                | Stage                                          |
+| --------------------------------- | ---------------------------------------------- |
+| `@diabetes-universe/platform`     | CR-01A — implemented                           |
+| `@diabetes-universe/platform-web` | CR-01C — implemented                           |
+| `apps/web` bootstrap              | CR-02 — Feature Complete                       |
+| `apps/web` presentation           | CR-03A — Feature Complete                      |
+| `apps/web` react integration      | CR-03B — implemented (not wired to routes yet) |
+| Route wiring + persistence        | CR-03C — deferred                              |
 
 Dashboard, Timeline, and Quick Add migration are out of scope for the initial
 Web Composition Root implementation.

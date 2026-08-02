@@ -198,12 +198,10 @@ Forbidden:
 - `PlatformRuntime` creation in CR-03A client orchestration;
 - separate non-canonical server locale input in client bootstrap.
 
-## Future CR-03B integration
+## Future CR-03C integration
 
-CR-03B will introduce React Provider/hooks that consume
-`ClientPresentationBootstrapResult`, persist snapshots through
-`PresentationPersistence`, and connect restored context to server bootstrap
-without redesigning CR-03A contracts.
+CR-03C will wire server bootstrap, client presentation bootstrap, persistence,
+and `PlatformProvider` into Next.js routes. CR-03B hooks remain unchanged.
 
 ## Architecture references
 
