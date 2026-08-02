@@ -78,5 +78,16 @@ test('quickAddActions exposes six categories in approved order', () => {
     quickAddActions.map((action) => action.label),
     ['Глюкоза', 'Инсулин', 'Питание', 'Лекарство', 'Активность', 'Заметка'],
   );
+  assert.deepEqual(
+    quickAddActions.map((action) => action.addTitle),
+    [
+      'Добавить глюкозу',
+      'Добавить инсулин',
+      'Добавить питание',
+      'Добавить лекарство',
+      'Добавить активность',
+      'Добавить заметку',
+    ],
+  );
   assert.equal(quickAddActions.length, 6);
 });

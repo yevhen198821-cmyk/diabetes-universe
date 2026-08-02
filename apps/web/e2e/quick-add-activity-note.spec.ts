@@ -56,7 +56,7 @@ test('note quick add is searchable and appears in notes filter', async ({
   await openQuickAdd(page);
   await page.getByRole('button', { name: 'Заметка. Добавить запись' }).click();
   await expect(
-    page.getByRole('dialog', { name: 'Добавить заметка' }),
+    page.getByRole('dialog', { name: 'Добавить заметку' }),
   ).toBeVisible();
 
   await page.getByLabel('Текст заметки').fill(noteText);

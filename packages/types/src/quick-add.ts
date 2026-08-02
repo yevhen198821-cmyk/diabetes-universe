@@ -9,6 +9,7 @@ export interface QuickAddAction {
   readonly id: string;
   readonly category: QuickAddCategory;
   readonly label: string;
+  readonly addTitle: string;
   readonly description: string;
 }
 

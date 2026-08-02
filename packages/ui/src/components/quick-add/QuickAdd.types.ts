@@ -6,6 +6,7 @@ export interface QuickAddActionItem {
   readonly id: string;
   readonly category: EventCardType;
   readonly label: string;
+  readonly addTitle: string;
   readonly description: string;
   readonly icon: ReactNode;
 }
