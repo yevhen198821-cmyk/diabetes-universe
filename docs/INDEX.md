@@ -18,7 +18,8 @@
 ## Brand
 
 - [05 Brand Architecture Specification](brand/05-brand-architecture-specification.md) — Feature Complete
-- [06 Logo Architecture Specification](brand/06-logo-architecture-specification.md) — Architecture Approved
+- [06 Logo Architecture Specification](brand/06-logo-architecture-specification.md) — Feature Complete
+- [07 Brand Identity Specification](brand/07-brand-identity-specification.md) — Architecture Approved
 
 ## Architecture
 
