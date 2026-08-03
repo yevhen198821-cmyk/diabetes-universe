@@ -80,18 +80,18 @@ of the approved implementation workflow.
 When documents conflict, the higher-level document governs until a new approved
 version supersedes it.
 
-| Priority | Document                                                                            | Notes                                                                                                |
-| -------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| 1        | **00 Project Constitution**                                                         | Highest authority; repository implementation of Project Constitution is pending a separate lifecycle |
-| 2        | **02 Project Governance Specification**                                             | This document                                                                                        |
-| 3        | [01 Project Development Specification](01-project-development-specification.md)     | Feature Complete                                                                                     |
-| 4        | [03 Engineering Standards Specification](03-engineering-standards-specification.md) | Architecture Approved                                                                                |
-| 5        | [Development Standard](development-standard.md)                                     | Linked standard under document 01                                                                    |
-| 6        | [Documentation Standard](documentation-standard.md)                                 | Linked standard under document 01                                                                    |
-| 7        | [Project Rules](project-rules.md)                                                   | Mandatory project constraints                                                                        |
-| 8        | Architecture Decision Records in `docs/adr/`                                        | Recorded architectural decisions                                                                     |
-| 9        | Architecture, specifications, UX/UI, design system, data, and engineering documents | Domain-specific authoritative documents within their scope                                           |
-| 10       | Guides such as Product Bible and Developer Bible                                    | Supporting guidance until superseded by Feature Complete project documents                           |
+| Priority | Document                                                                            | Notes                                                                      |
+| -------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| 1        | **00 Project Constitution**                                                         | Feature Complete; highest-level Source of Truth                            |
+| 2        | **02 Project Governance Specification**                                             | This document                                                              |
+| 3        | [01 Project Development Specification](01-project-development-specification.md)     | Feature Complete                                                           |
+| 4        | [03 Engineering Standards Specification](03-engineering-standards-specification.md) | Architecture Approved                                                      |
+| 5        | [Development Standard](development-standard.md)                                     | Linked standard under document 01                                          |
+| 6        | [Documentation Standard](documentation-standard.md)                                 | Linked standard under document 01                                          |
+| 7        | [Project Rules](project-rules.md)                                                   | Mandatory project constraints                                              |
+| 8        | Architecture Decision Records in `docs/adr/`                                        | Recorded architectural decisions                                           |
+| 9        | Architecture, specifications, UX/UI, design system, data, and engineering documents | Domain-specific authoritative documents within their scope                 |
+| 10       | Guides such as Product Bible and Developer Bible                                    | Supporting guidance until superseded by Feature Complete project documents |
 
 Lower-priority documents must not override higher-priority documents.
 
@@ -272,8 +272,9 @@ Governance is successful when:
 
 ## Notes
 
-- Repository implementation of Project Constitution is pending a separate
-  lifecycle.
+- [00 Project Constitution](00-project-constitution.md) is implemented in the
+  repository, has **Feature Complete** status, and is the active highest-level
+  Source of Truth.
 - This document is at **Architecture Approved** status and awaits Final
   Architecture Review before **Feature Complete** may be recorded.
 - Git workflow, CI/CD, quality gates, and repository validation commands remain
