@@ -1,5 +1,27 @@
 # Changelog
 
+## DU Standard Specification — Architecture Approved
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `13 DU Standard Specification` — `docs/project/13-du-standard-specification.md`
+- статус: **Architecture Approved** (Repository Implementation)
+- DU Standard purpose, objectives, scope, core philosophy, twelve DU Principles, design/product/architecture/engineering/AI/accessibility/security/performance review criteria, certification levels, 100-point DU Score model, review workflow, governance
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md), [glossary](project/glossary.md)
+- статус документа 12 в INDEX обновлён на **Feature Complete**
+
+Не входит в этот этап:
+
+- Feature Complete (ожидает Final Architecture Review и Merge)
+- coding standards, implementation details, изменения documents 00–12
+- документ 14 и последующие
+
+Статус:
+
+DU Standard Specification (document 13) — Architecture Approved
+
 ## UI Component Specification — Architecture Approved
 
 Дата: 2026-08-03

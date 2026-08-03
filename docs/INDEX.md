@@ -7,6 +7,7 @@
 - [02 Project Governance Specification](project/02-project-governance-specification.md) — Feature Complete
 - [03 Engineering Standards Specification](project/03-engineering-standards-specification.md) — Feature Complete
 - [04 Product Architecture Specification](project/04-product-architecture-specification.md) — Feature Complete
+- [13 DU Standard Specification](project/13-du-standard-specification.md) — Architecture Approved
 - [Vision](project/vision.md)
 - [Principles](project/principles.md)
 - [Roadmap](project/roadmap.md)
@@ -27,7 +28,7 @@
 
 - [10 Visual Design System Specification](design-system/10-visual-design-system-specification.md) — Feature Complete
 - [11 Design Tokens Specification](design-system/11-design-tokens-specification.md) — Feature Complete
-- [12 UI Component Specification](design-system/12-ui-component-specification.md) — Architecture Approved
+- [12 UI Component Specification](design-system/12-ui-component-specification.md) — Feature Complete
 
 ## Architecture
 
