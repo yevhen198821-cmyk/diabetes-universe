@@ -1,5 +1,27 @@
 # Changelog
 
+## App Icon Architecture Specification — Architecture Approved
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `14 App Icon Architecture Specification` — `docs/design-system/14-app-icon-architecture-specification.md`
+- статус: **Architecture Approved** (Repository Implementation)
+- app icon philosophy, platform scope, Brand Symbol integration, composition, background, shape, scalability, recognition, accessibility, internationalization, motion compatibility, production principles, validation criteria, governance
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md), [design-system README](design-system/README.md), [glossary](project/glossary.md)
+
+Не входит в этот этап:
+
+- Feature Complete (ожидает Final Architecture Review и Merge)
+- icon artwork, mockups, colors, typography, SVG, PNG, implementation
+- документ 15 и последующие
+- изменения documents 00–13
+
+Статус:
+
+App Icon Architecture Specification (document 14) — Architecture Approved
+
 ## DU Standard Specification — Architecture Approved
 
 Дата: 2026-08-03

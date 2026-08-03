@@ -84,6 +84,7 @@ docs/
 - [11 Design Tokens Specification](docs/design-system/11-design-tokens-specification.md)
 - [12 UI Component Specification](docs/design-system/12-ui-component-specification.md)
 - [13 DU Standard Specification](docs/project/13-du-standard-specification.md)
+- [14 App Icon Architecture Specification](docs/design-system/14-app-icon-architecture-specification.md)
 - [Architecture](docs/architecture/README.md)
 - [Product Bible](docs/product-bible/README.md)
 - [Developer Bible](docs/developer-bible/README.md)
