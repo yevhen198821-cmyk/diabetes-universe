@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from 'react';
 
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model';
+import { prepareDashboardAiInsightPresentation } from '../../lib/dashboard/dashboard-ai-insight-presentation';
 import { nextStepSource } from '../../lib/mocks/timeline';
 import { createActivityTimelineEvent } from '../../lib/quick-add/create-activity-timeline-event';
 import { createGlucoseTimelineEvent } from '../../lib/quick-add/create-glucose-timeline-event';
@@ -29,12 +30,12 @@ import { DashboardLastGlucose } from './dashboard-last-glucose';
 import { resolveDashboardNextActionDemoStep } from './dashboard-next-action-labels';
 import { DashboardNextAction } from './dashboard-next-action';
 import { DashboardRecentEvents } from './dashboard-recent-events';
+import { resolveDashboardAiInsightLabels } from './dashboard-ai-insight-labels';
 import { DashboardShell } from './dashboard-shell';
 
 const DASHBOARD_LOCALE = 'ru-RU';
 
 const mockAiInsight = {
-  displayTime: '10:20',
   generatedAt: '2026-08-02T07:20:00.000Z',
   id: 'insight-demo',
   relatedEventIds: ['glucose-0800', 'nutrition-0820'],
@@ -76,6 +77,19 @@ export function DashboardRoot() {
       formatter.formatTime(dateTime, { timeStyle: 'short' }),
     [formatter],
   );
+  const aiInsightPresentationLabels = useMemo(
+    () => resolveDashboardAiInsightLabels(localization),
+    [localization],
+  );
+  const formatAiInsightDisplayTime = useMemo(
+    () => (generatedAt: string) =>
+      formatter.formatTime(generatedAt, { timeStyle: 'short' }),
+    [formatter],
+  );
+  const formatAiInsightRelatedEventsCount = useMemo(
+    () => (count: number) => formatter.formatNumber(count),
+    [formatter],
+  );
 
   const derivedBlocks = useMemo(
     () =>
@@ -102,6 +116,25 @@ export function DashboardRoot() {
       referenceTime,
     ],
   );
+
+  const presentedAiInsight = useMemo(() => {
+    if (!derivedBlocks.aiInsight) {
+      return null;
+    }
+
+    return prepareDashboardAiInsightPresentation(derivedBlocks.aiInsight, {
+      formatDisplayTime: formatAiInsightDisplayTime,
+      formatRelatedEventsCount: formatAiInsightRelatedEventsCount,
+      relatedEventsLabel: aiInsightPresentationLabels.relatedEventsLabel,
+      relatedEventsNone: aiInsightPresentationLabels.relatedEventsNone,
+    });
+  }, [
+    aiInsightPresentationLabels.relatedEventsLabel,
+    aiInsightPresentationLabels.relatedEventsNone,
+    derivedBlocks.aiInsight,
+    formatAiInsightDisplayTime,
+    formatAiInsightRelatedEventsCount,
+  ]);
 
   const returnFocusRef =
     quickAddState.lastOpenTrigger === 'header'
@@ -142,11 +175,8 @@ export function DashboardRoot() {
     <>
       <DashboardShell
         aiInsight={
-          derivedBlocks.aiInsight ? (
-            <DashboardAiInsight
-              insight={derivedBlocks.aiInsight}
-              state="ready"
-            />
+          presentedAiInsight ? (
+            <DashboardAiInsight insight={presentedAiInsight} state="ready" />
           ) : (
             <DashboardAiInsight state="empty" />
           )

@@ -1,17 +1,29 @@
+'use client';
+
 import { EventCard } from '@diabetes-universe/ui';
 import { Sparkles } from 'lucide-react';
+import { useMemo } from 'react';
 
+import { useLocalization } from '../../lib/platform/react/use-localization';
 import { mapDashboardAiInsightToCard } from './dashboard-ai-insight-card.mapper';
+import { resolveDashboardAiInsightLabels } from './dashboard-ai-insight-labels';
 import {
   createDashboardAiInsightViewModel,
-  dashboardAiInsightLabels,
   type DashboardAiInsightProps,
 } from './dashboard-ai-insight-model';
 
 const titleId = 'dashboard-ai-insight-title';
 
 export function DashboardAiInsight(props: DashboardAiInsightProps) {
-  const viewModel = createDashboardAiInsightViewModel(props);
+  const localization = useLocalization();
+  const labels = useMemo(
+    () => resolveDashboardAiInsightLabels(localization),
+    [localization],
+  );
+  const viewModel = useMemo(
+    () => createDashboardAiInsightViewModel(props, labels),
+    [labels, props],
+  );
   const isError = viewModel.state === 'error';
 
   return (
@@ -27,7 +39,7 @@ export function DashboardAiInsight(props: DashboardAiInsightProps) {
       {viewModel.state === 'loading' ? (
         <>
           <h2 className="sr-only" id={titleId}>
-            {dashboardAiInsightLabels.title}
+            {labels.title}
           </h2>
           <span className="sr-only" role="status">
             {viewModel.message}
@@ -53,13 +65,13 @@ export function DashboardAiInsight(props: DashboardAiInsightProps) {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                {dashboardAiInsightLabels.eyebrow}
+                {labels.eyebrow}
               </p>
               <h2
                 className="mt-0.5 text-lg font-bold text-slate-950 dark:text-slate-50"
                 id={titleId}
               >
-                {dashboardAiInsightLabels.title}
+                {labels.title}
               </h2>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 {viewModel.insight.disclaimer}
@@ -96,7 +108,7 @@ export function DashboardAiInsight(props: DashboardAiInsightProps) {
               className="text-lg font-bold text-slate-950 dark:text-slate-50"
               id={titleId}
             >
-              {dashboardAiInsightLabels.title}
+              {labels.title}
             </h2>
             <p
               className={`mt-2 text-sm ${

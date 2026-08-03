@@ -1,8 +1,11 @@
+import type { DashboardAiInsightLabels } from './dashboard-ai-insight-labels';
+
 export interface DashboardAiInsightData {
   readonly displayTime: string;
   readonly generatedAt: string;
   readonly id: string;
   readonly relatedEventIds: readonly string[];
+  readonly relatedEventsLabel: string;
   readonly summary: string;
   readonly title: string;
 }
@@ -13,8 +16,16 @@ export interface DashboardAiInsightEngineRequest {
   readonly timeZone: string;
 }
 
+export interface DashboardAiInsightEngineInsight {
+  readonly generatedAt: string;
+  readonly id: string;
+  readonly relatedEventIds: readonly string[];
+  readonly summary: string;
+  readonly title: string;
+}
+
 export interface DashboardAiInsightEngineResponse {
-  readonly insight: DashboardAiInsightData | null;
+  readonly insight: DashboardAiInsightEngineInsight | null;
 }
 
 export interface DashboardAiInsightEngine {
@@ -67,17 +78,6 @@ export interface DashboardAiInsightViewModel {
   readonly state: 'empty' | 'error' | 'loading' | 'ready';
 }
 
-export const dashboardAiInsightLabels = {
-  defaultEmpty: 'ИИ-объяснение пока недоступно.',
-  defaultError: 'Не удалось загрузить ИИ-объяснение.',
-  disclaimer: 'Не является диагнозом или назначением лечения.',
-  eyebrow: 'Автоматическое объяснение',
-  loading: 'Загрузка ИИ-объяснения',
-  relatedEvents: 'Связанные записи',
-  title: 'ИИ-объяснение',
-  unavailable: 'ИИ-объяснение недоступно.',
-} as const;
-
 const forbiddenInsightPatterns = [
   /диагноз/i,
   /диагностир/i,
@@ -118,22 +118,16 @@ function normalizeRelatedEventIds(
     .filter((eventId) => eventId.length > 0);
 }
 
-function formatRelatedEventsLabel(count: number): string {
-  if (count === 0) {
-    return `${dashboardAiInsightLabels.relatedEvents}: нет подтверждённых записей`;
-  }
-
-  return `${dashboardAiInsightLabels.relatedEvents}: ${count}`;
-}
-
 function normalizeReadyInsight(
   insight: DashboardAiInsightData,
+  labels: DashboardAiInsightLabels,
 ): DashboardAiInsightReadyViewModel | null {
   const id = insight.id.trim();
   const title = insight.title.trim();
   const summary = insight.summary.trim();
   const displayTime = insight.displayTime.trim();
   const generatedAt = insight.generatedAt.trim();
+  const relatedEventsLabel = insight.relatedEventsLabel.trim();
   const relatedEventIds = normalizeRelatedEventIds(insight.relatedEventIds);
   const combinedContent = `${title}\n${summary}`;
 
@@ -143,6 +137,7 @@ function normalizeReadyInsight(
     summary.length === 0 ||
     displayTime.length === 0 ||
     generatedAt.length === 0 ||
+    relatedEventsLabel.length === 0 ||
     !isValidIsoDateTime(generatedAt) ||
     containsForbiddenAiInsightContent(combinedContent)
   ) {
@@ -150,18 +145,21 @@ function normalizeReadyInsight(
   }
 
   return {
-    disclaimer: dashboardAiInsightLabels.disclaimer,
+    disclaimer: labels.disclaimer,
     displayTime,
     generatedAt,
     id,
     relatedEventCount: relatedEventIds.length,
-    relatedEventsLabel: formatRelatedEventsLabel(relatedEventIds.length),
+    relatedEventsLabel,
     summary,
     title,
   };
 }
 
-function createEmptyViewModel(message: string): DashboardAiInsightViewModel {
+function createEmptyViewModel(
+  labels: DashboardAiInsightLabels,
+  message: string,
+): DashboardAiInsightViewModel {
   return {
     insight: null,
     isLoading: false,
@@ -172,20 +170,21 @@ function createEmptyViewModel(message: string): DashboardAiInsightViewModel {
 
 export function createDashboardAiInsightViewModel(
   props: DashboardAiInsightProps,
+  labels: DashboardAiInsightLabels,
 ): DashboardAiInsightViewModel {
   switch (props.state) {
     case 'loading':
       return {
         insight: null,
         isLoading: true,
-        message: props.loadingLabel?.trim() || dashboardAiInsightLabels.loading,
+        message: props.loadingLabel?.trim() || labels.loading,
         state: props.state,
       };
     case 'ready': {
-      const insight = normalizeReadyInsight(props.insight);
+      const insight = normalizeReadyInsight(props.insight, labels);
 
       if (!insight) {
-        return createEmptyViewModel(dashboardAiInsightLabels.unavailable);
+        return createEmptyViewModel(labels, labels.unavailable);
       }
 
       return {
@@ -199,14 +198,14 @@ export function createDashboardAiInsightViewModel(
       return {
         insight: null,
         isLoading: false,
-        message: props.message?.trim() || dashboardAiInsightLabels.defaultEmpty,
+        message: props.message?.trim() || labels.defaultEmpty,
         state: props.state,
       };
     case 'error':
       return {
         insight: null,
         isLoading: false,
-        message: props.message?.trim() || dashboardAiInsightLabels.defaultError,
+        message: props.message?.trim() || labels.defaultError,
         state: props.state,
       };
   }

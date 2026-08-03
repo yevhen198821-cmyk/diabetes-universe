@@ -14,7 +14,6 @@ import {
 } from '../timeline/timeline-selectors';
 
 export interface DashboardDerivedAiInsight {
-  readonly displayTime: string;
   readonly generatedAt: string;
   readonly id: string;
   readonly relatedEventIds: readonly string[];
