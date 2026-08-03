@@ -58,7 +58,7 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
   ).toBeHidden();
   await expect(daySummary.getByText('9 ЕД')).toBeVisible();
 
-  await page.getByRole('link', { name: 'Все события' }).click();
+  await page.getByRole('link', { name: 'All events' }).click();
 
   await expect(page).toHaveURL('/timeline');
   await expect(
@@ -114,7 +114,7 @@ test('next action opens insulin quick add directly and updates dashboard', async
     page.getByRole('button', { name: 'Add', exact: true }),
   ).toBeFocused();
 
-  await page.getByRole('link', { name: 'Все события' }).click();
+  await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
   await expect(page.getByText('2 ЕД').first()).toBeVisible();
 });

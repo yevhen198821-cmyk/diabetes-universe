@@ -71,6 +71,11 @@ export function DashboardRoot() {
     () => (date: Date) => formatter.formatDate(date, { dateStyle: 'full' }),
     [formatter],
   );
+  const formatRecentEventDisplayTime = useMemo(
+    () => (dateTime: string) =>
+      formatter.formatTime(dateTime, { timeStyle: 'short' }),
+    [formatter],
+  );
 
   const derivedBlocks = useMemo(
     () =>
@@ -80,6 +85,7 @@ export function DashboardRoot() {
           aiInsight: mockAiInsight,
           formatDaySummaryDisplayDate,
           formatLastGlucoseDisplayTime,
+          formatRecentEventDisplayTime,
           locale: DASHBOARD_LOCALE,
           referenceTime,
           remindersCompleted: 1,
@@ -92,6 +98,7 @@ export function DashboardRoot() {
       events,
       formatDaySummaryDisplayDate,
       formatLastGlucoseDisplayTime,
+      formatRecentEventDisplayTime,
       referenceTime,
     ],
   );

@@ -7,7 +7,7 @@ the Dashboard without reproducing Timeline structure or behavior.
 
 ## Status
 
-Approved
+Approved — I18N-02B4 architecture audit complete (implementation pending)
 
 ## Responsibility
 

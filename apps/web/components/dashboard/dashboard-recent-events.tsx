@@ -1,18 +1,30 @@
+'use client';
+
 import { EventCard } from '@diabetes-universe/ui';
 import { History } from 'lucide-react';
 import Link from 'next/link';
+import { useMemo } from 'react';
 
+import { useLocalization } from '../../lib/platform/react/use-localization';
 import { mapDashboardRecentEventToCard } from './dashboard-recent-events-card.mapper';
+import { resolveDashboardRecentEventsLabels } from './dashboard-recent-events-labels';
 import {
   createDashboardRecentEventsViewModel,
-  dashboardRecentEventsLabels,
   type DashboardRecentEventsProps,
 } from './dashboard-recent-events-model';
 
 const titleId = 'dashboard-recent-events-title';
 
 export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
-  const viewModel = createDashboardRecentEventsViewModel(props);
+  const localization = useLocalization();
+  const labels = useMemo(
+    () => resolveDashboardRecentEventsLabels(localization),
+    [localization],
+  );
+  const viewModel = useMemo(
+    () => createDashboardRecentEventsViewModel(props, labels),
+    [labels, props],
+  );
   const isError = viewModel.state === 'error';
 
   return (
@@ -28,7 +40,7 @@ export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
       {viewModel.state === 'loading' ? (
         <>
           <h2 className="sr-only" id={titleId}>
-            {dashboardRecentEventsLabels.title}
+            {labels.title}
           </h2>
           <span className="sr-only" role="status">
             {viewModel.message}
@@ -61,7 +73,7 @@ export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
                 className="text-lg font-bold text-slate-950 dark:text-slate-50"
                 id={titleId}
               >
-                {dashboardRecentEventsLabels.title}
+                {labels.title}
               </h2>
             </div>
             <Link
@@ -105,7 +117,7 @@ export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
               className="text-lg font-bold text-slate-950 dark:text-slate-50"
               id={titleId}
             >
-              {dashboardRecentEventsLabels.title}
+              {labels.title}
             </h2>
             <p
               className={`mt-2 text-sm ${

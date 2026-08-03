@@ -27,7 +27,7 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
 
   await expect(lastGlucoseRegion.getByText('7,7 ммоль/л')).toBeVisible();
 
-  await page.getByRole('link', { name: 'Все события' }).click();
+  await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
   await waitForApplicationReady(page);
 
@@ -46,7 +46,7 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
     page.getByRole('region', { name: 'Last glucose' }).getByText('8,2 ммоль/л'),
   ).toBeVisible();
 
-  await page.getByRole('link', { name: 'Все события' }).click();
+  await page.getByRole('link', { name: 'All events' }).click();
   await page
     .getByRole('button', { name: /Открыть событие: Глюкоза, 8,2 ммоль\/л/ })
     .click();

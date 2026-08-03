@@ -8,6 +8,13 @@ const referenceTime = new Date('2026-08-02T10:00:00.000Z');
 
 const formatDaySummaryDisplayDate = () => 'Sunday, 2 August 2026';
 
+const categoryLabels = {
+  activity: 'Activity',
+  insulin: 'Insulin',
+  medication: 'Medication',
+  nutrition: 'Nutrition',
+};
+
 const formatUtcShortTime = (dateTime) => {
   const date = new Date(dateTime);
 
@@ -200,7 +207,10 @@ test('derives recent event sources that can be sorted by latest event time', () 
     },
     { formatDaySummaryDisplayDate, referenceTime, timeZone: 'Europe/Moscow' },
   );
-  const selected = selectDashboardRecentEvents(blocks.recentEvents);
+  const selected = selectDashboardRecentEvents(
+    blocks.recentEvents,
+    categoryLabels,
+  );
 
   assert.deepEqual(
     selected.map((event) => event.id),

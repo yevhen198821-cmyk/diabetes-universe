@@ -1,5 +1,7 @@
 import type { EventCardType } from '@diabetes-universe/ui';
 
+import type { DashboardRecentEventsLabels } from './dashboard-recent-events-labels';
+
 export type DashboardRecentEventCategory =
   'activity' | 'insulin' | 'medication' | 'nutrition';
 
@@ -65,24 +67,12 @@ export interface DashboardRecentEventsViewModel {
 
 export const DASHBOARD_RECENT_EVENTS_MAX_CARDS = 4;
 
-export const dashboardRecentEventCategoryLabels: Record<
-  DashboardRecentEventCategory,
-  string
-> = {
-  activity: 'Активность',
-  insulin: 'Инсулин',
-  medication: 'Лекарства',
-  nutrition: 'Питание',
-};
-
-export const dashboardRecentEventsLabels = {
-  defaultEmpty: 'Недавних событий пока нет.',
-  defaultError: 'Не удалось загрузить недавние события.',
-  loading: 'Загрузка недавних событий',
-  title: 'Недавние события',
-  unavailable: 'Недавние события недоступны.',
-  viewAll: 'Все события',
-} as const;
+const APPROVED_RECENT_EVENT_CATEGORIES = new Set<DashboardRecentEventCategory>([
+  'activity',
+  'insulin',
+  'medication',
+  'nutrition',
+]);
 
 const categoryToCardType: Record<DashboardRecentEventCategory, EventCardType> =
   {
@@ -94,6 +84,14 @@ const categoryToCardType: Record<DashboardRecentEventCategory, EventCardType> =
 
 function isValidIsoDateTime(dateTime: string): boolean {
   return !Number.isNaN(Date.parse(dateTime));
+}
+
+function isApprovedRecentEventCategory(
+  category: string,
+): category is DashboardRecentEventCategory {
+  return APPROVED_RECENT_EVENT_CATEGORIES.has(
+    category as DashboardRecentEventCategory,
+  );
 }
 
 function normalizeRecentEventSource(
@@ -114,7 +112,7 @@ function normalizeRecentEventSource(
     displayTime.length === 0 ||
     dateTime.length === 0 ||
     !isValidIsoDateTime(dateTime) ||
-    !(event.category in dashboardRecentEventCategoryLabels)
+    !isApprovedRecentEventCategory(event.category)
   ) {
     return null;
   }
@@ -133,11 +131,12 @@ function normalizeRecentEventSource(
 
 function toRecentEventCard(
   event: DashboardRecentEventSource,
+  categoryLabels: DashboardRecentEventsLabels['categories'],
 ): DashboardRecentEventCard {
   return {
     cardType: categoryToCardType[event.category],
     category: event.category,
-    categoryLabel: dashboardRecentEventCategoryLabels[event.category],
+    categoryLabel: categoryLabels[event.category],
     context: event.context,
     dateTime: event.dateTime,
     displayTime: event.displayTime,
@@ -150,6 +149,7 @@ function toRecentEventCard(
 
 export function selectDashboardRecentEvents(
   events: readonly DashboardRecentEventSource[],
+  categoryLabels: DashboardRecentEventsLabels['categories'],
 ): DashboardRecentEventCard[] {
   const latestByCategory = new Map<
     DashboardRecentEventCategory,
@@ -179,44 +179,50 @@ export function selectDashboardRecentEvents(
       (left, right) => Date.parse(right.dateTime) - Date.parse(left.dateTime),
     )
     .slice(0, DASHBOARD_RECENT_EVENTS_MAX_CARDS)
-    .map(toRecentEventCard);
+    .map((event) => toRecentEventCard(event, categoryLabels));
 }
 
-function createEmptyViewModel(message: string): DashboardRecentEventsViewModel {
+function createEmptyViewModel(
+  labels: DashboardRecentEventsLabels,
+  message: string,
+): DashboardRecentEventsViewModel {
   return {
     events: [],
     isLoading: false,
     message,
     state: 'empty',
     viewAllHref: null,
-    viewAllLabel: dashboardRecentEventsLabels.viewAll,
+    viewAllLabel: labels.viewAll,
   };
 }
 
 export function createDashboardRecentEventsViewModel(
   props: DashboardRecentEventsProps,
+  labels: DashboardRecentEventsLabels,
 ): DashboardRecentEventsViewModel {
   switch (props.state) {
     case 'loading':
       return {
         events: [],
         isLoading: true,
-        message:
-          props.loadingLabel?.trim() || dashboardRecentEventsLabels.loading,
+        message: props.loadingLabel?.trim() || labels.loading,
         state: props.state,
         viewAllHref: null,
-        viewAllLabel: dashboardRecentEventsLabels.viewAll,
+        viewAllLabel: labels.viewAll,
       };
     case 'ready': {
-      const events = selectDashboardRecentEvents(props.events);
+      const events = selectDashboardRecentEvents(
+        props.events,
+        labels.categories,
+      );
       const viewAllHref = props.viewAllHref.trim();
 
       if (events.length === 0) {
-        return createEmptyViewModel(dashboardRecentEventsLabels.defaultEmpty);
+        return createEmptyViewModel(labels, labels.defaultEmpty);
       }
 
       if (viewAllHref.length === 0) {
-        return createEmptyViewModel(dashboardRecentEventsLabels.unavailable);
+        return createEmptyViewModel(labels, labels.unavailable);
       }
 
       return {
@@ -225,28 +231,26 @@ export function createDashboardRecentEventsViewModel(
         message: null,
         state: props.state,
         viewAllHref,
-        viewAllLabel: dashboardRecentEventsLabels.viewAll,
+        viewAllLabel: labels.viewAll,
       };
     }
     case 'empty':
       return {
         events: [],
         isLoading: false,
-        message:
-          props.message?.trim() || dashboardRecentEventsLabels.defaultEmpty,
+        message: props.message?.trim() || labels.defaultEmpty,
         state: props.state,
         viewAllHref: null,
-        viewAllLabel: dashboardRecentEventsLabels.viewAll,
+        viewAllLabel: labels.viewAll,
       };
     case 'error':
       return {
         events: [],
         isLoading: false,
-        message:
-          props.message?.trim() || dashboardRecentEventsLabels.defaultError,
+        message: props.message?.trim() || labels.defaultError,
         state: props.state,
         viewAllHref: null,
-        viewAllLabel: dashboardRecentEventsLabels.viewAll,
+        viewAllLabel: labels.viewAll,
       };
   }
 }

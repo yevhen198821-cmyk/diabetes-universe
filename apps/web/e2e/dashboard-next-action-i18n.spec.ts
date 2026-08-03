@@ -40,7 +40,7 @@ test('dashboard next action renders localized English copy and opens insulin qui
     page.getByRole('button', { name: 'Add', exact: true }),
   ).toBeFocused();
 
-  await page.getByRole('link', { name: 'Все события' }).click();
+  await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
   await waitForApplicationReady(page);
   await expect(page.getByText('2 ЕД').first()).toBeVisible();
