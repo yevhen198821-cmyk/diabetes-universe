@@ -80,6 +80,7 @@ docs/
 - [07 Brand Identity Specification](docs/brand/07-brand-identity-specification.md)
 - [08 Brand Governance Specification](docs/brand/08-brand-governance-specification.md)
 - [09 Brand Book](docs/brand/09-brand-book.md)
+- [10 Visual Design System Specification](docs/design-system/10-visual-design-system-specification.md)
 - [Architecture](docs/architecture/README.md)
 - [Product Bible](docs/product-bible/README.md)
 - [Developer Bible](docs/developer-bible/README.md)

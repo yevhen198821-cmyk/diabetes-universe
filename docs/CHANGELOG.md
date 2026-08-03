@@ -1,5 +1,28 @@
 # Changelog
 
+## Visual Design System Specification — Architecture Approved
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `10 Visual Design System Specification` — `docs/design-system/10-visual-design-system-specification.md`
+- статус: **Architecture Approved** (Repository Implementation)
+- design system objectives, principles, platform scope, architecture layers, foundation and semantic token categories, layout, typography, color, spacing, shape, border, elevation, motion, medical and AI interface principles, status treatment, themes, responsiveness, accessibility, internationalization, cross-platform consistency, governance
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md)
+- статус документа 09 в INDEX обновлён на **Feature Complete**
+
+Не входит в этот этап:
+
+- Feature Complete (ожидает Final Architecture Review и Merge)
+- final design-token values, production token files, component APIs, UI implementation
+- документ 11 и последующие
+- изменения documents 05–09
+
+Статус:
+
+Visual Design System Specification (document 10) — Architecture Approved
+
 ## Brand Book — Architecture Approved
 
 Дата: 2026-08-03
