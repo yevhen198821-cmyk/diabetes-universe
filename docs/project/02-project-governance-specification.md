@@ -85,7 +85,7 @@ version supersedes it.
 | 1        | **00 Project Constitution**                                                         | Highest authority; repository implementation of Project Constitution is pending a separate lifecycle |
 | 2        | **02 Project Governance Specification**                                             | This document                                                                                        |
 | 3        | [01 Project Development Specification](01-project-development-specification.md)     | Feature Complete                                                                                     |
-| 4        | **03 Engineering Standards Specification**                                          | Future document in the approved sequence; format not defined here                                    |
+| 4        | [03 Engineering Standards Specification](03-engineering-standards-specification.md) | Architecture Approved                                                                                |
 | 5        | [Development Standard](development-standard.md)                                     | Linked standard under document 01                                                                    |
 | 6        | [Documentation Standard](documentation-standard.md)                                 | Linked standard under document 01                                                                    |
 | 7        | [Project Rules](project-rules.md)                                                   | Mandatory project constraints                                                                        |
@@ -176,8 +176,8 @@ Registration is mandatory when a decision affects:
 - cross-cutting policies with long-term maintenance impact;
 - approved specification structure or governance boundaries.
 
-This document does not define ADR record format. ADR format will be established in
-**03 Engineering Standards Specification**.
+This document does not define ADR record format. ADR format is defined in
+[03 Engineering Standards Specification](03-engineering-standards-specification.md).
 
 Existing ADRs in `docs/adr/` remain authoritative decision records until
 superseded.
@@ -280,5 +280,5 @@ Governance is successful when:
   defined only in
   [01 Project Development Specification](01-project-development-specification.md)
   and [Development Standard](development-standard.md).
-- Engineering standards and ADR format are reserved for
-  **03 Engineering Standards Specification**.
+- Engineering standards and ADR format are defined in
+  [03 Engineering Standards Specification](03-engineering-standards-specification.md).
