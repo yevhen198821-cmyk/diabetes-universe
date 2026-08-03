@@ -69,6 +69,8 @@ docs/
 
 ## Documentation
 
+- [Documentation Index](docs/INDEX.md)
+- [01 Project Development Specification](docs/project/01-project-development-specification.md)
 - [Architecture](docs/architecture/README.md)
 - [Product Bible](docs/product-bible/README.md)
 - [Developer Bible](docs/developer-bible/README.md)
