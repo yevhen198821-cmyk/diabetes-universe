@@ -384,11 +384,131 @@ DU Standard is successful when:
 - the review workflow from Draft to Feature Complete is defined;
 - governance rules for ownership, responsibilities, versioning, and change
   management are documented;
+- continuous improvement framework for evolution, deprecation, and periodic
+  review is documented;
 - documentation navigation reflects the specification entry;
 - no coding standards, implementation details, or redefinitions of documents
   `03`–`12` are introduced;
 - contradictions with approved architecture are reported as **Blocked** instead
   of being resolved through independent quality redesign.
+
+## 20. Continuous Improvement
+
+DU Standard is a living quality framework. It evolves through governed
+improvement cycles without compromising approved architecture or user trust.
+
+### Evolution of DU Standard
+
+DU Standard evolves when:
+
+- new product surfaces, platforms, or domains require extended review criteria;
+- recurring review findings reveal gaps in principles or scoring;
+- ecosystem scale demands refined certification thresholds;
+- approved upstream documents (`00`–`12`) introduce new governed requirements
+  that DU Standard must reference without duplication.
+
+Evolution follows the change management rules in
+[Governance](#governance). Breaking changes require a major version increment.
+
+### Introduction of New DU Principles
+
+New DU Principles may be introduced when a recurring quality gap cannot be
+addressed by existing principles or review criteria.
+
+The process:
+
+1. Document the quality gap with evidence from DU Reviews or lessons learned.
+2. Propose the principle with clear scope and evaluative questions.
+3. Verify compatibility with [Core Philosophy](#core-philosophy) and existing
+   principles.
+4. Obtain architectural approval through
+   [02 Project Governance Specification](02-project-governance-specification.md).
+5. Record the addition in a governed version increment.
+
+Principles are not added for single incidents, local convenience, or
+undocumented team preference.
+
+### Deprecation Process
+
+Review criteria, principles, or certification guidance may be deprecated when
+they are superseded, no longer applicable, or contradicted by approved
+architecture.
+
+Deprecation requires:
+
+- explicit deprecation notice in a governed version increment;
+- migration guidance for in-flight deliverables;
+- a defined sunset period before removal;
+- traceability through changelog and governance records.
+
+Deprecated items remain enforceable until the sunset date unless an approved
+exception applies.
+
+### Lessons Learned Integration
+
+Lessons learned from DU Reviews, incidents, audits, and post-release
+evaluations must be:
+
+- recorded in governed documentation or decision records;
+- categorized by review domain (design, product, architecture, engineering, AI,
+  accessibility, security, performance);
+- evaluated for impact on DU Principles, review criteria, or scoring;
+- integrated through the governed change process — not through ad hoc rule
+  changes.
+
+Recurring lessons learned that affect quality standards trigger a DU Standard
+review cycle.
+
+### Periodic Review Process
+
+DU Standard undergoes periodic architectural review at least once per major
+product phase or annually, whichever comes first.
+
+Periodic review evaluates:
+
+- continued alignment with documents `00`–`12`;
+- effectiveness of DU Principles and review criteria;
+- certification level distribution and score trends;
+- gaps revealed by lessons learned;
+- need for new principles, criteria, or version increments.
+
+Periodic review outcomes are recorded as pass, revision required, or major
+revision required.
+
+### Backward Compatibility Principles
+
+DU Standard changes must preserve backward compatibility unless a major version
+increment is approved.
+
+| Change type                      | Compatibility expectation                         |
+| -------------------------------- | ------------------------------------------------- |
+| Clarifications and additions     | Backward-compatible within the same major version |
+| New review criteria (additive)   | Existing certifications remain valid              |
+| Modified scoring weights         | Requires migration guidance                       |
+| Removed principles or criteria   | Major version; deprecation process required       |
+| Changed certification thresholds | Major version; migration guidance required        |
+
+In-flight deliverables evaluated under a prior version may complete under that
+version until the governed sunset date.
+
+### Continuous Quality Improvement
+
+Continuous quality improvement is the ongoing practice of raising the quality
+bar across all governed domains.
+
+Practices include:
+
+- applying DU Review findings to future deliverables;
+- tracking certification trends across modules and documents;
+- identifying systemic weaknesses before they reach users;
+- reinforcing trust-centered decision-making in every review cycle;
+- aligning improvement actions with
+  [DU Principles](#du-principles) — especially Trust First, Simplicity Before
+  Complexity, and World-Class Ready.
+
+Continuous improvement does not authorize bypassing governance, lowering
+certification thresholds, or implementing changes without architectural
+approval.
 
 ## Notes
 
