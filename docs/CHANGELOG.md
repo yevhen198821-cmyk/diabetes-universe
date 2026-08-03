@@ -1,5 +1,27 @@
 # Changelog
 
+## Brand Book — Architecture Approved
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `09 Brand Book` — `docs/brand/09-brand-book.md`
+- статус: **Architecture Approved** (Repository Implementation)
+- brand overview, strategy summary, brand DNA, personality, positioning, visual philosophy, logo architecture summary, brand identity summary, brand governance summary, usage principles, tone of voice summary, accessibility summary, internationalization summary, brand do & don't, documentation references, version history (Brand Book v1.0)
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md)
+- статус документа 08 в INDEX обновлён на **Feature Complete**
+
+Не входит в этот этап:
+
+- Feature Complete (ожидает Final Architecture Review и Merge)
+- логотип, SVG, цвета, шрифты, иконки, иллюстрации, фотографии
+- документ 10 и последующие
+
+Статус:
+
+Brand Book (document 09) — Architecture Approved
+
 ## Brand Governance Specification — Architecture Approved
 
 Дата: 2026-08-03

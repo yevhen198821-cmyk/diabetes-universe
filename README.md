@@ -79,6 +79,7 @@ docs/
 - [06 Logo Architecture Specification](docs/brand/06-logo-architecture-specification.md)
 - [07 Brand Identity Specification](docs/brand/07-brand-identity-specification.md)
 - [08 Brand Governance Specification](docs/brand/08-brand-governance-specification.md)
+- [09 Brand Book](docs/brand/09-brand-book.md)
 - [Architecture](docs/architecture/README.md)
 - [Product Bible](docs/product-bible/README.md)
 - [Developer Bible](docs/developer-bible/README.md)

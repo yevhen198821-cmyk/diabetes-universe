@@ -20,7 +20,8 @@
 - [05 Brand Architecture Specification](brand/05-brand-architecture-specification.md) — Feature Complete
 - [06 Logo Architecture Specification](brand/06-logo-architecture-specification.md) — Feature Complete
 - [07 Brand Identity Specification](brand/07-brand-identity-specification.md) — Feature Complete
-- [08 Brand Governance Specification](brand/08-brand-governance-specification.md) — Architecture Approved
+- [08 Brand Governance Specification](brand/08-brand-governance-specification.md) — Feature Complete
+- [09 Brand Book](brand/09-brand-book.md) — Architecture Approved
 
 ## Architecture
 
