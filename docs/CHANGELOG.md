@@ -1,5 +1,42 @@
 # Changelog
 
+## Dashboard Recent Events Localization — Feature Complete
+
+Дата: 2026-08-03
+
+Завершено:
+
+- Dashboard Recent Events Localization Migration (I18N-02B4) — `apps/web/components/dashboard/dashboard-recent-events*`
+- пятый вертикальный Dashboard migration slice: `useLocalization()` (block chrome, state labels, category subtitles) + `useFormatter()` (container)
+- English canonical `dashboard.recentEvents.*` keys (10) в `@diabetes-universe/locales`
+- display time via single `PlatformFormatter.formatTime()` call at `dashboard-root` → `deriveDashboardRecentEventSources` boundary
+- Dashboard-only formatter derivation layer (`dashboard-recent-events-derivation.ts`); `timeline-selectors.ts` unchanged vs `main`
+- two-stage selector pipeline preserved: derivation sort/filter/limit → `selectDashboardRecentEvents()` latest-per-category, sort desc, limit 4
+- transitional pass-through for `title`, `context`, `value`, `unit`; glucose/note excluded from Recent Events derivation
+- pure presentation model boundary; preload без изменений (`common` + `dashboard`)
+- unit, integration, resource, and E2E coverage (`dashboard-recent-events-i18n.spec.ts`)
+- architecture documentation и Engineering Audit
+- squash merge: PR #27 (`d49f38e` → `52b26ce` on `main`)
+- web tests: 364 total; E2E: 27 total
+
+Не входит в этот этап:
+
+- Dashboard Header (I18N-02A — Feature Complete)
+- Dashboard Next Action (I18N-02B1 — Feature Complete)
+- Dashboard Last Glucose (I18N-02B2 — Feature Complete)
+- Dashboard Day Summary (I18N-02B3 — Feature Complete)
+- AI Insight (I18N-02B5+)
+- Timeline и Quick Add product source migration
+- `formatMeasurement()` / structural measurement contract
+- `uk`, `de`, `ru` professional translations
+- locale switch UI, cookie persistence
+- ICU MessageFormat interpolation
+- route-aware preload orchestration
+
+Статус:
+
+Dashboard Recent Events Localization (I18N-02B4) — Feature Complete ✅
+
 ## Dashboard Day Summary Localization — Feature Complete
 
 Дата: 2026-08-02

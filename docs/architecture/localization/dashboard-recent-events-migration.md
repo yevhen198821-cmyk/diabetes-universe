@@ -2,7 +2,7 @@
 
 ## Status
 
-Implementation Complete — Ready for Review
+Approved — Feature Complete (merged via PR #27)
 
 ## Purpose
 
@@ -15,7 +15,7 @@ conditions.
 No production code changes are made at this stage.
 
 > **Update (implementation):** The approved minimal presentation-only slice is
-> implemented on branch `feature/i18n-dashboard-recent-events`. See
+> merged to `main` via PR #27 (`52b26ce`). See
 > [Localization integration (implemented)](#localization-integration-implemented)
 > and [Engineering Audit (I18N-02B4)](#engineering-audit-i18n-02b4) below.
 
@@ -773,10 +773,10 @@ Quick Add structural contracts migrate.
 | Field      | Value                                            |
 | ---------- | ------------------------------------------------ |
 | Stage      | I18N-02B4 — Dashboard Recent Events Localization |
-| Phase      | **Implementation Complete — Ready for Review**   |
-| Base       | `main` @ `af866d9`                               |
-| Branch     | `feature/i18n-dashboard-recent-events`           |
-| Commit/PR  | Not performed (per task instructions)            |
+| Phase      | **Feature Complete** (merged via PR #27)         |
+| Base       | `main` @ `5a53d82`                               |
+| Branch     | `cursor/i18n-dashboard-recent-events-f9c2`       |
+| Commit/PR  | squash merge `52b26ce` (PR #27)                  |
 | Unit tests | **356** web (+14)                                |
 | E2E tests  | **27** (+1)                                      |
 
