@@ -70,6 +70,7 @@ docs/
 ## Documentation
 
 - [Documentation Index](docs/INDEX.md)
+- [02 Project Governance Specification](docs/project/02-project-governance-specification.md)
 - [01 Project Development Specification](docs/project/01-project-development-specification.md)
 - [Architecture](docs/architecture/README.md)
 - [Product Bible](docs/product-bible/README.md)

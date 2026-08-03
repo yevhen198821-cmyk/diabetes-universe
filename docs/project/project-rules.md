@@ -35,6 +35,10 @@ Exceptions require explicit architecture or product review and must be recorded
 in the appropriate ADR, specification, or changelog entry. Silent exceptions are
 not allowed.
 
+Required exception fields and prohibition of permanent unmanaged exceptions are
+defined in
+[02 Project Governance Specification](02-project-governance-specification.md).
+
 ## Review
 
 Reviewers reject changes that:
@@ -46,3 +50,6 @@ Reviewers reject changes that:
 
 See [01 Project Development Specification](01-project-development-specification.md)
 for the full repository implementation and Feature Complete process.
+
+Governance hierarchy, change lifecycle, and exception requirements are defined
+in [02 Project Governance Specification](02-project-governance-specification.md).

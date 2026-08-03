@@ -2,6 +2,7 @@
 
 ## Project
 
+- [02 Project Governance Specification](project/02-project-governance-specification.md) — Architecture Approved
 - [01 Project Development Specification](project/01-project-development-specification.md) — Feature Complete
 - [Vision](project/vision.md)
 - [Principles](project/principles.md)

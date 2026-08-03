@@ -5,6 +5,7 @@ This directory contains the project documentation and its supporting templates.
 ## Start Here
 
 - [Documentation Index](INDEX.md)
+- [02 Project Governance Specification](project/02-project-governance-specification.md)
 - [01 Project Development Specification](project/01-project-development-specification.md)
 - [Documentation Standard](project/documentation-standard.md)
 - [Project Rules](project/project-rules.md)
