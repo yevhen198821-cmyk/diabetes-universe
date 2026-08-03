@@ -13,6 +13,7 @@ This directory contains the project documentation and its supporting templates.
 - [05 Brand Architecture Specification](brand/05-brand-architecture-specification.md)
 - [06 Logo Architecture Specification](brand/06-logo-architecture-specification.md)
 - [07 Brand Identity Specification](brand/07-brand-identity-specification.md)
+- [08 Brand Governance Specification](brand/08-brand-governance-specification.md)
 - [Documentation Standard](project/documentation-standard.md)
 - [Project Rules](project/project-rules.md)
 

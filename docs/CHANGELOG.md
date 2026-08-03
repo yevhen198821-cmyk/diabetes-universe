@@ -1,5 +1,27 @@
 # Changelog
 
+## Brand Governance Specification — Architecture Approved
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `08 Brand Governance Specification` — `docs/brand/08-brand-governance-specification.md`
+- статус: **Architecture Approved** (Repository Implementation)
+- governance objectives, brand ownership, decision authority, brand change management, brand versioning, review process, approval process, brand asset management, usage compliance, exception management, deprecation policy, documentation requirements, audit requirements
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md)
+- статус документа 07 в INDEX обновлён на **Feature Complete**
+
+Не входит в этот этап:
+
+- Feature Complete (ожидает Final Architecture Review и Merge)
+- изменения documents 05–07, Brand Book
+- документ 09 и последующие
+
+Статус:
+
+Brand Governance Specification (document 08) — Architecture Approved
+
 ## Brand Identity Specification — Architecture Approved
 
 Дата: 2026-08-03
