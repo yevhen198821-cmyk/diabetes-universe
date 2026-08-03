@@ -1,5 +1,24 @@
 # Changelog
 
+## Project Constitution — Architecture Approved
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `00 Project Constitution` — `docs/project/00-project-constitution.md`
+- статус: **Architecture Approved** (Repository Implementation)
+- vision, mission, project scope, core principles, decision-making framework, roles and authority, priority hierarchy, architecture principles, quality principles, governance principles, amendment policy
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md)
+
+Не входит в этот этап:
+
+- Feature Complete (ожидает Final Architecture Review и Merge)
+
+Статус:
+
+Project Constitution (document 00) — Architecture Approved
+
 ## Engineering Standards Specification — Architecture Approved
 
 Дата: 2026-08-03
