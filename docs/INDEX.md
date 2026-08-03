@@ -15,6 +15,10 @@
 - [Documentation Standard](project/documentation-standard.md)
 - [Project Rules](project/project-rules.md)
 
+## Brand
+
+- [05 Brand Architecture Specification](brand/05-brand-architecture-specification.md) — Architecture Approved
+
 ## Architecture
 
 - [Architecture Overview](architecture/README.md)

@@ -1,5 +1,28 @@
 # Changelog
 
+## Brand Architecture Specification — Architecture Approved
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `05 Brand Architecture Specification` — `docs/brand/05-brand-architecture-specification.md`
+- статус: **Architecture Approved** (Repository Implementation)
+- strategic brand objective, immutable brand decisions, mission, vision, values, positioning, promise, target audiences, personality, archetype, emotional territory, differentiation, communication principles, visual philosophy, scaling principles, distinctive brand assets principles, internationalization, accessibility, trust and safety, quality criteria, prohibited brand directions
+- создана директория `docs/brand/`
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md)
+
+Не входит в этот этап:
+
+- Feature Complete (ожидает Final Architecture Review и Merge)
+- логотип, SVG, цвета, шрифты, App Icon, UI-компоненты
+- документ 06 и последующие
+- дублирование Product Architecture
+
+Статус:
+
+Brand Architecture Specification (document 05) — Architecture Approved
+
 ## Product Architecture Specification — Architecture Approved
 
 Дата: 2026-08-03
