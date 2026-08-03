@@ -2,11 +2,11 @@
 
 ## Project
 
-- [00 Project Constitution](project/00-project-constitution.md) — Architecture Approved
+- [00 Project Constitution](project/00-project-constitution.md) — Feature Complete
 - [01 Project Development Specification](project/01-project-development-specification.md) — Feature Complete
 - [02 Project Governance Specification](project/02-project-governance-specification.md) — Feature Complete
 - [03 Engineering Standards Specification](project/03-engineering-standards-specification.md) — Feature Complete
-- [04 Product Architecture Specification](project/04-product-architecture-specification.md) — Architecture Approved
+- [04 Product Architecture Specification](project/04-product-architecture-specification.md) — Feature Complete
 - [Vision](project/vision.md)
 - [Principles](project/principles.md)
 - [Roadmap](project/roadmap.md)
