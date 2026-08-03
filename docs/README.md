@@ -17,6 +17,7 @@ This directory contains the project documentation and its supporting templates.
 - [09 Brand Book](brand/09-brand-book.md)
 - [10 Visual Design System Specification](design-system/10-visual-design-system-specification.md)
 - [11 Design Tokens Specification](design-system/11-design-tokens-specification.md)
+- [12 UI Component Specification](design-system/12-ui-component-specification.md)
 - [Documentation Standard](project/documentation-standard.md)
 - [Project Rules](project/project-rules.md)
 
