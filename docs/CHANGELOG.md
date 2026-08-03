@@ -1,5 +1,29 @@
 # Changelog
 
+## Project Governance Specification — Architecture Approved
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `02 Project Governance Specification` — `docs/project/02-project-governance-specification.md`
+- статус: **Architecture Approved** (Repository Implementation)
+- governance principles, documentation hierarchy, change management lifecycle, versioning policy, exception management, specification lifecycle rules
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md)
+- перекрёстные ссылки на [01 Project Development Specification](project/01-project-development-specification.md) и [Project Rules](project/project-rules.md)
+
+Не входит в этот этап:
+
+- Feature Complete (ожидает Final Architecture Review)
+- `00 Project Constitution`
+- `03 Engineering Standards Specification`
+- формат ADR
+- дублирование Git workflow и CI/CD из document 01
+
+Статус:
+
+Project Governance Specification (document 02) — Architecture Approved
+
 ## Project Development Specification — Feature Complete
 
 Дата: 2026-08-03

@@ -189,6 +189,8 @@ review.
 
 - Document `01` must be Feature Complete before later documents in the approved
   sequence are implemented.
+- [02 Project Governance Specification](02-project-governance-specification.md)
+  defines project governance hierarchy, change lifecycle, and exception rules.
 - Do not begin the next document, create new specifications, or change the
   approved development sequence without architecture review.
 - Engineering conventions for day-to-day coding remain in the
