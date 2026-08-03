@@ -12,6 +12,7 @@ Design tokens, typography, spacing, icon, component, form, and motion guidance b
 
 - [10 Visual Design System Specification](10-visual-design-system-specification.md)
 - [11 Design Tokens Specification](11-design-tokens-specification.md)
+- [12 UI Component Specification](12-ui-component-specification.md)
 
 ## What Does Not Belong Here
 

@@ -82,6 +82,7 @@ docs/
 - [09 Brand Book](docs/brand/09-brand-book.md)
 - [10 Visual Design System Specification](docs/design-system/10-visual-design-system-specification.md)
 - [11 Design Tokens Specification](docs/design-system/11-design-tokens-specification.md)
+- [12 UI Component Specification](docs/design-system/12-ui-component-specification.md)
 - [Architecture](docs/architecture/README.md)
 - [Product Bible](docs/product-bible/README.md)
 - [Developer Bible](docs/developer-bible/README.md)

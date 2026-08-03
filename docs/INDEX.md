@@ -26,7 +26,8 @@
 ## Design System Specifications
 
 - [10 Visual Design System Specification](design-system/10-visual-design-system-specification.md) — Feature Complete
-- [11 Design Tokens Specification](design-system/11-design-tokens-specification.md) — Architecture Approved
+- [11 Design Tokens Specification](design-system/11-design-tokens-specification.md) — Feature Complete
+- [12 UI Component Specification](design-system/12-ui-component-specification.md) — Architecture Approved
 
 ## Architecture
 

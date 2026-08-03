@@ -1,5 +1,28 @@
 # Changelog
 
+## UI Component Specification — Architecture Approved
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `12 UI Component Specification` — `docs/design-system/12-ui-component-specification.md`
+- статус: **Architecture Approved** (Repository Implementation)
+- component architecture objectives, token-to-feature relationships, component principles, four-level hierarchy, foundation, input, navigation, feedback, data display, medical, AI, overlay, layout, and chart component categories, mandatory states, accessibility, internationalization, cross-platform principles, governance
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md), [glossary](project/glossary.md)
+- статус документа 11 в INDEX обновлён на **Feature Complete**
+
+Не входит в этот этап:
+
+- Feature Complete (ожидает Final Architecture Review и Merge)
+- React, SwiftUI, Compose implementation, Storybook, component code, screen implementation, production assets
+- документ 13 и последующие
+- изменения documents 05–11
+
+Статус:
+
+UI Component Specification (document 12) — Architecture Approved
+
 ## Design Tokens Specification — Architecture Approved
 
 Дата: 2026-08-03
