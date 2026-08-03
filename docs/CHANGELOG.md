@@ -1,5 +1,26 @@
 # Changelog
 
+## Engineering Standards Specification — Architecture Approved
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `03 Engineering Standards Specification` — `docs/project/03-engineering-standards-specification.md`
+- статус: **Architecture Approved** (Repository Implementation)
+- engineering principles, repository standards, naming conventions, code standards, validation standards, ADR format, technical debt management
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md)
+
+Не входит в этот этап:
+
+- Feature Complete (ожидает Final Architecture Review)
+- `00 Project Constitution`
+- дублирование полного Git/governance lifecycle из documents 01–02
+
+Статус:
+
+Engineering Standards Specification (document 03) — Architecture Approved
+
 ## Project Governance Specification — Architecture Approved
 
 Дата: 2026-08-03
