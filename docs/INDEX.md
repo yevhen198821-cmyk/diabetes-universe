@@ -6,6 +6,7 @@
 - [01 Project Development Specification](project/01-project-development-specification.md) — Feature Complete
 - [02 Project Governance Specification](project/02-project-governance-specification.md) — Feature Complete
 - [03 Engineering Standards Specification](project/03-engineering-standards-specification.md) — Feature Complete
+- [04 Product Architecture Specification](project/04-product-architecture-specification.md) — Architecture Approved
 - [Vision](project/vision.md)
 - [Principles](project/principles.md)
 - [Roadmap](project/roadmap.md)

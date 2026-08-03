@@ -1,5 +1,26 @@
 # Changelog
 
+## Product Architecture Specification — Architecture Approved
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `04 Product Architecture Specification` — `docs/project/04-product-architecture-specification.md`
+- статус: **Architecture Approved** (Repository Implementation)
+- product vision, scope, principles, ecosystem, modules, module responsibilities, user roles, product boundaries, scalability principles, product success criteria
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md)
+
+Не входит в этот этап:
+
+- Feature Complete (ожидает Final Architecture Review и Merge)
+- реализация planned modules (Analytics, AI, Recipes, Encyclopedia, Marketplace, Reminders, My Health, Reports, Settings)
+- дублирование governance и engineering lifecycle из documents 01–03
+
+Статус:
+
+Product Architecture Specification (document 04) — Architecture Approved
+
 ## Project Constitution — Architecture Approved
 
 Дата: 2026-08-03
