@@ -1,5 +1,27 @@
 # Changelog
 
+## Logo Architecture Specification — Architecture Approved
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `06 Logo Architecture Specification` — `docs/brand/06-logo-architecture-specification.md`
+- статус: **Architecture Approved** (Repository Implementation)
+- objectives, design principles, mandatory logo requirements, evaluation criteria, rejection criteria, three concept directions (Universe, Orbit, DU Symbol), development and evaluation workflows, scalability, digital, animation, accessibility, brand consistency rules, prohibited directions
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md)
+- статус документа 05 в INDEX обновлён на **Feature Complete**
+
+Не входит в этот этап:
+
+- Feature Complete (ожидает Final Architecture Review и Merge)
+- логотип, SVG, изображения, App Icon, выбор победившей концепции
+- документ 07 и последующие
+
+Статус:
+
+Logo Architecture Specification (document 06) — Architecture Approved
+
 ## Brand Architecture Specification — Architecture Approved
 
 Дата: 2026-08-03

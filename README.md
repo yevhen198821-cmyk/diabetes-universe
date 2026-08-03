@@ -76,6 +76,7 @@ docs/
 - [03 Engineering Standards Specification](docs/project/03-engineering-standards-specification.md)
 - [04 Product Architecture Specification](docs/project/04-product-architecture-specification.md)
 - [05 Brand Architecture Specification](docs/brand/05-brand-architecture-specification.md)
+- [06 Logo Architecture Specification](docs/brand/06-logo-architecture-specification.md)
 - [Architecture](docs/architecture/README.md)
 - [Product Bible](docs/product-bible/README.md)
 - [Developer Bible](docs/developer-bible/README.md)
