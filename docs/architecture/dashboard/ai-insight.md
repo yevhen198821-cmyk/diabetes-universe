@@ -7,7 +7,7 @@ on the Dashboard without competing with recorded health data or Next Action.
 
 ## Status
 
-Approved
+Approved — I18N-02B5 Feature Complete (merged via PR #28)
 
 ## Responsibility
 

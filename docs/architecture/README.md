@@ -66,6 +66,7 @@ documented architecture decision and an explicit product requirement.
 - [Dashboard Last Glucose Localization Migration (I18N-02B2)](localization/dashboard-last-glucose-migration.md) — Feature Complete
 - [Dashboard Day Summary Localization Migration (I18N-02B3)](localization/dashboard-day-summary-migration.md) — Feature Complete
 - [Dashboard Recent Events Localization Migration (I18N-02B4)](localization/dashboard-recent-events-migration.md) — Feature Complete
+- [Dashboard AI Insight Localization Migration (I18N-02B5)](localization/dashboard-ai-insight-migration.md) — Feature Complete
 - [Platform Readiness](localization/platform-readiness.md)
 - [Web Composition Root](composition-root/web-composition-root.md)
 - [Presentation Context Foundation](presentation/presentation-context.md) — CR-03A, Feature Complete

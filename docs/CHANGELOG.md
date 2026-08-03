@@ -1,5 +1,45 @@
 # Changelog
 
+## Dashboard AI Insight Localization — Feature Complete
+
+Дата: 2026-08-03
+
+Завершено:
+
+- Dashboard AI Insight Localization Migration (I18N-02B5) — `apps/web/components/dashboard/dashboard-ai-insight*`
+- шестой и финальный вертикальный Dashboard migration slice: `useLocalization()` (block labels) + `useFormatter()` (container)
+- English canonical `dashboard.aiInsight.*` keys (9) в `@diabetes-universe/locales`
+- display time via single `PlatformFormatter.formatTime()` call at `dashboard-root` → `prepareDashboardAiInsightPresentation` boundary
+- related-events count via `PlatformFormatter.formatNumber()` only when `count > 0`; zero-state via `dashboard.aiInsight.relatedEvents.none` (no ICU)
+- `generatedAt` as canonical ISO input; `displayTime` and `relatedEventsLabel` as precomposed presentation strings
+- medical-safety guard (`containsForbiddenAiInsightContent`) unchanged; checks only `title` + `summary`
+- `DashboardAiInsightEngine.generateInsight()` runtime signature unchanged
+- transitional pass-through for `title` and `summary`
+- pure presentation model boundary; preload без изменений (`common` + `dashboard`)
+- unit, presentation, integration, resource, and E2E coverage (`dashboard-ai-insight-i18n.spec.ts`)
+- architecture documentation и Engineering Audit
+- squash merge: PR #28 (`63cbc4f` → `8556d32` on `main`)
+- web tests: 381 total; E2E: 29 total
+
+Не входит в этот этап:
+
+- Dashboard Header (I18N-02A — Feature Complete)
+- Dashboard Next Action (I18N-02B1 — Feature Complete)
+- Dashboard Last Glucose (I18N-02B2 — Feature Complete)
+- Dashboard Day Summary (I18N-02B3 — Feature Complete)
+- Dashboard Recent Events (I18N-02B4 — Feature Complete)
+- финальный Dashboard localization audit (I18N-02B6+)
+- Timeline и Quick Add product source migration
+- AI Engine implementation
+- ICU MessageFormat interpolation
+- `uk`, `de`, `ru` professional translations
+- locale switch UI, cookie persistence
+- route-aware preload orchestration
+
+Статус:
+
+Dashboard AI Insight Localization (I18N-02B5) — Feature Complete ✅
+
 ## Dashboard Recent Events Localization — Feature Complete
 
 Дата: 2026-08-03

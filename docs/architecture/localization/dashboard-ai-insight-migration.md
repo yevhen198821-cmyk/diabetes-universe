@@ -2,7 +2,7 @@
 
 ## Status
 
-Implementation Complete — Ready for Review
+Approved — Feature Complete (merged via PR #28)
 
 ## Purpose
 
@@ -13,7 +13,7 @@ responsibilities, medical-safety validation boundaries, risks, and stop
 conditions.
 
 > **Update (implementation):** The approved minimal presentation-only slice is
-> implemented on branch `feature/i18n-dashboard-ai-insight`. See
+> merged to `main` via PR #28 (`8556d32`). See
 > [Localization integration (implemented)](#localization-integration-implemented)
 > and [Engineering Audit (I18N-02B5)](#engineering-audit-i18n-02b5) below.
 
@@ -692,15 +692,15 @@ mapDashboardAiInsightToCard → EventCard (pass-through title/summary)
 
 ### 1. General information
 
-| Field      | Value                                          |
-| ---------- | ---------------------------------------------- |
-| Stage      | I18N-02B5 — Dashboard AI Insight Localization  |
-| Phase      | **Implementation Complete — Ready for Review** |
-| Base       | `main` @ `a275b22`                             |
-| Branch     | `feature/i18n-dashboard-ai-insight`            |
-| Commit/PR  | Not performed (per task instructions)          |
-| Unit tests | **381** web (+17)                              |
-| E2E tests  | **29** (+2)                                    |
+| Field      | Value                                         |
+| ---------- | --------------------------------------------- |
+| Stage      | I18N-02B5 — Dashboard AI Insight Localization |
+| Phase      | **Feature Complete** (merged via PR #28)      |
+| Base       | `main` @ `a275b22`                            |
+| Branch     | `cursor/i18n-dashboard-ai-insight-f9c2`       |
+| Commit/PR  | squash merge `8556d32` (PR #28)               |
+| Unit tests | **381** web (+17)                             |
+| E2E tests  | **29** (+2)                                   |
 
 ### 2. Goal
 
