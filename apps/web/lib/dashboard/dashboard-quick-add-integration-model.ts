@@ -2,6 +2,7 @@ import type { TimelineEvent } from '@diabetes-universe/types';
 
 import { formatInsulinDose } from '../quick-add/format-insulin';
 import { formatNutritionCarbs } from '../quick-add/format-nutrition';
+import { deriveDashboardRecentEventSources } from './dashboard-recent-events-derivation';
 import { getTimelineCalendarDateKey } from '../timeline/timeline-date-time';
 import {
   getLatestGlucoseEvent,
@@ -57,6 +58,7 @@ export interface DashboardQuickAddIntegrationOptions {
   readonly aiInsight?: DashboardDerivedAiInsight | null;
   readonly formatDaySummaryDisplayDate?: (referenceTime: Date) => string;
   readonly formatLastGlucoseDisplayTime?: (dateTime: string) => string;
+  readonly formatRecentEventDisplayTime?: (dateTime: string) => string;
   readonly locale?: string;
   readonly referenceTime?: Date;
   readonly remindersCompleted?: number;
@@ -192,10 +194,14 @@ export function deriveDashboardQuickAddBlocks(
   const remindersCompleted = options.remindersCompleted ?? 0;
   const remindersTotal = options.remindersTotal ?? 0;
 
-  const recentEvents = getRecentTimelineEvents(state.events, {
-    locale,
-    timeZone,
-  });
+  const recentEvents = options.formatRecentEventDisplayTime
+    ? deriveDashboardRecentEventSources(state.events, {
+        formatDisplayTime: options.formatRecentEventDisplayTime,
+      })
+    : getRecentTimelineEvents(state.events, {
+        locale,
+        timeZone,
+      });
 
   return {
     aiInsight: options.aiInsight ?? null,

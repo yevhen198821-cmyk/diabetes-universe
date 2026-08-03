@@ -15,7 +15,7 @@ test('dashboard header renders localized English copy after platform readiness',
   await expect(page.locator('header time[datetime]')).toBeVisible();
   await expect(page.getByText('Добавить событие')).toHaveCount(0);
 
-  await page.getByRole('link', { name: 'Все события' }).click();
+  await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
   await waitForApplicationReady(page);
   await expect(

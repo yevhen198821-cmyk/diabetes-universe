@@ -73,7 +73,7 @@ test('dashboard day summary renders English labels and syncs with timeline edits
 
   await expect(metricValue(daySummary, 'Medication doses')).toHaveText('2');
 
-  await page.getByRole('link', { name: 'Все события' }).click();
+  await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
   await waitForApplicationReady(page);
 
@@ -90,7 +90,7 @@ test('dashboard day summary renders English labels and syncs with timeline edits
 
   await expect(metricValue(daySummary, 'Glucose measurements')).toHaveText('3');
 
-  await page.getByRole('link', { name: 'Все события' }).click();
+  await page.getByRole('link', { name: 'All events' }).click();
   await page
     .getByRole('button', { name: /Открыть событие: NovoRapid, 2 ЕД/ })
     .click();

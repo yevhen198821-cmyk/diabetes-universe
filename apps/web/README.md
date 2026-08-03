@@ -213,10 +213,18 @@ Location: `components/dashboard/dashboard-day-summary*`
 - architecture: `docs/architecture/localization/dashboard-day-summary-migration.md`
 - squash merge: PR #25 (`9794c88` → `4140bda` on `main`)
 
+## Dashboard recent events localization (I18N-02B4) — Architecture Audit
+
+Location: `components/dashboard/dashboard-recent-events*`
+
+Architectural audit complete; implementation not started. See
+`docs/architecture/localization/dashboard-recent-events-migration.md`.
+
 ### Not implemented (I18N-02B4+)
 
 - cookie scheme wiring and `PresentationPersistence` adapter
-- remaining Dashboard block hook migration (Recent Events, AI Insight)
+- Recent Events hook migration (I18N-02B4 — audit only)
+- remaining Dashboard block hook migration (AI Insight)
 - Timeline, Quick Add hook migration
 - locale switch UI
 - full insulin/carbohydrate formatting via `formatMeasurement()` (deferred until structural measurement contract)

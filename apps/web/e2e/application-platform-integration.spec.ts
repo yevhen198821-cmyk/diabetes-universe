@@ -22,7 +22,7 @@ test('dashboard to timeline client navigation preserves application ready root',
     return marker.dataset.platformMountProbe;
   });
 
-  await page.getByRole('link', { name: 'Все события' }).click();
+  await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
   await waitForApplicationReady(page);
 
@@ -54,7 +54,7 @@ test('dashboard to timeline client navigation preserves timeline store state', a
 
   await expect(daySummary.getByText('7 ЕД')).toBeVisible();
 
-  await page.getByRole('link', { name: 'Все события' }).click();
+  await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
   await waitForApplicationReady(page);
   await expect(page.getByText('3 ЕД').first()).toBeVisible();
