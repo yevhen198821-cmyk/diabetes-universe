@@ -4,119 +4,156 @@ import test from 'node:test';
 import {
   containsForbiddenAiInsightContent,
   createDashboardAiInsightViewModel,
-  dashboardAiInsightLabels,
 } from './dashboard-ai-insight-model.ts';
+
+const englishLabels = {
+  defaultEmpty: 'AI insight is not available yet.',
+  defaultError: 'Could not load AI insight.',
+  disclaimer: 'Not a diagnosis or treatment prescription.',
+  eyebrow: 'Automatic explanation',
+  loading: 'Loading AI insight',
+  relatedEventsLabel: 'Related records',
+  relatedEventsNone: 'Related records: no confirmed records',
+  title: 'AI insight',
+  unavailable: 'AI insight unavailable.',
+};
 
 const validInsight = {
   displayTime: '10:15',
   generatedAt: '2026-08-02T07:15:00.000Z',
   id: 'insight-1015',
   relatedEventIds: ['glucose-0800', 'meal-0820'],
+  relatedEventsLabel: 'Related records: 2',
   summary:
     'После завтрака значение глюкозы было выше обычного уровня по вашим записям.',
   title: 'После завтрака',
 };
 
 test('creates ready state with a single confirmed insight', () => {
-  const model = createDashboardAiInsightViewModel({
-    insight: validInsight,
-    state: 'ready',
-  });
+  const model = createDashboardAiInsightViewModel(
+    {
+      insight: validInsight,
+      state: 'ready',
+    },
+    englishLabels,
+  );
 
   assert.equal(model.state, 'ready');
   assert.ok(model.insight);
   assert.equal(model.insight.id, 'insight-1015');
   assert.equal(model.insight.title, 'После завтрака');
   assert.equal(model.insight.relatedEventCount, 2);
-  assert.equal(model.insight.relatedEventsLabel, 'Связанные записи: 2');
-  assert.equal(model.insight.disclaimer, dashboardAiInsightLabels.disclaimer);
+  assert.equal(model.insight.relatedEventsLabel, 'Related records: 2');
+  assert.equal(model.insight.disclaimer, englishLabels.disclaimer);
 });
 
 test('rejects diagnosis content in ready insight', () => {
-  const model = createDashboardAiInsightViewModel({
-    insight: {
-      ...validInsight,
-      summary: 'Это может быть диагноз сахарного диабета.',
+  const model = createDashboardAiInsightViewModel(
+    {
+      insight: {
+        ...validInsight,
+        summary: 'Это может быть диагноз сахарного диабета.',
+      },
+      state: 'ready',
     },
-    state: 'ready',
-  });
+    englishLabels,
+  );
 
   assert.equal(model.state, 'empty');
-  assert.equal(model.message, dashboardAiInsightLabels.unavailable);
+  assert.equal(model.message, englishLabels.unavailable);
 });
 
 test('rejects treatment assignment content in ready insight', () => {
-  const model = createDashboardAiInsightViewModel({
-    insight: {
-      ...validInsight,
-      summary: 'Рекомендуется назначить новое лечение.',
+  const model = createDashboardAiInsightViewModel(
+    {
+      insight: {
+        ...validInsight,
+        summary: 'Рекомендуется назначить новое лечение.',
+      },
+      state: 'ready',
     },
-    state: 'ready',
-  });
+    englishLabels,
+  );
 
   assert.equal(model.state, 'empty');
 });
 
 test('rejects dosing recommendation content in ready insight', () => {
-  const model = createDashboardAiInsightViewModel({
-    insight: {
-      ...validInsight,
-      summary: 'Рекомендуется увеличить дозу инсулина.',
+  const model = createDashboardAiInsightViewModel(
+    {
+      insight: {
+        ...validInsight,
+        summary: 'Рекомендуется увеличить дозу инсулина.',
+      },
+      state: 'ready',
     },
-    state: 'ready',
-  });
+    englishLabels,
+  );
 
   assert.equal(model.state, 'empty');
 });
 
 test('rejects forecast content in ready insight', () => {
-  const model = createDashboardAiInsightViewModel({
-    insight: {
-      ...validInsight,
-      summary: 'Прогноз на завтра выглядит нестабильно.',
+  const model = createDashboardAiInsightViewModel(
+    {
+      insight: {
+        ...validInsight,
+        summary: 'Прогноз на завтра выглядит нестабильно.',
+      },
+      state: 'ready',
     },
-    state: 'ready',
-  });
+    englishLabels,
+  );
 
   assert.equal(model.state, 'empty');
 });
 
 test('downgrades invalid ready insight fields to unavailable empty', () => {
-  const model = createDashboardAiInsightViewModel({
-    insight: {
-      ...validInsight,
-      generatedAt: 'invalid',
+  const model = createDashboardAiInsightViewModel(
+    {
+      insight: {
+        ...validInsight,
+        generatedAt: 'invalid',
+      },
+      state: 'ready',
     },
-    state: 'ready',
-  });
+    englishLabels,
+  );
 
   assert.equal(model.state, 'empty');
   assert.equal(model.insight, null);
-  assert.equal(model.message, dashboardAiInsightLabels.unavailable);
+  assert.equal(model.message, englishLabels.unavailable);
 });
 
-test('formats related events label when no confirmed records are linked', () => {
-  const model = createDashboardAiInsightViewModel({
-    insight: {
-      ...validInsight,
-      relatedEventIds: [' ', ''],
+test('accepts precomposed zero-state related events label without reformatting', () => {
+  const model = createDashboardAiInsightViewModel(
+    {
+      insight: {
+        ...validInsight,
+        relatedEventIds: [' ', ''],
+        relatedEventsLabel: englishLabels.relatedEventsNone,
+      },
+      state: 'ready',
     },
-    state: 'ready',
-  });
+    englishLabels,
+  );
 
   assert.equal(model.state, 'ready');
   assert.equal(model.insight?.relatedEventCount, 0);
   assert.equal(
     model.insight?.relatedEventsLabel,
-    'Связанные записи: нет подтверждённых записей',
+    englishLabels.relatedEventsNone,
   );
 });
 
 test('does not expose diagnosis, treatment, dosing, or forecast fields', () => {
-  const model = createDashboardAiInsightViewModel({
-    insight: validInsight,
-    state: 'ready',
-  });
+  const model = createDashboardAiInsightViewModel(
+    {
+      insight: validInsight,
+      state: 'ready',
+    },
+    englishLabels,
+  );
 
   assert.equal('diagnosis' in model, false);
   assert.equal('treatment' in model, false);
@@ -144,32 +181,41 @@ test('exposes a future AI engine contract without implementing generation', () =
 });
 
 test('creates loading state with the default accessible label', () => {
-  const model = createDashboardAiInsightViewModel({ state: 'loading' });
+  const model = createDashboardAiInsightViewModel(
+    { state: 'loading' },
+    englishLabels,
+  );
 
   assert.equal(model.state, 'loading');
   assert.equal(model.isLoading, true);
-  assert.equal(model.message, dashboardAiInsightLabels.loading);
+  assert.equal(model.message, englishLabels.loading);
 });
 
 test('creates empty state with the default message when none is supplied', () => {
-  const model = createDashboardAiInsightViewModel({ state: 'empty' });
+  const model = createDashboardAiInsightViewModel(
+    { state: 'empty' },
+    englishLabels,
+  );
 
   assert.equal(model.state, 'empty');
-  assert.equal(model.message, dashboardAiInsightLabels.defaultEmpty);
+  assert.equal(model.message, englishLabels.defaultEmpty);
 });
 
 test('creates error state with the default message when none is supplied', () => {
-  const model = createDashboardAiInsightViewModel({ state: 'error' });
+  const model = createDashboardAiInsightViewModel(
+    { state: 'error' },
+    englishLabels,
+  );
 
   assert.equal(model.state, 'error');
-  assert.equal(model.message, dashboardAiInsightLabels.defaultError);
+  assert.equal(model.message, englishLabels.defaultError);
 });
 
-test('exposes stable approved labels', () => {
-  assert.equal(dashboardAiInsightLabels.title, 'ИИ-объяснение');
-  assert.equal(dashboardAiInsightLabels.eyebrow, 'Автоматическое объяснение');
+test('uses injected English labels for block chrome', () => {
+  assert.equal(englishLabels.title, 'AI insight');
+  assert.equal(englishLabels.eyebrow, 'Automatic explanation');
   assert.equal(
-    dashboardAiInsightLabels.disclaimer,
-    'Не является диагнозом или назначением лечения.',
+    englishLabels.disclaimer,
+    'Not a diagnosis or treatment prescription.',
   );
 });

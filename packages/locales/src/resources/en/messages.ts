@@ -45,6 +45,17 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'dashboard.recentEvents.title': 'Recent events',
   'dashboard.recentEvents.unavailable': 'Recent events unavailable.',
   'dashboard.recentEvents.viewAll': 'All events',
+  'dashboard.aiInsight.disclaimer':
+    'Not a diagnosis or treatment prescription.',
+  'dashboard.aiInsight.empty.default': 'AI insight is not available yet.',
+  'dashboard.aiInsight.error.default': 'Could not load AI insight.',
+  'dashboard.aiInsight.eyebrow': 'Automatic explanation',
+  'dashboard.aiInsight.loading': 'Loading AI insight',
+  'dashboard.aiInsight.relatedEvents.label': 'Related records',
+  'dashboard.aiInsight.relatedEvents.none':
+    'Related records: no confirmed records',
+  'dashboard.aiInsight.title': 'AI insight',
+  'dashboard.aiInsight.unavailable': 'AI insight unavailable.',
   'dashboard.nextAction.action': 'Add',
   'dashboard.nextAction.description': 'Add insulin',
   'dashboard.nextAction.empty.description': 'New actions will appear here.',
