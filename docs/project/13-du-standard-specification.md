@@ -21,7 +21,7 @@ scoring, certification, and governance. Detailed engineering rules remain in
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Objectives
 
@@ -512,8 +512,7 @@ approval.
 
 ## Notes
 
-- This document is at **Architecture Approved** status and awaits Final
-  Architecture Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
 - Engineering implementation details remain authoritative in document `03`.
 - DU Standard is the highest-level quality framework; it does not replace
   discipline-specific specifications.

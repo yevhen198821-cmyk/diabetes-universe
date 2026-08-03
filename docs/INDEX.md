@@ -7,7 +7,7 @@
 - [02 Project Governance Specification](project/02-project-governance-specification.md) — Feature Complete
 - [03 Engineering Standards Specification](project/03-engineering-standards-specification.md) — Feature Complete
 - [04 Product Architecture Specification](project/04-product-architecture-specification.md) — Feature Complete
-- [13 DU Standard Specification](project/13-du-standard-specification.md) — Architecture Approved
+- [13 DU Standard Specification](project/13-du-standard-specification.md) — Feature Complete
 - [Vision](project/vision.md)
 - [Principles](project/principles.md)
 - [Roadmap](project/roadmap.md)
