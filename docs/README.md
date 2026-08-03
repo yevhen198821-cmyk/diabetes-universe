@@ -11,6 +11,7 @@ This directory contains the project documentation and its supporting templates.
 - [03 Engineering Standards Specification](project/03-engineering-standards-specification.md)
 - [04 Product Architecture Specification](project/04-product-architecture-specification.md)
 - [05 Brand Architecture Specification](brand/05-brand-architecture-specification.md)
+- [06 Logo Architecture Specification](brand/06-logo-architecture-specification.md)
 - [Documentation Standard](project/documentation-standard.md)
 - [Project Rules](project/project-rules.md)
 
