@@ -70,8 +70,9 @@ docs/
 ## Documentation
 
 - [Documentation Index](docs/INDEX.md)
-- [02 Project Governance Specification](docs/project/02-project-governance-specification.md)
+- 00 Project Constitution — repository implementation pending a separate lifecycle
 - [01 Project Development Specification](docs/project/01-project-development-specification.md)
+- [02 Project Governance Specification](docs/project/02-project-governance-specification.md)
 - [Architecture](docs/architecture/README.md)
 - [Product Bible](docs/product-bible/README.md)
 - [Developer Bible](docs/developer-bible/README.md)

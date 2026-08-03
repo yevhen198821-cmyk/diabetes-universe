@@ -2,8 +2,9 @@
 
 ## Project
 
-- [02 Project Governance Specification](project/02-project-governance-specification.md) — Architecture Approved
+- 00 Project Constitution — repository implementation pending a separate lifecycle
 - [01 Project Development Specification](project/01-project-development-specification.md) — Feature Complete
+- [02 Project Governance Specification](project/02-project-governance-specification.md) — Architecture Approved
 - [Vision](project/vision.md)
 - [Principles](project/principles.md)
 - [Roadmap](project/roadmap.md)
