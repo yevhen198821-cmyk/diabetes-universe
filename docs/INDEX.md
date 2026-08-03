@@ -2,6 +2,7 @@
 
 ## Project
 
+- [01 Project Development Specification](project/01-project-development-specification.md) — Feature Complete
 - [Vision](project/vision.md)
 - [Principles](project/principles.md)
 - [Roadmap](project/roadmap.md)

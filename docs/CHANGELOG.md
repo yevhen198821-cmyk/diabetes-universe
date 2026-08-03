@@ -1,5 +1,29 @@
 # Changelog
 
+## Project Development Specification — Feature Complete
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `01 Project Development Specification` — `docs/project/01-project-development-specification.md`
+- утверждённый ADD lifecycle, Feature Complete criteria, и repository implementation process
+- [Development Standard](project/development-standard.md)
+- [Documentation Standard](project/documentation-standard.md)
+- [Project Rules](project/project-rules.md)
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md)
+- link и formatting validation
+
+Не входит в этот этап:
+
+- Vision, Principles, Roadmap (следующие документы утверждённой последовательности)
+- изменение архитектуры существующих модулей
+- product/feature спецификации вне document 01
+
+Статус:
+
+Project Development Specification (TASK-001 / document 01) — Feature Complete ✅
+
 ## Dashboard AI Insight Localization — Feature Complete
 
 Дата: 2026-08-03
