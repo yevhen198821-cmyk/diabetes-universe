@@ -8,6 +8,11 @@ This section defines reusable visual, interaction, and component standards.
 
 Design tokens, typography, spacing, icon, component, form, and motion guidance belong here.
 
+## Specifications
+
+- [10 Visual Design System Specification](10-visual-design-system-specification.md)
+- [11 Design Tokens Specification](11-design-tokens-specification.md)
+
 ## What Does Not Belong Here
 
 Feature-specific requirements, page architecture, application code, and one-off implementation details should not be stored here.

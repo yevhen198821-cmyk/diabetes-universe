@@ -1,5 +1,28 @@
 # Changelog
 
+## Design Tokens Specification — Architecture Approved
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `11 Design Tokens Specification` — `docs/design-system/11-design-tokens-specification.md`
+- статус: **Architecture Approved** (Repository Implementation)
+- token architecture objectives, three-layer hierarchy (foundation, semantic, component), naming principles, foundation and semantic token categories, component token consumption, color, typography, spacing, radius, border, elevation, motion, breakpoint, grid, medical, AI, and theme token architectures, versioning, cross-platform mapping, accessibility, governance
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md), [glossary](project/glossary.md)
+- статус документа 10 в INDEX обновлён на **Feature Complete**
+
+Не входит в этот этап:
+
+- Feature Complete (ожидает Final Architecture Review и Merge)
+- production token files, JSON exports, Figma variables, component APIs, UI implementation
+- документ 12 и последующие
+- изменения documents 05–10
+
+Статус:
+
+Design Tokens Specification (document 11) — Architecture Approved
+
 ## Visual Design System Specification — Architecture Approved
 
 Дата: 2026-08-03
