@@ -1,5 +1,27 @@
 # Changelog
 
+## Brand Identity Specification — Architecture Approved
+
+Дата: 2026-08-03
+
+Завершено:
+
+- документ `07 Brand Identity Specification` — `docs/brand/07-brand-identity-specification.md`
+- статус: **Architecture Approved** (Repository Implementation)
+- brand identity principles, color strategy, typography strategy, iconography, illustration, photography, motion, tone of voice, writing principles, accessibility, internationalization, brand asset hierarchy, digital and print usage principles, consistency rules, prohibited identity directions
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md)
+- статус документа 06 в INDEX обновлён на **Feature Complete**
+
+Не входит в этот этап:
+
+- Feature Complete (ожидает Final Architecture Review и Merge)
+- HEX/RGB, шрифты, иконки, иллюстрации, фотографии, UI
+- документ 08 и последующие
+
+Статус:
+
+Brand Identity Specification (document 07) — Architecture Approved
+
 ## Logo Architecture Specification — Architecture Approved
 
 Дата: 2026-08-03
