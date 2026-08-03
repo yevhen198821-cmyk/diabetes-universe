@@ -7,6 +7,7 @@ export default defineConfig({
   testDir: './apps/web/e2e',
   use: {
     baseURL: 'http://127.0.0.1:3010',
+    timezoneId: 'UTC',
     trace: 'on-first-retry',
   },
   webServer: {

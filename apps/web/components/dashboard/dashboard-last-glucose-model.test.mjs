@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createDashboardLastGlucoseViewModel } from './dashboard-last-glucose-model.ts';
+import { CANONICAL_DEMO_REFERENCE_TIME } from '../../testing/demo-reference-time.ts';
 
 const englishLabels = {
   defaultEmpty: 'No measurements yet.',
@@ -23,6 +24,7 @@ test('creates ready state from a validated measurement contract', () => {
   const model = createDashboardLastGlucoseViewModel(
     {
       glucose: validMeasurement,
+      referenceTime: CANONICAL_DEMO_REFERENCE_TIME,
       state: 'ready',
     },
     englishLabels,

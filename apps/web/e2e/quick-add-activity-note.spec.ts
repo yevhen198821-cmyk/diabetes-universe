@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 
 const openQuickAdd = async (page: import('@playwright/test').Page) => {
   await page.getByRole('button', { name: 'Добавить событие' }).click();
