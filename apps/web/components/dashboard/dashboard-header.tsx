@@ -5,6 +5,8 @@ import { Plus, UserRound } from 'lucide-react';
 import Image from 'next/image';
 import { useMemo, useState, type ReactNode, type RefObject } from 'react';
 
+import { BrandSymbol } from '../brand/brand-symbol';
+
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { usePresentationContext } from '../../lib/platform/react/use-presentation-context';
@@ -143,12 +145,7 @@ export function DashboardHeader({
     >
       <div className="mx-auto grid min-h-16 max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-[4.5rem]">
         <div className="flex min-w-0 items-center gap-3">
-          <span
-            aria-hidden="true"
-            className="grid size-11 shrink-0 place-items-center rounded-xl bg-teal-700 text-sm font-bold text-white dark:bg-teal-500 dark:text-slate-950"
-          >
-            DU
-          </span>
+          <BrandSymbol />
           <h1 className="truncate text-base font-bold sm:text-lg">
             {viewModel.productName}
           </h1>
