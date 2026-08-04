@@ -23,6 +23,7 @@
 - [07 Brand Identity Specification](brand/07-brand-identity-specification.md) — Feature Complete
 - [08 Brand Governance Specification](brand/08-brand-governance-specification.md) — Feature Complete
 - [09 Brand Book](brand/09-brand-book.md) — Feature Complete
+- [Official App Icon Assets](brand/assets/app-icon/README.md) — Ready for Final Visual Review
 
 ## Design System Specifications
 

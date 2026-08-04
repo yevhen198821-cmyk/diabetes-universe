@@ -440,7 +440,8 @@ through [02 Project Governance Specification](../project/02-project-governance-s
 ## Notes
 
 - This document is at **Feature Complete** status.
-- Icon design, production exports, and platform asset delivery belong to later
-  approved work governed by this specification.
+- Official production assets are available at
+  [Official App Icon Assets](../brand/assets/app-icon/README.md) — lifecycle
+  status **Ready for Final Visual Review**.
 - Brand Symbol development remains authoritative in
   [06 Logo Architecture Specification](../brand/06-logo-architecture-specification.md).

@@ -1,5 +1,30 @@
 # Changelog
 
+## Official App Icon Assets — Ready for Final Visual Review
+
+Дата: 2026-08-04
+
+Завершено:
+
+- production assets в `apps/web/public/brand/app-icon/` и documentation previews в `docs/brand/assets/app-icon/`
+- SVG: `app-icon-master.svg`, `app-icon-dark.svg`, `app-icon-light.svg`, `app-icon-transparent.svg`
+- PNG 1024×1024: master, dark, light, transparent
+- generator: `scripts/brand/generate-app-icon-assets.mjs`
+- документация: [Official App Icon Assets](brand/assets/app-icon/README.md)
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md), [design-system README](design-system/README.md), [14 App Icon Architecture](design-system/14-app-icon-architecture-specification.md)
+
+Approved visual direction:
+
+- clear `D` and `U` with equal visual height;
+- DNA double helix between letters;
+- deep navy background (dark/master);
+- white-to-blue metallic gradient;
+- no text inside icon boundary.
+
+Статус:
+
+Official App Icon Assets — **Ready for Final Visual Review**
+
 ## App Icon Architecture Specification — Feature Complete
 
 Дата: 2026-08-04
