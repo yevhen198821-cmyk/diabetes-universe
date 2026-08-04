@@ -14,6 +14,7 @@ Design tokens, typography, spacing, icon, component, form, and motion guidance b
 - [11 Design Tokens Specification](11-design-tokens-specification.md)
 - [12 UI Component Specification](12-ui-component-specification.md)
 - [14 App Icon Architecture Specification](14-app-icon-architecture-specification.md)
+- [15 Brand Logo System Specification](15-brand-logo-system-specification.md)
 
 ## What Does Not Belong Here
 
