@@ -1,5 +1,22 @@
 # Changelog
 
+## Brand Symbol Integration — Feature Complete
+
+Дата: 2026-08-04
+
+Завершено:
+
+- интеграция approved DU + DNA Brand Symbol в web-приложение
+- `BrandSymbol` component: Dashboard Header, Timeline Top Bar
+- favicon, Apple Touch Icon, PWA manifest, Next.js metadata
+- production assets: `apps/web/public/brand/app-icon/`
+- удалены временные DU-плейсхолдеры
+- merge PR #46
+
+Статус:
+
+Brand Symbol Integration — Feature Complete ✅
+
 ## Brand Logo System Specification — Feature Complete
 
 Дата: 2026-08-04
