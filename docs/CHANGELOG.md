@@ -1,5 +1,25 @@
 # Changelog
 
+## Brand Logo System Specification — Architecture Approved
+
+Дата: 2026-08-04
+
+Завершено:
+
+- документ `15 Brand Logo System Specification` — `docs/design-system/15-brand-logo-system-specification.md`
+- статус: **Architecture Approved**
+- logo philosophy, logo system (Brand Symbol, Primary, Horizontal, Vertical, Symbol-only), wordmark architecture, composition rules, clear space, minimum size principles, color architecture, background compatibility, accessibility, internationalization, asset architecture, versioning, governance
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md), [design-system README](design-system/README.md), [glossary](project/glossary.md)
+
+Не входит в этот этап:
+
+- logo artwork, typography selection, production colors, SVG, PNG, PDF exports, implementation
+- Feature Complete (ожидает Final Architecture Review)
+
+Статус:
+
+Brand Logo System Specification (document 15) — **Architecture Approved** — Ready for Final Architecture Review
+
 ## App Icon Architecture Specification — Feature Complete
 
 Дата: 2026-08-04

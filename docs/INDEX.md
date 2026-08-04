@@ -30,6 +30,7 @@
 - [11 Design Tokens Specification](design-system/11-design-tokens-specification.md) — Feature Complete
 - [12 UI Component Specification](design-system/12-ui-component-specification.md) — Feature Complete
 - [14 App Icon Architecture Specification](design-system/14-app-icon-architecture-specification.md) — Feature Complete
+- [15 Brand Logo System Specification](design-system/15-brand-logo-system-specification.md) — Architecture Approved
 
 ## Architecture
 
