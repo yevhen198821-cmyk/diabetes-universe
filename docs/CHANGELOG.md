@@ -8,7 +8,7 @@
 
 - документ `15 Brand Logo System Specification` — `docs/design-system/15-brand-logo-system-specification.md`
 - статус: **Architecture Approved**
-- logo philosophy, logo system (Brand Symbol, Primary, Horizontal, Vertical, Symbol-only), wordmark architecture, composition rules, clear space, minimum size principles, color architecture, background compatibility, accessibility, internationalization, asset architecture, versioning, governance
+- logo philosophy, logo system (Brand Symbol, Primary, Horizontal, Vertical, Symbol-only), wordmark architecture, composition rules, clear space, minimum size principles, color architecture, background compatibility, accessibility, internationalization, asset architecture, versioning, governance, future evolution
 - обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md), [design-system README](design-system/README.md), [glossary](project/glossary.md)
 
 Не входит в этот этап:
