@@ -17,7 +17,7 @@ defines only the architectural rules governing all logo variants.
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Objectives
 
@@ -470,7 +470,7 @@ Brand Logo System architecture follows the governed document lifecycle in
 Draft → Architecture Review → Repository Implementation → Validation → DU Review →
 Certification → Feature Complete.
 
-Current status: **Architecture Approved** — ready for Final Architecture Review.
+Current status: **Feature Complete**.
 
 ### Review process
 
@@ -657,8 +657,7 @@ continuity assessment, and governed approval through
 
 ## Notes
 
-- This document is at **Architecture Approved** status and awaits Final Architecture
-  Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
 - The approved DU + DNA Brand Symbol direction is an owner-approved visual
   foundation aligned with
   [14 App Icon Architecture Specification](14-app-icon-architecture-specification.md);

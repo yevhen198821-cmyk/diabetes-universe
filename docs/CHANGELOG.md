@@ -1,5 +1,19 @@
 # Changelog
 
+## Brand Logo System Specification — Feature Complete
+
+Дата: 2026-08-04
+
+Завершено:
+
+- документ `15 Brand Logo System Specification` — `docs/design-system/15-brand-logo-system-specification.md`
+- статус: **Feature Complete**
+- merge PR #45; обновлены [INDEX](INDEX.md), статус документа в спецификации
+
+Статус:
+
+Brand Logo System Specification (document 15) — Feature Complete ✅
+
 ## Brand Logo System Specification — Architecture Approved
 
 Дата: 2026-08-04
