@@ -19,6 +19,7 @@ This directory contains the project documentation and its supporting templates.
 - [11 Design Tokens Specification](design-system/11-design-tokens-specification.md)
 - [12 UI Component Specification](design-system/12-ui-component-specification.md)
 - [13 DU Standard Specification](project/13-du-standard-specification.md)
+- [14 App Icon Architecture Specification](design-system/14-app-icon-architecture-specification.md)
 - [Documentation Standard](project/documentation-standard.md)
 - [Project Rules](project/project-rules.md)
 
