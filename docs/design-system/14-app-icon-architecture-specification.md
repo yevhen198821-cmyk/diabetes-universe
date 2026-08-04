@@ -15,7 +15,7 @@ architectural rules only.
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Objectives
 
@@ -439,8 +439,7 @@ through [02 Project Governance Specification](../project/02-project-governance-s
 
 ## Notes
 
-- This document is at **Architecture Approved** status and awaits Final
-  Architecture Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
 - Icon design, production exports, and platform asset delivery belong to later
   approved work governed by this specification.
 - Brand Symbol development remains authoritative in
