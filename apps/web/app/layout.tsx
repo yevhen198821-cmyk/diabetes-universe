@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
+import {
+  BRAND_SYMBOL_ICON_PNG,
+  BRAND_SYMBOL_ICON_SVG,
+} from '../lib/brand/brand-symbol-paths';
 import { createRequestPlatformRuntime } from '../lib/platform';
 import { ApplicationRuntimeGate } from '../lib/platform/integration/application-runtime-gate';
 import {
@@ -16,6 +20,31 @@ export const metadata: Metadata = {
     template: '%s | Diabetes Universe',
   },
   description: 'Демонстрационное приложение Diabetes Universe.',
+  manifest: '/manifest.webmanifest',
+  icons: {
+    icon: [
+      { url: BRAND_SYMBOL_ICON_SVG, type: 'image/svg+xml' },
+      {
+        url: BRAND_SYMBOL_ICON_PNG,
+        type: 'image/png',
+        sizes: '1024x1024',
+      },
+    ],
+    apple: [
+      {
+        url: BRAND_SYMBOL_ICON_PNG,
+        type: 'image/png',
+        sizes: '1024x1024',
+      },
+    ],
+    shortcut: BRAND_SYMBOL_ICON_PNG,
+  },
+  appleWebApp: {
+    capable: true,
+    title: 'Diabetes Universe',
+    statusBarStyle: 'default',
+  },
+  applicationName: 'Diabetes Universe',
 };
 
 type RootLayoutProps = Readonly<{

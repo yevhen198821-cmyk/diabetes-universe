@@ -1,6 +1,7 @@
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
+import { BrandSymbol } from '../brand/brand-symbol';
 import { iconButton } from './ui-styles';
 
 export function TopBar() {
@@ -15,12 +16,7 @@ export function TopBar() {
           <ArrowLeft aria-hidden="true" size={18} />
         </Link>
 
-        <div
-          aria-hidden="true"
-          className="grid size-10 shrink-0 place-items-center rounded-xl bg-teal-700 text-sm font-bold text-white"
-        >
-          DU
-        </div>
+        <BrandSymbol size="sm" />
 
         <p className="text-lg font-bold text-slate-950 sm:text-xl">Timeline</p>
       </div>
