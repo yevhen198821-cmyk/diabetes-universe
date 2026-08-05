@@ -15,6 +15,33 @@
 
 EA-001 — Feature Slice Complete
 
+## EB-001 — Next Action Engine Epic Backlog v1.0
+
+Дата: 2026-08-05
+
+Завершено:
+
+- created `docs/product/dashboard/eb-001-next-action-engine-backlog.md`
+- established EB-001 as the single product-management planning source for the
+  Next Action Engine Epic
+- defined backlog categories, item contract, status model, priority model,
+  ownership, dependency rules, Foundation-change gate, evolution rules, initial
+  named backlog, expansion governance, and success criteria
+- updated [INDEX](INDEX.md), [Documentation README](README.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- architecture changes
+- implementation plans
+- rule specifications
+- roadmap ordering
+- code, UI, medical algorithms, or AI algorithms
+
+Статус:
+
+EB-001 — Backlog Foundation Ready for Review
+
 ## EA-001 — Next Action Engine Epic Architecture Approval
 
 Дата: 2026-08-05
