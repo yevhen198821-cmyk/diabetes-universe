@@ -2,7 +2,7 @@ import type {
   LocalizationPlatform,
   TranslationKey,
 } from '@diabetes-universe/i18n';
-import type { NextStep, NextStepSource } from '@diabetes-universe/types';
+import type { NextStep } from '@diabetes-universe/types';
 
 import type { DashboardNextActionMessage } from './dashboard-next-action-model';
 
@@ -13,6 +13,17 @@ export interface DashboardNextActionLabels {
   readonly errorTitle: string;
   readonly loading: string;
 }
+
+export type NextActionReadyPresentationKeys = Readonly<{
+  actionLabelKey: string;
+  descriptionKey?: string;
+  messageKey: string;
+}>;
+
+export type NextActionInformationalPresentationKeys = Readonly<{
+  descriptionKey?: string;
+  messageKey: string;
+}>;
 
 function asTranslationKey(value: string): TranslationKey {
   return value as TranslationKey;
@@ -25,6 +36,10 @@ const DASHBOARD_NEXT_ACTION_TRANSLATION_KEYS = {
   emptyTitle: asTranslationKey('dashboard.nextAction.empty.title'),
   errorDescription: asTranslationKey('dashboard.nextAction.error.description'),
   errorTitle: asTranslationKey('dashboard.nextAction.error.title'),
+  fallbackDescription: asTranslationKey(
+    'dashboard.nextAction.fallback.description',
+  ),
+  fallbackTitle: asTranslationKey('dashboard.nextAction.fallback.title'),
   loading: asTranslationKey('dashboard.nextAction.loading'),
   title: asTranslationKey('dashboard.nextAction.title'),
 } as const;
@@ -67,35 +82,50 @@ export function resolveDashboardNextActionLabels(
 }
 
 /**
- * Maps structural demo next-step data to localized presentation copy.
+ * Resolves a ready-state NextStep from quick-add presentation keys.
+ * Requires actionLabelKey — never returns CTA-less ready content.
  */
-export function resolveDashboardNextActionDemoStep(
+export function resolveNextActionReadyStep(
   localization: LocalizationPlatform,
-  source: NextStepSource,
+  presentation: NextActionReadyPresentationKeys,
 ): NextStep {
-  switch (source.type) {
-    case 'insulin':
-      return {
-        actionLabel: translateDashboardNextActionKey(
+  return {
+    actionLabel: translateDashboardNextActionKey(
+      localization,
+      asTranslationKey(presentation.actionLabelKey),
+    ),
+    description: presentation.descriptionKey
+      ? translateDashboardNextActionKey(
           localization,
-          DASHBOARD_NEXT_ACTION_TRANSLATION_KEYS.action,
-        ),
-        description: translateDashboardNextActionKey(
+          asTranslationKey(presentation.descriptionKey),
+        )
+      : '',
+    title: translateDashboardNextActionKey(
+      localization,
+      asTranslationKey(presentation.messageKey),
+    ),
+  };
+}
+
+/**
+ * Resolves informational (non-CTA) presentation from none/navigate keys.
+ */
+export function resolveNextActionInformationalContent(
+  localization: LocalizationPlatform,
+  presentation: NextActionInformationalPresentationKeys,
+): DashboardNextActionMessage {
+  return {
+    description: presentation.descriptionKey
+      ? translateDashboardNextActionKey(
           localization,
-          DASHBOARD_NEXT_ACTION_TRANSLATION_KEYS.description,
-        ),
-        title: translateDashboardNextActionKey(
-          localization,
-          DASHBOARD_NEXT_ACTION_TRANSLATION_KEYS.title,
-        ),
-      };
-    default: {
-      const exhaustiveCheck: never = source.type;
-      throw new Error(
-        `Unsupported next step source type: ${String(exhaustiveCheck)}`,
-      );
-    }
-  }
+          asTranslationKey(presentation.descriptionKey),
+        )
+      : undefined,
+    title: translateDashboardNextActionKey(
+      localization,
+      asTranslationKey(presentation.messageKey),
+    ),
+  };
 }
 
 export function resolveDashboardNextActionEmptyContent(

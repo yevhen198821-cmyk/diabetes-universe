@@ -1,5 +1,99 @@
 # Changelog
 
+## SD-001 — Next Action Engine Foundation Final Review Preparation
+
+Дата: 2026-08-05
+
+Завершено:
+
+- lifecycle status advanced to Architecture Approved — Final Review
+- final implementation audit confirms empty contextual registry, governed
+  compatibility/default, governed neutral fallback, deterministic priority
+  resolution, and no clinical/contextual behavior in SD-001
+- validation, visual parity verification, and PR readiness evidence prepared for
+  Final Review
+
+Статус:
+
+SD-001 — Ready for Final Review
+
+## SD-001 — Next Action Engine Foundation Engineering Revision
+
+Дата: 2026-08-05
+
+Завершено:
+
+- single source of rule priority: `NextActionRule` owns ranking; evaluate returns payload only
+- discriminated `NextActionMappedPresentation` union (quick-add / navigate / none)
+- typed localization resolvers without unsafe `as NextStep` cast
+- direct `mapNeutralFallbackPresentation()` without synthetic `Date(0)` context
+- single governed category source: `DASHBOARD_QUICK_ADD_AVAILABLE_CATEGORIES`
+
+Статус:
+
+SD-001 — Engineering Revision Ready for Re-Review
+
+## SD-001 — Next Action Engine Foundation Repository Implementation
+
+Дата: 2026-08-05
+
+Завершено:
+
+- production engine в `apps/web/lib/dashboard/next-action/`
+- empty contextual rule registry; compatibility/default insulin Quick Add
+- neutral fallback localization keys (`dashboard.nextAction.fallback.*`)
+- DashboardRoot migration: engine → mapper → `resolveNextActionPresentation`
+- retirement `nextStepSource` mock supply и `resolveDashboardNextActionDemoStep`
+- unit tests: engine, priority mapping, determinism, integration parity
+
+Статус:
+
+SD-001 — Repository Implementation Ready for Engineering Review
+
+## SD-001 — Next Action Engine Foundation Architecture Revision
+
+Дата: 2026-08-05
+
+Завершено:
+
+- пересмотр scope SD-001: engine-foundation slice, не product-behavior dynamic selection
+- разделение contextual rules / compatibility-default / neutral fallback
+- exhaustive priority mapping (`NextActionPriority` → `NextStepPriority`)
+- документ переименован: `sd-001-next-action-engine-foundation.md`
+- обновлены [INDEX](INDEX.md), module README, [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Ключевые решения:
+
+- SD-001 не предоставляет clinically/contextually dynamic selection
+- insulin Quick Add — compatibility/default decision, не contextual rule
+- neutral fallback только когда default нельзя безопасно показать
+- contextual rule registry пуст в initial implementation
+
+Статус:
+
+SD-001 — Architecture Revision Ready for Re-Audit
+
+## SD-001 — Dynamic Next Action Architecture Draft
+
+Дата: 2026-08-05
+
+Завершено:
+
+- Feature Slice SD-001 — Architecture Draft для deterministic Dynamic Next Action
+- документ `docs/architecture/dashboard/sd-001-dynamic-next-action.md`
+- module boundary README `apps/web/lib/dashboard/next-action/README.md`
+- обновлены [INDEX](INDEX.md), [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- production engine implementation;
+- новые правила без approved data;
+- Feature Complete (ожидает Architecture Audit и Approval)
+
+Статус:
+
+SD-001 — Architecture Draft Ready for Architecture Audit
+
 ## Motion System Specification — Feature Complete
 
 Дата: 2026-08-05

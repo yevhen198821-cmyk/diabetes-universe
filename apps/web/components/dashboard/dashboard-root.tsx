@@ -3,8 +3,11 @@
 import { useMemo, useRef, useState } from 'react';
 
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model';
+import {
+  createDashboardNextActionEngineInput,
+  resolveDashboardNextActionPresentation,
+} from '../../lib/dashboard/dashboard-next-action-integration';
 import { prepareDashboardAiInsightPresentation } from '../../lib/dashboard/dashboard-ai-insight-presentation';
-import { nextStepSource } from '../../lib/mocks/timeline';
 import { createActivityTimelineEvent } from '../../lib/quick-add/create-activity-timeline-event';
 import { createGlucoseTimelineEvent } from '../../lib/quick-add/create-glucose-timeline-event';
 import { createInsulinTimelineEvent } from '../../lib/quick-add/create-insulin-timeline-event';
@@ -27,7 +30,6 @@ import { DashboardAiInsight } from './dashboard-ai-insight';
 import { DashboardDaySummary } from './dashboard-day-summary';
 import { DashboardHeader } from './dashboard-header';
 import { DashboardLastGlucose } from './dashboard-last-glucose';
-import { resolveDashboardNextActionDemoStep } from './dashboard-next-action-labels';
 import { DashboardNextAction } from './dashboard-next-action';
 import { DashboardRecentEvents } from './dashboard-recent-events';
 import { resolveDashboardAiInsightLabels } from './dashboard-ai-insight-labels';
@@ -55,9 +57,13 @@ export function DashboardRoot() {
   const fabRef = useRef<HTMLButtonElement>(null);
   const nextActionRef = useRef<HTMLButtonElement>(null);
   const referenceTime = useMemo(() => new Date(), []);
-  const localizedNextStep = useMemo(
-    () => resolveDashboardNextActionDemoStep(localization, nextStepSource),
-    [localization],
+  const nextActionPresentation = useMemo(
+    () =>
+      resolveDashboardNextActionPresentation(
+        localization,
+        createDashboardNextActionEngineInput(events, referenceTime),
+      ),
+    [events, localization, referenceTime],
   );
   const dashboardTimeZone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -213,13 +219,25 @@ export function DashboardRoot() {
           )
         }
         nextAction={
-          <DashboardNextAction
-            action={localizedNextStep}
-            actionButtonRef={nextActionRef}
-            actionDisabled={quickAddState.isOpen}
-            onAction={() => requestOpen('next-action', 'insulin')}
-            state="ready"
-          />
+          nextActionPresentation.state === 'ready' ? (
+            <DashboardNextAction
+              action={nextActionPresentation.action}
+              actionButtonRef={nextActionRef}
+              actionDisabled={quickAddState.isOpen}
+              onAction={() =>
+                requestOpen(
+                  'next-action',
+                  nextActionPresentation.quickAddCategory,
+                )
+              }
+              state="ready"
+            />
+          ) : (
+            <DashboardNextAction
+              content={nextActionPresentation.content}
+              state="empty"
+            />
+          )
         }
         recentEvents={
           <DashboardRecentEvents

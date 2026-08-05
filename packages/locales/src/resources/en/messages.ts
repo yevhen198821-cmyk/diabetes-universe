@@ -62,6 +62,9 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'dashboard.nextAction.empty.title': 'No actions available',
   'dashboard.nextAction.error.description': 'Please try again later.',
   'dashboard.nextAction.error.title': 'Action unavailable',
+  'dashboard.nextAction.fallback.description':
+    'Next action details are temporarily unavailable.',
+  'dashboard.nextAction.fallback.title': 'Next action unavailable',
   'dashboard.nextAction.loading': 'Loading next action',
   'dashboard.nextAction.title': 'Next action',
   'timeline.header.title': 'Timeline',
