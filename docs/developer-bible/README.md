@@ -5,8 +5,8 @@
 1. Install dependencies with `pnpm install`.
 2. Run the workspace with `pnpm dev`.
 3. Keep changes inside the package that owns the concern.
-4. Before review, run `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, and
-   `pnpm build`.
+4. Before review, run `pnpm format:check`, `pnpm lint`, `pnpm typecheck`,
+   `pnpm test`, `pnpm build`, and `python3 scripts/validate-markdown-links.py`.
 
 ## Conventions
 
