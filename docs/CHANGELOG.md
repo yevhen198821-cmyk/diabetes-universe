@@ -231,6 +231,30 @@ GP-001 — Architecture Draft Ready for Architecture Audit
 
 EA-001 — Feature Slice Complete
 
+## NA-001 — Glucose Data Staleness Rule Architecture Draft
+
+Дата: 2026-08-05
+
+Завершено:
+
+- advanced NA-001 from Approved Backlog Item to Architecture Draft
+- defined purpose, scope, dependencies, input, activation, suppression, decision,
+  explainability, safety, failure behavior, testing requirements, and future
+  evolution
+- preserved SD-001 resolver ownership and compatibility/default behavior
+- kept future Glucose Data Staleness Policy as a required unapproved dependency
+
+Не входит в этот этап:
+
+- implementation, code, UI, localization, algorithms, intervals, timing values,
+  medical thresholds, treatment recommendations, diagnosis, reminders, device
+  behavior, AI behavior, personalization, or prediction
+- changes to Foundation, SD-001, EA-001, or EB-001
+
+Статус:
+
+NA-001 — Architecture Draft
+
 ## EB-001 — Next Action Engine Epic Backlog Foundation Complete
 
 Дата: 2026-08-05
