@@ -1,5 +1,42 @@
 # Changelog
 
+## EB-001 — Next Action Engine Epic Backlog Foundation Approval
+
+Дата: 2026-08-05
+
+Завершено:
+
+- completed final approval audit of the EB-001 backlog management model
+- corrected planning hierarchy terminology across Candidate Registry Entries,
+  Backlog Qualification, Governed Backlog Items, Feature Slices, and the Project
+  Development Lifecycle
+- corrected Evolution Rules to operate on candidates and governed backlog items
+  rather than treating every planning record as an active Feature Slice
+- lifecycle advanced to Backlog Foundation Approved with Operational Status —
+  Living
+
+Статус:
+
+EB-001 — Backlog Foundation Approved — Operational Status Living
+
+## EB-001 — Next Action Engine Epic Backlog Foundation Revision
+
+Дата: 2026-08-05
+
+Завершено:
+
+- separated Candidate Registry Entries from Governed Backlog Items
+- added Backlog Qualification gate before `Proposed → Approved`
+- clarified status transitions for Deferred, Rejected, and Feature Complete
+- separated inherited dependencies from item-specific dependencies
+- clarified the living document lifecycle and operational backlog model
+- updated success criteria so compact initial entries use the Candidate Registry
+  contract while Approved and later items use the Governed Backlog Item contract
+
+Статус:
+
+EB-001 — Backlog Foundation Revision Ready for Re-Review
+
 ## EA-001 — Next Action Engine Epic Architecture Feature Slice Complete
 
 Дата: 2026-08-05
@@ -14,6 +51,36 @@
 Статус:
 
 EA-001 — Feature Slice Complete
+
+## EB-001 — Next Action Engine Epic Backlog v1.0
+
+Дата: 2026-08-05
+
+Завершено:
+
+- created `docs/product/dashboard/eb-001-next-action-engine-backlog.md`
+- normalized EB-001 onto `main` after EA-001 completion
+- established EB-001 as the single product-management planning source for the
+  Next Action Engine Epic
+- defined backlog categories, item contract, status model, priority model,
+  ownership, dependency rules, Foundation-change gate, evolution rules, initial
+  named backlog, expansion governance, and success criteria
+- added Backlog Governance for item creation, approval, priority changes,
+  Deferred, Rejected, archival, and duplicates
+- updated [INDEX](INDEX.md), [Documentation README](README.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- architecture changes
+- implementation plans
+- rule specifications
+- roadmap ordering
+- code, UI, medical algorithms, or AI algorithms
+
+Статус:
+
+EB-001 — Backlog Foundation Ready for Review
 
 ## EA-001 — Next Action Engine Epic Architecture Approval
 

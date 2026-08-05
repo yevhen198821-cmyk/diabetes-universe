@@ -16,6 +16,10 @@
 - [Documentation Standard](project/documentation-standard.md)
 - [Project Rules](project/project-rules.md)
 
+## Product Backlogs
+
+- [EB-001 — Next Action Engine Epic Backlog v1.0](product/dashboard/eb-001-next-action-engine-backlog.md) — Backlog Foundation Approved — Living
+
 ## Brand
 
 - [05 Brand Architecture Specification](brand/05-brand-architecture-specification.md) — Feature Complete

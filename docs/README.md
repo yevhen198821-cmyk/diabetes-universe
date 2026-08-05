@@ -32,6 +32,7 @@ This directory contains the project documentation and its supporting templates.
 ## Organization
 
 - `project/` contains project-level direction, standards, rules, and terminology.
+- `product/` contains product-management artifacts such as living Epic backlogs.
 - `brand/` contains strategic brand architecture and approved brand specifications.
 - `architecture/` describes system responsibilities, boundaries, and dependencies.
 - `specs/` defines functional behavior and acceptance criteria.
