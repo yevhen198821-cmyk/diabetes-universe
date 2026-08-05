@@ -32,6 +32,7 @@
 - [14 App Icon Architecture Specification](design-system/14-app-icon-architecture-specification.md) — Feature Complete
 - [15 Brand Logo System Specification](design-system/15-brand-logo-system-specification.md) — Feature Complete
 - [16 Color System Specification](design-system/16-color-system-specification.md) — Feature Complete
+- [17 Typography System Specification](design-system/17-typography-system-specification.md) — Architecture Approved
 
 ## Architecture
 

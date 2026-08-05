@@ -22,6 +22,7 @@ This directory contains the project documentation and its supporting templates.
 - [14 App Icon Architecture Specification](design-system/14-app-icon-architecture-specification.md)
 - [15 Brand Logo System Specification](design-system/15-brand-logo-system-specification.md)
 - [16 Color System Specification](design-system/16-color-system-specification.md)
+- [17 Typography System Specification](design-system/17-typography-system-specification.md)
 - [Documentation Standard](project/documentation-standard.md)
 - [Project Rules](project/project-rules.md)
 
