@@ -72,7 +72,7 @@ documented architecture decision and an explicit product requirement.
 - [Presentation Context Foundation](presentation/presentation-context.md) — CR-03A, Feature Complete
 - [React Platform Provider Foundation](presentation/react-platform-provider.md) — CR-03B, Feature Complete
 - [Application Platform Integration](presentation/application-platform-integration.md) — CR-03C, Feature Complete (ADR-0013)
-- [@diabetes-universe/web](../../../apps/web/README.md) — thin Next.js bootstrap (CR-02, Feature Complete)
-- [@diabetes-universe/platform-web](../../../packages/platform-web/README.md)
+- [@diabetes-universe/web](../../apps/web/README.md) — thin Next.js bootstrap (CR-02, Feature Complete)
+- [@diabetes-universe/platform-web](../../packages/platform-web/README.md)
 
 ## Notes

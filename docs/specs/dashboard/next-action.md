@@ -91,7 +91,7 @@ content.
 
 - [Dashboard Next Action Architecture](../../architecture/dashboard/next-action.md)
 - [Dashboard Next Action UI](../../ui/dashboard/next-action.md)
-- [Dashboard Layout UI](../ui/dashboard/layout.md)
+- [Dashboard Layout UI](../../ui/dashboard/layout.md)
 
 ## Acceptance Criteria
 
