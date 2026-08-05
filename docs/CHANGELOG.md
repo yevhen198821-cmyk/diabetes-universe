@@ -1,5 +1,25 @@
 # Changelog
 
+## Typography System Specification — Architecture Approved
+
+Дата: 2026-08-05
+
+Завершено:
+
+- документ `17 Typography System Specification` — `docs/design-system/17-typography-system-specification.md`
+- статус: **Architecture Approved**
+- typography philosophy, role hierarchy, numeric typography, information hierarchy, reading experience, internationalization, accessibility, theme compatibility, design token integration, evolution, governance
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md), [design-system README](design-system/README.md), [glossary](project/glossary.md)
+
+Не входит в этот этап:
+
+- font family selection, type scales, px/rem values, CSS, Tailwind config, token values, implementation
+- Feature Complete (ожидает Final Architecture Review)
+
+Статус:
+
+Typography System Specification (document 17) — **Architecture Approved** — Ready for Final Architecture Review
+
 ## Foundation Freeze — Feature Complete
 
 Дата: 2026-08-05

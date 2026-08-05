@@ -101,6 +101,7 @@ docs/
 - [14 App Icon Architecture Specification](docs/design-system/14-app-icon-architecture-specification.md)
 - [15 Brand Logo System Specification](docs/design-system/15-brand-logo-system-specification.md)
 - [16 Color System Specification](docs/design-system/16-color-system-specification.md)
+- [17 Typography System Specification](docs/design-system/17-typography-system-specification.md)
 - [Architecture](docs/architecture/README.md)
 - [Product Bible](docs/product-bible/README.md)
 - [Developer Bible](docs/developer-bible/README.md)
