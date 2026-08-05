@@ -1,5 +1,25 @@
 # Changelog
 
+## Illustration System Specification — Architecture Approved
+
+Дата: 2026-08-05
+
+Завершено:
+
+- документ `19 Illustration System Specification` — `docs/design-system/19-illustration-system-specification.md`
+- статус: **Architecture Approved**
+- illustration philosophy, category architecture, illustration roles, communication principles, information hierarchy, accessibility, internationalization, theme compatibility, design token integration, evolution, governance
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md), [design-system README](design-system/README.md), [glossary](project/glossary.md)
+
+Не входит в этот этап:
+
+- illustrations, artwork, colors, style guides, implementation
+- Feature Complete (ожидает Final Architecture Review)
+
+Статус:
+
+Illustration System Specification (document 19) — **Architecture Approved** — Ready for Final Architecture Review
+
 ## Iconography System Specification — Feature Complete
 
 Дата: 2026-08-05

@@ -24,6 +24,7 @@ This directory contains the project documentation and its supporting templates.
 - [16 Color System Specification](design-system/16-color-system-specification.md)
 - [17 Typography System Specification](design-system/17-typography-system-specification.md)
 - [18 Iconography System Specification](design-system/18-iconography-system-specification.md)
+- [19 Illustration System Specification](design-system/19-illustration-system-specification.md)
 - [Documentation Standard](project/documentation-standard.md)
 - [Project Rules](project/project-rules.md)
 
