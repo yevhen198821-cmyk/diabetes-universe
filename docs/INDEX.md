@@ -31,6 +31,7 @@
 - [12 UI Component Specification](design-system/12-ui-component-specification.md) — Feature Complete
 - [14 App Icon Architecture Specification](design-system/14-app-icon-architecture-specification.md) — Feature Complete
 - [15 Brand Logo System Specification](design-system/15-brand-logo-system-specification.md) — Feature Complete
+- [16 Color System Specification](design-system/16-color-system-specification.md) — Architecture Approved
 
 ## Architecture
 

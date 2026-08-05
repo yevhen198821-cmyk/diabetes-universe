@@ -1,5 +1,25 @@
 # Changelog
 
+## Color System Specification — Architecture Approved
+
+Дата: 2026-08-05
+
+Завершено:
+
+- документ `16 Color System Specification` — `docs/design-system/16-color-system-specification.md`
+- статус: **Architecture Approved**
+- color philosophy, role hierarchy, brand/neutral/semantic/surface/content/border/overlay architecture, interactive states, theme architecture (Light, Dark, High Contrast, AMOLED, Print), accessibility, internationalization, design token integration, evolution, governance
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md), [design-system README](design-system/README.md), [glossary](project/glossary.md)
+
+Не входит в этот этап:
+
+- palettes, HEX/RGB/HSL values, CSS variables, Tailwind config, theme implementation, token values
+- Feature Complete (ожидает Final Architecture Review)
+
+Статус:
+
+Color System Specification (document 16) — **Architecture Approved** — Ready for Final Architecture Review
+
 ## Brand Symbol Integration — Feature Complete
 
 Дата: 2026-08-04
