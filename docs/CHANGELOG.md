@@ -1,5 +1,19 @@
 # Changelog
 
+## Iconography System Specification — Feature Complete
+
+Дата: 2026-08-05
+
+Завершено:
+
+- документ `18 Iconography System Specification` — `docs/design-system/18-iconography-system-specification.md`
+- статус: **Feature Complete**
+- merge PR #53; обновлены [INDEX](INDEX.md), статус документа в спецификации
+
+Статус:
+
+Iconography System Specification (document 18) — Feature Complete ✅
+
 ## Iconography System Specification — Architecture Approved
 
 Дата: 2026-08-05

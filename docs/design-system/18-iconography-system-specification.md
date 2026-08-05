@@ -16,7 +16,7 @@ implementation guide. This document defines iconography architecture only.
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Objectives
 
@@ -544,7 +544,7 @@ Iconography System architecture follows the governed document lifecycle in
 Draft → Architecture Review → Repository Implementation → Validation → DU Review →
 Certification → Feature Complete.
 
-Current status: **Architecture Approved**.
+Current status: **Feature Complete**.
 
 ### Review
 
@@ -617,8 +617,7 @@ Iconography System architecture is successful when:
 
 ## Notes
 
-- This document is at **Architecture Approved** status and awaits Final
-  Architecture Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
 - Icon production, SVG assets, and library selection belong to later approved
   work governed by this specification and document `11`.
 - Iconography direction in
