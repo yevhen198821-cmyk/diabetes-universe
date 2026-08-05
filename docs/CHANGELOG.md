@@ -247,6 +247,31 @@ EA-001 — Feature Slice Complete
 
 EB-001 — Backlog Foundation Complete — Operational Status: Living
 
+## NA-001 — Glucose Data Staleness Rule Backlog Qualification
+
+Дата: 2026-08-05
+
+Завершено:
+
+- created `docs/product/dashboard/na-001-glucose-data-staleness-rule.md`
+- qualified NA-001 as an Approved Backlog Item
+- updated EB-001 to move NA-001 from Candidate Registry Entry to Governed
+  Backlog Item
+- recorded item-specific dependency on future approved Glucose Data Staleness
+  Policy
+- updated [INDEX](INDEX.md) and [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- architecture draft
+- implementation
+- algorithms, thresholds, time values, rule logic, UI, reminders, AI, devices,
+  or predictions
+
+Статус:
+
+NA-001 — Approved Backlog Item
+
 ## EB-001 — Next Action Engine Epic Backlog Foundation Approval
 
 Дата: 2026-08-05
