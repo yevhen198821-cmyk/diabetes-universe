@@ -4,17 +4,17 @@ _Subtitle: product architecture for the Dashboard Next Action Engine Epic._
 
 ## Status
 
-Architecture Audit — Ready for Review
+Architecture Approved
 
 ## Lifecycle
 
-| Stage                 | Status        |
-| --------------------- | ------------- |
-| Architecture Draft    | Complete      |
-| Architecture Audit    | **Current**   |
-| Architecture Approved | Pending       |
-| Epic Governance       | Pending       |
-| Feature Slice Ready   | Pending audit |
+| Stage                 | Status      |
+| --------------------- | ----------- |
+| Architecture Draft    | Complete    |
+| Architecture Audit    | Complete    |
+| Architecture Approved | **Current** |
+| Epic Governance       | Pending     |
+| Feature Slice Ready   | Pending     |
 
 ## Dependencies
 
@@ -413,4 +413,5 @@ EA-001 is successful when:
 - Dashboard continues to show one understandable recommendation at a time;
 - no future rule can bypass ownership, safety classification, explainability, or
   test expectations;
-- the Architecture Audit is ready for review.
+- the architecture is approved as the official product model for future NA-xxx
+  Feature Slices.

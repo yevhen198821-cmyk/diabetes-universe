@@ -59,7 +59,7 @@
 - [Dashboard Layout](architecture/dashboard/layout.md)
 - [Dashboard Header](architecture/dashboard/header.md)
 - [Dashboard Next Action](architecture/dashboard/next-action.md)
-- [EA-001 — Next Action Engine Epic Architecture](architecture/dashboard/ea-001-next-action-engine-epic-architecture.md) — Architecture Audit
+- [EA-001 — Next Action Engine Epic Architecture](architecture/dashboard/ea-001-next-action-engine-epic-architecture.md) — Architecture Approved
 - [SD-001 — Next Action Engine Foundation](architecture/dashboard/sd-001-next-action-engine-foundation.md) — Feature Slice Complete
 - [Dashboard Last Glucose](architecture/dashboard/last-glucose.md)
 - [Dashboard Day Summary](architecture/dashboard/day-summary.md)

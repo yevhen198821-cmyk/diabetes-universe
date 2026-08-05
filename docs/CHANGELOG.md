@@ -1,5 +1,21 @@
 # Changelog
 
+## EA-001 — Next Action Engine Epic Architecture Approval
+
+Дата: 2026-08-05
+
+Завершено:
+
+- completed final architecture approval review of EA-001
+- confirmed EA-001 defines only the Next Action Engine Epic product model
+- confirmed SD-001 remains the technical engine foundation and future NA-xxx
+  Feature Slices own individual rule definitions
+- lifecycle advanced to Architecture Approved
+
+Статус:
+
+EA-001 — Architecture Approved
+
 ## EA-001 — Next Action Engine Epic Architecture Audit
 
 Дата: 2026-08-05
