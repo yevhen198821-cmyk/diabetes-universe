@@ -19,6 +19,7 @@ Design tokens, typography, spacing, icon, component, form, and motion guidance b
 - [17 Typography System Specification](17-typography-system-specification.md)
 - [18 Iconography System Specification](18-iconography-system-specification.md)
 - [19 Illustration System Specification](19-illustration-system-specification.md)
+- [20 Motion System Specification](20-motion-system-specification.md)
 
 ## What Does Not Belong Here
 
