@@ -1,5 +1,21 @@
 # Changelog
 
+## EB-001 — Next Action Engine Epic Backlog Foundation Complete
+
+Дата: 2026-08-05
+
+Завершено:
+
+- PR #59 merged into `main` (merge commit `af54e93`)
+- EB-001 became the living product-management backlog for the Next Action Engine
+  Epic
+- lifecycle advanced to Backlog Foundation Complete with Operational Status:
+  Living
+
+Статус:
+
+EB-001 — Backlog Foundation Complete — Operational Status: Living
+
 ## EB-001 — Next Action Engine Epic Backlog Foundation Approval
 
 Дата: 2026-08-05
