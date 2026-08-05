@@ -12,7 +12,7 @@ engineering workflow, or implementation standards defined in documents `00`–`0
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Product Vision
 
@@ -315,7 +315,8 @@ Product architecture is successful when:
 
 ## Notes
 
-- This document is at **Architecture Approved** status and awaits Final
-  Architecture Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
+- Architecture Approved through the governed revision lifecycle; Final Architecture
+  Review completed as part of Foundation Freeze lifecycle synchronization.
 - Governance hierarchy and change lifecycle remain authoritative in document `02`.
 - Engineering standards remain authoritative in document `03`.

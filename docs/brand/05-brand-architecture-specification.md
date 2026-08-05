@@ -15,7 +15,7 @@ typography, app icon, or derivative brand materials.
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Strategic Brand Objective
 
@@ -355,8 +355,9 @@ Brand architecture is successful when:
 
 ## Notes
 
-- This document is at **Architecture Approved** status and awaits Final
-  Architecture Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
+- Architecture Approved through the governed revision lifecycle; Final Architecture
+  Review completed as part of Foundation Freeze lifecycle synchronization.
 - Final logo, color system, typography, app icon, and derivative materials belong
   to later approved brand documents.
 - Product module structure remains authoritative in

@@ -49,8 +49,22 @@ pnpm dev           # Start applications in development mode
 pnpm build         # Create production builds
 pnpm lint          # Run static analysis
 pnpm typecheck     # Check all TypeScript workspaces
+pnpm test          # Run unit tests across all workspaces
 pnpm format        # Format supported files
 pnpm format:check  # Verify formatting without writing files
+```
+
+## Local validation
+
+Run the standard validation sequence before review:
+
+```bash
+pnpm format:check
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+python3 scripts/validate-markdown-links.py
 ```
 
 ## Repository structure
@@ -90,3 +104,8 @@ docs/
 - [Architecture](docs/architecture/README.md)
 - [Product Bible](docs/product-bible/README.md)
 - [Developer Bible](docs/developer-bible/README.md)
+
+## Licensing
+
+This repository is proprietary. See [LICENSE](LICENSE) for terms. Diabetes Universe
+is not currently distributed as open source.

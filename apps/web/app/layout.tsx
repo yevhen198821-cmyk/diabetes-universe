@@ -2,6 +2,10 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 
 import {
+  APP_BASELINE_DESCRIPTION,
+  BRAND_SYMBOL_APPLE_TOUCH_ICON,
+  BRAND_SYMBOL_ICON_192,
+  BRAND_SYMBOL_ICON_512,
   BRAND_SYMBOL_ICON_PNG,
   BRAND_SYMBOL_ICON_SVG,
 } from '../lib/brand/brand-symbol-paths';
@@ -19,11 +23,21 @@ export const metadata: Metadata = {
     default: 'Diabetes Universe',
     template: '%s | Diabetes Universe',
   },
-  description: 'Демонстрационное приложение Diabetes Universe.',
+  description: APP_BASELINE_DESCRIPTION,
   manifest: '/manifest.webmanifest',
   icons: {
     icon: [
       { url: BRAND_SYMBOL_ICON_SVG, type: 'image/svg+xml' },
+      {
+        url: BRAND_SYMBOL_ICON_192,
+        type: 'image/png',
+        sizes: '192x192',
+      },
+      {
+        url: BRAND_SYMBOL_ICON_512,
+        type: 'image/png',
+        sizes: '512x512',
+      },
       {
         url: BRAND_SYMBOL_ICON_PNG,
         type: 'image/png',
@@ -32,12 +46,12 @@ export const metadata: Metadata = {
     ],
     apple: [
       {
-        url: BRAND_SYMBOL_ICON_PNG,
+        url: BRAND_SYMBOL_APPLE_TOUCH_ICON,
         type: 'image/png',
-        sizes: '1024x1024',
+        sizes: '180x180',
       },
     ],
-    shortcut: BRAND_SYMBOL_ICON_PNG,
+    shortcut: BRAND_SYMBOL_ICON_192,
   },
   appleWebApp: {
     capable: true,

@@ -17,7 +17,7 @@ visual assets.
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Design System Objectives
 
@@ -501,8 +501,9 @@ The visual design system specification is successful when:
 
 ## Notes
 
-- This document is at **Architecture Approved** status and awaits Final
-  Architecture Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
+- Architecture Approved through the governed revision lifecycle; Final Architecture
+  Review completed as part of Foundation Freeze lifecycle synchronization.
 - Existing guides under `docs/design-system/` remain supporting material until
   superseded by Feature Complete numbered specifications.
 - Final token values and component specifications belong to documents `11` and

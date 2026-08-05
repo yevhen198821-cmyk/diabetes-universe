@@ -12,7 +12,7 @@ exports, Figma variables, component APIs, or application implementation.
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Objectives
 
@@ -419,8 +419,9 @@ The design tokens specification is successful when:
 
 ## Notes
 
-- This document is at **Architecture Approved** status and awaits Final
-  Architecture Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
+- Architecture Approved through the governed revision lifecycle; Final Architecture
+  Review completed as part of Foundation Freeze lifecycle synchronization.
 - Production token file formats and platform exports belong to later approved
   implementation work governed by this specification.
 - UI component specifications remain authoritative in document `12`.

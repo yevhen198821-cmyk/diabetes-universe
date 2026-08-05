@@ -13,7 +13,7 @@ implementation workflow defined in
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Governance Objectives
 
@@ -85,7 +85,7 @@ version supersedes it.
 | 1        | **00 Project Constitution**                                                         | Feature Complete; highest-level Source of Truth                            |
 | 2        | **02 Project Governance Specification**                                             | This document                                                              |
 | 3        | [01 Project Development Specification](01-project-development-specification.md)     | Feature Complete                                                           |
-| 4        | [03 Engineering Standards Specification](03-engineering-standards-specification.md) | Architecture Approved                                                      |
+| 4        | [03 Engineering Standards Specification](03-engineering-standards-specification.md) | Feature Complete                                                           |
 | 5        | [Development Standard](development-standard.md)                                     | Linked standard under document 01                                          |
 | 6        | [Documentation Standard](documentation-standard.md)                                 | Linked standard under document 01                                          |
 | 7        | [Project Rules](project-rules.md)                                                   | Mandatory project constraints                                              |
@@ -275,8 +275,9 @@ Governance is successful when:
 - [00 Project Constitution](00-project-constitution.md) is implemented in the
   repository, has **Feature Complete** status, and is the active highest-level
   Source of Truth.
-- This document is at **Architecture Approved** status and awaits Final
-  Architecture Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
+- Architecture Approved through the governed revision lifecycle; Final Architecture
+  Review completed as part of Foundation Freeze lifecycle synchronization.
 - Git workflow, CI/CD, quality gates, and repository validation commands remain
   defined only in
   [01 Project Development Specification](01-project-development-specification.md)

@@ -12,6 +12,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
+    "test": "turbo run test",
     "test:e2e": "playwright test",
     "typecheck": "turbo run typecheck"
   },
