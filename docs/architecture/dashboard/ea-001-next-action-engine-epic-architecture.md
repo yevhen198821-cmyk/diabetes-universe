@@ -243,29 +243,129 @@ Retired
 | Deprecated     | Rule remains supported but is no longer preferred for new behavior.                      |
 | Retired        | Rule is removed or disabled with migration and documentation complete.                   |
 
-## 7. Rule Contract
+## 7. Standard Rule Contract
 
-Every future rule must define the following product contract before
-implementation:
+Every future Next Action Engine rule must satisfy the Standard Rule Contract
+before implementation. The contract is architectural and product-level. It does
+not prescribe technical type shapes, file layout, component behavior, registry
+mechanics, algorithms, thresholds, timing values, UI, localization, React, or
+implementation details.
 
-| Field             | Requirement                                                                            |
-| ----------------- | -------------------------------------------------------------------------------------- |
-| Rule ID           | Stable, unique, human-readable identifier.                                             |
-| Purpose           | User problem the rule solves and why Dashboard is the right surface.                   |
-| Owner             | Single accountable owner: Medical, UX, Platform, AI, or Product.                       |
-| Taxonomy category | One category from the Epic taxonomy.                                                   |
-| Inputs            | Approved facts the rule may inspect.                                                   |
-| Trigger           | Conditions that make evaluation relevant.                                              |
-| Preconditions     | Required data quality, permissions, settings, and availability.                        |
-| Priority          | Semantic priority and rationale.                                                       |
-| Suppression       | When the rule must stay silent or back off.                                            |
-| Explanation       | User-understandable reason for appearance.                                             |
-| Action            | Expected user action and target surface, if any.                                       |
-| Failure behavior  | Safe behavior when inputs, actions, localization, or platform support are unavailable. |
-| Test matrix       | Determinism, safety, conflict, localization, accessibility, and regression cases.      |
+### 7.1 Rule Metadata
 
-The contract is product-level. It does not prescribe technical type shapes, file
-layout, component behavior, or registry mechanics.
+Every rule defines:
+
+| Field                 | Requirement                                                           |
+| --------------------- | --------------------------------------------------------------------- |
+| Rule ID               | Stable, unique, human-readable identifier.                            |
+| Rule Name             | Short product name.                                                   |
+| Category              | One category from the Epic taxonomy.                                  |
+| Owner                 | Exactly one accountable owner: Medical, UX, Platform, AI, or Product. |
+| Safety Classification | One safety class from EA-001.                                         |
+
+Rule metadata identifies the rule for governance and planning only. It does not
+describe implementation.
+
+### 7.2 Purpose
+
+Every rule must explain:
+
+- what user problem it solves;
+- why the rule exists;
+- expected user value.
+
+Purpose must remain user-centered and must not include solution mechanics,
+algorithms, or implementation details.
+
+### 7.3 Input Contract
+
+Every rule must explicitly define:
+
+- permitted data sources;
+- prohibited data sources;
+- required dependencies.
+
+Input contracts must identify approved facts and source boundaries only. They
+must not define algorithms, thresholds, timing values, or data-processing
+implementation.
+
+### 7.4 Activation Contract
+
+Every rule must describe the conditions under which it becomes a candidate for
+Next Action evaluation.
+
+Activation contracts define product eligibility. They must not define
+thresholds, timing values, implementation mechanics, or resolver behavior.
+
+### 7.5 Suppression Contract
+
+Every rule must describe:
+
+- when it suppresses itself;
+- when another rule should win at the product-policy level.
+
+Suppression contracts must reference the SD-001 resolver boundary for final
+deterministic selection. They must not redefine resolver behavior, ordering
+mechanics, registry behavior, or fallback/default behavior.
+
+### 7.6 Decision Contract
+
+Every rule must define:
+
+- what product decision it produces;
+- what governed rule output it returns to SD-001.
+
+Decision contracts describe product intent and safe action target only. They
+must not define UI, localization, React behavior, component behavior, routing, or
+implementation details.
+
+### 7.7 Explainability
+
+Every rule must explain:
+
+- why the recommendation appears;
+- what information was evaluated;
+- what user action is expected.
+
+Explanation must remain understandable by non-technical users. It must not
+expose raw implementation details, raw localization keys, or hidden reasoning.
+
+### 7.8 Safety Contract
+
+Every rule must define:
+
+- applicable safety classification;
+- prohibited medical behavior;
+- prohibited treatment recommendations;
+- prohibited diagnosis.
+
+Safety contracts must not introduce medical policy by themselves. Medical
+policy, when required, belongs to separately approved governance before the rule
+can be implemented or enabled.
+
+### 7.9 Dependency Contract
+
+Every rule must declare:
+
+- inherited dependencies;
+- rule-specific dependencies;
+- Foundation impact.
+
+Foundation impact must be explicit. If a rule requires a Foundation change, rule
+development pauses and Project Governance begins.
+
+### 7.10 Testing Expectations
+
+Every rule must define required verification for:
+
+- positive scenarios;
+- negative scenarios;
+- suppression scenarios;
+- explainability validation;
+- safety validation.
+
+Testing expectations must describe verification obligations only. They must not
+include implementation details, test code, or pseudocode.
 
 ## 8. Conflict Resolution
 
