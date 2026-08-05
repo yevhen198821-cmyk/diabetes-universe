@@ -1,5 +1,22 @@
 # Changelog
 
+## SD-001 — Next Action Engine Foundation Repository Implementation
+
+Дата: 2026-08-05
+
+Завершено:
+
+- production engine в `apps/web/lib/dashboard/next-action/`
+- empty contextual rule registry; compatibility/default insulin Quick Add
+- neutral fallback localization keys (`dashboard.nextAction.fallback.*`)
+- DashboardRoot migration: engine → mapper → `resolveNextActionPresentation`
+- retirement `nextStepSource` mock supply и `resolveDashboardNextActionDemoStep`
+- unit tests: engine, priority mapping, determinism, integration parity
+
+Статус:
+
+SD-001 — Repository Implementation Ready for Engineering Review
+
 ## SD-001 — Next Action Engine Foundation Architecture Revision
 
 Дата: 2026-08-05

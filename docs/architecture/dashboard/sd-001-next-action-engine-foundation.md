@@ -17,22 +17,23 @@ This Feature Slice is an **engine-foundation slice**, not a product-behavior sli
 that changes what the user sees today beyond structural migration from static
 mock supply to governed engine output.
 
-Production engine implementation is a subsequent lifecycle stage. This revision
-defines architecture only.
+Production engine implementation is underway in
+`apps/web/lib/dashboard/next-action/`. Contextual rules remain deferred to future
+slices.
 
 ## Status
 
-Architecture Revision — Ready for Re-Audit
+Architecture Approved — Repository Implementation
 
 ## Lifecycle
 
-| Stage                     | Status        |
-| ------------------------- | ------------- |
-| Architecture Draft        | Superseded    |
-| Architecture Revision     | **Current**   |
-| Architecture Approved     | Pending audit |
-| Repository Implementation | Not started   |
-| Feature Complete          | Not started   |
+| Stage                     | Status          |
+| ------------------------- | --------------- |
+| Architecture Draft        | Superseded      |
+| Architecture Revision     | Superseded      |
+| Architecture Approved     | **Current**     |
+| Repository Implementation | **In progress** |
+| Feature Complete          | Not started     |
 
 ## Scope Clarification
 
@@ -92,15 +93,17 @@ yet optimize for "what is most important now" from live clinical context.
 ```text
 apps/web/lib/dashboard/next-action/
 ├── README.md                      # module boundary
-├── next-action-types.ts           # planned — domain contracts
-├── next-action-context.ts         # planned — context adapter
-├── next-action-rules.ts           # planned — contextual rule registry only
-├── next-action-default.ts         # planned — compatibility/default decision (not a rule)
-├── next-action-fallback.ts        # planned — neutral fallback (not a rule)
-├── next-action-engine.ts          # planned — evaluation pipeline
-├── next-action-mapper.ts          # planned — decision → presentation bridge
-├── next-action-priority-map.ts    # planned — engine → NextStepPriority mapping
-└── next-action-engine.test.mjs    # planned — unit tests
+├── next-action-types.ts           # domain contracts
+├── next-action-context.ts         # context adapter
+├── next-action-rules.ts           # contextual rule registry only (empty)
+├── next-action-default.ts         # compatibility/default decision (not a rule)
+├── next-action-fallback.ts        # neutral fallback (not a rule)
+├── next-action-presentation-safety.ts
+├── next-action-engine.ts          # evaluation pipeline
+├── next-action-mapper.ts          # decision → presentation bridge
+├── next-action-priority-map.ts    # engine → NextStepPriority mapping
+├── next-action-availability.ts
+└── next-action-engine.test.mjs    # unit tests
 ```
 
 Structure may be consolidated if a simpler shape is repository-consistent. Do not
@@ -466,10 +469,10 @@ Compatibility/default is a product parity constant — not a clinical recommenda
 
 | Phase                 | Work                                                                            |
 | --------------------- | ------------------------------------------------------------------------------- |
-| SD-001 implementation | Engine + default + fallback; empty contextual registry; parity with static demo |
-| SD-001 validation     | E2E and unit tests confirm identical user-visible insulin CTA                   |
-| Future slice N        | Register first contextual rule when approved data exists                        |
-| Retirement            | Remove `nextStepSource` mock import and `resolveDashboardNextActionDemoStep`    |
+| SD-001 implementation | Engine + default + fallback; empty contextual registry; parity with static demo — **complete** |
+| SD-001 validation     | E2E and unit tests confirm identical user-visible insulin CTA                                  |
+| Future slice N        | Register first contextual rule when approved data exists                                       |
+| Retirement            | `nextStepSource` and `resolveDashboardNextActionDemoStep` removed from Dashboard supply — **complete** |
 
 ## Foundation Changes Required
 

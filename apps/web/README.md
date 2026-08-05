@@ -182,7 +182,7 @@ Second vertical Dashboard migration to Platform Localization.
 
 - `DashboardNextAction` copy via `useLocalization()`
 - structural `NextStepSource` demo data (`lib/mocks/timeline.ts`)
-- localized presentation via `resolveDashboardNextActionDemoStep()`
+- localized presentation via `resolveNextActionPresentation()` from engine output
 - English canonical `dashboard.nextAction.*` keys (8)
 - pure presentation model boundary
 - unit, integration, resource, and E2E coverage

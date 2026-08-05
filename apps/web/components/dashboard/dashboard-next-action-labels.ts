@@ -2,7 +2,7 @@ import type {
   LocalizationPlatform,
   TranslationKey,
 } from '@diabetes-universe/i18n';
-import type { NextStep, NextStepSource } from '@diabetes-universe/types';
+import type { NextStep } from '@diabetes-universe/types';
 
 import type { DashboardNextActionMessage } from './dashboard-next-action-model';
 
@@ -25,6 +25,10 @@ const DASHBOARD_NEXT_ACTION_TRANSLATION_KEYS = {
   emptyTitle: asTranslationKey('dashboard.nextAction.empty.title'),
   errorDescription: asTranslationKey('dashboard.nextAction.error.description'),
   errorTitle: asTranslationKey('dashboard.nextAction.error.title'),
+  fallbackDescription: asTranslationKey(
+    'dashboard.nextAction.fallback.description',
+  ),
+  fallbackTitle: asTranslationKey('dashboard.nextAction.fallback.title'),
   loading: asTranslationKey('dashboard.nextAction.loading'),
   title: asTranslationKey('dashboard.nextAction.title'),
 } as const;
@@ -66,36 +70,51 @@ export function resolveDashboardNextActionLabels(
   };
 }
 
+export type NextActionPresentationKeys = Readonly<{
+  actionLabelKey?: string;
+  descriptionKey?: string;
+  messageKey: string;
+}>;
+
 /**
- * Maps structural demo next-step data to localized presentation copy.
+ * Resolves localized Dashboard Next Action presentation from engine output keys.
  */
-export function resolveDashboardNextActionDemoStep(
+export function resolveNextActionPresentation(
   localization: LocalizationPlatform,
-  source: NextStepSource,
-): NextStep {
-  switch (source.type) {
-    case 'insulin':
-      return {
-        actionLabel: translateDashboardNextActionKey(
+  presentation: NextActionPresentationKeys,
+): NextStep | DashboardNextActionMessage {
+  const title = translateDashboardNextActionKey(
+    localization,
+    asTranslationKey(presentation.messageKey),
+  );
+
+  if (!presentation.actionLabelKey) {
+    const description = presentation.descriptionKey
+      ? translateDashboardNextActionKey(
           localization,
-          DASHBOARD_NEXT_ACTION_TRANSLATION_KEYS.action,
-        ),
-        description: translateDashboardNextActionKey(
-          localization,
-          DASHBOARD_NEXT_ACTION_TRANSLATION_KEYS.description,
-        ),
-        title: translateDashboardNextActionKey(
-          localization,
-          DASHBOARD_NEXT_ACTION_TRANSLATION_KEYS.title,
-        ),
-      };
-    default: {
-      const exhaustiveCheck: never = source.type;
-      throw new Error(
-        `Unsupported next step source type: ${String(exhaustiveCheck)}`,
-      );
-    }
+          asTranslationKey(presentation.descriptionKey),
+        )
+      : undefined;
+
+    return {
+      description,
+      title,
+    };
   }
+
+  return {
+    actionLabel: translateDashboardNextActionKey(
+      localization,
+      asTranslationKey(presentation.actionLabelKey),
+    ),
+    description: presentation.descriptionKey
+      ? translateDashboardNextActionKey(
+          localization,
+          asTranslationKey(presentation.descriptionKey),
+        )
+      : '',
+    title,
+  };
 }
 
 export function resolveDashboardNextActionEmptyContent(
