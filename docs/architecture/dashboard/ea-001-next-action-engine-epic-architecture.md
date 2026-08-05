@@ -4,17 +4,17 @@ _Subtitle: product architecture for the Dashboard Next Action Engine Epic._
 
 ## Status
 
-Architecture Approved
+Architecture Approved — Feature Slice Complete
 
 ## Lifecycle
 
-| Stage                 | Status      |
-| --------------------- | ----------- |
-| Architecture Draft    | Complete    |
-| Architecture Audit    | Complete    |
-| Architecture Approved | **Current** |
-| Epic Governance       | Pending     |
-| Feature Slice Ready   | Pending     |
+| Stage                  | Status   |
+| ---------------------- | -------- |
+| Architecture Draft     | Complete |
+| Architecture Audit     | Complete |
+| Architecture Approved  | Complete |
+| Epic Governance        | Complete |
+| Feature Slice Complete | Complete |
 
 ## Dependencies
 

@@ -1,5 +1,20 @@
 # Changelog
 
+## EA-001 — Next Action Engine Epic Architecture Feature Slice Complete
+
+Дата: 2026-08-05
+
+Завершено:
+
+- PR #58 merged into `main` (merge commit `d11975b`)
+- EA-001 became the official product architecture for the Dashboard Next Action
+  Engine Epic
+- lifecycle advanced to Feature Slice Complete
+
+Статус:
+
+EA-001 — Feature Slice Complete
+
 ## EA-001 — Next Action Engine Epic Architecture Approval
 
 Дата: 2026-08-05
