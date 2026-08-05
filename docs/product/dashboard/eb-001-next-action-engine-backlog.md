@@ -165,7 +165,26 @@ Possible owners:
 
 Cross-domain review may be required, but ownership is never shared.
 
-## 9. Dependencies
+## 9. Backlog Governance
+
+Backlog governance is product-management responsibility. It does not define
+workflow automation, implementation process, architecture policy, or rule
+behavior.
+
+| Decision                    | Accountable role                                                                                                                                                                               |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Create backlog items        | Product owner or a delegated category owner may create Proposed items.                                                                                                                         |
+| Approve Proposed → Approved | Product owner approves after the item has a single owner, category, dependencies, and Foundation-change answer. Required domain reviewers may block approval for safety or governance reasons. |
+| Change priority             | Product owner changes priority with input from the item owner and relevant domain reviewers.                                                                                                   |
+| Mark Deferred               | Product owner marks Deferred when dependencies, evidence, or product timing are not ready.                                                                                                     |
+| Mark Rejected               | Product owner marks Rejected when the item does not fit the Epic, duplicates another item, conflicts with governance, or lacks product justification.                                          |
+| Archive completed items     | Product owner or backlog curator archives completed items after Feature Complete evidence is linked.                                                                                           |
+| Handle duplicates           | Product owner selects one canonical item, links duplicate context into it, and marks duplicate entries Rejected or merged in backlog notes.                                                    |
+
+Backlog governance decisions must preserve the backlog item contract and must
+not change EA-001 unless the Epic product model itself needs revision.
+
+## 10. Dependencies
 
 A Feature Slice may depend on:
 
@@ -178,7 +197,7 @@ Dependencies must be explicit on every backlog item. Hidden dependencies are not
 allowed because they make planning, governance, validation, and sequencing
 ambiguous.
 
-## 10. Foundation Changes
+## 11. Foundation Changes
 
 Every backlog item must answer:
 
@@ -194,7 +213,7 @@ Allowed values:
 If the value is `Yes`, development pauses and Project Governance starts. The
 Foundation change must be approved before the backlog item can continue.
 
-## 11. Evolution Rules
+## 12. Evolution Rules
 
 The backlog may evolve without changing EA-001.
 
@@ -213,7 +232,7 @@ These operations must never require changing EA-001 unless the product model,
 taxonomy, lifecycle, ownership model, or safety/explainability architecture
 itself changes.
 
-## 12. Initial Backlog
+## 13. Initial Backlog
 
 Initial backlog entries are names only. They are not specifications and do not
 approve implementation.
@@ -260,7 +279,7 @@ approve implementation.
 - NA-061 Rule Performance
 - NA-062 Rule Telemetry
 
-## 13. Future Expansion
+## 14. Future Expansion
 
 New categories can be introduced when existing categories cannot represent a new
 stable product intent. Category expansion requires governance review because
@@ -270,7 +289,7 @@ Adding individual backlog items does not require new category approval when the
 item fits an existing category. Adding a new category must not introduce
 implementation, medical policy, AI logic, or roadmap ordering.
 
-## 14. Success Criteria
+## 15. Success Criteria
 
 EB-001 is complete when:
 
@@ -280,6 +299,7 @@ EB-001 is complete when:
 - item statuses are unambiguous;
 - priority is planning-only and not roadmap ordering;
 - ownership is singular;
+- backlog governance roles are explicit;
 - dependencies and Foundation impact are explicit;
 - initial backlog entries are organized by category as names only;
 - future backlog evolution does not require changing EA-001;

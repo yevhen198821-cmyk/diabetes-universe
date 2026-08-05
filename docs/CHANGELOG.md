@@ -22,11 +22,14 @@ EA-001 — Feature Slice Complete
 Завершено:
 
 - created `docs/product/dashboard/eb-001-next-action-engine-backlog.md`
+- normalized EB-001 onto `main` after EA-001 completion
 - established EB-001 as the single product-management planning source for the
   Next Action Engine Epic
 - defined backlog categories, item contract, status model, priority model,
   ownership, dependency rules, Foundation-change gate, evolution rules, initial
   named backlog, expansion governance, and success criteria
+- added Backlog Governance for item creation, approval, priority changes,
+  Deferred, Rejected, archival, and duplicates
 - updated [INDEX](INDEX.md), [Documentation README](README.md), and
   [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
 
