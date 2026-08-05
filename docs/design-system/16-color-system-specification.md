@@ -18,7 +18,7 @@ governance.
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Objectives
 
@@ -478,7 +478,7 @@ Color System architecture follows the governed document lifecycle in
 Draft → Architecture Review → Repository Implementation → Validation → DU Review →
 Certification → Feature Complete.
 
-Current status: **Architecture Approved** — ready for Final Architecture Review.
+Current status: **Feature Complete**.
 
 ### Change management
 
@@ -661,8 +661,7 @@ palettes, chart themes, and component styling belong to later approved work.
 
 ## Notes
 
-- This document is at **Architecture Approved** status and awaits Final Architecture
-  Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
 - Palette production, theme implementation, and token value catalogs belong to
   later approved work governed by this specification and document `11`.
 - Brand color direction remains authoritative in

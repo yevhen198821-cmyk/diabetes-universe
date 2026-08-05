@@ -1,5 +1,19 @@
 # Changelog
 
+## Color System Specification — Feature Complete
+
+Дата: 2026-08-05
+
+Завершено:
+
+- документ `16 Color System Specification` — `docs/design-system/16-color-system-specification.md`
+- статус: **Feature Complete**
+- merge PR #48; обновлены [INDEX](INDEX.md), статус документа в спецификации
+
+Статус:
+
+Color System Specification (document 16) — Feature Complete ✅
+
 ## Color System Specification — Architecture Approved
 
 Дата: 2026-08-05
