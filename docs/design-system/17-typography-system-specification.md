@@ -597,6 +597,102 @@ Changes to Typography System architecture must:
 - [15 Brand Logo System Specification](15-brand-logo-system-specification.md)
 - [16 Color System Specification](16-color-system-specification.md)
 
+## 18. Typography Metrics Philosophy
+
+Typography metrics describe how roles occupy space and relate to one another
+without prescribing numeric values. Metrics philosophy governs production type
+systems and token assignments; this section defines architectural intent only.
+
+### Line-height philosophy
+
+Line height must support the reading mode of each role family.
+
+- Body and Supporting Text roles require comfortable vertical rhythm for
+  sustained reading and translation expansion;
+- Heading and Title roles may use tighter rhythm for structural scanning but
+  must not sacrifice legibility at enlarged scale;
+- Numeric roles require line height that preserves digit separation and unit
+  clarity without collapsing multi-line medical values;
+- line height is a production assignment per role — not a universal constant
+  across the system.
+
+### Paragraph spacing philosophy
+
+Paragraph spacing separates semantic blocks without relying on decorative rules.
+
+- spacing between paragraphs must reinforce information hierarchy — Primary blocks
+  must not visually merge with Supporting blocks;
+- long-form content requires predictable paragraph cadence independent of font
+  family;
+- dashboard and card modules use governed spacing between typographic groups, not
+  ad-hoc margin decisions per component;
+- paragraph spacing must remain stable across themes and locales.
+
+### Character spacing philosophy
+
+Character spacing (tracking) is used sparingly and purposefully.
+
+- default roles assume neutral tracking optimized for readability in each script
+  category;
+- Overline and compact Label roles may allow controlled tracking in production
+  but must not reduce legibility for low-vision users;
+- medical and numeric roles prohibit decorative tracking that alters digit
+  recognition;
+- CJK, Arabic, Hebrew, and long-word locales may require script-specific
+  tracking adjustments in production without changing role architecture.
+
+### Numeric alignment philosophy
+
+Numeric typography requires alignment rules that support comparison and trust.
+
+- glucose, insulin, statistics, and measurement values must align for vertical
+  scanning in lists, tables, and dashboards;
+- alignment philosophy distinguishes value columns from unit and label columns;
+- mixed numeric and narrative content must not share alignment rules that obscure
+  medical values;
+- alignment behavior is defined at token level in production; architecture
+  requires comparability without mandating implementation mechanics.
+
+### Baseline consistency
+
+Typographic elements on a shared horizontal surface must share a coherent
+baseline grid philosophy.
+
+- mixed roles on one line (e.g., Title with Caption, value with unit) must
+  baseline-align unless a governed exception is documented;
+- multi-column and responsive layouts must not break baseline relationships
+  arbitrarily between breakpoints;
+- baseline consistency supports optical calm and reduces cognitive load in dense
+  medical interfaces.
+
+### Optical alignment
+
+Optical alignment corrects perceived imbalance that mathematical centering alone
+cannot resolve.
+
+- icon-plus-label, symbol-plus-wordmark, and badge-plus-text compositions follow
+  optical alignment principles in production;
+- circular or asymmetric glyphs must not pull adjacent text out of perceived
+  alignment with numeric columns;
+- optical adjustments are production refinements within token bounds — they do not
+  create new typography roles.
+
+### Tabular figures philosophy
+
+Tabular (monospaced) figures are a first-class consideration for numeric roles.
+
+- glucose, insulin, time, statistics, and measurement values should use tabular
+  figure behavior in production where platform support allows;
+- proportional figures remain acceptable for narrative Body roles only;
+- tabular philosophy applies to dashboards, timelines, reports, and any surface
+  where numeric comparison is primary;
+- switching between proportional and tabular presentation must not change role
+  meaning or hierarchy.
+
+Metrics philosophy integrates with [Design Token Integration](#design-token-integration):
+production assigns line height, spacing, tracking, and figure behavior to roles
+through semantic and component tokens — not component-local overrides.
+
 ## Success Criteria
 
 Typography System architecture is successful when:
@@ -616,6 +712,9 @@ Typography System architecture is successful when:
   weight-only meaning;
 - theme compatibility covers Light, Dark, High Contrast, AMOLED, and Print;
 - typography-to-token integration chain is explicit;
+- typography metrics philosophy covers line height, paragraph spacing, character
+  spacing, numeric alignment, baseline consistency, optical alignment, and
+  tabular figures without numeric values;
 - future evolution and expansion frameworks are documented;
 - governance, dependencies, and documentation navigation are complete;
 - no font families, type scales, px, rem, CSS, Tailwind configuration, token
