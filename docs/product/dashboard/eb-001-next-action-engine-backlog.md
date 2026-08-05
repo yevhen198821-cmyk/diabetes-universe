@@ -329,15 +329,21 @@ formally initiated.
 
 ## 15. Initial Candidate Registry
 
-Initial entries are names only. Every listed entry in this section is classified
-as a Candidate Registry Entry with `Status: Proposed`.
+Initial entries are compact planning records. Candidate Registry Entries that
+become Approved Backlog Items remain here as historical records with
+`Status: Qualified`.
 
-These entries are not specifications, are not Approved Backlog Items, and do not
-approve implementation.
+Proposed entries are not specifications, are not Approved Backlog Items, and do
+not approve implementation.
 
 ### Medical
 
-- NA-001 Glucose Staleness Rule (future consumer of GP-001 if qualified)
+| Candidate | Status    | Linked Backlog Item                             |
+| --------- | --------- | ----------------------------------------------- |
+| NA-001    | Qualified | [NA-001](na-001-glucose-data-staleness-rule.md) |
+
+Proposed:
+
 - NA-002 Repeated High Glucose Rule
 - NA-003 Repeated Low Glucose Rule
 

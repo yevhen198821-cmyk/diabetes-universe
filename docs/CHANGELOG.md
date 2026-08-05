@@ -255,8 +255,8 @@ EB-001 — Backlog Foundation Complete — Operational Status: Living
 
 - created `docs/product/dashboard/na-001-glucose-data-staleness-rule.md`
 - qualified NA-001 as an Approved Backlog Item
-- updated EB-001 to move NA-001 from Candidate Registry Entry to Governed
-  Backlog Item
+- updated EB-001 to preserve NA-001 in the Candidate Registry as `Qualified`
+  while also recording it as an Approved Backlog Item
 - recorded item-specific dependency on future approved Glucose Data Staleness
   Policy
 - updated [INDEX](INDEX.md) and [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
