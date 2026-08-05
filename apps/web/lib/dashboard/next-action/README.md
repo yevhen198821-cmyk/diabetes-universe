@@ -1,47 +1,67 @@
-# Dynamic Next Action Engine
+# Next Action Engine Foundation
 
-**Feature Slice:** SD-001  
-**Lifecycle:** Architecture Draft  
+**Feature Slice:** SD-001 — Next Action Engine Foundation  
+**Lifecycle:** Architecture Revision  
 **Status:** Not implemented — architecture only
 
 ## Purpose
 
-Deterministic selection of exactly one Dashboard next action from existing
-application data. Framework-independent rule engine consumed by `DashboardRoot`.
+Framework-independent engine foundation for Dashboard next-action selection.
+Preserves current insulin Quick Add behavior while enabling future contextual
+rules.
 
-## Boundary
+**SD-001 does not yet provide clinically or contextually dynamic selection.**
+User-visible dynamic behavior begins when a separately approved contextual rule
+is implemented in a future slice.
 
-| In scope (planned)                          | Out of scope                       |
-| ------------------------------------------- | ---------------------------------- |
-| `next-action-types.ts` — domain contracts   | React components                   |
-| `next-action-context.ts` — adapter types    | Localization resources             |
-| `next-action-rules.ts` — rule registry      | Quick Add controller               |
-| `next-action-engine.ts` — evaluator         | `packages/ui`, `packages/platform` |
-| `next-action-mapper.ts` — structural bridge | Medical inference                  |
+## Decision model
 
-## Data flow
+SD-001 separates three concepts — **do not conflate them:**
+
+| Concept                   | Role in SD-001                                                                   |
+| ------------------------- | -------------------------------------------------------------------------------- |
+| **Contextual rules**      | Registered evaluators; **empty registry** in initial implementation              |
+| **Compatibility/default** | Governed insulin Quick Add decision when no rule matches — **not a rule**        |
+| **Neutral fallback**      | Safe no-action presentation when default cannot be shown safely — **not a rule** |
 
 ```text
-Timeline data → createNextActionContext() → evaluateNextAction() → NextActionDecision
-      → mapNextActionDecision() → labels layer → DashboardNextAction
+Contextual rules → winner?
+  yes → decision
+  no  → compatibility/default (insulin Quick Add)
+        → presentation safe?
+          yes → decision
+          no  → neutral fallback
 ```
 
-## Supported rules (initial)
+## Compatibility behavior (current product parity)
 
-| Rule ID                    | Priority        | Status                               |
-| -------------------------- | --------------- | ------------------------------------ |
-| `parity-insulin-quick-add` | `recommended`   | Planned — preserves current demo CTA |
-| `neutral-fallback`         | `informational` | Planned — always available           |
+| Aspect   | Value                                             |
+| -------- | ------------------------------------------------- |
+| Action   | Quick Add `insulin`                               |
+| Owner    | `requestOpen('next-action', 'insulin')`           |
+| UI       | `DashboardNextAction` unchanged                   |
+| Disabled | `actionDisabled={quickAddState.isOpen}` unchanged |
 
-Unsupported until approved data exists: stale glucose, active reminders, device
-attention.
+## Planned modules
+
+```text
+next-action-types.ts
+next-action-context.ts
+next-action-rules.ts          # contextual rules only
+next-action-default.ts        # compatibility/default (not a rule)
+next-action-fallback.ts       # neutral fallback (not a rule)
+next-action-engine.ts
+next-action-mapper.ts
+next-action-priority-map.ts
+next-action-engine.test.mjs
+```
 
 ## Documentation
 
-Full architecture: [SD-001 — Dynamic Next Action](../../../../../docs/architecture/dashboard/sd-001-dynamic-next-action.md)
+Full architecture:
+[SD-001 — Next Action Engine Foundation](../../../../../docs/architecture/dashboard/sd-001-next-action-engine-foundation.md)
 
 ## Implementation
 
-Production files in this directory are **not created** until Architecture
-Approval and a subsequent implementation slice. Do not add engine logic during
-Architecture Draft.
+No production engine code until Architecture Approval. Contextual rules require
+separate approved data and policies in future slices.

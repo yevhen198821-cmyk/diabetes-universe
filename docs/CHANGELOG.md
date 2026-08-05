@@ -1,5 +1,28 @@
 # Changelog
 
+## SD-001 — Next Action Engine Foundation Architecture Revision
+
+Дата: 2026-08-05
+
+Завершено:
+
+- пересмотр scope SD-001: engine-foundation slice, не product-behavior dynamic selection
+- разделение contextual rules / compatibility-default / neutral fallback
+- exhaustive priority mapping (`NextActionPriority` → `NextStepPriority`)
+- документ переименован: `sd-001-next-action-engine-foundation.md`
+- обновлены [INDEX](INDEX.md), module README, [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Ключевые решения:
+
+- SD-001 не предоставляет clinically/contextually dynamic selection
+- insulin Quick Add — compatibility/default decision, не contextual rule
+- neutral fallback только когда default нельзя безопасно показать
+- contextual rule registry пуст в initial implementation
+
+Статус:
+
+SD-001 — Architecture Revision Ready for Re-Audit
+
 ## SD-001 — Dynamic Next Action Architecture Draft
 
 Дата: 2026-08-05
