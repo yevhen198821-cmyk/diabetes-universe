@@ -52,7 +52,7 @@ Approved — localized via I18N-02B1 (Feature Complete)
   defines the long-term product model, taxonomy, lifecycle, ownership, safety,
   and explainability expectations for future Next Action rules —
   [EA-001 — Next Action Engine Epic Architecture](ea-001-next-action-engine-epic-architecture.md).
-- **EB-001** (Backlog Foundation): Next Action Engine Epic Backlog — records the
+- **EB-001** (Backlog Foundation Revision): Next Action Engine Epic Backlog — records the
   living product-management backlog for future Next Action Feature Slices —
   [EB-001 — Next Action Engine Epic Backlog](../../product/dashboard/eb-001-next-action-engine-backlog.md).
 - **SD-001** (Feature Slice Complete): Next Action Engine Foundation — preserves

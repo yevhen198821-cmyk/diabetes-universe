@@ -1,5 +1,23 @@
 # Changelog
 
+## EB-001 — Next Action Engine Epic Backlog Foundation Revision
+
+Дата: 2026-08-05
+
+Завершено:
+
+- separated Candidate Registry Entries from Governed Backlog Items
+- added Backlog Qualification gate before `Proposed → Approved`
+- clarified status transitions for Deferred, Rejected, and Feature Complete
+- separated inherited dependencies from item-specific dependencies
+- clarified the living document lifecycle and operational backlog model
+- updated success criteria so compact initial entries use the Candidate Registry
+  contract while Approved and later items use the Governed Backlog Item contract
+
+Статус:
+
+EB-001 — Backlog Foundation Revision Ready for Re-Review
+
 ## EA-001 — Next Action Engine Epic Architecture Feature Slice Complete
 
 Дата: 2026-08-05

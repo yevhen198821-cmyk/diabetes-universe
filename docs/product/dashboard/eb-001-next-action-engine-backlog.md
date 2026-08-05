@@ -5,15 +5,17 @@ Feature Slices._
 
 ## Status
 
-Backlog Foundation
+Backlog Foundation Revision — Ready for Re-Review
 
 ## Lifecycle
 
-| Stage              | Status      |
-| ------------------ | ----------- |
-| Backlog Foundation | **Current** |
-| Backlog Review     | Pending     |
-| Backlog Approved   | Pending     |
+| Stage                       | Status            |
+| --------------------------- | ----------------- |
+| Backlog Foundation          | Complete          |
+| Backlog Foundation Revision | **Current**       |
+| Backlog Foundation Review   | Pending re-review |
+| Backlog Foundation Approved | Pending           |
+| Operational Status — Living | Pending approval  |
 
 ## Dependencies
 
@@ -33,9 +35,9 @@ The Next Action Engine Epic Backlog exists to organize future Dashboard Next
 Action Feature Slices in one product-management source.
 
 EB-001 is the single planning source for the Next Action Engine Epic. It records
-candidate slice names, categories, planning status, ownership, dependencies, and
-Foundation impact decisions. It does not define architecture, implementation,
-rule behavior, UI behavior, medical policy, or delivery order.
+candidate slice names, governed backlog items, planning status, ownership,
+dependencies, and Foundation impact decisions. It does not define architecture,
+implementation, rule behavior, UI behavior, medical policy, or delivery order.
 
 Implementation priorities may change without modifying EA-001. EA-001 remains
 the Epic product architecture; EB-001 is the living backlog that evolves as
@@ -51,7 +53,7 @@ EB-001 distinguishes planning from architecture:
 | Foundation | Project-wide standards, governance, quality, and baseline constraints.                                             |
 | SD-001     | Completed technical engine foundation and deterministic evaluation boundary.                                       |
 | EA-001     | Approved Epic product architecture for rule taxonomy, lifecycle, ownership, safety, and explainability.            |
-| EB-001     | Product backlog and planning source for future Next Action Feature Slices.                                         |
+| EB-001     | Product backlog and planning source for candidate entries and governed future Next Action Feature Slices.          |
 | NA-xxx     | Individual future Feature Slices that specify and implement one backlog item or a governed group of related items. |
 
 EB-001 does not define architecture. Architecture changes belong in EA-001 or a
@@ -92,9 +94,34 @@ Categories are stable. Individual rules are not. Backlog items may be added,
 removed, split, merged, deferred, or rejected without changing the category
 model.
 
-## 5. Backlog Item Contract
+## 5. Planning Record Contracts
 
-Every backlog item must contain:
+EB-001 separates possible future initiatives from governed backlog items.
+
+### Candidate Registry Entry
+
+A Candidate Registry Entry records a possible future initiative. It is not
+approved for planning or development and cannot enter the Project Development
+Lifecycle.
+
+Minimum required fields:
+
+| Field    | Requirement                                    |
+| -------- | ---------------------------------------------- |
+| ID       | Stable candidate identifier, usually `NA-xxx`. |
+| Name     | Short product name.                            |
+| Category | One stable product category.                   |
+| Status   | `Proposed`.                                    |
+
+A Candidate Registry Entry does not require Goal, Priority, Owner, Item-specific
+Dependencies, Foundation Change Required, or Notes yet.
+
+### Governed Backlog Item
+
+Before `Proposed → Approved`, a planning record must become a Governed Backlog
+Item.
+
+Required fields:
 
 | Field                      | Requirement                                  |
 | -------------------------- | -------------------------------------------- |
@@ -104,23 +131,25 @@ Every backlog item must contain:
 | Goal                       | Product outcome, not implementation detail.  |
 | Priority                   | High, Medium, or Low.                        |
 | Status                     | One official backlog status.                 |
-| Dependencies               | Explicit dependencies, if any.               |
+| Item-specific Dependencies | Explicit item-specific dependencies, if any. |
 | Foundation Change Required | `Yes` or `No`.                               |
 | Owner                      | Exactly one owner.                           |
 | Notes                      | Planning notes only; no specifications.      |
 
-The contract is for backlog management only. It must not contain rule logic,
-technical design, UI design, clinical thresholds, AI algorithms, or acceptance
-criteria.
+The Governed Backlog Item contract is for backlog management only. It must not
+contain rule logic, technical design, UI design, clinical thresholds, AI
+algorithms, or acceptance criteria.
 
 ## 6. Status Model
 
 Official workflow:
 
 ```text
-Proposed
+Candidate Registry Entry
   ↓
-Approved
+Backlog Qualification
+  ↓
+Approved Backlog Item
   ↓
 Planned
   ↓
@@ -131,10 +160,29 @@ Review
 Feature Complete
 ```
 
-Optional terminal or holding statuses:
+`Backlog Qualification` verifies:
 
-- Deferred
-- Rejected
+- fit with EA-001;
+- no duplication;
+- clear user/product goal;
+- one accountable owner;
+- explicit item-specific dependencies;
+- Foundation-change answer;
+- safety/domain review where applicable.
+
+No Feature Slice work starts before `Approved`.
+
+Status transition rules:
+
+- `Proposed` belongs to Candidate Registry Entries only.
+- `Approved` means a Candidate Registry Entry passed Backlog Qualification and
+  became a Governed Backlog Item.
+- `Deferred` is a holding state available before `In Progress`.
+- `Rejected` is a terminal planning decision.
+- `Feature Complete` is a terminal successful state.
+- Deferred items may return only through Product Owner review.
+- Rejected items are not silently reopened; a new governance decision is
+  required.
 
 `Module Feature Complete` is not a backlog item status.
 
@@ -171,31 +219,40 @@ Backlog governance is product-management responsibility. It does not define
 workflow automation, implementation process, architecture policy, or rule
 behavior.
 
-| Decision                    | Accountable role                                                                                                                                                                               |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Create backlog items        | Product owner or a delegated category owner may create Proposed items.                                                                                                                         |
-| Approve Proposed → Approved | Product owner approves after the item has a single owner, category, dependencies, and Foundation-change answer. Required domain reviewers may block approval for safety or governance reasons. |
-| Change priority             | Product owner changes priority with input from the item owner and relevant domain reviewers.                                                                                                   |
-| Mark Deferred               | Product owner marks Deferred when dependencies, evidence, or product timing are not ready.                                                                                                     |
-| Mark Rejected               | Product owner marks Rejected when the item does not fit the Epic, duplicates another item, conflicts with governance, or lacks product justification.                                          |
-| Archive completed items     | Product owner or backlog curator archives completed items after Feature Complete evidence is linked.                                                                                           |
-| Handle duplicates           | Product owner selects one canonical item, links duplicate context into it, and marks duplicate entries Rejected or merged in backlog notes.                                                    |
+| Decision                    | Accountable role                                                                                                                                                                                      |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Create candidate entries    | Product owner or a delegated category owner may create Candidate Registry Entries with `Proposed` status.                                                                                             |
+| Approve Proposed → Approved | Product owner approves after Backlog Qualification verifies owner, category, goal, item-specific dependencies, Foundation-change answer, duplicate status, and required domain review.                |
+| Change priority             | Product owner changes priority for Governed Backlog Items with input from the item owner and relevant domain reviewers.                                                                               |
+| Mark Deferred               | Product owner marks `Deferred` before `In Progress` when dependencies, evidence, or product timing are not ready.                                                                                     |
+| Mark Rejected               | Product owner marks `Rejected` when the item does not fit the Epic, duplicates another item, conflicts with governance, or lacks product justification. Reopening requires a new governance decision. |
+| Archive completed items     | Product owner or backlog curator archives completed items after Feature Complete evidence is linked.                                                                                                  |
+| Handle duplicates           | Product owner selects one canonical candidate or item, links duplicate context into it, and marks duplicate entries `Rejected` or merged in backlog notes.                                            |
 
 Backlog governance decisions must preserve the backlog item contract and must
 not change EA-001 unless the Epic product model itself needs revision.
 
 ## 10. Dependencies
 
-A Feature Slice may depend on:
+Every item inherits these dependencies:
 
-- Foundation;
+- Foundation v1.0;
 - SD-001;
-- EA-001;
-- another Feature Slice.
+- EA-001.
 
-Dependencies must be explicit on every backlog item. Hidden dependencies are not
-allowed because they make planning, governance, validation, and sequencing
-ambiguous.
+Inherited dependencies do not need repetition in each backlog item.
+
+Item-specific dependencies may include:
+
+- another Feature Slice;
+- approved source-domain model;
+- policy;
+- integration;
+- required platform capability.
+
+Item-specific dependencies must be explicit on Governed Backlog Items. Hidden
+item-specific dependencies are not allowed because they make planning,
+governance, validation, and sequencing ambiguous.
 
 ## 11. Foundation Changes
 
@@ -232,9 +289,12 @@ These operations must never require changing EA-001 unless the product model,
 taxonomy, lifecycle, ownership model, or safety/explainability architecture
 itself changes.
 
-## 13. Initial Backlog
+## 13. Initial Candidate Registry
 
-Initial backlog entries are names only. They are not specifications and do not
+Initial entries are names only. Every listed entry in this section is classified
+as a Candidate Registry Entry with `Status: Proposed`.
+
+These entries are not specifications, are not Approved Backlog Items, and do not
 approve implementation.
 
 ### Medical
@@ -295,12 +355,37 @@ EB-001 is complete when:
 
 - the Epic has one official planning source;
 - categories are stable and product-level;
-- every future backlog item can use the backlog item contract;
+- candidate entries use the Candidate Registry Entry contract;
+- Approved and later items use the Governed Backlog Item contract;
 - item statuses are unambiguous;
 - priority is planning-only and not roadmap ordering;
 - ownership is singular;
 - backlog governance roles are explicit;
 - dependencies and Foundation impact are explicit;
-- initial backlog entries are organized by category as names only;
+- initial candidate entries are organized by category as names only;
 - future backlog evolution does not require changing EA-001;
-- EB-001 is ready for Backlog Foundation review.
+- EB-001 is ready for Backlog Foundation re-review.
+
+## 16. Living Document Lifecycle
+
+EB-001 has two kinds of lifecycle:
+
+1. the lifecycle of this backlog management model;
+2. the operating lifecycle of the backlog contents.
+
+Backlog management model:
+
+| Stage                       | Meaning                                                                                                    |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Backlog Foundation          | The baseline backlog structure, categories, contracts, statuses, dependencies, and governance are drafted. |
+| Backlog Foundation Review   | The backlog model is reviewed for consistency and completeness.                                            |
+| Backlog Foundation Approved | The backlog management model is approved.                                                                  |
+| Operational Status — Living | Backlog contents continue changing under the approved model.                                               |
+
+After Backlog Foundation Approved, adding candidate entries, qualifying items,
+changing priority, deferring items, rejecting items, or reprioritizing items does
+not require re-approving EB-001.
+
+Structural changes to the backlog contracts, status model, governance rules,
+dependency model, or category model require review before they become the new
+operating model.
