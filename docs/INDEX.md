@@ -59,6 +59,7 @@
 - [Dashboard Layout](architecture/dashboard/layout.md)
 - [Dashboard Header](architecture/dashboard/header.md)
 - [Dashboard Next Action](architecture/dashboard/next-action.md)
+- [SD-001 — Dynamic Next Action](architecture/dashboard/sd-001-dynamic-next-action.md) — Architecture Draft
 - [Dashboard Last Glucose](architecture/dashboard/last-glucose.md)
 - [Dashboard Day Summary](architecture/dashboard/day-summary.md)
 - [Dashboard Recent Events](architecture/dashboard/recent-events.md)

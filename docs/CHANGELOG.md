@@ -1,5 +1,26 @@
 # Changelog
 
+## SD-001 — Dynamic Next Action Architecture Draft
+
+Дата: 2026-08-05
+
+Завершено:
+
+- Feature Slice SD-001 — Architecture Draft для deterministic Dynamic Next Action
+- документ `docs/architecture/dashboard/sd-001-dynamic-next-action.md`
+- module boundary README `apps/web/lib/dashboard/next-action/README.md`
+- обновлены [INDEX](INDEX.md), [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- production engine implementation;
+- новые правила без approved data;
+- Feature Complete (ожидает Architecture Audit и Approval)
+
+Статус:
+
+SD-001 — Architecture Draft Ready for Architecture Audit
+
 ## Motion System Specification — Feature Complete
 
 Дата: 2026-08-05

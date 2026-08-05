@@ -48,3 +48,5 @@ Approved — localized via I18N-02B1 (Feature Complete)
   `requestOpen('next-action', 'insulin')`, opening the insulin form directly.
 - I18N-02B1 audit: see
   [Dashboard Next Action Localization Migration](../localization/dashboard-next-action-migration.md).
+- **SD-001** (Architecture Draft): deterministic next-action selection —
+  [SD-001 — Dynamic Next Action](sd-001-dynamic-next-action.md).
