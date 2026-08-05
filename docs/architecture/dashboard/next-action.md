@@ -32,7 +32,7 @@ Approved — localized via I18N-02B1 (Feature Complete)
   approved copy, and owner-supplied action callbacks.
 - Ready content is supplied through the shared `NextStep` contract and an
   `onAction` callback. Presentation is resolved from the Next Action engine via
-  `resolveNextActionPresentation()`; mocks contain no human-readable copy.
+  typed Dashboard localization resolvers; mocks contain no human-readable copy.
 - The block does not fetch data, call APIs, rank actions, or decide the next
   step.
 - The block does not open Quick Add by itself; the owner decides what the action
@@ -48,6 +48,6 @@ Approved — localized via I18N-02B1 (Feature Complete)
   `requestOpen('next-action', 'insulin')`, opening the insulin form directly.
 - I18N-02B1 audit: see
   [Dashboard Next Action Localization Migration](../localization/dashboard-next-action-migration.md).
-- **SD-001** (Engineering Revision): Next Action Engine Foundation — preserves
+- **SD-001** (Final Review): Next Action Engine Foundation — preserves
   insulin Quick Add parity; contextual rules deferred to future slices —
   [SD-001 — Next Action Engine Foundation](sd-001-next-action-engine-foundation.md).

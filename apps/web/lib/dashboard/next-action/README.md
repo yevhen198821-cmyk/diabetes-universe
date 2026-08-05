@@ -1,8 +1,8 @@
 # Next Action Engine Foundation
 
 **Feature Slice:** SD-001 — Next Action Engine Foundation  
-**Lifecycle:** Engineering Revision  
-**Status:** Implemented — contract-safety revision; insulin Quick Add parity preserved
+**Lifecycle:** Final Review  
+**Status:** Implemented — ready for Final Review; insulin Quick Add parity preserved
 
 ## Purpose
 
@@ -76,12 +76,12 @@ nextStepSource (lib/mocks/timeline.ts)
 createDashboardNextActionEngineInput(events, now)
   → evaluateNextAction() → compatibility/default
   → mapNextActionDecision()
-  → resolveNextActionPresentation(localization, mapped)
+  → resolveNextActionReadyStep(localization, mapped)
   → DashboardNextAction
 ```
 
 `resolveDashboardNextActionDemoStep` was retired; localization resolves engine
-keys through `resolveNextActionPresentation`.
+keys through typed ready and informational presentation resolvers.
 
 ## Documentation
 

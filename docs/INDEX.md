@@ -59,7 +59,7 @@
 - [Dashboard Layout](architecture/dashboard/layout.md)
 - [Dashboard Header](architecture/dashboard/header.md)
 - [Dashboard Next Action](architecture/dashboard/next-action.md)
-- [SD-001 — Next Action Engine Foundation](architecture/dashboard/sd-001-next-action-engine-foundation.md) — Engineering Revision
+- [SD-001 — Next Action Engine Foundation](architecture/dashboard/sd-001-next-action-engine-foundation.md) — Final Review
 - [Dashboard Last Glucose](architecture/dashboard/last-glucose.md)
 - [Dashboard Day Summary](architecture/dashboard/day-summary.md)
 - [Dashboard Recent Events](architecture/dashboard/recent-events.md)

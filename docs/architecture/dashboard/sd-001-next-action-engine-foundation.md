@@ -17,24 +17,25 @@ This Feature Slice is an **engine-foundation slice**, not a product-behavior sli
 that changes what the user sees today beyond structural migration from static
 mock supply to governed engine output.
 
-Production engine implementation is underway in
+Production engine implementation is complete in
 `apps/web/lib/dashboard/next-action/`. Contextual rules remain deferred to future
 slices.
 
 ## Status
 
-Architecture Approved — Engineering Revision
+Architecture Approved — Final Review
 
 ## Lifecycle
 
-| Stage                     | Status      |
-| ------------------------- | ----------- |
-| Architecture Draft        | Superseded  |
-| Architecture Revision     | Superseded  |
-| Architecture Approved     | Complete    |
-| Repository Implementation | Complete    |
-| Engineering Revision      | **Current** |
-| Feature Complete          | Not started |
+| Stage                     | Status        |
+| ------------------------- | ------------- |
+| Architecture Draft        | Superseded    |
+| Architecture Revision     | Complete      |
+| Architecture Approved     | Complete      |
+| Repository Implementation | Complete      |
+| Engineering Review        | Complete      |
+| Final Review              | **Current**   |
+| Feature Slice Complete    | Pending merge |
 
 ## Scope Clarification
 
@@ -232,7 +233,7 @@ decision — not via a contextual rule.
 | Localized copy     | Existing `dashboard.nextAction.title`, `.description`, `.action` keys |
 | Visual composition | Approved full-width card position unchanged                           |
 
-Current static supply (to be replaced at composition layer only):
+Previous static supply (replaced at composition layer only):
 
 ```text
 apps/web/lib/mocks/timeline.ts → nextStepSource
@@ -242,12 +243,12 @@ dashboard-root.tsx → resolveDashboardNextActionDemoStep(localization, nextStep
 <DashboardNextAction state="ready" action={…} onAction={…} />
 ```
 
-Target supply:
+Implemented supply:
 
 ```text
 createNextActionContext() → evaluateNextAction() → compatibility/default (no contextual rules)
         ↓
-map + localize → equivalent NextStep + onAction
+map + typed localization resolver → equivalent NextStep + onAction
         ↓
 <DashboardNextAction … />  (unchanged)
 ```
@@ -428,7 +429,7 @@ DashboardRoot (composition)
   → createNextActionContext()
   → evaluateNextAction()          # lib/dashboard/next-action/
   → mapNextActionDecision()
-  → resolveNextActionPresentation()  # labels layer
+  → resolveNextActionReadyStep() / resolveNextActionInformationalContent()
   → DashboardNextAction (unchanged)
 ```
 
@@ -451,7 +452,7 @@ NextActionDecision
         ↓
 mapEnginePriorityToNextStepPriority()
         ↓
-resolveNextActionPresentation(localization, decision) → NextStep
+typed Dashboard localization resolver → NextStep or informational content
         ↓
 DashboardNextAction
 ```
