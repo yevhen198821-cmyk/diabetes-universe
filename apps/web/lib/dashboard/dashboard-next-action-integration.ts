@@ -3,16 +3,20 @@ import type { NextStep, QuickAddCategory } from '@diabetes-universe/types';
 
 import type { DashboardNextActionMessage } from '../../components/dashboard/dashboard-next-action-model';
 import {
-  resolveDashboardNextActionEmptyContent,
-  resolveNextActionPresentation,
+  resolveNextActionInformationalContent,
+  resolveNextActionReadyStep,
 } from '../../components/dashboard/dashboard-next-action-labels';
-import { createNextActionContext } from './next-action/next-action-context';
-import { evaluateNextAction } from './next-action/next-action-engine';
-import { mapNextActionDecision } from './next-action/next-action-mapper';
-import { createNeutralFallbackDecision } from './next-action/next-action-fallback';
 import { DASHBOARD_QUICK_ADD_AVAILABLE_CATEGORIES } from './next-action/next-action-availability';
-import type { CreateNextActionContextInput } from './next-action/next-action-context';
-import type { NextActionMappedPresentation } from './next-action/next-action-mapper';
+import {
+  createNextActionContext,
+  type CreateNextActionContextInput,
+} from './next-action/next-action-context';
+import { evaluateNextAction } from './next-action/next-action-engine';
+import {
+  mapNeutralFallbackPresentation,
+  mapNextActionDecision,
+  type NextActionMappedPresentation,
+} from './next-action/next-action-mapper';
 
 export type DashboardNextActionEngineInput = CreateNextActionContextInput;
 
@@ -33,27 +37,13 @@ export type DashboardNextActionPresentation =
 function resolveFallbackPresentation(
   localization: LocalizationPlatform,
 ): DashboardNextActionEmptyPresentation {
-  const fallbackDecision = createNeutralFallbackDecision();
-  const mapped = mapNextActionDecision(
-    createNextActionContext({
-      events: [],
-      now: new Date(0),
-      quickAddAvailability: {
-        availableCategories: DASHBOARD_QUICK_ADD_AVAILABLE_CATEGORIES,
-      },
-    }),
-    fallbackDecision,
-  );
-
-  if (!mapped || mapped.action.kind !== 'none') {
-    return {
-      content: resolveDashboardNextActionEmptyContent(localization),
-      state: 'empty',
-    };
-  }
+  const mapped = mapNeutralFallbackPresentation();
 
   return {
-    content: resolveNextActionPresentation(localization, mapped),
+    content: resolveNextActionInformationalContent(localization, {
+      descriptionKey: mapped.descriptionKey,
+      messageKey: mapped.messageKey,
+    }),
     state: 'empty',
   };
 }
@@ -62,18 +52,31 @@ function toDashboardPresentation(
   localization: LocalizationPlatform,
   mapped: NextActionMappedPresentation,
 ): DashboardNextActionPresentation {
-  if (mapped.action.kind === 'quick-add') {
-    return {
-      action: resolveNextActionPresentation(localization, mapped) as NextStep,
-      quickAddCategory: mapped.action.category,
-      state: 'ready',
-    };
+  switch (mapped.kind) {
+    case 'quick-add':
+      return {
+        action: resolveNextActionReadyStep(localization, {
+          actionLabelKey: mapped.actionLabelKey,
+          descriptionKey: mapped.descriptionKey,
+          messageKey: mapped.messageKey,
+        }),
+        quickAddCategory: mapped.category,
+        state: 'ready',
+      };
+    case 'navigate':
+    case 'none':
+      return {
+        content: resolveNextActionInformationalContent(localization, {
+          descriptionKey: mapped.descriptionKey,
+          messageKey: mapped.messageKey,
+        }),
+        state: 'empty',
+      };
+    default: {
+      const exhaustive: never = mapped;
+      return exhaustive;
+    }
   }
-
-  return {
-    content: resolveNextActionPresentation(localization, mapped),
-    state: 'empty',
-  };
 }
 
 export function resolveDashboardNextActionPresentation(

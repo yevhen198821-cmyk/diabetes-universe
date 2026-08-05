@@ -14,6 +14,17 @@ export interface DashboardNextActionLabels {
   readonly loading: string;
 }
 
+export type NextActionReadyPresentationKeys = Readonly<{
+  actionLabelKey: string;
+  descriptionKey?: string;
+  messageKey: string;
+}>;
+
+export type NextActionInformationalPresentationKeys = Readonly<{
+  descriptionKey?: string;
+  messageKey: string;
+}>;
+
 function asTranslationKey(value: string): TranslationKey {
   return value as TranslationKey;
 }
@@ -70,38 +81,14 @@ export function resolveDashboardNextActionLabels(
   };
 }
 
-export type NextActionPresentationKeys = Readonly<{
-  actionLabelKey?: string;
-  descriptionKey?: string;
-  messageKey: string;
-}>;
-
 /**
- * Resolves localized Dashboard Next Action presentation from engine output keys.
+ * Resolves a ready-state NextStep from quick-add presentation keys.
+ * Requires actionLabelKey — never returns CTA-less ready content.
  */
-export function resolveNextActionPresentation(
+export function resolveNextActionReadyStep(
   localization: LocalizationPlatform,
-  presentation: NextActionPresentationKeys,
-): NextStep | DashboardNextActionMessage {
-  const title = translateDashboardNextActionKey(
-    localization,
-    asTranslationKey(presentation.messageKey),
-  );
-
-  if (!presentation.actionLabelKey) {
-    const description = presentation.descriptionKey
-      ? translateDashboardNextActionKey(
-          localization,
-          asTranslationKey(presentation.descriptionKey),
-        )
-      : undefined;
-
-    return {
-      description,
-      title,
-    };
-  }
-
+  presentation: NextActionReadyPresentationKeys,
+): NextStep {
   return {
     actionLabel: translateDashboardNextActionKey(
       localization,
@@ -113,7 +100,31 @@ export function resolveNextActionPresentation(
           asTranslationKey(presentation.descriptionKey),
         )
       : '',
-    title,
+    title: translateDashboardNextActionKey(
+      localization,
+      asTranslationKey(presentation.messageKey),
+    ),
+  };
+}
+
+/**
+ * Resolves informational (non-CTA) presentation from none/navigate keys.
+ */
+export function resolveNextActionInformationalContent(
+  localization: LocalizationPlatform,
+  presentation: NextActionInformationalPresentationKeys,
+): DashboardNextActionMessage {
+  return {
+    description: presentation.descriptionKey
+      ? translateDashboardNextActionKey(
+          localization,
+          asTranslationKey(presentation.descriptionKey),
+        )
+      : undefined,
+    title: translateDashboardNextActionKey(
+      localization,
+      asTranslationKey(presentation.messageKey),
+    ),
   };
 }
 

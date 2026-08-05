@@ -1,5 +1,21 @@
 # Changelog
 
+## SD-001 — Next Action Engine Foundation Engineering Revision
+
+Дата: 2026-08-05
+
+Завершено:
+
+- single source of rule priority: `NextActionRule` owns ranking; evaluate returns payload only
+- discriminated `NextActionMappedPresentation` union (quick-add / navigate / none)
+- typed localization resolvers without unsafe `as NextStep` cast
+- direct `mapNeutralFallbackPresentation()` without synthetic `Date(0)` context
+- single governed category source: `DASHBOARD_QUICK_ADD_AVAILABLE_CATEGORIES`
+
+Статус:
+
+SD-001 — Engineering Revision Ready for Re-Review
+
 ## SD-001 — Next Action Engine Foundation Repository Implementation
 
 Дата: 2026-08-05

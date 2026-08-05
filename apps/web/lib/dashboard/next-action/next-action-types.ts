@@ -26,6 +26,17 @@ export type NextActionNoneIntent = Readonly<{
 export type NextActionIntent =
   NextActionQuickAddIntent | NextActionNavigateIntent | NextActionNoneIntent;
 
+/**
+ * Applicable payload returned by a contextual rule evaluator.
+ * Ranking metadata (priority, ruleId, source) is owned exclusively by NextActionRule
+ * and assembled by the engine — never by the evaluator return value.
+ */
+export type NextActionRulePayload = Readonly<{
+  action: NextActionIntent;
+  descriptionKey?: string;
+  messageKey: string;
+}>;
+
 export type NextActionDecision = Readonly<{
   action: NextActionIntent;
   descriptionKey?: string;
@@ -45,7 +56,7 @@ export type NextActionContext = Readonly<{
 }>;
 
 export type NextActionRule = Readonly<{
-  evaluate: (context: NextActionContext) => NextActionDecision | null;
+  evaluate: (context: NextActionContext) => NextActionRulePayload | null;
   priority: NextActionPriority;
   ruleId: NextActionRuleId;
   tieBreakRank: number;

@@ -1,8 +1,8 @@
 # Next Action Engine Foundation
 
 **Feature Slice:** SD-001 — Next Action Engine Foundation  
-**Lifecycle:** Repository Implementation  
-**Status:** Implemented — preserves insulin Quick Add parity via governed engine
+**Lifecycle:** Engineering Revision  
+**Status:** Implemented — contract-safety revision; insulin Quick Add parity preserved
 
 ## Purpose
 

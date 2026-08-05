@@ -23,17 +23,18 @@ slices.
 
 ## Status
 
-Architecture Approved — Repository Implementation
+Architecture Approved — Engineering Revision
 
 ## Lifecycle
 
-| Stage                     | Status          |
-| ------------------------- | --------------- |
-| Architecture Draft        | Superseded      |
-| Architecture Revision     | Superseded      |
-| Architecture Approved     | **Current**     |
-| Repository Implementation | **In progress** |
-| Feature Complete          | Not started     |
+| Stage                     | Status      |
+| ------------------------- | ----------- |
+| Architecture Draft        | Superseded  |
+| Architecture Revision     | Superseded  |
+| Architecture Approved     | Complete    |
+| Repository Implementation | Complete    |
+| Engineering Revision      | **Current** |
+| Feature Complete          | Not started |
 
 ## Scope Clarification
 
@@ -134,13 +135,24 @@ applicable.
 - **initial SD-001 implementation: zero contextual rules** (empty registry).
 
 ```typescript
+type NextActionRulePayload = Readonly<{
+  action: NextActionIntent;
+  messageKey: string;
+  descriptionKey?: string;
+}>;
+
 type NextActionRule = Readonly<{
   ruleId: NextActionRuleId;
   priority: NextActionPriority;
   tieBreakRank: number;
-  evaluate: (context: NextActionContext) => NextActionDecision | null;
+  evaluate: (context: NextActionContext) => NextActionRulePayload | null;
 }>;
 ```
+
+`NextActionRule` is the sole owner of ranking priority. Rule evaluation returns
+an applicable payload without `priority`, `source`, or `ruleId`. The engine
+constructs the final contextual `NextActionDecision` from rule metadata plus
+payload — priority cannot drift between rule and decision.
 
 ### 2. Compatibility/default decision
 
@@ -467,11 +479,11 @@ Compatibility/default is a product parity constant — not a clinical recommenda
 
 ## Migration Path
 
-| Phase                 | Work                                                                            |
-| --------------------- | ------------------------------------------------------------------------------- |
-| SD-001 implementation | Engine + default + fallback; empty contextual registry; parity with static demo — **complete** |
-| SD-001 validation     | E2E and unit tests confirm identical user-visible insulin CTA                                  |
-| Future slice N        | Register first contextual rule when approved data exists                                       |
+| Phase                 | Work                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------ |
+| SD-001 implementation | Engine + default + fallback; empty contextual registry; parity with static demo — **complete**         |
+| SD-001 validation     | E2E and unit tests confirm identical user-visible insulin CTA                                          |
+| Future slice N        | Register first contextual rule when approved data exists                                               |
 | Retirement            | `nextStepSource` and `resolveDashboardNextActionDemoStep` removed from Dashboard supply — **complete** |
 
 ## Foundation Changes Required

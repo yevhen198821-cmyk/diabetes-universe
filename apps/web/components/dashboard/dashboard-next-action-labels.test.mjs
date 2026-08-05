@@ -6,20 +6,25 @@ import {
   resolveDashboardNextActionEmptyContent,
   resolveDashboardNextActionErrorContent,
   resolveDashboardNextActionLabels,
-  resolveNextActionPresentation,
+  resolveNextActionInformationalContent,
+  resolveNextActionReadyStep,
 } from './dashboard-next-action-labels.ts';
 import {
   NEXT_ACTION_DEFAULT_ACTION_LABEL_KEY,
   NEXT_ACTION_DEFAULT_DESCRIPTION_KEY,
   NEXT_ACTION_DEFAULT_MESSAGE_KEY,
 } from '../../lib/dashboard/next-action/next-action-default.ts';
+import {
+  NEXT_ACTION_FALLBACK_DESCRIPTION_KEY,
+  NEXT_ACTION_FALLBACK_MESSAGE_KEY,
+} from '../../lib/dashboard/next-action/next-action-fallback.ts';
 
-test('resolveNextActionPresentation maps engine default keys to NextStep', async () => {
+test('resolveNextActionReadyStep maps quick-add presentation to NextStep', async () => {
   const runtime = await createTestPlatformRuntime({
     request: { acceptLanguage: 'en-GB', cookieTimeZone: 'Europe/London' },
   });
 
-  const step = resolveNextActionPresentation(runtime.localization, {
+  const step = resolveNextActionReadyStep(runtime.localization, {
     actionLabelKey: NEXT_ACTION_DEFAULT_ACTION_LABEL_KEY,
     descriptionKey: NEXT_ACTION_DEFAULT_DESCRIPTION_KEY,
     messageKey: NEXT_ACTION_DEFAULT_MESSAGE_KEY,
@@ -28,6 +33,25 @@ test('resolveNextActionPresentation maps engine default keys to NextStep', async
   assert.equal(step.title, 'Next action');
   assert.equal(step.description, 'Add insulin');
   assert.equal(step.actionLabel, 'Add');
+  assert.ok('actionLabel' in step);
+});
+
+test('resolveNextActionInformationalContent maps none presentation without CTA', async () => {
+  const runtime = await createTestPlatformRuntime({
+    request: { acceptLanguage: 'en-GB', cookieTimeZone: 'Europe/London' },
+  });
+
+  const content = resolveNextActionInformationalContent(runtime.localization, {
+    descriptionKey: NEXT_ACTION_FALLBACK_DESCRIPTION_KEY,
+    messageKey: NEXT_ACTION_FALLBACK_MESSAGE_KEY,
+  });
+
+  assert.equal(content.title, 'Next action unavailable');
+  assert.equal(
+    content.description,
+    'Next action details are temporarily unavailable.',
+  );
+  assert.equal('actionLabel' in content, false);
 });
 
 test('resolveDashboardNextActionLabels returns canonical English strings', async () => {
@@ -70,21 +94,4 @@ test('resolveDashboardNextActionEmptyContent and error content use localized def
   assert.equal(empty.description, 'New actions will appear here.');
   assert.equal(error.title, 'Action unavailable');
   assert.equal(error.description, 'Please try again later.');
-});
-
-test('resolveNextActionPresentation resolves neutral fallback keys', async () => {
-  const runtime = await createTestPlatformRuntime({
-    request: { acceptLanguage: 'en-GB', cookieTimeZone: 'Europe/London' },
-  });
-
-  const content = resolveNextActionPresentation(runtime.localization, {
-    descriptionKey: 'dashboard.nextAction.fallback.description',
-    messageKey: 'dashboard.nextAction.fallback.title',
-  });
-
-  assert.equal(content.title, 'Next action unavailable');
-  assert.equal(
-    content.description,
-    'Next action details are temporarily unavailable.',
-  );
 });

@@ -9,6 +9,7 @@ import type {
   NextActionPriority,
   NextActionRule,
   NextActionRuleId,
+  NextActionRulePayload,
 } from './next-action-types';
 
 const NEXT_ACTION_PRIORITY_ORDER: readonly NextActionPriority[] = [
@@ -29,8 +30,8 @@ function compareNextActionPriority(
 }
 
 function compareContextualRuleMatches(
-  left: Readonly<{ decision: NextActionDecision; rule: NextActionRule }>,
-  right: Readonly<{ decision: NextActionDecision; rule: NextActionRule }>,
+  left: Readonly<{ payload: NextActionRulePayload; rule: NextActionRule }>,
+  right: Readonly<{ payload: NextActionRulePayload; rule: NextActionRule }>,
 ): number {
   const priorityComparison = compareNextActionPriority(
     left.rule.priority,
@@ -48,18 +49,32 @@ function compareContextualRuleMatches(
   return left.rule.ruleId.localeCompare(right.rule.ruleId);
 }
 
+function createContextualRuleDecision(
+  rule: NextActionRule,
+  payload: NextActionRulePayload,
+): NextActionDecision {
+  return {
+    action: payload.action,
+    descriptionKey: payload.descriptionKey,
+    messageKey: payload.messageKey,
+    priority: rule.priority,
+    ruleId: rule.ruleId,
+    source: 'contextual-rule',
+  };
+}
+
 function evaluateContextualRules(
   context: NextActionContext,
   rules: readonly NextActionRule[],
 ): NextActionDecision | null {
   const matches = rules.flatMap((rule) => {
-    const decision = rule.evaluate(context);
+    const payload = rule.evaluate(context);
 
-    if (!decision) {
+    if (!payload) {
       return [];
     }
 
-    return [{ decision, rule }];
+    return [{ payload, rule }];
   });
 
   if (matches.length === 0) {
@@ -68,11 +83,7 @@ function evaluateContextualRules(
 
   const winner = [...matches].sort(compareContextualRuleMatches)[0];
 
-  return {
-    ...winner.decision,
-    ruleId: winner.rule.ruleId,
-    source: 'contextual-rule',
-  };
+  return createContextualRuleDecision(winner.rule, winner.payload);
 }
 
 export function evaluateNextAction(
