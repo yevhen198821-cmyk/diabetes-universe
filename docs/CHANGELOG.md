@@ -1,5 +1,19 @@
 # Changelog
 
+## Illustration System Specification — Feature Complete
+
+Дата: 2026-08-05
+
+Завершено:
+
+- документ `19 Illustration System Specification` — `docs/design-system/19-illustration-system-specification.md`
+- статус: **Feature Complete**
+- merge PR #54; обновлены [INDEX](INDEX.md), статус документа в спецификации
+
+Статус:
+
+Illustration System Specification (document 19) — Feature Complete ✅
+
 ## Illustration System Specification — Architecture Approved
 
 Дата: 2026-08-05

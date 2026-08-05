@@ -34,7 +34,7 @@
 - [16 Color System Specification](design-system/16-color-system-specification.md) — Feature Complete
 - [17 Typography System Specification](design-system/17-typography-system-specification.md) — Feature Complete
 - [18 Iconography System Specification](design-system/18-iconography-system-specification.md) — Feature Complete
-- [19 Illustration System Specification](design-system/19-illustration-system-specification.md) — Architecture Approved
+- [19 Illustration System Specification](design-system/19-illustration-system-specification.md) — Feature Complete
 
 ## Architecture
 
