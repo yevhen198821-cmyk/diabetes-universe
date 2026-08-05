@@ -525,11 +525,139 @@ Color System architecture is successful when:
   is explicit;
 - accessibility, internationalization, evolution, and governance rules are
   enforceable;
+- future expansion framework for data visualization, product domains, platform
+  integrations, and accessibility modes is documented;
 - documentation navigation reflects the specification entry;
 - no palettes, HEX, RGB, HSL, CSS variables, Tailwind configuration, token values,
   or implementation assets are produced in this stage;
 - contradictions with approved architecture are reported as **Blocked** instead
   of being resolved through ad-hoc palette decisions.
+
+## 19. Future Expansion
+
+The Color System must extend to new product domains and platform contexts without
+redefining core role architecture or breaking medical safety rules.
+
+### Data Visualization
+
+Data visualization color roles must extend the Semantic and Content families
+without introducing chart-specific hues that bypass governed roles.
+
+Principles:
+
+- chart series, axes, grids, and annotations consume semantic and neutral roles
+  through tokens — not independent palette identities;
+- data meaning must remain perceivable without color alone (labels, markers,
+  patterns, structure);
+- medical and glucose-related visualization must follow non-color redundancy
+  rules from [10 Visual Design System Specification](10-visual-design-system-specification.md);
+- new visualization roles require architectural approval before production.
+
+### Charts
+
+Chart color architecture is a specialization of Data Visualization roles.
+
+Principles:
+
+- chart colors express data categories and series identity through governed roles,
+  not ad-hoc per-chart palettes;
+- positive, negative, neutral, and threshold states map to Semantic roles with
+  mandatory non-color indicators;
+- chart defaults must remain calm and medically responsible; alarmist defaults are
+  prohibited;
+- chart theming inherits Light, Dark, and future theme mappings without separate
+  color systems.
+
+### Marketplace
+
+Marketplace surfaces extend Surface, Content, Border, and Semantic roles for
+commerce and partner content.
+
+Principles:
+
+- marketplace UI must not introduce independent brand or semantic color systems;
+- promotional emphasis uses governed Accent and Semantic roles — not ungoverned
+  highlight colors;
+- partner content containers use neutral and surface hierarchy; partner brand
+  colors remain outside product role architecture unless explicitly approved;
+- trust and safety signaling in marketplace contexts requires non-color redundancy.
+
+### AI Interfaces
+
+AI-assisted surfaces extend Semantic and Content roles for insight, confidence,
+and system-generated guidance.
+
+Principles:
+
+- AI insight presentation must not rely on color alone to convey certainty,
+  urgency, or medical implication;
+- AI-specific roles (e.g., insight, suggestion, limitation) map to Semantic and
+  Content families through tokens;
+- AI interface color must remain subordinate to content clarity and medical safety;
+- new AI color roles require architectural approval and accessibility review.
+
+### Medical Device Integrations
+
+Connected device and integration surfaces extend Semantic roles for connection
+state, sync status, and device health.
+
+Principles:
+
+- device connection states (connected, disconnected, syncing, error) use governed
+  Semantic roles with text and icon redundancy;
+- device status must not use red or green as the sole indicator of clinical state;
+- integration UI inherits Surface and Content architecture; device-specific color
+  systems are prohibited without approval;
+- medical device data presentation follows medical safety rules in this document
+  and document `10`.
+
+### Wearables
+
+Wearable and compact-display contexts extend the Color System to constrained
+viewports including watch-class surfaces (future).
+
+Principles:
+
+- core role meanings remain identical across phone, desktop, and wearable contexts;
+- wearable themes inherit Light, Dark, AMOLED, and High Contrast mappings without
+  redefining roles;
+- reduced viewport size must not justify color-only state communication;
+- wearable-specific delivery is a platform mapping concern, not a parallel color
+  architecture.
+
+### Partner Modules
+
+Partner and third-party module integration extends role architecture for embedded
+experiences within the Diabetes Universe ecosystem.
+
+Principles:
+
+- partner modules consume governed Semantic, Surface, and Content tokens;
+- partner-supplied colors must not override core role semantics inside DU product
+  chrome;
+- co-branded surfaces require governed exceptions documented through
+  [08 Brand Governance Specification](../brand/08-brand-governance-specification.md);
+- partner expansion must not fragment cross-product color consistency.
+
+### Future Accessibility Modes
+
+Accessibility mode expansion extends theme architecture beyond default Light and
+Dark mappings.
+
+Principles:
+
+- High Contrast, reduced-motion-adjacent visual modes, and future accessibility
+  themes remap values without changing role meaning;
+- accessibility modes must strengthen — not weaken — non-color communication
+  requirements;
+- new accessibility modes require contrast validation and DU accessibility review
+  before approval;
+- accessibility expansion does not create product-specific or platform-specific
+  role forks.
+
+Expansion into any domain above follows the evolution and governance rules in
+[Future Evolution](#future-evolution) and [Governance](#governance). Production
+palettes, chart themes, and component styling belong to later approved work.
 
 ## Notes
 
