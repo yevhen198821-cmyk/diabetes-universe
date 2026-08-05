@@ -18,7 +18,7 @@
 
 ## Product Backlogs
 
-- [EB-001 — Next Action Engine Epic Backlog v1.0](product/dashboard/eb-001-next-action-engine-backlog.md) — Backlog Foundation Revision
+- [EB-001 — Next Action Engine Epic Backlog v1.0](product/dashboard/eb-001-next-action-engine-backlog.md) — Backlog Foundation Approved — Living
 
 ## Brand
 

@@ -5,17 +5,17 @@ Feature Slices._
 
 ## Status
 
-Backlog Foundation Revision — Ready for Re-Review
+Backlog Foundation Approved — Operational Status Living
 
 ## Lifecycle
 
-| Stage                       | Status            |
-| --------------------------- | ----------------- |
-| Backlog Foundation          | Complete          |
-| Backlog Foundation Revision | **Current**       |
-| Backlog Foundation Review   | Pending re-review |
-| Backlog Foundation Approved | Pending           |
-| Operational Status — Living | Pending approval  |
+| Stage                       | Status      |
+| --------------------------- | ----------- |
+| Backlog Foundation          | Complete    |
+| Backlog Foundation Revision | Complete    |
+| Backlog Foundation Review   | Complete    |
+| Backlog Foundation Approved | Complete    |
+| Operational Status — Living | **Current** |
 
 ## Dependencies
 
@@ -40,9 +40,9 @@ dependencies, and Foundation impact decisions. It does not define architecture,
 implementation, rule behavior, UI behavior, medical policy, or delivery order.
 
 Implementation priorities may change without modifying EA-001. EA-001 remains
-the Epic product architecture; EB-001 is the living backlog that evolves as
-future Feature Slices are added, removed, split, merged, deferred, or
-reprioritized.
+the Epic product architecture; EB-001 is the living backlog whose candidate
+entries and governed backlog items evolve under the approved backlog management
+model.
 
 ## 2. Relationship to Architecture
 
@@ -67,14 +67,27 @@ The planning hierarchy is:
 ```text
 Epic
   ↓
-Categories
+Category
+  ↓
+Candidate Registry Entry
+  ↓
+Backlog Qualification
+  ↓
+Governed Backlog Item
   ↓
 Feature Slice
+  ↓
+Project Development Lifecycle
+  ↓
+Feature Complete
 ```
 
 The Epic is the Dashboard Next Action Engine. Categories group product intent.
-Feature Slices are the independently reviewed and implemented units that may
-eventually add rules, supporting policy, or product behavior.
+Candidate Registry Entries record possible future initiatives. Backlog
+Qualification determines whether a candidate can become a Governed Backlog Item.
+A Governed Backlog Item becomes an active Feature Slice only when development is
+formally initiated. Feature Slices then follow the Project Development Lifecycle
+until Feature Complete or another governed outcome.
 
 ## 4. Categories
 
@@ -276,14 +289,16 @@ The backlog may evolve without changing EA-001.
 
 Allowed backlog operations:
 
-- adding Feature Slices;
-- removing Feature Slices;
-- splitting Feature Slices;
-- merging Feature Slices;
-- reprioritizing Feature Slices;
-- changing status;
-- changing owner;
-- changing dependencies.
+- adding Candidate Registry Entries;
+- removing Candidate Registry Entries;
+- qualifying candidates;
+- splitting Governed Backlog Items;
+- merging Governed Backlog Items;
+- reprioritizing items;
+- changing item status;
+- changing item owner;
+- changing item dependencies;
+- changing item category.
 
 These operations must never require changing EA-001 unless the product model,
 taxonomy, lifecycle, ownership model, or safety/explainability architecture
@@ -364,7 +379,7 @@ EB-001 is complete when:
 - dependencies and Foundation impact are explicit;
 - initial candidate entries are organized by category as names only;
 - future backlog evolution does not require changing EA-001;
-- EB-001 is ready for Backlog Foundation re-review.
+- EB-001 is approved as the living Epic Backlog management model.
 
 ## 16. Living Document Lifecycle
 
@@ -382,9 +397,12 @@ Backlog management model:
 | Backlog Foundation Approved | The backlog management model is approved.                                                                  |
 | Operational Status — Living | Backlog contents continue changing under the approved model.                                               |
 
-After Backlog Foundation Approved, adding candidate entries, qualifying items,
-changing priority, deferring items, rejecting items, or reprioritizing items does
-not require re-approving EB-001.
+Backlog Foundation Approved means the backlog management model is approved. It
+does not approve every Candidate Registry Entry or Governed Backlog Item.
+
+After Backlog Foundation Approved, adding candidate entries, qualifying
+candidates, changing priority, deferring items, rejecting items, or
+reprioritizing items does not require re-approving EB-001.
 
 Structural changes to the backlog contracts, status model, governance rules,
 dependency model, or category model require review before they become the new

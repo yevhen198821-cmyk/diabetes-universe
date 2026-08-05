@@ -1,5 +1,24 @@
 # Changelog
 
+## EB-001 — Next Action Engine Epic Backlog Foundation Approval
+
+Дата: 2026-08-05
+
+Завершено:
+
+- completed final approval audit of the EB-001 backlog management model
+- corrected planning hierarchy terminology across Candidate Registry Entries,
+  Backlog Qualification, Governed Backlog Items, Feature Slices, and the Project
+  Development Lifecycle
+- corrected Evolution Rules to operate on candidates and governed backlog items
+  rather than treating every planning record as an active Feature Slice
+- lifecycle advanced to Backlog Foundation Approved with Operational Status —
+  Living
+
+Статус:
+
+EB-001 — Backlog Foundation Approved — Operational Status Living
+
 ## EB-001 — Next Action Engine Epic Backlog Foundation Revision
 
 Дата: 2026-08-05
