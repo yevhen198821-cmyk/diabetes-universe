@@ -13,7 +13,7 @@ them and consolidates approved brand rules for practical reference.
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Brand Overview
 
@@ -320,7 +320,8 @@ The Brand Book is successful when:
 
 ## Notes
 
-- This document is at **Architecture Approved** status and awaits Final
-  Architecture Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
+- Architecture Approved through the governed revision lifecycle; Final Architecture
+  Review completed as part of Foundation Freeze lifecycle synchronization.
 - Normative brand requirements remain authoritative in documents `05`–`08`.
 - Final visual asset production belongs to later approved brand documents.

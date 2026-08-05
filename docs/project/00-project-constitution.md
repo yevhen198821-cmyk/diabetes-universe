@@ -8,7 +8,7 @@ This document governs every product, brand, design, engineering, documentation, 
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Vision
 
@@ -221,5 +221,7 @@ When this constitution conflicts with a lower-level document, this constitution 
 
 ## Notes
 
-- This document is at **Architecture Approved** status and awaits Final Architecture Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
+- Architecture Approved through the governed revision lifecycle; Final Architecture
+  Review completed as part of Foundation Freeze lifecycle synchronization.
 - The approved project name is **Diabetes Universe**. Alternative names and rebranding are outside the current architecture.

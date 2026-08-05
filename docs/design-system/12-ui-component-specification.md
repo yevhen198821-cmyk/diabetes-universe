@@ -13,7 +13,7 @@ application screens, Storybook, platform code, or production assets.
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Objectives
 
@@ -447,8 +447,9 @@ The UI component specification is successful when:
 
 ## Notes
 
-- This document is at **Architecture Approved** status and awaits Final
-  Architecture Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
+- Architecture Approved through the governed revision lifecycle; Final Architecture
+  Review completed as part of Foundation Freeze lifecycle synchronization.
 - Component implementation, APIs, and platform exports belong to later approved
   work governed by this specification.
 - Design token values remain authoritative in document `11`.

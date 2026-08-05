@@ -14,7 +14,7 @@ values, typeface families, icons, illustrations, photographs, or UI components.
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Brand Identity Principles
 
@@ -273,8 +273,9 @@ Brand identity specification is successful when:
 
 ## Notes
 
-- This document is at **Architecture Approved** status and awaits Final
-  Architecture Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
+- Architecture Approved through the governed revision lifecycle; Final Architecture
+  Review completed as part of Foundation Freeze lifecycle synchronization.
 - Final color tokens, typography files, icons, illustrations, and photography
   belong to later approved brand documents.
 - Logo concept development remains authoritative in
