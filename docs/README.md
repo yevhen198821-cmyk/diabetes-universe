@@ -25,6 +25,7 @@ This directory contains the project documentation and its supporting templates.
 - [17 Typography System Specification](design-system/17-typography-system-specification.md)
 - [18 Iconography System Specification](design-system/18-iconography-system-specification.md)
 - [19 Illustration System Specification](design-system/19-illustration-system-specification.md)
+- [20 Motion System Specification](design-system/20-motion-system-specification.md)
 - [Documentation Standard](project/documentation-standard.md)
 - [Project Rules](project/project-rules.md)
 

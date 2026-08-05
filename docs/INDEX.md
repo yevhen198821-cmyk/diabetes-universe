@@ -35,6 +35,7 @@
 - [17 Typography System Specification](design-system/17-typography-system-specification.md) — Feature Complete
 - [18 Iconography System Specification](design-system/18-iconography-system-specification.md) — Feature Complete
 - [19 Illustration System Specification](design-system/19-illustration-system-specification.md) — Feature Complete
+- [20 Motion System Specification](design-system/20-motion-system-specification.md) — Architecture Approved
 
 ## Architecture
 

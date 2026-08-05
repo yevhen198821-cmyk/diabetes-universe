@@ -1,5 +1,25 @@
 # Changelog
 
+## Motion System Specification — Architecture Approved
+
+Дата: 2026-08-05
+
+Завершено:
+
+- документ `20 Motion System Specification` — `docs/design-system/20-motion-system-specification.md`
+- статус: **Architecture Approved**
+- motion philosophy, category architecture, motion roles, communication principles, information hierarchy, accessibility, internationalization, theme compatibility, design token integration, evolution, governance
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md), [design-system README](design-system/README.md), [glossary](project/glossary.md)
+
+Не входит в этот этап:
+
+- animation durations, easing curves, CSS, motion libraries, implementation
+- Feature Complete (ожидает Final Architecture Review)
+
+Статус:
+
+Motion System Specification (document 20) — **Architecture Approved** — Ready for Final Architecture Review
+
 ## Illustration System Specification — Feature Complete
 
 Дата: 2026-08-05

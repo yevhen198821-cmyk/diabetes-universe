@@ -104,6 +104,7 @@ docs/
 - [17 Typography System Specification](docs/design-system/17-typography-system-specification.md)
 - [18 Iconography System Specification](docs/design-system/18-iconography-system-specification.md)
 - [19 Illustration System Specification](docs/design-system/19-illustration-system-specification.md)
+- [20 Motion System Specification](docs/design-system/20-motion-system-specification.md)
 - [Architecture](docs/architecture/README.md)
 - [Product Bible](docs/product-bible/README.md)
 - [Developer Bible](docs/developer-bible/README.md)
