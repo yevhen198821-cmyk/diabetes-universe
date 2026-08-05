@@ -33,6 +33,7 @@
 - [15 Brand Logo System Specification](design-system/15-brand-logo-system-specification.md) — Feature Complete
 - [16 Color System Specification](design-system/16-color-system-specification.md) — Feature Complete
 - [17 Typography System Specification](design-system/17-typography-system-specification.md) — Feature Complete
+- [18 Iconography System Specification](design-system/18-iconography-system-specification.md) — Architecture Approved
 
 ## Architecture
 
