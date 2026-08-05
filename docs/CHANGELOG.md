@@ -1,5 +1,25 @@
 # Changelog
 
+## Iconography System Specification — Architecture Approved
+
+Дата: 2026-08-05
+
+Завершено:
+
+- документ `18 Iconography System Specification` — `docs/design-system/18-iconography-system-specification.md`
+- статус: **Architecture Approved**
+- iconography philosophy, category architecture, icon roles, recognition principles, information hierarchy, accessibility, internationalization, theme compatibility, design token integration, evolution, governance
+- обновлены [INDEX](INDEX.md), [docs README](README.md), root [README](../README.md), [design-system README](design-system/README.md), [glossary](project/glossary.md)
+
+Не входит в этот этап:
+
+- SVG assets, icon libraries, sizes, stroke widths, implementation
+- Feature Complete (ожидает Final Architecture Review)
+
+Статус:
+
+Iconography System Specification (document 18) — **Architecture Approved** — Ready for Final Architecture Review
+
 ## Typography System Specification — Feature Complete
 
 Дата: 2026-08-05
