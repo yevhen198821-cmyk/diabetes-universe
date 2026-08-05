@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   quality:
-    name: Lint, typecheck, test, and build
+    name: Format, lint, typecheck, test, build, and link validation
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -48,3 +48,6 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Validate Markdown links
+        run: python3 scripts/validate-markdown-links.py
