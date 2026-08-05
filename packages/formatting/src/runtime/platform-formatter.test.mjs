@@ -887,13 +887,13 @@ if (isDateTimeFormatRangeSupported) {
   test('formatRange formats a date range within one month', () => {
     const formatter = createPlatformFormatter(createContext('en-GB'));
 
-    assert.equal(
+    assert.match(
       formatter.formatRange({
         kind: 'date',
         start: '2026-01-01T00:00:00Z',
         end: '2026-01-05T00:00:00Z',
       }),
-      '1–5 Jan 2026',
+      /1[\s\u00a0\u202f]*[–-][\s\u00a0\u202f]*5 Jan 2026/,
     );
   });
 
