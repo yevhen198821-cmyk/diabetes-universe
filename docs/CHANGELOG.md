@@ -1,5 +1,19 @@
 # Changelog
 
+## Typography System Specification — Feature Complete
+
+Дата: 2026-08-05
+
+Завершено:
+
+- документ `17 Typography System Specification` — `docs/design-system/17-typography-system-specification.md`
+- статус: **Feature Complete**
+- merge PR #52; обновлены [INDEX](INDEX.md), статус документа в спецификации
+
+Статус:
+
+Typography System Specification (document 17) — Feature Complete ✅
+
 ## Typography System Specification — Architecture Approved
 
 Дата: 2026-08-05
