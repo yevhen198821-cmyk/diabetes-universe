@@ -1,8 +1,8 @@
 # Next Action Engine Foundation
 
 **Feature Slice:** SD-001 — Next Action Engine Foundation  
-**Lifecycle:** Final Review  
-**Status:** Implemented — ready for Final Review; insulin Quick Add parity preserved
+**Lifecycle:** Feature Slice Complete  
+**Status:** Implemented — insulin Quick Add parity preserved; contextual rules deferred
 
 ## Purpose
 

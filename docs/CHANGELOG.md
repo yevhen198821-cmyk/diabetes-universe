@@ -1,5 +1,20 @@
 # Changelog
 
+## SD-001 — Next Action Engine Foundation Feature Slice Complete
+
+Дата: 2026-08-05
+
+Завершено:
+
+- PR #56 merged into `main` (merge commit `602589b`)
+- deterministic Next Action Engine Foundation shipped with empty contextual rule
+  registry and insulin Quick Add parity preserved
+- lifecycle advanced to Feature Slice Complete
+
+Статус:
+
+SD-001 — Feature Slice Complete
+
 ## SD-001 — Next Action Engine Foundation Final Review Preparation
 
 Дата: 2026-08-05
