@@ -4,16 +4,34 @@ _Subtitle: product architecture for the Dashboard Next Action Engine Epic._
 
 ## Status
 
-Architecture Draft
+Architecture Audit — Ready for Review
 
 ## Lifecycle
 
-| Stage                 | Status      |
-| --------------------- | ----------- |
-| Architecture Draft    | **Current** |
-| Architecture Audit    | Pending     |
-| Architecture Approved | Pending     |
-| Epic Governance       | Pending     |
+| Stage                 | Status        |
+| --------------------- | ------------- |
+| Architecture Draft    | Complete      |
+| Architecture Audit    | **Current**   |
+| Architecture Approved | Pending       |
+| Epic Governance       | Pending       |
+| Feature Slice Ready   | Pending audit |
+
+## Dependencies
+
+- [Project Constitution](../../project/00-project-constitution.md)
+- [Project Development Specification](../../project/01-project-development-specification.md)
+- [Project Governance Specification](../../project/02-project-governance-specification.md)
+- [Engineering Standards Specification](../../project/03-engineering-standards-specification.md)
+- [Product Architecture Specification](../../project/04-product-architecture-specification.md)
+- [Architecture Documentation Guide](../README.md)
+- [Dashboard Overview](overview.md)
+- [Dashboard Next Action](next-action.md)
+- [Dashboard Quick Add Integration](quick-add-integration.md)
+- [Timeline Overview](../timeline/overview.md)
+- [Reminders Overview](../reminders/overview.md)
+- [AI Overview](../ai/overview.md)
+- [SD-001 — Next Action Engine Foundation](sd-001-next-action-engine-foundation.md)
+- [Design System](../../design-system/README.md)
 
 ## 1. Purpose
 
@@ -24,9 +42,11 @@ Dashboard action.
 The Epic solves the product problem of competing user needs: clinical context,
 logging workflows, reminders, platform state, connected devices, educational
 content, and future AI support may all have reasons to ask for attention. The
-Dashboard must not expose that complexity directly to the user. It must present
-one clear next action when one is useful, or stay quiet when no action should
-interrupt the user.
+Dashboard must not expose that complexity directly to the user. Future
+contextual rules must either contribute one clear candidate when useful or
+suppress themselves when no contextual recommendation should interrupt the user.
+That self-suppression does not change SD-001 compatibility/default or neutral
+fallback behavior.
 
 Inside Dashboard, Next Action is the primary recommendation surface. It appears
 near the top of the home screen and should answer a simple question: "What is the
@@ -68,9 +88,10 @@ goals.
 
 ### No unnecessary interruptions
 
-The engine should stay silent when a recommendation would add noise, duplicate a
-recently completed action, or require unsupported context. Absence of a
-recommendation is an acceptable product outcome.
+Future contextual rules should suppress themselves when a recommendation would
+add noise, duplicate a recently completed action, or require unsupported context.
+Absence of a contextual recommendation is an acceptable product outcome and must
+not be interpreted as a change to SD-001 default or fallback behavior.
 
 ### Low cognitive load
 
@@ -108,7 +129,7 @@ Next Action should help when:
 - the recommendation reduces uncertainty or saves navigation;
 - the action aligns with current Dashboard context.
 
-Next Action should stay silent when:
+Future contextual rules should stay silent when:
 
 - evidence is incomplete, ambiguous, stale, or unsupported by an approved rule;
 - the only available message would be generic noise;
@@ -163,6 +184,15 @@ The Epic does not own:
 | AI               | May provide future explanatory or ranking support after governed AI slices.   |
 | Medical records  | May provide future structured inputs after explicit governance and consent.   |
 | Platform         | Provides runtime capabilities only through approved adapters; not rule logic. |
+
+### Source-domain governance
+
+Future Device, Reminder, Medical records, AI, Notification, and similar
+source-domain inputs require separately approved source-domain architecture
+before any NA-xxx rule may consume them. Where applicable, rule contracts must
+also define consent, availability, data quality, and failure behavior. EA-001
+defines the product model for consuming future inputs; it does not approve those
+domains as rule inputs by itself.
 
 ## 5. Rule Taxonomy
 
@@ -383,4 +413,4 @@ EA-001 is successful when:
 - Dashboard continues to show one understandable recommendation at a time;
 - no future rule can bypass ownership, safety classification, explainability, or
   test expectations;
-- the Architecture Draft is ready for Architecture Audit.
+- the Architecture Audit is ready for review.

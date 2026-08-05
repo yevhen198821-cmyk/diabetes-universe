@@ -48,7 +48,7 @@ Approved — localized via I18N-02B1 (Feature Complete)
   `requestOpen('next-action', 'insulin')`, opening the insulin form directly.
 - I18N-02B1 audit: see
   [Dashboard Next Action Localization Migration](../localization/dashboard-next-action-migration.md).
-- **EA-001** (Architecture Draft): Next Action Engine Epic Architecture —
+- **EA-001** (Architecture Audit): Next Action Engine Epic Architecture —
   defines the long-term product model, taxonomy, lifecycle, ownership, safety,
   and explainability expectations for future Next Action rules —
   [EA-001 — Next Action Engine Epic Architecture](ea-001-next-action-engine-epic-architecture.md).

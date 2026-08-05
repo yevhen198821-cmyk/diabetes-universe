@@ -1,5 +1,24 @@
 # Changelog
 
+## EA-001 — Next Action Engine Epic Architecture Audit
+
+Дата: 2026-08-05
+
+Завершено:
+
+- completed architecture audit of EA-001 against SD-001, Dashboard architecture,
+  project governance, engineering standards, product architecture, and design
+  system references
+- clarified that future contextual rule self-suppression does not change SD-001
+  compatibility/default or neutral fallback behavior
+- added source-domain governance for future Device, Reminder, Medical records,
+  AI, Notification, and similar inputs
+- added explicit dependencies for architecture traceability
+
+Статус:
+
+EA-001 — Architecture Audit Ready for Review
+
 ## EA-001 — Next Action Engine Epic Architecture Draft
 
 Дата: 2026-08-05
