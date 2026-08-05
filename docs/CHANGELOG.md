@@ -1,5 +1,19 @@
 # Changelog
 
+## Foundation Freeze — Feature Complete
+
+Дата: 2026-08-05
+
+Завершено:
+
+- merge PR #47 в `main` (merge commit `575e4de`)
+- Foundation v1.0: engineering, documentation, design system, product, and repository hygiene gates passed
+- удалена ветка `cursor/repo-hygiene-audit-0174`
+
+Статус:
+
+Foundation v1.0 — Feature Complete ✅
+
 ## Foundation Freeze Remediation — Lifecycle Synchronization
 
 Дата: 2026-08-05
