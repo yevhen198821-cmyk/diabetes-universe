@@ -56,6 +56,8 @@ export const CANONICAL_TRANSLATION_KEYS = [
   'dashboard.nextAction.empty.title',
   'dashboard.nextAction.error.description',
   'dashboard.nextAction.error.title',
+  'dashboard.nextAction.fallback.description',
+  'dashboard.nextAction.fallback.title',
   'dashboard.nextAction.loading',
   'dashboard.nextAction.title',
   'timeline.header.title',

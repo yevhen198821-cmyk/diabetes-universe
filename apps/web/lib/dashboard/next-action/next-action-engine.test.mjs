@@ -1,0 +1,382 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+
+import { createTestPlatformRuntime } from '../../platform/react/testing/create-test-platform-runtime.ts';
+import {
+  createDashboardNextActionEngineInput,
+  resolveDashboardNextActionPresentation,
+} from '../dashboard-next-action-integration.ts';
+import {
+  NEXT_ACTION_DEFAULT_ACTION_LABEL_KEY,
+  NEXT_ACTION_DEFAULT_DESCRIPTION_KEY,
+  NEXT_ACTION_DEFAULT_MESSAGE_KEY,
+  createCompatibilityDefaultDecision,
+} from './next-action-default.ts';
+import { createNextActionContext } from './next-action-context.ts';
+import { evaluateNextAction } from './next-action-engine.ts';
+import {
+  NEXT_ACTION_FALLBACK_MESSAGE_KEY,
+  createNeutralFallbackDecision,
+} from './next-action-fallback.ts';
+import { mapNextActionDecision } from './next-action-mapper.ts';
+import { mapEnginePriorityToNextStepPriority } from './next-action-priority-map.ts';
+import { getContextualNextActionRules } from './next-action-rules.ts';
+
+const FIXED_NOW = new Date('2026-08-02T10:00:00.000Z');
+
+function createTestContext(overrides = {}) {
+  return createNextActionContext({
+    events: [],
+    now: FIXED_NOW,
+    quickAddAvailability: {
+      availableCategories: ['insulin'],
+    },
+    ...overrides,
+  });
+}
+
+test('contextual rule registry is empty in SD-001', () => {
+  assert.deepEqual(getContextualNextActionRules(), []);
+});
+
+test('compatibility default is selected when no contextual rules match', () => {
+  const decision = evaluateNextAction(createTestContext());
+
+  assert.equal(decision.source, 'compatibility-default');
+  assert.equal(decision.action.kind, 'quick-add');
+  assert.equal(decision.action.category, 'insulin');
+  assert.equal(decision.messageKey, NEXT_ACTION_DEFAULT_MESSAGE_KEY);
+  assert.equal(decision.descriptionKey, NEXT_ACTION_DEFAULT_DESCRIPTION_KEY);
+  assert.equal(decision.action.labelKey, NEXT_ACTION_DEFAULT_ACTION_LABEL_KEY);
+});
+
+test('neutral fallback is selected when default mapping is unsafe', () => {
+  const decision = evaluateNextAction(
+    createTestContext({
+      quickAddAvailability: {
+        availableCategories: ['glucose'],
+      },
+    }),
+  );
+
+  assert.equal(decision.source, 'neutral-fallback');
+  assert.equal(decision.action.kind, 'none');
+  assert.equal(decision.messageKey, NEXT_ACTION_FALLBACK_MESSAGE_KEY);
+});
+
+test('evaluateNextAction returns exactly one decision', () => {
+  const decision = evaluateNextAction(createTestContext());
+
+  assert.equal(typeof decision.messageKey, 'string');
+  assert.equal(typeof decision.priority, 'string');
+  assert.equal(typeof decision.source, 'string');
+});
+
+test('evaluateNextAction is deterministic for identical input', () => {
+  const context = createTestContext({
+    events: [
+      {
+        dateTime: '2026-08-02T08:00:00.000Z',
+        id: 'glucose-1',
+        kind: 'glucose',
+        title: 'Glucose',
+        value: '6.4',
+      },
+    ],
+  });
+
+  const first = evaluateNextAction(context);
+  const second = evaluateNextAction(context);
+
+  assert.deepEqual(first, second);
+});
+
+test('contextual rules resolve by highest semantic priority', () => {
+  const decision = evaluateNextAction(
+    createTestContext({
+      quickAddAvailability: {
+        availableCategories: ['glucose', 'insulin'],
+      },
+    }),
+    {
+    rules: [
+      {
+        evaluate: () => ({
+          action: { category: 'glucose', kind: 'quick-add', labelKey: 'x' },
+          messageKey: 'recommended',
+          priority: 'recommended',
+          source: 'contextual-rule',
+        }),
+        priority: 'recommended',
+        ruleId: 'rule-recommended',
+        tieBreakRank: 1,
+      },
+      {
+        evaluate: () => ({
+          action: { category: 'glucose', kind: 'quick-add', labelKey: 'x' },
+          messageKey: 'critical',
+          priority: 'critical',
+          source: 'contextual-rule',
+        }),
+        priority: 'critical',
+        ruleId: 'rule-critical',
+        tieBreakRank: 2,
+      },
+    ],
+  });
+
+  assert.equal(decision.messageKey, 'critical');
+  assert.equal(decision.ruleId, 'rule-critical');
+});
+
+test('contextual rules resolve by lowest tie-break rank within same priority', () => {
+  const decision = evaluateNextAction(
+    createTestContext({
+      quickAddAvailability: {
+        availableCategories: ['glucose', 'insulin'],
+      },
+    }),
+    {
+    rules: [
+      {
+        evaluate: () => ({
+          action: { category: 'glucose', kind: 'quick-add', labelKey: 'x' },
+          messageKey: 'rank-2',
+          priority: 'important',
+          source: 'contextual-rule',
+        }),
+        priority: 'important',
+        ruleId: 'rule-b',
+        tieBreakRank: 2,
+      },
+      {
+        evaluate: () => ({
+          action: { category: 'glucose', kind: 'quick-add', labelKey: 'x' },
+          messageKey: 'rank-1',
+          priority: 'important',
+          source: 'contextual-rule',
+        }),
+        priority: 'important',
+        ruleId: 'rule-a',
+        tieBreakRank: 1,
+      },
+    ],
+  });
+
+  assert.equal(decision.messageKey, 'rank-1');
+  assert.equal(decision.ruleId, 'rule-a');
+});
+
+test('contextual rules resolve by lexicographic rule ID when priority and rank tie', () => {
+  const decision = evaluateNextAction(
+    createTestContext({
+      quickAddAvailability: {
+        availableCategories: ['glucose', 'insulin'],
+      },
+    }),
+    {
+    rules: [
+      {
+        evaluate: () => ({
+          action: { category: 'glucose', kind: 'quick-add', labelKey: 'x' },
+          messageKey: 'rule-b',
+          priority: 'important',
+          source: 'contextual-rule',
+        }),
+        priority: 'important',
+        ruleId: 'rule-b',
+        tieBreakRank: 1,
+      },
+      {
+        evaluate: () => ({
+          action: { category: 'glucose', kind: 'quick-add', labelKey: 'x' },
+          messageKey: 'rule-a',
+          priority: 'important',
+          source: 'contextual-rule',
+        }),
+        priority: 'important',
+        ruleId: 'rule-a',
+        tieBreakRank: 1,
+      },
+    ],
+  });
+
+  assert.equal(decision.messageKey, 'rule-a');
+  assert.equal(decision.ruleId, 'rule-a');
+});
+
+test('priority mapping is exhaustive for all engine priorities', () => {
+  assert.equal(mapEnginePriorityToNextStepPriority('critical'), 'high');
+  assert.equal(mapEnginePriorityToNextStepPriority('important'), 'high');
+  assert.equal(mapEnginePriorityToNextStepPriority('recommended'), 'normal');
+  assert.equal(mapEnginePriorityToNextStepPriority('informational'), 'normal');
+});
+
+test('unsupported quick-add category maps to null presentation', () => {
+  const context = createTestContext({
+    quickAddAvailability: {
+      availableCategories: ['glucose'],
+    },
+  });
+  const mapped = mapNextActionDecision(
+    context,
+    createCompatibilityDefaultDecision(),
+  );
+
+  assert.equal(mapped, null);
+});
+
+test('incomplete context still returns compatibility default when insulin is available', () => {
+  const decision = evaluateNextAction(
+    createTestContext({
+      events: [],
+    }),
+  );
+
+  assert.equal(decision.source, 'compatibility-default');
+});
+
+test('createNextActionContext does not mutate input events', () => {
+  const events = [
+    {
+      dateTime: '2026-08-02T08:00:00.000Z',
+      id: 'glucose-1',
+      kind: 'glucose',
+      title: 'Glucose',
+      value: '6.4',
+    },
+  ];
+  const inputEvents = [...events];
+
+  const context = createNextActionContext({
+    events: inputEvents,
+    now: FIXED_NOW,
+    quickAddAvailability: {
+      availableCategories: ['insulin'],
+    },
+  });
+
+  inputEvents.push({
+    dateTime: '2026-08-02T09:00:00.000Z',
+    id: 'glucose-2',
+    kind: 'glucose',
+    title: 'Glucose',
+    value: '7.0',
+  });
+  context.recentTimelineEvents.push({
+    dateTime: '2026-08-02T10:00:00.000Z',
+    id: 'glucose-3',
+    kind: 'glucose',
+    title: 'Glucose',
+    value: '7.5',
+  });
+
+  assert.equal(events.length, 1);
+  assert.equal(inputEvents.length, 2);
+  assert.equal(context.recentTimelineEvents.length, 2);
+});
+
+test('engine decisions contain localization keys only', () => {
+  const decision = evaluateNextAction(createTestContext());
+
+  assert.match(decision.messageKey, /^dashboard\.nextAction\./);
+  assert.match(decision.descriptionKey ?? '', /^dashboard\.nextAction\./);
+  if (decision.action.kind === 'quick-add') {
+    assert.match(decision.action.labelKey, /^dashboard\.nextAction\./);
+  }
+});
+
+test('compatibility default and neutral fallback decisions use keys only', () => {
+  const defaultDecision = createCompatibilityDefaultDecision();
+  const fallbackDecision = createNeutralFallbackDecision();
+
+  for (const decision of [defaultDecision, fallbackDecision]) {
+    assert.match(decision.messageKey, /^dashboard\.nextAction\./);
+    if (decision.descriptionKey) {
+      assert.match(decision.descriptionKey, /^dashboard\.nextAction\./);
+    }
+  }
+});
+
+test('contextual rule with unavailable action falls back to neutral presentation', () => {
+  const decision = evaluateNextAction(
+    createTestContext({
+      quickAddAvailability: {
+        availableCategories: ['insulin'],
+      },
+    }),
+    {
+      rules: [
+        {
+          evaluate: () => ({
+            action: {
+              category: 'glucose',
+              kind: 'quick-add',
+              labelKey: 'dashboard.nextAction.action',
+            },
+            messageKey: 'dashboard.nextAction.title',
+            priority: 'important',
+            source: 'contextual-rule',
+          }),
+          priority: 'important',
+          ruleId: 'glucose-rule',
+          tieBreakRank: 1,
+        },
+      ],
+    },
+  );
+
+  assert.equal(decision.source, 'neutral-fallback');
+});
+
+test('dashboard integration preserves insulin quick add presentation', async () => {
+  const runtime = await createTestPlatformRuntime({
+    request: { acceptLanguage: 'en-GB', cookieTimeZone: 'Europe/London' },
+  });
+
+  const presentation = resolveDashboardNextActionPresentation(
+    runtime.localization,
+    createDashboardNextActionEngineInput([], FIXED_NOW),
+  );
+
+  assert.equal(presentation.state, 'ready');
+  if (presentation.state === 'ready') {
+    assert.equal(presentation.quickAddCategory, 'insulin');
+    assert.equal(presentation.action.title, 'Next action');
+    assert.equal(presentation.action.description, 'Add insulin');
+    assert.equal(presentation.action.actionLabel, 'Add');
+  }
+});
+
+test('dashboard integration uses empty state for neutral fallback', async () => {
+  const runtime = await createTestPlatformRuntime({
+    request: { acceptLanguage: 'en-GB', cookieTimeZone: 'Europe/London' },
+  });
+
+  const presentation = resolveDashboardNextActionPresentation(
+    runtime.localization,
+    {
+      events: [],
+      now: FIXED_NOW,
+      quickAddAvailability: {
+        availableCategories: ['glucose'],
+      },
+    },
+  );
+
+  assert.equal(presentation.state, 'empty');
+  if (presentation.state === 'empty') {
+    assert.equal(presentation.content.title, 'Next action unavailable');
+    assert.equal(
+      presentation.content.description,
+      'Next action details are temporarily unavailable.',
+    );
+  }
+});
+
+test('no contextual match does not select neutral fallback when default is safe', () => {
+  const decision = evaluateNextAction(createTestContext());
+
+  assert.notEqual(decision.source, 'neutral-fallback');
+  assert.equal(decision.source, 'compatibility-default');
+});

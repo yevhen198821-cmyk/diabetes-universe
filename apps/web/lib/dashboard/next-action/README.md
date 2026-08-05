@@ -1,8 +1,8 @@
 # Next Action Engine Foundation
 
 **Feature Slice:** SD-001 — Next Action Engine Foundation  
-**Lifecycle:** Architecture Revision  
-**Status:** Not implemented — architecture only
+**Lifecycle:** Repository Implementation  
+**Status:** Implemented — preserves insulin Quick Add parity via governed engine
 
 ## Purpose
 
@@ -42,26 +42,53 @@ Contextual rules → winner?
 | UI       | `DashboardNextAction` unchanged                   |
 | Disabled | `actionDisabled={quickAddState.isOpen}` unchanged |
 
-## Planned modules
+## Modules
 
 ```text
 next-action-types.ts
 next-action-context.ts
-next-action-rules.ts          # contextual rules only
-next-action-default.ts        # compatibility/default (not a rule)
-next-action-fallback.ts       # neutral fallback (not a rule)
+next-action-rules.ts              # contextual rules only (empty)
+next-action-default.ts            # compatibility/default (not a rule)
+next-action-fallback.ts           # neutral fallback (not a rule)
+next-action-presentation-safety.ts
 next-action-engine.ts
 next-action-mapper.ts
 next-action-priority-map.ts
+next-action-availability.ts
 next-action-engine.test.mjs
 ```
+
+Dashboard composition: `apps/web/lib/dashboard/dashboard-next-action-integration.ts`
+
+## Migration from static supply
+
+**Before (removed from DashboardRoot):**
+
+```text
+nextStepSource (lib/mocks/timeline.ts)
+  → resolveDashboardNextActionDemoStep(localization, source)
+  → DashboardNextAction
+```
+
+**After:**
+
+```text
+createDashboardNextActionEngineInput(events, now)
+  → evaluateNextAction() → compatibility/default
+  → mapNextActionDecision()
+  → resolveNextActionPresentation(localization, mapped)
+  → DashboardNextAction
+```
+
+`resolveDashboardNextActionDemoStep` was retired; localization resolves engine
+keys through `resolveNextActionPresentation`.
 
 ## Documentation
 
 Full architecture:
 [SD-001 — Next Action Engine Foundation](../../../../../docs/architecture/dashboard/sd-001-next-action-engine-foundation.md)
 
-## Implementation
+## Contextual rules
 
-No production engine code until Architecture Approval. Contextual rules require
-separate approved data and policies in future slices.
+No contextual rules are registered in SD-001. Future rules require separate
+approved slices with governed data and policies.
