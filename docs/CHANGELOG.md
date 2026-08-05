@@ -1,5 +1,65 @@
 # Changelog
 
+## EA-001 — Next Action Engine Epic Architecture Approval
+
+Дата: 2026-08-05
+
+Завершено:
+
+- completed final architecture approval review of EA-001
+- confirmed EA-001 defines only the Next Action Engine Epic product model
+- confirmed SD-001 remains the technical engine foundation and future NA-xxx
+  Feature Slices own individual rule definitions
+- lifecycle advanced to Architecture Approved
+
+Статус:
+
+EA-001 — Architecture Approved
+
+## EA-001 — Next Action Engine Epic Architecture Audit
+
+Дата: 2026-08-05
+
+Завершено:
+
+- completed architecture audit of EA-001 against SD-001, Dashboard architecture,
+  project governance, engineering standards, product architecture, and design
+  system references
+- clarified that future contextual rule self-suppression does not change SD-001
+  compatibility/default or neutral fallback behavior
+- added source-domain governance for future Device, Reminder, Medical records,
+  AI, Notification, and similar inputs
+- added explicit dependencies for architecture traceability
+
+Статус:
+
+EA-001 — Architecture Audit Ready for Review
+
+## EA-001 — Next Action Engine Epic Architecture Draft
+
+Дата: 2026-08-05
+
+Завершено:
+
+- created `docs/architecture/dashboard/ea-001-next-action-engine-epic-architecture.md`
+- defined product-level purpose, principles, UX goals, scope, taxonomy, rule
+  lifecycle, rule contract, conflict principles, explainability, safety classes,
+  ownership model, extensibility, testing expectations, and future directions
+- documented EA-001 as above SD-001 without duplicating or changing the SD-001
+  engine foundation
+- updated [INDEX](INDEX.md) and [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- implementation changes
+- specific Next Action rules
+- medical thresholds, reminder logic, device logic, or AI logic
+- Feature Slice implementation
+
+Статус:
+
+EA-001 — Architecture Draft Ready for Architecture Audit
+
 ## SD-001 — Next Action Engine Foundation Feature Slice Complete
 
 Дата: 2026-08-05
