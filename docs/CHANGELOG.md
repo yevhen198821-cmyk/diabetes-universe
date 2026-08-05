@@ -1,5 +1,19 @@
 # Changelog
 
+## Motion System Specification — Feature Complete
+
+Дата: 2026-08-05
+
+Завершено:
+
+- документ `20 Motion System Specification` — `docs/design-system/20-motion-system-specification.md`
+- статус: **Feature Complete**
+- merge PR #55; обновлены [INDEX](INDEX.md), статус документа в спецификации
+
+Статус:
+
+Motion System Specification (document 20) — Feature Complete ✅
+
 ## Motion System Specification — Architecture Approved
 
 Дата: 2026-08-05

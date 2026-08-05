@@ -16,7 +16,7 @@ is not an implementation guide. This document defines motion architecture only.
 
 ## Status
 
-Architecture Approved
+Feature Complete
 
 ## Objectives
 
@@ -506,7 +506,7 @@ Motion System architecture follows the governed document lifecycle in
 Draft → Architecture Review → Repository Implementation → Validation → DU Review →
 Certification → Feature Complete.
 
-Current status: **Architecture Approved**.
+Current status: **Feature Complete**.
 
 ### Review
 
@@ -582,8 +582,7 @@ Motion System architecture is successful when:
 
 ## Notes
 
-- This document is at **Architecture Approved** status and awaits Final
-  Architecture Review before **Feature Complete** may be recorded.
+- This document is at **Feature Complete** status.
 - Motion production, timing values, and library selection belong to later approved
   work governed by this specification and document `11`.
 - Motion direction in
