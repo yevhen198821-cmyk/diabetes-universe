@@ -5,15 +5,15 @@ freshness policy._
 
 ## Status
 
-Architecture Draft Ready for Architecture Audit
+Architecture Audit Ready for Review
 
 ## Lifecycle
 
 | Stage                     | Status      |
 | ------------------------- | ----------- |
 | Backlog Qualification     | Complete    |
-| Architecture Draft        | **Current** |
-| Architecture Audit        | Pending     |
+| Architecture Draft        | Complete    |
+| Architecture Audit        | **Current** |
 | Architecture Approved     | Pending     |
 | Repository Implementation | Blocked     |
 | Engineering Review        | Pending     |
@@ -309,6 +309,8 @@ Principles:
 - each evaluation uses one explicit evaluation reference time;
 - all comparisons use a normalized time representation approved by source and
   policy governance;
+- GP-001 must not assume UTC, local timezone, device-clock authority, storage
+  format, database encoding, or API timestamp shape;
 - freshness calculation must be timezone-independent after normalization;
 - daylight-saving transitions must not create duplicate, skipped, or ambiguous
   freshness conclusions;
@@ -407,6 +409,10 @@ All consumers must:
 
 - accept GP-001 outcomes without rederiving staleness;
 - handle all outcomes exhaustively;
+- use the same semantic Policy Result contract across Dashboard, Timeline,
+  Analytics, AI, Reports, and future approved modules;
+- ignore a Policy Result only when the consumer has separate governance for not
+  acting on that result;
 - suppress action on `unavailable` or `indeterminate` results unless separately
   governed;
 - retain Policy ID and Policy version for audit;
@@ -414,6 +420,8 @@ All consumers must:
 - avoid converting Policy Results into medical meaning;
 - preserve source/provenance identity where needed for audit;
 - respect privacy and permission boundaries.
+
+Consumers must never reinterpret the semantic meaning of a Policy Result.
 
 Compatibility with NA-001:
 
@@ -561,3 +569,49 @@ GP-001 architecture is complete when:
 - consumers can support every outcome safely;
 - implementation gates are explicit;
 - no Foundation change is required.
+
+## Architecture Audit
+
+**Audit result:** Architecture Audit Passed
+
+GP-001 is verified as a reusable platform Policy, independent of Dashboard, the
+Next Action Engine, UI, storage implementation, API payloads, TypeScript models,
+and medical algorithms.
+
+| Audit area                    | Decision | Verification                                                                                                                                                                                                                                                         |
+| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Policy Responsibility         | Verified | GP-001 owns only semantic freshness evaluation, deterministic semantic result, provenance, version identity, and governance. It does not own Next Action, resolver behavior, UI, Dashboard, Quick Add, Analytics decisions, AI behavior, or medical interpretation.  |
+| Semantic Result Verification  | Verified | `attention-required`, `no-attention-required`, `unavailable`, and `indeterminate` have unique meanings. `unavailable` means the Policy could not safely evaluate; `indeterminate` means evaluation completed but no governed conclusion can be made.                 |
+| Source Contract Boundary      | Verified | GP-001 defines semantic source requirements only. It does not define database schema, TypeScript models, storage fields, or API payloads. Provenance remains implementation-independent.                                                                             |
+| Time Semantics                | Verified | GP-001 requires normalized time semantics from the approved source contract and does not assume UTC, device clock authority, local timezone, storage format, numeric tolerance, or implementation encoding.                                                          |
+| Consumer Contract             | Verified | Consumers must not derive staleness independently, may ignore a result only under separate governance, and must never reinterpret the semantic meaning. Dashboard, Timeline, Analytics, AI, Reports, and future modules consume the same semantic result.            |
+| Explainability                | Verified | Every result must identify Policy version, evaluation reference, and provenance identity. Internal thresholds, algorithms, and parameters remain hidden from users.                                                                                                  |
+| Versioning                    | Verified | Architecture requires historical reproducibility, backward compatibility, parameter traceability, rollback, migration, and version identity for every result. Parameter changes must not invalidate historical evaluations.                                          |
+| Failure Behaviour             | Verified | Unsupported source, malformed input, missing provenance, unavailable Policy configuration, unknown Policy version, future timestamps, and conflicting metadata have deterministic unavailable/indeterminate handling. Consumers never receive fabricated confidence. |
+| Safety                        | Verified | GP-001 never diagnoses, interprets glucose values, classifies glucose risk, recommends treatment, predicts glucose, claims safety, or embeds hidden medical logic.                                                                                                   |
+| Dependency Verification       | Verified | GP-001 aligns with Foundation, SD-001, EA-001, EB-001, and NA-001 without duplicating responsibility. It remains a platform Policy and NA-001 remains a consumer.                                                                                                    |
+| Implementation Independence   | Verified | GP-001 remains architecture-only and independent from React, Next.js, packages, UI, localization, storage, APIs, and TypeScript.                                                                                                                                     |
+| Success Criteria Verification | Verified | Every success criterion in Section 22 is satisfied by the architecture draft and audit clarifications.                                                                                                                                                               |
+
+### Dependency Verification Details
+
+| Dependency | Verification                                                                                                                                                        |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Foundation | No Foundation change is required. GP-001 follows existing architecture-before-implementation governance.                                                            |
+| SD-001     | GP-001 does not participate in SD-001 resolver behavior, priority ordering, compatibility/default behavior, or neutral fallback.                                    |
+| EA-001     | GP-001 supports future Next Action consumers without changing EA-001 taxonomy, ownership, safety, explainability, or resolver boundaries.                           |
+| EB-001     | GP-001 is recorded as a cross-domain Platform dependency, not as a Next Action rule.                                                                                |
+| NA-001     | GP-001 provides the governed Policy Result NA-001 can later consume without rederiving staleness; GP-001 does not change NA-001 lifecycle or implementation status. |
+
+### Success Criteria Verification
+
+| Success criterion                                                                                                 | Status   |
+| ----------------------------------------------------------------------------------------------------------------- | -------- |
+| Policy responsibility is singular and clear                                                                       | Verified |
+| Source, input, output, time, failure, safety, versioning, governance, privacy, and consumer contracts are defined | Verified |
+| No numeric values or medical claims are invented                                                                  | Verified |
+| NA-001 can consume the Policy Result without rederiving staleness                                                 | Verified |
+| Missing data remains outside scope                                                                                | Verified |
+| Consumers can support every outcome safely                                                                        | Verified |
+| Implementation gates are explicit                                                                                 | Verified |
+| No Foundation change is required                                                                                  | Verified |

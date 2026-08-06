@@ -1,5 +1,36 @@
 # Changelog
 
+## GP-001 — Glucose Data Staleness Policy Architecture Audit
+
+Дата: 2026-08-06
+
+Завершено:
+
+- performed complete Architecture Audit for
+  [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md)
+- verified GP-001 as a reusable platform Policy independent from Dashboard, Next
+  Action Engine, UI, storage implementation, API payloads, TypeScript models,
+  and medical algorithms
+- clarified that GP-001 does not assume UTC, device-clock authority, local
+  timezone, storage format, database encoding, or API timestamp shape
+- clarified cross-consumer obligations for Dashboard, Timeline, Analytics, AI,
+  Reports, and future approved modules
+- recorded Architecture Audit result, dependency verification, and success
+  criteria verification in the GP-001 document
+- updated [INDEX](INDEX.md) and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- implementation, code, packages, React, Next.js, UI, localization, storage, APIs,
+  TypeScript models, or Policy parameter values
+- changes to Foundation, SD-001, EA-001, EB-001, NA-001, or PR #60
+- Architecture Approval, Repository Implementation, or Feature Slice Complete
+
+Статус:
+
+GP-001 — Architecture Audit Ready for Review
+
 ## GP-001 — Glucose Data Staleness Policy Backlog Qualification and Architecture Draft
 
 Дата: 2026-08-06
