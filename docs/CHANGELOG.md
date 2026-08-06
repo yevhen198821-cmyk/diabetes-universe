@@ -1,5 +1,32 @@
 # Changelog
 
+## EA-001 — Standard Rule Contract Architecture Refinement
+
+Дата: 2026-08-05
+
+Завершено:
+
+- added the Architecture Refinement Principle to
+  [01 Project Development Specification](project/01-project-development-specification.md)
+- extended EA-001 with the Standard Rule Contract for future Next Action Engine
+  rules
+- defined mandatory generic contract areas: metadata, purpose, inputs,
+  activation, suppression, decision output, explainability, safety,
+  dependencies, and testing expectations
+- classified the EA-001 Standard Rule Contract update as Architecture Refinement,
+  not a new Feature Slice or lifecycle restart
+- preserved EA-001 Feature Slice Complete lifecycle status
+
+Не входит в этот этап:
+
+- SD-001, EB-001, NA-001, or Foundation changes
+- implementation, algorithms, thresholds, UI, localization, React, TypeScript,
+  or concrete rule examples
+
+Статус:
+
+EA-001 — Feature Slice Complete
+
 ## EB-001 — Next Action Engine Epic Backlog Foundation Complete
 
 Дата: 2026-08-05

@@ -74,6 +74,58 @@ If contradictions with approved architecture are discovered at any step, work
 must stop and be reported. Do not resolve contradictions by making independent
 architectural decisions.
 
+## Architecture Refinement Principle
+
+### Purpose
+
+Architecture Refinement allows improvement of approved architectural
+documentation without creating artificial Feature Slices or restarting the
+architecture lifecycle.
+
+### Definition
+
+Architecture Refinement is a documentation improvement that:
+
+- clarifies existing architecture;
+- removes ambiguity;
+- improves consistency;
+- adds mandatory documentation templates;
+- strengthens governance;
+- improves explainability.
+
+Architecture Refinement must not:
+
+- introduce new functionality;
+- change architecture boundaries;
+- change responsibilities;
+- change contracts;
+- change public interfaces;
+- change lifecycle;
+- change approved behavior.
+
+### Decision Rule
+
+If any architectural behavior changes:
+
+```text
+Architecture Change
+```
+
+Otherwise:
+
+```text
+Architecture Refinement
+```
+
+### Lifecycle
+
+Architecture Refinement:
+
+- does not create a new Feature Slice;
+- does not reopen Architecture Approval;
+- does not change Feature Complete status;
+- is reviewed as documentation refinement only.
+
 ## Feature Complete definition
 
 A document or module is **Feature Complete** only when all of the following are
