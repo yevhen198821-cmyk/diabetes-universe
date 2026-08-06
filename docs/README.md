@@ -26,13 +26,15 @@ This directory contains the project documentation and its supporting templates.
 - [18 Iconography System Specification](design-system/18-iconography-system-specification.md)
 - [19 Illustration System Specification](design-system/19-illustration-system-specification.md)
 - [20 Motion System Specification](design-system/20-motion-system-specification.md)
+- [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md)
 - [Documentation Standard](project/documentation-standard.md)
 - [Project Rules](project/project-rules.md)
 
 ## Organization
 
 - `project/` contains project-level direction, standards, rules, and terminology.
-- `product/` contains product-management artifacts such as living Epic backlogs.
+- `product/` contains product-management artifacts such as living Epic backlogs
+  and cross-domain product policy architecture.
 - `brand/` contains strategic brand architecture and approved brand specifications.
 - `architecture/` describes system responsibilities, boundaries, and dependencies.
 - `specs/` defines functional behavior and acceptance criteria.

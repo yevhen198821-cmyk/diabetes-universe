@@ -1,5 +1,40 @@
 # Changelog
 
+## GP-001 — Glucose Data Staleness Policy Backlog Qualification and Architecture Draft
+
+Дата: 2026-08-06
+
+Завершено:
+
+- created [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md)
+- qualified GP-001 as an Approved Backlog Item in the Platform category
+- defined GP-001 as the single governed authority for semantic freshness state
+  of an existing glucose record
+- documented reusable governed data flow from approved glucose source contract to
+  Policy Result to consumers
+- defined source boundary, input contract, Policy Result contract, time
+  semantics, missing-data boundary, safety, failure behavior, consumer contract,
+  versioning, governance, privacy/security, observability, implementation gate,
+  and success criteria
+- updated [EB-001](product/dashboard/eb-001-next-action-engine-backlog.md) to
+  record GP-001 as an approved cross-domain platform dependency for future
+  glucose-staleness consumers
+- updated [INDEX](INDEX.md), [Documentation README](README.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- implementation, code, TypeScript contracts, storage design, UI, localization,
+  Dashboard behavior, Next Action resolution, or SD-001 changes
+- numeric staleness intervals, thresholds, tolerances, or algorithms
+- glucose value interpretation, diagnosis, treatment, dosing, prediction,
+  device-health behavior, AI behavior, or missing-data recommendation behavior
+- changes to Foundation, SD-001, EA-001, or PR #60
+
+Статус:
+
+GP-001 — Architecture Draft Ready for Architecture Audit
+
 ## EA-001 — Standard Rule Contract Architecture Refinement
 
 Дата: 2026-08-05
