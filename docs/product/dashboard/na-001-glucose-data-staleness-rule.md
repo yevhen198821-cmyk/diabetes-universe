@@ -1,22 +1,29 @@
 # NA-001 — Glucose Data Staleness Rule
 
-_Subtitle: architecture draft for a future Dashboard Next Action rule._
+_Subtitle: architecture revision for a future Dashboard Next Action rule._
 
 ## Status
 
-Architecture Draft
+Architecture Revision Ready for Re-Audit
 
 ## Lifecycle
 
-| Stage                 | Status      |
-| --------------------- | ----------- |
-| Backlog Qualification | Complete    |
-| Architecture Draft    | **Current** |
-| Architecture Audit    | Pending     |
-| Architecture Approved | Pending     |
-| Implementation        | Pending     |
-| Validation            | Pending     |
-| Feature Complete      | Pending     |
+| Stage                     | Status      |
+| ------------------------- | ----------- |
+| Backlog Qualification     | Complete    |
+| Architecture Draft        | Superseded  |
+| Architecture Revision     | **Current** |
+| Architecture Audit        | Pending     |
+| Architecture Approved     | Pending     |
+| Repository Implementation | Blocked     |
+| Engineering Review        | Pending     |
+| Final Review              | Pending     |
+| Feature Slice Complete    | Pending     |
+
+Repository Implementation remains blocked until the Glucose Data Staleness Policy
+is approved with input/output contracts, owner, governance, and source data
+availability. Architecture approval does not approve that policy or unblock
+implementation.
 
 ## Rule Identity
 
@@ -34,18 +41,84 @@ Safety classification and semantic priority describe the recommendation
 contract. They do not define backlog priority, medical urgency, or medical
 policy.
 
+## Policy Boundary
+
+NA-001 does not calculate, infer, or validate glucose staleness from raw
+timestamps, intervals, or thresholds. The Glucose Data Staleness Policy is the
+single source of truth for staleness meaning.
+
+Governed data flow:
+
+```text
+Approved glucose source contract
+  → Glucose Data Staleness Policy
+  → governed policy evaluation result
+  → NA-001
+  → SD-001
+```
+
+NA-001 consumes only the governed policy evaluation result and permitted
+supporting context. It must not re-derive staleness, embed policy values, or
+substitute for policy evaluation.
+
+## Implementation Gate
+
+| Gate                      | Requirement                                                                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Architecture approval     | May proceed before the Glucose Data Staleness Policy exists.                                                                |
+| Repository Implementation | Blocked until the policy is approved with input contract, output contract, owner, governance, and source data availability. |
+| Policy approval           | Does not occur in this document.                                                                                            |
+| NA-001 implementation     | Must not begin until both architecture approval and policy approval are complete.                                           |
+
+## Stale Data vs Missing Data
+
+NA-001 addresses stale glucose context only when an existing glucose record is
+present. Absence of a glucose record is not a staleness condition in NA-001.
+
+| Condition                         | NA-001 behavior                                                                   |
+| --------------------------------- | --------------------------------------------------------------------------------- |
+| No glucose record                 | Not a staleness condition. NA-001 suppresses and returns no contextual candidate. |
+| Glucose record present            | Eligible for policy evaluation through the approved source contract.              |
+| Policy result: attention required | May activate per the Activation Contract.                                         |
+| Policy result: no attention       | NA-001 suppresses and returns no contextual candidate.                            |
+| Policy result: unavailable        | NA-001 suppresses and returns no contextual candidate.                            |
+
+NA-001 must never treat missing data as stale data or imply that the user should
+refresh context solely because no record exists.
+
+## Policy Result Contract
+
+The Glucose Data Staleness Policy must expose a governed evaluation result to
+NA-001. This section defines the architecture-level minimum semantic contract.
+It does not define intervals, thresholds, algorithms, or implementation.
+
+| Semantic outcome            | Meaning for NA-001                                                                              |
+| --------------------------- | ----------------------------------------------------------------------------------------------- |
+| Attention required          | Existing glucose context requires user attention before supporting a contextual recommendation. |
+| No attention required       | Existing glucose context does not require attention under the approved policy.                  |
+| Unavailable / indeterminate | Policy cannot produce a governed result for the supplied record.                                |
+
+Every policy result must also carry:
+
+- policy version or identity for audit and provenance;
+- explanation or provenance sufficient for NA-001 explainability obligations
+  without exposing policy internals to the user.
+
+NA-001 must treat policy results outside this contract as unavailable and
+suppress itself.
+
 ## 1. Purpose
 
 Users may rely on Dashboard context without realizing that available glucose
 information is not current enough for a contextual recommendation.
 
-NA-001 exists to allow the Next Action Engine to communicate that glucose
-context needs attention before it can support a useful contextual
+NA-001 exists to allow the Next Action Engine to communicate that existing
+glucose context needs attention before it can support a useful contextual
 recommendation.
 
 Expected user value:
 
-- clearer understanding of why available glucose context cannot support a
+- clearer understanding of why existing glucose context cannot support a
   contextual recommendation;
 - a safe, understandable next step for refreshing glucose context;
 - no implication that the existing data is medically safe or unsafe.
@@ -55,12 +128,17 @@ Expected user value:
 ### In Scope
 
 - architectural contract for a future contextual rule;
+- policy boundary and governed data flow;
+- implementation gate relative to the Glucose Data Staleness Policy;
+- distinction between stale data and missing data;
+- policy result contract at architecture level;
 - permitted and prohibited inputs;
 - activation and self-suppression responsibilities;
 - decision output to the SD-001 engine boundary;
 - explainability and safety obligations;
 - failure behavior;
 - architecture-level testing requirements;
+- Standard Rule Contract compliance verification;
 - future extension boundaries.
 
 ### Out of Scope
@@ -68,6 +146,7 @@ Expected user value:
 - medical intervals;
 - medical thresholds;
 - an algorithm for determining staleness;
+- timestamp-based staleness calculation inside NA-001;
 - treatment or dosing recommendations;
 - diagnosis;
 - evaluation of treatment effectiveness;
@@ -93,6 +172,7 @@ Expected user value:
 
 ### Rule-specific
 
+- approved glucose source contract (future);
 - approved Glucose Data Staleness Policy (future).
 
 The future policy is the sole authority for data-staleness meaning. NA-001 must
@@ -108,13 +188,15 @@ Foundation change pauses development and starts Project Governance.
 
 NA-001 may use only:
 
-- normalized presence or absence of the latest available glucose record;
-- record recency metadata required by the approved Glucose Data Staleness
-  Policy;
-- data-quality and availability state exposed through an approved source
-  contract;
-- the approved policy result applicable to the normalized record;
+- confirmation that an existing glucose record is present through an approved
+  source contract;
+- the governed policy evaluation result from the Glucose Data Staleness Policy;
+- policy version or identity and explanation provenance supplied with the policy
+  result;
 - supported action availability supplied through the SD-001 context boundary.
+
+NA-001 must not read raw timestamps, recency intervals, or threshold inputs for
+staleness evaluation. Those belong to the policy layer.
 
 ### Prohibited data
 
@@ -122,6 +204,7 @@ NA-001 must not use:
 
 - glucose values or value ranges;
 - trends or inferred glucose direction;
+- raw timestamps or recency metadata for staleness calculation;
 - treatment, medication, insulin, nutrition, or activity data;
 - diagnosis or medical-record conclusions;
 - reminder state;
@@ -137,13 +220,15 @@ remain explicit.
 
 NA-001 may become a contextual candidate only when:
 
-- the required source contract is available;
-- a glucose record and its permitted recency metadata satisfy the input
-  contract;
-- the approved Glucose Data Staleness Policy produces a governed result that
-  requires user attention;
+- the approved glucose source contract is available;
+- an existing glucose record is present;
+- the Glucose Data Staleness Policy produces a governed result of
+  **attention required** for that record;
 - the intended action is supported and available;
 - no rule-level precondition requires self-suppression.
+
+Absence of a glucose record does not satisfy activation. NA-001 must not
+activate for missing data.
 
 Activation is eligibility only. NA-001 does not decide whether it becomes the
 visible recommendation. Final deterministic selection remains owned by the
@@ -156,10 +241,13 @@ algorithm.
 
 NA-001 must suppress itself when:
 
+- no glucose record is present;
 - required input is absent, malformed, unsupported, or outside the permitted
   input contract;
 - the Glucose Data Staleness Policy is unavailable, unapproved, or does not
   produce an applicable result;
+- the policy result is **no attention required**, **unavailable**, or
+  **indeterminate**;
 - the intended action is unavailable or unsupported;
 - the recommendation cannot provide a clear, safe explanation;
 - required source-domain governance is missing;
@@ -180,7 +268,7 @@ contains:
 
 - semantic recommendation identity;
 - informational safety classification;
-- an explanation identity for why glucose context requires attention;
+- an explanation identity for why existing glucose context requires attention;
 - a supported action intent for refreshing glucose context;
 - no localized copy.
 
@@ -195,10 +283,10 @@ ownership of compatibility/default and neutral fallback behavior.
 
 The recommendation must allow the user to understand:
 
-1. why it appeared: available glucose context requires attention under an
+1. why it appeared: existing glucose context requires attention under an
    approved data-staleness policy;
-2. what information was used: permitted record recency, availability, and
-   policy-result information;
+2. what information was used: presence of an existing glucose record and the
+   governed policy evaluation result;
 3. what action is expected: refresh glucose context through a supported product
    action.
 
@@ -207,7 +295,7 @@ expose:
 
 - raw rule identifiers;
 - raw localization keys;
-- policy internals;
+- policy internals, intervals, or thresholds;
 - technical source details;
 - unsupported medical reasoning;
 - hidden or prohibited inputs.
@@ -225,7 +313,8 @@ NA-001 never:
 - predicts future glucose behavior;
 - infers urgency from unapproved data;
 - substitutes for medical advice;
-- activates without its approved policy dependency.
+- activates without its approved policy dependency;
+- treats missing glucose data as stale data.
 
 The recommendation remains informational. Medical meaning and data-staleness
 policy require separate approval outside this architecture.
@@ -237,9 +326,12 @@ and free of medical claims.
 
 | Condition                                                  | Required behavior                                         |
 | ---------------------------------------------------------- | --------------------------------------------------------- |
+| No glucose record is present                               | Suppress NA-001 and return no contextual candidate.       |
 | Required data is absent                                    | Suppress NA-001 and return no contextual candidate.       |
 | Required data violates the input contract                  | Suppress NA-001 and return no contextual candidate.       |
 | Glucose Data Staleness Policy is unavailable or unapproved | Suppress NA-001 and return no contextual candidate.       |
+| Policy result is unavailable or indeterminate              | Suppress NA-001 and return no contextual candidate.       |
+| Policy result is no attention required                     | Suppress NA-001 and return no contextual candidate.       |
 | Intended action is unavailable or unsupported              | Suppress NA-001 and return no broken action.              |
 | Explanation cannot be resolved safely                      | Suppress NA-001; raw identifiers must not reach the user. |
 
@@ -252,14 +344,18 @@ Future validation must verify:
 
 - deterministic output for identical normalized inputs and policy result;
 - input immutability;
-- candidate production only when all Activation Contract obligations are met;
+- candidate production only when an existing glucose record and an
+  **attention required** policy result are present;
+- no candidate when no glucose record is present;
 - no candidate when the approved policy does not produce an applicable result;
+- no staleness activation or messaging for missing data;
 - self-suppression for missing, malformed, prohibited, or unsupported inputs;
 - self-suppression when policy or action availability is missing;
 - correct participation in SD-001 conflict resolution without redefining it;
 - explanation completeness: reason, evaluated information, and expected action;
 - no raw identifiers or localized copy in rule output;
-- enforcement of prohibited data sources;
+- enforcement of prohibited data sources, including raw timestamp-based
+  staleness calculation inside NA-001;
 - enforcement of every Safety Contract prohibition;
 - preservation of SD-001 compatibility/default and neutral fallback behavior;
 - no medical claim during normal or failure behavior;
@@ -283,3 +379,29 @@ Each extension requires its own governance, dependencies, safety review, and
 architecture. Future extensions must not silently broaden NA-001 inputs, embed
 new policy, redefine SD-001 resolver behavior, or weaken this rule's Safety
 Contract.
+
+## 13. Standard Rule Contract Compliance
+
+NA-001 is verified against the
+[EA-001 Standard Rule Contract](../../architecture/dashboard/ea-001-next-action-engine-epic-architecture.md#7-standard-rule-contract).
+This section records compliance only. It does not restate EA-001.
+
+| EA-001 contract area      | NA-001 section          | Verified |
+| ------------------------- | ----------------------- | -------- |
+| 7.1 Rule Metadata         | Rule Identity           | Yes      |
+| 7.2 Purpose               | §1 Purpose              | Yes      |
+| 7.3 Input Contract        | §4 Input Contract       | Yes      |
+| 7.4 Activation Contract   | §5 Activation Contract  | Yes      |
+| 7.5 Suppression Contract  | §6 Suppression Contract | Yes      |
+| 7.6 Decision Contract     | §7 Decision Contract    | Yes      |
+| 7.7 Explainability        | §8 Explainability       | Yes      |
+| 7.8 Safety Contract       | §9 Safety               | Yes      |
+| 7.9 Dependency Contract   | §3 Dependencies         | Yes      |
+| 7.10 Testing Expectations | §11 Test Requirements   | Yes      |
+
+Additional architecture obligations beyond the generic contract:
+
+- Policy Boundary (this document);
+- Implementation Gate (this document);
+- Stale Data vs Missing Data (this document);
+- Policy Result Contract (this document).

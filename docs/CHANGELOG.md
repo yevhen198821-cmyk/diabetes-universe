@@ -204,6 +204,37 @@ GP-001 — Architecture Audit Ready for Review
 
 GP-001 — Architecture Draft Ready for Architecture Audit
 
+## NA-001 — Glucose Data Staleness Rule Architecture Revision
+
+Дата: 2026-08-06
+
+Завершено:
+
+- revised NA-001 against the EA-001 Standard Rule Contract after PR #61 merge
+- defined policy boundary: approved glucose source contract → Glucose Data
+  Staleness Policy → governed policy evaluation result → NA-001 → SD-001
+- added implementation gate: architecture may proceed; Repository Implementation
+  blocked until policy is approved with contracts, owner, governance, and source
+  data
+- separated stale data from missing data: NA-001 evaluates existing records only
+- defined architecture-level policy result contract without intervals,
+  thresholds, or algorithms
+- updated lifecycle to Architecture Revision Ready for Re-Audit
+- recorded Standard Rule Contract compliance verification (EA-001 §7.1–7.10)
+- updated [INDEX](INDEX.md) and [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- implementation, code, UI, localization, algorithms, intervals, timing values,
+  medical thresholds, treatment recommendations, diagnosis, reminders, device
+  behavior, AI behavior, personalization, or prediction
+- Glucose Data Staleness Policy approval
+- changes to Foundation, SD-001, EA-001, or EB-001
+
+Статус:
+
+NA-001 — Architecture Revision Ready for Re-Audit
+
 ## EA-001 — Standard Rule Contract Architecture Refinement
 
 Дата: 2026-08-05
