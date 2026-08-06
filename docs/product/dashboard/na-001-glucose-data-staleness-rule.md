@@ -1,10 +1,10 @@
 # NA-001 — Glucose Data Staleness Rule
 
-_Subtitle: architecture revision for a future Dashboard Next Action rule._
+_Subtitle: approved architecture contract for a future Dashboard Next Action rule._
 
 ## Status
 
-Architecture Revision Ready for Re-Audit
+Architecture Approved — Repository Implementation Blocked
 
 ## Lifecycle
 
@@ -12,9 +12,9 @@ Architecture Revision Ready for Re-Audit
 | ------------------------- | ----------- |
 | Backlog Qualification     | Complete    |
 | Architecture Draft        | Superseded  |
-| Architecture Revision     | **Current** |
-| Architecture Audit        | Pending     |
-| Architecture Approved     | Pending     |
+| Architecture Revision     | Complete    |
+| Architecture Audit        | Complete    |
+| Architecture Approved     | **Current** |
 | Repository Implementation | Blocked     |
 | Engineering Review        | Pending     |
 | Final Review              | Pending     |
@@ -61,6 +61,15 @@ NA-001 consumes only the governed policy evaluation result and permitted
 supporting context. It must not re-derive staleness, embed policy values, or
 substitute for policy evaluation.
 
+## Source Boundary
+
+NA-001 requires an approved glucose source contract before evaluation. Source
+data provenance and availability must remain explicit through that contract.
+
+NA-001 does not own source normalization, ingestion, storage, or policy
+evaluation. It consumes governed outputs from the approved source and policy
+layers only.
+
 ## Implementation Gate
 
 | Gate                      | Requirement                                                                                                                 |
@@ -85,6 +94,9 @@ present. Absence of a glucose record is not a staleness condition in NA-001.
 
 NA-001 must never treat missing data as stale data or imply that the user should
 refresh context solely because no record exists.
+
+Missing-data product behavior requires a separately qualified Feature Slice or
+separately approved policy scope. NA-001 does not cover that case.
 
 ## Policy Result Contract
 
@@ -402,6 +414,35 @@ This section records compliance only. It does not restate EA-001.
 Additional architecture obligations beyond the generic contract:
 
 - Policy Boundary (this document);
+- Source Boundary (this document);
 - Implementation Gate (this document);
 - Stale Data vs Missing Data (this document);
 - Policy Result Contract (this document).
+
+## Architecture Approval
+
+**Decision:** Architecture Approved — Implementation Blocked by Policy Dependency
+
+NA-001 is approved as the official implementation contract for a future contextual
+rule once its Policy dependency is satisfied. The architecture preserves a
+strict boundary: staleness meaning belongs exclusively to the Glucose Data
+Staleness Policy; NA-001 maps governed policy results to a safe contextual
+candidate for SD-001 without embedding medical policy, source normalization, or
+resolver behavior.
+
+Architecture approval does not unblock Repository Implementation. Implementation
+may begin only after the approved glucose source contract and Glucose Data
+Staleness Policy are in place with input/output contracts, owner, governance, and
+source data availability.
+
+| Approval criterion        | Result   |
+| ------------------------- | -------- |
+| Policy Boundary           | Verified |
+| Source Boundary           | Verified |
+| Missing Data Boundary     | Verified |
+| Policy Result Contract    | Verified |
+| Rule Contract (EA-001 §7) | Verified |
+| SD-001 Boundary           | Verified |
+| Safety                    | Verified |
+| Implementation Gate       | Verified |
+| Foundation Impact         | None     |

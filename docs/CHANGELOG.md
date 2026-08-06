@@ -1,5 +1,6 @@
 # Changelog
 
+<<<<<<< HEAD
 ## GP-001 — Glucose Data Staleness Policy Feature Slice Complete
 
 Дата: 2026-08-07
@@ -203,6 +204,31 @@ GP-001 — Architecture Audit Ready for Review
 Статус:
 
 GP-001 — Architecture Draft Ready for Architecture Audit
+
+## NA-001 — Glucose Data Staleness Rule Architecture Approval
+
+Дата: 2026-08-06
+
+Завершено:
+
+- performed Architecture Approval review against nine approval criteria
+- approved NA-001 as the official implementation contract for a future contextual
+  rule, with Policy dependency preserved
+- added Source Boundary and missing-data scope clarification
+- recorded Architecture Approval decision and verification table
+- lifecycle advanced to Architecture Approved — Repository Implementation Blocked
+- updated [INDEX](INDEX.md) and [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- Repository Implementation, code, UI, localization, or Policy approval
+- Glucose Data Staleness Policy definition or approval
+- changes to Foundation, SD-001, EA-001, or EB-001
+- Feature Slice Complete
+
+Статус:
+
+NA-001 — Architecture Approved — Repository Implementation Blocked
 
 ## NA-001 — Glucose Data Staleness Rule Architecture Revision
 
