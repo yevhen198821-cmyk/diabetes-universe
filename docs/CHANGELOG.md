@@ -1,5 +1,187 @@
 # Changelog
 
+## GP-001 — Glucose Data Staleness Policy Final Review
+
+Дата: 2026-08-07
+
+Завершено:
+
+- completed final repository review for GP-001 before merge
+- verified lifecycle completion through Engineering Review with only Feature
+  Slice Complete still pending
+- verified scope, architecture alignment, public API, runtime behavior,
+  dependencies, documentation consistency, and repository structure
+- updated lifecycle status in
+  [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md),
+  [INDEX](INDEX.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- merge, branch cleanup, Feature Slice Complete, new functionality,
+  architecture expansion, refactoring, or implementation expansion
+
+Статус:
+
+GP-001 — Final Review Complete
+
+## GP-001 — Glucose Data Staleness Policy Engineering Review
+
+Дата: 2026-08-07
+
+Завершено:
+
+- performed complete engineering review of the GP-001 repository implementation
+- verified public API, contract compliance, runtime independence, determinism,
+  immutability, failure model, outcomes, audit metadata, safety, repository
+  structure, tests, and documentation consistency
+- corrected malformed policy configuration and malformed evaluation reference
+  handling so expected evaluation returns deterministic non-final results
+- added focused GP-001 tests for malformed configuration and malformed
+  evaluation reference behavior
+- updated [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md),
+  [INDEX](INDEX.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- new product functionality, threshold logic, medical scenarios, Dashboard
+  integration, NA-001 integration, Engineering implementation expansion, Final
+  Review, Merge, or Feature Slice Complete
+
+Статус:
+
+GP-001 — Engineering Review Ready for Final Review
+
+## GP-001 — Glucose Data Staleness Policy Repository Implementation
+
+Дата: 2026-08-07
+
+Завершено:
+
+- implemented the reusable GP-001 platform Policy contract in
+  `@diabetes-universe/platform`
+- added public Policy identity, version, outcome, input, result, audit, and
+  evaluation contracts
+- added a deterministic contract-only evaluator that returns governed
+  unavailable/indeterminate outcomes instead of inventing medical thresholds or
+  numeric staleness values
+- added tests for deterministic behavior, input immutability, identity/version,
+  semantic outcomes, unsupported input, unavailable configuration, malformed
+  input, indeterminate time semantics, and audit metadata
+- updated [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md),
+  [INDEX](INDEX.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- actual staleness calculation, numeric policy values, time intervals,
+  production decision logic, glucose interpretation, diagnosis, treatment, AI,
+  Dashboard integration, or NA-001 integration
+- Engineering Review, Final Review, Merge, or Feature Slice Complete
+
+Статус:
+
+GP-001 — Repository Implementation
+
+## GP-001 — Glucose Data Staleness Policy Architecture Approval
+
+Дата: 2026-08-07
+
+Завершено:
+
+- added the informational Known Policy Consumers architecture reference to
+  [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md)
+- documented NA-001 as the current approved consumer and Timeline, Analytics,
+  Reports, AI Services, and Device Integrations as potential future consumers
+- clarified that the consumer list does not create implementation dependencies,
+  runtime coupling, ownership changes, approval requirements, or Policy contract
+  changes
+- advanced GP-001 to Architecture Approved with Repository Implementation Not
+  Started
+- recorded final Architecture Approval verification for policy responsibility,
+  source, input, result, time semantics, failure behavior, safety, consumer
+  contract, governance, versioning, privacy, implementation gate, and Foundation
+  impact
+- updated [INDEX](INDEX.md) and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- Repository Implementation, Policy implementation, runtime integration,
+  dependency-type modeling, EB-001 refinement, or Feature Slice Complete
+- changes to Foundation, SD-001, EA-001, EB-001, NA-001, or PR #60
+
+Статус:
+
+GP-001 — Architecture Approved; Repository Implementation — Not Started
+
+## GP-001 — Glucose Data Staleness Policy Architecture Audit
+
+Дата: 2026-08-06
+
+Завершено:
+
+- performed complete Architecture Audit for
+  [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md)
+- verified GP-001 as a reusable platform Policy independent from Dashboard, Next
+  Action Engine, UI, storage implementation, API payloads, TypeScript models,
+  and medical algorithms
+- clarified that GP-001 does not assume UTC, device-clock authority, local
+  timezone, storage format, database encoding, or API timestamp shape
+- clarified cross-consumer obligations for Dashboard, Timeline, Analytics, AI,
+  Reports, and future approved modules
+- recorded Architecture Audit result, dependency verification, and success
+  criteria verification in the GP-001 document
+- updated [INDEX](INDEX.md) and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- implementation, code, packages, React, Next.js, UI, localization, storage, APIs,
+  TypeScript models, or Policy parameter values
+- changes to Foundation, SD-001, EA-001, EB-001, NA-001, or PR #60
+- Architecture Approval, Repository Implementation, or Feature Slice Complete
+
+Статус:
+
+GP-001 — Architecture Audit Ready for Review
+
+## GP-001 — Glucose Data Staleness Policy Backlog Qualification and Architecture Draft
+
+Дата: 2026-08-06
+
+Завершено:
+
+- created [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md)
+- qualified GP-001 as an Approved Backlog Item in the Platform category
+- defined GP-001 as the single governed authority for semantic freshness state
+  of an existing glucose record
+- documented reusable governed data flow from approved glucose source contract to
+  Policy Result to consumers
+- defined source boundary, input contract, Policy Result contract, time
+  semantics, missing-data boundary, safety, failure behavior, consumer contract,
+  versioning, governance, privacy/security, observability, implementation gate,
+  and success criteria
+- updated [EB-001](product/dashboard/eb-001-next-action-engine-backlog.md) to
+  record GP-001 as an approved cross-domain platform dependency for future
+  glucose-staleness consumers
+- updated [INDEX](INDEX.md), [Documentation README](README.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- implementation, code, TypeScript contracts, storage design, UI, localization,
+  Dashboard behavior, Next Action resolution, or SD-001 changes
+- numeric staleness intervals, thresholds, tolerances, or algorithms
+- glucose value interpretation, diagnosis, treatment, dosing, prediction,
+  device-health behavior, AI behavior, or missing-data recommendation behavior
+- changes to Foundation, SD-001, EA-001, or PR #60
+
+Статус:
+
+GP-001 — Architecture Draft Ready for Architecture Audit
+
 ## EA-001 — Standard Rule Contract Architecture Refinement
 
 Дата: 2026-08-05

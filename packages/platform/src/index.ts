@@ -8,9 +8,35 @@
  */
 
 export type {
+  GlucoseDataStalenessDataQualityState,
+  GlucoseDataStalenessEvaluationReferenceAudit,
+  GlucoseDataStalenessEvaluationReferenceInput,
+  GlucoseDataStalenessPolicy,
+  GlucoseDataStalenessPolicyAuditMetadata,
+  GlucoseDataStalenessPolicyConfigurationInput,
+  GlucoseDataStalenessPolicyConfigurationState,
+  GlucoseDataStalenessPolicyInput,
+  GlucoseDataStalenessPolicyOutcome,
+  GlucoseDataStalenessPolicyReason,
+  GlucoseDataStalenessPolicyResult,
+  GlucoseDataStalenessRecordInput,
+  GlucoseDataStalenessRecordTimeInput,
+  GlucoseDataStalenessSourceAudit,
+  GlucoseDataStalenessSourceInput,
+  GlucoseDataStalenessSourceSupport,
+  GlucoseDataStalenessTimeSemanticsState,
   PlatformRuntime,
   PlatformRuntimeCreateInput,
   PlatformRuntimeFactory,
 } from './contracts';
 
+export {
+  GLUCOSE_DATA_STALENESS_POLICY_ID,
+  GLUCOSE_DATA_STALENESS_POLICY_OUTCOMES,
+  GLUCOSE_DATA_STALENESS_POLICY_VERSION,
+} from './contracts';
 export { createPlatformRuntime } from './runtime/create-platform-runtime';
+export {
+  evaluateGlucoseDataStalenessPolicy,
+  glucoseDataStalenessPolicy,
+} from './runtime/evaluate-glucose-data-staleness-policy';

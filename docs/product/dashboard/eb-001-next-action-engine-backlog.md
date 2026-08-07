@@ -304,7 +304,20 @@ These operations must never require changing EA-001 unless the product model,
 taxonomy, lifecycle, ownership model, or safety/explainability architecture
 itself changes.
 
-## 13. Initial Candidate Registry
+## 13. Approved Cross-Domain Platform Dependencies
+
+The Next Action Engine Epic may depend on governed platform policies that are not
+Next Action rules and do not belong to the NA-xxx candidate registry.
+
+| ID     | Name                          | Category | Status                | Relationship to Next Action                                                                                                    | Foundation Change Required | Owner    | Notes                                                                                              |
+| ------ | ----------------------------- | -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
+| GP-001 | Glucose Data Staleness Policy | Platform | Approved Backlog Item | Blocking policy dependency for any future glucose-staleness consumer, including a future qualified NA-001 implementation path. | No                         | Platform | See [GP-001 — Glucose Data Staleness Policy](../platform/gp-001-glucose-data-staleness-policy.md). |
+
+GP-001 does not select a Next Action, participate in SD-001 resolution, define
+Dashboard behavior, or implement a rule. Consumers must not rederive glucose
+staleness independently after GP-001 is approved.
+
+## 14. Initial Candidate Registry
 
 Initial entries are names only. Every listed entry in this section is classified
 as a Candidate Registry Entry with `Status: Proposed`.
@@ -314,7 +327,7 @@ approve implementation.
 
 ### Medical
 
-- NA-001 Glucose Staleness Rule
+- NA-001 Glucose Staleness Rule (future consumer of GP-001 if qualified)
 - NA-002 Repeated High Glucose Rule
 - NA-003 Repeated Low Glucose Rule
 
@@ -354,7 +367,7 @@ approve implementation.
 - NA-061 Rule Performance
 - NA-062 Rule Telemetry
 
-## 14. Future Expansion
+## 15. Future Expansion
 
 New categories can be introduced when existing categories cannot represent a new
 stable product intent. Category expansion requires governance review because
@@ -364,7 +377,7 @@ Adding individual backlog items does not require new category approval when the
 item fits an existing category. Adding a new category must not introduce
 implementation, medical policy, AI logic, or roadmap ordering.
 
-## 15. Success Criteria
+## 16. Success Criteria
 
 EB-001 is complete when:
 

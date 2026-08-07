@@ -56,6 +56,10 @@ Approved — localized via I18N-02B1 (Feature Complete)
 - **EB-001** (Backlog Foundation Complete — Living): Next Action Engine Epic Backlog — records the
   living product-management backlog for future Next Action Feature Slices —
   [EB-001 — Next Action Engine Epic Backlog](../../product/dashboard/eb-001-next-action-engine-backlog.md).
+- **GP-001** (Final Review Complete): Glucose Data Staleness Policy — defines
+  the future governed platform policy that glucose staleness consumers must use
+  instead of rederiving staleness independently —
+  [GP-001 — Glucose Data Staleness Policy](../../product/platform/gp-001-glucose-data-staleness-policy.md).
 - **SD-001** (Feature Slice Complete): Next Action Engine Foundation — preserves
   insulin Quick Add parity; contextual rules deferred to future slices —
   [SD-001 — Next Action Engine Foundation](sd-001-next-action-engine-foundation.md).
