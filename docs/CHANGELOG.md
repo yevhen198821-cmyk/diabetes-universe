@@ -1,6 +1,29 @@
 # Changelog
 
-<<<<<<< HEAD
+## NA-001 — GP-001 Dependency Status Update
+
+Дата: 2026-08-07
+
+Завершено:
+
+- rebased PR #60 onto updated `main` after GP-001 reached Feature Slice Complete
+- updated NA-001 Repository Implementation dependency status from blocked by
+  GP-001 to ready to start
+- linked NA-001 to
+  [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md)
+  as Feature Slice Complete
+- updated [INDEX](INDEX.md) and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- NA-001 implementation, architecture changes, policy changes, SD-001 changes, or
+  Feature Slice Complete
+
+Статус:
+
+NA-001 — Architecture Approved — Repository Implementation Ready to Start
+
 ## GP-001 — Glucose Data Staleness Policy Feature Slice Complete
 
 Дата: 2026-08-07

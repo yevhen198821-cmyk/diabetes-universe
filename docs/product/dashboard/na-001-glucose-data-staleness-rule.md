@@ -4,26 +4,27 @@ _Subtitle: approved architecture contract for a future Dashboard Next Action rul
 
 ## Status
 
-Architecture Approved — Repository Implementation Blocked
+Architecture Approved — Repository Implementation Ready to Start
 
 ## Lifecycle
 
-| Stage                     | Status      |
-| ------------------------- | ----------- |
-| Backlog Qualification     | Complete    |
-| Architecture Draft        | Superseded  |
-| Architecture Revision     | Complete    |
-| Architecture Audit        | Complete    |
-| Architecture Approved     | **Current** |
-| Repository Implementation | Blocked     |
-| Engineering Review        | Pending     |
-| Final Review              | Pending     |
-| Feature Slice Complete    | Pending     |
+| Stage                     | Status         |
+| ------------------------- | -------------- |
+| Backlog Qualification     | Complete       |
+| Architecture Draft        | Superseded     |
+| Architecture Revision     | Complete       |
+| Architecture Audit        | Complete       |
+| Architecture Approved     | **Current**    |
+| Repository Implementation | Ready to Start |
+| Engineering Review        | Pending        |
+| Final Review              | Pending        |
+| Feature Slice Complete    | Pending        |
 
-Repository Implementation remains blocked until the Glucose Data Staleness Policy
-is approved with input/output contracts, owner, governance, and source data
-availability. Architecture approval does not approve that policy or unblock
-implementation.
+Repository Implementation is ready to start because
+[GP-001 — Glucose Data Staleness Policy](../platform/gp-001-glucose-data-staleness-policy.md)
+has reached Feature Slice Complete. Starting implementation remains a separate
+Repository Implementation task and must not occur as part of this dependency
+status update.
 
 ## Rule Identity
 
@@ -72,12 +73,12 @@ layers only.
 
 ## Implementation Gate
 
-| Gate                      | Requirement                                                                                                                 |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Architecture approval     | May proceed before the Glucose Data Staleness Policy exists.                                                                |
-| Repository Implementation | Blocked until the policy is approved with input contract, output contract, owner, governance, and source data availability. |
-| Policy approval           | Does not occur in this document.                                                                                            |
-| NA-001 implementation     | Must not begin until both architecture approval and policy approval are complete.                                           |
+| Gate                      | Requirement                                                                                                                                                   |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Architecture approval     | May proceed before the Glucose Data Staleness Policy exists.                                                                                                  |
+| Repository Implementation | Ready to start after GP-001 reached Feature Slice Complete; implementation must still consume the governed Policy contract without inventing policy behavior. |
+| Policy approval           | Satisfied by GP-001 Feature Slice Complete.                                                                                                                   |
+| NA-001 implementation     | Ready to start only through a separate Repository Implementation task; no implementation occurs in this dependency status update.                             |
 
 ## Stale Data vs Missing Data
 
@@ -185,7 +186,8 @@ Expected user value:
 ### Rule-specific
 
 - approved glucose source contract (future);
-- approved Glucose Data Staleness Policy (future).
+- [GP-001 — Glucose Data Staleness Policy](../platform/gp-001-glucose-data-staleness-policy.md)
+  (Feature Slice Complete).
 
 The future policy is the sole authority for data-staleness meaning. NA-001 must
 not invent or embed policy values. Architecture approval does not approve that
@@ -421,7 +423,7 @@ Additional architecture obligations beyond the generic contract:
 
 ## Architecture Approval
 
-**Decision:** Architecture Approved — Implementation Blocked by Policy Dependency
+**Decision:** Architecture Approved — Repository Implementation Ready to Start
 
 NA-001 is approved as the official implementation contract for a future contextual
 rule once its Policy dependency is satisfied. The architecture preserves a
@@ -430,10 +432,9 @@ Staleness Policy; NA-001 maps governed policy results to a safe contextual
 candidate for SD-001 without embedding medical policy, source normalization, or
 resolver behavior.
 
-Architecture approval does not unblock Repository Implementation. Implementation
-may begin only after the approved glucose source contract and Glucose Data
-Staleness Policy are in place with input/output contracts, owner, governance, and
-source data availability.
+Repository Implementation is ready to start because GP-001 is Feature Slice
+Complete. Implementation still must consume the governed GP-001 contract and
+must not calculate, infer, or validate staleness independently.
 
 | Approval criterion        | Result   |
 | ------------------------- | -------- |
