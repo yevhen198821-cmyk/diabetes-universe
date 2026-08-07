@@ -4,27 +4,26 @@ _Subtitle: approved architecture contract for a future Dashboard Next Action rul
 
 ## Status
 
-Architecture Approved — Repository Implementation Ready to Start
+Repository Implementation
 
 ## Lifecycle
 
-| Stage                     | Status         |
-| ------------------------- | -------------- |
-| Backlog Qualification     | Complete       |
-| Architecture Draft        | Superseded     |
-| Architecture Revision     | Complete       |
-| Architecture Audit        | Complete       |
-| Architecture Approved     | **Current**    |
-| Repository Implementation | Ready to Start |
-| Engineering Review        | Pending        |
-| Final Review              | Pending        |
-| Feature Slice Complete    | Pending        |
+| Stage                     | Status      |
+| ------------------------- | ----------- |
+| Backlog Qualification     | Complete    |
+| Architecture Draft        | Superseded  |
+| Architecture Revision     | Complete    |
+| Architecture Audit        | Complete    |
+| Architecture Approved     | Complete    |
+| Repository Implementation | **Current** |
+| Engineering Review        | Pending     |
+| Final Review              | Pending     |
+| Feature Slice Complete    | Pending     |
 
-Repository Implementation is ready to start because
+Repository Implementation is in progress because
 [GP-001 — Glucose Data Staleness Policy](../platform/gp-001-glucose-data-staleness-policy.md)
-has reached Feature Slice Complete. Starting implementation remains a separate
-Repository Implementation task and must not occur as part of this dependency
-status update.
+has reached Feature Slice Complete. The implementation is limited to the NA-001
+contextual rule consuming the governed GP-001 Policy Result.
 
 ## Rule Identity
 
@@ -73,12 +72,12 @@ layers only.
 
 ## Implementation Gate
 
-| Gate                      | Requirement                                                                                                                                                   |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Architecture approval     | May proceed before the Glucose Data Staleness Policy exists.                                                                                                  |
-| Repository Implementation | Ready to start after GP-001 reached Feature Slice Complete; implementation must still consume the governed Policy contract without inventing policy behavior. |
-| Policy approval           | Satisfied by GP-001 Feature Slice Complete.                                                                                                                   |
-| NA-001 implementation     | Ready to start only through a separate Repository Implementation task; no implementation occurs in this dependency status update.                             |
+| Gate                      | Requirement                                                                                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Architecture approval     | May proceed before the Glucose Data Staleness Policy exists.                                                                                     |
+| Repository Implementation | In progress after GP-001 reached Feature Slice Complete; implementation consumes the governed Policy contract without inventing policy behavior. |
+| Policy approval           | Satisfied by GP-001 Feature Slice Complete.                                                                                                      |
+| NA-001 implementation     | Limited to the contextual rule implementation; Engineering Review, Final Review, and Feature Slice Complete remain pending.                      |
 
 ## Stale Data vs Missing Data
 
@@ -423,7 +422,7 @@ Additional architecture obligations beyond the generic contract:
 
 ## Architecture Approval
 
-**Decision:** Architecture Approved — Repository Implementation Ready to Start
+**Decision:** Architecture Approved — Repository Implementation
 
 NA-001 is approved as the official implementation contract for a future contextual
 rule once its Policy dependency is satisfied. The architecture preserves a
@@ -432,9 +431,9 @@ Staleness Policy; NA-001 maps governed policy results to a safe contextual
 candidate for SD-001 without embedding medical policy, source normalization, or
 resolver behavior.
 
-Repository Implementation is ready to start because GP-001 is Feature Slice
-Complete. Implementation still must consume the governed GP-001 contract and
-must not calculate, infer, or validate staleness independently.
+Repository Implementation is in progress because GP-001 is Feature Slice
+Complete. Implementation consumes the governed GP-001 contract and must not
+calculate, infer, or validate staleness independently.
 
 | Approval criterion        | Result   |
 | ------------------------- | -------- |

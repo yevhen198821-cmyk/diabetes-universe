@@ -1,5 +1,37 @@
 # Changelog
 
+## NA-001 — Glucose Data Staleness Rule Repository Implementation
+
+Дата: 2026-08-07
+
+Завершено:
+
+- implemented NA-001 as an injectable contextual Next Action rule factory
+- consumed only the governed GP-001 Policy Result plus existing SD-001 engine
+  context for action availability
+- activated only on `attention-required` and suppressed on
+  `no-attention-required`, `unavailable`, `indeterminate`, malformed, or
+  unsupported Policy Results
+- preserved SD-001 resolver/default/fallback ownership and did not register the
+  rule globally
+- added tests for activation, suppression, determinism, input immutability,
+  malformed/unsupported Policy Results, no raw timestamp/glucose access,
+  explainability identity, action availability, and SD-001 compatibility
+- updated [NA-001 — Glucose Data Staleness Rule](product/dashboard/na-001-glucose-data-staleness-rule.md),
+  [INDEX](INDEX.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- medical thresholds, numeric freshness values, glucose interpretation,
+  diagnosis, treatment, insulin, dosing, prediction, Dashboard UI,
+  localization, GP-001 changes, SD-001 resolver/default/fallback changes, or
+  NA-001 Feature Slice Complete
+
+Статус:
+
+NA-001 — Repository Implementation
+
 ## NA-001 — GP-001 Dependency Status Update
 
 Дата: 2026-08-07
