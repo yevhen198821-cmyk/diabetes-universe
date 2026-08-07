@@ -4,7 +4,7 @@ _Subtitle: approved architecture for the governed glucose freshness policy._
 
 ## Status
 
-Architecture Approved
+Repository Implementation
 
 ## Lifecycle
 
@@ -13,15 +13,16 @@ Architecture Approved
 | Backlog Qualification     | Complete    |
 | Architecture Draft        | Complete    |
 | Architecture Audit        | Complete    |
-| Architecture Approved     | **Current** |
-| Repository Implementation | Not Started |
+| Architecture Approved     | Complete    |
+| Repository Implementation | **Current** |
 | Engineering Review        | Pending     |
 | Final Review              | Pending     |
 | Feature Slice Complete    | Pending     |
 
-Repository Implementation has not started. Architecture Approval does not start
-implementation; the implementation gates in Section 21 must still be satisfied
-before Repository Implementation begins.
+Repository Implementation is limited to the reusable platform Policy contract,
+input/result types, policy identity/version, deterministic evaluation interface,
+failure/result model, and test scaffolding. It does not implement medical
+thresholds, numeric staleness values, or production freshness classification.
 
 ## Backlog Qualification
 
@@ -568,7 +569,8 @@ contract.
 
 ## 21. Implementation Gate
 
-Repository Implementation may begin only after:
+The current Repository Implementation is contract-only. Production freshness
+classification may begin only after:
 
 - Architecture Approved;
 - approved glucose source contract;
@@ -583,6 +585,30 @@ Repository Implementation may begin only after:
 If numeric staleness values are still unapproved, implementation of real
 classification remains blocked. A contract-only implementation must not pretend
 to produce medically governed results.
+
+### Repository Implementation Scope
+
+Implemented:
+
+- public Policy API in `@diabetes-universe/platform`;
+- Policy identity and version contract;
+- input and result contracts;
+- evaluation entry point;
+- deterministic unavailable/indeterminate failure model;
+- immutable result objects;
+- test scaffolding for contract behavior.
+
+Not implemented:
+
+- actual staleness calculation;
+- numeric policy values;
+- time intervals;
+- glucose interpretation;
+- diagnosis;
+- treatment;
+- AI behavior;
+- Dashboard integration;
+- NA-001 integration.
 
 ## 22. Success Criteria
 

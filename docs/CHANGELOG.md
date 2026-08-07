@@ -1,5 +1,36 @@
 # Changelog
 
+## GP-001 — Glucose Data Staleness Policy Repository Implementation
+
+Дата: 2026-08-07
+
+Завершено:
+
+- implemented the reusable GP-001 platform Policy contract in
+  `@diabetes-universe/platform`
+- added public Policy identity, version, outcome, input, result, audit, and
+  evaluation contracts
+- added a deterministic contract-only evaluator that returns governed
+  unavailable/indeterminate outcomes instead of inventing medical thresholds or
+  numeric staleness values
+- added tests for deterministic behavior, input immutability, identity/version,
+  semantic outcomes, unsupported input, unavailable configuration, malformed
+  input, indeterminate time semantics, and audit metadata
+- updated [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md),
+  [INDEX](INDEX.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- actual staleness calculation, numeric policy values, time intervals,
+  production decision logic, glucose interpretation, diagnosis, treatment, AI,
+  Dashboard integration, or NA-001 integration
+- Engineering Review, Final Review, Merge, or Feature Slice Complete
+
+Статус:
+
+GP-001 — Repository Implementation
+
 ## GP-001 — Glucose Data Staleness Policy Architecture Approval
 
 Дата: 2026-08-07
