@@ -117,6 +117,33 @@ test('evaluation returns unavailable for unavailable configuration', () => {
   assert.equal(result.audit.reason, 'unavailable-policy-configuration');
 });
 
+test('evaluation returns unavailable for malformed configuration', () => {
+  const result = evaluateGlucoseDataStalenessPolicy(
+    createValidInput({
+      policyConfiguration: {
+        state: 'unknown',
+      },
+    }),
+  );
+
+  assert.equal(result.outcome, 'unavailable');
+  assert.equal(result.audit.reason, 'unavailable-policy-configuration');
+});
+
+test('evaluation returns unavailable for malformed evaluation reference', () => {
+  const result = evaluateGlucoseDataStalenessPolicy(
+    createValidInput({
+      evaluationReference: {
+        identity: '',
+      },
+    }),
+  );
+
+  assert.equal(result.outcome, 'unavailable');
+  assert.equal(result.audit.reason, 'malformed-input');
+  assert.equal(result.evaluationReference.identity, 'unavailable');
+});
+
 test('evaluation returns unavailable for malformed input', () => {
   const result = evaluateGlucoseDataStalenessPolicy(undefined);
 

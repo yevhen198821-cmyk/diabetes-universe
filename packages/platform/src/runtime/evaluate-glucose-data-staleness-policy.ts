@@ -117,6 +117,18 @@ export function evaluateGlucoseDataStalenessPolicy(
     });
   }
 
+  if (evaluationReference === null) {
+    return createResult({
+      reason: 'malformed-input',
+      outcome: 'unavailable',
+      evaluationReference,
+      configurationState,
+      recordIdentity,
+      source,
+      provenanceIdentity,
+    });
+  }
+
   if (occurrenceTime === 'unavailable') {
     return createResult({
       reason: 'unavailable-time-semantics',
@@ -157,6 +169,18 @@ export function evaluateGlucoseDataStalenessPolicy(
     return createResult({
       reason: 'conflicting-source-metadata',
       outcome: 'indeterminate',
+      evaluationReference,
+      configurationState,
+      recordIdentity,
+      source,
+      provenanceIdentity,
+    });
+  }
+
+  if (configurationState === null) {
+    return createResult({
+      reason: 'unavailable-policy-configuration',
+      outcome: 'unavailable',
       evaluationReference,
       configurationState,
       recordIdentity,
