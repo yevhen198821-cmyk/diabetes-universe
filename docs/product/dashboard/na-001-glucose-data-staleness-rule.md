@@ -4,7 +4,7 @@ _Subtitle: approved architecture contract for a future Dashboard Next Action rul
 
 ## Status
 
-Repository Implementation
+Engineering Review
 
 ## Lifecycle
 
@@ -15,15 +15,13 @@ Repository Implementation
 | Architecture Revision     | Complete    |
 | Architecture Audit        | Complete    |
 | Architecture Approved     | Complete    |
-| Repository Implementation | **Current** |
-| Engineering Review        | Pending     |
+| Repository Implementation | Complete    |
+| Engineering Review        | **Current** |
 | Final Review              | Pending     |
 | Feature Slice Complete    | Pending     |
 
-Repository Implementation is in progress because
-[GP-001 — Glucose Data Staleness Policy](../platform/gp-001-glucose-data-staleness-policy.md)
-has reached Feature Slice Complete. The implementation is limited to the NA-001
-contextual rule consuming the governed GP-001 Policy Result.
+Repository Implementation is complete. Engineering Review is in progress for the
+NA-001 contextual rule that consumes only the governed GP-001 Policy Result.
 
 ## Rule Identity
 
@@ -75,9 +73,9 @@ layers only.
 | Gate                      | Requirement                                                                                                                                      |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Architecture approval     | May proceed before the Glucose Data Staleness Policy exists.                                                                                     |
-| Repository Implementation | In progress after GP-001 reached Feature Slice Complete; implementation consumes the governed Policy contract without inventing policy behavior. |
+| Repository Implementation | Complete after GP-001 reached Feature Slice Complete; implementation consumes the governed Policy contract without inventing policy behavior. |
 | Policy approval           | Satisfied by GP-001 Feature Slice Complete.                                                                                                      |
-| NA-001 implementation     | Limited to the contextual rule implementation; Engineering Review, Final Review, and Feature Slice Complete remain pending.                      |
+| NA-001 implementation     | Limited to the contextual rule implementation; Final Review and Feature Slice Complete remain pending.                                           |
 
 ## Stale Data vs Missing Data
 
@@ -431,9 +429,9 @@ Staleness Policy; NA-001 maps governed policy results to a safe contextual
 candidate for SD-001 without embedding medical policy, source normalization, or
 resolver behavior.
 
-Repository Implementation is in progress because GP-001 is Feature Slice
-Complete. Implementation consumes the governed GP-001 contract and must not
-calculate, infer, or validate staleness independently.
+Repository Implementation is complete. GP-001 is Feature Slice Complete.
+Implementation consumes the governed GP-001 contract and does not calculate,
+infer, or validate staleness independently.
 
 | Approval criterion        | Result   |
 | ------------------------- | -------- |
@@ -446,3 +444,27 @@ calculate, infer, or validate staleness independently.
 | Safety                    | Verified |
 | Implementation Gate       | Verified |
 | Foundation Impact         | None     |
+
+## Engineering Review
+
+**Review Decision:** Engineering Review Passed
+
+The NA-001 repository implementation is verified against the approved
+architecture, GP-001 Policy contract, SD-001 Engine Foundation, and EA-001 Epic
+Architecture as an injectable, deterministic, policy-bound contextual rule.
+
+| Review area               | Result   | Notes                                                                                                                                                                                                 |
+| ------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Rule Registration         | Verified | Implemented as `createNa001GlucoseDataStalenessRule`; not globally registered; no singleton state; multiple instances remain deterministic; registration order does not affect correctness.            |
+| GP-001 Contract           | Verified | Consumes only public `@diabetes-universe/platform` symbols: policy ID, outcomes, and result/outcome types. No runtime internals or private helpers imported.                                          |
+| Rule Contract             | Verified | Returns rule identity, informational priority, explainability identity, and approved quick-add action contract only. No UI models, localized strings, or presentation objects.                        |
+| Self-Suppression          | Verified | Suppresses on `no-attention-required`, `unavailable`, `indeterminate`, malformed, and unsupported Policy Results by returning no contextual candidate. Does not generate fallback behavior.         |
+| Runtime Independence      | Verified | No dependency on Dashboard UI, React, browser APIs, localization, AI, device logic, or reminder logic.                                                                                               |
+| Determinism               | Verified | Identical input produces identical output; no random values, hidden mutable state, or caches.                                                                                                          |
+| Immutability              | Verified | Policy result and engine context are not mutated; rule instance is frozen.                                                                                                                            |
+| Explainability            | Verified | Returns only semantic explanation identity via `descriptionKey`; no user-facing wording or medical explanation.                                                                                       |
+| SD-001 Compatibility      | Verified | Does not modify resolver, compatibility/default, neutral fallback, tie-break, priority resolver, or contextual rule registry behavior.                                                                |
+| Safety                    | Verified | Does not interpret glucose values, evaluate timestamps, calculate staleness, recommend treatment/insulin/dosing, predict glucose, or convert GP-001 outcomes into medical meaning.                    |
+| Repository Structure      | Verified | Implementation lives in `apps/web/lib/dashboard/next-action/` with no duplicate contracts, circular dependencies, dead exports, or temporary helpers.                                                   |
+| Tests                     | Verified | Tests cover activation, suppression, malformed/unsupported Policy Results, determinism, input immutability, explainability identity, action availability, SD-001 compatibility, and no raw data access. |
+| Documentation Consistency | Verified | NA-001 document, GP-001 references, Dashboard references, INDEX, and CHANGELOG match implementation scope.                                                                                          |

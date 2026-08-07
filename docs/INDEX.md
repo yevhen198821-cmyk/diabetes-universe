@@ -20,7 +20,7 @@
 
 - [EB-001 — Next Action Engine Epic Backlog v1.0](product/dashboard/eb-001-next-action-engine-backlog.md) — Backlog Foundation Complete — Living
 - [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md) — Feature Slice Complete
-- [NA-001 — Glucose Data Staleness Rule](product/dashboard/na-001-glucose-data-staleness-rule.md) — Repository Implementation
+- [NA-001 — Glucose Data Staleness Rule](product/dashboard/na-001-glucose-data-staleness-rule.md) — Engineering Review
 
 ## Brand
 
