@@ -1,5 +1,31 @@
 # Changelog
 
+## EB-001 — Dependency Type Architecture Refinement
+
+Дата: 2026-08-07
+
+Завершено:
+
+- extended the Governed Backlog Item Contract in
+  [EB-001 — Next Action Engine Epic Backlog](product/dashboard/eb-001-next-action-engine-backlog.md)
+  with Dependency Type
+- defined allowed Dependency Type values: Blocking, Architectural, Optional, and
+  Runtime, including the refined Architectural definition for Architecture
+  Approval gating
+- added the initial usage example: NA-001 depends on GP-001 with Dependency Type
+  Blocking
+- kept the change as backlog architecture refinement only
+
+Не входит в этот этап:
+
+- changes to GP-001, PR #62, NA-001, SD-001, EA-001, Foundation, or
+  implementation code
+- runtime dependency modeling or Repository Implementation
+
+Статус:
+
+EB-001 — Architecture Refinement
+
 ## NA-001 — Glucose Data Staleness Rule Feature Slice Complete
 
 Дата: 2026-08-07
