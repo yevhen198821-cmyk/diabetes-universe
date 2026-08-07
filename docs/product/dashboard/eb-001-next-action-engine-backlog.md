@@ -317,17 +317,33 @@ GP-001 does not select a Next Action, participate in SD-001 resolution, define
 Dashboard behavior, or implement a rule. Consumers must not rederive glucose
 staleness independently after GP-001 is approved.
 
-## 14. Initial Candidate Registry
+## 14. Approved Backlog Items
 
-Initial entries are names only. Every listed entry in this section is classified
-as a Candidate Registry Entry with `Status: Proposed`.
+Approved Backlog Items have passed Backlog Qualification and use the Governed
+Backlog Item contract. They are not active Feature Slices until development is
+formally initiated.
 
-These entries are not specifications, are not Approved Backlog Items, and do not
-approve implementation.
+| ID     | Name                        | Category | Goal                                                          | Priority | Status                | Item-specific Dependencies                      | Foundation Change Required | Owner   | Notes                                                         |
+| ------ | --------------------------- | -------- | ------------------------------------------------------------- | -------- | --------------------- | ----------------------------------------------- | -------------------------- | ------- | ------------------------------------------------------------- |
+| NA-001 | Glucose Data Staleness Rule | Medical  | Clarify glucose data quality for future Next Action planning. | Medium   | Approved Backlog Item | Approved Glucose Data Staleness Policy (future) | No                         | Medical | Qualified in [NA-001](na-001-glucose-data-staleness-rule.md). |
+
+## 15. Initial Candidate Registry
+
+Initial entries are compact planning records. Candidate Registry Entries that
+become Approved Backlog Items remain here as historical records with
+`Status: Qualified`.
+
+Proposed entries are not specifications, are not Approved Backlog Items, and do
+not approve implementation.
 
 ### Medical
 
-- NA-001 Glucose Staleness Rule (future consumer of GP-001 if qualified)
+| Candidate | Status    | Linked Backlog Item                             |
+| --------- | --------- | ----------------------------------------------- |
+| NA-001    | Qualified | [NA-001](na-001-glucose-data-staleness-rule.md) |
+
+Proposed:
+
 - NA-002 Repeated High Glucose Rule
 - NA-003 Repeated Low Glucose Rule
 
@@ -367,7 +383,7 @@ approve implementation.
 - NA-061 Rule Performance
 - NA-062 Rule Telemetry
 
-## 15. Future Expansion
+## 16. Future Expansion
 
 New categories can be introduced when existing categories cannot represent a new
 stable product intent. Category expansion requires governance review because
@@ -377,7 +393,7 @@ Adding individual backlog items does not require new category approval when the
 item fits an existing category. Adding a new category must not introduce
 implementation, medical policy, AI logic, or roadmap ordering.
 
-## 16. Success Criteria
+## 17. Success Criteria
 
 EB-001 is complete when:
 
@@ -390,11 +406,12 @@ EB-001 is complete when:
 - ownership is singular;
 - backlog governance roles are explicit;
 - dependencies and Foundation impact are explicit;
+- approved backlog items use the Governed Backlog Item contract;
 - initial candidate entries are organized by category as names only;
 - future backlog evolution does not require changing EA-001;
 - EB-001 is approved as the living Epic Backlog management model.
 
-## 16. Living Document Lifecycle
+## 17. Living Document Lifecycle
 
 EB-001 has two kinds of lifecycle:
 

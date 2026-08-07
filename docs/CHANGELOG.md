@@ -1,5 +1,114 @@
 # Changelog
 
+## NA-001 — Glucose Data Staleness Rule Final Review
+
+Дата: 2026-08-07
+
+Завершено:
+
+- completed Final Review of the NA-001 Feature Slice against the approved
+  architecture, GP-001 Policy contract, SD-001 Engine Foundation, and EA-001 Epic
+  Architecture
+- verified lifecycle completion through Engineering Review, scope boundaries,
+  architecture compliance, GP-001 integration, SD-001 compatibility, rule
+  runtime behavior, safety boundaries, repository hygiene, and documentation
+  consistency
+- updated [NA-001 — Glucose Data Staleness Rule](product/dashboard/na-001-glucose-data-staleness-rule.md),
+  [INDEX](INDEX.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- merge, Feature Slice Complete, new functionality, architecture changes, scope
+  expansion, GP-001 changes, or SD-001 resolver/default/fallback changes
+
+Статус:
+
+NA-001 — Final Review Complete
+
+## NA-001 — Glucose Data Staleness Rule Engineering Review
+
+Дата: 2026-08-07
+
+Завершено:
+
+- completed Engineering Review of the NA-001 repository implementation against
+  the approved NA-001 architecture, GP-001 Policy contract, SD-001 Engine
+  Foundation, and EA-001 Epic Architecture
+- verified injectable rule factory registration, GP-001 public API consumption,
+  rule contract compliance, self-suppression, runtime independence, determinism,
+  immutability, explainability identity, SD-001 compatibility, safety
+  boundaries, repository structure, tests, and documentation consistency
+- updated [NA-001 — Glucose Data Staleness Rule](product/dashboard/na-001-glucose-data-staleness-rule.md),
+  [INDEX](INDEX.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- new functionality, architecture changes, scope expansion, GP-001 changes,
+  SD-001 resolver/default/fallback changes, Final Review, merge, or Feature Slice
+  Complete
+
+Статус:
+
+NA-001 — Engineering Review Ready for Final Review
+
+## NA-001 — Glucose Data Staleness Rule Repository Implementation
+
+Дата: 2026-08-07
+
+Завершено:
+
+- implemented NA-001 as an injectable contextual Next Action rule factory
+- consumed only the governed GP-001 Policy Result plus existing SD-001 engine
+  context for action availability
+- activated only on `attention-required` and suppressed on
+  `no-attention-required`, `unavailable`, `indeterminate`, malformed, or
+  unsupported Policy Results
+- preserved SD-001 resolver/default/fallback ownership and did not register the
+  rule globally
+- added tests for activation, suppression, determinism, input immutability,
+  malformed/unsupported Policy Results, no raw timestamp/glucose access,
+  explainability identity, action availability, and SD-001 compatibility
+- updated [NA-001 — Glucose Data Staleness Rule](product/dashboard/na-001-glucose-data-staleness-rule.md),
+  [INDEX](INDEX.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- medical thresholds, numeric freshness values, glucose interpretation,
+  diagnosis, treatment, insulin, dosing, prediction, Dashboard UI,
+  localization, GP-001 changes, SD-001 resolver/default/fallback changes, or
+  NA-001 Feature Slice Complete
+
+Статус:
+
+NA-001 — Repository Implementation
+
+## NA-001 — GP-001 Dependency Status Update
+
+Дата: 2026-08-07
+
+Завершено:
+
+- rebased PR #60 onto updated `main` after GP-001 reached Feature Slice Complete
+- updated NA-001 Repository Implementation dependency status from blocked by
+  GP-001 to ready to start
+- linked NA-001 to
+  [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md)
+  as Feature Slice Complete
+- updated [INDEX](INDEX.md) and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- NA-001 implementation, architecture changes, policy changes, SD-001 changes, or
+  Feature Slice Complete
+
+Статус:
+
+NA-001 — Architecture Approved — Repository Implementation Ready to Start
+
 ## GP-001 — Glucose Data Staleness Policy Feature Slice Complete
 
 Дата: 2026-08-07
@@ -204,6 +313,62 @@ GP-001 — Architecture Audit Ready for Review
 
 GP-001 — Architecture Draft Ready for Architecture Audit
 
+## NA-001 — Glucose Data Staleness Rule Architecture Approval
+
+Дата: 2026-08-06
+
+Завершено:
+
+- performed Architecture Approval review against nine approval criteria
+- approved NA-001 as the official implementation contract for a future contextual
+  rule, with Policy dependency preserved
+- added Source Boundary and missing-data scope clarification
+- recorded Architecture Approval decision and verification table
+- lifecycle advanced to Architecture Approved — Repository Implementation Blocked
+- updated [INDEX](INDEX.md) and [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- Repository Implementation, code, UI, localization, or Policy approval
+- Glucose Data Staleness Policy definition or approval
+- changes to Foundation, SD-001, EA-001, or EB-001
+- Feature Slice Complete
+
+Статус:
+
+NA-001 — Architecture Approved — Repository Implementation Blocked
+
+## NA-001 — Glucose Data Staleness Rule Architecture Revision
+
+Дата: 2026-08-06
+
+Завершено:
+
+- revised NA-001 against the EA-001 Standard Rule Contract after PR #61 merge
+- defined policy boundary: approved glucose source contract → Glucose Data
+  Staleness Policy → governed policy evaluation result → NA-001 → SD-001
+- added implementation gate: architecture may proceed; Repository Implementation
+  blocked until policy is approved with contracts, owner, governance, and source
+  data
+- separated stale data from missing data: NA-001 evaluates existing records only
+- defined architecture-level policy result contract without intervals,
+  thresholds, or algorithms
+- updated lifecycle to Architecture Revision Ready for Re-Audit
+- recorded Standard Rule Contract compliance verification (EA-001 §7.1–7.10)
+- updated [INDEX](INDEX.md) and [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- implementation, code, UI, localization, algorithms, intervals, timing values,
+  medical thresholds, treatment recommendations, diagnosis, reminders, device
+  behavior, AI behavior, personalization, or prediction
+- Glucose Data Staleness Policy approval
+- changes to Foundation, SD-001, EA-001, or EB-001
+
+Статус:
+
+NA-001 — Architecture Revision Ready for Re-Audit
+
 ## EA-001 — Standard Rule Contract Architecture Refinement
 
 Дата: 2026-08-05
@@ -231,6 +396,30 @@ GP-001 — Architecture Draft Ready for Architecture Audit
 
 EA-001 — Feature Slice Complete
 
+## NA-001 — Glucose Data Staleness Rule Architecture Draft
+
+Дата: 2026-08-05
+
+Завершено:
+
+- advanced NA-001 from Approved Backlog Item to Architecture Draft
+- defined purpose, scope, dependencies, input, activation, suppression, decision,
+  explainability, safety, failure behavior, testing requirements, and future
+  evolution
+- preserved SD-001 resolver ownership and compatibility/default behavior
+- kept future Glucose Data Staleness Policy as a required unapproved dependency
+
+Не входит в этот этап:
+
+- implementation, code, UI, localization, algorithms, intervals, timing values,
+  medical thresholds, treatment recommendations, diagnosis, reminders, device
+  behavior, AI behavior, personalization, or prediction
+- changes to Foundation, SD-001, EA-001, or EB-001
+
+Статус:
+
+NA-001 — Architecture Draft
+
 ## EB-001 — Next Action Engine Epic Backlog Foundation Complete
 
 Дата: 2026-08-05
@@ -246,6 +435,31 @@ EA-001 — Feature Slice Complete
 Статус:
 
 EB-001 — Backlog Foundation Complete — Operational Status: Living
+
+## NA-001 — Glucose Data Staleness Rule Backlog Qualification
+
+Дата: 2026-08-05
+
+Завершено:
+
+- created `docs/product/dashboard/na-001-glucose-data-staleness-rule.md`
+- qualified NA-001 as an Approved Backlog Item
+- updated EB-001 to preserve NA-001 in the Candidate Registry as `Qualified`
+  while also recording it as an Approved Backlog Item
+- recorded item-specific dependency on future approved Glucose Data Staleness
+  Policy
+- updated [INDEX](INDEX.md) and [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- architecture draft
+- implementation
+- algorithms, thresholds, time values, rule logic, UI, reminders, AI, devices,
+  or predictions
+
+Статус:
+
+NA-001 — Approved Backlog Item
 
 ## EB-001 — Next Action Engine Epic Backlog Foundation Approval
 
