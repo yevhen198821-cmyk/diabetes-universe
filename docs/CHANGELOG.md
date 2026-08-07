@@ -13,7 +13,12 @@
 - clarified that the consumer list does not create implementation dependencies,
   runtime coupling, ownership changes, approval requirements, or Policy contract
   changes
-- advanced GP-001 to Architecture Approved — Repository Implementation Blocked
+- advanced GP-001 to Architecture Approved with Repository Implementation Not
+  Started
+- recorded final Architecture Approval verification for policy responsibility,
+  source, input, result, time semantics, failure behavior, safety, consumer
+  contract, governance, versioning, privacy, implementation gate, and Foundation
+  impact
 - updated [INDEX](INDEX.md) and
   [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
 
@@ -25,7 +30,7 @@
 
 Статус:
 
-GP-001 — Architecture Approved — Repository Implementation Blocked
+GP-001 — Architecture Approved; Repository Implementation — Not Started
 
 ## GP-001 — Glucose Data Staleness Policy Architecture Audit
 

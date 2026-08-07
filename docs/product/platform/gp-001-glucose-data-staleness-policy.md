@@ -4,7 +4,7 @@ _Subtitle: approved architecture for the governed glucose freshness policy._
 
 ## Status
 
-Architecture Approved — Repository Implementation Blocked
+Architecture Approved
 
 ## Lifecycle
 
@@ -14,13 +14,14 @@ Architecture Approved — Repository Implementation Blocked
 | Architecture Draft        | Complete    |
 | Architecture Audit        | Complete    |
 | Architecture Approved     | **Current** |
-| Repository Implementation | Blocked     |
+| Repository Implementation | Not Started |
 | Engineering Review        | Pending     |
 | Final Review              | Pending     |
 | Feature Slice Complete    | Pending     |
 
-Repository Implementation is blocked until this architecture is approved and the
-implementation gates in Section 21 are satisfied.
+Repository Implementation has not started. Architecture Approval does not start
+implementation; the implementation gates in Section 21 must still be satisfied
+before Repository Implementation begins.
 
 ## Backlog Qualification
 
@@ -82,25 +83,31 @@ Consumers must not rederive staleness independently.
 
 ## Known Policy Consumers
 
-This section is an informational architecture reference only. It documents
-currently approved consumers and known future consumers to support architecture
-impact analysis.
+### Purpose
+
+Informational architecture reference only.
+
+This section documents currently approved consumers and known future consumers to
+support architecture impact analysis.
 
 This section does not create implementation dependencies, runtime coupling,
-ownership changes, or approval requirements. Future additions to this list do
-not change the Policy contract.
+ownership changes, or approval requirements.
 
-Current approved consumer:
+### Current Approved Consumer
 
 - NA-001 — Glucose Data Staleness Rule
 
-Potential future consumers:
+### Potential Future Consumers
 
 - Timeline
 - Analytics
 - Reports
 - AI Services
 - Device Integrations
+
+Future additions do not change the Policy contract.
+
+This section is informative only.
 
 ## Architecture Draft
 
@@ -636,3 +643,25 @@ and medical algorithms.
 | Consumers can support every outcome safely                                                                        | Verified |
 | Implementation gates are explicit                                                                                 | Verified |
 | No Foundation change is required                                                                                  | Verified |
+
+## Architecture Approval
+
+**Approval Decision:** Architecture Approved
+
+Repository Implementation remains Not Started.
+
+| Approval area         | Confirmation |
+| --------------------- | ------------ |
+| Policy responsibility | Verified     |
+| Source Contract       | Verified     |
+| Input Contract        | Verified     |
+| Result Contract       | Verified     |
+| Time Semantics        | Verified     |
+| Failure Behaviour     | Verified     |
+| Safety Contract       | Verified     |
+| Consumer Contract     | Verified     |
+| Governance            | Verified     |
+| Versioning            | Verified     |
+| Privacy requirements  | Verified     |
+| Implementation Gate   | Preserved    |
+| Foundation impact     | None         |

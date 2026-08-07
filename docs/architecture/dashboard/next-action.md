@@ -56,7 +56,7 @@ Approved — localized via I18N-02B1 (Feature Complete)
 - **EB-001** (Backlog Foundation Complete — Living): Next Action Engine Epic Backlog — records the
   living product-management backlog for future Next Action Feature Slices —
   [EB-001 — Next Action Engine Epic Backlog](../../product/dashboard/eb-001-next-action-engine-backlog.md).
-- **GP-001** (Architecture Approved — Repository Implementation Blocked):
+- **GP-001** (Architecture Approved; Repository Implementation Not Started):
   Glucose Data Staleness Policy — defines the future governed platform policy
   that glucose staleness consumers must use instead of rederiving staleness
   independently —

@@ -19,7 +19,7 @@
 ## Product Backlogs
 
 - [EB-001 — Next Action Engine Epic Backlog v1.0](product/dashboard/eb-001-next-action-engine-backlog.md) — Backlog Foundation Complete — Living
-- [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md) — Architecture Approved — Repository Implementation Blocked
+- [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md) — Architecture Approved; Repository Implementation Not Started
 
 ## Brand
 
