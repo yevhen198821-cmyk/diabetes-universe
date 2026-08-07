@@ -136,22 +136,44 @@ Item.
 
 Required fields:
 
-| Field                      | Requirement                                  |
-| -------------------------- | -------------------------------------------- |
-| ID                         | Stable backlog identifier, usually `NA-xxx`. |
-| Name                       | Short product name.                          |
-| Category                   | One stable product category.                 |
-| Goal                       | Product outcome, not implementation detail.  |
-| Priority                   | High, Medium, or Low.                        |
-| Status                     | One official backlog status.                 |
-| Item-specific Dependencies | Explicit item-specific dependencies, if any. |
-| Foundation Change Required | `Yes` or `No`.                               |
-| Owner                      | Exactly one owner.                           |
-| Notes                      | Planning notes only; no specifications.      |
+| Field                      | Requirement                                                  |
+| -------------------------- | ------------------------------------------------------------ |
+| ID                         | Stable backlog identifier, usually `NA-xxx`.                 |
+| Name                       | Short product name.                                          |
+| Category                   | One stable product category.                                 |
+| Goal                       | Product outcome, not implementation detail.                  |
+| Priority                   | High, Medium, or Low.                                        |
+| Status                     | One official backlog status.                                 |
+| Item-specific Dependencies | Explicit item-specific dependencies, if any.                 |
+| Dependency Type            | Dependency classification for each item-specific dependency. |
+| Foundation Change Required | `Yes` or `No`.                                               |
+| Owner                      | Exactly one owner.                                           |
+| Notes                      | Planning notes only; no specifications.                      |
 
 The Governed Backlog Item contract is for backlog management only. It must not
 contain rule logic, technical design, UI design, clinical thresholds, AI
 algorithms, or acceptance criteria.
+
+Dependency Type allowed values:
+
+| Dependency Type | Definition                                                                                                                                                                                            |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Blocking        | The dependent Feature Slice cannot enter Repository Implementation until the dependency reaches Feature Slice Complete.                                                                               |
+| Architectural   | The dependent Feature Slice may not pass Architecture Approval until the required dependency architecture is approved. Repository Implementation remains governed by any additional dependency types. |
+| Optional        | The dependency enhances functionality but is not required.                                                                                                                                            |
+| Runtime         | The dependency exists only during runtime integration.                                                                                                                                                |
+
+If a Governed Backlog Item has multiple item-specific dependencies, each
+dependency must have its own Dependency Type.
+
+Initial usage example:
+
+| Backlog Item | Dependency | Dependency Type |
+| ------------ | ---------- | --------------- |
+| NA-001       | GP-001     | Blocking        |
+
+This example records backlog dependency classification only. It does not approve
+NA-001 or GP-001 implementation.
 
 ## 6. Status Model
 
