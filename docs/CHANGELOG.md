@@ -1,5 +1,30 @@
 # Changelog
 
+## GP-001 — Glucose Data Staleness Policy Final Review
+
+Дата: 2026-08-07
+
+Завершено:
+
+- completed final repository review for GP-001 before merge
+- verified lifecycle completion through Engineering Review with only Feature
+  Slice Complete still pending
+- verified scope, architecture alignment, public API, runtime behavior,
+  dependencies, documentation consistency, and repository structure
+- updated lifecycle status in
+  [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md),
+  [INDEX](INDEX.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- merge, branch cleanup, Feature Slice Complete, new functionality,
+  architecture expansion, refactoring, or implementation expansion
+
+Статус:
+
+GP-001 — Final Review Complete
+
 ## GP-001 — Glucose Data Staleness Policy Engineering Review
 
 Дата: 2026-08-07
