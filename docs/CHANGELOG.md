@@ -1,5 +1,27 @@
 # Changelog
 
+## GP-001 — Glucose Data Staleness Policy Feature Slice Complete
+
+Дата: 2026-08-07
+
+Завершено:
+
+- PR #62 merged into `main`
+- advanced GP-001 lifecycle to Feature Slice Complete
+- updated lifecycle status in
+  [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md),
+  [INDEX](INDEX.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- architecture changes, implementation changes, new product behavior, NA-001
+  implementation, or additional policy logic
+
+Статус:
+
+GP-001 — Feature Slice Complete
+
 ## GP-001 — Glucose Data Staleness Policy Final Review
 
 Дата: 2026-08-07

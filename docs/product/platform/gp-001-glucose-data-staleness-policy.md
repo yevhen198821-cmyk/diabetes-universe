@@ -4,7 +4,7 @@ _Subtitle: approved architecture for the governed glucose freshness policy._
 
 ## Status
 
-Final Review Complete
+Feature Slice Complete
 
 ## Lifecycle
 
@@ -17,7 +17,7 @@ Final Review Complete
 | Repository Implementation | Complete |
 | Engineering Review        | Complete |
 | Final Review              | Complete |
-| Feature Slice Complete    | Pending  |
+| Feature Slice Complete    | Complete |
 
 Repository Implementation is limited to the reusable platform Policy contract,
 input/result types, policy identity/version, deterministic evaluation interface,
