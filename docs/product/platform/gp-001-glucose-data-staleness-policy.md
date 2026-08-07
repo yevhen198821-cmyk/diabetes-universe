@@ -1,11 +1,10 @@
 # GP-001 — Glucose Data Staleness Policy
 
-_Subtitle: backlog qualification and architecture draft for the governed glucose
-freshness policy._
+_Subtitle: approved architecture for the governed glucose freshness policy._
 
 ## Status
 
-Architecture Audit Ready for Review
+Architecture Approved — Repository Implementation Blocked
 
 ## Lifecycle
 
@@ -13,8 +12,8 @@ Architecture Audit Ready for Review
 | ------------------------- | ----------- |
 | Backlog Qualification     | Complete    |
 | Architecture Draft        | Complete    |
-| Architecture Audit        | **Current** |
-| Architecture Approved     | Pending     |
+| Architecture Audit        | Complete    |
+| Architecture Approved     | **Current** |
 | Repository Implementation | Blocked     |
 | Engineering Review        | Pending     |
 | Final Review              | Pending     |
@@ -80,6 +79,28 @@ Consumers
 ```
 
 Consumers must not rederive staleness independently.
+
+## Known Policy Consumers
+
+This section is an informational architecture reference only. It documents
+currently approved consumers and known future consumers to support architecture
+impact analysis.
+
+This section does not create implementation dependencies, runtime coupling,
+ownership changes, or approval requirements. Future additions to this list do
+not change the Policy contract.
+
+Current approved consumer:
+
+- NA-001 — Glucose Data Staleness Rule
+
+Potential future consumers:
+
+- Timeline
+- Analytics
+- Reports
+- AI Services
+- Device Integrations
 
 ## Architecture Draft
 

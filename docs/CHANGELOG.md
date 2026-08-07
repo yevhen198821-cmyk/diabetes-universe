@@ -1,5 +1,32 @@
 # Changelog
 
+## GP-001 — Glucose Data Staleness Policy Architecture Approval
+
+Дата: 2026-08-07
+
+Завершено:
+
+- added the informational Known Policy Consumers architecture reference to
+  [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md)
+- documented NA-001 as the current approved consumer and Timeline, Analytics,
+  Reports, AI Services, and Device Integrations as potential future consumers
+- clarified that the consumer list does not create implementation dependencies,
+  runtime coupling, ownership changes, approval requirements, or Policy contract
+  changes
+- advanced GP-001 to Architecture Approved — Repository Implementation Blocked
+- updated [INDEX](INDEX.md) and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- Repository Implementation, Policy implementation, runtime integration,
+  dependency-type modeling, EB-001 refinement, or Feature Slice Complete
+- changes to Foundation, SD-001, EA-001, EB-001, NA-001, or PR #60
+
+Статус:
+
+GP-001 — Architecture Approved — Repository Implementation Blocked
+
 ## GP-001 — Glucose Data Staleness Policy Architecture Audit
 
 Дата: 2026-08-06
