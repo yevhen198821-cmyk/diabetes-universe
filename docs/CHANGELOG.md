@@ -1,5 +1,31 @@
 # Changelog
 
+## NA-001 — Glucose Data Staleness Rule Final Review
+
+Дата: 2026-08-07
+
+Завершено:
+
+- completed Final Review of the NA-001 Feature Slice against the approved
+  architecture, GP-001 Policy contract, SD-001 Engine Foundation, and EA-001 Epic
+  Architecture
+- verified lifecycle completion through Engineering Review, scope boundaries,
+  architecture compliance, GP-001 integration, SD-001 compatibility, rule
+  runtime behavior, safety boundaries, repository hygiene, and documentation
+  consistency
+- updated [NA-001 — Glucose Data Staleness Rule](product/dashboard/na-001-glucose-data-staleness-rule.md),
+  [INDEX](INDEX.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- merge, Feature Slice Complete, new functionality, architecture changes, scope
+  expansion, GP-001 changes, or SD-001 resolver/default/fallback changes
+
+Статус:
+
+NA-001 — Final Review Complete
+
 ## NA-001 — Glucose Data Staleness Rule Engineering Review
 
 Дата: 2026-08-07
