@@ -4,25 +4,24 @@ _Subtitle: approved architecture contract for a future Dashboard Next Action rul
 
 ## Status
 
-Final Review Complete
+Feature Slice Complete
 
 ## Lifecycle
 
-| Stage                     | Status      |
-| ------------------------- | ----------- |
-| Backlog Qualification     | Complete    |
-| Architecture Draft        | Superseded  |
-| Architecture Revision     | Complete    |
-| Architecture Audit        | Complete    |
-| Architecture Approved     | Complete    |
-| Repository Implementation | Complete    |
-| Engineering Review        | Complete    |
-| Final Review              | **Current** |
-| Feature Slice Complete    | Pending     |
+| Stage                     | Status     |
+| ------------------------- | ---------- |
+| Backlog Qualification     | Complete   |
+| Architecture Draft        | Superseded |
+| Architecture Revision     | Complete   |
+| Architecture Audit        | Complete   |
+| Architecture Approved     | Complete   |
+| Repository Implementation | Complete   |
+| Engineering Review        | Complete   |
+| Final Review              | Complete   |
+| Feature Slice Complete    | Complete   |
 
-Final Review is complete for the NA-001 contextual rule that consumes only the
-governed GP-001 Policy Result. Feature Slice Complete remains pending until
-merge.
+NA-001 is complete. The contextual rule consumes only the governed GP-001 Policy
+Result and integrates with SD-001 as an injectable rule factory.
 
 ## Rule Identity
 

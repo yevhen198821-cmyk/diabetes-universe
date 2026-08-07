@@ -1,5 +1,27 @@
 # Changelog
 
+## NA-001 — Glucose Data Staleness Rule Feature Slice Complete
+
+Дата: 2026-08-07
+
+Завершено:
+
+- PR #60 merged into `main`
+- advanced NA-001 lifecycle to Feature Slice Complete
+- updated lifecycle status in
+  [NA-001 — Glucose Data Staleness Rule](product/dashboard/na-001-glucose-data-staleness-rule.md),
+  [INDEX](INDEX.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- architecture changes, implementation changes, new product behavior, GP-001
+  changes, or SD-001 resolver/default/fallback changes
+
+Статус:
+
+NA-001 — Feature Slice Complete
+
 ## NA-001 — Glucose Data Staleness Rule Final Review
 
 Дата: 2026-08-07

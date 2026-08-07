@@ -60,9 +60,8 @@ Approved — localized via I18N-02B1 (Feature Complete)
   the future governed platform policy that glucose staleness consumers must use
   instead of rederiving staleness independently —
   [GP-001 — Glucose Data Staleness Policy](../../product/platform/gp-001-glucose-data-staleness-policy.md).
-- **NA-001** (Final Review Complete): Glucose Data Staleness Rule — implements the
-  policy-bound contextual rule that consumes GP-001 Policy Results only; merge
-  and Feature Slice Complete remain pending —
+- **NA-001** (Feature Slice Complete): Glucose Data Staleness Rule — implements the
+  policy-bound contextual rule that consumes GP-001 Policy Results only —
   [NA-001 — Glucose Data Staleness Rule](../../product/dashboard/na-001-glucose-data-staleness-rule.md).
 - **SD-001** (Feature Slice Complete): Next Action Engine Foundation — preserves
   insulin Quick Add parity; contextual rules deferred to future slices —
