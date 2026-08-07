@@ -644,7 +644,7 @@ and medical algorithms.
 | Failure Behaviour             | Verified | Unsupported source, malformed input, missing provenance, unavailable Policy configuration, unknown Policy version, future timestamps, and conflicting metadata have deterministic unavailable/indeterminate handling. Consumers never receive fabricated confidence. |
 | Safety                        | Verified | GP-001 never diagnoses, interprets glucose values, classifies glucose risk, recommends treatment, predicts glucose, claims safety, or embeds hidden medical logic.                                                                                                   |
 | Dependency Verification       | Verified | GP-001 aligns with Foundation, SD-001, EA-001, EB-001, and NA-001 without duplicating responsibility. It remains a platform Policy and NA-001 remains a consumer.                                                                                                    |
-| Implementation Independence   | Verified | GP-001 remains architecture-only and independent from React, Next.js, packages, UI, localization, storage, APIs, and TypeScript.                                                                                                                                     |
+| Implementation Independence   | Verified | GP-001 remains framework-independent and independent from React, Next.js, Dashboard, UI, localization, storage implementations, APIs, and medical algorithms.                                                                                                        |
 | Success Criteria Verification | Verified | Every success criterion in Section 22 is satisfied by the architecture draft and audit clarifications.                                                                                                                                                               |
 
 ### Dependency Verification Details
@@ -674,7 +674,8 @@ and medical algorithms.
 
 **Approval Decision:** Architecture Approved
 
-Repository Implementation remains Not Started.
+Repository Implementation has proceeded only within the contract-only scope
+defined in Section 21. Production freshness classification remains gated.
 
 | Approval area         | Confirmation |
 | --------------------- | ------------ |
