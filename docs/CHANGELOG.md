@@ -1,5 +1,28 @@
 # Changelog
 
+## EB-001 — Dependency Type Architecture Refinement Merged
+
+Дата: 2026-08-07
+
+Завершено:
+
+- PR #63 merged into `main`
+- recorded that EB-001 Architecture Refinement — Dependency Type is merged into
+  the Living Backlog Model
+- updated lifecycle documentation in
+  [EB-001 — Next Action Engine Epic Backlog](product/dashboard/eb-001-next-action-engine-backlog.md),
+  [INDEX](INDEX.md), and
+  [Dashboard Next Action Architecture](architecture/dashboard/next-action.md)
+
+Не входит в этот этап:
+
+- architecture changes, implementation changes, backlog item modifications,
+  GP-001 changes, NA-001 changes, or SD-001 changes
+
+Статус:
+
+EB-001 — Architecture Refinement — Dependency Type merged into Living Backlog Model
+
 ## EB-001 — Dependency Type Architecture Refinement
 
 Дата: 2026-08-07

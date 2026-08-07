@@ -54,7 +54,8 @@ Approved — localized via I18N-02B1 (Feature Complete)
   rules —
   [EA-001 — Next Action Engine Epic Architecture](ea-001-next-action-engine-epic-architecture.md).
 - **EB-001** (Backlog Foundation Complete — Living): Next Action Engine Epic Backlog — records the
-  living product-management backlog for future Next Action Feature Slices —
+  living product-management backlog for future Next Action Feature Slices;
+  Dependency Type architecture refinement merged into the Living Backlog Model —
   [EB-001 — Next Action Engine Epic Backlog](../../product/dashboard/eb-001-next-action-engine-backlog.md).
 - **GP-001** (Feature Slice Complete): Glucose Data Staleness Policy — defines
   the future governed platform policy that glucose staleness consumers must use

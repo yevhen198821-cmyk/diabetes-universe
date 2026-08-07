@@ -459,3 +459,21 @@ reprioritizing items does not require re-approving EB-001.
 Structural changes to the backlog contracts, status model, governance rules,
 dependency model, or category model require review before they become the new
 operating model.
+
+## Architecture Refinement
+
+**Refinement:** Dependency Type  
+**Status:** Merged into Living Backlog Model
+
+PR #63 merged the Dependency Type architecture refinement into the EB-001 Living
+Backlog Model. The Governed Backlog Item Contract now includes Dependency Type
+classification for item-specific dependencies.
+
+| Refinement area                                        | Result                                  |
+| ------------------------------------------------------ | --------------------------------------- |
+| Dependency Type contract                               | Merged into Living Backlog Model        |
+| Blocking, Architectural, Optional, Runtime definitions | Active in Living Backlog Model          |
+| NA-001 → GP-001 initial usage example (Blocking)       | Recorded as backlog classification only |
+
+This refinement does not change EA-001 architecture, SD-001, GP-001, NA-001, or
+implementation.
