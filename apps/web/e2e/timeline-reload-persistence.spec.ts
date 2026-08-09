@@ -2,14 +2,19 @@ import { expect, test } from './support/test';
 
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
-async function clearTimelineEventsInIndexedDb(page: import('@playwright/test').Page) {
+async function clearTimelineEventsInIndexedDb(
+  page: import('@playwright/test').Page,
+) {
   await page.evaluate(async () => {
     await new Promise<void>((resolve, reject) => {
       const request = indexedDB.open('diabetes-universe-timeline');
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         const database = request.result;
-        const transaction = database.transaction('timeline_events', 'readwrite');
+        const transaction = database.transaction(
+          'timeline_events',
+          'readwrite',
+        );
         transaction.objectStore('timeline_events').clear();
         transaction.oncomplete = () => {
           database.close();
@@ -65,7 +70,9 @@ test('deleted timeline note remains deleted across page reload', async ({
   await page.getByRole('button', { name: 'Удалить', exact: true }).click();
   const confirmation = page.getByRole('dialog', { name: 'Удалить событие?' });
   await expect(confirmation).toBeVisible();
-  await confirmation.getByRole('button', { name: 'Удалить', exact: true }).click();
+  await confirmation
+    .getByRole('button', { name: 'Удалить', exact: true })
+    .click();
 
   await expect(page.getByText(noteText)).toHaveCount(0);
 
@@ -86,13 +93,17 @@ test('empty durable timeline does not reseed demo data after reload', async ({
   await page.reload();
   await waitForApplicationReady(page);
 
-  await expect(page.getByRole('heading', { name: 'Событий пока нет' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Событий пока нет' }),
+  ).toBeVisible();
   await expect(page.locator('#timeline-events-list')).toHaveCount(0);
 
   await page.reload();
   await waitForApplicationReady(page);
 
-  await expect(page.getByRole('heading', { name: 'Событий пока нет' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Событий пока нет' }),
+  ).toBeVisible();
   await expect(page.locator('#timeline-events-list')).toHaveCount(0);
 });
 
