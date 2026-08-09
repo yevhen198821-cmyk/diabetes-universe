@@ -128,6 +128,12 @@ importers:
         specifier: workspace:*
         version: link:../platform
 
+  packages/timeline:
+    dependencies:
+      '@diabetes-universe/types':
+        specifier: workspace:*
+        version: link:../types
+
   packages/types: {}
 
   packages/ui:
