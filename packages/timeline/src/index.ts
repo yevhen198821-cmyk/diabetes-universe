@@ -25,6 +25,12 @@ export {
 export {
   createInMemoryTimelineRepository,
   IN_MEMORY_TIMELINE_REPOSITORY_MAX_QUERY_LIMIT,
+  IN_MEMORY_TIMELINE_REPOSITORY_MAX_QUERY_SCAN,
   InMemoryTimelineRepository,
   type InMemoryTimelineRepositoryOptions,
 } from './runtime/in-memory-timeline-repository';
+export {
+  cloneTimelineRepositoryEvent,
+  cloneTimelineRepositoryEvents,
+  normalizeTimelineRepositoryEvents,
+} from './runtime/timeline-event-normalization';

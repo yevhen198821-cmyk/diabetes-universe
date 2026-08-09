@@ -46,3 +46,7 @@ export {
   type TimelineIndexedDbOpenOptions,
   type TimelineIndexedDbOpenResult,
 } from './persistence/indexeddb/timeline-indexeddb-open';
+export {
+  IndexedDbTimelineRepository,
+  createIndexedDbTimelineRepository,
+} from './persistence/indexeddb/timeline-indexeddb-repository';
