@@ -75,6 +75,7 @@ test('timeline event delete requires confirmation and updates Dashboard', async 
   page,
 }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   await openEvent(page, /Открыть событие: NovoRapid/);
   await page.getByRole('button', { name: 'Удалить' }).click();
@@ -126,6 +127,7 @@ test('timeline event details work on mobile without horizontal scroll', async ({
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   await openEvent(page, /Открыть событие: Метформин/);
 

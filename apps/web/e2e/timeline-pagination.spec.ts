@@ -1,5 +1,7 @@
 import { expect, test, type Page } from './support/test';
 
+import { waitForApplicationReady } from './support/wait-for-application-ready';
+
 const eventCards = (page: Page) =>
   page.getByRole('button', { name: /Открыть событие/ });
 
@@ -7,6 +9,7 @@ test('timeline load more reveals the next page and then disappears', async ({
   page,
 }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   await expect(eventCards(page)).toHaveCount(20);
   await expect(page.getByText('Осталось: 11')).toBeVisible();
@@ -19,6 +22,7 @@ test('timeline load more reveals the next page and then disappears', async ({
 
 test('timeline search paginates all matching results', async ({ page }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   await page.getByLabel('Поиск событий').fill('История');
 
@@ -35,6 +39,7 @@ test('timeline filter pagination resets visible count with criteria reset', asyn
   page,
 }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   await page.getByRole('button', { name: 'Заметки' }).click();
 
@@ -57,6 +62,7 @@ test('timeline pagination recalculates after delete and keeps new add on top', a
   page,
 }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   await page
     .getByRole('button', { name: /Открыть событие: NovoRapid/ })
@@ -92,6 +98,7 @@ test('timeline load more is usable on mobile without FAB overlap or horizontal s
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   const loadMore = page.getByRole('button', { name: 'Показать ещё' });
 

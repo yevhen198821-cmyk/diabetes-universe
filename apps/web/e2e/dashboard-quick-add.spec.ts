@@ -4,6 +4,7 @@ import { waitForApplicationReady } from './support/wait-for-application-ready';
 
 test('dashboard quick add updates shared timeline state', async ({ page }) => {
   await page.goto('/');
+  await waitForApplicationReady(page);
 
   await expect(page).toHaveTitle(/Dashboard \| Diabetes Universe/);
   await expect(
@@ -61,6 +62,7 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
   await page.getByRole('link', { name: 'All events' }).click();
 
   await expect(page).toHaveURL('/timeline');
+  await waitForApplicationReady(page);
   await expect(
     page.getByRole('heading', { level: 1, name: 'Timeline' }),
   ).toBeVisible();
@@ -124,6 +126,7 @@ test('timeline groups demo events and avoids mobile horizontal scroll', async ({
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   await expect(
     page.getByRole('heading', { level: 1, name: 'Timeline' }),
@@ -185,6 +188,7 @@ test('timeline search and filters combine without changing store', async ({
 
 test('timeline quick add updates shared dashboard state', async ({ page }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   await expect(page).toHaveTitle(/Timeline \| Diabetes Universe/);
   await expect(
@@ -227,6 +231,7 @@ test('timeline quick add updates shared dashboard state', async ({ page }) => {
 
 test('/dashboard redirects to home dashboard', async ({ page }) => {
   await page.goto('/dashboard');
+  await waitForApplicationReady(page);
 
   await expect(page).toHaveURL('/');
   await expect(

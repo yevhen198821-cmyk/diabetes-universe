@@ -1,5 +1,7 @@
 import { expect, test } from './support/test';
 
+import { waitForApplicationReady } from './support/wait-for-application-ready';
+
 const openQuickAdd = async (page: import('@playwright/test').Page) => {
   await page.getByRole('button', { name: 'Добавить событие' }).click();
   await expect(
@@ -11,6 +13,7 @@ test('activity quick add creates timeline event with details flow', async ({
   page,
 }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   await openQuickAdd(page);
   await page
@@ -50,6 +53,7 @@ test('note quick add is searchable and appears in notes filter', async ({
   page,
 }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   const noteText = 'E2E заметка для поиска';
 
@@ -85,6 +89,7 @@ test('quick add shows six categories on mobile without horizontal scroll', async
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   await openQuickAdd(page);
   const quickAddDialog = page.getByRole('dialog', { name: 'Добавить событие' });
