@@ -9,6 +9,22 @@ export type Brand<TValue, TBrand extends string> = TValue & {
 };
 
 export type {
+  ActivityTimelineEvent,
+  CanonicalUnitId,
+  EventProvenance,
+  GlucoseMeasurementContext,
+  GlucoseTimelineEvent,
+  InsulinTimelineEvent,
+  MedicationTimelineEvent,
+  NoteTimelineEvent,
+  NutritionMealType,
+  NutritionProductSnapshot,
+  NutritionTimelineEvent,
+  SemanticEventEnvelope,
+  SemanticTimelineEvent,
+  TimelineEventSchemaVersion,
+} from './semantic-timeline';
+export type {
   DaySummary,
   LastGlucose,
   NextStep,
@@ -19,6 +35,16 @@ export type {
   TimelineEventKind,
   TimelineEventSource,
 } from './timeline';
+export type {
+  MigrationRecord,
+  MigrationResult,
+  PreservedLegacyRaw,
+  QuarantineRecord,
+  QuarantineReason,
+  TimelineDiagnosticsSnapshot,
+  UnmappableLegacyField,
+  UnmappableReason,
+} from './timeline-migration';
 export type {
   ActivityQuickAddEntry,
   GlucoseQuickAddEntry,

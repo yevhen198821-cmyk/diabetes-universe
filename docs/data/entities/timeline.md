@@ -203,11 +203,44 @@ P2 Repository Foundation changes:
 - kept the existing `TimelineEvent` shape as a temporary P2 compatibility type;
 - reload persistence remains not implemented.
 
+P3a Semantic Types Foundation changes:
+
+- introduced `SemanticTimelineEvent` and per-kind semantic variants in
+  `@diabetes-universe/types`;
+- introduced P3 migration and diagnostics contracts (`MigrationRecord`,
+  `MigrationResult`, `QuarantineRecord`, `TimelineDiagnosticsSnapshot`) as
+  separate types outside the semantic domain event;
+- legacy `TimelineEvent` remains the active P2 repository compatibility contract;
+- semantic repository cutover (P3h) has not occurred;
+- migration runtime (`liftLegacyToSemantic`) is not implemented (P3b).
+
+## Semantic model (P3a)
+
+`SemanticTimelineEvent` is the target application/domain representation defined
+in `@diabetes-universe/types`. It uses a single `kind` discriminator with
+per-variant fields and canonical numeric values plus `CanonicalUnitId` where
+required.
+
+Legacy `TimelineEvent` with presentation-oriented `title`, `value`, and `unit`
+fields remains in use by the P2 repository until the semantic repository cutover.
+Presentation strings must not be treated as canonical medical data once an event
+is represented semantically.
+
+`ownerId` and other persistence-envelope fields from ADR-0014 are intentionally
+absent from `SemanticTimelineEvent`. Ownership belongs to a future persistence
+record wrapper, not to the semantic domain event.
+
+P3b will implement legacy lift and migration runtime. P3h will cut the
+repository over to native semantic storage before any durable IndexedDB/SQLite
+persistence work.
+
 ## Out of scope
 
 - reminder and `ai_insight` as Timeline events
 - backend/API implementation
-- type-specific nested payloads per event kind
+- type-specific nested payloads on legacy `TimelineEvent` (semantic payloads are
+  defined separately in P3a)
+- P3b migration runtime, P3h repository cutover, and durable persistence
 
 ## Quick Add mapping
 
