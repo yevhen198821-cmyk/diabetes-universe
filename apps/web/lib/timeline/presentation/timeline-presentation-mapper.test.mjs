@@ -73,10 +73,10 @@ const [
   noteEvent,
 ] = legacyFixtures;
 
-let dependencies;
+let enGbDependencies;
 
 test.before(async () => {
-  dependencies = await createTestTimelinePresentationDependencies();
+  enGbDependencies = await createTestTimelinePresentationDependencies();
 });
 
 test('timelinePresentationKindMappers covers all six semantic kinds', () => {
@@ -90,43 +90,73 @@ test('timelinePresentationKindMappers covers all six semantic kinds', () => {
   ]);
 });
 
-test('maps glucose card and detail presentation with localized labels and ru-RU numeric formatting', () => {
+test('en-GB glucose presentation uses English labels and dot decimal formatting', () => {
   const card = mapTimelineEventCardPresentation(
     glucoseEvent,
-    dependencies,
+    enGbDependencies,
     '10:15',
   );
-  const detail = mapTimelineEventDetailPresentation(glucoseEvent, dependencies);
-
-  assert.equal(card.title, 'Глюкоза');
-  assert.equal(card.value, '7,3');
-  assert.equal(card.unit, 'ммоль/л');
-  assert.equal(card.context, 'Перед едой');
-  assert.equal(detail.kindLabel, 'Глюкоза');
-  assert.equal(detail.primaryText, '7,3 ммоль/л');
-  assert.equal(
-    formatTimelineGlucoseDisplayValue(glucoseEvent, dependencies),
-    '7,3 ммоль/л',
+  const detail = mapTimelineEventDetailPresentation(
+    glucoseEvent,
+    enGbDependencies,
   );
+
+  assert.equal(card.title, 'Glucose');
+  assert.equal(card.value, '7.3');
+  assert.equal(card.unit, 'mmol/L');
+  assert.equal(card.context, 'Before meal');
+  assert.equal(detail.kindLabel, 'Glucose');
+  assert.equal(detail.primaryText, '7.3 mmol/L');
+  assert.equal(
+    formatTimelineGlucoseDisplayValue(glucoseEvent, enGbDependencies),
+    '7.3 mmol/L',
+  );
+});
+
+test('ru-RU runtime uses comma decimal formatting', async () => {
+  const ruDependencies = await createTestTimelinePresentationDependencies({
+    request: { acceptLanguage: 'ru-RU', cookieTimeZone: 'Europe/Moscow' },
+  });
+  const card = mapTimelineEventCardPresentation(
+    glucoseEvent,
+    ruDependencies,
+    '10:15',
+  );
+
+  assert.equal(card.value, '7,3');
+  assert.equal(card.unit, 'mmol/L');
+});
+
+test('presentation dependencies do not hardcode a medical locale formatter', async () => {
+  const source = await import('node:fs/promises').then((fs) =>
+    fs.readFile(
+      new URL('./timeline-presentation-dependencies.ts', import.meta.url),
+      'utf8',
+    ),
+  );
+
+  assert.equal(source.includes('TIMELINE_MEDICAL_VALUE_FORMAT_LOCALE'), false);
+  assert.equal(source.includes('valueFormatter'), false);
+  assert.equal(source.includes("'ru-RU'"), false);
 });
 
 test('maps insulin presentation with user-authored preparation unchanged', () => {
   const card = mapTimelineEventCardPresentation(
     insulinEvent,
-    dependencies,
+    enGbDependencies,
     '08:05',
   );
 
   assert.equal(card.title, 'NovoRapid');
   assert.equal(card.value, '4');
-  assert.equal(card.unit, 'ЕД');
+  assert.equal(card.unit, 'U');
   assert.equal(card.context, 'Перед едой');
 });
 
 test('maps nutrition enum meal type via localization and preserves custom meal text', () => {
   const enumCard = mapTimelineEventCardPresentation(
     nutritionEvent,
-    dependencies,
+    enGbDependencies,
     '08:20',
   );
   const [customMealEvent] = liftLegacyTestFixtures([
@@ -140,38 +170,38 @@ test('maps nutrition enum meal type via localization and preserves custom meal t
   ]);
   const customCard = mapTimelineEventCardPresentation(
     customMealEvent,
-    dependencies,
+    enGbDependencies,
     '09:00',
   );
 
-  assert.equal(enumCard.title, 'Завтрак');
+  assert.equal(enumCard.title, 'Breakfast');
   assert.equal(enumCard.value, '42');
-  assert.equal(enumCard.unit, 'г углеводов');
+  assert.equal(enumCard.unit, 'g carbs');
   assert.equal(customCard.title, 'Поздний перекус');
 });
 
-test('maps medication unit presentation from canonical dose unit', () => {
+test('maps medication unit presentation from localized labels', () => {
   const card = mapTimelineEventCardPresentation(
     medicationEvent,
-    dependencies,
+    enGbDependencies,
     '07:30',
   );
 
   assert.equal(card.title, 'Метформин');
   assert.equal(card.value, '400');
-  assert.equal(card.unit, 'мг');
+  assert.equal(card.unit, 'mg');
 });
 
 test('maps activity duration presentation in minutes', () => {
   const card = mapTimelineEventCardPresentation(
     activityEvent,
-    dependencies,
+    enGbDependencies,
     '15:00',
   );
 
   assert.equal(card.title, 'Walk');
   assert.equal(card.value, '30');
-  assert.equal(card.unit, 'мин');
+  assert.equal(card.unit, 'min');
 });
 
 test('maps note fallback title when title is missing', () => {
@@ -185,50 +215,45 @@ test('maps note fallback title when title is missing', () => {
   ]);
   const card = mapTimelineEventCardPresentation(
     untitledNote,
-    dependencies,
+    enGbDependencies,
     '13:00',
   );
 
-  assert.equal(card.title, 'Заметка');
+  assert.equal(card.title, 'Note');
   assert.equal(card.value, 'Короткая запись');
 });
 
 test('search presentation separates localized labels from user-authored content', () => {
   const insulinSearch = mapTimelineSearchPresentation(
     insulinEvent,
-    dependencies,
+    enGbDependencies,
   );
-  const noteSearch = mapTimelineSearchPresentation(noteEvent, dependencies);
+  const noteSearch = mapTimelineSearchPresentation(noteEvent, enGbDependencies);
 
   assert.equal(insulinSearch.userContent.includes('NovoRapid'), true);
-  assert.equal(insulinSearch.localizedLabels.includes('Инсулин'), true);
+  assert.equal(insulinSearch.localizedLabels.includes('Insulin'), true);
   assert.equal(noteSearch.userContent.includes('Самочувствие'), true);
-  assert.equal(noteSearch.localizedLabels.includes('Заметка'), true);
-  assert.equal(
-    Object.hasOwn(insulinSearch, 'title') &&
-      Object.hasOwn(insulinSearch, 'value'),
-    false,
-  );
+  assert.equal(noteSearch.localizedLabels.includes('Note'), true);
 });
 
 test('legacy repository projection uses presentation mapper output', () => {
   const projection = mapTimelineLegacyRepositoryProjection(
     glucoseEvent,
-    dependencies,
+    enGbDependencies,
   );
 
-  assert.equal(projection.title, 'Глюкоза');
-  assert.equal(projection.value, '7,3 ммоль/л');
-  assert.equal(projection.unit, 'ммоль/л');
-  assert.equal(projection.context, 'Перед едой');
+  assert.equal(projection.title, 'Glucose');
+  assert.equal(projection.value, '7.3 mmol/L');
+  assert.equal(projection.unit, 'mmol/L');
+  assert.equal(projection.context, 'Before meal');
 });
 
 test('EventCard mapper receives presentation-only props', () => {
-  const cardProps = mapTimelineEventToCard(insulinEvent, dependencies);
+  const cardProps = mapTimelineEventToCard(insulinEvent, enGbDependencies);
 
   assert.equal(cardProps.title, 'NovoRapid');
   assert.equal(cardProps.value, '4');
-  assert.equal(cardProps.unit, 'ЕД');
+  assert.equal(cardProps.unit, 'U');
   assert.equal(cardProps.type, 'insulin');
   assert.equal(Object.hasOwn(cardProps, 'kind'), false);
   assert.equal(Object.hasOwn(cardProps, 'occurredAt'), false);

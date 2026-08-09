@@ -41,7 +41,7 @@ test('timeline filter pagination resets visible count with criteria reset', asyn
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await page.getByRole('button', { name: 'Заметки' }).click();
+  await page.getByRole('button', { name: 'Notes' }).click();
 
   await expect(page.getByText('Найдено: 25')).toBeVisible();
   await expect(eventCards(page)).toHaveCount(20);
@@ -64,9 +64,7 @@ test('timeline pagination recalculates after delete and keeps new add on top', a
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await page
-    .getByRole('button', { name: /Open event: NovoRapid/ })
-    .click();
+  await page.getByRole('button', { name: /Open event: NovoRapid/ }).click();
   await page.getByRole('button', { name: 'Удалить' }).click();
   await page
     .getByRole('dialog', { name: 'Удалить событие?' })

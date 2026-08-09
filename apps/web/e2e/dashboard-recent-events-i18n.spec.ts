@@ -33,7 +33,7 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
     recentEvents.getByText('Метформин', { exact: true }),
   ).toBeVisible();
   await expect(
-    recentEvents.getByText('Завтрак', { exact: true }),
+    recentEvents.getByText('Breakfast', { exact: true }),
   ).toBeVisible();
   await expect(
     recentEvents.getByText('NovoRapid', { exact: true }),

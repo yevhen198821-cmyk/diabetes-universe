@@ -18,8 +18,14 @@ export interface TimelinePresentationLabels {
   readonly eventKinds: Readonly<Record<TimelineEventKind, string>>;
   readonly filters: Readonly<Record<TimelineEventKind | 'all', string>>;
   readonly glucoseContexts: Readonly<Record<GlucoseMeasurementContext, string>>;
+  readonly groups: Readonly<{
+    readonly earlier: string;
+    readonly today: string;
+    readonly yesterday: string;
+  }>;
   readonly mealTypes: Readonly<Record<NutritionMealType, string>>;
   readonly noteFallbackTitle: string;
+  readonly openEventAriaPrefix: string;
   readonly units: Readonly<{
     readonly activityMinutes: string;
     readonly glucoseMmolPerL: string;
@@ -109,6 +115,17 @@ export function resolveTimelinePresentationLabels(
         asTranslationKey('timeline.glucoseContext.other'),
       ),
     },
+    groups: {
+      earlier: translate(
+        localization,
+        asTranslationKey('timeline.group.earlier'),
+      ),
+      today: translate(localization, asTranslationKey('timeline.group.today')),
+      yesterday: translate(
+        localization,
+        asTranslationKey('timeline.group.yesterday'),
+      ),
+    },
     mealTypes: {
       breakfast: translate(
         localization,
@@ -134,6 +151,10 @@ export function resolveTimelinePresentationLabels(
     noteFallbackTitle: translate(
       localization,
       asTranslationKey('timeline.note.fallbackTitle'),
+    ),
+    openEventAriaPrefix: translate(
+      localization,
+      asTranslationKey('timeline.eventCard.openAriaPrefix'),
     ),
     units: {
       activityMinutes: translate(

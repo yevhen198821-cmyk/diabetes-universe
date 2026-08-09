@@ -72,7 +72,7 @@ test('note quick add is searchable and appears in notes filter', async ({
   await expect(page.getByText(noteText).first()).toBeVisible();
 
   await page.getByRole('button', { name: 'Очистить поиск' }).click();
-  await page.getByRole('button', { name: 'Заметки' }).click();
+  await page.getByRole('button', { name: 'Notes' }).click();
   await expect(page.getByText(noteText).first()).toBeVisible();
 
   await page

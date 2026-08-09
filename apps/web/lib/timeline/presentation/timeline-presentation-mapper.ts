@@ -42,7 +42,7 @@ function formatMedicalNumber(
     readonly minimumFractionDigits: number;
   },
 ): string {
-  return dependencies.valueFormatter.formatNumber(value, fractionDigits);
+  return dependencies.formatter.formatNumber(value, fractionDigits);
 }
 
 function formatMeasurementPresentation(

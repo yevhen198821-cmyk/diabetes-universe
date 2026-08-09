@@ -15,14 +15,9 @@ export async function createTestTimelinePresentationDependencies(
   options: CreateTestTimelinePresentationDependenciesOptions = {},
 ): Promise<TimelinePresentationDependencies> {
   const runtime = await createTestPlatformRuntime(options);
-  const timeZone =
-    options.timeZone ??
-    options.request?.cookieTimeZone ??
-    runtime.localization.localeContext.timeZone;
 
   return createTimelinePresentationDependencies({
     formatter: runtime.formatter,
     localization: runtime.localization,
-    timeZone,
   });
 }

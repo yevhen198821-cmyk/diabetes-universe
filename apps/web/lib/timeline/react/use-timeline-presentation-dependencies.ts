@@ -12,18 +12,12 @@ import {
 export function useTimelinePresentationDependencies(): TimelinePresentationDependencies {
   const formatter = useFormatter();
   const localization = useLocalization();
-  const timeZone = useMemo(
-    () => Intl.DateTimeFormat().resolvedOptions().timeZone,
-    [],
-  );
-
   return useMemo(
     () =>
       createTimelinePresentationDependencies({
         formatter,
         localization,
-        timeZone,
       }),
-    [formatter, localization, timeZone],
+    [formatter, localization],
   );
 }

@@ -5,6 +5,7 @@ import type {
 
 import {
   mapTimelineSearchPresentation,
+  resolveTimelinePresentationLocale,
   type TimelinePresentationDependencies,
 } from '../../lib/timeline/presentation';
 
@@ -35,18 +36,25 @@ export const timelineEventFilterOptions: readonly TimelineEventFilter[] = [
   'note',
 ];
 
-export function normalizeTimelineSearchQuery(query: string): string {
-  return query.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
+export function normalizeTimelineSearchQuery(
+  query: string,
+  locale: string,
+): string {
+  return query.trim().replace(/\s+/g, ' ').toLocaleLowerCase(locale);
 }
 
-function normalizeSearchField(value: string | undefined): string {
-  return normalizeTimelineSearchQuery(value ?? '');
+function normalizeSearchField(
+  value: string | undefined,
+  locale: string,
+): string {
+  return normalizeTimelineSearchQuery(value ?? '', locale);
 }
 
 function createSearchHaystack(
   event: SemanticTimelineEvent,
   dependencies: TimelinePresentationDependencies,
 ): string {
+  const locale = resolveTimelinePresentationLocale(dependencies);
   const presentation = mapTimelineSearchPresentation(event, dependencies);
   const searchable = [
     ...presentation.userContent,
@@ -54,7 +62,7 @@ function createSearchHaystack(
   ];
 
   return searchable
-    .map((value) => normalizeSearchField(value))
+    .map((value) => normalizeSearchField(value, locale))
     .filter(Boolean)
     .join(' ');
 }
@@ -82,7 +90,10 @@ export function createTimelineSearchFilterModel(
   input: TimelineSearchFilterInput,
   dependencies: TimelinePresentationDependencies,
 ): TimelineSearchFilterModel {
-  const normalizedQuery = normalizeTimelineSearchQuery(input.query);
+  const normalizedQuery = normalizeTimelineSearchQuery(
+    input.query,
+    resolveTimelinePresentationLocale(dependencies),
+  );
   const activeFilter = timelineEventFilterOptions.includes(input.filter)
     ? input.filter
     : 'all';

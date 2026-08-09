@@ -1,6 +1,6 @@
 export {
   createTimelinePresentationDependencies,
-  TIMELINE_MEDICAL_VALUE_FORMAT_LOCALE,
+  resolveTimelinePresentationLocale,
   type TimelinePresentationDependencies,
 } from './timeline-presentation-dependencies';
 export { resolveTimelinePresentationLabels } from './timeline-presentation-labels';

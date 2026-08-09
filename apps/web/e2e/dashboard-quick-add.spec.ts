@@ -158,7 +158,7 @@ test('timeline search and filters combine without changing store', async ({
 
   await page.getByRole('button', { name: 'Очистить поиск' }).click();
   await expect(search).toHaveValue('');
-  await page.getByRole('button', { name: 'Инсулин' }).click();
+  await page.getByRole('button', { name: 'Insulin' }).click();
   await expect(page.getByText('NovoRapid').first()).toBeVisible();
   await expect(page.getByText('Метформин').first()).toBeHidden();
 
@@ -168,7 +168,7 @@ test('timeline search and filters combine without changing store', async ({
   ).toBeVisible();
   await page.getByRole('button', { name: 'Сбросить фильтры' }).first().click();
   await expect(search).toHaveValue('');
-  await expect(page.getByRole('button', { name: 'Все' })).toHaveAttribute(
+  await expect(page.getByRole('button', { name: 'All' })).toHaveAttribute(
     'aria-pressed',
     'true',
   );

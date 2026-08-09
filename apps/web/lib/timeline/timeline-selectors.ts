@@ -3,6 +3,7 @@ import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 import {
   formatTimelineGlucoseDisplayValue,
   mapTimelineEventCardPresentation,
+  resolveTimelinePresentationLocale,
   type TimelinePresentationDependencies,
 } from '../timeline/presentation';
 import {
@@ -116,7 +117,8 @@ export function getRecentTimelineEvents(
     readonly timeZone?: string;
   } = {},
 ): TimelineRecentEvent[] {
-  const locale = options.locale ?? 'ru-RU';
+  const locale =
+    options.locale ?? resolveTimelinePresentationLocale(dependencies);
   const limit = options.limit ?? DEFAULT_RECENT_TIMELINE_EVENTS_LIMIT;
 
   return [...events]

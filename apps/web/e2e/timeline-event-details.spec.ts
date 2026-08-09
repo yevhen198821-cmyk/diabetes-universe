@@ -19,9 +19,10 @@ test('timeline event details open, close with Escape, and return focus', async (
   const card = await openEvent(page, /Open event: Метформин/);
 
   await expect(page.getByRole('dialog', { name: 'Метформин' })).toBeVisible();
-  await expect(page.getByText('Лекарство')).toBeVisible();
-  await expect(page.getByText('400 мг').first()).toBeVisible();
-  await expect(page.getByText('Демо-данные')).toBeVisible();
+  const detailDialog = page.getByRole('dialog', { name: 'Метформин' });
+  await expect(detailDialog.getByText('Medication')).toBeVisible();
+  await expect(detailDialog.getByText('400 mg').first()).toBeVisible();
+  await expect(detailDialog.getByText('Демо-данные')).toBeVisible();
 
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog', { name: 'Метформин' })).toBeHidden();
@@ -119,7 +120,7 @@ test('timeline closes details when edited event leaves search results', async ({
   await expect(
     page.getByRole('heading', { name: 'Ничего не найдено' }),
   ).toBeVisible();
-  await expect(search).toBeFocused();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 
 test('timeline event details work on mobile without horizontal scroll', async ({

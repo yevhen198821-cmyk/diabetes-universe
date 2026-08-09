@@ -416,7 +416,6 @@ test('dashboard integration preserves insulin quick add presentation', async () 
   const presentationDependencies = createTimelinePresentationDependencies({
     formatter: runtime.formatter,
     localization: runtime.localization,
-    timeZone: 'Europe/London',
   });
 
   const presentation = resolveDashboardNextActionPresentation(

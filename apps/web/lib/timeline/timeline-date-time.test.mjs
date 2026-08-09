@@ -76,6 +76,12 @@ test('places invalid dateTime values after valid events during sorting', () => {
 });
 
 test('creates today, yesterday, and earlier grouping labels', () => {
+  const englishGroups = {
+    earlier: 'Earlier',
+    today: 'Today',
+    yesterday: 'Yesterday',
+  };
+
   assert.equal(
     getTimelineDayGroupKey('2026-08-02T05:00:00.000Z', referenceDate, timeZone),
     'today',
@@ -84,10 +90,11 @@ test('creates today, yesterday, and earlier grouping labels', () => {
     formatTimelineDayGroupLabel(
       'today',
       '2026-08-02T05:00:00.000Z',
-      'ru-RU',
+      'en-GB',
       timeZone,
+      englishGroups,
     ),
-    'Сегодня',
+    'Today',
   );
   assert.equal(
     getTimelineDayGroupKey('2026-08-01T12:00:00.000Z', referenceDate, timeZone),
@@ -97,10 +104,11 @@ test('creates today, yesterday, and earlier grouping labels', () => {
     formatTimelineDayGroupLabel(
       'yesterday',
       '2026-08-01T12:00:00.000Z',
-      'ru-RU',
+      'en-GB',
       timeZone,
+      englishGroups,
     ),
-    'Вчера',
+    'Yesterday',
   );
   assert.equal(
     getTimelineDayGroupKey('2026-07-30T09:00:00.000Z', referenceDate, timeZone),
@@ -143,7 +151,7 @@ test('maps all six timeline kinds to event cards', () => {
         value: '6,4 ммоль/л',
       },
       expectedType: 'glucose',
-      expectedValue: '6,4',
+      expectedValue: '6.4',
     },
     {
       event: {

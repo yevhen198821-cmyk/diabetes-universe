@@ -36,8 +36,6 @@ import { DashboardRecentEvents } from './dashboard-recent-events';
 import { resolveDashboardAiInsightLabels } from './dashboard-ai-insight-labels';
 import { DashboardShell } from './dashboard-shell';
 
-const DASHBOARD_LOCALE = 'ru-RU';
-
 const mockAiInsight = {
   generatedAt: '2026-08-02T07:20:00.000Z',
   id: 'insight-demo',
@@ -112,7 +110,7 @@ export function DashboardRoot() {
           formatDaySummaryDisplayDate,
           formatLastGlucoseDisplayTime,
           formatRecentEventDisplayTime,
-          locale: DASHBOARD_LOCALE,
+          locale: localization.localeContext.locale,
           presentationDependencies,
           referenceTime,
           remindersCompleted: 1,
@@ -126,6 +124,7 @@ export function DashboardRoot() {
       formatDaySummaryDisplayDate,
       formatLastGlucoseDisplayTime,
       formatRecentEventDisplayTime,
+      localization.localeContext.locale,
       presentationDependencies,
       referenceTime,
     ],

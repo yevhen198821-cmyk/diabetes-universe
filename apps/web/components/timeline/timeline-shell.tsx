@@ -10,7 +10,7 @@ import type {
   SemanticTimelineEvent,
   TimelineEvent,
 } from '@diabetes-universe/types';
-import { useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { createActivityTimelineEvent } from '../../lib/quick-add/create-activity-timeline-event';
 import { createGlucoseTimelineEvent } from '../../lib/quick-add/create-glucose-timeline-event';
@@ -21,6 +21,7 @@ import { createNutritionTimelineEvent } from '../../lib/quick-add/create-nutriti
 import { liftRepositorySnapshot } from '../../lib/timeline/migration/lift-repository-snapshot';
 import { compareSemanticTimelineEventsDescending } from '../../lib/timeline/semantic-timeline-ordering';
 import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
+import { resolveTimelinePresentationLocale } from '../../lib/timeline/presentation';
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
 import { createTimelineListModel } from './timeline-list-model';
 import { QuickAddRoot } from './quick-add-root';
@@ -50,6 +51,9 @@ export function TimelineShell() {
   const { addEvent, deleteEvent, error, events, status, updateEvent } =
     useTimelineStore();
   const presentationDependencies = useTimelinePresentationDependencies();
+  const presentationLocale = resolveTimelinePresentationLocale(
+    presentationDependencies,
+  );
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<TimelineEventFilter>('all');
@@ -59,6 +63,7 @@ export function TimelineShell() {
   const [returnFocusElement, setReturnFocusElement] =
     useState<HTMLElement | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const pendingSearchFocusRef = useRef(false);
   const referenceDate = useMemo(() => new Date(), []);
   const timeZone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -80,6 +85,22 @@ export function TimelineShell() {
       ),
     [activeFilter, displayOrderedEvents, presentationDependencies, query],
   );
+
+  useLayoutEffect(() => {
+    if (!pendingSearchFocusRef.current || selectedEventId !== null) {
+      return;
+    }
+
+    pendingSearchFocusRef.current = false;
+    const searchInput = document.getElementById('timeline-search');
+
+    if (searchInput instanceof HTMLElement) {
+      searchInput.focus();
+      return;
+    }
+
+    headingRef.current?.focus();
+  }, [selectedEventId]);
   const paginationModel = useMemo(
     () =>
       createTimelinePaginationModel({
@@ -95,6 +116,8 @@ export function TimelineShell() {
         error,
         events: paginationModel.visibleEvents,
         hasActiveCriteria: searchFilterModel.hasActiveCriteria,
+        locale: presentationLocale,
+        groupLabels: presentationDependencies.labels.groups,
         referenceDate,
         status,
         timeZone,
@@ -108,6 +131,8 @@ export function TimelineShell() {
       searchFilterModel.hasActiveCriteria,
       status,
       timeZone,
+      presentationLocale,
+      presentationDependencies.labels.groups,
     ],
   );
   const showToolbar = status === 'ready' && events.length > 0;
@@ -190,18 +215,9 @@ export function TimelineShell() {
     );
 
     if (!isStillVisible) {
+      pendingSearchFocusRef.current = true;
       setSelectedEventId(null);
       setDetailMode('view');
-      requestAnimationFrame(() => {
-        const searchInput = document.getElementById('timeline-search');
-
-        if (searchInput instanceof HTMLElement) {
-          searchInput.focus();
-          return;
-        }
-
-        headingRef.current?.focus();
-      });
     }
   };
 

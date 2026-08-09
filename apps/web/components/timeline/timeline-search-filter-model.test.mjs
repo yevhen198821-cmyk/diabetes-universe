@@ -77,8 +77,11 @@ function filter(query, filter = 'all') {
   );
 }
 
-test('normalizes trim, case, and repeated spaces', () => {
-  assert.equal(normalizeTimelineSearchQuery('  После   ЕДЫ  '), 'после еды');
+test('normalizes trim, case, and repeated spaces for runtime locale', () => {
+  assert.equal(
+    normalizeTimelineSearchQuery('  After   MEAL  ', 'en-GB'),
+    'after meal',
+  );
 });
 
 test('empty query with all filter returns every event', () => {
@@ -102,7 +105,7 @@ test('search matches value and unit', () => {
     ['medication-1'],
   );
   assert.deepEqual(
-    filter('мг').filteredEvents.map((event) => event.id),
+    filter('mg').filteredEvents.map((event) => event.id),
     ['medication-1'],
   );
 });
@@ -118,13 +121,13 @@ test('search matches context and note', () => {
   );
 });
 
-test('search matches kind display label in Cyrillic', () => {
+test('search matches kind display label in runtime locale', () => {
   assert.deepEqual(
-    filter('инсулин').filteredEvents.map((event) => event.id),
+    filter('insulin').filteredEvents.map((event) => event.id),
     ['insulin-1'],
   );
   assert.deepEqual(
-    filter('заметка').filteredEvents.map((event) => event.id),
+    filter('note').filteredEvents.map((event) => event.id),
     ['note-1'],
   );
 });
@@ -186,7 +189,7 @@ test('combines search and filter criteria', () => {
 test('does not mutate input events', () => {
   const originalOrder = events.map((event) => event.id);
 
-  filter('глюкоза');
+  filter('glucose');
 
   assert.deepEqual(
     events.map((event) => event.id),

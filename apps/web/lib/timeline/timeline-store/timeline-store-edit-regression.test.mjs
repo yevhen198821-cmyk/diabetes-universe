@@ -251,7 +251,7 @@ test('dashboard and timeline consumers receive semantic events after edit flow',
       presentationDependencies,
     );
 
-    assert.equal(dashboardBlocks.lastGlucose?.value, '8,2 ммоль/л');
+    assert.equal(dashboardBlocks.lastGlucose?.value, '8.2 mmol/L');
     assert.equal(dashboardBlocks.lastGlucose?.dateTime, glucoseLatest.dateTime);
     assert.equal(timelineFilter.filteredEvents.length, 1);
     assert.equal(timelineFilter.filteredEvents[0]?.concentrationMmolPerL, 8.2);

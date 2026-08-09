@@ -182,7 +182,7 @@ export function TimelineList({
                     />
                     <EventCard
                       {...eventCardProps}
-                      ariaLabel={`Открыть событие: ${[
+                      ariaLabel={`${presentationDependencies.labels.openEventAriaPrefix}: ${[
                         eventCardProps.title,
                         [eventCardProps.value, eventCardProps.unit]
                           .filter(Boolean)

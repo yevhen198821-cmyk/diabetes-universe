@@ -1,5 +1,6 @@
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
+import { WEB_PLATFORM_DEFAULT_LOCALE } from '../../lib/platform/web-platform-defaults';
 import { compareSemanticTimelineEventsDescending } from '../../lib/timeline/semantic-timeline-ordering';
 import {
   formatTimelineDateGroupLabel,
@@ -24,6 +25,11 @@ export interface TimelineListModel {
 export interface TimelineListModelInput {
   readonly error?: string;
   readonly events: readonly SemanticTimelineEvent[];
+  readonly groupLabels?: Readonly<{
+    readonly earlier: string;
+    readonly today: string;
+    readonly yesterday: string;
+  }>;
   readonly hasActiveCriteria?: boolean;
   readonly locale?: string;
   readonly referenceDate?: Date;
@@ -72,6 +78,7 @@ function createGroupLabel(
   referenceDate: Date,
   locale: string,
   timeZone?: string,
+  groupLabels?: TimelineListModelInput['groupLabels'],
 ): string {
   const firstValidEvent = events.find(
     (event) => getTimelineCalendarDateKey(event.occurredAt, timeZone) !== null,
@@ -86,6 +93,7 @@ function createGroupLabel(
     referenceDate,
     locale,
     timeZone,
+    groupLabels,
   );
 }
 
@@ -94,6 +102,7 @@ function createGroups(
   referenceDate: Date,
   locale: string,
   timeZone?: string,
+  groupLabels?: TimelineListModelInput['groupLabels'],
 ): readonly TimelineListGroup[] {
   const groupedEvents = new Map<string, SemanticTimelineEvent[]>();
 
@@ -115,7 +124,13 @@ function createGroups(
         dateKey,
         events: sortedEvents,
         key: `timeline-group-${dateKey}`,
-        label: createGroupLabel(sortedEvents, referenceDate, locale, timeZone),
+        label: createGroupLabel(
+          sortedEvents,
+          referenceDate,
+          locale,
+          timeZone,
+          groupLabels,
+        ),
       };
     });
 }
@@ -123,8 +138,9 @@ function createGroups(
 export function createTimelineListModel({
   error,
   events,
+  groupLabels,
   hasActiveCriteria = false,
-  locale = 'ru-RU',
+  locale = WEB_PLATFORM_DEFAULT_LOCALE,
   referenceDate = new Date(),
   status,
   timeZone,
@@ -164,7 +180,7 @@ export function createTimelineListModel({
   }
 
   return {
-    groups: createGroups(events, referenceDate, locale, timeZone),
+    groups: createGroups(events, referenceDate, locale, timeZone, groupLabels),
     status: 'ready',
     totalEventCount: events.length,
   };

@@ -103,7 +103,7 @@ test('derives last glucose from shared timeline events', () => {
     },
   );
 
-  assert.equal(blocks.lastGlucose?.value, '6,4 ммоль/л');
+  assert.equal(blocks.lastGlucose?.value, '6.4 mmol/L');
   assert.equal(blocks.lastGlucose?.displayTime, '08:00');
   assert.equal(blocks.daySummary?.glucoseMeasurements, 1);
   assert.equal(blocks.recentEvents.length, 0);
@@ -155,8 +155,8 @@ test('derives day summary only from today events', () => {
     },
   );
 
-  assert.equal(blocks.daySummary?.totalInsulin, '4 ЕД');
-  assert.equal(blocks.daySummary?.totalCarbohydrates, '42 г');
+  assert.equal(blocks.daySummary?.totalInsulin, '4 U');
+  assert.equal(blocks.daySummary?.totalCarbohydrates, '42 g');
 });
 
 test('updates day summary and recent events after insulin save', () => {
@@ -181,7 +181,7 @@ test('updates day summary and recent events after insulin save', () => {
     },
   );
 
-  assert.equal(blocks.daySummary?.totalInsulin, '4 ЕД');
+  assert.equal(blocks.daySummary?.totalInsulin, '4 U');
   assert.equal(blocks.recentEvents[0]?.category, 'insulin');
   assert.equal(blocks.recentEvents[0]?.title, 'NovoRapid');
 });

@@ -37,7 +37,7 @@ const readySummary = {
   remindersCompleted: 1,
   remindersTotal: 3,
   totalCarbohydrates: '120 г',
-  totalInsulin: '12 ЕД',
+  totalInsulin: '12 U',
 };
 
 after(() => {
@@ -140,7 +140,6 @@ test('deriveDaySummary invokes formatDate callback exactly once with referenceTi
   const presentationDependencies = createTimelinePresentationDependencies({
     formatter: runtime.formatter,
     localization: runtime.localization,
-    timeZone: 'UTC',
   });
   const referenceTime = new Date('2026-08-02T10:00:00.000Z');
   let formatDateCalls = 0;
@@ -217,8 +216,8 @@ test('deriveDaySummary passes insulin and carbohydrate totals through unchanged'
     },
   );
 
-  assert.equal(blocks.daySummary?.totalInsulin, '4 ЕД');
-  assert.equal(blocks.daySummary?.totalCarbohydrates, '42 г');
+  assert.equal(blocks.daySummary?.totalInsulin, '4 U');
+  assert.equal(blocks.daySummary?.totalCarbohydrates, '42 g');
 });
 
 test('dashboard day summary formats counters with platform formatter', async () => {
@@ -255,7 +254,7 @@ test('dashboard day summary formats counters with platform formatter', async () 
   try {
     assert.equal(formatNumberCalls >= 4, true);
     assert.match(document.body.textContent ?? '', /1 \/ 3/);
-    assert.match(document.body.textContent ?? '', /12 ЕД/);
+    assert.match(document.body.textContent ?? '', /12 U/);
     assert.match(document.body.textContent ?? '', /120 г/);
   } finally {
     formatter.formatNumber = originalFormatNumber;

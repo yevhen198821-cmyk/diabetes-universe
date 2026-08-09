@@ -134,7 +134,6 @@ test('deriveDashboardRecentEventSources invokes formatTime callback once per map
   const presentationDependencies = createTimelinePresentationDependencies({
     formatter: runtime.formatter,
     localization: runtime.localization,
-    timeZone: 'UTC',
   });
   const formatCalls = [];
 

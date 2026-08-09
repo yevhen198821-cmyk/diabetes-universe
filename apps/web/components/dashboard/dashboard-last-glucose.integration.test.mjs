@@ -51,7 +51,7 @@ test('dashboard last glucose renders localized English copy inside platform prov
           glucose: {
             dateTime: '2026-08-02T05:00:00.000Z',
             displayTime: '06:00',
-            value: '6,4 ммоль/л',
+            value: '6.4 mmol/L',
           },
           state: 'ready',
         }),
@@ -62,7 +62,7 @@ test('dashboard last glucose renders localized English copy inside platform prov
   try {
     assert.match(document.body.textContent ?? '', /Last glucose/);
     assert.match(document.body.textContent ?? '', /Last measurement/);
-    assert.match(document.body.textContent ?? '', /6,4 ммоль\/л/);
+    assert.match(document.body.textContent ?? '', /6\.4 mmol\/L/);
     assert.equal(
       document.body.textContent?.includes('Последняя глюкоза'),
       false,
@@ -121,7 +121,6 @@ test('deriveLastGlucose uses injected formatter for display time', async () => {
   const presentationDependencies = createTimelinePresentationDependencies({
     formatter: runtime.formatter,
     localization: runtime.localization,
-    timeZone: 'UTC',
   });
   let formatTimeCalls = 0;
   let receivedDateTime = null;
@@ -153,7 +152,7 @@ test('deriveLastGlucose uses injected formatter for display time', async () => {
 
   assert.equal(formatTimeCalls, 1);
   assert.equal(receivedDateTime, '2026-08-02T08:00:00.000Z');
-  assert.equal(blocks.lastGlucose?.value, '6,4 ммоль/л');
+  assert.equal(blocks.lastGlucose?.value, '6.4 mmol/L');
   assert.equal(blocks.lastGlucose?.displayTime, '08:00');
   assert.equal(blocks.lastGlucose?.dateTime, '2026-08-02T08:00:00.000Z');
 });

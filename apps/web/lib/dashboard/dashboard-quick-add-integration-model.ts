@@ -1,6 +1,7 @@
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
 import type { TimelinePresentationDependencies } from '../timeline/presentation';
+import { resolveTimelinePresentationLocale } from '../timeline/presentation';
 import { deriveDashboardRecentEventSources } from './dashboard-recent-events-derivation';
 import { getTimelineCalendarDateKey } from '../timeline/timeline-date-time';
 import {
@@ -72,8 +73,6 @@ export interface DashboardQuickAddIntegrationResult {
   readonly lastGlucose: DashboardDerivedLastGlucose | null;
   readonly recentEvents: readonly DashboardDerivedRecentEvent[];
 }
-
-const DEFAULT_LOCALE = 'ru-RU';
 
 function createDashboardDayLabel(
   currentDate: Date,
@@ -173,11 +172,11 @@ function deriveDaySummary(
     referenceTime,
     timeZone,
   );
-  const formattedInsulin = dependencies.valueFormatter.formatNumber(
+  const formattedInsulin = dependencies.formatter.formatNumber(
     totalInsulinUnits,
     { maximumFractionDigits: 1, minimumFractionDigits: 0 },
   );
-  const formattedCarbs = dependencies.valueFormatter.formatNumber(
+  const formattedCarbs = dependencies.formatter.formatNumber(
     totalCarbohydrateGrams,
     { maximumFractionDigits: 0, minimumFractionDigits: 0 },
   );
@@ -198,12 +197,14 @@ export function deriveDashboardQuickAddBlocks(
   state: DashboardTimelineState,
   options: DashboardQuickAddIntegrationOptions,
 ): DashboardQuickAddIntegrationResult {
+  const { presentationDependencies } = options;
   const referenceTime = options.referenceTime ?? new Date();
-  const locale = options.locale ?? DEFAULT_LOCALE;
+  const locale =
+    options.locale ??
+    resolveTimelinePresentationLocale(presentationDependencies);
   const timeZone = options.timeZone?.trim() || undefined;
   const remindersCompleted = options.remindersCompleted ?? 0;
   const remindersTotal = options.remindersTotal ?? 0;
-  const { presentationDependencies } = options;
 
   const recentEvents = options.formatRecentEventDisplayTime
     ? deriveDashboardRecentEventSources(

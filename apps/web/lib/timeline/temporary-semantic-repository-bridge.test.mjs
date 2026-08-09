@@ -38,9 +38,9 @@ test('projectSemanticToLegacyRepositoryEvent reconstructs legacy glucose fields'
   assert.equal(legacy.kind, 'glucose');
   assert.equal(legacy.id, 'glucose-1015');
   assert.equal(legacy.dateTime, '2026-08-02T07:15:00.000Z');
-  assert.equal(legacy.value, '7,3 ммоль/л');
-  assert.equal(legacy.unit, 'ммоль/л');
-  assert.equal(legacy.title, 'Глюкоза');
+  assert.equal(legacy.value, '7.3 mmol/L');
+  assert.equal(legacy.unit, 'mmol/L');
+  assert.equal(legacy.title, 'Glucose');
 });
 
 test('projectSemanticToLegacyRepositoryEvent maps glucose semantic context to legacy label', () => {
@@ -50,14 +50,14 @@ test('projectSemanticToLegacyRepositoryEvent maps glucose semantic context to le
   });
   const legacy = projectSemanticToLegacyRepositoryEvent(semantic, dependencies);
 
-  assert.equal(legacy.context, 'Перед едой');
+  assert.equal(legacy.context, 'Before meal');
 });
 
 test('projectSemanticToLegacyRepositoryEvent reconstructs legacy insulin fields', () => {
   const semantic = liftLegacyTestFixture(insulinLegacy);
   const legacy = projectSemanticToLegacyRepositoryEvent(semantic, dependencies);
 
-  assert.equal(legacy.value, '4 ЕД');
-  assert.equal(legacy.unit, 'ЕД');
+  assert.equal(legacy.value, '4 U');
+  assert.equal(legacy.unit, 'U');
   assert.equal(legacy.title, 'NovoRapid');
 });

@@ -100,6 +100,11 @@ test('creates ready model for one date with newest events first', () => {
       createEvent('older', '2026-08-02T08:00:00.000Z'),
       createEvent('newer', '2026-08-02T09:00:00.000Z'),
     ],
+    groupLabels: {
+      earlier: 'Earlier',
+      today: 'Today',
+      yesterday: 'Yesterday',
+    },
     referenceDate,
     status: 'ready',
     timeZone: 'UTC',
@@ -108,7 +113,7 @@ test('creates ready model for one date with newest events first', () => {
   assert.equal(model.status, 'ready');
   assert.equal(model.totalEventCount, 2);
   assert.equal(model.groups.length, 1);
-  assert.equal(model.groups[0].label, 'Сегодня');
+  assert.equal(model.groups[0].label, 'Today');
   assert.deepEqual(
     model.groups[0].events.map((event) => event.id),
     ['newer', 'older'],
@@ -122,6 +127,11 @@ test('creates separate today, yesterday, and older date groups', () => {
       createEvent('today', '2026-08-02T08:00:00.000Z'),
       createEvent('yesterday', '2026-08-01T21:00:00.000Z'),
     ],
+    groupLabels: {
+      earlier: 'Earlier',
+      today: 'Today',
+      yesterday: 'Yesterday',
+    },
     referenceDate,
     status: 'ready',
     timeZone: 'UTC',
@@ -133,7 +143,7 @@ test('creates separate today, yesterday, and older date groups', () => {
   );
   assert.deepEqual(
     model.groups.map((group) => group.label),
-    ['Сегодня', 'Вчера', '30 июля'],
+    ['Today', 'Yesterday', '30 July'],
   );
 });
 
@@ -145,7 +155,7 @@ test('shows year for groups outside the current year', () => {
     timeZone: 'UTC',
   });
 
-  assert.equal(model.groups[0].label, '31 декабря 2025 г.');
+  assert.equal(model.groups[0].label, '31 December 2025');
 });
 
 test('keeps same dateTime events stable by id', () => {
