@@ -15,6 +15,10 @@ export {
   type TimelineStorageSchemaVersion,
 } from './persistence/indexeddb/timeline-indexeddb-schema';
 export {
+  TimelineIndexedDbSchemaUpgradeError,
+  applyTimelineIndexedDbSchemaUpgrade,
+} from './persistence/indexeddb/timeline-indexeddb-upgrade';
+export {
   isTimelineBootstrapMetadata,
   validateIndexedDbTimelineEventRecord,
   type TimelineIndexedDbRecordValidationResult,
