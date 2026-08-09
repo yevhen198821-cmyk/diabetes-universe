@@ -7,6 +7,7 @@ import type {
   MedicationQuickAddEntry,
   NoteQuickAddEntry,
   NutritionQuickAddEntry,
+  SemanticTimelineEvent,
   TimelineEvent,
 } from '@diabetes-universe/types';
 import { useMemo, useRef, useState } from 'react';
@@ -17,7 +18,8 @@ import { createInsulinTimelineEvent } from '../../lib/quick-add/create-insulin-t
 import { createMedicationTimelineEvent } from '../../lib/quick-add/create-medication-timeline-event';
 import { createNoteTimelineEvent } from '../../lib/quick-add/create-note-timeline-event';
 import { createNutritionTimelineEvent } from '../../lib/quick-add/create-nutrition-timeline-event';
-import { compareTimelineDateTime } from '../../lib/timeline/timeline-date-time';
+import { liftRepositorySnapshot } from '../../lib/timeline/migration/lift-repository-snapshot';
+import { compareSemanticTimelineEventsDescending } from '../../lib/timeline/semantic-timeline-ordering';
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
 import { createTimelineListModel } from './timeline-list-model';
 import { QuickAddRoot } from './quick-add-root';
@@ -38,17 +40,9 @@ import { TopBar } from './top-bar';
 const TIMELINE_PAGE_SIZE = 20;
 
 function sortTimelineEventsNewestFirst(
-  events: readonly TimelineEvent[],
-): readonly TimelineEvent[] {
-  return [...events].sort((left, right) => {
-    const comparison = compareTimelineDateTime(right.dateTime, left.dateTime);
-
-    if (comparison !== 0) {
-      return comparison;
-    }
-
-    return left.id.localeCompare(right.id);
-  });
+  events: readonly SemanticTimelineEvent[],
+): readonly SemanticTimelineEvent[] {
+  return [...events].sort(compareSemanticTimelineEventsDescending);
 }
 
 export function TimelineShell() {
@@ -162,25 +156,27 @@ export function TimelineShell() {
     setDetailMode('view');
   };
 
-  const handleUpdateEvent = (event: TimelineEvent) => {
-    updateEvent(event);
+  const handleUpdateEvent = (legacyEvent: TimelineEvent) => {
+    updateEvent(legacyEvent);
 
-    const nextEvents = sortTimelineEventsNewestFirst(
-      events.map((existingEvent) =>
-        existingEvent.id === event.id ? event : existingEvent,
-      ),
-    );
+    const liftedUpdate = liftRepositorySnapshot([legacyEvent], {
+      migratedAt: new Date().toISOString(),
+    });
+    const updatedEvent = liftedUpdate.events[0];
+    const nextEvents =
+      updatedEvent !== undefined
+        ? sortTimelineEventsNewestFirst(
+            events.map((event) =>
+              event.id === updatedEvent.id ? updatedEvent : event,
+            ),
+          )
+        : sortTimelineEventsNewestFirst(events);
     const nextSearchFilterModel = createTimelineSearchFilterModel(nextEvents, {
       filter: activeFilter,
       query,
     });
-    const nextPaginationModel = createTimelinePaginationModel({
-      events: nextSearchFilterModel.filteredEvents,
-      pageSize: TIMELINE_PAGE_SIZE,
-      visibleCount,
-    });
-    const isStillVisible = nextPaginationModel.visibleEvents.some(
-      (visibleEvent) => visibleEvent.id === event.id,
+    const isStillVisible = nextSearchFilterModel.filteredEvents.some(
+      (visibleEvent) => visibleEvent.id === legacyEvent.id,
     );
 
     if (!isStillVisible) {
@@ -289,6 +285,7 @@ export function TimelineShell() {
       {selectedEvent ? (
         <TimelineEventDetail
           event={selectedEvent}
+          key={selectedEvent.id}
           mode={detailMode}
           onClose={closeDetails}
           onDelete={handleDeleteEvent}

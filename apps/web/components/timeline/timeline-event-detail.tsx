@@ -1,6 +1,9 @@
 'use client';
 
-import type { TimelineEvent } from '@diabetes-universe/types';
+import type {
+  SemanticTimelineEvent,
+  TimelineEvent,
+} from '@diabetes-universe/types';
 import { Button, haptics } from '@diabetes-universe/ui';
 import { X } from 'lucide-react';
 import {
@@ -20,11 +23,12 @@ import {
   type TimelineEventEditDraft,
   type TimelineEventEditErrors,
 } from './timeline-event-detail-model';
+import { projectSemanticToLegacyRepositoryEvent } from '../../lib/timeline/temporary-semantic-repository-bridge';
 
 export type TimelineEventDetailMode = 'edit' | 'view';
 
 interface TimelineEventDetailProps {
-  readonly event: TimelineEvent;
+  readonly event: SemanticTimelineEvent;
   readonly mode: TimelineEventDetailMode;
   readonly onClose: () => void;
   readonly onDelete: (eventId: string) => void;
@@ -278,16 +282,19 @@ export function TimelineEventDetail({
   const deleteDescriptionId = useId();
   const dialogRef = useRef<HTMLElement>(null);
   const deleteDialogRef = useRef<HTMLElement>(null);
-  const [draft, setDraft] = useState(() => createTimelineEventEditDraft(event));
+  const legacyEvent = projectSemanticToLegacyRepositoryEvent(event);
+  const [draft, setDraft] = useState(() =>
+    createTimelineEventEditDraft(legacyEvent),
+  );
   const [errors, setErrors] = useState<TimelineEventEditErrors>({});
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const model = createTimelineEventDetailModel(event);
+  const model = createTimelineEventDetailModel(legacyEvent);
 
   useDialogFocusTrap(!deleteOpen, dialogRef, onClose);
   useDialogFocusTrap(deleteOpen, deleteDialogRef, () => setDeleteOpen(false));
 
   const handleSave = () => {
-    const result = updateTimelineEventFromDraft(event, draft);
+    const result = updateTimelineEventFromDraft(legacyEvent, draft);
 
     setErrors(result.errors);
 
@@ -336,7 +343,7 @@ export function TimelineEventDetail({
             </h2>
           </div>
           <button
-            aria-label="Закрыть"
+            aria-label="Закрыть детали"
             className="grid size-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
             onClick={onClose}
             type="button"
@@ -354,7 +361,7 @@ export function TimelineEventDetail({
               draft={draft}
               errors={errors}
               onCancel={() => {
-                setDraft(createTimelineEventEditDraft(event));
+                setDraft(createTimelineEventEditDraft(legacyEvent));
                 setErrors({});
                 onModeChange('view');
               }}
@@ -394,22 +401,31 @@ export function TimelineEventDetail({
         {mode === 'view' ? (
           <footer className="flex flex-col-reverse gap-3 border-t border-slate-100 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:flex-row sm:justify-between sm:px-6 dark:border-slate-800">
             <Button
-              className="border border-rose-200 bg-white text-rose-700 hover:bg-rose-50"
-              onClick={() => setDeleteOpen(true)}
+              className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              onClick={onClose}
               type="button"
             >
-              Удалить
+              Закрыть
             </Button>
-            <Button
-              onClick={() => {
-                setDraft(createTimelineEventEditDraft(event));
-                setErrors({});
-                onModeChange('edit');
-              }}
-              type="button"
-            >
-              Изменить
-            </Button>
+            <div className="flex flex-col-reverse gap-3 sm:flex-row">
+              <Button
+                className="border border-rose-200 bg-white text-rose-700 hover:bg-rose-50"
+                onClick={() => setDeleteOpen(true)}
+                type="button"
+              >
+                Удалить
+              </Button>
+              <Button
+                onClick={() => {
+                  setDraft(createTimelineEventEditDraft(legacyEvent));
+                  setErrors({});
+                  onModeChange('edit');
+                }}
+                type="button"
+              >
+                Изменить
+              </Button>
+            </div>
           </footer>
         ) : null}
       </section>

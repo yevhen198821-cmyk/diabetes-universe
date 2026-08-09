@@ -1,18 +1,38 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
 import { createTimelineListModel } from './timeline-list-model.ts';
 
 const referenceDate = new Date('2026-08-02T12:00:00.000Z');
 
+function createLegacyEvent(id, dateTime, kind = 'glucose') {
+  const base = { dateTime, id, kind, source: 'test' };
+
+  switch (kind) {
+    case 'activity':
+      return { ...base, title: 'Прогулка', unit: 'минут', value: '30' };
+    case 'glucose':
+      return { ...base, title: 'Глюкоза', value: '6,4 ммоль/л' };
+    case 'insulin':
+      return { ...base, title: 'NovoRapid', value: '4 ЕД' };
+    case 'medication':
+      return { ...base, title: 'Метформин', unit: 'мг', value: '500' };
+    case 'note':
+      return { ...base, title: 'Заметка', value: 'Тест' };
+    case 'nutrition':
+      return { ...base, title: 'Завтрак', value: '42 г углеводов' };
+    default:
+      return { ...base, title: id, value: '6,4 ммоль/л' };
+  }
+}
+
 function createEvent(id, dateTime, kind = 'glucose') {
-  return {
-    dateTime,
-    id,
-    kind,
-    title: id,
-    value: id,
-  };
+  const [event] = liftLegacyTestFixtures([
+    createLegacyEvent(id, dateTime, kind),
+  ]);
+
+  return event;
 }
 
 test('creates loading model without groups', () => {
@@ -146,11 +166,13 @@ test('keeps same dateTime events stable by id', () => {
 });
 
 test('places invalid dateTime in a predictable fallback group', () => {
+  const validEvent = createEvent('valid', '2026-08-02T08:00:00.000Z');
+  const invalidEvent = {
+    ...createEvent('invalid', '2026-08-02T08:00:00.000Z'),
+    occurredAt: 'not-a-date',
+  };
   const model = createTimelineListModel({
-    events: [
-      createEvent('invalid', 'not-a-date'),
-      createEvent('valid', '2026-08-02T08:00:00.000Z'),
-    ],
+    events: [invalidEvent, validEvent],
     referenceDate,
     status: 'ready',
     timeZone: 'UTC',

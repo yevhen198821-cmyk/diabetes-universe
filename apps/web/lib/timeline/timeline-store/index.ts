@@ -5,8 +5,11 @@ export {
 } from './timeline-store';
 export {
   createReadyTimelineStoreState,
+  createTimelineDiagnosticsFromState,
+  initialTimelineMigrationStoreState,
   initialTimelineStoreState,
   timelineStoreReducer,
+  type TimelineMigrationStoreState,
   type TimelineStoreAction,
   type TimelineStoreState,
   type TimelineStoreStatus,

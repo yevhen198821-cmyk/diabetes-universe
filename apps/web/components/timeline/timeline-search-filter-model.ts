@@ -1,7 +1,14 @@
 import type {
-  TimelineEvent,
+  SemanticTimelineEvent,
   TimelineEventKind,
 } from '@diabetes-universe/types';
+
+import {
+  getSemanticEventCardContext,
+  getSemanticEventCardTitle,
+  getSemanticEventCardUnit,
+  getSemanticEventCardValue,
+} from '../../lib/timeline/semantic-event-fields';
 
 export type TimelineEventFilter = 'all' | TimelineEventKind;
 
@@ -12,7 +19,7 @@ export interface TimelineSearchFilterInput {
 
 export interface TimelineSearchFilterModel {
   readonly activeFilter: TimelineEventFilter;
-  readonly filteredEvents: readonly TimelineEvent[];
+  readonly filteredEvents: readonly SemanticTimelineEvent[];
   readonly hasActiveCriteria: boolean;
   readonly hasActiveFilter: boolean;
   readonly hasActiveSearch: boolean;
@@ -57,29 +64,40 @@ function normalizeSearchField(value: string | undefined): string {
   return normalizeTimelineSearchQuery(value ?? '');
 }
 
-function createSearchHaystack(event: TimelineEvent): string {
-  return [
-    event.title,
-    event.value,
-    event.unit,
-    event.context,
-    event.note,
+function createSearchHaystack(event: SemanticTimelineEvent): string {
+  const searchable = [
+    getSemanticEventCardTitle(event),
+    getSemanticEventCardValue(event),
+    getSemanticEventCardUnit(event),
+    getSemanticEventCardContext(event),
+    event.kind === 'nutrition'
+      ? event.note
+      : event.kind === 'medication'
+        ? event.note
+        : event.kind === 'activity'
+          ? event.note
+          : undefined,
     timelineEventKindLabels[event.kind],
     event.kind,
-  ]
-    .map(normalizeSearchField)
+  ];
+
+  return searchable
+    .map((value) => normalizeSearchField(value))
     .filter(Boolean)
     .join(' ');
 }
 
 function matchesFilter(
-  event: TimelineEvent,
+  event: SemanticTimelineEvent,
   filter: TimelineEventFilter,
 ): boolean {
   return filter === 'all' || event.kind === filter;
 }
 
-function matchesSearch(event: TimelineEvent, normalizedQuery: string): boolean {
+function matchesSearch(
+  event: SemanticTimelineEvent,
+  normalizedQuery: string,
+): boolean {
   return (
     normalizedQuery.length === 0 ||
     createSearchHaystack(event).includes(normalizedQuery)
@@ -87,7 +105,7 @@ function matchesSearch(event: TimelineEvent, normalizedQuery: string): boolean {
 }
 
 export function createTimelineSearchFilterModel(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
   input: TimelineSearchFilterInput,
 ): TimelineSearchFilterModel {
   const normalizedQuery = normalizeTimelineSearchQuery(input.query);

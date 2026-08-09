@@ -32,6 +32,7 @@ test('timeline event edit updates Timeline and Dashboard selectors', async ({
   page,
 }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   await openEvent(page, /Открыть событие: Глюкоза, 7,3 ммоль\/л/);
   await page.getByRole('button', { name: 'Изменить' }).click();
@@ -58,6 +59,7 @@ test('timeline edit moves an event between Today and Yesterday groups', async ({
   page,
 }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   await openEvent(page, /Открыть событие: Завтрак/);
   await page.getByRole('button', { name: 'Изменить' }).click();

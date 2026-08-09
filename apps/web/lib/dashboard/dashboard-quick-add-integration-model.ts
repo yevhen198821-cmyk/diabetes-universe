@@ -1,10 +1,11 @@
-import type { TimelineEvent } from '@diabetes-universe/types';
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
 import { formatInsulinDose } from '../quick-add/format-insulin';
 import { formatNutritionCarbs } from '../quick-add/format-nutrition';
 import { deriveDashboardRecentEventSources } from './dashboard-recent-events-derivation';
 import { getTimelineCalendarDateKey } from '../timeline/timeline-date-time';
 import {
+  formatLatestGlucoseValue,
   getLatestGlucoseEvent,
   getRecentTimelineEvents,
   getTodayInsulinTotal,
@@ -50,7 +51,7 @@ export interface DashboardDerivedRecentEvent {
 }
 
 export interface DashboardTimelineState {
-  readonly events: readonly TimelineEvent[];
+  readonly events: readonly SemanticTimelineEvent[];
 }
 
 export interface DashboardQuickAddIntegrationOptions {
@@ -105,7 +106,7 @@ function createDashboardDayLabel(
 }
 
 function deriveLastGlucose(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
   formatLastGlucoseDisplayTime?: (dateTime: string) => string,
 ): DashboardDerivedLastGlucose | null {
   const latestGlucose = getLatestGlucoseEvent(events);
@@ -115,7 +116,7 @@ function deriveLastGlucose(
   }
 
   const displayTime = formatLastGlucoseDisplayTime(
-    latestGlucose.dateTime,
+    latestGlucose.occurredAt,
   ).trim();
 
   if (displayTime.length === 0 || displayTime === '--:--') {
@@ -123,14 +124,14 @@ function deriveLastGlucose(
   }
 
   return {
-    dateTime: latestGlucose.dateTime,
+    dateTime: latestGlucose.occurredAt,
     displayTime,
-    value: latestGlucose.value,
+    value: formatLatestGlucoseValue(latestGlucose),
   };
 }
 
 function deriveDaySummary(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
   referenceTime: Date,
   timeZone: string | undefined,
   remindersCompleted: number,

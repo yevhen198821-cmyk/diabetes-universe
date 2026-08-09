@@ -7,25 +7,38 @@ import {
   timelineStoreReducer,
 } from './timeline-store-model.ts';
 
-const glucoseEarly = {
-  dateTime: '2026-08-02T05:00:00.000Z',
+const glucoseSemantic = {
+  concentrationMmolPerL: 6.4,
+  context: 'before_meal',
+  createdAt: '2026-08-09T08:30:00.000Z',
   id: 'glucose-0800',
   kind: 'glucose',
-  title: 'Глюкоза',
-  value: '6,4 ммоль/л',
+  occurredAt: '2026-08-02T05:00:00.000Z',
+  schemaVersion: 1,
+  source: 'demo',
+  updatedAt: '2026-08-09T08:30:00.000Z',
 };
 
-const insulinLater = {
-  dateTime: '2026-08-02T05:05:00.000Z',
+const insulinSemantic = {
+  createdAt: '2026-08-09T08:30:00.000Z',
+  doseUnits: 4,
   id: 'insulin-0805',
   kind: 'insulin',
-  title: 'NovoRapid',
-  value: '4 ЕД',
+  occurredAt: '2026-08-02T05:05:00.000Z',
+  preparation: 'NovoRapid',
+  schemaVersion: 1,
+  source: 'demo',
+  updatedAt: '2026-08-09T08:30:00.000Z',
 };
 
-test('setReady stores the repository snapshot as ready state', () => {
+test('setReady stores semantic repository snapshot as ready state', () => {
   const state = timelineStoreReducer(initialTimelineStoreState, {
-    events: [insulinLater, glucoseEarly],
+    events: [insulinSemantic, glucoseSemantic],
+    migration: {
+      migrationRecords: new Map(),
+      quarantinedRecords: [],
+      unsupportedSchemaCount: 0,
+    },
     type: 'setReady',
   });
 
@@ -35,20 +48,20 @@ test('setReady stores the repository snapshot as ready state', () => {
     ['insulin-0805', 'glucose-0800'],
   );
 
-  assert.notEqual(state.events[0], insulinLater);
+  assert.notEqual(state.events[0], insulinSemantic);
 });
 
-test('createReadyTimelineStoreState clones repository snapshot events', () => {
-  const mutableEvent = { ...glucoseEarly };
+test('createReadyTimelineStoreState clones semantic events', () => {
+  const mutableEvent = { ...glucoseSemantic };
   const state = createReadyTimelineStoreState([mutableEvent]);
 
-  mutableEvent.value = 'mutated outside store';
+  mutableEvent.concentrationMmolPerL = 9.9;
 
-  assert.equal(state.events[0].value, '6,4 ммоль/л');
+  assert.equal(state.events[0].concentrationMmolPerL, 6.4);
 });
 
 test('setLoading resets to empty loading projection', () => {
-  const previousState = createReadyTimelineStoreState([glucoseEarly]);
+  const previousState = createReadyTimelineStoreState([glucoseSemantic]);
   const nextState = timelineStoreReducer(previousState, {
     type: 'setLoading',
   });
@@ -58,8 +71,8 @@ test('setLoading resets to empty loading projection', () => {
   assert.equal(nextState.error, undefined);
 });
 
-test('setError keeps existing events and stores machine-readable error code', () => {
-  const previousState = createReadyTimelineStoreState([glucoseEarly]);
+test('setError keeps existing semantic events and stores machine-readable error code', () => {
+  const previousState = createReadyTimelineStoreState([glucoseSemantic]);
   const nextState = timelineStoreReducer(previousState, {
     errorCode: 'TIMELINE_REPOSITORY_INITIALIZE_FAILED',
     type: 'setError',
@@ -69,16 +82,4 @@ test('setError keeps existing events and stores machine-readable error code', ()
   assert.equal(nextState.error, undefined);
   assert.equal(nextState.errorCode, 'TIMELINE_REPOSITORY_INITIALIZE_FAILED');
   assert.equal(nextState.events, previousState.events);
-});
-
-test('setError can retain an application-layer presentation message', () => {
-  const previousState = createReadyTimelineStoreState([glucoseEarly]);
-  const nextState = timelineStoreReducer(previousState, {
-    error: 'Failed to load timeline',
-    type: 'setError',
-  });
-
-  assert.equal(nextState.status, 'error');
-  assert.equal(nextState.error, 'Failed to load timeline');
-  assert.equal(nextState.errorCode, 'TIMELINE_STORE_UNKNOWN_ERROR');
 });

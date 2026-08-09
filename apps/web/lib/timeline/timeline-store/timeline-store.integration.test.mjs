@@ -21,12 +21,43 @@ after(() => {
 });
 
 function createEvent(id, dateTime, overrides = {}) {
+  const kind = overrides.kind ?? 'glucose';
+
+  const defaultsByKind = {
+    activity: {
+      title: 'Прогулка',
+      unit: 'минут',
+      value: '30',
+    },
+    glucose: {
+      title: 'Глюкоза',
+      value: '6,4 ммоль/л',
+    },
+    insulin: {
+      title: 'NovoRapid',
+      value: '4 ЕД',
+    },
+    medication: {
+      title: 'Метформин',
+      unit: 'мг',
+      value: '400',
+    },
+    note: {
+      title: 'Заметка',
+      value: 'Текст заметки',
+    },
+    nutrition: {
+      title: 'Завтрак',
+      value: '42 г углеводов',
+    },
+  };
+
   return {
     dateTime,
     id,
-    kind: 'glucose',
-    title: id,
-    value: id,
+    kind,
+    source: 'demo',
+    ...defaultsByKind[kind],
     ...overrides,
   };
 }
@@ -254,6 +285,7 @@ async function mountTimelineStore({ initialEvents, repository } = {}) {
     const store = useTimelineStore();
     currentStore = store;
     observations.push({
+      diagnostics: store.diagnostics,
       error: store.error,
       eventIds: store.events.map((event) => event.id),
       events: store.events.map((event) => ({ ...event })),
@@ -296,7 +328,45 @@ async function mountTimelineStore({ initialEvents, repository } = {}) {
   };
 }
 
+test('partial bad-data lift still reaches ready with diagnostics quarantine count', async () => {
+  const mounted = await mountTimelineStore({
+    repository: createInMemoryTimelineRepository({
+      seedEvents: [
+        glucoseEarly,
+        {
+          ...medicationLegacy,
+          id: 'medication-bad',
+          kind: 'medication',
+          unit: 'таблетка',
+        },
+      ],
+    }),
+  });
+
+  try {
+    await waitFor(
+      () => mounted.observations.at(-1)?.status === 'ready',
+      'ready state',
+    );
+
+    assert.equal(mounted.observations.at(-1)?.eventIds.length, 1);
+    assert.equal(mounted.observations.at(-1)?.diagnostics.quarantinedCount, 1);
+    assert.equal(
+      mounted.observations.at(-1)?.diagnostics.quarantinedRecords[0]?.raw.id,
+      'medication-bad',
+    );
+  } finally {
+    await mounted.unmount();
+  }
+});
+
 const glucoseEarly = createEvent('glucose-0800', '2026-08-02T05:00:00.000Z');
+const medicationLegacy = createEvent(
+  'medication-1130',
+  '2026-08-02T08:30:00.000Z',
+  { kind: 'medication' },
+);
+
 const insulinLater = createEvent('insulin-0805', '2026-08-02T05:05:00.000Z', {
   kind: 'insulin',
 });
@@ -326,7 +396,7 @@ test('provider exposes initial loading state before repository initialization re
   }
 });
 
-test('provider initializes repository and renders seeded events', async () => {
+test('provider initializes repository and renders seeded semantic events', async () => {
   const mounted = await mountTimelineStore({
     repository: createInMemoryTimelineRepository({
       seedEvents: [insulinLater, glucoseEarly],
@@ -343,6 +413,12 @@ test('provider initializes repository and renders seeded events', async () => {
       'glucose-0800',
       'insulin-0805',
     ]);
+    assert.equal(mounted.observations.at(-1)?.events[0]?.schemaVersion, 1);
+    assert.equal(
+      Object.hasOwn(mounted.observations.at(-1)?.events[0] ?? {}, 'value'),
+      false,
+    );
+    assert.equal(mounted.observations.at(-1)?.diagnostics.quarantinedCount, 0);
   } finally {
     await mounted.unmount();
   }
@@ -416,7 +492,9 @@ test('duplicate add follows repository replacement semantics', async () => {
       });
     });
     await waitFor(
-      () => mounted.observations.at(-1)?.events[0]?.value === '7,0 ммоль/л',
+      () =>
+        mounted.observations.at(-1)?.events[0]?.kind === 'glucose' &&
+        mounted.observations.at(-1)?.events[0]?.concentrationMmolPerL === 7,
       'repository replacement snapshot',
     );
 
@@ -449,8 +527,8 @@ test('updateEvent delegates to repository and refreshes from repository snapshot
       () =>
         mounted.observations
           .at(-1)
-          ?.events.find((event) => event.id === 'insulin-0805')?.value ===
-        '5 ЕД',
+          ?.events.find((event) => event.id === 'insulin-0805')?.doseUnits ===
+        5,
       'updated repository snapshot',
     );
   } finally {

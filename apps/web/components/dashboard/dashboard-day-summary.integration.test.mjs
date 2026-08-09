@@ -10,6 +10,7 @@ import { renderToString } from 'react-dom/server';
 import test from 'node:test';
 
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model.ts';
+import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
 import { createTestPlatformRuntime } from '../../lib/platform/react/testing/create-test-platform-runtime.ts';
 import { TestPlatformProvider } from '../../lib/platform/react/testing/test-platform-provider.ts';
 import {
@@ -176,7 +177,7 @@ test('deriveDaySummary keeps dayDate independent from display label formatting',
 test('deriveDaySummary passes insulin and carbohydrate totals through unchanged', () => {
   const blocks = deriveDashboardQuickAddBlocks(
     {
-      events: [
+      events: liftLegacyTestFixtures([
         {
           context: 'Today',
           dateTime: '2026-08-02T08:05:00.000Z',
@@ -193,7 +194,7 @@ test('deriveDaySummary passes insulin and carbohydrate totals through unchanged'
           title: 'Breakfast',
           value: '42 г углеводов',
         },
-      ],
+      ]),
     },
     {
       formatDaySummaryDisplayDate: () => 'Sunday, 2 August 2026',

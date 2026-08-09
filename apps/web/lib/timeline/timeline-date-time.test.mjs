@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { mapTimelineEventToCard } from '../../components/timeline/timeline-event-card.mapper.ts';
+import { liftLegacyTestFixture } from './testing/lift-legacy-test-fixtures.ts';
 import {
   compareTimelineDateTime,
   createIsoDateTimeFromLocalTime,
@@ -101,14 +102,16 @@ test('creates today, yesterday, and earlier grouping labels', () => {
 });
 
 test('maps nutrition without legacy meal kind', () => {
-  const card = mapTimelineEventToCard({
-    context: 'После инсулина',
-    dateTime: '2026-08-02T05:20:00.000Z',
-    id: 'nutrition-0820',
-    kind: 'nutrition',
-    title: 'Завтрак',
-    value: '42 г углеводов',
-  });
+  const card = mapTimelineEventToCard(
+    liftLegacyTestFixture({
+      context: 'После инсулина',
+      dateTime: '2026-08-02T05:20:00.000Z',
+      id: 'nutrition-0820',
+      kind: 'nutrition',
+      title: 'Завтрак',
+      value: '42 г углеводов',
+    }),
+  );
 
   assert.equal(card.type, 'nutrition');
   assert.equal(
@@ -196,7 +199,7 @@ test('maps all six timeline kinds to event cards', () => {
   ];
 
   for (const testCase of cases) {
-    const card = mapTimelineEventToCard(testCase.event);
+    const card = mapTimelineEventToCard(liftLegacyTestFixture(testCase.event));
 
     assert.equal(card.type, testCase.expectedType);
     assert.equal(card.value, testCase.expectedValue);
@@ -204,16 +207,18 @@ test('maps all six timeline kinds to event cards', () => {
 });
 
 test('does not confuse note kind with optional note field on other events', () => {
-  const card = mapTimelineEventToCard({
-    context: 'Введено вручную',
-    dateTime: '2026-08-02T05:20:00.000Z',
-    id: 'nutrition-note-field',
-    kind: 'nutrition',
-    note: 'Без сахара',
-    title: 'Перекус',
-    value: '15 г углеводов',
-  });
+  const card = mapTimelineEventToCard(
+    liftLegacyTestFixture({
+      context: 'Введено вручную',
+      dateTime: '2026-08-02T05:20:00.000Z',
+      id: 'nutrition-note-field',
+      kind: 'nutrition',
+      note: 'Без сахара',
+      title: 'Перекус',
+      value: '15 г углеводов',
+    }),
+  );
 
   assert.equal(card.type, 'nutrition');
-  assert.equal(card.context, 'Введено вручную');
+  assert.equal(card.context, undefined);
 });

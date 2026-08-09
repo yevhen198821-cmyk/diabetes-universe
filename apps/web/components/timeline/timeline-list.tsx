@@ -177,7 +177,7 @@ export function TimelineList({
                     <EventCard
                       {...eventCardProps}
                       ariaLabel={`Открыть событие: ${[
-                        event.title,
+                        eventCardProps.title,
                         [eventCardProps.value, eventCardProps.unit]
                           .filter(Boolean)
                           .join(' '),

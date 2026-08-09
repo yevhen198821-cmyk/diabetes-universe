@@ -1,7 +1,8 @@
-import type { TimelineEvent } from '@diabetes-universe/types';
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
+import { getSemanticEventOccurredAt } from '../../lib/timeline/semantic-event-fields';
+import { compareSemanticTimelineEventsDescending } from '../../lib/timeline/semantic-timeline-ordering';
 import {
-  compareTimelineDateTime,
   formatTimelineDateGroupLabel,
   getTimelineCalendarDateKey,
 } from '../../lib/timeline/timeline-date-time';
@@ -9,7 +10,7 @@ import type { TimelineStoreStatus } from '../../lib/timeline/timeline-store';
 
 export interface TimelineListGroup {
   readonly dateKey: string;
-  readonly events: readonly TimelineEvent[];
+  readonly events: readonly SemanticTimelineEvent[];
   readonly key: string;
   readonly label: string;
 }
@@ -23,7 +24,7 @@ export interface TimelineListModel {
 
 export interface TimelineListModelInput {
   readonly error?: string;
-  readonly events: readonly TimelineEvent[];
+  readonly events: readonly SemanticTimelineEvent[];
   readonly hasActiveCriteria?: boolean;
   readonly locale?: string;
   readonly referenceDate?: Date;
@@ -36,9 +37,13 @@ const DEFAULT_ERROR_MESSAGE =
   'Попробуйте обновить страницу или вернуться позже.';
 const INVALID_DATE_KEY = 'invalid-date';
 
-function getGroupDateKey(event: TimelineEvent, timeZone?: string): string {
+function getGroupDateKey(
+  event: SemanticTimelineEvent,
+  timeZone?: string,
+): string {
   return (
-    getTimelineCalendarDateKey(event.dateTime, timeZone) ?? INVALID_DATE_KEY
+    getTimelineCalendarDateKey(getSemanticEventOccurredAt(event), timeZone) ??
+    INVALID_DATE_KEY
   );
 }
 
@@ -59,27 +64,23 @@ function compareGroupDateKeys(left: string, right: string): number {
 }
 
 function sortEventsNewestFirst(
-  events: readonly TimelineEvent[],
-): readonly TimelineEvent[] {
-  return [...events].sort((left, right) => {
-    const comparison = compareTimelineDateTime(right.dateTime, left.dateTime);
-
-    if (comparison !== 0) {
-      return comparison;
-    }
-
-    return left.id.localeCompare(right.id);
-  });
+  events: readonly SemanticTimelineEvent[],
+): readonly SemanticTimelineEvent[] {
+  return [...events].sort(compareSemanticTimelineEventsDescending);
 }
 
 function createGroupLabel(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
   referenceDate: Date,
   locale: string,
   timeZone?: string,
 ): string {
   const firstValidEvent = events.find(
-    (event) => getTimelineCalendarDateKey(event.dateTime, timeZone) !== null,
+    (event) =>
+      getTimelineCalendarDateKey(
+        getSemanticEventOccurredAt(event),
+        timeZone,
+      ) !== null,
   );
 
   if (!firstValidEvent) {
@@ -87,7 +88,7 @@ function createGroupLabel(
   }
 
   return formatTimelineDateGroupLabel(
-    firstValidEvent.dateTime,
+    getSemanticEventOccurredAt(firstValidEvent),
     referenceDate,
     locale,
     timeZone,
@@ -95,12 +96,12 @@ function createGroupLabel(
 }
 
 function createGroups(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
   referenceDate: Date,
   locale: string,
   timeZone?: string,
 ): readonly TimelineListGroup[] {
-  const groupedEvents = new Map<string, TimelineEvent[]>();
+  const groupedEvents = new Map<string, SemanticTimelineEvent[]>();
 
   for (const event of events) {
     const dateKey = getGroupDateKey(event, timeZone);

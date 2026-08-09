@@ -1,4 +1,7 @@
-import type { QuickAddCategory, TimelineEvent } from '@diabetes-universe/types';
+import type {
+  QuickAddCategory,
+  SemanticTimelineEvent,
+} from '@diabetes-universe/types';
 
 export type NextActionRuleId = string;
 
@@ -52,7 +55,7 @@ export type NextActionContext = Readonly<{
   quickAddAvailability: Readonly<{
     availableCategories: readonly QuickAddCategory[];
   }>;
-  recentTimelineEvents: readonly TimelineEvent[];
+  recentTimelineEvents: readonly SemanticTimelineEvent[];
 }>;
 
 export type NextActionRule = Readonly<{

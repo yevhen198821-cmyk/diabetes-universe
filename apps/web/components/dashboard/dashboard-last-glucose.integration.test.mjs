@@ -9,6 +9,7 @@ import { createRoot } from 'react-dom/client';
 import test from 'node:test';
 
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model.ts';
+import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
 import { createTestPlatformRuntime } from '../../lib/platform/react/testing/create-test-platform-runtime.ts';
 import { TestPlatformProvider } from '../../lib/platform/react/testing/test-platform-provider.ts';
 import {
@@ -120,7 +121,7 @@ test('deriveLastGlucose uses injected formatter for display time', async () => {
 
   const blocks = deriveDashboardQuickAddBlocks(
     {
-      events: [
+      events: liftLegacyTestFixtures([
         {
           context: 'Before breakfast',
           dateTime: '2026-08-02T08:00:00.000Z',
@@ -129,7 +130,7 @@ test('deriveLastGlucose uses injected formatter for display time', async () => {
           title: 'Glucose',
           value: '6,4 ммоль/л',
         },
-      ],
+      ]),
     },
     {
       formatLastGlucoseDisplayTime: (dateTime) => {
@@ -152,7 +153,7 @@ test('deriveLastGlucose uses injected formatter for display time', async () => {
 test('deriveLastGlucose passes display time through to view model unchanged', () => {
   const blocks = deriveDashboardQuickAddBlocks(
     {
-      events: [
+      events: liftLegacyTestFixtures([
         {
           context: 'Before breakfast',
           dateTime: '2026-08-02T08:00:00.000Z',
@@ -161,7 +162,7 @@ test('deriveLastGlucose passes display time through to view model unchanged', ()
           title: 'Glucose',
           value: '6,4 ммоль/л',
         },
-      ],
+      ]),
     },
     {
       formatLastGlucoseDisplayTime: () => 'formatted-once',

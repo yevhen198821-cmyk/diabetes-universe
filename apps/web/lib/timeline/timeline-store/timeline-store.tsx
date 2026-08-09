@@ -6,7 +6,12 @@ import {
   type TimelineRepository,
   type TimelineRepositoryMutationResult,
 } from '@diabetes-universe/timeline';
-import type { TimelineEvent } from '@diabetes-universe/types';
+import type {
+  MigrationRecord,
+  SemanticTimelineEvent,
+  TimelineDiagnosticsSnapshot,
+  TimelineEvent,
+} from '@diabetes-universe/types';
 import {
   createContext,
   useCallback,
@@ -20,18 +25,29 @@ import {
 } from 'react';
 
 import { timelineEvents as demoTimelineEvents } from '../../mocks/timeline';
+import { liftRepositorySnapshot } from '../migration/lift-repository-snapshot';
 import {
   initialTimelineStoreState,
+  createTimelineDiagnosticsFromState,
   timelineStoreReducer,
   type TimelineStoreErrorCode,
   type TimelineStoreStatus,
 } from './timeline-store-model';
 
 export interface TimelineStoreValue {
+  /**
+   * Temporary P3c compatibility bridge.
+   *
+   * Quick Add still creates legacy `TimelineEvent` records. Repository writes
+   * remain legacy until P3e introduces the semantic write path. Application
+   * state is refreshed from lifted semantic snapshots after each mutation.
+   */
   readonly addEvent: (event: TimelineEvent) => void;
   readonly deleteEvent: (eventId: string) => void;
+  readonly diagnostics: TimelineDiagnosticsSnapshot;
   readonly error?: string;
-  readonly events: readonly TimelineEvent[];
+  readonly events: readonly SemanticTimelineEvent[];
+  readonly getMigrationRecord: (eventId: string) => MigrationRecord | undefined;
   readonly replaceEvents: (events: readonly TimelineEvent[]) => void;
   readonly status: TimelineStoreStatus;
   readonly updateEvent: (event: TimelineEvent) => void;
@@ -59,6 +75,10 @@ function resolveTimelineStoreErrorCode(error: unknown): TimelineStoreErrorCode {
   return 'TIMELINE_STORE_UNKNOWN_ERROR';
 }
 
+function createMigrationContext(migratedAt: string) {
+  return { migratedAt };
+}
+
 export function TimelineStoreProvider({
   children,
   initialEvents = demoTimelineEvents,
@@ -74,12 +94,35 @@ export function TimelineStoreProvider({
     initialTimelineStoreState,
   );
 
+  const liftRepositoryEvents = useCallback(
+    (migratedAt: string) => {
+      const lifted = liftRepositorySnapshot(
+        timelineRepository.getSnapshot().events,
+        createMigrationContext(migratedAt),
+      );
+
+      return {
+        events: lifted.events,
+        migration: {
+          migrationRecords: lifted.migrationRecords,
+          quarantinedRecords: lifted.quarantinedRecords,
+          unsupportedSchemaCount: lifted.unsupportedSchemaCount,
+        },
+      };
+    },
+    [timelineRepository],
+  );
+
   const dispatchReadySnapshot = useCallback(() => {
+    const migratedAt = new Date().toISOString();
+    const lifted = liftRepositoryEvents(migratedAt);
+
     dispatch({
-      events: timelineRepository.getSnapshot().events,
+      events: lifted.events,
+      migration: lifted.migration,
       type: 'setReady',
     });
-  }, [timelineRepository]);
+  }, [liftRepositoryEvents]);
 
   const dispatchRepositoryError = useCallback((error: unknown) => {
     dispatch({
@@ -162,12 +205,24 @@ export function TimelineStoreProvider({
     [enqueueRepositoryMutation, timelineRepository],
   );
 
+  const diagnostics = useMemo(
+    () => createTimelineDiagnosticsFromState(state),
+    [state],
+  );
+
+  const getMigrationRecord = useCallback(
+    (eventId: string) => state.migration.migrationRecords.get(eventId),
+    [state.migration.migrationRecords],
+  );
+
   const value = useMemo<TimelineStoreValue>(
     () => ({
       addEvent,
       deleteEvent,
+      diagnostics,
       error: state.error,
       events: state.events,
+      getMigrationRecord,
       replaceEvents,
       status: state.status,
       updateEvent,
@@ -175,6 +230,8 @@ export function TimelineStoreProvider({
     [
       addEvent,
       deleteEvent,
+      diagnostics,
+      getMigrationRecord,
       replaceEvents,
       state.error,
       state.events,

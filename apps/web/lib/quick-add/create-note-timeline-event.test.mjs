@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import { createNoteTimelineEvent } from './create-note-timeline-event.ts';
 import { createTimelineSearchFilterModel } from '../../components/timeline/timeline-search-filter-model.ts';
+import { liftLegacyTestFixture } from '../timeline/testing/lift-legacy-test-fixtures.ts';
 
 test('createNoteTimelineEvent maps quick add entry to timeline event', () => {
   const event = createNoteTimelineEvent({
@@ -34,10 +35,13 @@ test('note quick add events are searchable and filterable', () => {
     time: '10:00',
     title: 'Тест',
   });
-  const model = createTimelineSearchFilterModel([event], {
-    filter: 'note',
-    query: 'поиска',
-  });
+  const model = createTimelineSearchFilterModel(
+    [liftLegacyTestFixture(event)],
+    {
+      filter: 'note',
+      query: 'поиска',
+    },
+  );
 
   assert.equal(model.filteredEvents.length, 1);
   assert.equal(model.filteredEvents[0]?.id, event.id);

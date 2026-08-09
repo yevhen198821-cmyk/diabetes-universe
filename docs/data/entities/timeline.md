@@ -242,14 +242,28 @@ P3b implements legacy lift runtime in `@diabetes-universe/timeline` via
 `liftLegacyToSemantic()`. Application integration, sidecar stores, and
 presentation mapping remain future waves.
 
+P3c Semantic Application Store changes:
+
+- `TimelineStoreProvider` lifts P2 repository snapshots into
+  `SemanticTimelineEvent[]` on initialization and after legacy repository
+  mutations;
+- migration sidecar (`MigrationRecord` by `eventId`) and quarantine registry
+  are in-memory application stores;
+- `useTimelineStore().events` exposes semantic events only;
+- `useTimelineStore().diagnostics` exposes `TimelineDiagnosticsSnapshot`;
+- legacy repository mutations remain through a temporary compatibility bridge
+  until P3e;
+- presentation mappers are not migrated (P3d);
+- repository cutover (P3h) has not occurred.
+
 ## Out of scope
 
 - reminder and `ai_insight` as Timeline events
 - backend/API implementation
 - type-specific nested payloads on legacy `TimelineEvent` (semantic payloads are
   defined separately in P3a)
-- P3c semantic application store wiring and P3h repository cutover
-- durable persistence
+- P3d presentation mappers and P3e semantic Quick Add write path
+- P3h repository cutover and durable persistence
 
 ## Quick Add mapping
 

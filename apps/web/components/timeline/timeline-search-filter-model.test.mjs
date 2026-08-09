@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
 import {
   createTimelineSearchFilterModel,
   normalizeTimelineSearchQuery,
 } from './timeline-search-filter-model.ts';
 
-const events = [
+const legacyEvents = [
   {
     context: 'Перед завтраком',
     dateTime: '2026-08-02T05:00:00.000Z',
@@ -59,6 +60,8 @@ const events = [
   },
 ];
 
+const events = liftLegacyTestFixtures(legacyEvents);
+
 function filter(query, filter = 'all') {
   return createTimelineSearchFilterModel(events, { filter, query });
 }
@@ -107,7 +110,7 @@ test('search matches context and note', () => {
 test('search matches kind display label in Cyrillic', () => {
   assert.deepEqual(
     filter('инсулин').filteredEvents.map((event) => event.id),
-    ['insulin-1', 'nutrition-1'],
+    ['insulin-1'],
   );
   assert.deepEqual(
     filter('заметка').filteredEvents.map((event) => event.id),

@@ -12,6 +12,7 @@ import test from 'node:test';
 
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model.ts';
 import { deriveDashboardRecentEventSources } from '../../lib/dashboard/dashboard-recent-events-derivation.ts';
+import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
 import { createTestPlatformRuntime } from '../../lib/platform/react/testing/create-test-platform-runtime.ts';
 import { TestPlatformProvider } from '../../lib/platform/react/testing/test-platform-provider.ts';
 import {
@@ -131,7 +132,7 @@ test('deriveDashboardRecentEventSources invokes formatTime callback once per map
   const formatCalls = [];
 
   const events = deriveDashboardRecentEventSources(
-    [
+    liftLegacyTestFixtures([
       {
         dateTime: '2026-08-02T08:05:00.000Z',
         id: 'insulin-0805',
@@ -153,7 +154,7 @@ test('deriveDashboardRecentEventSources invokes formatTime callback once per map
         title: 'Breakfast',
         value: '42 г углеводов',
       },
-    ],
+    ]),
     {
       formatDisplayTime: (dateTime) => {
         formatCalls.push(dateTime);
@@ -174,7 +175,7 @@ test('deriveDashboardRecentEventSources invokes formatTime callback once per map
 test('deriveDashboardQuickAddBlocks passes displayTime through unchanged', () => {
   const blocks = deriveDashboardQuickAddBlocks(
     {
-      events: [
+      events: liftLegacyTestFixtures([
         {
           dateTime: '2026-08-02T08:05:00.000Z',
           id: 'insulin-0805',
@@ -182,7 +183,7 @@ test('deriveDashboardQuickAddBlocks passes displayTime through unchanged', () =>
           title: 'NovoRapid',
           value: '4 ЕД',
         },
-      ],
+      ]),
     },
     {
       formatRecentEventDisplayTime: () => 'formatted-once',

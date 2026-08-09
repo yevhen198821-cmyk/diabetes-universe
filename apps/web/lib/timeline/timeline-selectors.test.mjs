@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { liftLegacyTestFixtures } from './testing/lift-legacy-test-fixtures.ts';
 import {
   getLatestGlucoseEvent,
   getRecentTimelineEvents,
@@ -12,7 +13,7 @@ import {
 
 const referenceDate = new Date('2026-08-02T12:00:00.000Z');
 
-const events = [
+const legacyEvents = [
   {
     dateTime: '2026-08-02T05:00:00.000Z',
     id: 'glucose-0800',
@@ -80,6 +81,8 @@ const events = [
   },
 ];
 
+const events = liftLegacyTestFixtures(legacyEvents);
+
 test('gets latest glucose event by dateTime', () => {
   assert.equal(getLatestGlucoseEvent(events)?.id, 'glucose-1015');
 });
@@ -125,7 +128,7 @@ test('counts medication events only for today', () => {
 });
 
 test('respects timezone offsets for local day membership', () => {
-  const boundaryEvents = [
+  const boundaryEvents = liftLegacyTestFixtures([
     {
       dateTime: '2026-08-02T01:30:00.000Z',
       id: 'tokyo-today',
@@ -140,7 +143,7 @@ test('respects timezone offsets for local day membership', () => {
       title: 'NovoRapid',
       value: '2 ЕД',
     },
-  ];
+  ]);
 
   assert.equal(
     getTodayInsulinTotal(

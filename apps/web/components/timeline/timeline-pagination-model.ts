@@ -1,7 +1,7 @@
-import type { TimelineEvent } from '@diabetes-universe/types';
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
 export interface TimelinePaginationInput {
-  readonly events: readonly TimelineEvent[];
+  readonly events: readonly SemanticTimelineEvent[];
   readonly pageSize: number;
   readonly visibleCount: number;
 }
@@ -12,7 +12,7 @@ export interface TimelinePaginationModel {
   readonly remainingCount: number;
   readonly totalCount: number;
   readonly visibleCount: number;
-  readonly visibleEvents: readonly TimelineEvent[];
+  readonly visibleEvents: readonly SemanticTimelineEvent[];
 }
 
 function normalizePositiveInteger(value: number, fallback: number): number {

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { selectDashboardRecentEvents } from '../../components/dashboard/dashboard-recent-events-model.ts';
+import { liftLegacyTestFixtures } from '../timeline/testing/lift-legacy-test-fixtures.ts';
 import { deriveDashboardRecentEventSources } from './dashboard-recent-events-derivation.ts';
 import { formatTimelineDisplayTime } from '../timeline/timeline-date-time.ts';
 import { getRecentTimelineEvents } from '../timeline/timeline-selectors.ts';
@@ -13,7 +14,7 @@ const categoryLabels = {
   nutrition: 'Nutrition',
 };
 
-const pipelineEvents = [
+const legacyPipelineEvents = [
   {
     dateTime: '2026-08-02T05:00:00.000Z',
     id: 'glucose-0800',
@@ -81,6 +82,8 @@ const pipelineEvents = [
   },
 ];
 
+const pipelineEvents = liftLegacyTestFixtures(legacyPipelineEvents);
+
 test('deriveDashboardRecentEventSources matches getRecentTimelineEvents selection baseline', () => {
   const baseline = getRecentTimelineEvents(pipelineEvents, {
     limit: 4,
@@ -120,7 +123,7 @@ test('deriveDashboardRecentEventSources preserves desc ordering and first limit'
 
 test('deriveDashboardRecentEventSources excludes glucose and note kinds', () => {
   const derived = deriveDashboardRecentEventSources(
-    [
+    liftLegacyTestFixtures([
       {
         dateTime: '2026-08-02T08:05:00.000Z',
         id: 'insulin-0805',
@@ -149,7 +152,7 @@ test('deriveDashboardRecentEventSources excludes glucose and note kinds', () => 
         title: 'Note',
         value: 'Feeling fine',
       },
-    ],
+    ]),
     {
       formatDisplayTime: () => '10:00',
     },
@@ -165,7 +168,7 @@ test('deriveDashboardRecentEventSources invokes formatter once per mappable even
   const formatCalls = [];
 
   const derived = deriveDashboardRecentEventSources(
-    [
+    liftLegacyTestFixtures([
       {
         dateTime: '2026-08-02T08:05:00.000Z',
         id: 'insulin-0805',
@@ -187,7 +190,7 @@ test('deriveDashboardRecentEventSources invokes formatter once per mappable even
         title: 'Breakfast',
         value: '42 г углеводов',
       },
-    ],
+    ]),
     {
       formatDisplayTime: (dateTime) => {
         formatCalls.push(dateTime);
@@ -209,7 +212,7 @@ test('deriveDashboardRecentEventSources invokes formatter once per mappable even
 
 test('deriveDashboardRecentEventSources passes original dateTime through unchanged', () => {
   const derived = deriveDashboardRecentEventSources(
-    [
+    liftLegacyTestFixtures([
       {
         dateTime: '2026-08-02T08:05:00.000Z',
         id: 'insulin-0805',
@@ -217,7 +220,7 @@ test('deriveDashboardRecentEventSources passes original dateTime through unchang
         title: 'NovoRapid',
         value: '4 ЕД',
       },
-    ],
+    ]),
     {
       formatDisplayTime: () => 'formatted-time',
     },
@@ -231,7 +234,7 @@ test('deriveDashboardRecentEventSources does not format excluded glucose or note
   const formatCalls = [];
 
   deriveDashboardRecentEventSources(
-    [
+    liftLegacyTestFixtures([
       {
         dateTime: '2026-08-02T07:15:00.000Z',
         id: 'glucose-1015',
@@ -246,7 +249,7 @@ test('deriveDashboardRecentEventSources does not format excluded glucose or note
         title: 'Note',
         value: 'Feeling fine',
       },
-    ],
+    ]),
     {
       formatDisplayTime: (dateTime) => {
         formatCalls.push(dateTime);
