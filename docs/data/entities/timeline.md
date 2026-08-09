@@ -22,7 +22,10 @@ Timeline UI, demo data, repository storage, and future API integration.
   `liftRepositorySnapshot`).
 - **Durable persistence** (IndexedDB, SQLite, backend, auth, sync) is **not**
   implemented.
-- **P4** has **not** started.
+- **P4** has **not** started (architecture design in
+  `docs/architecture/timeline/p4-durable-local-persistence.md`).
+- **P3 — Semantic Timeline Event Model: Feature Complete** (merged PR #67 @
+  `44ca315`, 2026-08-09).
 
 ## SemanticTimelineEvent contract
 

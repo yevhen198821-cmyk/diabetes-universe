@@ -1,5 +1,33 @@
 # Changelog
 
+## P3 — Semantic Timeline Event Model: Feature Complete
+
+Дата: 2026-08-09
+
+Merge commit: `44ca315` — Merge pull request #67: P3 Semantic Timeline Event
+Model (P3a–P3h)
+
+Завершено (P3a–P3h + Final Remediation, merged to `main`):
+
+- canonical `SemanticTimelineEvent` model in `@diabetes-universe/types`
+- legacy migration utilities (`liftLegacyToSemantic`, `liftRepositorySnapshot`)
+- semantic application store with native repository cutover
+- P3d presentation boundary (locale-neutral mapper + i18n labels)
+- semantic Quick Add and edit write path (all 6 kinds)
+- Dashboard semantic closure (read derivations from semantic fields)
+- demo migration closure + preserved legacy fixture
+- `TimelineRepositoryEvent = SemanticTimelineEvent` native storage
+- 757 unit tests + 29 E2E journeys green on merge commit CI
+
+Статус:
+
+**P3 — Semantic Timeline Event Model: Feature Complete**
+
+Следующий этап:
+
+**P4 — Durable Local Persistence** (architecture design approved for planning;
+implementation not started)
+
 ## P3 Final Remediation — Documentation & Dead-Surface Cleanup
 
 Дата: 2026-08-09
