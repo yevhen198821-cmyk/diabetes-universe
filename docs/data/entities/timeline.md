@@ -195,6 +195,14 @@ Stage 7 migration changes:
 - grouping happens after pagination;
 - documented future cursor API without implementing backend transport.
 
+P2 Repository Foundation changes:
+
+- introduced `@diabetes-universe/timeline` as the repository boundary package;
+- introduced `InMemoryTimelineRepository` as the current non-durable adapter;
+- integrated `TimelineStoreProvider` with `TimelineRepository`;
+- kept the existing `TimelineEvent` shape as a temporary P2 compatibility type;
+- reload persistence remains not implemented.
+
 ## Out of scope
 
 - reminder and `ai_insight` as Timeline events

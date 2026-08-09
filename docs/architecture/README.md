@@ -34,10 +34,10 @@ Layering follows [ADR-0011 — Platform Infrastructure Layer](../adr/0011-platfo
 ```text
 apps/web (Application + Web Composition Root wiring)
   → packages/platform-web
-  → packages/platform, i18n, i18n-locales, locales, formatting
+  → packages/platform, timeline, i18n, i18n-locales, locales, formatting
   → packages/ui, packages/types
 
-packages/platform, i18n, formatting, locales
+packages/platform, timeline, i18n, formatting, locales
   → must not depend on apps/web
 ```
 
@@ -48,6 +48,7 @@ packages/platform, i18n, formatting, locales
 | `apps/web`              | Routing, page composition, Dashboard/Timeline demo, web Composition Root |
 | `packages/platform-web` | Web-specific platform runtime assembly                                   |
 | `packages/platform`     | `PlatformRuntime` aggregate (`createPlatformRuntime`)                    |
+| `packages/timeline`     | Timeline repository contract and current in-memory adapter               |
 | `packages/i18n`         | Localization Platform contracts and runtime                              |
 | `packages/i18n-locales` | In-memory translation bundle loaders (Infrastructure adapter)            |
 | `packages/locales`      | Canonical translation resources                                          |

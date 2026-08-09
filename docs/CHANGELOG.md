@@ -1,5 +1,39 @@
 # Changelog
 
+## P2 Phase C — Timeline Repository Store Integration
+
+Дата: 2026-08-09
+
+Завершено:
+
+- integrated `TimelineStoreProvider` with `TimelineRepository`
+- added `apps/web` dependency on `@diabetes-universe/timeline`
+- current adapter: `InMemoryTimelineRepository`
+- preserved existing Dashboard / Timeline / Quick Add facade methods:
+  `addEvent`, `updateEvent`, `deleteEvent`, and `replaceEvents`
+- React state now represents loading, ready repository snapshot, and error
+  projection state
+- added provider integration tests for initialization, mutation delegation,
+  missing-ID no-ops, serialization, and unmount safety
+
+Не входит в этот этап:
+
+- durable reload persistence
+- IndexedDB
+- localStorage persistence
+- SQLite
+- backend/API
+- auth
+- sync/outbox/retry/conflict resolution
+- semantic TimelineEvent migration
+- device integrations
+- Dashboard read-model optimization
+
+Статус:
+
+P2 Phase C — Repository Foundation integrated with application store;
+current adapter is in-memory only
+
 ## ADR-0014 — Local-First Medical Event Persistence Architecture Approved
 
 Дата: 2026-08-09

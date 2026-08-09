@@ -21,6 +21,7 @@
     "@diabetes-universe/i18n": "workspace:*",
     "@diabetes-universe/platform": "workspace:*",
     "@diabetes-universe/platform-web": "workspace:*",
+    "@diabetes-universe/timeline": "workspace:*",
     "@diabetes-universe/types": "workspace:*",
     "@diabetes-universe/ui": "workspace:*",
     "@tailwindcss/postcss": "^4.3.3",
