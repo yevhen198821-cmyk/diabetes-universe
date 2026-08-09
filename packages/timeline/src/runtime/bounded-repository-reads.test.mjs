@@ -49,7 +49,10 @@ test('getById returns a clone and null for a missing event', async () => {
   const found = await repository.getById('g-1');
   assert.equal(found?.id, 'g-1');
   found.concentrationMmolPerL = 99;
-  assert.equal((await repository.getById('g-1'))?.concentrationMmolPerL, 6.4);
+  assert.equal(
+    (await repository.getById('g-1'))?.concentrationMmolPerL,
+    6.4,
+  );
   assert.equal(await repository.getById('missing'), null);
 });
 
