@@ -27,9 +27,11 @@ import {
 import { timelineEvents as demoTimelineEvents } from '../../mocks/timeline';
 import { liftRepositorySnapshot } from '../migration/lift-repository-snapshot';
 import {
+  initialTimelineMigrationStoreState,
   initialTimelineStoreState,
   createTimelineDiagnosticsFromState,
   timelineStoreReducer,
+  type TimelineMigrationStoreState,
   type TimelineStoreErrorCode,
   type TimelineStoreStatus,
 } from './timeline-store-model';
@@ -93,36 +95,35 @@ export function TimelineStoreProvider({
     timelineStoreReducer,
     initialTimelineStoreState,
   );
-
-  const liftRepositoryEvents = useCallback(
-    (migratedAt: string) => {
-      const lifted = liftRepositorySnapshot(
-        timelineRepository.getSnapshot().events,
-        createMigrationContext(migratedAt),
-      );
-
-      return {
-        events: lifted.events,
-        migration: {
-          migrationRecords: lifted.migrationRecords,
-          quarantinedRecords: lifted.quarantinedRecords,
-          unsupportedSchemaCount: lifted.unsupportedSchemaCount,
-        },
-      };
-    },
-    [timelineRepository],
+  const migrationStateRef = useRef<TimelineMigrationStoreState>(
+    initialTimelineMigrationStoreState,
   );
 
   const dispatchReadySnapshot = useCallback(() => {
     const migratedAt = new Date().toISOString();
-    const lifted = liftRepositoryEvents(migratedAt);
+    const previousEvidence = migrationStateRef.current;
+    const lifted = liftRepositorySnapshot(
+      timelineRepository.getSnapshot().events,
+      createMigrationContext(migratedAt),
+      {
+        migrationRecords: previousEvidence.migrationRecords,
+        quarantinedRecords: previousEvidence.quarantinedRecords,
+      },
+    );
+    const migration = {
+      migrationRecords: lifted.migrationRecords,
+      quarantinedRecords: lifted.quarantinedRecords,
+      unsupportedSchemaCount: lifted.unsupportedSchemaCount,
+    };
+
+    migrationStateRef.current = migration;
 
     dispatch({
       events: lifted.events,
-      migration: lifted.migration,
+      migration,
       type: 'setReady',
     });
-  }, [liftRepositoryEvents]);
+  }, [timelineRepository]);
 
   const dispatchRepositoryError = useCallback((error: unknown) => {
     dispatch({
