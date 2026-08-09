@@ -1,5 +1,31 @@
 # Changelog
 
+## ADR-0014 — Local-First Medical Event Persistence Architecture Approved
+
+Дата: 2026-08-09
+
+Завершено:
+
+- ADR-0014 — Local-First Medical Event Persistence Architecture approved via
+  Architecture Audit
+- lifecycle status advanced from Draft to Approved
+- updated [ADR Index](adr/index.md) and [INDEX](INDEX.md)
+
+Не входит в этот этап:
+
+- persistence runtime implementation
+- Timeline remains in-memory demo
+- IndexedDB not implemented
+- backend absent
+- auth absent
+- sync absent
+- device integrations absent
+- P2 Repository Foundation not started
+
+Статус:
+
+ADR-0014 — Architecture Approved — Repository Implementation Not Started
+
 ## Wave 10 — Documentation Source-of-Truth Remediation
 
 Дата: 2026-08-09

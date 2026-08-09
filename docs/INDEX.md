@@ -179,6 +179,7 @@ Canonical registry: [ADR Index](adr/index.md)
 - [ADR-0011 — Platform Infrastructure Layer](adr/0011-platform-infrastructure-layer.md)
 - [ADR-0012 — User Time Zone Policy](adr/0012-user-time-zone-policy.md)
 - [ADR-0013 — Web Client Runtime Ownership and Bootstrap Gate](adr/0013-web-client-runtime-ownership.md)
+- [ADR-0014 — Local-First Medical Event Persistence Architecture](adr/0014-local-first-medical-event-persistence-architecture.md)
 - [ADR Template](adr/template.md)
 
 ## Existing Guides
