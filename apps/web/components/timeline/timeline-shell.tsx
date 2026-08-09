@@ -48,8 +48,18 @@ function sortTimelineEventsNewestFirst(
 }
 
 export function TimelineShell() {
-  const { addEvent, deleteEvent, error, events, status, updateEvent } =
-    useTimelineStore();
+  const {
+    addEvent,
+    deleteEvent,
+    error,
+    events,
+    hasMoreHistory,
+    historyLoadErrorCode,
+    historyLoadStatus,
+    loadMoreHistory,
+    status,
+    updateEvent,
+  } = useTimelineStore();
   const presentationDependencies = useTimelinePresentationDependencies();
   const presentationLocale = resolveTimelinePresentationLocale(
     presentationDependencies,
@@ -158,8 +168,22 @@ export function TimelineShell() {
   };
 
   const handleLoadMore = () => {
-    setVisibleCount(paginationModel.nextVisibleCount);
+    if (paginationModel.hasMore) {
+      setVisibleCount(paginationModel.nextVisibleCount);
+      return;
+    }
+
+    if (hasMoreHistory) {
+      loadMoreHistory();
+    }
   };
+
+  const showLoadMore =
+    status === 'ready' &&
+    (paginationModel.hasMore ||
+      hasMoreHistory ||
+      historyLoadStatus === 'loading');
+  const isLoadingRepositoryHistory = historyLoadStatus === 'loading';
 
   const focusTimelineHeading = () => {
     requestAnimationFrame(() => {
@@ -280,15 +304,34 @@ export function TimelineShell() {
           presentationDependencies={presentationDependencies}
         />
 
-        {status === 'ready' && paginationModel.hasMore ? (
+        {showLoadMore ? (
           <TimelineLoadMore
             addedCount={
-              paginationModel.nextVisibleCount - paginationModel.visibleCount
+              paginationModel.hasMore
+                ? paginationModel.nextVisibleCount -
+                  paginationModel.visibleCount
+                : 0
             }
             ariaControls="timeline-events-list"
+            isLoading={isLoadingRepositoryHistory}
             onLoadMore={handleLoadMore}
-            remainingCount={paginationModel.remainingCount}
+            remainingCount={
+              paginationModel.hasMore
+                ? paginationModel.remainingCount
+                : undefined
+            }
+            showRemainingCount={paginationModel.hasMore}
           />
+        ) : null}
+
+        {historyLoadErrorCode ? (
+          <p
+            className="text-center text-sm text-red-600 dark:text-red-400"
+            role="status"
+          >
+            Не удалось загрузить более ранние события. Попробуйте обновить
+            страницу.
+          </p>
         ) : null}
       </main>
 
