@@ -55,5 +55,17 @@ jobs:
       - name: E2E
         run: pnpm test:e2e
 
+      - name: Upload Playwright diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-diagnostics
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Validate Markdown links
+        if: always()
         run: python3 scripts/validate-markdown-links.py
