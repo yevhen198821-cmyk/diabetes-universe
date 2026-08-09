@@ -20,7 +20,7 @@
 
 - [EB-001 — Next Action Engine Epic Backlog v1.0](product/dashboard/eb-001-next-action-engine-backlog.md) — Backlog Foundation Complete — Living — Dependency Type merged
 - [GP-001 — Glucose Data Staleness Policy](product/platform/gp-001-glucose-data-staleness-policy.md) — Feature Slice Complete
-- [NA-001 — Glucose Data Staleness Rule](product/dashboard/na-001-glucose-data-staleness-rule.md) — Feature Slice Complete
+- [NA-001 — Glucose Data Staleness Rule](product/dashboard/na-001-glucose-data-staleness-rule.md) — Feature Slice Complete — not production-activated
 
 ## Brand
 
@@ -135,14 +135,19 @@
 ## Design System
 
 - [Design System Overview](design-system/README.md)
-- [Colors](design-system/colors.md)
-- [Typography](design-system/typography.md)
-- [Spacing](design-system/spacing.md)
-- [Icons](design-system/icons.md)
-- [Buttons](design-system/buttons.md)
-- [Cards](design-system/cards.md)
-- [Forms](design-system/forms.md)
-- [Motion](design-system/motion.md)
+- [10 Visual Design System Specification](design-system/10-visual-design-system-specification.md) — Feature Complete
+- [11 Design Tokens Specification](design-system/11-design-tokens-specification.md) — Feature Complete
+- [12 UI Component Specification](design-system/12-ui-component-specification.md) — Feature Complete
+- [14 App Icon Architecture Specification](design-system/14-app-icon-architecture-specification.md) — Feature Complete
+- [15 Brand Logo System Specification](design-system/15-brand-logo-system-specification.md) — Feature Complete
+- [16 Color System Specification](design-system/16-color-system-specification.md) — Feature Complete
+- [17 Typography System Specification](design-system/17-typography-system-specification.md) — Feature Complete
+- [18 Iconography System Specification](design-system/18-iconography-system-specification.md) — Feature Complete
+- [19 Illustration System Specification](design-system/19-illustration-system-specification.md) — Feature Complete
+- [20 Motion System Specification](design-system/20-motion-system-specification.md) — Feature Complete
+
+Legacy placeholder stubs (`colors.md`, `typography.md`, etc.) are deprecated; use
+the numbered specifications above.
 
 ## Data
 
@@ -167,9 +172,13 @@
 
 ## Architecture Decisions
 
-- [ADR Overview](adr/README.md)
-- [ADR Index](adr/index.md)
+Canonical registry: [ADR Index](adr/index.md)
+
+- [ADR-0009 — Localization Platform](adr/0009-localization-platform.md)
+- [ADR-0010 — Platform Formatting Library](adr/0010-platform-formatting-library.md)
+- [ADR-0011 — Platform Infrastructure Layer](adr/0011-platform-infrastructure-layer.md)
 - [ADR-0012 — User Time Zone Policy](adr/0012-user-time-zone-policy.md)
+- [ADR-0013 — Web Client Runtime Ownership and Bootstrap Gate](adr/0013-web-client-runtime-ownership.md)
 - [ADR Template](adr/template.md)
 
 ## Existing Guides

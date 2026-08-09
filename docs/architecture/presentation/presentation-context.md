@@ -207,10 +207,11 @@ persistence remains deferred. See
 [Application Platform Integration](application-platform-integration.md) and
 [ADR-0013](../../adr/0013-web-client-runtime-ownership.md).
 
-## Future I18N-02 integration
+## I18N-02 integration status
 
-I18N-02 will migrate Dashboard, Timeline, and Quick Add to platform hooks.
-CR-03C keeps product modules on existing local/mock state.
+Dashboard blocks (I18N-02A–02B5) use platform hooks in production. Timeline and
+Quick Add localization migrations remain future work. Runtime locale switching is
+not production-ready.
 
 ## Architecture references
 

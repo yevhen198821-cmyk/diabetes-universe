@@ -89,9 +89,9 @@ mounts `ApplicationRuntimeGate` per CR-03C (ADR-0013).
 
 - cookie scheme wiring
 - route integration and cookie persistence
-- UI migration (Dashboard, Timeline, Quick Add)
-- locale switcher
-- full translations integration across UI
+- Timeline and Quick Add localization (I18N product-surface migration)
+- runtime locale switcher / locale switching in production
+- full translations integration across all UI surfaces
 
 ## Presentation context foundation (CR-03A) — Feature Complete ✅
 
@@ -113,7 +113,8 @@ it does not accept a separate server locale input.
 ### Not implemented (CR-03C+)
 
 - cookie persistence adapter
-- UI migration (Dashboard, Timeline, Quick Add)
+- Timeline and Quick Add localization
+- runtime locale switcher
 
 ## React platform provider foundation (CR-03B) — Feature Complete ✅
 
@@ -213,21 +214,41 @@ Location: `components/dashboard/dashboard-day-summary*`
 - architecture: `docs/architecture/localization/dashboard-day-summary-migration.md`
 - squash merge: PR #25 (`9794c88` → `4140bda` on `main`)
 
-## Dashboard recent events localization (I18N-02B4) — Architecture Audit
+## Dashboard recent events localization (I18N-02B4) — Feature Complete ✅
 
-Location: `components/dashboard/dashboard-recent-events*`
+Location: `components/dashboard/dashboard-recent-events*`, `dashboard-recent-events-labels.ts`
 
-Architectural audit complete; implementation not started. See
-`docs/architecture/localization/dashboard-recent-events-migration.md`.
+- English canonical `dashboard.recentEvents.*` keys
+- localized labels via `useLocalization()` + `dashboard-recent-events-labels.ts`
+- unit, integration, resource, and E2E coverage (`dashboard-recent-events-i18n.spec.ts`)
+- architecture: `docs/architecture/localization/dashboard-recent-events-migration.md`
+- squash merge: PR #27
 
-### Not implemented (I18N-02B4+)
+## Dashboard AI insight localization (I18N-02B5) — Feature Complete ✅
+
+Location: `components/dashboard/dashboard-ai-insight*`, `dashboard-ai-insight-labels.ts`
+
+- English canonical `dashboard.aiInsight.*` keys
+- localized chrome via `useLocalization()`; domain title/summary remain pass-through
+- unit, integration, resource, and E2E coverage (`dashboard-ai-insight-i18n.spec.ts`)
+- architecture: `docs/architecture/localization/dashboard-ai-insight-migration.md`
+
+## Localization status summary
+
+| Surface                          | I18N status                                                           |
+| -------------------------------- | --------------------------------------------------------------------- |
+| Dashboard blocks (I18N-02A–02B5) | **Feature Complete** — platform hooks in production                   |
+| Timeline                         | **Not migrated** — Russian UI strings remain                          |
+| Quick Add                        | **Not migrated** — Russian UI strings remain                          |
+| Runtime locale switching         | **Not production-ready** — no locale switch UI; no runtime switch E2E |
+
+### Still not implemented (localization)
 
 - cookie scheme wiring and `PresentationPersistence` adapter
-- Recent Events hook migration (I18N-02B4 — audit only)
-- remaining Dashboard block hook migration (AI Insight)
-- Timeline, Quick Add hook migration
-- locale switch UI
+- Timeline and Quick Add hook migration to platform localization
+- locale switch UI and runtime locale switching
 - full insulin/carbohydrate formatting via `formatMeasurement()` (deferred until structural measurement contract)
+- non-English locale bundles beyond English-canonical Dashboard chrome (draft `ru`/`de`/`uk` placeholders)
 
 ## Architecture references
 

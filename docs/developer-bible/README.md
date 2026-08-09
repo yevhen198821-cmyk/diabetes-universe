@@ -20,11 +20,19 @@
 
 ## Package ownership
 
-| Workspace                  | Responsibility                   |
-| -------------------------- | -------------------------------- |
-| `@diabetes-universe/web`   | Web routing and page composition |
-| `@diabetes-universe/ui`    | Shared React UI primitives       |
-| `@diabetes-universe/types` | Shared platform-agnostic types   |
+Per [ADR-0011 — Platform Infrastructure Layer](../adr/0011-platform-infrastructure-layer.md):
+
+| Workspace                         | Responsibility                                                |
+| --------------------------------- | ------------------------------------------------------------- |
+| `@diabetes-universe/web`          | Web routing, Dashboard/Timeline demo, Composition Root wiring |
+| `@diabetes-universe/platform-web` | Web-specific platform runtime assembly                        |
+| `@diabetes-universe/platform`     | `PlatformRuntime` aggregate                                   |
+| `@diabetes-universe/i18n`         | Localization Platform contracts and runtime                   |
+| `@diabetes-universe/i18n-locales` | In-memory translation bundle loaders                          |
+| `@diabetes-universe/locales`      | Canonical translation resources                               |
+| `@diabetes-universe/formatting`   | Platform Formatting library                                   |
+| `@diabetes-universe/ui`           | Shared React UI primitives                                    |
+| `@diabetes-universe/types`        | Shared platform-agnostic contracts                            |
 
 ## Definition of done
 
