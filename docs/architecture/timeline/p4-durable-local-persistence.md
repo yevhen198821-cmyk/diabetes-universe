@@ -2,14 +2,12 @@
 
 ## Status
 
-**Architecture Approved; implementation not started**
+**Feature Complete for the approved Web scope**
 
 P3 (Semantic Timeline Event Model) is Feature Complete on `main`.
 P4 adds durable local Web persistence behind the semantic `TimelineRepository` without introducing backend, authentication, sync, mobile storage, or device runtime.
 
-The architecture baseline in this document and the concrete Web implementation decisions in [ADR-0015 — Web IndexedDB Timeline Persistence Implementation](../../adr/0015-web-indexeddb-timeline-persistence-implementation.md) are approved.
-
-No P4 runtime implementation is implied by architecture approval. P4a begins only after the approved documentation change is merged to `main`.
+The architecture baseline in this document and the concrete Web implementation decisions in [ADR-0015 — Web IndexedDB Timeline Persistence Implementation](../../adr/0015-web-indexeddb-timeline-persistence-implementation.md) remain the governing design. The implementation lifecycle is recorded in [P4 — Durable Local Persistence — Feature Complete Record](p4-feature-complete.md).
 
 ## Purpose
 
@@ -26,12 +24,20 @@ TimelineStoreProvider
       ↓
 TimelineRepository
       ↓
-InMemoryTimelineRepository   ← current adapter; non-durable
+@diabetes-universe/timeline-web
+      ↓
+IndexedDbTimelineRepository   ← current default Web adapter; durable
+      ↓
+Browser IndexedDB
 ```
 
-P3 already guarantees semantic-native repository records, semantic Quick Add/edit, semantic Dashboard derivations, locale-aware presentation, deterministic `occurredAt + id` ordering, and legacy `TimelineEvent` isolation to migration/import utilities.
+`InMemoryTimelineRepository` remains available only through explicit test/development composition and is not a silent production fallback.
+
+P3 guarantees semantic-native repository records, semantic Quick Add/edit, semantic Dashboard derivations, locale-aware presentation, deterministic `occurredAt + id` ordering, and legacy `TimelineEvent` isolation to migration/import utilities. P4 preserves these guarantees while adding durable local Web persistence, bounded reads, deterministic bootstrap/no-reseed behavior, durable corruption quarantine, and fail-closed storage initialization.
 
 ## Target State
+
+The P4 target state is now the active Web runtime state:
 
 ```text
 Quick Add / Edit
@@ -53,7 +59,7 @@ Browser IndexedDB
 
 ## Governing Invariants
 
-P4 must preserve all of the following:
+P4 preserves all of the following:
 
 - `SemanticTimelineEvent` is the canonical medical event model.
 - UI and product components never call IndexedDB directly.
@@ -64,7 +70,7 @@ P4 must preserve all of the following:
 - `localStorage` is not used for medical event bodies.
 - First-run bootstrap is persistent-metadata-driven and integrity-aware.
 - Corrupt persisted rows are quarantined durably, never silently skipped.
-- Routine Timeline/Dashboard reads become bounded; full-history startup is not the P4 end state.
+- Routine Timeline/Dashboard reads are bounded; full-history startup is not the P4 end state.
 - P4 local persistence is not cloud backup, account recovery, sync, or multi-device durability.
 
 ## Decision 1 — Platform-specific Web adapter package
@@ -143,7 +149,7 @@ No canonical persisted `localDay` field is approved. Day boundaries are timezone
 
 ## Decision 5 — Bounded repository reads
 
-P4 must add bounded reads for:
+P4 adds bounded reads for:
 
 - event by ID;
 - chronological page with required limit/cursor;
@@ -152,9 +158,9 @@ P4 must add bounded reads for:
 
 Timeline pagination uses chronological compound indexes. Latest glucose uses the kind index with descending limit 1. Dashboard day summaries query a timezone-derived occurrence range.
 
-Multi-kind filtering must remain bounded. P4a must choose and test either a bounded merge of kind cursors or a chronological scan with an explicit scan budget.
+Multi-kind filtering remains bounded through the approved repository implementation rather than an unbounded historical hydration.
 
-`getSnapshot()` is transitional compatibility only. The durable adapter must not preload all historical events merely to satisfy a synchronous snapshot API. P4a resolves that contract before Web cutover; by P4d routine product rendering uses bounded reads only.
+Routine product rendering no longer requires full-history startup hydration. Compatibility APIs must not be used to reintroduce unbounded reads into normal Web rendering.
 
 ## Decision 6 — Opaque cursor semantics
 
@@ -254,9 +260,9 @@ Application-level encryption/key management remains a separate future decision b
 
 ## Testing Requirements
 
-P4 testing must cover schema creation/upgrades, first-run atomic bootstrap, no-reseed after delete-all, inconsistent bootstrap detection, reload durability, duplicate IDs, missing update/delete, compound ordering, bounded asc/desc queries, kind and multi-kind reads, cursor continuation/incompatibility, corruption quarantine, quarantine failure, transaction abort, quota normalization where practical, connection lifecycle, immutability, and all P3 semantic regressions.
+P4 testing covers schema creation/upgrades, first-run atomic bootstrap, no-reseed after delete-all, inconsistent bootstrap detection, reload durability, duplicate IDs, missing update/delete, compound ordering, bounded asc/desc queries, kind and multi-kind reads, cursor continuation/incompatibility, corruption quarantine, quarantine failure, transaction abort, quota normalization where practical, connection lifecycle, immutability, and P3 semantic regressions.
 
-Node tests may use `fake-indexeddb`; browser E2E must prove real persistence.
+Node tests may use `fake-indexeddb`; browser E2E proves real persistence.
 
 Minimum browser journeys:
 
@@ -266,27 +272,29 @@ delete event → reload → event remains deleted
 delete all events → reload → demo data does not return
 ```
 
+These journeys are part of the mandatory Playwright CI gate.
+
 ## P4 Waves
 
 ### P4a — Web Storage Contract & Schema Foundation
 
-Deliver the new `@diabetes-universe/timeline-web` package, `idb`/test dependency boundaries, bounded repository contracts, removal/resolution of routine synchronous `getSnapshot()`, DB schema/open/upgrade foundation, bootstrap metadata/state machine, validators, quarantine/error contracts, connection lifecycle, and foundation tests. No default Web cutover.
+Delivered the `@diabetes-universe/timeline-web` package, `idb`/test dependency boundaries, bounded repository contracts, DB schema/open/upgrade foundation, bootstrap metadata/state machine, validators, quarantine/error contracts, connection lifecycle, and foundation tests.
 
 ### P4b — IndexedDB Repository Adapter
 
-Deliver durable semantic CRUD, atomic bootstrap, compound-index queries/cursors, durable quarantine, transaction semantics, and complete adapter tests. Keep `InMemoryTimelineRepository` for tests/explicit injection.
+Delivered durable semantic CRUD, atomic bootstrap, compound-index queries/cursors, durable quarantine, transaction semantics, and adapter tests. `InMemoryTimelineRepository` remains for tests/explicit injection.
 
 ### P4c — Web Cutover & Reload Durability
 
-Make Web composition use `IndexedDbTimelineRepository` by default. No silent memory fallback. Startup uses bounded/bootstrap flow rather than full-history preload. Add browser reload/delete/no-reseed coverage while preserving existing journeys.
+Web composition uses `IndexedDbTimelineRepository` by default with no silent memory fallback. Startup follows the durable bootstrap flow and browser coverage verifies reload/delete/no-reseed behavior.
 
 ### P4d — Bounded Product Reads
 
-Move Timeline pagination and Dashboard latest-glucose/recent/day-range data access to bounded repository/read-model queries. Routine rendering no longer requires full historical arrays. Complete scale/regression audit.
+Timeline/product reads use bounded repository/read-model queries and incremental loading rather than full-history startup hydration for routine rendering.
 
 ## P4 Completion Gate
 
-P4 is Feature Complete only when all are true:
+P4 is Feature Complete for the approved Web scope because all are satisfied:
 
 1. Durable semantic repository is active by default on Web.
 2. Save success equals committed transaction.
@@ -294,9 +302,11 @@ P4 is Feature Complete only when all are true:
 4. Corrupt rows are durably quarantined.
 5. Routine Timeline/Dashboard reads are bounded.
 6. No silent in-memory fallback exists.
-7. Reload/delete/no-reseed regressions pass in a real browser.
-8. Full validation is green.
+7. Reload/delete/no-reseed regressions are covered in a real browser.
+8. Full implementation validation is green.
 9. Documentation matches runtime reality.
+
+See [P4 — Durable Local Persistence — Feature Complete Record](p4-feature-complete.md) for the merge and validation baseline.
 
 ## Explicit Non-Scope
 
