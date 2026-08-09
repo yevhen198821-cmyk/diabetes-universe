@@ -1,4 +1,7 @@
-import type { SemanticTimelineEvent, TimelineEventKind } from '@diabetes-universe/types';
+import type {
+  SemanticTimelineEvent,
+  TimelineEventKind,
+} from '@diabetes-universe/types';
 
 export const TIMELINE_INDEXEDDB_DATABASE_NAME = 'diabetes-universe-timeline';
 export const TIMELINE_INDEXEDDB_VERSION = 1;
