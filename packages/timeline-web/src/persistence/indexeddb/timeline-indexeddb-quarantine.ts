@@ -12,10 +12,14 @@ export function createIndexedDbTimelineQuarantineRecord(
 ): IndexedDbTimelineQuarantineRecord {
   return {
     quarantineId: `${String(sourceKey)}:${quarantinedAt}:${validation.reason}`,
-    sourceRecordId: validation.sourceRecordId,
     reason: validation.reason,
     quarantinedAt,
     raw,
-    storageSchemaVersion: validation.storageSchemaVersion,
+    ...(validation.sourceRecordId === undefined
+      ? {}
+      : { sourceRecordId: validation.sourceRecordId }),
+    ...(validation.storageSchemaVersion === undefined
+      ? {}
+      : { storageSchemaVersion: validation.storageSchemaVersion }),
   };
 }
