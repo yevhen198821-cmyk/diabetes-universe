@@ -39,7 +39,10 @@ test('declares the approved P4 IndexedDB database identity', () => {
   assert.equal(TIMELINE_INDEXEDDB_DATABASE_NAME, 'diabetes-universe-timeline');
   assert.equal(TIMELINE_INDEXEDDB_VERSION, 1);
   assert.equal(TIMELINE_STORAGE_SCHEMA_VERSION, 1);
-  assert.equal(timelineIndexedDbSchemaV1.databaseName, TIMELINE_INDEXEDDB_DATABASE_NAME);
+  assert.equal(
+    timelineIndexedDbSchemaV1.databaseName,
+    TIMELINE_INDEXEDDB_DATABASE_NAME,
+  );
 });
 
 test('declares all three v1 stores and required event indexes', () => {
@@ -113,7 +116,7 @@ test('rejects invalid semantic numeric payloads', () => {
 
   assert.equal(result.status, 'quarantine');
   if (result.status === 'quarantine') {
-    assert.equal(result.reason, 'invalid_record_shape');
+    assert.equal(result.reason, 'invalid_event_schema');
   }
 });
 
