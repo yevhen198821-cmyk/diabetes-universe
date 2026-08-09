@@ -12,6 +12,7 @@ import {
   TIMELINE_STORAGE_SCHEMA_VERSION,
   type IndexedDbTimelineEventRecord,
   type TimelineBootstrapMetadata,
+  type TimelineIndexedDbBootstrapStateMetadata,
   type TimelineStorageQuarantineReason,
 } from './timeline-indexeddb-schema';
 
@@ -248,5 +249,25 @@ export function isTimelineBootstrapMetadata(
     raw.bootstrapVersion === TIMELINE_BOOTSTRAP_VERSION &&
     raw.seedVersion === TIMELINE_SEED_VERSION &&
     isIsoTimestamp(raw.completedAt)
+  );
+}
+
+export function isTimelineBootstrapStateMetadata(
+  raw: unknown,
+): raw is TimelineIndexedDbBootstrapStateMetadata {
+  if (!isRecord(raw)) {
+    return false;
+  }
+
+  return (
+    raw.key === 'bootstrap-state' &&
+    (raw.status === 'migrating' ||
+      raw.status === 'ready' ||
+      raw.status === 'failed') &&
+    raw.storageSchemaVersion === TIMELINE_STORAGE_SCHEMA_VERSION &&
+    isIsoTimestamp(raw.updatedAt) &&
+    (raw.lastMigrationAt === undefined ||
+      isIsoTimestamp(raw.lastMigrationAt)) &&
+    (raw.failureCode === undefined || typeof raw.failureCode === 'string')
   );
 }

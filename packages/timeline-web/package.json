@@ -7,10 +7,15 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "test": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test 'src/**/*.test.mjs'",
+    "test": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test --test-force-exit 'src/**/*.test.mjs'",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@diabetes-universe/types": "workspace:*"
+    "@diabetes-universe/timeline": "workspace:*",
+    "@diabetes-universe/types": "workspace:*",
+    "idb": "^8.0.3"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.5"
   }
 }

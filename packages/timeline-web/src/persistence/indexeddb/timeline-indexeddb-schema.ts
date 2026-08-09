@@ -40,6 +40,19 @@ export interface TimelineBootstrapMetadata {
   readonly completedAt: string;
 }
 
+export const TIMELINE_BOOTSTRAP_STATE_METADATA_KEY = 'bootstrap-state';
+
+export type TimelineBootstrapLifecycleStatus = 'migrating' | 'ready' | 'failed';
+
+export interface TimelineIndexedDbBootstrapStateMetadata {
+  readonly key: typeof TIMELINE_BOOTSTRAP_STATE_METADATA_KEY;
+  readonly status: TimelineBootstrapLifecycleStatus;
+  readonly storageSchemaVersion: TimelineStorageSchemaVersion;
+  readonly lastMigrationAt?: string;
+  readonly updatedAt: string;
+  readonly failureCode?: string;
+}
+
 export type TimelineStorageQuarantineReason =
   | 'invalid_record_shape'
   | 'unsupported_storage_schema'
