@@ -69,6 +69,7 @@ async function waitFor(predicate, description, maxAttempts = 30) {
 class DeferredInitializeRepository {
   #events;
   #initialized = false;
+  initializeCalls = 0;
   initializeDeferred;
 
   constructor(seedEvents = []) {
@@ -77,6 +78,7 @@ class DeferredInitializeRepository {
   }
 
   async initialize() {
+    this.initializeCalls += 1;
     await this.initializeDeferred.promise;
     this.#initialized = true;
   }
@@ -121,7 +123,62 @@ class DeferredInitializeRepository {
 
 class FailingInitializeRepository extends DeferredInitializeRepository {
   async initialize() {
+    this.initializeCalls += 1;
     throw new TimelineRepositoryError('TIMELINE_REPOSITORY_INITIALIZE_FAILED');
+  }
+}
+
+class RecoveringMutationRepository {
+  #events = [];
+  #initialized = false;
+  addCalls = [];
+
+  async initialize() {
+    this.#initialized = true;
+  }
+
+  getSnapshot() {
+    this.#assertInitialized();
+
+    return { events: cloneEvents(this.#events) };
+  }
+
+  async addEvent(event) {
+    this.#assertInitialized();
+    this.addCalls.push(event.id);
+
+    if (event.id === 'failing-event') {
+      throw new TimelineRepositoryError('TIMELINE_REPOSITORY_WRITE_FAILED');
+    }
+
+    this.#events = [...this.#events, { ...event }];
+
+    return { status: 'applied' };
+  }
+
+  async updateEvent() {
+    this.#assertInitialized();
+
+    return { status: 'not-found' };
+  }
+
+  async deleteEvent() {
+    this.#assertInitialized();
+
+    return { status: 'not-found' };
+  }
+
+  async replaceEvents(events) {
+    this.#assertInitialized();
+    this.#events = cloneEvents(events);
+
+    return { status: 'applied' };
+  }
+
+  #assertInitialized() {
+    if (!this.#initialized) {
+      throw new TimelineRepositoryError('TIMELINE_REPOSITORY_NOT_INITIALIZED');
+    }
   }
 }
 
@@ -263,6 +320,7 @@ test('provider exposes initial loading state before repository initialization re
       () => mounted.observations.at(-1)?.status === 'ready',
       'ready state',
     );
+    assert.equal(repository.initializeCalls, 1);
   } finally {
     await mounted.unmount();
   }
@@ -522,6 +580,61 @@ test('mutations are serialized to prevent stale snapshot overwrite', async () =>
   } finally {
     await mounted.unmount();
   }
+});
+
+test('mutation queue recovers after a rejected mutation', async () => {
+  const repository = new RecoveringMutationRepository();
+  const mounted = await mountTimelineStore({ repository });
+  const failingEvent = createEvent('failing-event', '2026-08-02T04:00:00.000Z');
+
+  try {
+    await waitFor(
+      () => mounted.observations.at(-1)?.status === 'ready',
+      'ready state',
+    );
+
+    await act(async () => {
+      mounted.currentStore.addEvent(failingEvent);
+      mounted.currentStore.addEvent(glucoseEarly);
+    });
+    await waitFor(
+      () => mounted.observations.at(-1)?.eventIds.includes('glucose-0800'),
+      'recovered mutation snapshot',
+    );
+
+    assert.deepEqual(repository.addCalls, ['failing-event', 'glucose-0800']);
+    assert.equal(mounted.observations.at(-1)?.status, 'ready');
+    assert.deepEqual(mounted.observations.at(-1)?.eventIds, ['glucose-0800']);
+  } finally {
+    await mounted.unmount();
+  }
+});
+
+test('async mutation completion does not render after unmount', async () => {
+  const repository = new SerializedMutationRepository();
+  const mounted = await mountTimelineStore({ repository });
+
+  await waitFor(
+    () => mounted.observations.at(-1)?.status === 'ready',
+    'ready state',
+  );
+
+  await act(async () => {
+    mounted.currentStore.addEvent(glucoseEarly);
+  });
+  await waitFor(
+    () => repository.addCalls.length === 1,
+    'pending serialized mutation',
+  );
+
+  const renderCountBeforeUnmount = mounted.observations.length;
+
+  await mounted.unmount();
+
+  repository.addDeferreds[0].deferred.resolve();
+  await flushAsyncWork();
+
+  assert.equal(mounted.observations.length, renderCountBeforeUnmount);
 });
 
 test('async initialization completion does not render after unmount', async () => {
