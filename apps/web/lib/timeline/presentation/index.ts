@@ -8,7 +8,6 @@ export {
   formatTimelineGlucoseDisplayValue,
   mapTimelineEventCardPresentation,
   mapTimelineEventDetailPresentation,
-  mapTimelineLegacyRepositoryProjection,
   mapTimelineSearchPresentation,
   timelinePresentationKindMappers,
 } from './timeline-presentation-mapper';

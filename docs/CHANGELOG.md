@@ -1,5 +1,34 @@
 # Changelog
 
+## P3h — Semantic Repository Cutover
+
+Дата: 2026-08-09
+
+Завершено:
+
+- `TimelineRepositoryEvent` cut over to native `SemanticTimelineEvent`
+- `InMemoryTimelineRepository` stores semantic records with `occurredAt` + `id`
+  ordering
+- `TimelineStoreProvider` reads semantic repository snapshots directly (no
+  routine `liftRepositorySnapshot()` re-lift)
+- removed temporary write projection bridge and `NativeSemanticEventSidecar`
+- production demo seed in `apps/web/lib/mocks/timeline.ts` is semantic-native;
+  preserved legacy demo fixture retained for migration regression only
+- routine store state no longer carries migration sidecar/quarantine state
+- `liftLegacyToSemantic()` / `liftRepositorySnapshot()` remain migration/import
+  utilities only
+- added production-runtime legacy isolation audit test
+
+Не входит в этот этап:
+
+- IndexedDB / SQLite / backend / API / auth / sync / outbox
+- P4 durable persistence
+- P3 Feature Complete declaration (awaiting Final Audit)
+
+Статус:
+
+P3h — Semantic Repository Cutover complete; PR remains Draft until Final Audit
+
 ## P2 Phase C — Timeline Repository Store Integration
 
 Дата: 2026-08-09

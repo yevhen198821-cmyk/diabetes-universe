@@ -367,37 +367,6 @@ export function mapTimelineSearchPresentation(
   };
 }
 
-export function mapTimelineLegacyRepositoryProjection(
-  event: SemanticTimelineEvent,
-  dependencies: TimelinePresentationDependencies,
-): {
-  readonly context: string | undefined;
-  readonly note: string | undefined;
-  readonly title: string;
-  readonly unit: string | undefined;
-  readonly value: string;
-} {
-  const presentation = mapTimelineKindPresentation(event, dependencies);
-
-  return {
-    context: presentation.context,
-    note:
-      event.kind === 'nutrition' ||
-      event.kind === 'medication' ||
-      event.kind === 'activity'
-        ? (presentation.note ?? undefined)
-        : undefined,
-    title: presentation.title,
-    unit: presentation.measurement.unit || undefined,
-    value:
-      event.kind === 'note'
-        ? event.body
-        : event.kind === 'activity'
-          ? presentation.measurement.value
-          : presentation.measurement.display,
-  };
-}
-
 export const timelinePresentationKindMappers = {
   activity: mapActivityPresentation,
   glucose: mapGlucosePresentation,

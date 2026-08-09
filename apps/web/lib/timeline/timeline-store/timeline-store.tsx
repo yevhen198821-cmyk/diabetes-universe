@@ -6,12 +6,7 @@ import {
   type TimelineRepository,
   type TimelineRepositoryMutationResult,
 } from '@diabetes-universe/timeline';
-import type {
-  MigrationRecord,
-  SemanticTimelineEvent,
-  TimelineDiagnosticsSnapshot,
-  TimelineEvent,
-} from '@diabetes-universe/types';
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 import {
   createContext,
   useCallback,
@@ -25,19 +20,12 @@ import {
 } from 'react';
 
 import { timelineEvents as demoTimelineEvents } from '../../mocks/timeline';
+import { cloneSemanticTimelineEvents } from '../semantic-timeline-clone';
 import {
-  registerNativeSemanticEvent,
-  unregisterNativeSemanticEvent,
-} from '../migration/native-semantic-event-sidecar';
-import { liftRepositorySnapshot } from '../migration/lift-repository-snapshot';
-import type { TimelinePresentationDependencies } from '../presentation';
-import { projectSemanticEventForRepositoryWrite } from '../timeline-semantic-write';
-import {
-  initialTimelineMigrationStoreState,
-  initialTimelineStoreState,
   createTimelineDiagnosticsFromState,
+  getMigrationRecord,
+  initialTimelineStoreState,
   timelineStoreReducer,
-  type TimelineMigrationStoreState,
   type TimelineStoreErrorCode,
   type TimelineStoreStatus,
 } from './timeline-store-model';
@@ -45,26 +33,25 @@ import {
 export interface TimelineStoreValue {
   readonly addEvent: (event: SemanticTimelineEvent) => void;
   readonly deleteEvent: (eventId: string) => void;
-  readonly diagnostics: TimelineDiagnosticsSnapshot;
+  readonly diagnostics: ReturnType<typeof createTimelineDiagnosticsFromState>;
   readonly error?: string;
   readonly events: readonly SemanticTimelineEvent[];
-  readonly getMigrationRecord: (eventId: string) => MigrationRecord | undefined;
-  readonly replaceEvents: (events: readonly TimelineEvent[]) => void;
+  readonly getMigrationRecord: typeof getMigrationRecord;
+  readonly replaceEvents: (events: readonly SemanticTimelineEvent[]) => void;
   readonly status: TimelineStoreStatus;
   readonly updateEvent: (event: SemanticTimelineEvent) => void;
 }
 
 interface TimelineStoreProviderProps {
   readonly children: ReactNode;
-  readonly initialEvents?: readonly TimelineEvent[];
-  readonly presentationDependencies: TimelinePresentationDependencies;
+  readonly initialEvents?: readonly SemanticTimelineEvent[];
   readonly repository?: TimelineRepository;
 }
 
 const TimelineStoreContext = createContext<TimelineStoreValue | null>(null);
 
 function createDefaultTimelineRepository(
-  initialEvents: readonly TimelineEvent[],
+  initialEvents: readonly SemanticTimelineEvent[],
 ): TimelineRepository {
   return createInMemoryTimelineRepository({ seedEvents: initialEvents });
 }
@@ -77,14 +64,9 @@ function resolveTimelineStoreErrorCode(error: unknown): TimelineStoreErrorCode {
   return 'TIMELINE_STORE_UNKNOWN_ERROR';
 }
 
-function createMigrationContext(migratedAt: string) {
-  return { migratedAt };
-}
-
 export function TimelineStoreProvider({
   children,
   initialEvents = demoTimelineEvents,
-  presentationDependencies,
   repository,
 }: TimelineStoreProviderProps) {
   const isMountedRef = useRef(false);
@@ -96,34 +78,12 @@ export function TimelineStoreProvider({
     timelineStoreReducer,
     initialTimelineStoreState,
   );
-  const migrationStateRef = useRef<TimelineMigrationStoreState>(
-    initialTimelineMigrationStoreState,
-  );
 
   const dispatchReadySnapshot = useCallback(() => {
-    const migratedAt = new Date().toISOString();
-    const previousEvidence = migrationStateRef.current;
-    const lifted = liftRepositorySnapshot(
-      timelineRepository.getSnapshot().events,
-      createMigrationContext(migratedAt),
-      {
-        migrationRecords: previousEvidence.migrationRecords,
-        quarantinedRecords: previousEvidence.quarantinedRecords,
-      },
-      previousEvidence.nativeSemanticEvents,
-    );
-    const migration = {
-      migrationRecords: lifted.migrationRecords,
-      nativeSemanticEvents: previousEvidence.nativeSemanticEvents,
-      quarantinedRecords: lifted.quarantinedRecords,
-      unsupportedSchemaCount: lifted.unsupportedSchemaCount,
-    };
-
-    migrationStateRef.current = migration;
-
     dispatch({
-      events: lifted.events,
-      migration,
+      events: cloneSemanticTimelineEvents(
+        timelineRepository.getSnapshot().events,
+      ),
       type: 'setReady',
     });
   }, [timelineRepository]);
@@ -161,18 +121,12 @@ export function TimelineStoreProvider({
   }, [dispatchReadySnapshot, dispatchRepositoryError, timelineRepository]);
 
   const enqueueRepositoryMutation = useCallback(
-    (
-      mutation: () => Promise<TimelineRepositoryMutationResult>,
-      options?: {
-        readonly onApplied?: () => void;
-      },
-    ): void => {
+    (mutation: () => Promise<TimelineRepositoryMutationResult>): void => {
       const mutationOperation = operationQueueRef.current
         .then(async () => {
           const result = await mutation();
 
           if (isMountedRef.current && result.status === 'applied') {
-            options?.onApplied?.();
             dispatchReadySnapshot();
           }
         })
@@ -189,79 +143,27 @@ export function TimelineStoreProvider({
 
   const addEvent = useCallback(
     (event: SemanticTimelineEvent) => {
-      const legacyEvent = projectSemanticEventForRepositoryWrite(
-        event,
-        presentationDependencies,
-      );
-
-      enqueueRepositoryMutation(
-        () => timelineRepository.addEvent(legacyEvent),
-        {
-          onApplied: () => {
-            migrationStateRef.current = {
-              ...migrationStateRef.current,
-              nativeSemanticEvents: registerNativeSemanticEvent(
-                migrationStateRef.current.nativeSemanticEvents,
-                event,
-              ),
-            };
-          },
-        },
-      );
+      enqueueRepositoryMutation(() => timelineRepository.addEvent(event));
     },
-    [enqueueRepositoryMutation, presentationDependencies, timelineRepository],
+    [enqueueRepositoryMutation, timelineRepository],
   );
 
   const updateEvent = useCallback(
     (event: SemanticTimelineEvent) => {
-      const legacyEvent = projectSemanticEventForRepositoryWrite(
-        event,
-        presentationDependencies,
-      );
-      const isNativeEvent =
-        migrationStateRef.current.nativeSemanticEvents.events.has(event.id);
-
-      enqueueRepositoryMutation(
-        () => timelineRepository.updateEvent(legacyEvent),
-        {
-          onApplied: () => {
-            if (!isNativeEvent) {
-              return;
-            }
-
-            migrationStateRef.current = {
-              ...migrationStateRef.current,
-              nativeSemanticEvents: registerNativeSemanticEvent(
-                migrationStateRef.current.nativeSemanticEvents,
-                event,
-              ),
-            };
-          },
-        },
-      );
+      enqueueRepositoryMutation(() => timelineRepository.updateEvent(event));
     },
-    [enqueueRepositoryMutation, presentationDependencies, timelineRepository],
+    [enqueueRepositoryMutation, timelineRepository],
   );
 
   const deleteEvent = useCallback(
     (eventId: string) => {
-      enqueueRepositoryMutation(() => timelineRepository.deleteEvent(eventId), {
-        onApplied: () => {
-          migrationStateRef.current = {
-            ...migrationStateRef.current,
-            nativeSemanticEvents: unregisterNativeSemanticEvent(
-              migrationStateRef.current.nativeSemanticEvents,
-              eventId,
-            ),
-          };
-        },
-      });
+      enqueueRepositoryMutation(() => timelineRepository.deleteEvent(eventId));
     },
     [enqueueRepositoryMutation, timelineRepository],
   );
 
   const replaceEvents = useCallback(
-    (events: readonly TimelineEvent[]) => {
+    (events: readonly SemanticTimelineEvent[]) => {
       enqueueRepositoryMutation(() => timelineRepository.replaceEvents(events));
     },
     [enqueueRepositoryMutation, timelineRepository],
@@ -270,11 +172,6 @@ export function TimelineStoreProvider({
   const diagnostics = useMemo(
     () => createTimelineDiagnosticsFromState(state),
     [state],
-  );
-
-  const getMigrationRecord = useCallback(
-    (eventId: string) => state.migration.migrationRecords.get(eventId),
-    [state.migration.migrationRecords],
   );
 
   const value = useMemo<TimelineStoreValue>(
@@ -293,7 +190,6 @@ export function TimelineStoreProvider({
       addEvent,
       deleteEvent,
       diagnostics,
-      getMigrationRecord,
       replaceEvents,
       state.error,
       state.events,

@@ -7,10 +7,9 @@ export {
 export {
   createReadyTimelineStoreState,
   createTimelineDiagnosticsFromState,
-  initialTimelineMigrationStoreState,
+  getMigrationRecord,
   initialTimelineStoreState,
   timelineStoreReducer,
-  type TimelineMigrationStoreState,
   type TimelineStoreAction,
   type TimelineStoreState,
   type TimelineStoreStatus,

@@ -1,13 +1,10 @@
 import type {
   MigrationRecord,
-  QuarantineRecord,
   SemanticTimelineEvent,
   TimelineDiagnosticsSnapshot,
 } from '@diabetes-universe/types';
 
 import { cloneSemanticTimelineEvents } from '../semantic-timeline-clone';
-import type { NativeSemanticEventSidecar } from '../migration/native-semantic-event-sidecar';
-import { createNativeSemanticEventSidecar } from '../migration/native-semantic-event-sidecar';
 
 export type TimelineStoreStatus = 'error' | 'loading' | 'ready';
 
@@ -18,18 +15,10 @@ export type TimelineStoreErrorCode =
   | 'TIMELINE_REPOSITORY_WRITE_FAILED'
   | 'TIMELINE_STORE_UNKNOWN_ERROR';
 
-export interface TimelineMigrationStoreState {
-  readonly migrationRecords: ReadonlyMap<string, MigrationRecord>;
-  readonly nativeSemanticEvents: NativeSemanticEventSidecar;
-  readonly quarantinedRecords: readonly QuarantineRecord[];
-  readonly unsupportedSchemaCount: number;
-}
-
 export interface TimelineStoreState {
   readonly error?: string;
   readonly errorCode?: TimelineStoreErrorCode;
   readonly events: readonly SemanticTimelineEvent[];
-  readonly migration: TimelineMigrationStoreState;
   readonly status: TimelineStoreStatus;
 }
 
@@ -39,7 +28,6 @@ export type TimelineStoreAction =
     }
   | {
       readonly events: readonly SemanticTimelineEvent[];
-      readonly migration: TimelineMigrationStoreState;
       readonly type: 'setReady';
     }
   | {
@@ -48,37 +36,16 @@ export type TimelineStoreAction =
       readonly type: 'setError';
     };
 
-export const initialTimelineMigrationStoreState: TimelineMigrationStoreState = {
-  migrationRecords: new Map(),
-  nativeSemanticEvents: createNativeSemanticEventSidecar(),
-  quarantinedRecords: [],
-  unsupportedSchemaCount: 0,
-};
-
 export const initialTimelineStoreState: TimelineStoreState = {
   events: [],
-  migration: initialTimelineMigrationStoreState,
   status: 'loading',
 };
 
 export function createReadyTimelineStoreState(
   events: readonly SemanticTimelineEvent[],
-  migration: TimelineMigrationStoreState = initialTimelineMigrationStoreState,
 ): TimelineStoreState {
   return {
     events: cloneSemanticTimelineEvents(events),
-    migration: {
-      migrationRecords: new Map(migration.migrationRecords),
-      nativeSemanticEvents: {
-        events: new Map(migration.nativeSemanticEvents.events),
-      },
-      quarantinedRecords: migration.quarantinedRecords.map((record) => ({
-        ...record,
-        preservedLegacy: { ...record.preservedLegacy },
-        raw: { ...record.raw },
-      })),
-      unsupportedSchemaCount: migration.unsupportedSchemaCount,
-    },
     status: 'ready',
   };
 }
@@ -91,13 +58,12 @@ export function timelineStoreReducer(
     case 'setLoading':
       return initialTimelineStoreState;
     case 'setReady':
-      return createReadyTimelineStoreState(action.events, action.migration);
+      return createReadyTimelineStoreState(action.events);
     case 'setError':
       return {
         error: action.error?.trim() || undefined,
         errorCode: action.errorCode ?? 'TIMELINE_STORE_UNKNOWN_ERROR',
         events: state.events,
-        migration: state.migration,
         status: 'error',
       };
   }
@@ -108,9 +74,15 @@ export function createTimelineDiagnosticsFromState(
 ): TimelineDiagnosticsSnapshot {
   return {
     activeEventCount: state.events.length,
-    migrationRecordCount: state.migration.migrationRecords.size,
-    quarantinedCount: state.migration.quarantinedRecords.length,
-    quarantinedRecords: state.migration.quarantinedRecords,
-    unsupportedSchemaCount: state.migration.unsupportedSchemaCount,
+    migrationRecordCount: 0,
+    quarantinedCount: 0,
+    quarantinedRecords: [],
+    unsupportedSchemaCount: 0,
   };
+}
+
+export function getMigrationRecord(
+  _eventId: string,
+): MigrationRecord | undefined {
+  return undefined;
 }

@@ -15,59 +15,59 @@ import {
   teardownIntegrationDom,
 } from '../../platform/integration/tests/integration-dom-setup.mjs';
 import {
-  getTestTimelinePresentationDependencies,
   semanticGlucoseEarly,
   semanticInsulinLater,
 } from './testing/timeline-store-test-fixtures.mjs';
 import { TimelineStoreProvider, useTimelineStore } from './timeline-store.tsx';
 
-let presentationDependencies;
-
-test.before(async () => {
-  presentationDependencies = await getTestTimelinePresentationDependencies();
-});
-
 after(() => {
   teardownIntegrationDom();
 });
 
-function createEvent(id, dateTime, overrides = {}) {
+function createSemanticEvent(id, occurredAt, overrides = {}) {
   const kind = overrides.kind ?? 'glucose';
 
   const defaultsByKind = {
     activity: {
-      title: 'Прогулка',
-      unit: 'минут',
-      value: '30',
+      activityType: 'walk',
+      durationSeconds: 1800,
+      kind: 'activity',
     },
     glucose: {
-      title: 'Глюкоза',
-      value: '6,4 ммоль/л',
+      concentrationMmolPerL: 6.4,
+      kind: 'glucose',
     },
     insulin: {
-      title: 'NovoRapid',
-      value: '4 ЕД',
+      doseUnits: 4,
+      kind: 'insulin',
+      preparation: 'NovoRapid',
     },
     medication: {
-      title: 'Метформин',
-      unit: 'мг',
-      value: '400',
+      dose: 400,
+      doseUnit: 'mg',
+      kind: 'medication',
+      medicationName: 'Метформин',
     },
     note: {
+      body: 'Текст заметки',
+      kind: 'note',
       title: 'Заметка',
-      value: 'Текст заметки',
     },
     nutrition: {
-      title: 'Завтрак',
-      value: '42 г углеводов',
+      carbohydratesGrams: 42,
+      kind: 'nutrition',
+      mealType: 'breakfast',
+      mode: 'carbs_only',
     },
   };
 
   return {
-    dateTime,
+    createdAt: '2026-08-09T08:30:00.000Z',
     id,
-    kind,
+    occurredAt,
+    schemaVersion: 1,
     source: 'demo',
+    updatedAt: '2026-08-09T08:30:00.000Z',
     ...defaultsByKind[kind],
     ...overrides,
   };
@@ -314,7 +314,7 @@ async function mountTimelineStore({ initialEvents, repository } = {}) {
     root.render(
       createElement(
         TimelineStoreProvider,
-        { initialEvents, presentationDependencies, repository },
+        { initialEvents, repository },
         createElement(StoreProbe),
       ),
     );
@@ -339,18 +339,10 @@ async function mountTimelineStore({ initialEvents, repository } = {}) {
   };
 }
 
-test('partial bad-data lift still reaches ready with diagnostics quarantine count', async () => {
+test('routine initialization reports zero migration diagnostics', async () => {
   const mounted = await mountTimelineStore({
     repository: createInMemoryTimelineRepository({
-      seedEvents: [
-        glucoseEarly,
-        {
-          ...medicationLegacy,
-          id: 'medication-bad',
-          kind: 'medication',
-          unit: 'таблетка',
-        },
-      ],
+      seedEvents: [semanticGlucoseEarly],
     }),
   });
 
@@ -360,28 +352,27 @@ test('partial bad-data lift still reaches ready with diagnostics quarantine coun
       'ready state',
     );
 
-    assert.equal(mounted.observations.at(-1)?.eventIds.length, 1);
-    assert.equal(mounted.observations.at(-1)?.diagnostics.quarantinedCount, 1);
     assert.equal(
-      mounted.observations.at(-1)?.diagnostics.quarantinedRecords[0]?.raw.id,
-      'medication-bad',
+      mounted.observations.at(-1)?.diagnostics.migrationRecordCount,
+      0,
     );
+    assert.equal(mounted.observations.at(-1)?.diagnostics.quarantinedCount, 0);
   } finally {
     await mounted.unmount();
   }
 });
 
-const glucoseEarly = createEvent('glucose-0800', '2026-08-02T05:00:00.000Z');
-const medicationLegacy = createEvent(
-  'medication-1130',
-  '2026-08-02T08:30:00.000Z',
-  { kind: 'medication' },
+const glucoseEarly = createSemanticEvent(
+  'glucose-0800',
+  '2026-08-02T05:00:00.000Z',
 );
 
-const insulinLater = createEvent('insulin-0805', '2026-08-02T05:05:00.000Z', {
-  kind: 'insulin',
-});
-const nutritionLatest = createEvent(
+const insulinLater = createSemanticEvent(
+  'insulin-0805',
+  '2026-08-02T05:05:00.000Z',
+  { kind: 'insulin' },
+);
+const nutritionLatest = createSemanticEvent(
   'nutrition-0820',
   '2026-08-02T05:20:00.000Z',
   {

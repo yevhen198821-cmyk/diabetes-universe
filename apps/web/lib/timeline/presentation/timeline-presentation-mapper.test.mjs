@@ -7,7 +7,6 @@ import {
   formatTimelineGlucoseDisplayValue,
   mapTimelineEventCardPresentation,
   mapTimelineEventDetailPresentation,
-  mapTimelineLegacyRepositoryProjection,
   mapTimelineSearchPresentation,
   timelinePresentationKindMappers,
 } from './timeline-presentation-mapper.ts';
@@ -234,18 +233,6 @@ test('search presentation separates localized labels from user-authored content'
   assert.equal(insulinSearch.localizedLabels.includes('Insulin'), true);
   assert.equal(noteSearch.userContent.includes('Самочувствие'), true);
   assert.equal(noteSearch.localizedLabels.includes('Note'), true);
-});
-
-test('legacy repository projection uses presentation mapper output', () => {
-  const projection = mapTimelineLegacyRepositoryProjection(
-    glucoseEvent,
-    enGbDependencies,
-  );
-
-  assert.equal(projection.title, 'Glucose');
-  assert.equal(projection.value, '7.3 mmol/L');
-  assert.equal(projection.unit, 'mmol/L');
-  assert.equal(projection.context, 'Before meal');
 });
 
 test('EventCard mapper receives presentation-only props', () => {

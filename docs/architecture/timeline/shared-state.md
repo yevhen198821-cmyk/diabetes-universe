@@ -12,12 +12,12 @@ Approved
 ## Responsibility
 
 `InMemoryTimelineRepository` owns the current persistence-facing in-memory
-collection of `TimelineEvent` records before durable local storage, Backend/API,
-or sync integration exists.
+collection of `SemanticTimelineEvent` records before durable local storage,
+Backend/API, or sync integration exists.
 
 `TimelineStoreProvider` owns the React application projection used for rendering:
 
-- `readonly TimelineEvent[]`;
+- `readonly SemanticTimelineEvent[]`;
 - loading status;
 - error status;
 - safe application error message when one is provided;
@@ -26,6 +26,11 @@ or sync integration exists.
 The provider delegates event mutations to `TimelineRepository` and refreshes
 React state from `repository.getSnapshot()`. React state is therefore a
 projection/cache for rendering, not a second canonical event collection.
+
+Routine runtime does **not** lift legacy repository snapshots or maintain
+migration sidecar/quarantine state. Migration utilities (`liftLegacyToSemantic`,
+`liftRepositorySnapshot`) exist only for explicit import/migration paths and
+regression tests.
 
 The store does not own:
 
@@ -59,21 +64,21 @@ The root layout remains a server component. A small client provider wrapper owns
 the store, so navigation between `/` and `/timeline` does not reset events.
 
 `TimelineStoreProvider` creates the demo repository at the application/provider
-boundary from `demoTimelineEvents`. It does not create repositories inside
-Dashboard, Timeline, Quick Add, or presentation components.
+boundary from semantic `demoTimelineEvents`. It does not create repositories
+inside Dashboard, Timeline, Quick Add, or presentation components.
 
 ### Public API
 
 ```ts
 interface TimelineStoreValue {
-  readonly events: readonly TimelineEvent[];
+  readonly events: readonly SemanticTimelineEvent[];
   readonly status: 'loading' | 'ready' | 'error';
   readonly error?: string;
 
-  readonly addEvent: (event: TimelineEvent) => void;
-  readonly updateEvent: (event: TimelineEvent) => void;
+  readonly addEvent: (event: SemanticTimelineEvent) => void;
+  readonly updateEvent: (event: SemanticTimelineEvent) => void;
   readonly deleteEvent: (eventId: string) => void;
-  readonly replaceEvents: (events: readonly TimelineEvent[]) => void;
+  readonly replaceEvents: (events: readonly SemanticTimelineEvent[]) => void;
 }
 ```
 
@@ -84,11 +89,14 @@ Repository mutation semantics live in `@diabetes-universe/timeline`.
 The React reducer/model owns only application projection state:
 
 - loading;
-- ready repository snapshot;
+- ready semantic repository snapshot;
 - error.
 
 It does not independently perform add/update/delete business mutations.
 Existing arrays and event objects are cloned before entering React state.
+
+Routine diagnostics report zero migration/quarantine counts. Migration evidence
+exists only in explicit import/migration utilities, not in normal app state.
 
 ### Selectors
 
@@ -106,15 +114,23 @@ Approved selectors:
 
 Day Summary uses only events from the local current calendar day.
 
+### Ordering
+
+Repository, selectors, and Timeline UI share one semantic ordering contract:
+
+1. `occurredAt` ascending/descending as required by the consumer;
+2. `id` as deterministic tie-breaker.
+
 ### Timezone policy
 
-Demo state stores `dateTime` as ISO 8601. Grouping, summaries, and display
+Demo state stores `occurredAt` as ISO 8601. Grouping, summaries, and display
 formatting use the user's browser-local timezone unless a test or caller passes
 an explicit timezone. Account-level timezone settings are future scope.
 
 ### API readiness
 
-Repository Foundation is implemented with `InMemoryTimelineRepository`.
+Repository Foundation is implemented with `InMemoryTimelineRepository` storing
+`SemanticTimelineEvent` natively after P3h.
 
 Current:
 
@@ -126,7 +142,7 @@ Future:
 
 - durable Web adapter such as IndexedDB;
 - mobile adapter such as SQLite/native storage;
-- sync/backend/auth only after separate approved work.
+- sync/backend/auth only after separate approved work (P4 not started).
 
 Future API/repository work should keep selectors as pure model logic where
 possible and replace the provider's repository adapter rather than

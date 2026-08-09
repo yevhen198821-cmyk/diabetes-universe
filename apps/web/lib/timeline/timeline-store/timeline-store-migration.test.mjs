@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { timelineEvents as demoTimelineEvents } from '../../mocks/timeline.ts';
+import { preservedLegacyDemoTimelineEvents } from '../../mocks/preserved-legacy-demo-timeline-events.ts';
 import { liftRepositorySnapshot } from '../migration/lift-repository-snapshot.ts';
 import { createMigrationSidecarStore } from '../migration/migration-sidecar-store.ts';
 import { createQuarantineRegistry } from '../migration/quarantine-registry.ts';
@@ -9,7 +9,6 @@ import { createTimelineDiagnosticsSnapshot } from '../migration/timeline-migrati
 import {
   createReadyTimelineStoreState,
   createTimelineDiagnosticsFromState,
-  timelineStoreReducer,
 } from './timeline-store-model.ts';
 
 const MIGRATED_AT = '2026-08-09T08:30:00.000Z';
@@ -170,26 +169,21 @@ test('diagnostics snapshot reports active, migration, and quarantine counts', ()
   assert.equal(diagnostics.quarantinedRecords[0].raw.id, 'bad-insulin');
 });
 
-test('demo fixtures lift with zero quarantine records', () => {
-  const lifted = liftRepositorySnapshot(demoTimelineEvents, {
+test('preserved legacy demo fixtures lift with zero quarantine records', () => {
+  const lifted = liftRepositorySnapshot(preservedLegacyDemoTimelineEvents, {
     migratedAt: MIGRATED_AT,
   });
 
   assert.equal(lifted.quarantinedRecords.length, 0);
   assert.equal(lifted.unsupportedSchemaCount, 0);
-  assert.equal(lifted.events.length, demoTimelineEvents.length);
+  assert.equal(lifted.events.length, preservedLegacyDemoTimelineEvents.length);
 });
 
 test('semantic ready store state does not expose legacy presentation fields', () => {
   const lifted = liftRepositorySnapshot([glucoseLegacy], {
     migratedAt: MIGRATED_AT,
   });
-  const state = createReadyTimelineStoreState(lifted.events, {
-    migrationRecords: lifted.migrationRecords,
-    nativeSemanticEvents: { events: new Map() },
-    quarantinedRecords: lifted.quarantinedRecords,
-    unsupportedSchemaCount: 0,
-  });
+  const state = createReadyTimelineStoreState(lifted.events);
 
   assert.equal(state.events[0].kind, 'glucose');
   assert.equal(state.events[0].concentrationMmolPerL, 6.4);
@@ -197,55 +191,14 @@ test('semantic ready store state does not expose legacy presentation fields', ()
   assert.equal(Object.hasOwn(state.events[0], 'value'), false);
 });
 
-test('createTimelineDiagnosticsFromState mirrors store migration state', () => {
+test('routine store diagnostics report zero migration state', () => {
   const lifted = liftRepositorySnapshot([glucoseLegacy, insulinLegacy], {
     migratedAt: MIGRATED_AT,
   });
-  const state = createReadyTimelineStoreState(lifted.events, {
-    migrationRecords: lifted.migrationRecords,
-    nativeSemanticEvents: { events: new Map() },
-    quarantinedRecords: lifted.quarantinedRecords,
-    unsupportedSchemaCount: 0,
-  });
-
+  const state = createReadyTimelineStoreState(lifted.events);
   const diagnostics = createTimelineDiagnosticsFromState(state);
 
   assert.equal(diagnostics.activeEventCount, 2);
-  assert.equal(diagnostics.migrationRecordCount, 2);
+  assert.equal(diagnostics.migrationRecordCount, 0);
   assert.equal(diagnostics.quarantinedCount, 0);
-});
-
-test('setReady stores semantic events and migration sidecar state', () => {
-  const lifted = liftRepositorySnapshot([glucoseLegacy], {
-    migratedAt: MIGRATED_AT,
-  });
-  const state = timelineStoreReducer(
-    {
-      events: [],
-      migration: {
-        migrationRecords: new Map(),
-        nativeSemanticEvents: { events: new Map() },
-        quarantinedRecords: [],
-        unsupportedSchemaCount: 0,
-      },
-      status: 'loading',
-    },
-    {
-      events: lifted.events,
-      migration: {
-        migrationRecords: lifted.migrationRecords,
-        nativeSemanticEvents: { events: new Map() },
-        quarantinedRecords: lifted.quarantinedRecords,
-        unsupportedSchemaCount: 0,
-      },
-      type: 'setReady',
-    },
-  );
-
-  assert.equal(state.status, 'ready');
-  assert.equal(state.events[0].schemaVersion, 1);
-  assert.equal(
-    state.migration.migrationRecords.get('glucose-0800')?.eventId,
-    'glucose-0800',
-  );
 });

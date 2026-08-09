@@ -15,15 +15,7 @@ import {
   setupIntegrationDom,
   teardownIntegrationDom,
 } from '../../platform/integration/tests/integration-dom-setup.mjs';
-import { projectSemanticEventForRepositoryWrite } from '../timeline-semantic-write.ts';
-import { getTestTimelinePresentationDependencies } from './testing/timeline-store-test-fixtures.mjs';
 import { TimelineStoreProvider, useTimelineStore } from './timeline-store.tsx';
-
-let presentationDependencies;
-
-test.before(async () => {
-  presentationDependencies = await getTestTimelinePresentationDependencies();
-});
 
 after(() => {
   teardownIntegrationDom();
@@ -51,7 +43,7 @@ async function mountTimelineStore({ repository } = {}) {
     root.render(
       createElement(
         TimelineStoreProvider,
-        { presentationDependencies, repository },
+        { repository },
         createElement(StoreProbe),
       ),
     );
@@ -99,6 +91,14 @@ test('native semantic add does not create migration evidence', async () => {
     );
     assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
     assert.equal(mounted.currentStore.diagnostics.quarantinedCount, 0);
+
+    const repositoryEvent = repository
+      .getSnapshot()
+      .events.find((event) => event.id === semanticEvent.id);
+
+    assert.equal(repositoryEvent?.kind, 'glucose');
+    assert.equal(repositoryEvent?.concentrationMmolPerL, 6.1);
+    assert.equal(Object.hasOwn(repositoryEvent ?? {}, 'value'), false);
   } finally {
     await mounted.unmount();
   }
@@ -152,23 +152,4 @@ test('repository failure does not commit native semantic mutation', async () => 
   } finally {
     await mounted.unmount();
   }
-});
-
-test('semantic store projects legacy repository payload at write boundary only', () => {
-  const semanticEvent = createSemanticGlucoseTimelineEvent(
-    {
-      context: 'Натощак',
-      time: '08:00',
-      valueMmol: 6.1,
-    },
-    { clock: fixedClock },
-  );
-  const legacy = projectSemanticEventForRepositoryWrite(
-    semanticEvent,
-    presentationDependencies,
-  );
-
-  assert.equal(legacy.kind, 'glucose');
-  assert.equal(typeof legacy.value, 'string');
-  assert.equal(Object.hasOwn(legacy, 'concentrationMmolPerL'), false);
 });

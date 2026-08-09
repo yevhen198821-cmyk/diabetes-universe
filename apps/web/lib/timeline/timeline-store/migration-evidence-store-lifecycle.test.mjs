@@ -15,38 +15,15 @@ import {
   setupIntegrationDom,
   teardownIntegrationDom,
 } from '../../platform/integration/tests/integration-dom-setup.mjs';
-import { getTestTimelinePresentationDependencies } from './testing/timeline-store-test-fixtures.mjs';
+import {
+  semanticGlucoseEarly,
+  semanticInsulinLater,
+} from './testing/timeline-store-test-fixtures.mjs';
 import { TimelineStoreProvider, useTimelineStore } from './timeline-store.tsx';
-
-let presentationDependencies;
-
-test.before(async () => {
-  presentationDependencies = await getTestTimelinePresentationDependencies();
-});
 
 after(() => {
   teardownIntegrationDom();
 });
-
-const glucoseA = {
-  context: 'Перед завтраком',
-  dateTime: '2026-08-02T05:00:00.000Z',
-  id: 'glucose-a',
-  kind: 'glucose',
-  source: 'demo',
-  title: 'Глюкоза',
-  value: '6,4 ммоль/л',
-};
-
-const insulinB = {
-  context: 'Перед едой',
-  dateTime: '2026-08-02T05:05:00.000Z',
-  id: 'insulin-b',
-  kind: 'insulin',
-  source: 'demo',
-  title: 'NovoRapid',
-  value: '4 ЕД',
-};
 
 const semanticGlucoseC = {
   concentrationMmolPerL: 7.1,
@@ -102,7 +79,7 @@ async function mountTimelineStore({ repository } = {}) {
     root.render(
       createElement(
         TimelineStoreProvider,
-        { presentationDependencies, repository },
+        { repository },
         createElement(StoreProbe),
       ),
     );
@@ -126,45 +103,41 @@ async function mountTimelineStore({ repository } = {}) {
   };
 }
 
-test('store initialize records stable migration evidence for seeded events', async () => {
+test('routine store initialize does not record migration evidence', async () => {
   const repository = createInMemoryTimelineRepository({
-    seedEvents: [glucoseA, insulinB],
+    seedEvents: [semanticGlucoseEarly, semanticInsulinLater],
   });
   const mounted = await mountTimelineStore({ repository });
 
   try {
     await waitFor(() => mounted.currentStore.status === 'ready', 'ready state');
 
-    const recordA = mounted.currentStore.getMigrationRecord('glucose-a');
-    const recordB = mounted.currentStore.getMigrationRecord('insulin-b');
-
-    assert.ok(recordA?.migratedAt);
-    assert.ok(recordB?.migratedAt);
-    assert.equal(recordA?.preservedLegacy.value, '6,4 ммоль/л');
-    assert.equal(recordB?.preservedLegacy.value, '4 ЕД');
+    assert.equal(
+      mounted.currentStore.getMigrationRecord('glucose-0800'),
+      undefined,
+    );
+    assert.equal(
+      mounted.currentStore.getMigrationRecord('insulin-0805'),
+      undefined,
+    );
+    assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
+    assert.equal(mounted.currentStore.diagnostics.quarantinedCount, 0);
   } finally {
     await mounted.unmount();
   }
 });
 
-test('store update keeps migration evidence for unchanged events', async () => {
+test('routine store update does not create migration evidence', async () => {
   const repository = createInMemoryTimelineRepository({
-    seedEvents: [glucoseA, insulinB],
+    seedEvents: [semanticGlucoseEarly, semanticInsulinLater],
   });
   const mounted = await mountTimelineStore({ repository });
 
   try {
     await waitFor(() => mounted.currentStore.status === 'ready', 'ready state');
 
-    const recordABefore = structuredClone(
-      mounted.currentStore.getMigrationRecord('glucose-a'),
-    );
-    const recordBBefore = structuredClone(
-      mounted.currentStore.getMigrationRecord('insulin-b'),
-    );
-
     const semanticGlucoseA = mounted.currentStore.events.find(
-      (event) => event.id === 'glucose-a',
+      (event) => event.id === 'glucose-0800',
     );
 
     await act(async () => {
@@ -176,39 +149,29 @@ test('store update keeps migration evidence for unchanged events', async () => {
     });
     await waitFor(
       () =>
-        mounted.currentStore.events.find((event) => event.id === 'glucose-a')
+        mounted.currentStore.events.find((event) => event.id === 'glucose-0800')
           ?.concentrationMmolPerL === 7,
       'semantic glucose refresh',
     );
 
-    assert.deepEqual(
-      mounted.currentStore.getMigrationRecord('glucose-a'),
-      recordABefore,
+    assert.equal(
+      mounted.currentStore.getMigrationRecord('glucose-0800'),
+      undefined,
     );
-    assert.deepEqual(
-      mounted.currentStore.getMigrationRecord('insulin-b'),
-      recordBBefore,
-    );
+    assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
   } finally {
     await mounted.unmount();
   }
 });
 
-test('store native semantic add preserves legacy migration evidence and skips migration record for new event', async () => {
+test('routine store native semantic add does not create migration evidence', async () => {
   const repository = createInMemoryTimelineRepository({
-    seedEvents: [glucoseA, insulinB],
+    seedEvents: [semanticGlucoseEarly, semanticInsulinLater],
   });
   const mounted = await mountTimelineStore({ repository });
 
   try {
     await waitFor(() => mounted.currentStore.status === 'ready', 'ready state');
-
-    const recordABefore = structuredClone(
-      mounted.currentStore.getMigrationRecord('glucose-a'),
-    );
-    const recordBBefore = structuredClone(
-      mounted.currentStore.getMigrationRecord('insulin-b'),
-    );
 
     await act(async () => {
       mounted.currentStore.addEvent(semanticGlucoseC);
@@ -219,70 +182,55 @@ test('store native semantic add preserves legacy migration evidence and skips mi
       'added glucose event',
     );
 
-    const recordC = mounted.currentStore.getMigrationRecord('glucose-c');
-
-    assert.deepEqual(
-      mounted.currentStore.getMigrationRecord('glucose-a'),
-      recordABefore,
+    assert.equal(
+      mounted.currentStore.getMigrationRecord('glucose-c'),
+      undefined,
     );
-    assert.deepEqual(
-      mounted.currentStore.getMigrationRecord('insulin-b'),
-      recordBBefore,
-    );
-    assert.equal(recordC, undefined);
-    assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 2);
+    assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
   } finally {
     await mounted.unmount();
   }
 });
 
-test('store delete removes only deleted migration evidence', async () => {
+test('routine store delete does not leave migration evidence', async () => {
   const repository = createInMemoryTimelineRepository({
-    seedEvents: [glucoseA, insulinB],
+    seedEvents: [semanticGlucoseEarly, semanticInsulinLater],
   });
   const mounted = await mountTimelineStore({ repository });
 
   try {
     await waitFor(() => mounted.currentStore.status === 'ready', 'ready state');
 
-    const recordBBefore = structuredClone(
-      mounted.currentStore.getMigrationRecord('insulin-b'),
-    );
-
     await act(async () => {
-      mounted.currentStore.deleteEvent('glucose-a');
+      mounted.currentStore.deleteEvent('glucose-0800');
     });
     await waitFor(
       () =>
-        !mounted.currentStore.events.some((event) => event.id === 'glucose-a'),
+        !mounted.currentStore.events.some(
+          (event) => event.id === 'glucose-0800',
+        ),
       'deleted glucose event',
     );
 
     assert.equal(
-      mounted.currentStore.getMigrationRecord('glucose-a'),
+      mounted.currentStore.getMigrationRecord('glucose-0800'),
       undefined,
     );
-    assert.deepEqual(
-      mounted.currentStore.getMigrationRecord('insulin-b'),
-      recordBBefore,
-    );
+    assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
   } finally {
     await mounted.unmount();
   }
 });
 
-test('store compatibility edit does not restamp migration evidence', async () => {
+test('routine store edit flow does not create migration evidence', async () => {
   const repository = createInMemoryTimelineRepository({
-    seedEvents: [glucoseA],
+    seedEvents: [semanticGlucoseEarly],
   });
   const mounted = await mountTimelineStore({ repository });
 
   try {
     await waitFor(() => mounted.currentStore.status === 'ready', 'ready state');
 
-    const recordBefore = structuredClone(
-      mounted.currentStore.getMigrationRecord('glucose-a'),
-    );
     const semanticBefore = mounted.currentStore.events[0];
     const editResult = updateSemanticTimelineEventFromDraft(semanticBefore, {
       ...createTimelineSemanticEventEditDraft(semanticBefore),
@@ -297,10 +245,11 @@ test('store compatibility edit does not restamp migration evidence', async () =>
       'semantic glucose refresh',
     );
 
-    assert.deepEqual(
-      mounted.currentStore.getMigrationRecord('glucose-a'),
-      recordBefore,
+    assert.equal(
+      mounted.currentStore.getMigrationRecord('glucose-0800'),
+      undefined,
     );
+    assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
   } finally {
     await mounted.unmount();
   }

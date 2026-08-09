@@ -229,10 +229,9 @@ in `@diabetes-universe/types`. It uses a single `kind` discriminator with
 per-variant fields and canonical numeric values plus `CanonicalUnitId` where
 required.
 
-Legacy `TimelineEvent` with presentation-oriented `title`, `value`, and `unit`
-fields remains in use by the P2 repository until the semantic repository cutover.
-Presentation strings must not be treated as canonical medical data once an event
-is represented semantically.
+- legacy `TimelineEvent` with presentation-oriented `title`, `value`, and `unit`
+  fields remains in `@diabetes-universe/types` as a migration-only contract;
+- routine application and repository runtime use `SemanticTimelineEvent` after P3h.
 
 `ownerId` and other persistence-envelope fields from ADR-0014 are intentionally
 absent from `SemanticTimelineEvent`. Ownership belongs to a future persistence
@@ -242,19 +241,18 @@ P3b implements legacy lift runtime in `@diabetes-universe/timeline` via
 `liftLegacyToSemantic()`. Application integration, sidecar stores, and
 presentation mapping remain future waves.
 
-P3c Semantic Application Store changes:
+P3c Semantic Application Store changes (superseded by P3h for routine runtime):
 
-- `TimelineStoreProvider` lifts P2 repository snapshots into
+- `TimelineStoreProvider` previously lifted P2 repository snapshots into
   `SemanticTimelineEvent[]` on initialization and after legacy repository
   mutations;
 - migration sidecar (`MigrationRecord` by `eventId`) and quarantine registry
-  are in-memory application stores;
+  were in-memory application stores;
 - `useTimelineStore().events` exposes semantic events only;
 - `useTimelineStore().diagnostics` exposes `TimelineDiagnosticsSnapshot`;
-- legacy repository mutations remain through a temporary compatibility bridge
-  until P3e;
-- presentation mappers are not migrated (P3d);
-- repository cutover (P3h) has not occurred.
+- legacy repository mutations remained through a temporary compatibility bridge
+  until P3h;
+- repository cutover completed in P3h.
 
 P3f Dashboard Semantic Closure changes:
 
@@ -265,17 +263,37 @@ P3f Dashboard Semantic Closure changes:
 
 P3g Demo Fixture & Migration Closure changes:
 
-- production demo legacy records in `apps/web/lib/mocks/timeline.ts` validated
-  through `liftRepositorySnapshot()` with `quarantinedCount === 0` and
-  `unsupportedSchemaCount === 0`;
+- preserved legacy demo dataset in
+  `apps/web/lib/mocks/preserved-legacy-demo-timeline-events.ts` for migration
+  regression only;
 - deterministic regression coverage in
-  `apps/web/lib/mocks/demo-fixture-migration-closure.test.mjs` against the real
-  production demo dataset (31 events across all 6 kinds);
-- semantic integrity, migration evidence, and P3d presentation fidelity verified
-  for representative demo records;
+  `apps/web/lib/mocks/demo-fixture-migration-closure.test.mjs` validates
+  `legacy demo v0 → liftLegacyToSemantic → semantic v1` matches the current
+  semantic demo source;
 - obsolete presentation-only demo exports (`lastGlucose`, `daySummary`) removed
   from the mock module;
-- P2 repository contract and legacy seed format remain unchanged until P3h.
+- production demo seed cutover to native semantic records completed in P3h.
+
+P3h Semantic Repository Cutover changes:
+
+- `TimelineRepositoryEvent` is now `SemanticTimelineEvent` natively;
+- `InMemoryTimelineRepository` stores semantic records with `occurredAt` ordering
+  (`occurredAt`, then `id` tie-break);
+- `TimelineStoreProvider` reads semantic repository snapshots directly without
+  routine `liftRepositorySnapshot()` re-lift;
+- removed temporary write projection (`projectSemanticEventForRepositoryWrite`,
+  `projectSemanticToLegacyRepositoryEvent`, `temporary-semantic-repository-bridge`);
+- removed `NativeSemanticEventSidecar` from routine runtime;
+- routine store state no longer carries migration sidecar/quarantine state;
+- production demo seed in `apps/web/lib/mocks/timeline.ts` is
+  `readonly SemanticTimelineEvent[]`;
+- `liftLegacyToSemantic()` and `liftRepositorySnapshot()` remain migration/import
+  utilities only;
+- legacy `TimelineEvent` remains in `@diabetes-universe/types` as a migration
+  contract only;
+- durable persistence (IndexedDB/SQLite/backend/sync) is **not** implemented;
+- P4 has **not** started;
+- P3 Feature Complete is **not** declared until a separate Final Audit.
 
 ## Out of scope
 
@@ -284,7 +302,7 @@ P3g Demo Fixture & Migration Closure changes:
 - type-specific nested payloads on legacy `TimelineEvent` (semantic payloads are
   defined separately in P3a)
 - P3d presentation mappers and P3e semantic Quick Add write path
-- P3h repository cutover and durable persistence
+- P4 durable persistence and sync
 
 ## Quick Add mapping
 

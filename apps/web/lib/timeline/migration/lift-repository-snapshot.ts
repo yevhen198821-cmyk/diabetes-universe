@@ -13,7 +13,6 @@ import {
   reuseQuarantineRecord,
   type PreviousMigrationEvidenceSnapshot,
 } from './reconcile-migration-evidence';
-import type { NativeSemanticEventSidecar } from './native-semantic-event-sidecar';
 
 export type { PreviousMigrationEvidenceSnapshot };
 
@@ -31,18 +30,12 @@ function cloneTimelineEvent(event: TimelineEvent): TimelineEvent {
 /**
  * Lifts a legacy repository snapshot into semantic application state.
  *
- * Partial migration failure does not abort the lift. Successfully migrated
- * records are returned alongside quarantined legacy records.
- *
- * When `previousEvidence` is provided, existing migration and quarantine
- * evidence is reused for legacy records that were already observed. Semantic
- * events are always rebuilt from the current legacy mirror.
+ * Import/migration utility only — not used by routine semantic repository runtime.
  */
 export function liftRepositorySnapshot(
   legacyEvents: readonly TimelineEvent[],
   context: LiftLegacyMigrationContext,
   previousEvidence?: PreviousMigrationEvidenceSnapshot,
-  nativeSemanticEvents?: NativeSemanticEventSidecar,
 ): LiftRepositorySnapshotResult {
   const events: SemanticTimelineEvent[] = [];
   const migrationRecords = new Map<string, MigrationRecord>();
@@ -54,13 +47,6 @@ export function liftRepositorySnapshot(
 
   for (const legacyEvent of legacyEvents) {
     const raw = cloneTimelineEvent(legacyEvent);
-    const nativeEvent = nativeSemanticEvents?.events.get(raw.id);
-
-    if (nativeEvent) {
-      events.push(nativeEvent);
-      continue;
-    }
-
     const result = liftLegacyToSemantic(raw, context);
 
     switch (result.status) {

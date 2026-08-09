@@ -17,6 +17,10 @@ import {
   setupIntegrationDom,
   teardownIntegrationDom,
 } from '../../platform/integration/tests/integration-dom-setup.mjs';
+import {
+  semanticGlucoseEarly,
+  semanticInsulinLater,
+} from './testing/timeline-store-test-fixtures.mjs';
 import { getTestTimelinePresentationDependencies } from './testing/timeline-store-test-fixtures.mjs';
 import { TimelineStoreProvider, useTimelineStore } from './timeline-store.tsx';
 
@@ -30,18 +34,16 @@ after(() => {
   teardownIntegrationDom();
 });
 
-function createLegacyEvent(id, dateTime, kind = 'glucose', overrides = {}) {
-  const defaultsByKind = {
-    glucose: { title: 'Глюкоза', value: '6,4 ммоль/л' },
-    insulin: { title: 'NovoRapid', value: '4 ЕД' },
-  };
-
+function createSemanticGlucoseEvent(id, occurredAt, overrides = {}) {
   return {
-    dateTime,
+    concentrationMmolPerL: 6.4,
+    createdAt: '2026-08-09T08:30:00.000Z',
     id,
-    kind,
+    kind: 'glucose',
+    occurredAt,
+    schemaVersion: 1,
     source: 'demo',
-    ...defaultsByKind[kind],
+    updatedAt: '2026-08-09T08:30:00.000Z',
     ...overrides,
   };
 }
@@ -89,7 +91,7 @@ async function mountTimelineStore({ initialEvents, repository } = {}) {
     root.render(
       createElement(
         TimelineStoreProvider,
-        { initialEvents, presentationDependencies, repository },
+        { initialEvents, repository },
         createElement(StoreProbe),
       ),
     );
@@ -121,16 +123,15 @@ function assertSemanticEventShape(event) {
   assert.equal(event.schemaVersion, 1);
 }
 
-test('edit flow updates legacy repository mirror and refreshes semantic store', async () => {
-  const glucoseEarly = createLegacyEvent(
+test('edit flow updates semantic repository and refreshes semantic store', async () => {
+  const glucoseEarly = createSemanticGlucoseEvent(
     'glucose-0800',
     '2026-08-02T05:00:00.000Z',
   );
-  const glucoseLatest = createLegacyEvent(
+  const glucoseLatest = createSemanticGlucoseEvent(
     'glucose-1015',
     '2026-08-02T07:15:00.000Z',
-    'glucose',
-    { context: 'После завтрака', value: '7,3 ммоль/л' },
+    { concentrationMmolPerL: 7.3, context: 'after_meal' },
   );
   const repository = createInMemoryTimelineRepository({
     seedEvents: [glucoseEarly, glucoseLatest],
@@ -176,28 +177,25 @@ test('edit flow updates legacy repository mirror and refreshes semantic store', 
     const semanticAfter = mounted.currentStore.events.find(
       (event) => event.id === 'glucose-1015',
     );
-    const repositoryLegacy = repository
+    const repositorySemantic = repository
       .getSnapshot()
       .events.find((event) => event.id === 'glucose-1015');
 
     assertSemanticEventShape(semanticAfter);
     assert.equal(semanticAfter?.concentrationMmolPerL, 9.1);
     assert.equal(semanticAfter?.occurredAt, '2026-08-02T23:58:00.000Z');
-    assert.equal(
-      Object.hasOwn(repositoryLegacy, 'concentrationMmolPerL'),
-      false,
-    );
+    assert.equal(repositorySemantic?.concentrationMmolPerL, 9.1);
+    assert.equal(repositorySemantic?.occurredAt, '2026-08-02T23:58:00.000Z');
   } finally {
     await mounted.unmount();
   }
 });
 
 test('dashboard and timeline consumers receive semantic events after edit flow', async () => {
-  const glucoseLatest = createLegacyEvent(
+  const glucoseLatest = createSemanticGlucoseEvent(
     'glucose-1015',
     '2026-08-02T07:15:00.000Z',
-    'glucose',
-    { context: 'После завтрака', value: '7,3 ммоль/л' },
+    { concentrationMmolPerL: 7.3, context: 'after_meal' },
   );
   const repository = createInMemoryTimelineRepository({
     seedEvents: [glucoseLatest],
@@ -247,7 +245,7 @@ test('dashboard and timeline consumers receive semantic events after edit flow',
     assert.equal(dashboardBlocks.lastGlucose?.event.concentrationMmolPerL, 8.2);
     assert.equal(
       dashboardBlocks.lastGlucose?.event.occurredAt,
-      glucoseLatest.dateTime,
+      glucoseLatest.occurredAt,
     );
     assert.equal(timelineFilter.filteredEvents.length, 1);
     assert.equal(timelineFilter.filteredEvents[0]?.concentrationMmolPerL, 8.2);
@@ -257,22 +255,16 @@ test('dashboard and timeline consumers receive semantic events after edit flow',
   }
 });
 
-test('edit flow keeps migration sidecar aligned with semantic events', async () => {
-  const insulinLegacy = createLegacyEvent(
-    'insulin-0805',
-    '2026-08-02T05:05:00.000Z',
-    'insulin',
-    { context: 'Перед едой' },
-  );
+test('edit flow keeps zero migration diagnostics for semantic repository events', async () => {
   const repository = createInMemoryTimelineRepository({
-    seedEvents: [insulinLegacy],
+    seedEvents: [semanticInsulinLater],
   });
   const mounted = await mountTimelineStore({ repository });
 
   try {
     await waitFor(() => mounted.currentStore.status === 'ready', 'ready state');
 
-    assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 1);
+    assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
 
     const semanticBefore = mounted.currentStore.events[0];
     const editResult = updateSemanticTimelineEventFromDraft(semanticBefore, {
@@ -289,14 +281,14 @@ test('edit flow keeps migration sidecar aligned with semantic events', async () 
       return updated?.kind === 'insulin' && updated.doseUnits === 6;
     }, 'semantic insulin refresh');
 
-    assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 1);
+    assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
     assert.equal(mounted.currentStore.diagnostics.quarantinedCount, 0);
     assert.equal(
-      mounted.currentStore.getMigrationRecord('insulin-0805')?.eventId,
-      'insulin-0805',
+      mounted.currentStore.getMigrationRecord('insulin-0805'),
+      undefined,
     );
     assert.equal(mounted.currentStore.events[0]?.doseUnits, 6);
-    assert.equal(repository.getSnapshot().events[0]?.value, '6 U');
+    assert.equal(repository.getSnapshot().events[0]?.doseUnits, 6);
   } finally {
     await mounted.unmount();
   }
