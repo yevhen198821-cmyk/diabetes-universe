@@ -24,9 +24,13 @@ import {
   initialTimelineStoreState,
   timelineStoreReducer,
   type TimelineStoreErrorCode,
+  type TimelineStoreHistoryLoadStatus,
   type TimelineStoreStatus,
 } from './timeline-store-model';
-import { loadTimelineRepositoryEvents } from './load-timeline-repository-events';
+import {
+  loadTimelineRepositoryFirstPage,
+  loadTimelineRepositoryNextPage,
+} from './timeline-store-repository-reads';
 
 export interface TimelineStoreValue {
   readonly addEvent: (event: SemanticTimelineEvent) => void;
@@ -34,6 +38,10 @@ export interface TimelineStoreValue {
   readonly diagnostics: ReturnType<typeof createTimelineDiagnosticsFromState>;
   readonly error?: string;
   readonly events: readonly SemanticTimelineEvent[];
+  readonly hasMoreHistory: boolean;
+  readonly historyLoadErrorCode?: TimelineStoreErrorCode;
+  readonly historyLoadStatus: TimelineStoreHistoryLoadStatus;
+  readonly loadMoreHistory: () => void;
   readonly replaceEvents: (events: readonly SemanticTimelineEvent[]) => void;
   readonly status: TimelineStoreStatus;
   readonly updateEvent: (event: SemanticTimelineEvent) => void;
@@ -70,11 +78,13 @@ export function TimelineStoreProvider({
   );
 
   const dispatchReadySnapshot = useCallback(async () => {
-    const events = await loadTimelineRepositoryEvents(timelineRepository);
+    const page = await loadTimelineRepositoryFirstPage(timelineRepository);
 
     if (isMountedRef.current) {
       dispatch({
-        events: cloneSemanticTimelineEvents(events),
+        events: cloneSemanticTimelineEvents(page.events),
+        hasMoreHistory: page.hasMoreHistory,
+        nextCursor: page.nextCursor,
         type: 'setReady',
       });
     }
@@ -96,7 +106,7 @@ export function TimelineStoreProvider({
         await timelineRepository.initialize();
 
         if (isMountedRef.current) {
-          dispatchReadySnapshot();
+          await dispatchReadySnapshot();
         }
       })
       .catch((error: unknown) => {
@@ -113,13 +123,16 @@ export function TimelineStoreProvider({
   }, [dispatchReadySnapshot, dispatchRepositoryError, timelineRepository]);
 
   const enqueueRepositoryMutation = useCallback(
-    (mutation: () => Promise<TimelineRepositoryMutationResult>): void => {
+    (
+      mutation: () => Promise<TimelineRepositoryMutationResult>,
+      onApplied?: () => void,
+    ): void => {
       const mutationOperation = operationQueueRef.current
         .then(async () => {
           const result = await mutation();
 
           if (isMountedRef.current && result.status === 'applied') {
-            await dispatchReadySnapshot();
+            onApplied?.();
           }
         })
         .catch((error: unknown) => {
@@ -130,35 +143,116 @@ export function TimelineStoreProvider({
 
       operationQueueRef.current = mutationOperation;
     },
-    [dispatchReadySnapshot, dispatchRepositoryError],
+    [dispatchRepositoryError],
   );
+
+  const loadMoreHistory = useCallback(() => {
+    if (
+      state.historyLoadStatus === 'loading' ||
+      !state.hasMoreHistory ||
+      state.nextCursor === undefined
+    ) {
+      return;
+    }
+
+    const cursor = state.nextCursor;
+    const loadOperation = operationQueueRef.current
+      .then(async () => {
+        if (!isMountedRef.current) {
+          return;
+        }
+
+        dispatch({ type: 'setHistoryLoading' });
+
+        try {
+          const page = await loadTimelineRepositoryNextPage(
+            timelineRepository,
+            cursor,
+          );
+
+          if (!isMountedRef.current) {
+            return;
+          }
+
+          dispatch({
+            events: page.events,
+            hasMoreHistory: page.hasMoreHistory,
+            nextCursor: page.nextCursor,
+            type: 'appendHistoryPage',
+          });
+        } catch (error: unknown) {
+          if (!isMountedRef.current) {
+            return;
+          }
+
+          const errorCode = resolveTimelineStoreErrorCode(error);
+          dispatch({
+            errorCode,
+            type: 'setHistoryLoadError',
+          });
+        }
+      })
+      .catch((error: unknown) => {
+        if (isMountedRef.current) {
+          dispatchRepositoryError(error);
+        }
+      });
+
+    operationQueueRef.current = loadOperation;
+  }, [
+    dispatchRepositoryError,
+    state.hasMoreHistory,
+    state.historyLoadStatus,
+    state.nextCursor,
+    timelineRepository,
+  ]);
 
   const addEvent = useCallback(
     (event: SemanticTimelineEvent) => {
-      enqueueRepositoryMutation(() => timelineRepository.addEvent(event));
+      enqueueRepositoryMutation(
+        () => timelineRepository.addEvent(event),
+        () => {
+          dispatch({ event, type: 'upsertEvent' });
+        },
+      );
     },
     [enqueueRepositoryMutation, timelineRepository],
   );
 
   const updateEvent = useCallback(
     (event: SemanticTimelineEvent) => {
-      enqueueRepositoryMutation(() => timelineRepository.updateEvent(event));
+      enqueueRepositoryMutation(
+        () => timelineRepository.updateEvent(event),
+        () => {
+          dispatch({ event, type: 'upsertEvent' });
+        },
+      );
     },
     [enqueueRepositoryMutation, timelineRepository],
   );
 
   const deleteEvent = useCallback(
     (eventId: string) => {
-      enqueueRepositoryMutation(() => timelineRepository.deleteEvent(eventId));
+      enqueueRepositoryMutation(
+        () => timelineRepository.deleteEvent(eventId),
+        () => {
+          dispatch({ eventId, type: 'removeEvent' });
+        },
+      );
     },
     [enqueueRepositoryMutation, timelineRepository],
   );
 
   const replaceEvents = useCallback(
     (events: readonly SemanticTimelineEvent[]) => {
-      enqueueRepositoryMutation(() => timelineRepository.replaceEvents(events));
+      enqueueRepositoryMutation(
+        () => timelineRepository.replaceEvents(events),
+        () => {
+          void dispatchReadySnapshot();
+        },
+      );
     },
-    [enqueueRepositoryMutation, timelineRepository],
+    [dispatchReadySnapshot, enqueueRepositoryMutation, timelineRepository],
   );
 
   const diagnostics = useMemo(
@@ -173,6 +267,10 @@ export function TimelineStoreProvider({
       diagnostics,
       error: state.error,
       events: state.events,
+      hasMoreHistory: state.hasMoreHistory,
+      historyLoadErrorCode: state.historyLoadErrorCode,
+      historyLoadStatus: state.historyLoadStatus,
+      loadMoreHistory,
       replaceEvents,
       status: state.status,
       updateEvent,
@@ -181,9 +279,13 @@ export function TimelineStoreProvider({
       addEvent,
       deleteEvent,
       diagnostics,
+      loadMoreHistory,
       replaceEvents,
       state.error,
       state.events,
+      state.hasMoreHistory,
+      state.historyLoadErrorCode,
+      state.historyLoadStatus,
       state.status,
       updateEvent,
     ],

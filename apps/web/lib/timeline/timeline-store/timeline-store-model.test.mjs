@@ -34,6 +34,7 @@ const insulinSemantic = {
 test('setReady stores semantic repository snapshot as ready state', () => {
   const state = timelineStoreReducer(initialTimelineStoreState, {
     events: [insulinSemantic, glucoseSemantic],
+    hasMoreHistory: false,
     type: 'setReady',
   });
 
