@@ -11,17 +11,16 @@ import {
 } from '@diabetes-universe/timeline';
 import type { IDBPDatabase } from 'idb';
 
-import {
-  createIndexedDbTimelineEventRecord,
-  readIndexedDbTimelineEventRecord,
-} from './timeline-indexeddb-record';
+import { createIndexedDbTimelineEventRecord } from './timeline-indexeddb-record';
 import type { TimelineIndexedDbConnection } from './timeline-indexeddb-connection';
 import {
   openTimelineIndexedDB,
   type TimelineIndexedDbOpenOptions,
 } from './timeline-indexeddb-open';
 import { queryIndexedDbTimelineEvents } from './timeline-indexeddb-query';
+import { createIndexedDbTimelineQuarantineRecord } from './timeline-indexeddb-quarantine';
 import { TIMELINE_INDEXEDDB_STORES } from './timeline-indexeddb-schema';
+import { validateIndexedDbTimelineEventRecord } from './timeline-indexeddb-validation';
 
 export class IndexedDbTimelineRepository implements TimelineRepository {
   #database: IDBPDatabase | null = null;
@@ -73,25 +72,56 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
   async getById(eventId: string): Promise<TimelineRepositoryEvent | null> {
     this.#assertInitialized();
 
+    let quarantineAttempted = false;
+
     try {
-      const record = await this.#database!.transaction(
+      const transaction = this.#database!.transaction(
+        [
+          TIMELINE_INDEXEDDB_STORES.events,
+          TIMELINE_INDEXEDDB_STORES.quarantine,
+        ],
+        'readwrite',
+      );
+      const eventStore = transaction.objectStore(
         TIMELINE_INDEXEDDB_STORES.events,
-        'readonly',
-      )
-        .objectStore(TIMELINE_INDEXEDDB_STORES.events)
-        .get(eventId);
+      );
+      const record = await eventStore.get(eventId);
 
       if (record === undefined) {
+        await transaction.done;
         return null;
       }
 
-      return readIndexedDbTimelineEventRecord(record);
+      const validation = validateIndexedDbTimelineEventRecord(record);
+      if (validation.status === 'quarantine') {
+        quarantineAttempted = true;
+        transaction
+          .objectStore(TIMELINE_INDEXEDDB_STORES.quarantine)
+          .put(
+            createIndexedDbTimelineQuarantineRecord(
+              record,
+              validation,
+              eventId,
+              this.#now(),
+            ),
+          );
+        eventStore.delete(eventId);
+        await transaction.done;
+        throw new TimelineRepositoryError('TIMELINE_REPOSITORY_READ_FAILED');
+      }
+
+      await transaction.done;
+      return cloneTimelineRepositoryEvent(validation.record.event);
     } catch (error) {
       if (error instanceof TimelineRepositoryError) {
         throw error;
       }
 
-      throw new TimelineRepositoryError('TIMELINE_REPOSITORY_READ_FAILED');
+      throw new TimelineRepositoryError(
+        quarantineAttempted
+          ? 'TIMELINE_REPOSITORY_QUARANTINE_FAILED'
+          : 'TIMELINE_REPOSITORY_READ_FAILED',
+      );
     }
   }
 
@@ -101,7 +131,11 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
     this.#assertInitialized();
 
     try {
-      return await queryIndexedDbTimelineEvents(this.#database!, query);
+      return await queryIndexedDbTimelineEvents(
+        this.#database!,
+        query,
+        this.#now,
+      );
     } catch (error) {
       if (error instanceof TimelineRepositoryError) {
         throw error;
