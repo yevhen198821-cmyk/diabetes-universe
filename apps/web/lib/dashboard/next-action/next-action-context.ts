@@ -3,17 +3,12 @@ import type {
   SemanticTimelineEvent,
 } from '@diabetes-universe/types';
 
-import type { TimelinePresentationDependencies } from '../../timeline/presentation';
-import {
-  formatLatestGlucoseValue,
-  getLatestGlucoseEvent,
-} from '../../timeline/timeline-selectors';
+import { getLatestGlucoseEvent } from '../../timeline/timeline-selectors';
 import type { NextActionContext } from './next-action-types';
 
 export type CreateNextActionContextInput = Readonly<{
   events: readonly SemanticTimelineEvent[];
   now: Date;
-  presentationDependencies: TimelinePresentationDependencies;
   quickAddAvailability: Readonly<{
     availableCategories: readonly QuickAddCategory[];
   }>;
@@ -27,11 +22,8 @@ export function createNextActionContext(
   return {
     latestGlucose: latestGlucoseEvent
       ? {
-          dateTime: latestGlucoseEvent.occurredAt,
-          value: formatLatestGlucoseValue(
-            latestGlucoseEvent,
-            input.presentationDependencies,
-          ),
+          concentrationMmolPerL: latestGlucoseEvent.concentrationMmolPerL,
+          occurredAt: latestGlucoseEvent.occurredAt,
         }
       : undefined,
     now: input.now,

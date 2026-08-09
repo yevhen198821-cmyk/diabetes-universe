@@ -76,7 +76,10 @@ test('deriveLastGlucose invokes formatter callback exactly once with event dateT
 
   assert.equal(callCount, 1);
   assert.equal(receivedDateTime, '2026-08-02T08:00:00.000Z');
-  assert.equal(blocks.lastGlucose?.dateTime, '2026-08-02T08:00:00.000Z');
+  assert.equal(
+    blocks.lastGlucose?.event.occurredAt,
+    '2026-08-02T08:00:00.000Z',
+  );
   assert.equal(blocks.lastGlucose?.displayTime, '08:00');
 });
 
@@ -103,7 +106,7 @@ test('derives last glucose from shared timeline events', () => {
     },
   );
 
-  assert.equal(blocks.lastGlucose?.value, '6.4 mmol/L');
+  assert.equal(blocks.lastGlucose?.event.concentrationMmolPerL, 6.4);
   assert.equal(blocks.lastGlucose?.displayTime, '08:00');
   assert.equal(blocks.daySummary?.glucoseMeasurements, 1);
   assert.equal(blocks.recentEvents.length, 0);
@@ -155,8 +158,8 @@ test('derives day summary only from today events', () => {
     },
   );
 
-  assert.equal(blocks.daySummary?.totalInsulin, '4 U');
-  assert.equal(blocks.daySummary?.totalCarbohydrates, '42 g');
+  assert.equal(blocks.daySummary?.totalInsulinUnits, 4);
+  assert.equal(blocks.daySummary?.totalCarbohydrateGrams, 42);
 });
 
 test('updates day summary and recent events after insulin save', () => {
@@ -175,13 +178,14 @@ test('updates day summary and recent events after insulin save', () => {
     },
     {
       formatDaySummaryDisplayDate,
+      formatRecentEventDisplayTime: formatUtcShortTime,
       referenceTime,
       timeZone: 'UTC',
       presentationDependencies,
     },
   );
 
-  assert.equal(blocks.daySummary?.totalInsulin, '4 U');
+  assert.equal(blocks.daySummary?.totalInsulinUnits, 4);
   assert.equal(blocks.recentEvents[0]?.category, 'insulin');
   assert.equal(blocks.recentEvents[0]?.title, 'NovoRapid');
 });
@@ -219,6 +223,7 @@ test('derives recent event sources that can be sorted by latest event time', () 
     },
     {
       formatDaySummaryDisplayDate,
+      formatRecentEventDisplayTime: formatUtcShortTime,
       referenceTime,
       timeZone: 'Europe/Moscow',
       presentationDependencies,

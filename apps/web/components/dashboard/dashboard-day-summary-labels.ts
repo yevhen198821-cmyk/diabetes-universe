@@ -15,6 +15,10 @@ export interface DashboardDaySummaryLabels {
   readonly totalCarbohydrates: string;
   readonly totalInsulin: string;
   readonly unavailable: string;
+  readonly units: Readonly<{
+    readonly compactInsulinDose: string;
+    readonly compactMassG: string;
+  }>;
 }
 
 function asTranslationKey(value: string): TranslationKey {
@@ -39,6 +43,11 @@ const DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS = {
   ),
   totalInsulin: asTranslationKey('dashboard.daySummary.metrics.totalInsulin'),
   unavailable: asTranslationKey('dashboard.daySummary.unavailable'),
+} as const;
+
+const DASHBOARD_DAY_SUMMARY_COMPACT_UNIT_TRANSLATION_KEYS = {
+  compactInsulinDose: asTranslationKey('timeline.units.insulinDose'),
+  compactMassG: asTranslationKey('timeline.units.massG'),
 } as const;
 
 function translateDashboardDaySummaryKey(
@@ -99,6 +108,16 @@ export function resolveDashboardDaySummaryLabels(
       localization,
       DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.unavailable,
     ),
+    units: {
+      compactInsulinDose: translateDashboardDaySummaryKey(
+        localization,
+        DASHBOARD_DAY_SUMMARY_COMPACT_UNIT_TRANSLATION_KEYS.compactInsulinDose,
+      ),
+      compactMassG: translateDashboardDaySummaryKey(
+        localization,
+        DASHBOARD_DAY_SUMMARY_COMPACT_UNIT_TRANSLATION_KEYS.compactMassG,
+      ),
+    },
   };
 }
 

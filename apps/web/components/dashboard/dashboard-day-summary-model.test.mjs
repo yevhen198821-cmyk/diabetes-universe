@@ -15,6 +15,10 @@ const labels = {
   totalCarbohydrates: 'Total carbohydrates',
   totalInsulin: 'Total insulin',
   unavailable: 'Day summary unavailable.',
+  units: {
+    compactInsulinDose: 'U',
+    compactMassG: 'g',
+  },
 };
 
 const validSummary = {
@@ -24,14 +28,16 @@ const validSummary = {
   medicationDoses: 2,
   remindersCompleted: 1,
   remindersTotal: 3,
-  totalCarbohydrates: '120 г',
-  totalInsulin: '12 ЕД',
+  totalCarbohydrateGrams: 120,
+  totalInsulinUnits: 12,
 };
 
 const formattedMetrics = {
   glucoseMeasurements: '4',
   medicationDoses: '2',
   reminders: '1 / 3',
+  totalCarbohydrates: '120 g',
+  totalInsulin: '12 U',
 };
 
 test('creates ready state with primary and secondary metrics', () => {
@@ -51,8 +57,8 @@ test('creates ready state with primary and secondary metrics', () => {
   assert.equal(model.secondaryMetrics.length, 2);
   assert.equal(model.primaryMetrics[0]?.label, 'Glucose measurements');
   assert.equal(model.primaryMetrics[0]?.value, '4');
-  assert.equal(model.primaryMetrics[1]?.value, '12 ЕД');
-  assert.equal(model.primaryMetrics[2]?.value, '120 г');
+  assert.equal(model.primaryMetrics[1]?.value, '12 U');
+  assert.equal(model.primaryMetrics[2]?.value, '120 g');
   assert.equal(model.secondaryMetrics[0]?.value, '2');
   assert.equal(model.secondaryMetrics[1]?.value, '1 / 3');
   assert.equal(model.isLoading, false);
@@ -69,8 +75,8 @@ test('normalizes ready summary values without changing their meaning', () => {
         medicationDoses: 2,
         remindersCompleted: 1,
         remindersTotal: 3,
-        totalCarbohydrates: ' 120 г ',
-        totalInsulin: ' 12 ЕД ',
+        totalCarbohydrateGrams: 120,
+        totalInsulinUnits: 12,
       },
     },
     labels,
@@ -79,7 +85,7 @@ test('normalizes ready summary values without changing their meaning', () => {
 
   assert.equal(model.state, 'ready');
   assert.equal(model.dayDate, '2026-08-02');
-  assert.equal(model.primaryMetrics[1]?.value, '12 ЕД');
+  assert.equal(model.primaryMetrics[1]?.value, '12 U');
 });
 
 test('downgrades invalid dayDate to the safe empty fallback', () => {
@@ -100,13 +106,13 @@ test('downgrades invalid dayDate to the safe empty fallback', () => {
   assert.equal(model.primaryMetrics.length, 0);
 });
 
-test('downgrades empty display totals to the safe empty fallback', () => {
+test('downgrades negative totals to the safe empty fallback', () => {
   const model = createDashboardDaySummaryViewModel(
     {
       state: 'ready',
       summary: {
         ...validSummary,
-        totalInsulin: '   ',
+        totalInsulinUnits: -1,
       },
     },
     labels,
@@ -189,8 +195,8 @@ test('accepts zero counts when the owner supplies valid current-day totals', () 
         medicationDoses: 0,
         remindersCompleted: 0,
         remindersTotal: 0,
-        totalCarbohydrates: '0 г',
-        totalInsulin: '0 ЕД',
+        totalCarbohydrateGrams: 0,
+        totalInsulinUnits: 0,
       },
     },
     labels,
@@ -198,6 +204,8 @@ test('accepts zero counts when the owner supplies valid current-day totals', () 
       glucoseMeasurements: '0',
       medicationDoses: '0',
       reminders: '0 / 0',
+      totalCarbohydrates: '0 g',
+      totalInsulin: '0 U',
     },
   );
 

@@ -50,7 +50,10 @@ export type NextActionDecision = Readonly<{
 }>;
 
 export type NextActionContext = Readonly<{
-  latestGlucose?: Readonly<{ dateTime: string; value: string }>;
+  latestGlucose?: Readonly<{
+    concentrationMmolPerL: number;
+    occurredAt: string;
+  }>;
   now: Date;
   quickAddAvailability: Readonly<{
     availableCategories: readonly QuickAddCategory[];

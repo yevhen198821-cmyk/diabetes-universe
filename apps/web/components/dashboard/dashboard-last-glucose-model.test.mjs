@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createDashboardLastGlucoseViewModel } from './dashboard-last-glucose-model.ts';
+import { liftLegacyTestFixture } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
 import { CANONICAL_DEMO_REFERENCE_TIME } from '../../testing/demo-reference-time.ts';
+import { createDashboardLastGlucoseViewModel } from './dashboard-last-glucose-model.ts';
 
 const englishLabels = {
   defaultEmpty: 'No measurements yet.',
@@ -14,11 +15,25 @@ const englishLabels = {
   unavailable: 'Last measurement unavailable.',
 };
 
-const validMeasurement = {
-  dateTime: '2026-08-02T05:00:00.000Z',
-  displayTime: '08:00',
-  value: '6,4 ммоль/л',
-};
+function createGlucoseMeasurement(overrides = {}) {
+  const event = liftLegacyTestFixture({
+    context: 'Before breakfast',
+    dateTime: '2026-08-02T05:00:00.000Z',
+    id: 'glucose-test',
+    kind: 'glucose',
+    title: 'Glucose',
+    value: '6.4 mmol/L',
+    ...(overrides.eventOverrides ?? {}),
+  });
+
+  return {
+    displayTime: '08:00',
+    event,
+    ...overrides,
+  };
+}
+
+const validMeasurement = createGlucoseMeasurement();
 
 test('creates ready state from a validated measurement contract', () => {
   const model = createDashboardLastGlucoseViewModel(
@@ -28,10 +43,11 @@ test('creates ready state from a validated measurement contract', () => {
       state: 'ready',
     },
     englishLabels,
+    { formattedValue: '6.4 mmol/L' },
   );
 
   assert.equal(model.state, 'ready');
-  assert.equal(model.value, '6,4 ммоль/л');
+  assert.equal(model.value, '6.4 mmol/L');
   assert.equal(model.displayTime, '08:00');
   assert.equal(model.dateTime, '2026-08-02T05:00:00.000Z');
   assert.equal(model.message, null);
@@ -44,32 +60,36 @@ test('normalizes ready state values without changing their meaning', () => {
   const model = createDashboardLastGlucoseViewModel(
     {
       glucose: {
-        dateTime: ' 2026-08-02T05:00:00.000Z ',
         displayTime: ' 08:00 ',
-        value: ' 6,4 ммоль/л ',
+        event: liftLegacyTestFixture({
+          context: 'Before breakfast',
+          dateTime: '2026-08-02T05:00:00.000Z',
+          id: 'glucose-test',
+          kind: 'glucose',
+          title: 'Glucose',
+          value: '6.4 mmol/L',
+        }),
       },
       state: 'ready',
     },
     englishLabels,
+    { formattedValue: ' 6.4 mmol/L ' },
   );
 
   assert.equal(model.state, 'ready');
-  assert.equal(model.value, '6,4 ммоль/л');
+  assert.equal(model.value, '6.4 mmol/L');
   assert.equal(model.displayTime, '08:00');
   assert.equal(model.dateTime, '2026-08-02T05:00:00.000Z');
 });
 
-test('downgrades empty value in ready state to the safe empty fallback', () => {
+test('downgrades empty formatted value in ready state to the safe empty fallback', () => {
   const model = createDashboardLastGlucoseViewModel(
     {
-      glucose: {
-        dateTime: '2026-08-02T05:00:00.000Z',
-        displayTime: '08:00',
-        value: '   ',
-      },
+      glucose: validMeasurement,
       state: 'ready',
     },
     englishLabels,
+    { formattedValue: '   ' },
   );
 
   assert.equal(model.state, 'empty');
@@ -82,14 +102,11 @@ test('downgrades empty value in ready state to the safe empty fallback', () => {
 test('downgrades empty display time in ready state to the safe empty fallback', () => {
   const model = createDashboardLastGlucoseViewModel(
     {
-      glucose: {
-        dateTime: '2026-08-02T05:00:00.000Z',
-        displayTime: ' ',
-        value: '6,4 ммоль/л',
-      },
+      glucose: createGlucoseMeasurement({ displayTime: ' ' }),
       state: 'ready',
     },
     englishLabels,
+    { formattedValue: '6.4 mmol/L' },
   );
 
   assert.equal(model.state, 'empty');
@@ -99,17 +116,20 @@ test('downgrades empty display time in ready state to the safe empty fallback', 
   assert.equal(model.message, englishLabels.unavailable);
 });
 
-test('downgrades invalid dateTime in ready state to the safe empty fallback', () => {
+test('downgrades invalid occurredAt in ready state to the safe empty fallback', () => {
   const model = createDashboardLastGlucoseViewModel(
     {
       glucose: {
-        dateTime: 'not-a-datetime',
         displayTime: '08:00',
-        value: '6,4 ммоль/л',
+        event: {
+          ...validMeasurement.event,
+          occurredAt: 'not-a-datetime',
+        },
       },
       state: 'ready',
     },
     englishLabels,
+    { formattedValue: '6.4 mmol/L' },
   );
 
   assert.equal(model.state, 'empty');
@@ -117,12 +137,8 @@ test('downgrades invalid dateTime in ready state to the safe empty fallback', ()
   assert.equal(model.message, englishLabels.unavailable);
 });
 
-test('preserves a valid machine-readable dateTime separate from display time', () => {
-  const measurement = {
-    dateTime: '2026-08-02T05:00:00.000Z',
-    displayTime: '08:00',
-    value: '6,4 ммоль/л',
-  };
+test('preserves a valid machine-readable occurredAt separate from display time', () => {
+  const measurement = createGlucoseMeasurement();
 
   const model = createDashboardLastGlucoseViewModel(
     {
@@ -130,26 +146,29 @@ test('preserves a valid machine-readable dateTime separate from display time', (
       state: 'ready',
     },
     englishLabels,
+    { formattedValue: '6.4 mmol/L' },
   );
 
   assert.equal(model.state, 'ready');
-  assert.equal(model.dateTime, measurement.dateTime);
+  assert.equal(model.dateTime, measurement.event.occurredAt);
   assert.equal(model.displayTime, measurement.displayTime);
   assert.notEqual(model.dateTime, model.displayTime);
 });
 
-test('stale calculation uses canonical dateTime and ignores display string', () => {
+test('stale calculation uses canonical occurredAt and ignores display string', () => {
   const model = createDashboardLastGlucoseViewModel(
     {
-      glucose: {
-        dateTime: '2026-08-01T05:00:00.000Z',
+      glucose: createGlucoseMeasurement({
         displayTime: 'not-used-for-stale',
-        value: '6,4 ммоль/л',
-      },
+        eventOverrides: {
+          dateTime: '2026-08-01T05:00:00.000Z',
+        },
+      }),
       referenceTime: new Date('2026-08-02T05:00:01.000Z'),
       state: 'ready',
     },
     englishLabels,
+    { formattedValue: '6.4 mmol/L' },
   );
 
   assert.equal(model.isStale, true);
@@ -159,18 +178,15 @@ test('stale calculation uses canonical dateTime and ignores display string', () 
 test('does not expose or derive a glucose target range', () => {
   const model = createDashboardLastGlucoseViewModel(
     {
-      glucose: {
-        dateTime: '2026-08-02T05:00:00.000Z',
-        displayTime: '08:00',
-        value: '6,4 ммоль/л',
-      },
+      glucose: validMeasurement,
       state: 'ready',
     },
     englishLabels,
+    { formattedValue: '6.4 mmol/L' },
   );
 
   assert.equal(model.state, 'ready');
-  assert.equal(model.value, '6,4 ммоль/л');
+  assert.equal(model.value, '6.4 mmol/L');
   assert.equal('range' in model, false);
   assert.equal('targetRange' in model, false);
   assert.doesNotMatch(model.value ?? '', /диапазон|range/i);
@@ -179,49 +195,44 @@ test('does not expose or derive a glucose target range', () => {
 test('accepts mmol per liter and mg per dL display values unchanged', () => {
   const mmolModel = createDashboardLastGlucoseViewModel(
     {
-      glucose: {
-        dateTime: '2026-08-02T05:00:00.000Z',
-        displayTime: '08:00',
-        value: '6,4 ммоль/л',
-      },
+      glucose: validMeasurement,
       state: 'ready',
     },
     englishLabels,
+    { formattedValue: '6.4 mmol/L' },
   );
   const mgDlModel = createDashboardLastGlucoseViewModel(
     {
-      glucose: {
-        dateTime: '2026-08-02T05:00:00.000Z',
-        displayTime: '08:00',
-        value: '115 mg/dL',
-      },
+      glucose: validMeasurement,
       state: 'ready',
     },
     englishLabels,
+    { formattedValue: '115 mg/dL' },
   );
 
-  assert.equal(mmolModel.value, '6,4 ммоль/л');
+  assert.equal(mmolModel.value, '6.4 mmol/L');
   assert.equal(mgDlModel.value, '115 mg/dL');
 });
 
 test('marks a measurement older than the stale threshold as stale', () => {
   const model = createDashboardLastGlucoseViewModel(
     {
-      glucose: {
-        dateTime: '2026-08-01T05:00:00.000Z',
-        displayTime: '08:00',
-        value: '6,4 ммоль/л',
-      },
+      glucose: createGlucoseMeasurement({
+        eventOverrides: {
+          dateTime: '2026-08-01T05:00:00.000Z',
+        },
+      }),
       referenceTime: new Date('2026-08-02T05:00:01.000Z'),
       state: 'ready',
     },
     englishLabels,
+    { formattedValue: '6.4 mmol/L' },
   );
 
   assert.equal(model.state, 'ready');
   assert.equal(model.isStale, true);
   assert.equal(model.staleMessage, englishLabels.stale);
-  assert.equal(model.value, '6,4 ммоль/л');
+  assert.equal(model.value, '6.4 mmol/L');
 });
 
 test('creates loading state with the default accessible label', () => {

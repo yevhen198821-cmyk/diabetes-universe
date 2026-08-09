@@ -1,9 +1,10 @@
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
+
 import type { DashboardLastGlucoseLabels } from './dashboard-last-glucose-labels';
 
 export interface DashboardLastGlucoseMeasurement {
-  readonly dateTime: string;
   readonly displayTime: string;
-  readonly value: string;
+  readonly event: Extract<SemanticTimelineEvent, { kind: 'glucose' }>;
 }
 
 interface DashboardLastGlucoseLoadingProps {
@@ -58,23 +59,21 @@ function isValidIsoDateTime(dateTime: string): boolean {
 function normalizeReadyMeasurement(
   glucose: DashboardLastGlucoseMeasurement,
 ): DashboardLastGlucoseMeasurement | null {
-  const value = glucose.value.trim();
   const displayTime = glucose.displayTime.trim();
-  const dateTime = glucose.dateTime.trim();
+  const occurredAt = glucose.event.occurredAt.trim();
 
   if (
-    value.length === 0 ||
     displayTime.length === 0 ||
-    dateTime.length === 0 ||
-    !isValidIsoDateTime(dateTime)
+    occurredAt.length === 0 ||
+    !isValidIsoDateTime(occurredAt) ||
+    !Number.isFinite(glucose.event.concentrationMmolPerL)
   ) {
     return null;
   }
 
   return {
-    dateTime,
     displayTime,
-    value,
+    event: glucose.event,
   };
 }
 
@@ -108,7 +107,9 @@ function isMeasurementStale(
 export function createDashboardLastGlucoseViewModel(
   props: DashboardLastGlucoseProps,
   labels: DashboardLastGlucoseLabels,
-  options: DashboardLastGlucoseViewModelOptions = {},
+  options: DashboardLastGlucoseViewModelOptions & {
+    readonly formattedValue?: string;
+  } = {},
 ): DashboardLastGlucoseViewModel {
   switch (props.state) {
     case 'loading':
@@ -124,8 +125,9 @@ export function createDashboardLastGlucoseViewModel(
       };
     case 'ready': {
       const measurement = normalizeReadyMeasurement(props.glucose);
+      const formattedValue = options.formattedValue?.trim() ?? '';
 
-      if (!measurement) {
+      if (!measurement || formattedValue.length === 0) {
         return createEmptyViewModel(labels.unavailable);
       }
 
@@ -134,20 +136,20 @@ export function createDashboardLastGlucoseViewModel(
       const staleAfterMs =
         props.staleAfterMs ?? DEFAULT_LAST_GLUCOSE_STALE_AFTER_MS;
       const isStale = isMeasurementStale(
-        measurement.dateTime,
+        measurement.event.occurredAt,
         referenceTime,
         staleAfterMs,
       );
 
       return {
-        dateTime: measurement.dateTime,
+        dateTime: measurement.event.occurredAt,
         displayTime: measurement.displayTime,
         isLoading: false,
         isStale,
         message: null,
         staleMessage: isStale ? labels.stale : null,
         state: props.state,
-        value: measurement.value,
+        value: formattedValue,
       };
     }
     case 'empty':

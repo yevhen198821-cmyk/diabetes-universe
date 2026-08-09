@@ -36,8 +36,8 @@ const readySummary = {
   medicationDoses: 2,
   remindersCompleted: 1,
   remindersTotal: 3,
-  totalCarbohydrates: '120 г',
-  totalInsulin: '12 U',
+  totalCarbohydrateGrams: 120,
+  totalInsulinUnits: 12,
 };
 
 after(() => {
@@ -216,8 +216,8 @@ test('deriveDaySummary passes insulin and carbohydrate totals through unchanged'
     },
   );
 
-  assert.equal(blocks.daySummary?.totalInsulin, '4 U');
-  assert.equal(blocks.daySummary?.totalCarbohydrates, '42 g');
+  assert.equal(blocks.daySummary?.totalInsulinUnits, 4);
+  assert.equal(blocks.daySummary?.totalCarbohydrateGrams, 42);
 });
 
 test('dashboard day summary formats counters with platform formatter', async () => {
@@ -255,7 +255,7 @@ test('dashboard day summary formats counters with platform formatter', async () 
     assert.equal(formatNumberCalls >= 4, true);
     assert.match(document.body.textContent ?? '', /1 \/ 3/);
     assert.match(document.body.textContent ?? '', /12 U/);
-    assert.match(document.body.textContent ?? '', /120 г/);
+    assert.match(document.body.textContent ?? '', /120 g/);
   } finally {
     formatter.formatNumber = originalFormatNumber;
     await act(async () => {

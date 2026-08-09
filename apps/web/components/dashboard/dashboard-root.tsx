@@ -63,13 +63,9 @@ export function DashboardRoot() {
     () =>
       resolveDashboardNextActionPresentation(
         localization,
-        createDashboardNextActionEngineInput(
-          events,
-          referenceTime,
-          presentationDependencies,
-        ),
+        createDashboardNextActionEngineInput(events, referenceTime),
       ),
-    [events, localization, presentationDependencies, referenceTime],
+    [events, localization, referenceTime],
   );
   const dashboardTimeZone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -219,7 +215,10 @@ export function DashboardRoot() {
         lastGlucose={
           derivedBlocks.lastGlucose ? (
             <DashboardLastGlucose
-              glucose={derivedBlocks.lastGlucose}
+              glucose={{
+                displayTime: derivedBlocks.lastGlucose.displayTime,
+                event: derivedBlocks.lastGlucose.event,
+              }}
               referenceTime={referenceTime}
               state="ready"
             />

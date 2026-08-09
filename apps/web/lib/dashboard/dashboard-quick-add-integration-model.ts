@@ -1,17 +1,15 @@
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
 import type { TimelinePresentationDependencies } from '../timeline/presentation';
-import { resolveTimelinePresentationLocale } from '../timeline/presentation';
 import { deriveDashboardRecentEventSources } from './dashboard-recent-events-derivation';
 import { getTimelineCalendarDateKey } from '../timeline/timeline-date-time';
 import {
-  formatLatestGlucoseValue,
   getLatestGlucoseEvent,
-  getRecentTimelineEvents,
   getTodayInsulinTotal,
   getTodayMedicationCount,
   getTodayNutritionTotal,
   getTodayTimelineEvents,
+  type TimelineRecentEvent,
 } from '../timeline/timeline-selectors';
 
 export interface DashboardDerivedAiInsight {
@@ -29,26 +27,16 @@ export interface DashboardDerivedDaySummary {
   readonly medicationDoses: number;
   readonly remindersCompleted: number;
   readonly remindersTotal: number;
-  readonly totalCarbohydrates: string;
-  readonly totalInsulin: string;
+  readonly totalCarbohydrateGrams: number;
+  readonly totalInsulinUnits: number;
 }
 
 export interface DashboardDerivedLastGlucose {
-  readonly dateTime: string;
   readonly displayTime: string;
-  readonly value: string;
+  readonly event: Extract<SemanticTimelineEvent, { kind: 'glucose' }>;
 }
 
-export interface DashboardDerivedRecentEvent {
-  readonly category: 'activity' | 'insulin' | 'medication' | 'nutrition';
-  readonly context: string;
-  readonly dateTime: string;
-  readonly displayTime: string;
-  readonly id: string;
-  readonly title: string;
-  readonly unit: string;
-  readonly value: string;
-}
+export type DashboardDerivedRecentEvent = TimelineRecentEvent;
 
 export interface DashboardTimelineState {
   readonly events: readonly SemanticTimelineEvent[];
@@ -106,7 +94,6 @@ function createDashboardDayLabel(
 
 function deriveLastGlucose(
   events: readonly SemanticTimelineEvent[],
-  dependencies: TimelinePresentationDependencies,
   formatLastGlucoseDisplayTime?: (dateTime: string) => string,
 ): DashboardDerivedLastGlucose | null {
   const latestGlucose = getLatestGlucoseEvent(events);
@@ -124,15 +111,13 @@ function deriveLastGlucose(
   }
 
   return {
-    dateTime: latestGlucose.occurredAt,
     displayTime,
-    value: formatLatestGlucoseValue(latestGlucose, dependencies),
+    event: latestGlucose,
   };
 }
 
 function deriveDaySummary(
   events: readonly SemanticTimelineEvent[],
-  dependencies: TimelinePresentationDependencies,
   referenceTime: Date,
   timeZone: string | undefined,
   remindersCompleted: number,
@@ -172,14 +157,6 @@ function deriveDaySummary(
     referenceTime,
     timeZone,
   );
-  const formattedInsulin = dependencies.formatter.formatNumber(
-    totalInsulinUnits,
-    { maximumFractionDigits: 1, minimumFractionDigits: 0 },
-  );
-  const formattedCarbs = dependencies.formatter.formatNumber(
-    totalCarbohydrateGrams,
-    { maximumFractionDigits: 0, minimumFractionDigits: 0 },
-  );
 
   return {
     dayDate: dayLabel.dayDate,
@@ -188,8 +165,8 @@ function deriveDaySummary(
     medicationDoses,
     remindersCompleted,
     remindersTotal,
-    totalCarbohydrates: `${formattedCarbs} ${dependencies.labels.units.massG}`,
-    totalInsulin: `${formattedInsulin} ${dependencies.labels.units.insulinDose}`,
+    totalCarbohydrateGrams,
+    totalInsulinUnits,
   };
 }
 
@@ -199,13 +176,9 @@ export function deriveDashboardQuickAddBlocks(
 ): DashboardQuickAddIntegrationResult {
   const { presentationDependencies } = options;
   const referenceTime = options.referenceTime ?? new Date();
-  const locale =
-    options.locale ??
-    resolveTimelinePresentationLocale(presentationDependencies);
   const timeZone = options.timeZone?.trim() || undefined;
   const remindersCompleted = options.remindersCompleted ?? 0;
   const remindersTotal = options.remindersTotal ?? 0;
-
   const recentEvents = options.formatRecentEventDisplayTime
     ? deriveDashboardRecentEventSources(
         state.events,
@@ -214,16 +187,12 @@ export function deriveDashboardQuickAddBlocks(
           formatDisplayTime: options.formatRecentEventDisplayTime,
         },
       )
-    : getRecentTimelineEvents(state.events, presentationDependencies, {
-        locale,
-        timeZone,
-      });
+    : [];
 
   return {
     aiInsight: options.aiInsight ?? null,
     daySummary: deriveDaySummary(
       state.events,
-      presentationDependencies,
       referenceTime,
       timeZone,
       remindersCompleted,
@@ -232,7 +201,6 @@ export function deriveDashboardQuickAddBlocks(
     ),
     lastGlucose: deriveLastGlucose(
       state.events,
-      presentationDependencies,
       options.formatLastGlucoseDisplayTime,
     ),
     recentEvents,

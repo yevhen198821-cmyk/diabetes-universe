@@ -10,7 +10,10 @@ import test from 'node:test';
 
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model.ts';
 import { createTimelinePresentationDependencies } from '../../lib/timeline/presentation/index.ts';
-import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
+import {
+  liftLegacyTestFixture,
+  liftLegacyTestFixtures,
+} from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
 import { createTestTimelinePresentationDependencies } from '../../lib/timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import { createTestPlatformRuntime } from '../../lib/platform/react/testing/create-test-platform-runtime.ts';
 import { TestPlatformProvider } from '../../lib/platform/react/testing/test-platform-provider.ts';
@@ -49,9 +52,15 @@ test('dashboard last glucose renders localized English copy inside platform prov
         { runtime },
         createElement(DashboardLastGlucose, {
           glucose: {
-            dateTime: '2026-08-02T05:00:00.000Z',
             displayTime: '06:00',
-            value: '6.4 mmol/L',
+            event: liftLegacyTestFixture({
+              context: 'Before breakfast',
+              dateTime: '2026-08-02T05:00:00.000Z',
+              id: 'glucose-test',
+              kind: 'glucose',
+              title: 'Glucose',
+              value: '6.4 mmol/L',
+            }),
           },
           state: 'ready',
         }),
@@ -152,9 +161,12 @@ test('deriveLastGlucose uses injected formatter for display time', async () => {
 
   assert.equal(formatTimeCalls, 1);
   assert.equal(receivedDateTime, '2026-08-02T08:00:00.000Z');
-  assert.equal(blocks.lastGlucose?.value, '6.4 mmol/L');
+  assert.equal(blocks.lastGlucose?.event.concentrationMmolPerL, 6.4);
   assert.equal(blocks.lastGlucose?.displayTime, '08:00');
-  assert.equal(blocks.lastGlucose?.dateTime, '2026-08-02T08:00:00.000Z');
+  assert.equal(
+    blocks.lastGlucose?.event.occurredAt,
+    '2026-08-02T08:00:00.000Z',
+  );
 });
 
 test('deriveLastGlucose passes display time through to view model unchanged', async () => {
