@@ -1,36 +1,12 @@
 import type {
-  GlucoseMeasurementContext,
   SemanticTimelineEvent,
   TimelineEvent,
 } from '@diabetes-universe/types';
 
 import {
-  getSemanticEventCardContext,
-  getSemanticEventCardTitle,
-  getSemanticEventCardUnit,
-  getSemanticEventCardValue,
-  getSemanticEventOccurredAt,
-} from './semantic-event-fields';
-
-const legacyGlucoseContextBySemantic: Readonly<
-  Record<GlucoseMeasurementContext, string>
-> = {
-  after_meal: 'После еды',
-  bedtime: 'Перед сном',
-  before_meal: 'Перед едой',
-  fasting: 'Натощак',
-  other: 'Другое',
-};
-
-function projectLegacyContext(
-  event: SemanticTimelineEvent,
-): string | undefined {
-  if (event.kind === 'glucose' && event.context) {
-    return legacyGlucoseContextBySemantic[event.context];
-  }
-
-  return getSemanticEventCardContext(event);
-}
+  mapTimelineLegacyRepositoryProjection,
+  type TimelinePresentationDependencies,
+} from './presentation';
 
 /**
  * Temporary P3c repository compatibility bridge.
@@ -41,40 +17,21 @@ function projectLegacyContext(
  */
 export function projectSemanticToLegacyRepositoryEvent(
   event: SemanticTimelineEvent,
+  dependencies: TimelinePresentationDependencies,
 ): TimelineEvent {
-  const unit = getSemanticEventCardUnit(event);
-  const value = getSemanticEventCardValue(event);
-  const legacyValue =
-    event.kind === 'glucose'
-      ? `${value.replace('.', ',')} ммоль/л`
-      : event.kind === 'insulin'
-        ? `${value} ЕД`
-        : event.kind === 'nutrition'
-          ? `${value} г углеводов`
-          : event.kind === 'activity'
-            ? value
-            : event.kind === 'note'
-              ? event.body
-              : value;
+  const projection = mapTimelineLegacyRepositoryProjection(event, dependencies);
 
   return {
-    context: projectLegacyContext(event),
+    context: projection.context,
     createdAt: event.createdAt,
-    dateTime: getSemanticEventOccurredAt(event),
+    dateTime: event.occurredAt,
     id: event.id,
     kind: event.kind,
-    note:
-      event.kind === 'nutrition'
-        ? event.note
-        : event.kind === 'medication'
-          ? event.note
-          : event.kind === 'activity'
-            ? event.note
-            : undefined,
+    note: projection.note,
     source: event.source,
-    title: getSemanticEventCardTitle(event),
-    unit: unit || undefined,
+    title: projection.title,
+    unit: projection.unit,
     updatedAt: event.updatedAt,
-    value: legacyValue,
+    value: projection.value,
   };
 }

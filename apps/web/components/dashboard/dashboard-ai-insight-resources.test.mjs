@@ -52,5 +52,6 @@ test('dashboard preload namespaces remain unchanged for ai insight keys', async 
   assert.deepEqual(WEB_PLATFORM_APPLICATION_PRELOAD_NAMESPACES, [
     'common',
     'dashboard',
+    'timeline',
   ]);
 });

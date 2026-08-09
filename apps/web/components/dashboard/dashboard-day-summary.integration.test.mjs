@@ -10,7 +10,9 @@ import { renderToString } from 'react-dom/server';
 import test from 'node:test';
 
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model.ts';
+import { createTimelinePresentationDependencies } from '../../lib/timeline/presentation/index.ts';
 import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
+import { createTestTimelinePresentationDependencies } from '../../lib/timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import { createTestPlatformRuntime } from '../../lib/platform/react/testing/create-test-platform-runtime.ts';
 import { TestPlatformProvider } from '../../lib/platform/react/testing/test-platform-provider.ts';
 import {
@@ -135,6 +137,11 @@ test('deriveDaySummary invokes formatDate callback exactly once with referenceTi
     request: { acceptLanguage: 'en-GB', cookieTimeZone: 'UTC' },
   });
   const formatter = runtime.formatter;
+  const presentationDependencies = createTimelinePresentationDependencies({
+    formatter: runtime.formatter,
+    localization: runtime.localization,
+    timeZone: 'UTC',
+  });
   const referenceTime = new Date('2026-08-02T10:00:00.000Z');
   let formatDateCalls = 0;
   let receivedDate = null;
@@ -149,6 +156,7 @@ test('deriveDaySummary invokes formatDate callback exactly once with referenceTi
       },
       referenceTime,
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 
@@ -158,7 +166,9 @@ test('deriveDaySummary invokes formatDate callback exactly once with referenceTi
   assert.match(blocks.daySummary?.displayDayLabel ?? '', /August/i);
 });
 
-test('deriveDaySummary keeps dayDate independent from display label formatting', () => {
+test('deriveDaySummary keeps dayDate independent from display label formatting', async () => {
+  const presentationDependencies =
+    await createTestTimelinePresentationDependencies();
   const referenceTime = new Date('2026-08-02T10:00:00.000Z');
 
   const blocks = deriveDashboardQuickAddBlocks(
@@ -167,6 +177,7 @@ test('deriveDaySummary keeps dayDate independent from display label formatting',
       formatDaySummaryDisplayDate: () => 'custom-display-label',
       referenceTime,
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 
@@ -174,7 +185,9 @@ test('deriveDaySummary keeps dayDate independent from display label formatting',
   assert.equal(blocks.daySummary?.displayDayLabel, 'custom-display-label');
 });
 
-test('deriveDaySummary passes insulin and carbohydrate totals through unchanged', () => {
+test('deriveDaySummary passes insulin and carbohydrate totals through unchanged', async () => {
+  const presentationDependencies =
+    await createTestTimelinePresentationDependencies();
   const blocks = deriveDashboardQuickAddBlocks(
     {
       events: liftLegacyTestFixtures([
@@ -200,6 +213,7 @@ test('deriveDaySummary passes insulin and carbohydrate totals through unchanged'
       formatDaySummaryDisplayDate: () => 'Sunday, 2 August 2026',
       referenceTime: new Date('2026-08-02T10:00:00.000Z'),
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 

@@ -1,7 +1,6 @@
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
-import { formatInsulinDose } from '../quick-add/format-insulin';
-import { formatNutritionCarbs } from '../quick-add/format-nutrition';
+import type { TimelinePresentationDependencies } from '../timeline/presentation';
 import { deriveDashboardRecentEventSources } from './dashboard-recent-events-derivation';
 import { getTimelineCalendarDateKey } from '../timeline/timeline-date-time';
 import {
@@ -60,6 +59,7 @@ export interface DashboardQuickAddIntegrationOptions {
   readonly formatLastGlucoseDisplayTime?: (dateTime: string) => string;
   readonly formatRecentEventDisplayTime?: (dateTime: string) => string;
   readonly locale?: string;
+  readonly presentationDependencies: TimelinePresentationDependencies;
   readonly referenceTime?: Date;
   readonly remindersCompleted?: number;
   readonly remindersTotal?: number;
@@ -107,6 +107,7 @@ function createDashboardDayLabel(
 
 function deriveLastGlucose(
   events: readonly SemanticTimelineEvent[],
+  dependencies: TimelinePresentationDependencies,
   formatLastGlucoseDisplayTime?: (dateTime: string) => string,
 ): DashboardDerivedLastGlucose | null {
   const latestGlucose = getLatestGlucoseEvent(events);
@@ -126,12 +127,13 @@ function deriveLastGlucose(
   return {
     dateTime: latestGlucose.occurredAt,
     displayTime,
-    value: formatLatestGlucoseValue(latestGlucose),
+    value: formatLatestGlucoseValue(latestGlucose, dependencies),
   };
 }
 
 function deriveDaySummary(
   events: readonly SemanticTimelineEvent[],
+  dependencies: TimelinePresentationDependencies,
   referenceTime: Date,
   timeZone: string | undefined,
   remindersCompleted: number,
@@ -171,6 +173,14 @@ function deriveDaySummary(
     referenceTime,
     timeZone,
   );
+  const formattedInsulin = dependencies.valueFormatter.formatNumber(
+    totalInsulinUnits,
+    { maximumFractionDigits: 1, minimumFractionDigits: 0 },
+  );
+  const formattedCarbs = dependencies.valueFormatter.formatNumber(
+    totalCarbohydrateGrams,
+    { maximumFractionDigits: 0, minimumFractionDigits: 0 },
+  );
 
   return {
     dayDate: dayLabel.dayDate,
@@ -179,26 +189,31 @@ function deriveDaySummary(
     medicationDoses,
     remindersCompleted,
     remindersTotal,
-    totalCarbohydrates: `${formatNutritionCarbs(totalCarbohydrateGrams)} г`,
-    totalInsulin: `${formatInsulinDose(totalInsulinUnits)} ЕД`,
+    totalCarbohydrates: `${formattedCarbs} ${dependencies.labels.units.massG}`,
+    totalInsulin: `${formattedInsulin} ${dependencies.labels.units.insulinDose}`,
   };
 }
 
 export function deriveDashboardQuickAddBlocks(
   state: DashboardTimelineState,
-  options: DashboardQuickAddIntegrationOptions = {},
+  options: DashboardQuickAddIntegrationOptions,
 ): DashboardQuickAddIntegrationResult {
   const referenceTime = options.referenceTime ?? new Date();
   const locale = options.locale ?? DEFAULT_LOCALE;
   const timeZone = options.timeZone?.trim() || undefined;
   const remindersCompleted = options.remindersCompleted ?? 0;
   const remindersTotal = options.remindersTotal ?? 0;
+  const { presentationDependencies } = options;
 
   const recentEvents = options.formatRecentEventDisplayTime
-    ? deriveDashboardRecentEventSources(state.events, {
-        formatDisplayTime: options.formatRecentEventDisplayTime,
-      })
-    : getRecentTimelineEvents(state.events, {
+    ? deriveDashboardRecentEventSources(
+        state.events,
+        presentationDependencies,
+        {
+          formatDisplayTime: options.formatRecentEventDisplayTime,
+        },
+      )
+    : getRecentTimelineEvents(state.events, presentationDependencies, {
         locale,
         timeZone,
       });
@@ -207,6 +222,7 @@ export function deriveDashboardQuickAddBlocks(
     aiInsight: options.aiInsight ?? null,
     daySummary: deriveDaySummary(
       state.events,
+      presentationDependencies,
       referenceTime,
       timeZone,
       remindersCompleted,
@@ -215,6 +231,7 @@ export function deriveDashboardQuickAddBlocks(
     ),
     lastGlucose: deriveLastGlucose(
       state.events,
+      presentationDependencies,
       options.formatLastGlucoseDisplayTime,
     ),
     recentEvents,

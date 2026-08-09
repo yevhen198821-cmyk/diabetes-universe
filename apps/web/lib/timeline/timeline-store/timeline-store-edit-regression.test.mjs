@@ -13,12 +13,19 @@ import {
 } from '../../../components/timeline/timeline-event-detail-model.ts';
 import { createTimelineSearchFilterModel } from '../../../components/timeline/timeline-search-filter-model.ts';
 import { deriveDashboardQuickAddBlocks } from '../../dashboard/dashboard-quick-add-integration-model.ts';
+import { createTestTimelinePresentationDependencies } from '../presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import {
   setupIntegrationDom,
   teardownIntegrationDom,
 } from '../../platform/integration/tests/integration-dom-setup.mjs';
 import { projectSemanticToLegacyRepositoryEvent } from '../temporary-semantic-repository-bridge.ts';
 import { TimelineStoreProvider, useTimelineStore } from './timeline-store.tsx';
+
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
 
 after(() => {
   teardownIntegrationDom();
@@ -141,8 +148,10 @@ test('edit flow updates legacy repository mirror and refreshes semantic store', 
     assert.equal(semanticBefore?.kind, 'glucose');
     assert.equal(semanticBefore?.concentrationMmolPerL, 7.3);
 
-    const legacyProjection =
-      projectSemanticToLegacyRepositoryEvent(semanticBefore);
+    const legacyProjection = projectSemanticToLegacyRepositoryEvent(
+      semanticBefore,
+      presentationDependencies,
+    );
     const draft = {
       ...createTimelineEventEditDraft(legacyProjection),
       value: '9.1',
@@ -202,8 +211,10 @@ test('dashboard and timeline consumers receive semantic events after edit flow',
     await waitFor(() => mounted.currentStore.status === 'ready', 'ready state');
 
     const semanticBefore = mounted.currentStore.events[0];
-    const legacyProjection =
-      projectSemanticToLegacyRepositoryEvent(semanticBefore);
+    const legacyProjection = projectSemanticToLegacyRepositoryEvent(
+      semanticBefore,
+      presentationDependencies,
+    );
     const editResult = updateTimelineEventFromDraft(legacyProjection, {
       ...createTimelineEventEditDraft(legacyProjection),
       value: '8.2',
@@ -228,12 +239,17 @@ test('dashboard and timeline consumers receive semantic events after edit flow',
         formatLastGlucoseDisplayTime: () => '07:15',
         referenceTime: new Date('2026-08-02T10:00:00.000Z'),
         timeZone: 'UTC',
+        presentationDependencies,
       },
     );
-    const timelineFilter = createTimelineSearchFilterModel(semanticEvents, {
-      filter: 'glucose',
-      query: '',
-    });
+    const timelineFilter = createTimelineSearchFilterModel(
+      semanticEvents,
+      {
+        filter: 'glucose',
+        query: '',
+      },
+      presentationDependencies,
+    );
 
     assert.equal(dashboardBlocks.lastGlucose?.value, '8,2 ммоль/л');
     assert.equal(dashboardBlocks.lastGlucose?.dateTime, glucoseLatest.dateTime);
@@ -263,8 +279,10 @@ test('edit flow keeps migration sidecar aligned with semantic events', async () 
     assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 1);
 
     const semanticBefore = mounted.currentStore.events[0];
-    const legacyProjection =
-      projectSemanticToLegacyRepositoryEvent(semanticBefore);
+    const legacyProjection = projectSemanticToLegacyRepositoryEvent(
+      semanticBefore,
+      presentationDependencies,
+    );
     const editResult = updateTimelineEventFromDraft(legacyProjection, {
       ...createTimelineEventEditDraft(legacyProjection),
       value: '6',

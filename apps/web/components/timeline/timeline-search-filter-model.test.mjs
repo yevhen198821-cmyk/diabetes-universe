@@ -2,10 +2,17 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
+import { createTestTimelinePresentationDependencies } from '../../lib/timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import {
   createTimelineSearchFilterModel,
   normalizeTimelineSearchQuery,
 } from './timeline-search-filter-model.ts';
+
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
 
 const legacyEvents = [
   {
@@ -63,7 +70,11 @@ const legacyEvents = [
 const events = liftLegacyTestFixtures(legacyEvents);
 
 function filter(query, filter = 'all') {
-  return createTimelineSearchFilterModel(events, { filter, query });
+  return createTimelineSearchFilterModel(
+    events,
+    { filter, query },
+    presentationDependencies,
+  );
 }
 
 test('normalizes trim, case, and repeated spaces', () => {

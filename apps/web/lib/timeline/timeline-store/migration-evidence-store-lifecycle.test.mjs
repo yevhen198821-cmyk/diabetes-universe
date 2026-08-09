@@ -16,7 +16,14 @@ import {
   teardownIntegrationDom,
 } from '../../platform/integration/tests/integration-dom-setup.mjs';
 import { projectSemanticToLegacyRepositoryEvent } from '../temporary-semantic-repository-bridge.ts';
+import { createTestTimelinePresentationDependencies } from '../presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import { TimelineStoreProvider, useTimelineStore } from './timeline-store.tsx';
+
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
 
 after(() => {
   teardownIntegrationDom();
@@ -271,8 +278,10 @@ test('store compatibility edit does not restamp migration evidence', async () =>
       mounted.currentStore.getMigrationRecord('glucose-a'),
     );
     const semanticBefore = mounted.currentStore.events[0];
-    const legacyProjection =
-      projectSemanticToLegacyRepositoryEvent(semanticBefore);
+    const legacyProjection = projectSemanticToLegacyRepositoryEvent(
+      semanticBefore,
+      presentationDependencies,
+    );
     const editResult = updateTimelineEventFromDraft(legacyProjection, {
       ...createTimelineEventEditDraft(legacyProjection),
       value: '8.2',

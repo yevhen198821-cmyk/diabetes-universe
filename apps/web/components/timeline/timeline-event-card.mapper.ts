@@ -12,63 +12,51 @@ import type { LucideIcon } from 'lucide-react';
 import { createElement } from 'react';
 
 import {
-  getSemanticEventCardContext,
-  getSemanticEventCardTitle,
-  getSemanticEventCardUnit,
-  getSemanticEventCardValue,
-  getSemanticEventOccurredAt,
-} from '../../lib/timeline/semantic-event-fields';
-import { formatTimelineDisplayTime } from '../../lib/timeline/timeline-date-time';
+  mapTimelineEventCardPresentation,
+  type TimelinePresentationDependencies,
+} from '../../lib/timeline/presentation';
 
 type TimelineEventCardProps = Omit<EventCardProps, 'onClick' | 'variant'>;
 
-interface EventMapping {
-  readonly cardType: EventCardType;
-  readonly icon: LucideIcon;
-}
+type TimelineEventCardKind = Extract<
+  EventCardType,
+  'activity' | 'glucose' | 'insulin' | 'medication' | 'note' | 'nutrition'
+>;
 
-const eventMappings = {
-  activity: {
-    cardType: 'activity',
-    icon: Activity,
-  },
-  glucose: {
-    cardType: 'glucose',
-    icon: Droplets,
-  },
-  insulin: {
-    cardType: 'insulin',
-    icon: Syringe,
-  },
-  medication: {
-    cardType: 'medication',
-    icon: Pill,
-  },
-  note: {
-    cardType: 'note',
-    icon: StickyNote,
-  },
-  nutrition: {
-    cardType: 'nutrition',
-    icon: CookingPot,
-  },
-} as const satisfies Record<SemanticTimelineEvent['kind'], EventMapping>;
+const ICON_BY_CARD_TYPE = {
+  activity: Activity,
+  glucose: Droplets,
+  insulin: Syringe,
+  medication: Pill,
+  note: StickyNote,
+  nutrition: CookingPot,
+} as const satisfies Record<TimelineEventCardKind, LucideIcon>;
 
 export function mapTimelineEventToCard(
   event: SemanticTimelineEvent,
+  dependencies: TimelinePresentationDependencies,
 ): TimelineEventCardProps {
-  const mapping = eventMappings[event.kind];
+  const time = dependencies.formatter.formatTime(event.occurredAt, {
+    timeStyle: 'short',
+  });
+  const presentation = mapTimelineEventCardPresentation(
+    event,
+    dependencies,
+    time,
+  );
+  const icon =
+    ICON_BY_CARD_TYPE[presentation.cardType as TimelineEventCardKind];
 
   return {
-    context: getSemanticEventCardContext(event),
-    icon: createElement(mapping.icon, {
+    context: presentation.context,
+    icon: createElement(icon, {
       'aria-hidden': true,
       size: 15,
     }),
-    time: formatTimelineDisplayTime(getSemanticEventOccurredAt(event)),
-    title: getSemanticEventCardTitle(event),
-    type: mapping.cardType,
-    unit: getSemanticEventCardUnit(event) ?? '',
-    value: getSemanticEventCardValue(event),
+    time: presentation.time,
+    title: presentation.title,
+    type: presentation.cardType,
+    unit: presentation.unit,
+    value: presentation.value,
   };
 }

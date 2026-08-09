@@ -20,6 +20,7 @@ import { createNoteTimelineEvent } from '../../lib/quick-add/create-note-timelin
 import { createNutritionTimelineEvent } from '../../lib/quick-add/create-nutrition-timeline-event';
 import { liftRepositorySnapshot } from '../../lib/timeline/migration/lift-repository-snapshot';
 import { compareSemanticTimelineEventsDescending } from '../../lib/timeline/semantic-timeline-ordering';
+import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
 import { createTimelineListModel } from './timeline-list-model';
 import { QuickAddRoot } from './quick-add-root';
@@ -48,6 +49,7 @@ function sortTimelineEventsNewestFirst(
 export function TimelineShell() {
   const { addEvent, deleteEvent, error, events, status, updateEvent } =
     useTimelineStore();
+  const presentationDependencies = useTimelinePresentationDependencies();
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<TimelineEventFilter>('all');
@@ -68,11 +70,15 @@ export function TimelineShell() {
   );
   const searchFilterModel = useMemo(
     () =>
-      createTimelineSearchFilterModel(displayOrderedEvents, {
-        filter: activeFilter,
-        query,
-      }),
-    [activeFilter, displayOrderedEvents, query],
+      createTimelineSearchFilterModel(
+        displayOrderedEvents,
+        {
+          filter: activeFilter,
+          query,
+        },
+        presentationDependencies,
+      ),
+    [activeFilter, displayOrderedEvents, presentationDependencies, query],
   );
   const paginationModel = useMemo(
     () =>
@@ -171,10 +177,14 @@ export function TimelineShell() {
             ),
           )
         : sortTimelineEventsNewestFirst(events);
-    const nextSearchFilterModel = createTimelineSearchFilterModel(nextEvents, {
-      filter: activeFilter,
-      query,
-    });
+    const nextSearchFilterModel = createTimelineSearchFilterModel(
+      nextEvents,
+      {
+        filter: activeFilter,
+        query,
+      },
+      presentationDependencies,
+    );
     const isStillVisible = nextSearchFilterModel.filteredEvents.some(
       (visibleEvent) => visibleEvent.id === legacyEvent.id,
     );
@@ -244,6 +254,7 @@ export function TimelineShell() {
 
         {showToolbar ? (
           <TimelineToolbar
+            filterLabels={presentationDependencies.labels.filters}
             model={searchFilterModel}
             onFilterChange={handleFilterChange}
             onQueryChange={handleQueryChange}
@@ -257,6 +268,7 @@ export function TimelineShell() {
           onAddEvent={() => setQuickAddOpen(true)}
           onOpenEvent={handleOpenEvent}
           onResetCriteria={resetCriteria}
+          presentationDependencies={presentationDependencies}
         />
 
         {status === 'ready' && paginationModel.hasMore ? (
@@ -291,6 +303,7 @@ export function TimelineShell() {
           onDelete={handleDeleteEvent}
           onModeChange={setDetailMode}
           onUpdate={handleUpdateEvent}
+          presentationDependencies={presentationDependencies}
         />
       ) : null}
     </div>

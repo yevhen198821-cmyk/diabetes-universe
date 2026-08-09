@@ -1,6 +1,5 @@
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
-import { getSemanticEventOccurredAt } from '../../lib/timeline/semantic-event-fields';
 import { compareSemanticTimelineEventsDescending } from '../../lib/timeline/semantic-timeline-ordering';
 import {
   formatTimelineDateGroupLabel,
@@ -42,8 +41,7 @@ function getGroupDateKey(
   timeZone?: string,
 ): string {
   return (
-    getTimelineCalendarDateKey(getSemanticEventOccurredAt(event), timeZone) ??
-    INVALID_DATE_KEY
+    getTimelineCalendarDateKey(event.occurredAt, timeZone) ?? INVALID_DATE_KEY
   );
 }
 
@@ -76,11 +74,7 @@ function createGroupLabel(
   timeZone?: string,
 ): string {
   const firstValidEvent = events.find(
-    (event) =>
-      getTimelineCalendarDateKey(
-        getSemanticEventOccurredAt(event),
-        timeZone,
-      ) !== null,
+    (event) => getTimelineCalendarDateKey(event.occurredAt, timeZone) !== null,
   );
 
   if (!firstValidEvent) {
@@ -88,7 +82,7 @@ function createGroupLabel(
   }
 
   return formatTimelineDateGroupLabel(
-    getSemanticEventOccurredAt(firstValidEvent),
+    firstValidEvent.occurredAt,
     referenceDate,
     locale,
     timeZone,

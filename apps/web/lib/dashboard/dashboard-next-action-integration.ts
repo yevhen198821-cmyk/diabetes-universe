@@ -6,6 +6,7 @@ import {
   resolveNextActionInformationalContent,
   resolveNextActionReadyStep,
 } from '../../components/dashboard/dashboard-next-action-labels';
+import type { TimelinePresentationDependencies } from '../timeline/presentation';
 import { DASHBOARD_QUICK_ADD_AVAILABLE_CATEGORIES } from './next-action/next-action-availability';
 import {
   createNextActionContext,
@@ -97,10 +98,12 @@ export function resolveDashboardNextActionPresentation(
 export function createDashboardNextActionEngineInput(
   events: DashboardNextActionEngineInput['events'],
   now: Date,
+  presentationDependencies: TimelinePresentationDependencies,
 ): DashboardNextActionEngineInput {
   return {
     events,
     now,
+    presentationDependencies,
     quickAddAvailability: {
       availableCategories: DASHBOARD_QUICK_ADD_AVAILABLE_CATEGORIES,
     },

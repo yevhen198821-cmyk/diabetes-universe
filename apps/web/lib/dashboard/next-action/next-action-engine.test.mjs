@@ -6,6 +6,9 @@ import {
   createDashboardNextActionEngineInput,
   resolveDashboardNextActionPresentation,
 } from '../dashboard-next-action-integration.ts';
+import { createTimelinePresentationDependencies } from '../../timeline/presentation/index.ts';
+import { liftLegacyTestFixtures } from '../../timeline/testing/lift-legacy-test-fixtures.ts';
+import { createTestTimelinePresentationDependencies } from '../../timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import {
   NEXT_ACTION_DEFAULT_ACTION_LABEL_KEY,
   NEXT_ACTION_DEFAULT_DESCRIPTION_KEY,
@@ -31,14 +34,26 @@ import {
 
 const FIXED_NOW = new Date('2026-08-02T10:00:00.000Z');
 
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
+
 function createTestContext(overrides = {}) {
+  const { events: overrideEvents, ...rest } = overrides;
+  const events = Array.isArray(overrideEvents)
+    ? liftLegacyTestFixtures(overrideEvents)
+    : [];
+
   return createNextActionContext({
-    events: [],
+    events,
     now: FIXED_NOW,
+    presentationDependencies,
     quickAddAvailability: {
       availableCategories: ['insulin'],
     },
-    ...overrides,
+    ...rest,
   });
 }
 
@@ -314,8 +329,9 @@ test('createNextActionContext does not mutate input events', () => {
   const inputEvents = [...events];
 
   const context = createNextActionContext({
-    events: inputEvents,
+    events: liftLegacyTestFixtures(inputEvents),
     now: FIXED_NOW,
+    presentationDependencies,
     quickAddAvailability: {
       availableCategories: ['insulin'],
     },
@@ -397,9 +413,19 @@ test('dashboard integration preserves insulin quick add presentation', async () 
     request: { acceptLanguage: 'en-GB', cookieTimeZone: 'Europe/London' },
   });
 
+  const presentationDependencies = createTimelinePresentationDependencies({
+    formatter: runtime.formatter,
+    localization: runtime.localization,
+    timeZone: 'Europe/London',
+  });
+
   const presentation = resolveDashboardNextActionPresentation(
     runtime.localization,
-    createDashboardNextActionEngineInput([], FIXED_NOW),
+    createDashboardNextActionEngineInput(
+      [],
+      FIXED_NOW,
+      presentationDependencies,
+    ),
   );
 
   assert.equal(presentation.state, 'ready');

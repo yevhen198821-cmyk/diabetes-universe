@@ -9,7 +9,9 @@ import { createRoot } from 'react-dom/client';
 import test from 'node:test';
 
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model.ts';
+import { createTimelinePresentationDependencies } from '../../lib/timeline/presentation/index.ts';
 import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
+import { createTestTimelinePresentationDependencies } from '../../lib/timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import { createTestPlatformRuntime } from '../../lib/platform/react/testing/create-test-platform-runtime.ts';
 import { TestPlatformProvider } from '../../lib/platform/react/testing/test-platform-provider.ts';
 import {
@@ -116,6 +118,11 @@ test('deriveLastGlucose uses injected formatter for display time', async () => {
     request: { acceptLanguage: 'en-GB', cookieTimeZone: 'UTC' },
   });
   const formatter = runtime.formatter;
+  const presentationDependencies = createTimelinePresentationDependencies({
+    formatter: runtime.formatter,
+    localization: runtime.localization,
+    timeZone: 'UTC',
+  });
   let formatTimeCalls = 0;
   let receivedDateTime = null;
 
@@ -140,6 +147,7 @@ test('deriveLastGlucose uses injected formatter for display time', async () => {
       },
       referenceTime: new Date('2026-08-02T10:00:00.000Z'),
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 
@@ -150,7 +158,9 @@ test('deriveLastGlucose uses injected formatter for display time', async () => {
   assert.equal(blocks.lastGlucose?.dateTime, '2026-08-02T08:00:00.000Z');
 });
 
-test('deriveLastGlucose passes display time through to view model unchanged', () => {
+test('deriveLastGlucose passes display time through to view model unchanged', async () => {
+  const presentationDependencies =
+    await createTestTimelinePresentationDependencies();
   const blocks = deriveDashboardQuickAddBlocks(
     {
       events: liftLegacyTestFixtures([
@@ -167,6 +177,7 @@ test('deriveLastGlucose passes display time through to view model unchanged', ()
     {
       formatLastGlucoseDisplayTime: () => 'formatted-once',
       referenceTime: new Date('2026-08-02T10:00:00.000Z'),
+      presentationDependencies,
     },
   );
 

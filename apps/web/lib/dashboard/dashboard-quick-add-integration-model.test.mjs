@@ -3,7 +3,14 @@ import test from 'node:test';
 
 import { selectDashboardRecentEvents } from '../../components/dashboard/dashboard-recent-events-model.ts';
 import { liftLegacyTestFixtures } from '../timeline/testing/lift-legacy-test-fixtures.ts';
+import { createTestTimelinePresentationDependencies } from '../timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import { deriveDashboardQuickAddBlocks } from './dashboard-quick-add-integration-model.ts';
+
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
 
 const referenceTime = new Date('2026-08-02T10:00:00.000Z');
 
@@ -63,6 +70,7 @@ test('deriveLastGlucose invokes formatter callback exactly once with event dateT
       },
       referenceTime,
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 
@@ -91,6 +99,7 @@ test('derives last glucose from shared timeline events', () => {
       formatLastGlucoseDisplayTime: formatUtcShortTime,
       referenceTime,
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 
@@ -142,6 +151,7 @@ test('derives day summary only from today events', () => {
       formatDaySummaryDisplayDate,
       referenceTime,
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 
@@ -167,6 +177,7 @@ test('updates day summary and recent events after insulin save', () => {
       formatDaySummaryDisplayDate,
       referenceTime,
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 
@@ -206,7 +217,12 @@ test('derives recent event sources that can be sorted by latest event time', () 
         },
       ]),
     },
-    { formatDaySummaryDisplayDate, referenceTime, timeZone: 'Europe/Moscow' },
+    {
+      formatDaySummaryDisplayDate,
+      referenceTime,
+      timeZone: 'Europe/Moscow',
+      presentationDependencies,
+    },
   );
   const selected = selectDashboardRecentEvents(
     blocks.recentEvents,

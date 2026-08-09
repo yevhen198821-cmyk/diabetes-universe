@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { liftLegacyTestFixtures } from './testing/lift-legacy-test-fixtures.ts';
+import { createTestTimelinePresentationDependencies } from './presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import {
   getLatestGlucoseEvent,
   getRecentTimelineEvents,
@@ -10,6 +11,12 @@ import {
   getTodayNutritionTotal,
   getTodayTimelineEvents,
 } from './timeline-selectors.ts';
+
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
 
 const referenceDate = new Date('2026-08-02T12:00:00.000Z');
 
@@ -88,10 +95,14 @@ test('gets latest glucose event by dateTime', () => {
 });
 
 test('gets recent timeline events for dashboard-compatible categories', () => {
-  const recentEvents = getRecentTimelineEvents(events, {
-    limit: 3,
-    timeZone: 'UTC',
-  });
+  const recentEvents = getRecentTimelineEvents(
+    events,
+    presentationDependencies,
+    {
+      limit: 3,
+      timeZone: 'UTC',
+    },
+  );
 
   assert.deepEqual(
     recentEvents.map((event) => event.id),

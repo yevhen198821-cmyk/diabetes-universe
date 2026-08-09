@@ -12,7 +12,9 @@ import test from 'node:test';
 
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model.ts';
 import { deriveDashboardRecentEventSources } from '../../lib/dashboard/dashboard-recent-events-derivation.ts';
+import { createTimelinePresentationDependencies } from '../../lib/timeline/presentation/index.ts';
 import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
+import { createTestTimelinePresentationDependencies } from '../../lib/timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import { createTestPlatformRuntime } from '../../lib/platform/react/testing/create-test-platform-runtime.ts';
 import { TestPlatformProvider } from '../../lib/platform/react/testing/test-platform-provider.ts';
 import {
@@ -129,6 +131,11 @@ test('deriveDashboardRecentEventSources invokes formatTime callback once per map
     request: { acceptLanguage: 'en-GB', cookieTimeZone: 'UTC' },
   });
   const formatter = runtime.formatter;
+  const presentationDependencies = createTimelinePresentationDependencies({
+    formatter: runtime.formatter,
+    localization: runtime.localization,
+    timeZone: 'UTC',
+  });
   const formatCalls = [];
 
   const events = deriveDashboardRecentEventSources(
@@ -155,6 +162,7 @@ test('deriveDashboardRecentEventSources invokes formatTime callback once per map
         value: '42 г углеводов',
       },
     ]),
+    presentationDependencies,
     {
       formatDisplayTime: (dateTime) => {
         formatCalls.push(dateTime);
@@ -172,7 +180,9 @@ test('deriveDashboardRecentEventSources invokes formatTime callback once per map
   assert.equal(events[1]?.id, 'insulin-0805');
 });
 
-test('deriveDashboardQuickAddBlocks passes displayTime through unchanged', () => {
+test('deriveDashboardQuickAddBlocks passes displayTime through unchanged', async () => {
+  const presentationDependencies =
+    await createTestTimelinePresentationDependencies();
   const blocks = deriveDashboardQuickAddBlocks(
     {
       events: liftLegacyTestFixtures([
@@ -188,6 +198,7 @@ test('deriveDashboardQuickAddBlocks passes displayTime through unchanged', () =>
     {
       formatRecentEventDisplayTime: () => 'formatted-once',
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 

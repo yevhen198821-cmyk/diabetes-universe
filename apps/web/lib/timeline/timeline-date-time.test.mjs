@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { mapTimelineEventToCard } from '../../components/timeline/timeline-event-card.mapper.ts';
+import { createTestTimelinePresentationDependencies } from './presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import { liftLegacyTestFixture } from './testing/lift-legacy-test-fixtures.ts';
 import {
   compareTimelineDateTime,
@@ -14,6 +15,12 @@ import {
 
 const referenceDate = new Date('2026-08-02T10:00:00.000Z');
 const timeZone = 'Europe/Moscow';
+
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
 
 test('creates ISO dateTime from selected local time', () => {
   const dateTime = createIsoDateTimeFromLocalTime('08:05', referenceDate);
@@ -111,12 +118,15 @@ test('maps nutrition without legacy meal kind', () => {
       title: 'Завтрак',
       value: '42 г углеводов',
     }),
+    presentationDependencies,
   );
 
   assert.equal(card.type, 'nutrition');
   assert.equal(
     card.time,
-    formatTimelineDisplayTime('2026-08-02T05:20:00.000Z'),
+    presentationDependencies.formatter.formatTime('2026-08-02T05:20:00.000Z', {
+      timeStyle: 'short',
+    }),
   );
   assert.equal(card.value, '42');
 });
@@ -199,7 +209,10 @@ test('maps all six timeline kinds to event cards', () => {
   ];
 
   for (const testCase of cases) {
-    const card = mapTimelineEventToCard(liftLegacyTestFixture(testCase.event));
+    const card = mapTimelineEventToCard(
+      liftLegacyTestFixture(testCase.event),
+      presentationDependencies,
+    );
 
     assert.equal(card.type, testCase.expectedType);
     assert.equal(card.value, testCase.expectedValue);
@@ -217,6 +230,7 @@ test('does not confuse note kind with optional note field on other events', () =
       title: 'Перекус',
       value: '15 г углеводов',
     }),
+    presentationDependencies,
   );
 
   assert.equal(card.type, 'nutrition');

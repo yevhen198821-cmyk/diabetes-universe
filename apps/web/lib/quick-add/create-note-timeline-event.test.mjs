@@ -3,7 +3,14 @@ import test from 'node:test';
 
 import { createNoteTimelineEvent } from './create-note-timeline-event.ts';
 import { createTimelineSearchFilterModel } from '../../components/timeline/timeline-search-filter-model.ts';
+import { createTestTimelinePresentationDependencies } from '../timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import { liftLegacyTestFixture } from '../timeline/testing/lift-legacy-test-fixtures.ts';
+
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
 
 test('createNoteTimelineEvent maps quick add entry to timeline event', () => {
   const event = createNoteTimelineEvent({
@@ -41,6 +48,7 @@ test('note quick add events are searchable and filterable', () => {
       filter: 'note',
       query: 'поиска',
     },
+    presentationDependencies,
   );
 
   assert.equal(model.filteredEvents.length, 1);

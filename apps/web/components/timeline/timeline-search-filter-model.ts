@@ -4,11 +4,9 @@ import type {
 } from '@diabetes-universe/types';
 
 import {
-  getSemanticEventCardContext,
-  getSemanticEventCardTitle,
-  getSemanticEventCardUnit,
-  getSemanticEventCardValue,
-} from '../../lib/timeline/semantic-event-fields';
+  mapTimelineSearchPresentation,
+  type TimelinePresentationDependencies,
+} from '../../lib/timeline/presentation';
 
 export type TimelineEventFilter = 'all' | TimelineEventKind;
 
@@ -26,25 +24,6 @@ export interface TimelineSearchFilterModel {
   readonly normalizedQuery: string;
   readonly resultCount: number;
 }
-
-export const timelineEventKindLabels: Record<TimelineEventKind, string> = {
-  activity: 'Активность',
-  glucose: 'Глюкоза',
-  insulin: 'Инсулин',
-  medication: 'Лекарство',
-  note: 'Заметка',
-  nutrition: 'Питание',
-};
-
-export const timelineEventFilterLabels: Record<TimelineEventFilter, string> = {
-  all: 'Все',
-  activity: 'Активность',
-  glucose: 'Глюкоза',
-  insulin: 'Инсулин',
-  medication: 'Лекарства',
-  note: 'Заметки',
-  nutrition: 'Питание',
-};
 
 export const timelineEventFilterOptions: readonly TimelineEventFilter[] = [
   'all',
@@ -64,21 +43,14 @@ function normalizeSearchField(value: string | undefined): string {
   return normalizeTimelineSearchQuery(value ?? '');
 }
 
-function createSearchHaystack(event: SemanticTimelineEvent): string {
+function createSearchHaystack(
+  event: SemanticTimelineEvent,
+  dependencies: TimelinePresentationDependencies,
+): string {
+  const presentation = mapTimelineSearchPresentation(event, dependencies);
   const searchable = [
-    getSemanticEventCardTitle(event),
-    getSemanticEventCardValue(event),
-    getSemanticEventCardUnit(event),
-    getSemanticEventCardContext(event),
-    event.kind === 'nutrition'
-      ? event.note
-      : event.kind === 'medication'
-        ? event.note
-        : event.kind === 'activity'
-          ? event.note
-          : undefined,
-    timelineEventKindLabels[event.kind],
-    event.kind,
+    ...presentation.userContent,
+    ...presentation.localizedLabels,
   ];
 
   return searchable
@@ -97,16 +69,18 @@ function matchesFilter(
 function matchesSearch(
   event: SemanticTimelineEvent,
   normalizedQuery: string,
+  dependencies: TimelinePresentationDependencies,
 ): boolean {
   return (
     normalizedQuery.length === 0 ||
-    createSearchHaystack(event).includes(normalizedQuery)
+    createSearchHaystack(event, dependencies).includes(normalizedQuery)
   );
 }
 
 export function createTimelineSearchFilterModel(
   events: readonly SemanticTimelineEvent[],
   input: TimelineSearchFilterInput,
+  dependencies: TimelinePresentationDependencies,
 ): TimelineSearchFilterModel {
   const normalizedQuery = normalizeTimelineSearchQuery(input.query);
   const activeFilter = timelineEventFilterOptions.includes(input.filter)
@@ -117,7 +91,7 @@ export function createTimelineSearchFilterModel(
   const filteredEvents = events.filter(
     (event) =>
       matchesFilter(event, activeFilter) &&
-      matchesSearch(event, normalizedQuery),
+      matchesSearch(event, normalizedQuery, dependencies),
   );
 
   return {

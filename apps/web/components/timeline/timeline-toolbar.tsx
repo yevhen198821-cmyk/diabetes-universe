@@ -6,6 +6,7 @@ import { TimelineFilters } from './timeline-filters';
 import { TimelineSearch } from './timeline-search';
 
 interface TimelineToolbarProps {
+  readonly filterLabels: Readonly<Record<TimelineEventFilter, string>>;
   readonly model: TimelineSearchFilterModel;
   readonly onFilterChange: (filter: TimelineEventFilter) => void;
   readonly onQueryChange: (query: string) => void;
@@ -26,6 +27,7 @@ function createResultLabel(model: TimelineSearchFilterModel): string {
 }
 
 export function TimelineToolbar({
+  filterLabels,
   model,
   onFilterChange,
   onQueryChange,
@@ -43,6 +45,7 @@ export function TimelineToolbar({
       <TimelineSearch onChange={onQueryChange} query={query} />
       <TimelineFilters
         activeFilter={model.activeFilter}
+        filterLabels={filterLabels}
         onChange={onFilterChange}
       />
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

@@ -23,6 +23,7 @@ import {
   type QuickAddOpenTrigger,
 } from '../../lib/quick-add/quick-add-controller-model';
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
+import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { QuickAddHost } from '../quick-add/quick-add-host';
@@ -49,6 +50,7 @@ const mockAiInsight = {
 export function DashboardRoot() {
   const localization = useLocalization();
   const formatter = useFormatter();
+  const presentationDependencies = useTimelinePresentationDependencies();
   const { addEvent, events } = useTimelineStore();
   const [quickAddState, setQuickAddState] = useState(
     createInitialQuickAddControllerState,
@@ -61,9 +63,13 @@ export function DashboardRoot() {
     () =>
       resolveDashboardNextActionPresentation(
         localization,
-        createDashboardNextActionEngineInput(events, referenceTime),
+        createDashboardNextActionEngineInput(
+          events,
+          referenceTime,
+          presentationDependencies,
+        ),
       ),
-    [events, localization, referenceTime],
+    [events, localization, presentationDependencies, referenceTime],
   );
   const dashboardTimeZone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -107,6 +113,7 @@ export function DashboardRoot() {
           formatLastGlucoseDisplayTime,
           formatRecentEventDisplayTime,
           locale: DASHBOARD_LOCALE,
+          presentationDependencies,
           referenceTime,
           remindersCompleted: 1,
           remindersTotal: 3,
@@ -119,6 +126,7 @@ export function DashboardRoot() {
       formatDaySummaryDisplayDate,
       formatLastGlucoseDisplayTime,
       formatRecentEventDisplayTime,
+      presentationDependencies,
       referenceTime,
     ],
   );

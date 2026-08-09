@@ -2,9 +2,16 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { projectSemanticToLegacyRepositoryEvent } from '../temporary-semantic-repository-bridge.ts';
+import { createTestTimelinePresentationDependencies } from '../presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import { liftRepositorySnapshot } from './lift-repository-snapshot.ts';
 import { createMigrationSidecarStore } from './migration-sidecar-store.ts';
 import { createQuarantineRegistry } from './quarantine-registry.ts';
+
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
 
 const INITIAL_MIGRATED_AT = '2026-08-09T08:30:00.000Z';
 const REFRESH_MIGRATED_AT = '2026-08-09T09:45:00.000Z';
@@ -135,8 +142,10 @@ test('compatibility edit round-trip does not restamp migration evidence', () => 
   });
   const recordA = initial.migrationRecords.get('glucose-a');
   const semanticBefore = initial.events[0];
-  const legacyProjection =
-    projectSemanticToLegacyRepositoryEvent(semanticBefore);
+  const legacyProjection = projectSemanticToLegacyRepositoryEvent(
+    semanticBefore,
+    presentationDependencies,
+  );
   const editedLegacy = {
     ...legacyProjection,
     value: '8,2 ммоль/л',

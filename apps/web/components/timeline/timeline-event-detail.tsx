@@ -23,6 +23,8 @@ import {
   type TimelineEventEditDraft,
   type TimelineEventEditErrors,
 } from './timeline-event-detail-model';
+import { mapTimelineEventDetailPresentation } from '../../lib/timeline/presentation';
+import type { TimelinePresentationDependencies } from '../../lib/timeline/presentation';
 import { projectSemanticToLegacyRepositoryEvent } from '../../lib/timeline/temporary-semantic-repository-bridge';
 
 export type TimelineEventDetailMode = 'edit' | 'view';
@@ -34,6 +36,7 @@ interface TimelineEventDetailProps {
   readonly onDelete: (eventId: string) => void;
   readonly onModeChange: (mode: TimelineEventDetailMode) => void;
   readonly onUpdate: (event: TimelineEvent) => void;
+  readonly presentationDependencies: TimelinePresentationDependencies;
 }
 
 const fieldClass =
@@ -275,6 +278,7 @@ export function TimelineEventDetail({
   onDelete,
   onModeChange,
   onUpdate,
+  presentationDependencies,
 }: TimelineEventDetailProps) {
   const titleId = useId();
   const descriptionId = useId();
@@ -282,13 +286,28 @@ export function TimelineEventDetail({
   const deleteDescriptionId = useId();
   const dialogRef = useRef<HTMLElement>(null);
   const deleteDialogRef = useRef<HTMLElement>(null);
-  const legacyEvent = projectSemanticToLegacyRepositoryEvent(event);
+  const legacyEvent = projectSemanticToLegacyRepositoryEvent(
+    event,
+    presentationDependencies,
+  );
+  const readPresentation = mapTimelineEventDetailPresentation(
+    event,
+    presentationDependencies,
+  );
   const [draft, setDraft] = useState(() =>
     createTimelineEventEditDraft(legacyEvent),
   );
   const [errors, setErrors] = useState<TimelineEventEditErrors>({});
   const [deleteOpen, setDeleteOpen] = useState(false);
   const model = createTimelineEventDetailModel(legacyEvent);
+  const displayDate = presentationDependencies.formatter.formatDate(
+    event.occurredAt,
+    { dateStyle: 'long' },
+  );
+  const displayTime = presentationDependencies.formatter.formatTime(
+    event.occurredAt,
+    { timeStyle: 'short' },
+  );
 
   useDialogFocusTrap(!deleteOpen, dialogRef, onClose);
   useDialogFocusTrap(deleteOpen, deleteDialogRef, () => setDeleteOpen(false));
@@ -333,13 +352,13 @@ export function TimelineEventDetail({
         <header className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 sm:px-6 dark:border-slate-800">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-              {model.kindLabel}
+              {readPresentation.kindLabel}
             </p>
             <h2
               className="truncate text-lg font-bold text-slate-950 dark:text-slate-50"
               id={titleId}
             >
-              {mode === 'edit' ? 'Изменить событие' : model.title}
+              {mode === 'edit' ? 'Изменить событие' : readPresentation.title}
             </h2>
           </div>
           <button
@@ -372,27 +391,44 @@ export function TimelineEventDetail({
             <div className="space-y-5">
               <div>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {model.date} · {model.time}
+                  {displayDate} · {displayTime}
                 </p>
                 <p className="mt-2 text-2xl font-bold text-slate-950 dark:text-slate-50">
-                  {model.primaryText}
+                  {readPresentation.primaryText}
                 </p>
               </div>
 
               <dl className="grid gap-3">
-                {model.rows.map((row) => (
-                  <div
-                    className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900"
-                    key={row.label}
-                  >
+                {readPresentation.context ? (
+                  <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
                     <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                      {row.label}
+                      Контекст
                     </dt>
                     <dd className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      {row.value}
+                      {readPresentation.context}
                     </dd>
                   </div>
-                ))}
+                ) : null}
+                {readPresentation.note ? (
+                  <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
+                    <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                      Заметка
+                    </dt>
+                    <dd className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {readPresentation.note}
+                    </dd>
+                  </div>
+                ) : null}
+                {model.sourceLabel ? (
+                  <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
+                    <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                      Источник
+                    </dt>
+                    <dd className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {model.sourceLabel}
+                    </dd>
+                  </div>
+                ) : null}
               </dl>
             </div>
           )}

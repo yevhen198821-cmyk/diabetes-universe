@@ -1,13 +1,10 @@
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
 import {
-  formatSemanticGlucoseDisplayValue,
-  getSemanticEventCardContext,
-  getSemanticEventCardTitle,
-  getSemanticEventCardUnit,
-  getSemanticEventCardValue,
-  getSemanticEventOccurredAt,
-} from './semantic-event-fields';
+  formatTimelineGlucoseDisplayValue,
+  mapTimelineEventCardPresentation,
+  type TimelinePresentationDependencies,
+} from '../timeline/presentation';
 import {
   compareSemanticTimelineEvents,
   compareSemanticTimelineEventsDescending,
@@ -49,10 +46,11 @@ function isSameLocalDay(
 
 function mapRecentEvent(
   event: SemanticTimelineEvent,
+  dependencies: TimelinePresentationDependencies,
   locale: string,
   timeZone?: string,
 ): TimelineRecentEvent | null {
-  const occurredAt = getSemanticEventOccurredAt(event);
+  const occurredAt = event.occurredAt;
   const displayTime = formatTimelineDisplayTime(occurredAt, locale, timeZone);
 
   if (displayTime === '--:--') {
@@ -61,49 +59,26 @@ function mapRecentEvent(
 
   switch (event.kind) {
     case 'activity':
-      return {
-        category: 'activity',
-        context: getSemanticEventCardContext(event) ?? '',
-        dateTime: occurredAt,
-        displayTime,
-        id: event.id,
-        title: getSemanticEventCardTitle(event),
-        unit: getSemanticEventCardUnit(event) ?? '',
-        value: getSemanticEventCardValue(event),
-      };
     case 'insulin':
-      return {
-        category: 'insulin',
-        context: getSemanticEventCardContext(event) ?? '',
-        dateTime: occurredAt,
-        displayTime,
-        id: event.id,
-        title: getSemanticEventCardTitle(event),
-        unit: getSemanticEventCardUnit(event) ?? '',
-        value: getSemanticEventCardValue(event),
-      };
     case 'medication':
+    case 'nutrition': {
+      const presentation = mapTimelineEventCardPresentation(
+        event,
+        dependencies,
+        displayTime,
+      );
+
       return {
-        category: 'medication',
-        context: getSemanticEventCardContext(event) ?? '',
+        category: event.kind,
+        context: presentation.context ?? '',
         dateTime: occurredAt,
         displayTime,
         id: event.id,
-        title: getSemanticEventCardTitle(event),
-        unit: getSemanticEventCardUnit(event) ?? '',
-        value: getSemanticEventCardValue(event),
+        title: presentation.title,
+        unit: presentation.unit,
+        value: presentation.value,
       };
-    case 'nutrition':
-      return {
-        category: 'nutrition',
-        context: '',
-        dateTime: occurredAt,
-        displayTime,
-        id: event.id,
-        title: getSemanticEventCardTitle(event),
-        unit: getSemanticEventCardUnit(event) ?? '',
-        value: getSemanticEventCardValue(event),
-      };
+    }
     default:
       return null;
   }
@@ -127,17 +102,14 @@ export function getTodayTimelineEvents(
 ): SemanticTimelineEvent[] {
   return sortSemanticTimelineEvents(
     events.filter((event) =>
-      isSameLocalDay(
-        getSemanticEventOccurredAt(event),
-        referenceDate,
-        timeZone,
-      ),
+      isSameLocalDay(event.occurredAt, referenceDate, timeZone),
     ),
   );
 }
 
 export function getRecentTimelineEvents(
   events: readonly SemanticTimelineEvent[],
+  dependencies: TimelinePresentationDependencies,
   options: {
     readonly limit?: number;
     readonly locale?: string;
@@ -149,7 +121,9 @@ export function getRecentTimelineEvents(
 
   return [...events]
     .sort(compareSemanticTimelineEventsDescending)
-    .map((event) => mapRecentEvent(event, locale, options.timeZone))
+    .map((event) =>
+      mapRecentEvent(event, dependencies, locale, options.timeZone),
+    )
     .filter((event): event is TimelineRecentEvent => event !== null)
     .slice(0, limit);
 }
@@ -186,6 +160,7 @@ export function getTodayMedicationCount(
 
 export function formatLatestGlucoseValue(
   event: Extract<SemanticTimelineEvent, { kind: 'glucose' }>,
+  dependencies: TimelinePresentationDependencies,
 ): string {
-  return formatSemanticGlucoseDisplayValue(event);
+  return formatTimelineGlucoseDisplayValue(event, dependencies);
 }

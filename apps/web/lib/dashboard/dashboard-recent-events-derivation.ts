@@ -1,12 +1,9 @@
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
 import {
-  getSemanticEventCardContext,
-  getSemanticEventCardTitle,
-  getSemanticEventCardUnit,
-  getSemanticEventCardValue,
-  getSemanticEventOccurredAt,
-} from '../timeline/semantic-event-fields';
+  mapTimelineEventCardPresentation,
+  type TimelinePresentationDependencies,
+} from '../timeline/presentation';
 import { compareSemanticTimelineEventsDescending } from '../timeline/semantic-timeline-ordering';
 import {
   DEFAULT_RECENT_TIMELINE_EVENTS_LIMIT,
@@ -15,6 +12,7 @@ import {
 
 function mapDashboardRecentEventSource(
   event: SemanticTimelineEvent,
+  dependencies: TimelinePresentationDependencies,
   formatDisplayTime: (dateTime: string) => string,
 ): TimelineRecentEvent | null {
   switch (event.kind) {
@@ -27,22 +25,28 @@ function mapDashboardRecentEventSource(
       return null;
   }
 
-  const occurredAt = getSemanticEventOccurredAt(event);
+  const occurredAt = event.occurredAt;
   const displayTime = formatDisplayTime(occurredAt).trim();
 
   if (displayTime.length === 0 || displayTime === '--:--') {
     return null;
   }
 
+  const presentation = mapTimelineEventCardPresentation(
+    event,
+    dependencies,
+    displayTime,
+  );
+
   return {
     category: event.kind,
-    context: getSemanticEventCardContext(event) ?? '',
+    context: presentation.context ?? '',
     dateTime: occurredAt,
     displayTime,
     id: event.id,
-    title: getSemanticEventCardTitle(event),
-    unit: getSemanticEventCardUnit(event) ?? '',
-    value: getSemanticEventCardValue(event),
+    title: presentation.title,
+    unit: presentation.unit,
+    value: presentation.value,
   };
 }
 
@@ -52,6 +56,7 @@ function mapDashboardRecentEventSource(
  */
 export function deriveDashboardRecentEventSources(
   events: readonly SemanticTimelineEvent[],
+  dependencies: TimelinePresentationDependencies,
   options: {
     readonly formatDisplayTime: (dateTime: string) => string;
     readonly limit?: number;
@@ -62,7 +67,11 @@ export function deriveDashboardRecentEventSources(
   return [...events]
     .sort(compareSemanticTimelineEventsDescending)
     .map((event) =>
-      mapDashboardRecentEventSource(event, options.formatDisplayTime),
+      mapDashboardRecentEventSource(
+        event,
+        dependencies,
+        options.formatDisplayTime,
+      ),
     )
     .filter((event): event is TimelineRecentEvent => event !== null)
     .slice(0, limit);
