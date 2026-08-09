@@ -14,7 +14,18 @@ import {
   setupIntegrationDom,
   teardownIntegrationDom,
 } from '../../platform/integration/tests/integration-dom-setup.mjs';
+import {
+  getTestTimelinePresentationDependencies,
+  semanticGlucoseEarly,
+  semanticInsulinLater,
+} from './testing/timeline-store-test-fixtures.mjs';
 import { TimelineStoreProvider, useTimelineStore } from './timeline-store.tsx';
+
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await getTestTimelinePresentationDependencies();
+});
 
 after(() => {
   teardownIntegrationDom();
@@ -303,7 +314,7 @@ async function mountTimelineStore({ initialEvents, repository } = {}) {
     root.render(
       createElement(
         TimelineStoreProvider,
-        { initialEvents, repository },
+        { initialEvents, presentationDependencies, repository },
         createElement(StoreProbe),
       ),
     );
@@ -456,7 +467,7 @@ test('addEvent delegates to repository and refreshes from repository snapshot', 
     );
 
     await act(async () => {
-      mounted.currentStore.addEvent(insulinLater);
+      mounted.currentStore.addEvent(semanticInsulinLater);
     });
     await waitFor(
       () => mounted.observations.at(-1)?.eventIds.includes('insulin-0805'),
@@ -487,8 +498,9 @@ test('duplicate add follows repository replacement semantics', async () => {
 
     await act(async () => {
       mounted.currentStore.addEvent({
-        ...glucoseEarly,
-        value: '7,0 ммоль/л',
+        ...semanticGlucoseEarly,
+        concentrationMmolPerL: 7,
+        updatedAt: '2026-08-09T09:00:00.000Z',
       });
     });
     await waitFor(
@@ -519,8 +531,9 @@ test('updateEvent delegates to repository and refreshes from repository snapshot
 
     await act(async () => {
       mounted.currentStore.updateEvent({
-        ...insulinLater,
-        value: '5 ЕД',
+        ...semanticInsulinLater,
+        doseUnits: 5,
+        updatedAt: '2026-08-09T09:00:00.000Z',
       });
     });
     await waitFor(
@@ -608,7 +621,7 @@ test('missing update and delete remain no-ops from the user perspective', async 
     const readyRenderCount = mounted.observations.length;
 
     await act(async () => {
-      mounted.currentStore.updateEvent(insulinLater);
+      mounted.currentStore.updateEvent(semanticInsulinLater);
       mounted.currentStore.deleteEvent('unknown');
     });
     await flushAsyncWork();
@@ -632,8 +645,8 @@ test('mutations are serialized to prevent stale snapshot overwrite', async () =>
     );
 
     await act(async () => {
-      mounted.currentStore.addEvent(glucoseEarly);
-      mounted.currentStore.addEvent(insulinLater);
+      mounted.currentStore.addEvent(semanticGlucoseEarly);
+      mounted.currentStore.addEvent(semanticInsulinLater);
     });
     await flushAsyncWork();
 
@@ -663,7 +676,11 @@ test('mutations are serialized to prevent stale snapshot overwrite', async () =>
 test('mutation queue recovers after a rejected mutation', async () => {
   const repository = new RecoveringMutationRepository();
   const mounted = await mountTimelineStore({ repository });
-  const failingEvent = createEvent('failing-event', '2026-08-02T04:00:00.000Z');
+  const failingSemanticEvent = {
+    ...semanticGlucoseEarly,
+    id: 'failing-event',
+    occurredAt: '2026-08-02T04:00:00.000Z',
+  };
 
   try {
     await waitFor(
@@ -672,8 +689,8 @@ test('mutation queue recovers after a rejected mutation', async () => {
     );
 
     await act(async () => {
-      mounted.currentStore.addEvent(failingEvent);
-      mounted.currentStore.addEvent(glucoseEarly);
+      mounted.currentStore.addEvent(failingSemanticEvent);
+      mounted.currentStore.addEvent(semanticGlucoseEarly);
     });
     await waitFor(
       () => mounted.observations.at(-1)?.eventIds.includes('glucose-0800'),
@@ -698,7 +715,7 @@ test('async mutation completion does not render after unmount', async () => {
   );
 
   await act(async () => {
-    mounted.currentStore.addEvent(glucoseEarly);
+    mounted.currentStore.addEvent(semanticGlucoseEarly);
   });
   await waitFor(
     () => repository.addCalls.length === 1,

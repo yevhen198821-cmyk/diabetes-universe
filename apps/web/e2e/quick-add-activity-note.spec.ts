@@ -77,11 +77,11 @@ test('note quick add is searchable and appears in notes filter', async ({
 
   await page
     .getByRole('button', {
-      name: new RegExp(`Open event: Заметка, ${noteText}`),
+      name: new RegExp(`Open event: Note, ${noteText}`),
     })
     .first()
     .click();
-  await expect(page.getByRole('dialog', { name: 'Заметка' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Note' })).toBeVisible();
 });
 
 test('quick add shows six categories on mobile without horizontal scroll', async ({

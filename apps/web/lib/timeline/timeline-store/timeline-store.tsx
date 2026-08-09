@@ -25,7 +25,13 @@ import {
 } from 'react';
 
 import { timelineEvents as demoTimelineEvents } from '../../mocks/timeline';
+import {
+  registerNativeSemanticEvent,
+  unregisterNativeSemanticEvent,
+} from '../migration/native-semantic-event-sidecar';
 import { liftRepositorySnapshot } from '../migration/lift-repository-snapshot';
+import type { TimelinePresentationDependencies } from '../presentation';
+import { projectSemanticEventForRepositoryWrite } from '../timeline-semantic-write';
 import {
   initialTimelineMigrationStoreState,
   initialTimelineStoreState,
@@ -37,14 +43,7 @@ import {
 } from './timeline-store-model';
 
 export interface TimelineStoreValue {
-  /**
-   * Temporary P3c compatibility bridge.
-   *
-   * Quick Add still creates legacy `TimelineEvent` records. Repository writes
-   * remain legacy until P3e introduces the semantic write path. Application
-   * state is refreshed from lifted semantic snapshots after each mutation.
-   */
-  readonly addEvent: (event: TimelineEvent) => void;
+  readonly addEvent: (event: SemanticTimelineEvent) => void;
   readonly deleteEvent: (eventId: string) => void;
   readonly diagnostics: TimelineDiagnosticsSnapshot;
   readonly error?: string;
@@ -52,12 +51,13 @@ export interface TimelineStoreValue {
   readonly getMigrationRecord: (eventId: string) => MigrationRecord | undefined;
   readonly replaceEvents: (events: readonly TimelineEvent[]) => void;
   readonly status: TimelineStoreStatus;
-  readonly updateEvent: (event: TimelineEvent) => void;
+  readonly updateEvent: (event: SemanticTimelineEvent) => void;
 }
 
 interface TimelineStoreProviderProps {
   readonly children: ReactNode;
   readonly initialEvents?: readonly TimelineEvent[];
+  readonly presentationDependencies: TimelinePresentationDependencies;
   readonly repository?: TimelineRepository;
 }
 
@@ -84,6 +84,7 @@ function createMigrationContext(migratedAt: string) {
 export function TimelineStoreProvider({
   children,
   initialEvents = demoTimelineEvents,
+  presentationDependencies,
   repository,
 }: TimelineStoreProviderProps) {
   const isMountedRef = useRef(false);
@@ -109,9 +110,11 @@ export function TimelineStoreProvider({
         migrationRecords: previousEvidence.migrationRecords,
         quarantinedRecords: previousEvidence.quarantinedRecords,
       },
+      previousEvidence.nativeSemanticEvents,
     );
     const migration = {
       migrationRecords: lifted.migrationRecords,
+      nativeSemanticEvents: previousEvidence.nativeSemanticEvents,
       quarantinedRecords: lifted.quarantinedRecords,
       unsupportedSchemaCount: lifted.unsupportedSchemaCount,
     };
@@ -158,12 +161,18 @@ export function TimelineStoreProvider({
   }, [dispatchReadySnapshot, dispatchRepositoryError, timelineRepository]);
 
   const enqueueRepositoryMutation = useCallback(
-    (mutation: () => Promise<TimelineRepositoryMutationResult>): void => {
+    (
+      mutation: () => Promise<TimelineRepositoryMutationResult>,
+      options?: {
+        readonly onApplied?: () => void;
+      },
+    ): void => {
       const mutationOperation = operationQueueRef.current
         .then(async () => {
           const result = await mutation();
 
           if (isMountedRef.current && result.status === 'applied') {
+            options?.onApplied?.();
             dispatchReadySnapshot();
           }
         })
@@ -179,22 +188,74 @@ export function TimelineStoreProvider({
   );
 
   const addEvent = useCallback(
-    (event: TimelineEvent) => {
-      enqueueRepositoryMutation(() => timelineRepository.addEvent(event));
+    (event: SemanticTimelineEvent) => {
+      const legacyEvent = projectSemanticEventForRepositoryWrite(
+        event,
+        presentationDependencies,
+      );
+
+      enqueueRepositoryMutation(
+        () => timelineRepository.addEvent(legacyEvent),
+        {
+          onApplied: () => {
+            migrationStateRef.current = {
+              ...migrationStateRef.current,
+              nativeSemanticEvents: registerNativeSemanticEvent(
+                migrationStateRef.current.nativeSemanticEvents,
+                event,
+              ),
+            };
+          },
+        },
+      );
     },
-    [enqueueRepositoryMutation, timelineRepository],
+    [enqueueRepositoryMutation, presentationDependencies, timelineRepository],
   );
 
   const updateEvent = useCallback(
-    (event: TimelineEvent) => {
-      enqueueRepositoryMutation(() => timelineRepository.updateEvent(event));
+    (event: SemanticTimelineEvent) => {
+      const legacyEvent = projectSemanticEventForRepositoryWrite(
+        event,
+        presentationDependencies,
+      );
+      const isNativeEvent =
+        migrationStateRef.current.nativeSemanticEvents.events.has(event.id);
+
+      enqueueRepositoryMutation(
+        () => timelineRepository.updateEvent(legacyEvent),
+        {
+          onApplied: () => {
+            if (!isNativeEvent) {
+              return;
+            }
+
+            migrationStateRef.current = {
+              ...migrationStateRef.current,
+              nativeSemanticEvents: registerNativeSemanticEvent(
+                migrationStateRef.current.nativeSemanticEvents,
+                event,
+              ),
+            };
+          },
+        },
+      );
     },
-    [enqueueRepositoryMutation, timelineRepository],
+    [enqueueRepositoryMutation, presentationDependencies, timelineRepository],
   );
 
   const deleteEvent = useCallback(
     (eventId: string) => {
-      enqueueRepositoryMutation(() => timelineRepository.deleteEvent(eventId));
+      enqueueRepositoryMutation(() => timelineRepository.deleteEvent(eventId), {
+        onApplied: () => {
+          migrationStateRef.current = {
+            ...migrationStateRef.current,
+            nativeSemanticEvents: unregisterNativeSemanticEvent(
+              migrationStateRef.current.nativeSemanticEvents,
+              eventId,
+            ),
+          };
+        },
+      });
     },
     [enqueueRepositoryMutation, timelineRepository],
   );

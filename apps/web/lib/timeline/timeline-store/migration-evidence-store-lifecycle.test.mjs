@@ -8,21 +8,20 @@ import test from 'node:test';
 import { createInMemoryTimelineRepository } from '@diabetes-universe/timeline';
 
 import {
-  createTimelineEventEditDraft,
-  updateTimelineEventFromDraft,
+  createTimelineSemanticEventEditDraft,
+  updateSemanticTimelineEventFromDraft,
 } from '../../../components/timeline/timeline-event-detail-model.ts';
 import {
   setupIntegrationDom,
   teardownIntegrationDom,
 } from '../../platform/integration/tests/integration-dom-setup.mjs';
-import { projectSemanticToLegacyRepositoryEvent } from '../temporary-semantic-repository-bridge.ts';
-import { createTestTimelinePresentationDependencies } from '../presentation/testing/create-test-timeline-presentation-dependencies.ts';
+import { getTestTimelinePresentationDependencies } from './testing/timeline-store-test-fixtures.mjs';
 import { TimelineStoreProvider, useTimelineStore } from './timeline-store.tsx';
 
 let presentationDependencies;
 
 test.before(async () => {
-  presentationDependencies = await createTestTimelinePresentationDependencies();
+  presentationDependencies = await getTestTimelinePresentationDependencies();
 });
 
 after(() => {
@@ -49,14 +48,16 @@ const insulinB = {
   value: '4 ЕД',
 };
 
-const glucoseC = {
-  context: 'После еды',
-  dateTime: '2026-08-02T06:00:00.000Z',
+const semanticGlucoseC = {
+  concentrationMmolPerL: 7.1,
+  context: 'after_meal',
+  createdAt: '2026-08-09T09:00:00.000Z',
   id: 'glucose-c',
   kind: 'glucose',
-  source: 'demo',
-  title: 'Глюкоза',
-  value: '7,1 ммоль/л',
+  occurredAt: '2026-08-02T06:00:00.000Z',
+  schemaVersion: 1,
+  source: 'manual',
+  updatedAt: '2026-08-09T09:00:00.000Z',
 };
 
 async function flushAsyncWork() {
@@ -101,7 +102,7 @@ async function mountTimelineStore({ repository } = {}) {
     root.render(
       createElement(
         TimelineStoreProvider,
-        { repository },
+        { presentationDependencies, repository },
         createElement(StoreProbe),
       ),
     );
@@ -162,10 +163,15 @@ test('store update keeps migration evidence for unchanged events', async () => {
       mounted.currentStore.getMigrationRecord('insulin-b'),
     );
 
+    const semanticGlucoseA = mounted.currentStore.events.find(
+      (event) => event.id === 'glucose-a',
+    );
+
     await act(async () => {
       mounted.currentStore.updateEvent({
-        ...glucoseA,
-        value: '7,0 ммоль/л',
+        ...semanticGlucoseA,
+        concentrationMmolPerL: 7,
+        updatedAt: '2026-08-09T09:00:00.000Z',
       });
     });
     await waitFor(
@@ -188,7 +194,7 @@ test('store update keeps migration evidence for unchanged events', async () => {
   }
 });
 
-test('store add preserves existing migration evidence and records only the new event', async () => {
+test('store native semantic add preserves legacy migration evidence and skips migration record for new event', async () => {
   const repository = createInMemoryTimelineRepository({
     seedEvents: [glucoseA, insulinB],
   });
@@ -205,7 +211,7 @@ test('store add preserves existing migration evidence and records only the new e
     );
 
     await act(async () => {
-      mounted.currentStore.addEvent(glucoseC);
+      mounted.currentStore.addEvent(semanticGlucoseC);
     });
     await waitFor(
       () =>
@@ -223,8 +229,8 @@ test('store add preserves existing migration evidence and records only the new e
       mounted.currentStore.getMigrationRecord('insulin-b'),
       recordBBefore,
     );
-    assert.ok(recordC?.migratedAt);
-    assert.notEqual(recordC?.migratedAt, recordABefore?.migratedAt);
+    assert.equal(recordC, undefined);
+    assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 2);
   } finally {
     await mounted.unmount();
   }
@@ -278,12 +284,8 @@ test('store compatibility edit does not restamp migration evidence', async () =>
       mounted.currentStore.getMigrationRecord('glucose-a'),
     );
     const semanticBefore = mounted.currentStore.events[0];
-    const legacyProjection = projectSemanticToLegacyRepositoryEvent(
-      semanticBefore,
-      presentationDependencies,
-    );
-    const editResult = updateTimelineEventFromDraft(legacyProjection, {
-      ...createTimelineEventEditDraft(legacyProjection),
+    const editResult = updateSemanticTimelineEventFromDraft(semanticBefore, {
+      ...createTimelineSemanticEventEditDraft(semanticBefore),
       value: '8.2',
     });
 

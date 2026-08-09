@@ -186,6 +186,7 @@ test('semantic ready store state does not expose legacy presentation fields', ()
   });
   const state = createReadyTimelineStoreState(lifted.events, {
     migrationRecords: lifted.migrationRecords,
+    nativeSemanticEvents: { events: new Map() },
     quarantinedRecords: lifted.quarantinedRecords,
     unsupportedSchemaCount: 0,
   });
@@ -202,6 +203,7 @@ test('createTimelineDiagnosticsFromState mirrors store migration state', () => {
   });
   const state = createReadyTimelineStoreState(lifted.events, {
     migrationRecords: lifted.migrationRecords,
+    nativeSemanticEvents: { events: new Map() },
     quarantinedRecords: lifted.quarantinedRecords,
     unsupportedSchemaCount: 0,
   });
@@ -222,6 +224,7 @@ test('setReady stores semantic events and migration sidecar state', () => {
       events: [],
       migration: {
         migrationRecords: new Map(),
+        nativeSemanticEvents: { events: new Map() },
         quarantinedRecords: [],
         unsupportedSchemaCount: 0,
       },
@@ -231,6 +234,7 @@ test('setReady stores semantic events and migration sidecar state', () => {
       events: lifted.events,
       migration: {
         migrationRecords: lifted.migrationRecords,
+        nativeSemanticEvents: { events: new Map() },
         quarantinedRecords: lifted.quarantinedRecords,
         unsupportedSchemaCount: 0,
       },

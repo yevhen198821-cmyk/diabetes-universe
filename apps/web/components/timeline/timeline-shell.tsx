@@ -8,17 +8,17 @@ import type {
   NoteQuickAddEntry,
   NutritionQuickAddEntry,
   SemanticTimelineEvent,
-  TimelineEvent,
 } from '@diabetes-universe/types';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { createActivityTimelineEvent } from '../../lib/quick-add/create-activity-timeline-event';
-import { createGlucoseTimelineEvent } from '../../lib/quick-add/create-glucose-timeline-event';
-import { createInsulinTimelineEvent } from '../../lib/quick-add/create-insulin-timeline-event';
-import { createMedicationTimelineEvent } from '../../lib/quick-add/create-medication-timeline-event';
-import { createNoteTimelineEvent } from '../../lib/quick-add/create-note-timeline-event';
-import { createNutritionTimelineEvent } from '../../lib/quick-add/create-nutrition-timeline-event';
-import { liftRepositorySnapshot } from '../../lib/timeline/migration/lift-repository-snapshot';
+import {
+  createSemanticActivityTimelineEvent,
+  createSemanticGlucoseTimelineEvent,
+  createSemanticInsulinTimelineEvent,
+  createSemanticMedicationTimelineEvent,
+  createSemanticNoteTimelineEvent,
+  createSemanticNutritionTimelineEvent,
+} from '../../lib/timeline/semantic-creators';
 import { compareSemanticTimelineEventsDescending } from '../../lib/timeline/semantic-timeline-ordering';
 import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
 import { resolveTimelinePresentationLocale } from '../../lib/timeline/presentation';
@@ -187,21 +187,14 @@ export function TimelineShell() {
     setDetailMode('view');
   };
 
-  const handleUpdateEvent = (legacyEvent: TimelineEvent) => {
-    updateEvent(legacyEvent);
+  const handleUpdateEvent = (updatedEvent: SemanticTimelineEvent) => {
+    updateEvent(updatedEvent);
 
-    const liftedUpdate = liftRepositorySnapshot([legacyEvent], {
-      migratedAt: new Date().toISOString(),
-    });
-    const updatedEvent = liftedUpdate.events[0];
-    const nextEvents =
-      updatedEvent !== undefined
-        ? sortTimelineEventsNewestFirst(
-            events.map((event) =>
-              event.id === updatedEvent.id ? updatedEvent : event,
-            ),
-          )
-        : sortTimelineEventsNewestFirst(events);
+    const nextEvents = sortTimelineEventsNewestFirst(
+      events.map((event) =>
+        event.id === updatedEvent.id ? updatedEvent : event,
+      ),
+    );
     const nextSearchFilterModel = createTimelineSearchFilterModel(
       nextEvents,
       {
@@ -211,7 +204,7 @@ export function TimelineShell() {
       presentationDependencies,
     );
     const isStillVisible = nextSearchFilterModel.filteredEvents.some(
-      (visibleEvent) => visibleEvent.id === legacyEvent.id,
+      (visibleEvent) => visibleEvent.id === updatedEvent.id,
     );
 
     if (!isStillVisible) {
@@ -229,27 +222,27 @@ export function TimelineShell() {
   };
 
   const handleGlucoseSubmit = (entry: GlucoseQuickAddEntry) => {
-    addEvent(createGlucoseTimelineEvent(entry));
+    addEvent(createSemanticGlucoseTimelineEvent(entry));
   };
 
   const handleInsulinSubmit = (entry: InsulinQuickAddEntry) => {
-    addEvent(createInsulinTimelineEvent(entry));
+    addEvent(createSemanticInsulinTimelineEvent(entry));
   };
 
   const handleNutritionSubmit = (entry: NutritionQuickAddEntry) => {
-    addEvent(createNutritionTimelineEvent(entry));
+    addEvent(createSemanticNutritionTimelineEvent(entry));
   };
 
   const handleMedicationSubmit = (entry: MedicationQuickAddEntry) => {
-    addEvent(createMedicationTimelineEvent(entry));
+    addEvent(createSemanticMedicationTimelineEvent(entry));
   };
 
   const handleActivitySubmit = (entry: ActivityQuickAddEntry) => {
-    addEvent(createActivityTimelineEvent(entry));
+    addEvent(createSemanticActivityTimelineEvent(entry));
   };
 
   const handleNoteSubmit = (entry: NoteQuickAddEntry) => {
-    addEvent(createNoteTimelineEvent(entry));
+    addEvent(createSemanticNoteTimelineEvent(entry));
   };
 
   return (

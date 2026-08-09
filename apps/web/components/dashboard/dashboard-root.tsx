@@ -8,12 +8,14 @@ import {
   resolveDashboardNextActionPresentation,
 } from '../../lib/dashboard/dashboard-next-action-integration';
 import { prepareDashboardAiInsightPresentation } from '../../lib/dashboard/dashboard-ai-insight-presentation';
-import { createActivityTimelineEvent } from '../../lib/quick-add/create-activity-timeline-event';
-import { createGlucoseTimelineEvent } from '../../lib/quick-add/create-glucose-timeline-event';
-import { createInsulinTimelineEvent } from '../../lib/quick-add/create-insulin-timeline-event';
-import { createMedicationTimelineEvent } from '../../lib/quick-add/create-medication-timeline-event';
-import { createNoteTimelineEvent } from '../../lib/quick-add/create-note-timeline-event';
-import { createNutritionTimelineEvent } from '../../lib/quick-add/create-nutrition-timeline-event';
+import {
+  createSemanticActivityTimelineEvent,
+  createSemanticGlucoseTimelineEvent,
+  createSemanticInsulinTimelineEvent,
+  createSemanticMedicationTimelineEvent,
+  createSemanticNoteTimelineEvent,
+  createSemanticNutritionTimelineEvent,
+} from '../../lib/timeline/semantic-creators';
 import {
   closeQuickAddController,
   createInitialQuickAddControllerState,
@@ -258,22 +260,22 @@ export function DashboardRoot() {
         floatingActionButtonClassName="dashboard-fab lg:hidden"
         floatingActionButtonRef={fabRef}
         onActivitySubmit={(entry) => {
-          addEvent(createActivityTimelineEvent(entry));
+          addEvent(createSemanticActivityTimelineEvent(entry));
         }}
         onGlucoseSubmit={(entry) => {
-          addEvent(createGlucoseTimelineEvent(entry));
+          addEvent(createSemanticGlucoseTimelineEvent(entry));
         }}
         onInsulinSubmit={(entry) => {
-          addEvent(createInsulinTimelineEvent(entry));
+          addEvent(createSemanticInsulinTimelineEvent(entry));
         }}
         onMedicationSubmit={(entry) => {
-          addEvent(createMedicationTimelineEvent(entry));
+          addEvent(createSemanticMedicationTimelineEvent(entry));
         }}
         onNoteSubmit={(entry) => {
-          addEvent(createNoteTimelineEvent(entry));
+          addEvent(createSemanticNoteTimelineEvent(entry));
         }}
         onNutritionSubmit={(entry) => {
-          addEvent(createNutritionTimelineEvent(entry));
+          addEvent(createSemanticNutritionTimelineEvent(entry));
         }}
         onOpenChange={handleQuickAddOpenChange}
         onRequestOpen={() => requestOpen('fab')}

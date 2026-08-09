@@ -36,6 +36,7 @@ test('setReady stores semantic repository snapshot as ready state', () => {
     events: [insulinSemantic, glucoseSemantic],
     migration: {
       migrationRecords: new Map(),
+      nativeSemanticEvents: { events: new Map() },
       quarantinedRecords: [],
       unsupportedSchemaCount: 0,
     },

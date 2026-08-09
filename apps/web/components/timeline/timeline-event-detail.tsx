@@ -1,9 +1,6 @@
 'use client';
 
-import type {
-  SemanticTimelineEvent,
-  TimelineEvent,
-} from '@diabetes-universe/types';
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 import { Button, haptics } from '@diabetes-universe/ui';
 import { X } from 'lucide-react';
 import {
@@ -17,15 +14,13 @@ import {
 } from 'react';
 
 import {
-  createTimelineEventDetailModel,
-  createTimelineEventEditDraft,
-  updateTimelineEventFromDraft,
+  createTimelineSemanticEventEditDraft,
+  updateSemanticTimelineEventFromDraft,
   type TimelineEventEditDraft,
   type TimelineEventEditErrors,
 } from './timeline-event-detail-model';
 import { mapTimelineEventDetailPresentation } from '../../lib/timeline/presentation';
 import type { TimelinePresentationDependencies } from '../../lib/timeline/presentation';
-import { projectSemanticToLegacyRepositoryEvent } from '../../lib/timeline/temporary-semantic-repository-bridge';
 
 export type TimelineEventDetailMode = 'edit' | 'view';
 
@@ -35,7 +30,7 @@ interface TimelineEventDetailProps {
   readonly onClose: () => void;
   readonly onDelete: (eventId: string) => void;
   readonly onModeChange: (mode: TimelineEventDetailMode) => void;
-  readonly onUpdate: (event: TimelineEvent) => void;
+  readonly onUpdate: (event: SemanticTimelineEvent) => void;
   readonly presentationDependencies: TimelinePresentationDependencies;
 }
 
@@ -271,6 +266,13 @@ function TimelineEventEditForm({
   );
 }
 
+const timelineEventSourceLabels = {
+  demo: 'Демо-данные',
+  device: 'Устройство',
+  import: 'Импорт',
+  manual: 'Вручную',
+} as const;
+
 export function TimelineEventDetail({
   event,
   mode,
@@ -286,20 +288,18 @@ export function TimelineEventDetail({
   const deleteDescriptionId = useId();
   const dialogRef = useRef<HTMLElement>(null);
   const deleteDialogRef = useRef<HTMLElement>(null);
-  const legacyEvent = projectSemanticToLegacyRepositoryEvent(
-    event,
-    presentationDependencies,
-  );
   const readPresentation = mapTimelineEventDetailPresentation(
     event,
     presentationDependencies,
   );
   const [draft, setDraft] = useState(() =>
-    createTimelineEventEditDraft(legacyEvent),
+    createTimelineSemanticEventEditDraft(event),
   );
   const [errors, setErrors] = useState<TimelineEventEditErrors>({});
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const model = createTimelineEventDetailModel(legacyEvent);
+  const sourceLabel = event.source
+    ? timelineEventSourceLabels[event.source]
+    : null;
   const displayDate = presentationDependencies.formatter.formatDate(
     event.occurredAt,
     { dateStyle: 'long' },
@@ -313,7 +313,7 @@ export function TimelineEventDetail({
   useDialogFocusTrap(deleteOpen, deleteDialogRef, () => setDeleteOpen(false));
 
   const handleSave = () => {
-    const result = updateTimelineEventFromDraft(legacyEvent, draft);
+    const result = updateSemanticTimelineEventFromDraft(event, draft);
 
     setErrors(result.errors);
 
@@ -380,7 +380,7 @@ export function TimelineEventDetail({
               draft={draft}
               errors={errors}
               onCancel={() => {
-                setDraft(createTimelineEventEditDraft(legacyEvent));
+                setDraft(createTimelineSemanticEventEditDraft(event));
                 setErrors({});
                 onModeChange('view');
               }}
@@ -419,13 +419,13 @@ export function TimelineEventDetail({
                     </dd>
                   </div>
                 ) : null}
-                {model.sourceLabel ? (
+                {sourceLabel ? (
                   <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
                     <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
                       Источник
                     </dt>
                     <dd className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      {model.sourceLabel}
+                      {sourceLabel}
                     </dd>
                   </div>
                 ) : null}
@@ -453,7 +453,7 @@ export function TimelineEventDetail({
               </Button>
               <Button
                 onClick={() => {
-                  setDraft(createTimelineEventEditDraft(legacyEvent));
+                  setDraft(createTimelineSemanticEventEditDraft(event));
                   setErrors({});
                   onModeChange('edit');
                 }}

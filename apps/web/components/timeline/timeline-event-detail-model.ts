@@ -1,35 +1,17 @@
 import type {
-  TimelineEvent,
-  TimelineEventKind,
-  TimelineEventSource,
+  CanonicalUnitId,
+  GlucoseMeasurementContext,
+  SemanticTimelineEvent,
 } from '@diabetes-universe/types';
 
 import {
   createIsoDateTimeFromLocalDateAndTime,
-  formatTimelineDisplayDate,
   formatTimelineDisplayTime,
   getTimelineCalendarDateKey,
-  isValidTimelineDateTime,
 } from '../../lib/timeline/timeline-date-time';
-
-export interface TimelineEventDetailRow {
-  readonly label: string;
-  readonly value: string;
-}
-
-export interface TimelineEventDetailModel {
-  readonly canDelete: boolean;
-  readonly canEdit: boolean;
-  readonly context: string | null;
-  readonly date: string;
-  readonly kindLabel: string;
-  readonly note: string | null;
-  readonly primaryText: string;
-  readonly rows: readonly TimelineEventDetailRow[];
-  readonly sourceLabel: string | null;
-  readonly time: string;
-  readonly title: string;
-}
+import { mapQuickAddGlucoseContext } from '../../lib/timeline/semantic-creators/map-quick-add-glucose-context';
+import { mapQuickAddMedicationUnit } from '../../lib/timeline/semantic-creators/map-quick-add-medication-unit';
+import { mapQuickAddNutritionMealType } from '../../lib/timeline/semantic-creators/map-quick-add-nutrition-meal-type';
 
 export interface TimelineEventEditDraft {
   readonly context: string;
@@ -45,39 +27,36 @@ export type TimelineEventEditErrors = Partial<
   Record<keyof TimelineEventEditDraft, string>
 >;
 
-export interface TimelineEventEditResult {
+export interface TimelineSemanticEditResult {
   readonly errors: TimelineEventEditErrors;
-  readonly event: TimelineEvent | null;
+  readonly event: SemanticTimelineEvent | null;
 }
 
-export const timelineDetailKindLabels: Record<TimelineEventKind, string> = {
-  activity: 'Активность',
-  glucose: 'Глюкоза',
-  insulin: 'Инсулин',
-  medication: 'Лекарство',
-  note: 'Заметка',
-  nutrition: 'Питание',
+const glucoseContextFormLabels: Readonly<
+  Record<GlucoseMeasurementContext, string>
+> = {
+  after_meal: 'После еды',
+  before_meal: 'Перед едой',
+  bedtime: 'Перед сном',
+  fasting: 'Натощак',
+  other: 'Другое',
 };
 
-export const timelineEventSourceLabels: Record<TimelineEventSource, string> = {
-  demo: 'Демо-данные',
-  device: 'Устройство',
-  import: 'Импорт',
-  manual: 'Вручную',
+const nutritionMealTypeFormLabels: Readonly<Record<string, string>> = {
+  breakfast: 'Завтрак',
+  dinner: 'Ужин',
+  lunch: 'Обед',
+  other: 'Другое',
+  snack: 'Перекус',
 };
 
-const defaultUnits: Partial<Record<TimelineEventKind, string>> = {
-  activity: 'минут',
-  glucose: 'ммоль/л',
-  insulin: 'ЕД',
-  nutrition: 'г углеводов',
+const medicationUnitFormLabels: Readonly<
+  Partial<Record<CanonicalUnitId, string>>
+> = {
+  'mass.g': 'г',
+  'mass.mg': 'мг',
+  'volume.ml': 'мл',
 };
-
-function trimToNull(value: string | undefined): string | null {
-  const trimmed = value?.trim() ?? '';
-
-  return trimmed.length > 0 ? trimmed : null;
-}
 
 function parseEditableNumber(value: string): number | null {
   const normalized = value.trim().replace(',', '.');
@@ -97,91 +76,104 @@ function formatEditableNumber(value: number): string {
     : value.toString().replace('.', ',');
 }
 
-function removeUnit(value: string, unit: string): string {
-  const trimmedValue = value.trim();
-  const trimmedUnit = unit.trim();
-
-  if (trimmedUnit.length === 0) {
-    return trimmedValue;
-  }
-
-  const suffix = ` ${trimmedUnit}`;
-
-  return trimmedValue.endsWith(suffix)
-    ? trimmedValue.slice(0, -suffix.length)
-    : trimmedValue;
+function resolveGlucoseContextLabel(
+  context: GlucoseMeasurementContext | undefined,
+): string {
+  return context ? glucoseContextFormLabels[context] : '';
 }
 
-function createPrimaryText(event: TimelineEvent): string {
-  const unit = event.unit?.trim();
-
-  return unit ? `${event.value} ${unit}` : event.value;
+function resolveNutritionMealTypeLabel(mealType: string): string {
+  return nutritionMealTypeFormLabels[mealType] ?? mealType;
 }
 
-function createDateValue(event: TimelineEvent): string {
-  return isValidTimelineDateTime(event.dateTime)
-    ? formatTimelineDisplayDate(event.dateTime)
-    : 'Дата неизвестна';
+function resolveMedicationUnitLabel(unit: CanonicalUnitId): string {
+  return medicationUnitFormLabels[unit] ?? unit;
 }
 
-function createTimeValue(event: TimelineEvent): string {
-  return formatTimelineDisplayTime(event.dateTime);
-}
-
-export function createTimelineEventDetailModel(
-  event: TimelineEvent,
-): TimelineEventDetailModel {
-  const context = trimToNull(event.context);
-  const note = trimToNull(event.note);
-  const sourceLabel = event.source
-    ? timelineEventSourceLabels[event.source]
-    : null;
-  const rows: TimelineEventDetailRow[] = [
-    { label: 'Дата', value: createDateValue(event) },
-    { label: 'Время', value: createTimeValue(event) },
-  ];
-
-  if (context) {
-    rows.push({ label: 'Контекст', value: context });
-  }
-
-  if (note && event.kind !== 'note') {
-    rows.push({ label: 'Заметка', value: note });
-  }
-
-  if (sourceLabel) {
-    rows.push({ label: 'Источник', value: sourceLabel });
-  }
-
-  return {
-    canDelete: true,
-    canEdit: true,
-    context,
-    date: createDateValue(event),
-    kindLabel: timelineDetailKindLabels[event.kind],
-    note,
-    primaryText: createPrimaryText(event),
-    rows,
-    sourceLabel,
-    time: createTimeValue(event),
-    title: event.title,
-  };
-}
-
-export function createTimelineEventEditDraft(
-  event: TimelineEvent,
+export function createTimelineSemanticEventEditDraft(
+  event: SemanticTimelineEvent,
 ): TimelineEventEditDraft {
-  const unit = event.unit ?? defaultUnits[event.kind] ?? '';
+  const date = getTimelineCalendarDateKey(event.occurredAt) ?? '';
+  const time = formatTimelineDisplayTime(event.occurredAt);
 
-  return {
-    context: event.context ?? '',
-    date: getTimelineCalendarDateKey(event.dateTime) ?? '',
-    note: event.note ?? '',
-    time: formatTimelineDisplayTime(event.dateTime),
-    title: event.title,
-    unit,
-    value: event.kind === 'note' ? event.value : removeUnit(event.value, unit),
-  };
+  switch (event.kind) {
+    case 'activity':
+      return {
+        context: '',
+        date,
+        note: event.note ?? '',
+        time,
+        title: event.activityType,
+        unit: 'мин',
+        value: formatEditableNumber(event.durationSeconds / 60),
+      };
+    case 'glucose':
+      return {
+        context: resolveGlucoseContextLabel(event.context),
+        date,
+        note: '',
+        time,
+        title: '',
+        unit: '',
+        value: formatEditableNumber(event.concentrationMmolPerL),
+      };
+    case 'insulin':
+      return {
+        context: event.context ?? '',
+        date,
+        note: '',
+        time,
+        title: event.preparation,
+        unit: '',
+        value: formatEditableNumber(event.doseUnits),
+      };
+    case 'medication':
+      return {
+        context: event.context ?? '',
+        date,
+        note: event.note ?? '',
+        time,
+        title: event.medicationName,
+        unit: resolveMedicationUnitLabel(event.doseUnit),
+        value: formatEditableNumber(event.dose),
+      };
+    case 'note':
+      return {
+        context: '',
+        date,
+        note: '',
+        time,
+        title: event.title ?? '',
+        unit: '',
+        value: event.body,
+      };
+    case 'nutrition':
+      return {
+        context: '',
+        date,
+        note: event.note ?? '',
+        time,
+        title: resolveNutritionMealTypeLabel(event.mealType),
+        unit: '',
+        value: formatEditableNumber(event.carbohydratesGrams),
+      };
+  }
+}
+
+function validateCommonDraft(
+  draft: TimelineEventEditDraft,
+): TimelineEventEditErrors {
+  const errors: TimelineEventEditErrors = {};
+
+  if (draft.date.trim().length === 0) {
+    errors.date = 'Укажите дату.';
+  }
+
+  if (draft.time.trim().length === 0) {
+    errors.time = 'Укажите время.';
+  }
+
+  return errors;
 }
 
 function validateNumber(
@@ -203,122 +195,183 @@ function validateNumber(
   return { errors: {}, parsed };
 }
 
-function validateCommonDraft(
-  draft: TimelineEventEditDraft,
-): TimelineEventEditErrors {
-  const errors: TimelineEventEditErrors = {};
-
-  if (draft.date.trim().length === 0) {
-    errors.date = 'Укажите дату.';
-  }
-
-  if (draft.time.trim().length === 0) {
-    errors.time = 'Укажите время.';
-  }
-
-  if (draft.title.trim().length === 0) {
-    errors.title = 'Укажите название.';
-  }
-
-  return errors;
-}
-
-function createEventValue(
-  kind: TimelineEventKind,
-  parsed: number,
-  unit: string,
-): string {
-  const formatted = formatEditableNumber(parsed);
-
-  switch (kind) {
-    case 'glucose':
-      return `${formatted} ммоль/л`;
-    case 'insulin':
-      return `${formatted} ЕД`;
-    case 'nutrition':
-      return `${formatted} г углеводов`;
-    case 'medication':
-      return formatted;
-    case 'activity':
-    case 'note':
-      return unit.length > 0 ? `${formatted} ${unit}` : formatted;
+function resolveOccurredAt(draft: TimelineEventEditDraft): string | null {
+  try {
+    return createIsoDateTimeFromLocalDateAndTime(draft.date, draft.time);
+  } catch {
+    return null;
   }
 }
 
-export function updateTimelineEventFromDraft(
-  event: TimelineEvent,
+export function updateSemanticTimelineEventFromDraft(
+  event: SemanticTimelineEvent,
   draft: TimelineEventEditDraft,
   now: Date = new Date(),
-): TimelineEventEditResult {
-  const errors: TimelineEventEditErrors = validateCommonDraft(draft);
-  const title = draft.title.trim();
-  const context = draft.context.trim();
-  const note = draft.note.trim();
-  const unit = draft.unit.trim();
-  let value = draft.value.trim();
+): TimelineSemanticEditResult {
+  const errors = validateCommonDraft(draft);
+  const occurredAt = resolveOccurredAt(draft);
 
-  try {
-    createIsoDateTimeFromLocalDateAndTime(draft.date, draft.time);
-  } catch {
+  if (!occurredAt) {
     errors.date = errors.date ?? 'Укажите корректную дату.';
     errors.time = errors.time ?? 'Укажите корректное время.';
-  }
-
-  if (event.kind === 'note') {
-    if (value.length === 0) {
-      errors.value = 'Введите текст заметки.';
-    } else if (value.length > 500) {
-      errors.value = 'Заметка должна быть не длиннее 500 символов.';
-    }
-  } else if (event.kind === 'activity') {
-    if (value.length === 0) {
-      errors.value = 'Укажите значение активности.';
-    }
-  } else {
-    const maxByKind: Record<
-      'glucose' | 'insulin' | 'medication' | 'nutrition',
-      number
-    > = {
-      glucose: 40,
-      insulin: 100,
-      medication: 100000,
-      nutrition: 500,
-    };
-    const validation = validateNumber(
-      draft,
-      maxByKind[event.kind],
-      timelineDetailKindLabels[event.kind],
-    );
-
-    Object.assign(errors, validation.errors);
-
-    if (validation.parsed !== null) {
-      value = createEventValue(event.kind, validation.parsed, unit);
-    }
-  }
-
-  if (event.kind === 'medication' && unit.length === 0) {
-    errors.unit = 'Укажите единицу лекарства.';
   }
 
   if (Object.keys(errors).length > 0) {
     return { errors, event: null };
   }
 
-  return {
-    errors: {},
-    event: {
-      ...event,
-      context: context || undefined,
-      dateTime: createIsoDateTimeFromLocalDateAndTime(draft.date, draft.time),
-      note: event.kind === 'note' ? event.note : note || undefined,
-      title,
-      unit:
-        event.kind === 'medication' || event.kind === 'activity'
-          ? unit || undefined
-          : event.unit,
-      updatedAt: now.toISOString(),
-      value,
-    },
-  };
+  const updatedAt = now.toISOString();
+  const nextOccurredAt = occurredAt ?? event.occurredAt;
+
+  switch (event.kind) {
+    case 'activity': {
+      const durationMinutes = parseEditableNumber(draft.value);
+
+      if (durationMinutes === null || durationMinutes <= 0) {
+        return {
+          errors: { value: 'Укажите значение активности.' },
+          event: null,
+        };
+      }
+
+      if (draft.title.trim().length === 0) {
+        return { errors: { title: 'Укажите название.' }, event: null };
+      }
+
+      return {
+        errors: {},
+        event: {
+          ...event,
+          activityType: draft.title.trim(),
+          durationSeconds: durationMinutes * 60,
+          note: draft.note.trim() || undefined,
+          occurredAt: nextOccurredAt,
+          updatedAt,
+        },
+      };
+    }
+    case 'glucose': {
+      const validation = validateNumber(draft, 40, 'Глюкоза');
+
+      if (Object.keys(validation.errors).length > 0) {
+        return { errors: validation.errors, event: null };
+      }
+
+      const context = mapQuickAddGlucoseContext(draft.context);
+
+      return {
+        errors: {},
+        event: {
+          ...event,
+          concentrationMmolPerL: validation.parsed as number,
+          context,
+          occurredAt: nextOccurredAt,
+          updatedAt,
+        },
+      };
+    }
+    case 'insulin': {
+      const validation = validateNumber(draft, 100, 'Инсулин');
+
+      if (Object.keys(validation.errors).length > 0) {
+        return { errors: validation.errors, event: null };
+      }
+
+      if (draft.title.trim().length === 0) {
+        return { errors: { title: 'Укажите название.' }, event: null };
+      }
+
+      return {
+        errors: {},
+        event: {
+          ...event,
+          context: draft.context.trim() || undefined,
+          doseUnits: validation.parsed as number,
+          occurredAt: nextOccurredAt,
+          preparation: draft.title.trim(),
+          updatedAt,
+        },
+      };
+    }
+    case 'medication': {
+      const validation = validateNumber(draft, 100000, 'Лекарство');
+      const doseUnit = mapQuickAddMedicationUnit(draft.unit);
+
+      if (Object.keys(validation.errors).length > 0) {
+        return { errors: validation.errors, event: null };
+      }
+
+      if (draft.title.trim().length === 0) {
+        return { errors: { title: 'Укажите название.' }, event: null };
+      }
+
+      if (!doseUnit) {
+        return { errors: { unit: 'Укажите единицу лекарства.' }, event: null };
+      }
+
+      return {
+        errors: {},
+        event: {
+          ...event,
+          context: draft.context.trim() || undefined,
+          dose: validation.parsed as number,
+          doseUnit,
+          medicationName: draft.title.trim(),
+          note: draft.note.trim() || undefined,
+          occurredAt: nextOccurredAt,
+          updatedAt,
+        },
+      };
+    }
+    case 'note': {
+      const body = draft.value.trim();
+
+      if (body.length === 0) {
+        return { errors: { value: 'Введите текст заметки.' }, event: null };
+      }
+
+      if (body.length > 500) {
+        return {
+          errors: { value: 'Заметка должна быть не длиннее 500 символов.' },
+          event: null,
+        };
+      }
+
+      const title = draft.title.trim();
+
+      return {
+        errors: {},
+        event: {
+          ...event,
+          body,
+          occurredAt: nextOccurredAt,
+          title: title.length > 0 ? title : undefined,
+          updatedAt,
+        },
+      };
+    }
+    case 'nutrition': {
+      const validation = validateNumber(draft, 500, 'Питание');
+
+      if (Object.keys(validation.errors).length > 0) {
+        return { errors: validation.errors, event: null };
+      }
+
+      if (draft.title.trim().length === 0) {
+        return { errors: { title: 'Укажите название.' }, event: null };
+      }
+
+      return {
+        errors: {},
+        event: {
+          ...event,
+          carbohydratesGrams: validation.parsed as number,
+          mealType: mapQuickAddNutritionMealType(draft.title),
+          note: draft.note.trim() || undefined,
+          occurredAt: nextOccurredAt,
+          updatedAt,
+        },
+      };
+    }
+  }
 }

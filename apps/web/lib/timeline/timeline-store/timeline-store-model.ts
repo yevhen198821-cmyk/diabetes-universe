@@ -6,6 +6,8 @@ import type {
 } from '@diabetes-universe/types';
 
 import { cloneSemanticTimelineEvents } from '../semantic-timeline-clone';
+import type { NativeSemanticEventSidecar } from '../migration/native-semantic-event-sidecar';
+import { createNativeSemanticEventSidecar } from '../migration/native-semantic-event-sidecar';
 
 export type TimelineStoreStatus = 'error' | 'loading' | 'ready';
 
@@ -18,6 +20,7 @@ export type TimelineStoreErrorCode =
 
 export interface TimelineMigrationStoreState {
   readonly migrationRecords: ReadonlyMap<string, MigrationRecord>;
+  readonly nativeSemanticEvents: NativeSemanticEventSidecar;
   readonly quarantinedRecords: readonly QuarantineRecord[];
   readonly unsupportedSchemaCount: number;
 }
@@ -47,6 +50,7 @@ export type TimelineStoreAction =
 
 export const initialTimelineMigrationStoreState: TimelineMigrationStoreState = {
   migrationRecords: new Map(),
+  nativeSemanticEvents: createNativeSemanticEventSidecar(),
   quarantinedRecords: [],
   unsupportedSchemaCount: 0,
 };
@@ -65,6 +69,9 @@ export function createReadyTimelineStoreState(
     events: cloneSemanticTimelineEvents(events),
     migration: {
       migrationRecords: new Map(migration.migrationRecords),
+      nativeSemanticEvents: {
+        events: new Map(migration.nativeSemanticEvents.events),
+      },
       quarantinedRecords: migration.quarantinedRecords.map((record) => ({
         ...record,
         preservedLegacy: { ...record.preservedLegacy },

@@ -8,23 +8,22 @@ import test from 'node:test';
 import { createInMemoryTimelineRepository } from '@diabetes-universe/timeline';
 
 import {
-  createTimelineEventEditDraft,
-  updateTimelineEventFromDraft,
+  createTimelineSemanticEventEditDraft,
+  updateSemanticTimelineEventFromDraft,
 } from '../../../components/timeline/timeline-event-detail-model.ts';
 import { createTimelineSearchFilterModel } from '../../../components/timeline/timeline-search-filter-model.ts';
 import { deriveDashboardQuickAddBlocks } from '../../dashboard/dashboard-quick-add-integration-model.ts';
-import { createTestTimelinePresentationDependencies } from '../presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import {
   setupIntegrationDom,
   teardownIntegrationDom,
 } from '../../platform/integration/tests/integration-dom-setup.mjs';
-import { projectSemanticToLegacyRepositoryEvent } from '../temporary-semantic-repository-bridge.ts';
+import { getTestTimelinePresentationDependencies } from './testing/timeline-store-test-fixtures.mjs';
 import { TimelineStoreProvider, useTimelineStore } from './timeline-store.tsx';
 
 let presentationDependencies;
 
 test.before(async () => {
-  presentationDependencies = await createTestTimelinePresentationDependencies();
+  presentationDependencies = await getTestTimelinePresentationDependencies();
 });
 
 after(() => {
@@ -90,7 +89,7 @@ async function mountTimelineStore({ initialEvents, repository } = {}) {
     root.render(
       createElement(
         TimelineStoreProvider,
-        { initialEvents, repository },
+        { initialEvents, presentationDependencies, repository },
         createElement(StoreProbe),
       ),
     );
@@ -148,19 +147,18 @@ test('edit flow updates legacy repository mirror and refreshes semantic store', 
     assert.equal(semanticBefore?.kind, 'glucose');
     assert.equal(semanticBefore?.concentrationMmolPerL, 7.3);
 
-    const legacyProjection = projectSemanticToLegacyRepositoryEvent(
-      semanticBefore,
-      presentationDependencies,
-    );
     const draft = {
-      ...createTimelineEventEditDraft(legacyProjection),
+      ...createTimelineSemanticEventEditDraft(semanticBefore),
       value: '9.1',
       time: '23:58',
     };
-    const editResult = updateTimelineEventFromDraft(legacyProjection, draft);
+    const editResult = updateSemanticTimelineEventFromDraft(
+      semanticBefore,
+      draft,
+    );
 
-    assert.equal(editResult.event?.value, '9,1 ммоль/л');
     assert.deepEqual(editResult.errors, {});
+    assert.equal(editResult.event?.concentrationMmolPerL, 9.1);
 
     await act(async () => {
       mounted.currentStore.updateEvent(editResult.event);
@@ -185,7 +183,6 @@ test('edit flow updates legacy repository mirror and refreshes semantic store', 
     assertSemanticEventShape(semanticAfter);
     assert.equal(semanticAfter?.concentrationMmolPerL, 9.1);
     assert.equal(semanticAfter?.occurredAt, '2026-08-02T23:58:00.000Z');
-    assert.equal(repositoryLegacy?.value, '9,1 ммоль/л');
     assert.equal(
       Object.hasOwn(repositoryLegacy, 'concentrationMmolPerL'),
       false,
@@ -211,12 +208,8 @@ test('dashboard and timeline consumers receive semantic events after edit flow',
     await waitFor(() => mounted.currentStore.status === 'ready', 'ready state');
 
     const semanticBefore = mounted.currentStore.events[0];
-    const legacyProjection = projectSemanticToLegacyRepositoryEvent(
-      semanticBefore,
-      presentationDependencies,
-    );
-    const editResult = updateTimelineEventFromDraft(legacyProjection, {
-      ...createTimelineEventEditDraft(legacyProjection),
+    const editResult = updateSemanticTimelineEventFromDraft(semanticBefore, {
+      ...createTimelineSemanticEventEditDraft(semanticBefore),
       value: '8.2',
     });
 
@@ -279,12 +272,8 @@ test('edit flow keeps migration sidecar aligned with semantic events', async () 
     assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 1);
 
     const semanticBefore = mounted.currentStore.events[0];
-    const legacyProjection = projectSemanticToLegacyRepositoryEvent(
-      semanticBefore,
-      presentationDependencies,
-    );
-    const editResult = updateTimelineEventFromDraft(legacyProjection, {
-      ...createTimelineEventEditDraft(legacyProjection),
+    const editResult = updateSemanticTimelineEventFromDraft(semanticBefore, {
+      ...createTimelineSemanticEventEditDraft(semanticBefore),
       value: '6',
     });
 
@@ -304,7 +293,7 @@ test('edit flow keeps migration sidecar aligned with semantic events', async () 
       'insulin-0805',
     );
     assert.equal(mounted.currentStore.events[0]?.doseUnits, 6);
-    assert.equal(repository.getSnapshot().events[0]?.value, '6 ЕД');
+    assert.equal(repository.getSnapshot().events[0]?.value, '6 U');
   } finally {
     await mounted.unmount();
   }

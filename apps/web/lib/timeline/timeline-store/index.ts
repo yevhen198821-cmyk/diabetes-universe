@@ -1,3 +1,4 @@
+export { TimelineStoreBoundary } from './timeline-store-boundary';
 export {
   TimelineStoreProvider,
   useTimelineStore,

@@ -13,6 +13,7 @@ import {
   reuseQuarantineRecord,
   type PreviousMigrationEvidenceSnapshot,
 } from './reconcile-migration-evidence';
+import type { NativeSemanticEventSidecar } from './native-semantic-event-sidecar';
 
 export type { PreviousMigrationEvidenceSnapshot };
 
@@ -41,6 +42,7 @@ export function liftRepositorySnapshot(
   legacyEvents: readonly TimelineEvent[],
   context: LiftLegacyMigrationContext,
   previousEvidence?: PreviousMigrationEvidenceSnapshot,
+  nativeSemanticEvents?: NativeSemanticEventSidecar,
 ): LiftRepositorySnapshotResult {
   const events: SemanticTimelineEvent[] = [];
   const migrationRecords = new Map<string, MigrationRecord>();
@@ -52,6 +54,13 @@ export function liftRepositorySnapshot(
 
   for (const legacyEvent of legacyEvents) {
     const raw = cloneTimelineEvent(legacyEvent);
+    const nativeEvent = nativeSemanticEvents?.events.get(raw.id);
+
+    if (nativeEvent) {
+      events.push(nativeEvent);
+      continue;
+    }
+
     const result = liftLegacyToSemantic(raw, context);
 
     switch (result.status) {
