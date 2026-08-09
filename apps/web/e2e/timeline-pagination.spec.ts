@@ -3,7 +3,7 @@ import { expect, test, type Page } from './support/test';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
 const eventCards = (page: Page) =>
-  page.getByRole('button', { name: /Открыть событие/ });
+  page.getByRole('button', { name: /Open event/ });
 
 test('timeline load more reveals the next page and then disappears', async ({
   page,
@@ -65,7 +65,7 @@ test('timeline pagination recalculates after delete and keeps new add on top', a
   await waitForApplicationReady(page);
 
   await page
-    .getByRole('button', { name: /Открыть событие: NovoRapid/ })
+    .getByRole('button', { name: /Open event: NovoRapid/ })
     .click();
   await page.getByRole('button', { name: 'Удалить' }).click();
   await page
@@ -89,7 +89,7 @@ test('timeline pagination recalculates after delete and keeps new add on top', a
   await timePicker.getByRole('button', { name: 'Готово' }).click();
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
-  await expect(eventCards(page).first()).toContainText('8,8 ммоль/л');
+  await expect(eventCards(page).first()).toContainText('8.8 mmol/L');
   await expect(page.getByText('Осталось: 11')).toBeVisible();
 });
 

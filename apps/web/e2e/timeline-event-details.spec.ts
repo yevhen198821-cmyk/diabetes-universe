@@ -16,7 +16,7 @@ test('timeline event details open, close with Escape, and return focus', async (
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  const card = await openEvent(page, /Открыть событие: Метформин/);
+  const card = await openEvent(page, /Open event: Метформин/);
 
   await expect(page.getByRole('dialog', { name: 'Метформин' })).toBeVisible();
   await expect(page.getByText('Лекарство')).toBeVisible();
@@ -34,7 +34,7 @@ test('timeline event edit updates Timeline and Dashboard selectors', async ({
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await openEvent(page, /Открыть событие: Глюкоза, 7,3 ммоль\/л/);
+  await openEvent(page, /Open event: Glucose, 7\.3 mmol\/L/);
   await page.getByRole('button', { name: 'Изменить' }).click();
 
   await expect(
@@ -44,15 +44,15 @@ test('timeline event edit updates Timeline and Dashboard selectors', async ({
   await page.getByLabel('Время').fill('23:58');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
-  await expect(page.getByText('9,1 ммоль/л').first()).toBeVisible();
+  await expect(page.getByText('9.1 mmol/L').first()).toBeVisible();
 
   await page.getByRole('button', { exact: true, name: 'Закрыть' }).click();
   await page.getByRole('link', { name: 'На главную' }).click();
 
   await expect(
-    page.getByRole('region', { name: 'Last glucose' }).getByText('9,1 ммоль/л'),
+    page.getByRole('region', { name: 'Last glucose' }).getByText('9.1 mmol/L'),
   ).toBeVisible();
-  await expect(page.getByText('9,1 ммоль/л').first()).toBeVisible();
+  await expect(page.getByText('9.1 mmol/L').first()).toBeVisible();
 });
 
 test('timeline edit moves an event between Today and Yesterday groups', async ({
@@ -61,14 +61,14 @@ test('timeline edit moves an event between Today and Yesterday groups', async ({
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await openEvent(page, /Открыть событие: Завтрак/);
+  await openEvent(page, /Open event: Breakfast/);
   await page.getByRole('button', { name: 'Изменить' }).click();
   await page.getByLabel('Дата').fill('2026-08-01');
   await page.getByRole('button', { name: 'Сохранить' }).click();
   await page.getByRole('button', { exact: true, name: 'Закрыть' }).click();
 
-  await expect(page.getByRole('heading', { name: 'Вчера' })).toBeVisible();
-  await expect(page.getByText('Завтрак').first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Yesterday' })).toBeVisible();
+  await expect(page.getByText('Breakfast').first()).toBeVisible();
 });
 
 test('timeline event delete requires confirmation and updates Dashboard', async ({
@@ -77,7 +77,7 @@ test('timeline event delete requires confirmation and updates Dashboard', async 
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await openEvent(page, /Открыть событие: NovoRapid/);
+  await openEvent(page, /Open event: NovoRapid/);
   await page.getByRole('button', { name: 'Удалить' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Удалить событие?' }),
@@ -98,7 +98,7 @@ test('timeline event delete requires confirmation and updates Dashboard', async 
 
   await page.getByRole('link', { name: 'На главную' }).click();
   await expect(
-    page.getByRole('region', { name: 'Day summary' }).getByText('0 ЕД'),
+    page.getByRole('region', { name: 'Day summary' }).getByText('0 U'),
   ).toBeVisible();
 });
 
@@ -111,7 +111,7 @@ test('timeline closes details when edited event leaves search results', async ({
   const search = page.getByLabel('Поиск событий');
 
   await search.fill('Метформин');
-  await openEvent(page, /Открыть событие: Метформин/);
+  await openEvent(page, /Open event: Метформин/);
   await page.getByRole('button', { name: 'Изменить' }).click();
   await page.getByLabel('Название').fill('Сиофор');
   await page.getByRole('button', { name: 'Сохранить' }).click();
@@ -129,7 +129,7 @@ test('timeline event details work on mobile without horizontal scroll', async ({
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await openEvent(page, /Открыть событие: Метформин/);
+  await openEvent(page, /Open event: Метформин/);
 
   const dialog = page.getByRole('dialog', { name: 'Метформин' });
   const box = await dialog.boundingBox();

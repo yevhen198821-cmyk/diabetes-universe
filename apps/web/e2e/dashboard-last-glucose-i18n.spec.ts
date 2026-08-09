@@ -15,7 +15,7 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   ).toBeVisible();
   await expect(page.getByText('Last measurement')).toBeVisible();
   await expect(page.getByText('Последняя глюкоза')).toHaveCount(0);
-  await expect(lastGlucoseRegion.getByText('7,3 ммоль/л')).toBeVisible();
+  await expect(lastGlucoseRegion.getByText('7.3 mmol/L')).toBeVisible();
   await expect(lastGlucoseRegion.locator('time')).toBeVisible();
 
   await page.getByRole('button', { name: 'Add event' }).click();
@@ -25,14 +25,14 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   await page.getByLabel('Уровень глюкозы').fill('7,7');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
-  await expect(lastGlucoseRegion.getByText('7,7 ммоль/л')).toBeVisible();
+  await expect(lastGlucoseRegion.getByText('7.7 mmol/L')).toBeVisible();
 
   await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
   await waitForApplicationReady(page);
 
   await page
-    .getByRole('button', { name: /Открыть событие: Глюкоза, 7,7 ммоль\/л/ })
+    .getByRole('button', { name: /Open event: Glucose, 7\.7 mmol\/L/ })
     .click();
   await page.getByRole('button', { name: 'Изменить' }).click();
   await page.getByLabel('Значение').fill('8.2');
@@ -43,12 +43,12 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   await waitForApplicationReady(page);
 
   await expect(
-    page.getByRole('region', { name: 'Last glucose' }).getByText('8,2 ммоль/л'),
+    page.getByRole('region', { name: 'Last glucose' }).getByText('8.2 mmol/L'),
   ).toBeVisible();
 
   await page.getByRole('link', { name: 'All events' }).click();
   await page
-    .getByRole('button', { name: /Открыть событие: Глюкоза, 8,2 ммоль\/л/ })
+    .getByRole('button', { name: /Open event: Glucose, 8\.2 mmol\/L/ })
     .click();
   await page.getByRole('button', { name: 'Удалить' }).click();
   await page
@@ -60,6 +60,6 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   await waitForApplicationReady(page);
 
   await expect(
-    page.getByRole('region', { name: 'Last glucose' }).getByText('7,3 ммоль/л'),
+    page.getByRole('region', { name: 'Last glucose' }).getByText('7.3 mmol/L'),
   ).toBeVisible();
 });

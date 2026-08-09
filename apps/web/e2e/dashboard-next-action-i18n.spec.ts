@@ -35,7 +35,7 @@ test('dashboard next action renders localized English copy and opens insulin qui
   await expect(
     page.getByRole('dialog', { name: 'Добавить инсулин' }),
   ).toBeHidden();
-  await expect(daySummary.getByText('6 ЕД')).toBeVisible();
+  await expect(daySummary.getByText('6 U')).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Add', exact: true }),
   ).toBeFocused();
@@ -43,5 +43,5 @@ test('dashboard next action renders localized English copy and opens insulin qui
   await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
   await waitForApplicationReady(page);
-  await expect(page.getByText('2 ЕД').first()).toBeVisible();
+  await expect(page.getByText('2 U').first()).toBeVisible();
 });

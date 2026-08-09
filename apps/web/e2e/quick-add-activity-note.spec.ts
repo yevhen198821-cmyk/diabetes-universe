@@ -28,11 +28,11 @@ test('activity quick add creates timeline event with details flow', async ({
   await page.getByLabel('Продолжительность, мин').fill('30');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
-  await expect(page.getByText('30 мин').first()).toBeVisible();
+  await expect(page.getByText('30 min').first()).toBeVisible();
   await expect(page.getByText('Ходьба').first()).toBeVisible();
 
   await page
-    .getByRole('button', { name: /Открыть событие: Ходьба, 30 мин/ })
+    .getByRole('button', { name: /Open event: Ходьба, 30 min/ })
     .first()
     .click();
   await expect(page.getByRole('dialog', { name: 'Ходьба' })).toBeVisible();
@@ -77,7 +77,7 @@ test('note quick add is searchable and appears in notes filter', async ({
 
   await page
     .getByRole('button', {
-      name: new RegExp(`Открыть событие: Заметка, ${noteText}`),
+      name: new RegExp(`Open event: Заметка, ${noteText}`),
     })
     .first()
     .click();
