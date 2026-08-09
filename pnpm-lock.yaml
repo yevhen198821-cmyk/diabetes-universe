@@ -44,6 +44,9 @@ importers:
       '@diabetes-universe/platform-web':
         specifier: workspace:*
         version: link:../../packages/platform-web
+      '@diabetes-universe/timeline':
+        specifier: workspace:*
+        version: link:../../packages/timeline
       '@diabetes-universe/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -127,6 +130,12 @@ importers:
       '@diabetes-universe/platform':
         specifier: workspace:*
         version: link:../platform
+
+  packages/timeline:
+    dependencies:
+      '@diabetes-universe/types':
+        specifier: workspace:*
+        version: link:../types
 
   packages/types: {}
 

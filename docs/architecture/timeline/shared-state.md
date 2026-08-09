@@ -1,9 +1,9 @@
-# Timeline Shared State
+# Timeline Shared State and Repository Foundation
 
 ## Purpose
 
-Define the approved demo-stage state owner for Timeline events shared by
-Dashboard and Timeline.
+Define the approved application state and repository ownership for Timeline
+events shared by Dashboard and Timeline.
 
 ## Status
 
@@ -11,15 +11,21 @@ Approved
 
 ## Responsibility
 
-The shared Timeline store owns the in-memory collection of `TimelineEvent`
-records before Backend/API integration exists.
+`InMemoryTimelineRepository` owns the current persistence-facing in-memory
+collection of `TimelineEvent` records before durable local storage, Backend/API,
+or sync integration exists.
 
-The store owns:
+`TimelineStoreProvider` owns the React application projection used for rendering:
 
 - `readonly TimelineEvent[]`;
-- demo loading status;
-- demo error message;
-- add/update/delete/replace event operations.
+- loading status;
+- error status;
+- safe application error message when one is provided;
+- mutation facade methods exposed to existing consumers.
+
+The provider delegates event mutations to `TimelineRepository` and refreshes
+React state from `repository.getSnapshot()`. React state is therefore a
+projection/cache for rendering, not a second canonical event collection.
 
 The store does not own:
 
@@ -28,6 +34,8 @@ The store does not own:
 - filter state;
 - event detail UI state;
 - pagination cursor state.
+- durable reload persistence;
+- IndexedDB, SQLite, backend, auth, sync, outbox, or device integrations.
 
 ## Dependencies
 
@@ -42,11 +50,17 @@ The store does not own:
 
 - Provider: `TimelineStoreProvider`
 - Hook: `useTimelineStore`
+- Repository contract: `@diabetes-universe/timeline`
+- Current adapter: `InMemoryTimelineRepository`
 - Reducer/model: `apps/web/lib/timeline/timeline-store/timeline-store-model.ts`
 - App placement: `apps/web/app/providers.tsx`, mounted by `apps/web/app/layout.tsx`
 
 The root layout remains a server component. A small client provider wrapper owns
 the store, so navigation between `/` and `/timeline` does not reset events.
+
+`TimelineStoreProvider` creates the demo repository at the application/provider
+boundary from `demoTimelineEvents`. It does not create repositories inside
+Dashboard, Timeline, Quick Add, or presentation components.
 
 ### Public API
 
@@ -65,15 +79,16 @@ interface TimelineStoreValue {
 
 ### Reducer invariants
 
-- Events are always sorted by `dateTime`.
-- Event IDs are unique.
-- `add` with an existing ID replaces the existing event.
-- `update` with an unknown ID is a no-op.
-- `delete` with an unknown ID is a no-op.
-- `replace` deduplicates by ID and sorts.
-- Existing arrays and event objects are not mutated.
-- Invalid `dateTime` values follow the temporal fallback from the Timeline
-  entity contract: they sort after valid events.
+Repository mutation semantics live in `@diabetes-universe/timeline`.
+
+The React reducer/model owns only application projection state:
+
+- loading;
+- ready repository snapshot;
+- error.
+
+It does not independently perform add/update/delete business mutations.
+Existing arrays and event objects are cloned before entering React state.
 
 ### Selectors
 
@@ -99,6 +114,27 @@ an explicit timezone. Account-level timezone settings are future scope.
 
 ### API readiness
 
-The store is a temporary in-memory demo implementation. Future API/repository
-work should keep the reducer/selectors as pure model logic where possible and
-replace the provider's data source rather than reintroducing local screen state.
+Repository Foundation is implemented with `InMemoryTimelineRepository`.
+
+Current:
+
+- repository boundary implemented;
+- current adapter is in-memory only;
+- reload persistence is **not implemented**.
+
+Future:
+
+- durable Web adapter such as IndexedDB;
+- mobile adapter such as SQLite/native storage;
+- sync/backend/auth only after separate approved work.
+
+Future API/repository work should keep selectors as pure model logic where
+possible and replace the provider's repository adapter rather than
+reintroducing local screen state.
+
+### Known application-state debt
+
+Timeline renders loading/error states through `TimelineListModel`. Dashboard
+currently reads `events` and `addEvent` from `useTimelineStore()` and does not
+render Timeline repository loading/error states. Fixing Dashboard loading/error
+handling is outside P2 Phase C.

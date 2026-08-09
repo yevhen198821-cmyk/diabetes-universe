@@ -1,19 +1,29 @@
 'use client';
 
+import {
+  TimelineRepositoryError,
+  createInMemoryTimelineRepository,
+  type TimelineRepository,
+  type TimelineRepositoryMutationResult,
+} from '@diabetes-universe/timeline';
 import type { TimelineEvent } from '@diabetes-universe/types';
 import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useReducer,
+  useRef,
+  useState,
   type ReactNode,
 } from 'react';
 
 import { timelineEvents as demoTimelineEvents } from '../../mocks/timeline';
 import {
-  createReadyTimelineStoreState,
+  initialTimelineStoreState,
   timelineStoreReducer,
+  type TimelineStoreErrorCode,
   type TimelineStoreStatus,
 } from './timeline-store-model';
 
@@ -30,35 +40,127 @@ export interface TimelineStoreValue {
 interface TimelineStoreProviderProps {
   readonly children: ReactNode;
   readonly initialEvents?: readonly TimelineEvent[];
+  readonly repository?: TimelineRepository;
 }
 
 const TimelineStoreContext = createContext<TimelineStoreValue | null>(null);
 
+function createDefaultTimelineRepository(
+  initialEvents: readonly TimelineEvent[],
+): TimelineRepository {
+  return createInMemoryTimelineRepository({ seedEvents: initialEvents });
+}
+
+function resolveTimelineStoreErrorCode(error: unknown): TimelineStoreErrorCode {
+  if (error instanceof TimelineRepositoryError) {
+    return error.code;
+  }
+
+  return 'TIMELINE_STORE_UNKNOWN_ERROR';
+}
+
 export function TimelineStoreProvider({
   children,
   initialEvents = demoTimelineEvents,
+  repository,
 }: TimelineStoreProviderProps) {
+  const isMountedRef = useRef(false);
+  const operationQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const [timelineRepository] = useState<TimelineRepository>(
+    () => repository ?? createDefaultTimelineRepository(initialEvents),
+  );
   const [state, dispatch] = useReducer(
     timelineStoreReducer,
-    initialEvents,
-    createReadyTimelineStoreState,
+    initialTimelineStoreState,
   );
 
-  const addEvent = useCallback((event: TimelineEvent) => {
-    dispatch({ event, type: 'add' });
+  const dispatchReadySnapshot = useCallback(() => {
+    dispatch({
+      events: timelineRepository.getSnapshot().events,
+      type: 'setReady',
+    });
+  }, [timelineRepository]);
+
+  const dispatchRepositoryError = useCallback((error: unknown) => {
+    dispatch({
+      errorCode: resolveTimelineStoreErrorCode(error),
+      type: 'setError',
+    });
   }, []);
 
-  const updateEvent = useCallback((event: TimelineEvent) => {
-    dispatch({ event, type: 'update' });
-  }, []);
+  useEffect(() => {
+    isMountedRef.current = true;
+    dispatch({ type: 'setLoading' });
 
-  const deleteEvent = useCallback((eventId: string) => {
-    dispatch({ eventId, type: 'delete' });
-  }, []);
+    const initializeOperation = operationQueueRef.current
+      .then(async () => {
+        await timelineRepository.initialize();
 
-  const replaceEvents = useCallback((events: readonly TimelineEvent[]) => {
-    dispatch({ events, type: 'replace' });
-  }, []);
+        if (isMountedRef.current) {
+          dispatchReadySnapshot();
+        }
+      })
+      .catch((error: unknown) => {
+        if (isMountedRef.current) {
+          dispatchRepositoryError(error);
+        }
+      });
+
+    operationQueueRef.current = initializeOperation;
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [dispatchReadySnapshot, dispatchRepositoryError, timelineRepository]);
+
+  const enqueueRepositoryMutation = useCallback(
+    (mutation: () => Promise<TimelineRepositoryMutationResult>): void => {
+      const mutationOperation = operationQueueRef.current
+        .then(async () => {
+          const result = await mutation();
+
+          if (isMountedRef.current && result.status === 'applied') {
+            dispatchReadySnapshot();
+          }
+        })
+        .catch((error: unknown) => {
+          if (isMountedRef.current) {
+            dispatchRepositoryError(error);
+          }
+        });
+
+      operationQueueRef.current = mutationOperation;
+    },
+    [dispatchReadySnapshot, dispatchRepositoryError],
+  );
+
+  const addEvent = useCallback(
+    (event: TimelineEvent) => {
+      enqueueRepositoryMutation(() => timelineRepository.addEvent(event));
+    },
+    [enqueueRepositoryMutation, timelineRepository],
+  );
+
+  const updateEvent = useCallback(
+    (event: TimelineEvent) => {
+      enqueueRepositoryMutation(() => timelineRepository.updateEvent(event));
+    },
+    [enqueueRepositoryMutation, timelineRepository],
+  );
+
+  const deleteEvent = useCallback(
+    (eventId: string) => {
+      enqueueRepositoryMutation(() => timelineRepository.deleteEvent(eventId));
+    },
+    [enqueueRepositoryMutation, timelineRepository],
+  );
+
+  const replaceEvents = useCallback(
+    (events: readonly TimelineEvent[]) => {
+      enqueueRepositoryMutation(() => timelineRepository.replaceEvents(events));
+    },
+    [enqueueRepositoryMutation, timelineRepository],
+  );
 
   const value = useMemo<TimelineStoreValue>(
     () => ({

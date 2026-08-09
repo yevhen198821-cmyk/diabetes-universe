@@ -92,13 +92,16 @@ Dashboard but does not share Dashboard block composition.
 
 ### Shared state (Stage 3)
 
-- Dashboard and Timeline read from one app-level in-memory Timeline store.
+- Dashboard and Timeline read from one app-level Timeline store facade.
 - Provider is mounted through `apps/web/app/providers.tsx`.
 - Quick Add on both screens writes completed events through `addEvent`.
 - Store does not contain search, filter, details, pagination, or Quick Add UI
   state.
 - Dashboard derived data uses React-independent selectors and only counts events
   from the local current day for Day Summary.
+- Repository Foundation routes the store facade through `TimelineRepository`.
+- Current adapter: `InMemoryTimelineRepository`.
+- Reload persistence is not implemented; reload returns to demo seed data.
 
 ### List model (Stage 4)
 

@@ -23,137 +23,55 @@ const insulinLater = {
   value: '4 ЕД',
 };
 
-const nutritionLatest = {
-  dateTime: '2026-08-02T05:20:00.000Z',
-  id: 'nutrition-0820',
-  kind: 'nutrition',
-  title: 'Завтрак',
-  value: '42 г углеводов',
-};
-
-test('initialize sorts events and sets ready state', () => {
+test('setReady stores the repository snapshot as ready state', () => {
   const state = timelineStoreReducer(initialTimelineStoreState, {
-    events: [nutritionLatest, glucoseEarly, insulinLater],
-    type: 'initialize',
+    events: [insulinLater, glucoseEarly],
+    type: 'setReady',
   });
 
   assert.equal(state.status, 'ready');
   assert.deepEqual(
     state.events.map((event) => event.id),
-    ['glucose-0800', 'insulin-0805', 'nutrition-0820'],
+    ['insulin-0805', 'glucose-0800'],
   );
+
+  assert.notEqual(state.events[0], insulinLater);
 });
 
-test('add appends, sorts, and preserves immutability', () => {
-  const previousState = createReadyTimelineStoreState([nutritionLatest]);
-  const nextState = timelineStoreReducer(previousState, {
-    event: glucoseEarly,
-    type: 'add',
-  });
+test('createReadyTimelineStoreState clones repository snapshot events', () => {
+  const mutableEvent = { ...glucoseEarly };
+  const state = createReadyTimelineStoreState([mutableEvent]);
 
-  assert.notEqual(nextState, previousState);
-  assert.notEqual(nextState.events, previousState.events);
-  assert.deepEqual(
-    nextState.events.map((event) => event.id),
-    ['glucose-0800', 'nutrition-0820'],
-  );
-  assert.deepEqual(
-    previousState.events.map((event) => event.id),
-    ['nutrition-0820'],
-  );
+  mutableEvent.value = 'mutated outside store';
+
+  assert.equal(state.events[0].value, '6,4 ммоль/л');
 });
 
-test('add with duplicate id replaces existing event', () => {
-  const replacement = {
-    ...glucoseEarly,
-    dateTime: '2026-08-02T06:00:00.000Z',
-    value: '7,0 ммоль/л',
-  };
-  const nextState = timelineStoreReducer(
-    createReadyTimelineStoreState([glucoseEarly, insulinLater]),
-    {
-      event: replacement,
-      type: 'add',
-    },
-  );
-
-  assert.equal(nextState.events.length, 2);
-  assert.equal(
-    nextState.events.find((event) => event.id === 'glucose-0800')?.value,
-    '7,0 ммоль/л',
-  );
-});
-
-test('update changes an existing event without creating a new event', () => {
-  const nextState = timelineStoreReducer(
-    createReadyTimelineStoreState([glucoseEarly, insulinLater]),
-    {
-      event: {
-        ...insulinLater,
-        value: '5 ЕД',
-      },
-      type: 'update',
-    },
-  );
-
-  assert.equal(nextState.events.length, 2);
-  assert.equal(
-    nextState.events.find((event) => event.id === 'insulin-0805')?.value,
-    '5 ЕД',
-  );
-});
-
-test('update unknown id is a no-op', () => {
+test('setLoading resets to empty loading projection', () => {
   const previousState = createReadyTimelineStoreState([glucoseEarly]);
   const nextState = timelineStoreReducer(previousState, {
-    event: insulinLater,
-    type: 'update',
+    type: 'setLoading',
   });
 
-  assert.equal(nextState, previousState);
+  assert.equal(nextState.status, 'loading');
+  assert.deepEqual(nextState.events, []);
+  assert.equal(nextState.error, undefined);
 });
 
-test('delete removes an existing event', () => {
-  const nextState = timelineStoreReducer(
-    createReadyTimelineStoreState([glucoseEarly, insulinLater]),
-    {
-      eventId: 'glucose-0800',
-      type: 'delete',
-    },
-  );
-
-  assert.deepEqual(
-    nextState.events.map((event) => event.id),
-    ['insulin-0805'],
-  );
-});
-
-test('delete unknown id is a no-op', () => {
+test('setError keeps existing events and stores machine-readable error code', () => {
   const previousState = createReadyTimelineStoreState([glucoseEarly]);
   const nextState = timelineStoreReducer(previousState, {
-    eventId: 'unknown',
-    type: 'delete',
+    errorCode: 'TIMELINE_REPOSITORY_INITIALIZE_FAILED',
+    type: 'setError',
   });
 
-  assert.equal(nextState, previousState);
+  assert.equal(nextState.status, 'error');
+  assert.equal(nextState.error, undefined);
+  assert.equal(nextState.errorCode, 'TIMELINE_REPOSITORY_INITIALIZE_FAILED');
+  assert.equal(nextState.events, previousState.events);
 });
 
-test('replace swaps the collection and sorts it', () => {
-  const nextState = timelineStoreReducer(
-    createReadyTimelineStoreState([glucoseEarly]),
-    {
-      events: [nutritionLatest, insulinLater],
-      type: 'replace',
-    },
-  );
-
-  assert.deepEqual(
-    nextState.events.map((event) => event.id),
-    ['insulin-0805', 'nutrition-0820'],
-  );
-});
-
-test('setError keeps existing events and exposes error status', () => {
+test('setError can retain an application-layer presentation message', () => {
   const previousState = createReadyTimelineStoreState([glucoseEarly]);
   const nextState = timelineStoreReducer(previousState, {
     error: 'Failed to load timeline',
@@ -162,19 +80,5 @@ test('setError keeps existing events and exposes error status', () => {
 
   assert.equal(nextState.status, 'error');
   assert.equal(nextState.error, 'Failed to load timeline');
-  assert.equal(nextState.events, previousState.events);
-});
-
-test('invalid dateTime follows stable temporal fallback', () => {
-  const invalidEvent = {
-    ...nutritionLatest,
-    dateTime: 'invalid',
-    id: 'invalid-date',
-  };
-  const nextState = createReadyTimelineStoreState([invalidEvent, glucoseEarly]);
-
-  assert.deepEqual(
-    nextState.events.map((event) => event.id),
-    ['glucose-0800', 'invalid-date'],
-  );
+  assert.equal(nextState.errorCode, 'TIMELINE_STORE_UNKNOWN_ERROR');
 });
