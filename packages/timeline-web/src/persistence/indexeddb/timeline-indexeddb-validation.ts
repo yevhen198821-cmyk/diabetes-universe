@@ -232,7 +232,7 @@ export function validateIndexedDbTimelineEventRecord(
 
   return {
     status: 'ok',
-    record: raw as IndexedDbTimelineEventRecord,
+    record: raw as unknown as IndexedDbTimelineEventRecord,
   };
 }
 
