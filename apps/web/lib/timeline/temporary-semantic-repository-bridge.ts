@@ -9,11 +9,10 @@ import {
 } from './presentation';
 
 /**
- * Temporary P3c repository compatibility bridge.
+ * Temporary P2 repository compatibility bridge (until P3h cutover).
  *
- * Reconstructs a legacy `TimelineEvent` shape for P2 repository mutations
- * until P3e introduces the semantic write path. Output is not canonical and
- * must not be exposed through `useTimelineStore().events`.
+ * Reconstructs a legacy `TimelineEvent` shape for repository mutations only.
+ * Invoked from the store write boundary (`timeline-semantic-write.ts`), not UI.
  */
 export function projectSemanticToLegacyRepositoryEvent(
   event: SemanticTimelineEvent,
