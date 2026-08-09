@@ -2,12 +2,14 @@ import { EventCard } from '@diabetes-universe/ui';
 
 import type { TimelineListModel } from './timeline-list-model';
 import { mapTimelineEventToCard } from './timeline-event-card.mapper';
+import type { TimelinePresentationDependencies } from '../../lib/timeline/presentation';
 
 interface TimelineListProps {
   readonly model: TimelineListModel;
   readonly onAddEvent: () => void;
   readonly onOpenEvent: (eventId: string, trigger: HTMLElement) => void;
   readonly onResetCriteria: () => void;
+  readonly presentationDependencies: TimelinePresentationDependencies;
 }
 
 function TimelineLoadingState() {
@@ -120,6 +122,7 @@ export function TimelineList({
   onAddEvent,
   onOpenEvent,
   onResetCriteria,
+  presentationDependencies,
 }: TimelineListProps) {
   if (model.status === 'loading') {
     return <TimelineLoadingState />;
@@ -164,7 +167,10 @@ export function TimelineList({
 
             <ul className="space-y-2.5">
               {group.events.map((event, index) => {
-                const eventCardProps = mapTimelineEventToCard(event);
+                const eventCardProps = mapTimelineEventToCard(
+                  event,
+                  presentationDependencies,
+                );
 
                 return (
                   <li className="relative pl-10 sm:pl-12" key={event.id}>
@@ -176,8 +182,8 @@ export function TimelineList({
                     />
                     <EventCard
                       {...eventCardProps}
-                      ariaLabel={`Открыть событие: ${[
-                        event.title,
+                      ariaLabel={`${presentationDependencies.labels.openEventAriaPrefix}: ${[
+                        eventCardProps.title,
                         [eventCardProps.value, eventCardProps.unit]
                           .filter(Boolean)
                           .join(' '),

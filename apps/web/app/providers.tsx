@@ -2,12 +2,12 @@
 
 import type { ReactNode } from 'react';
 
-import { TimelineStoreProvider } from '../lib/timeline/timeline-store';
+import { TimelineStoreBoundary } from '../lib/timeline/timeline-store/timeline-store-boundary';
 
 interface AppProvidersProps {
   readonly children: ReactNode;
 }
 
 export function AppProviders({ children }: AppProvidersProps) {
-  return <TimelineStoreProvider>{children}</TimelineStoreProvider>;
+  return <TimelineStoreBoundary>{children}</TimelineStoreBoundary>;
 }

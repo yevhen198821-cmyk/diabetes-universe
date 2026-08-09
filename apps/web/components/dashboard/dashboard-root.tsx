@@ -8,12 +8,14 @@ import {
   resolveDashboardNextActionPresentation,
 } from '../../lib/dashboard/dashboard-next-action-integration';
 import { prepareDashboardAiInsightPresentation } from '../../lib/dashboard/dashboard-ai-insight-presentation';
-import { createActivityTimelineEvent } from '../../lib/quick-add/create-activity-timeline-event';
-import { createGlucoseTimelineEvent } from '../../lib/quick-add/create-glucose-timeline-event';
-import { createInsulinTimelineEvent } from '../../lib/quick-add/create-insulin-timeline-event';
-import { createMedicationTimelineEvent } from '../../lib/quick-add/create-medication-timeline-event';
-import { createNoteTimelineEvent } from '../../lib/quick-add/create-note-timeline-event';
-import { createNutritionTimelineEvent } from '../../lib/quick-add/create-nutrition-timeline-event';
+import {
+  createSemanticActivityTimelineEvent,
+  createSemanticGlucoseTimelineEvent,
+  createSemanticInsulinTimelineEvent,
+  createSemanticMedicationTimelineEvent,
+  createSemanticNoteTimelineEvent,
+  createSemanticNutritionTimelineEvent,
+} from '../../lib/timeline/semantic-creators';
 import {
   closeQuickAddController,
   createInitialQuickAddControllerState,
@@ -23,6 +25,7 @@ import {
   type QuickAddOpenTrigger,
 } from '../../lib/quick-add/quick-add-controller-model';
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
+import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { QuickAddHost } from '../quick-add/quick-add-host';
@@ -34,8 +37,6 @@ import { DashboardNextAction } from './dashboard-next-action';
 import { DashboardRecentEvents } from './dashboard-recent-events';
 import { resolveDashboardAiInsightLabels } from './dashboard-ai-insight-labels';
 import { DashboardShell } from './dashboard-shell';
-
-const DASHBOARD_LOCALE = 'ru-RU';
 
 const mockAiInsight = {
   generatedAt: '2026-08-02T07:20:00.000Z',
@@ -49,6 +50,7 @@ const mockAiInsight = {
 export function DashboardRoot() {
   const localization = useLocalization();
   const formatter = useFormatter();
+  const presentationDependencies = useTimelinePresentationDependencies();
   const { addEvent, events } = useTimelineStore();
   const [quickAddState, setQuickAddState] = useState(
     createInitialQuickAddControllerState,
@@ -106,7 +108,8 @@ export function DashboardRoot() {
           formatDaySummaryDisplayDate,
           formatLastGlucoseDisplayTime,
           formatRecentEventDisplayTime,
-          locale: DASHBOARD_LOCALE,
+          locale: localization.localeContext.locale,
+          presentationDependencies,
           referenceTime,
           remindersCompleted: 1,
           remindersTotal: 3,
@@ -119,6 +122,8 @@ export function DashboardRoot() {
       formatDaySummaryDisplayDate,
       formatLastGlucoseDisplayTime,
       formatRecentEventDisplayTime,
+      localization.localeContext.locale,
+      presentationDependencies,
       referenceTime,
     ],
   );
@@ -210,7 +215,10 @@ export function DashboardRoot() {
         lastGlucose={
           derivedBlocks.lastGlucose ? (
             <DashboardLastGlucose
-              glucose={derivedBlocks.lastGlucose}
+              glucose={{
+                displayTime: derivedBlocks.lastGlucose.displayTime,
+                event: derivedBlocks.lastGlucose.event,
+              }}
               referenceTime={referenceTime}
               state="ready"
             />
@@ -251,22 +259,22 @@ export function DashboardRoot() {
         floatingActionButtonClassName="dashboard-fab lg:hidden"
         floatingActionButtonRef={fabRef}
         onActivitySubmit={(entry) => {
-          addEvent(createActivityTimelineEvent(entry));
+          addEvent(createSemanticActivityTimelineEvent(entry));
         }}
         onGlucoseSubmit={(entry) => {
-          addEvent(createGlucoseTimelineEvent(entry));
+          addEvent(createSemanticGlucoseTimelineEvent(entry));
         }}
         onInsulinSubmit={(entry) => {
-          addEvent(createInsulinTimelineEvent(entry));
+          addEvent(createSemanticInsulinTimelineEvent(entry));
         }}
         onMedicationSubmit={(entry) => {
-          addEvent(createMedicationTimelineEvent(entry));
+          addEvent(createSemanticMedicationTimelineEvent(entry));
         }}
         onNoteSubmit={(entry) => {
-          addEvent(createNoteTimelineEvent(entry));
+          addEvent(createSemanticNoteTimelineEvent(entry));
         }}
         onNutritionSubmit={(entry) => {
-          addEvent(createNutritionTimelineEvent(entry));
+          addEvent(createSemanticNutritionTimelineEvent(entry));
         }}
         onOpenChange={handleQuickAddOpenChange}
         onRequestOpen={() => requestOpen('fab')}

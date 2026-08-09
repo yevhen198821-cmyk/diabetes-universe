@@ -6,7 +6,7 @@ import {
   type TimelineRepository,
   type TimelineRepositoryMutationResult,
 } from '@diabetes-universe/timeline';
-import type { TimelineEvent } from '@diabetes-universe/types';
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 import {
   createContext,
   useCallback,
@@ -20,7 +20,9 @@ import {
 } from 'react';
 
 import { timelineEvents as demoTimelineEvents } from '../../mocks/timeline';
+import { cloneSemanticTimelineEvents } from '../semantic-timeline-clone';
 import {
+  createTimelineDiagnosticsFromState,
   initialTimelineStoreState,
   timelineStoreReducer,
   type TimelineStoreErrorCode,
@@ -28,25 +30,26 @@ import {
 } from './timeline-store-model';
 
 export interface TimelineStoreValue {
-  readonly addEvent: (event: TimelineEvent) => void;
+  readonly addEvent: (event: SemanticTimelineEvent) => void;
   readonly deleteEvent: (eventId: string) => void;
+  readonly diagnostics: ReturnType<typeof createTimelineDiagnosticsFromState>;
   readonly error?: string;
-  readonly events: readonly TimelineEvent[];
-  readonly replaceEvents: (events: readonly TimelineEvent[]) => void;
+  readonly events: readonly SemanticTimelineEvent[];
+  readonly replaceEvents: (events: readonly SemanticTimelineEvent[]) => void;
   readonly status: TimelineStoreStatus;
-  readonly updateEvent: (event: TimelineEvent) => void;
+  readonly updateEvent: (event: SemanticTimelineEvent) => void;
 }
 
 interface TimelineStoreProviderProps {
   readonly children: ReactNode;
-  readonly initialEvents?: readonly TimelineEvent[];
+  readonly initialEvents?: readonly SemanticTimelineEvent[];
   readonly repository?: TimelineRepository;
 }
 
 const TimelineStoreContext = createContext<TimelineStoreValue | null>(null);
 
 function createDefaultTimelineRepository(
-  initialEvents: readonly TimelineEvent[],
+  initialEvents: readonly SemanticTimelineEvent[],
 ): TimelineRepository {
   return createInMemoryTimelineRepository({ seedEvents: initialEvents });
 }
@@ -76,7 +79,9 @@ export function TimelineStoreProvider({
 
   const dispatchReadySnapshot = useCallback(() => {
     dispatch({
-      events: timelineRepository.getSnapshot().events,
+      events: cloneSemanticTimelineEvents(
+        timelineRepository.getSnapshot().events,
+      ),
       type: 'setReady',
     });
   }, [timelineRepository]);
@@ -135,14 +140,14 @@ export function TimelineStoreProvider({
   );
 
   const addEvent = useCallback(
-    (event: TimelineEvent) => {
+    (event: SemanticTimelineEvent) => {
       enqueueRepositoryMutation(() => timelineRepository.addEvent(event));
     },
     [enqueueRepositoryMutation, timelineRepository],
   );
 
   const updateEvent = useCallback(
-    (event: TimelineEvent) => {
+    (event: SemanticTimelineEvent) => {
       enqueueRepositoryMutation(() => timelineRepository.updateEvent(event));
     },
     [enqueueRepositoryMutation, timelineRepository],
@@ -156,16 +161,22 @@ export function TimelineStoreProvider({
   );
 
   const replaceEvents = useCallback(
-    (events: readonly TimelineEvent[]) => {
+    (events: readonly SemanticTimelineEvent[]) => {
       enqueueRepositoryMutation(() => timelineRepository.replaceEvents(events));
     },
     [enqueueRepositoryMutation, timelineRepository],
+  );
+
+  const diagnostics = useMemo(
+    () => createTimelineDiagnosticsFromState(state),
+    [state],
   );
 
   const value = useMemo<TimelineStoreValue>(
     () => ({
       addEvent,
       deleteEvent,
+      diagnostics,
       error: state.error,
       events: state.events,
       replaceEvents,
@@ -175,6 +186,7 @@ export function TimelineStoreProvider({
     [
       addEvent,
       deleteEvent,
+      diagnostics,
       replaceEvents,
       state.error,
       state.events,

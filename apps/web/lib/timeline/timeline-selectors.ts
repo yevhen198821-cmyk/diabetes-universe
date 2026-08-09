@@ -1,10 +1,19 @@
-import type { TimelineEvent } from '@diabetes-universe/types';
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
 import {
-  compareTimelineDateTime,
+  formatTimelineGlucoseDisplayValue,
+  mapTimelineEventCardPresentation,
+  resolveTimelinePresentationLocale,
+  type TimelinePresentationDependencies,
+} from '../timeline/presentation';
+import {
+  compareSemanticTimelineEvents,
+  compareSemanticTimelineEventsDescending,
+  sortSemanticTimelineEvents,
+} from './semantic-timeline-ordering';
+import {
   formatTimelineDisplayTime,
   getTimelineCalendarDateKey,
-  sortTimelineEvents,
 } from './timeline-date-time';
 
 export interface TimelineRecentEvent {
@@ -20,24 +29,12 @@ export interface TimelineRecentEvent {
 
 export const DEFAULT_RECENT_TIMELINE_EVENTS_LIMIT = 4;
 
-function parseLeadingNumber(value: string): number {
-  const match = value.trim().match(/^([\d.,]+)/);
-
-  if (!match) {
-    return 0;
-  }
-
-  const parsed = Number(match[1].replace(',', '.'));
-
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
 function isSameLocalDay(
-  dateTime: string,
+  occurredAt: string,
   referenceDate: Date,
   timeZone?: string,
 ): boolean {
-  const eventDay = getTimelineCalendarDateKey(dateTime, timeZone);
+  const eventDay = getTimelineCalendarDateKey(occurredAt, timeZone);
   const referenceDay = getTimelineCalendarDateKey(
     referenceDate.toISOString(),
     timeZone,
@@ -49,15 +46,13 @@ function isSameLocalDay(
 }
 
 function mapRecentEvent(
-  event: TimelineEvent,
+  event: SemanticTimelineEvent,
+  dependencies: TimelinePresentationDependencies,
   locale: string,
   timeZone?: string,
 ): TimelineRecentEvent | null {
-  const displayTime = formatTimelineDisplayTime(
-    event.dateTime,
-    locale,
-    timeZone,
-  );
+  const occurredAt = event.occurredAt;
+  const displayTime = formatTimelineDisplayTime(occurredAt, locale, timeZone);
 
   if (displayTime === '--:--') {
     return null;
@@ -65,120 +60,109 @@ function mapRecentEvent(
 
   switch (event.kind) {
     case 'activity':
-      return {
-        category: 'activity',
-        context: event.context ?? '',
-        dateTime: event.dateTime,
-        displayTime,
-        id: event.id,
-        title: event.title,
-        unit: event.unit ?? 'минут',
-        value: event.value,
-      };
     case 'insulin':
-      return {
-        category: 'insulin',
-        context: event.context ?? '',
-        dateTime: event.dateTime,
-        displayTime,
-        id: event.id,
-        title: event.title,
-        unit: 'ЕД',
-        value: parseLeadingNumber(event.value).toString(),
-      };
     case 'medication':
+    case 'nutrition': {
+      const presentation = mapTimelineEventCardPresentation(
+        event,
+        dependencies,
+        displayTime,
+      );
+
       return {
-        category: 'medication',
-        context: event.context ?? '',
-        dateTime: event.dateTime,
+        category: event.kind,
+        context: presentation.context ?? '',
+        dateTime: occurredAt,
         displayTime,
         id: event.id,
-        title: event.title,
-        unit: event.unit ?? '',
-        value: event.value,
+        title: presentation.title,
+        unit: presentation.unit,
+        value: presentation.value,
       };
-    case 'nutrition':
-      return {
-        category: 'nutrition',
-        context: event.context ?? '',
-        dateTime: event.dateTime,
-        displayTime,
-        id: event.id,
-        title: event.title,
-        unit: 'г углеводов',
-        value: parseLeadingNumber(event.value).toString(),
-      };
+    }
     default:
       return null;
   }
 }
 
 export function getLatestGlucoseEvent(
-  events: readonly TimelineEvent[],
-): TimelineEvent | null {
-  const glucoseEvents = events.filter((event) => event.kind === 'glucose');
+  events: readonly SemanticTimelineEvent[],
+): Extract<SemanticTimelineEvent, { kind: 'glucose' }> | null {
+  const glucoseEvents = events.filter(
+    (event): event is Extract<SemanticTimelineEvent, { kind: 'glucose' }> =>
+      event.kind === 'glucose',
+  );
 
-  return sortTimelineEvents(glucoseEvents).at(-1) ?? null;
+  return [...glucoseEvents].sort(compareSemanticTimelineEvents).at(-1) ?? null;
 }
 
 export function getTodayTimelineEvents(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
   referenceDate: Date = new Date(),
   timeZone?: string,
-): TimelineEvent[] {
-  return sortTimelineEvents(
+): SemanticTimelineEvent[] {
+  return sortSemanticTimelineEvents(
     events.filter((event) =>
-      isSameLocalDay(event.dateTime, referenceDate, timeZone),
+      isSameLocalDay(event.occurredAt, referenceDate, timeZone),
     ),
   );
 }
 
 export function getRecentTimelineEvents(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
+  dependencies: TimelinePresentationDependencies,
   options: {
     readonly limit?: number;
     readonly locale?: string;
     readonly timeZone?: string;
   } = {},
 ): TimelineRecentEvent[] {
-  const locale = options.locale ?? 'ru-RU';
+  const locale =
+    options.locale ?? resolveTimelinePresentationLocale(dependencies);
   const limit = options.limit ?? DEFAULT_RECENT_TIMELINE_EVENTS_LIMIT;
 
   return [...events]
-    .sort((left, right) =>
-      compareTimelineDateTime(right.dateTime, left.dateTime),
+    .sort(compareSemanticTimelineEventsDescending)
+    .map((event) =>
+      mapRecentEvent(event, dependencies, locale, options.timeZone),
     )
-    .map((event) => mapRecentEvent(event, locale, options.timeZone))
     .filter((event): event is TimelineRecentEvent => event !== null)
     .slice(0, limit);
 }
 
 export function getTodayInsulinTotal(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
   referenceDate: Date = new Date(),
   timeZone?: string,
 ): number {
   return getTodayTimelineEvents(events, referenceDate, timeZone)
     .filter((event) => event.kind === 'insulin')
-    .reduce((total, event) => total + parseLeadingNumber(event.value), 0);
+    .reduce((total, event) => total + event.doseUnits, 0);
 }
 
 export function getTodayNutritionTotal(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
   referenceDate: Date = new Date(),
   timeZone?: string,
 ): number {
   return getTodayTimelineEvents(events, referenceDate, timeZone)
     .filter((event) => event.kind === 'nutrition')
-    .reduce((total, event) => total + parseLeadingNumber(event.value), 0);
+    .reduce((total, event) => total + event.carbohydratesGrams, 0);
 }
 
 export function getTodayMedicationCount(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
   referenceDate: Date = new Date(),
   timeZone?: string,
 ): number {
   return getTodayTimelineEvents(events, referenceDate, timeZone).filter(
     (event) => event.kind === 'medication',
   ).length;
+}
+
+export function formatLatestGlucoseValue(
+  event: Extract<SemanticTimelineEvent, { kind: 'glucose' }>,
+  dependencies: TimelinePresentationDependencies,
+): string {
+  return formatTimelineGlucoseDisplayValue(event, dependencies);
 }

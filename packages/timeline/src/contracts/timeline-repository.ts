@@ -1,14 +1,13 @@
-import type { TimelineEvent } from '@diabetes-universe/types';
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
 /**
- * P2 compatibility boundary.
+ * P3h semantic repository boundary.
  *
- * The current `TimelineEvent` shape contains presentation-oriented fields such
- * as title/value/unit. Repository Foundation accepts it temporarily so the
- * existing product behavior can migrate behind a storage boundary first.
- * Semantic event payload migration belongs to P3.
+ * The repository stores canonical `SemanticTimelineEvent` records natively.
+ * Legacy `TimelineEvent` remains available in `@diabetes-universe/types` for
+ * migration/import utilities only.
  */
-export type TimelineRepositoryEvent = TimelineEvent;
+export type TimelineRepositoryEvent = SemanticTimelineEvent;
 
 export interface TimelineRepositorySnapshot {
   readonly events: readonly TimelineRepositoryEvent[];

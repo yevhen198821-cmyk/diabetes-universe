@@ -5,7 +5,10 @@ import { useMemo } from 'react';
 
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
-import { resolveDashboardDaySummaryLabels } from './dashboard-day-summary-labels';
+import {
+  resolveDashboardDaySummaryLabels,
+  type DashboardDaySummaryLabels,
+} from './dashboard-day-summary-labels';
 import {
   createDashboardDaySummaryViewModel,
   type DashboardDaySummaryFormattedMetrics,
@@ -63,11 +66,20 @@ function MetricList({
 function createFormattedMetrics(
   summary: DashboardDaySummaryProps & { state: 'ready' },
   formatter: ReturnType<typeof useFormatter>,
+  labels: DashboardDaySummaryLabels,
 ): DashboardDaySummaryFormattedMetrics {
   const formattedCompleted = formatter.formatNumber(
     summary.summary.remindersCompleted,
   );
   const formattedTotal = formatter.formatNumber(summary.summary.remindersTotal);
+  const formattedInsulin = formatter.formatNumber(
+    summary.summary.totalInsulinUnits,
+    { maximumFractionDigits: 1, minimumFractionDigits: 0 },
+  );
+  const formattedCarbs = formatter.formatNumber(
+    summary.summary.totalCarbohydrateGrams,
+    { maximumFractionDigits: 0, minimumFractionDigits: 0 },
+  );
 
   return {
     glucoseMeasurements: formatter.formatNumber(
@@ -75,6 +87,8 @@ function createFormattedMetrics(
     ),
     medicationDoses: formatter.formatNumber(summary.summary.medicationDoses),
     reminders: `${formattedCompleted} / ${formattedTotal}`,
+    totalCarbohydrates: `${formattedCarbs} ${labels.units.compactMassG}`,
+    totalInsulin: `${formattedInsulin} ${labels.units.compactInsulinDose}`,
   };
 }
 
@@ -90,8 +104,8 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
       return undefined;
     }
 
-    return createFormattedMetrics(props, formatter);
-  }, [formatter, props]);
+    return createFormattedMetrics(props, formatter, labels);
+  }, [formatter, labels, props]);
   const viewModel = useMemo(
     () => createDashboardDaySummaryViewModel(props, labels, formattedMetrics),
     [formattedMetrics, labels, props],

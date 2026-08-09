@@ -1,4 +1,9 @@
-import type { TimelineEvent } from '@diabetes-universe/types';
+import type {
+  SemanticTimelineEvent,
+  TimelineDiagnosticsSnapshot,
+} from '@diabetes-universe/types';
+
+import { cloneSemanticTimelineEvents } from '../semantic-timeline-clone';
 
 export type TimelineStoreStatus = 'error' | 'loading' | 'ready';
 
@@ -12,7 +17,7 @@ export type TimelineStoreErrorCode =
 export interface TimelineStoreState {
   readonly error?: string;
   readonly errorCode?: TimelineStoreErrorCode;
-  readonly events: readonly TimelineEvent[];
+  readonly events: readonly SemanticTimelineEvent[];
   readonly status: TimelineStoreStatus;
 }
 
@@ -21,7 +26,7 @@ export type TimelineStoreAction =
       readonly type: 'setLoading';
     }
   | {
-      readonly events: readonly TimelineEvent[];
+      readonly events: readonly SemanticTimelineEvent[];
       readonly type: 'setReady';
     }
   | {
@@ -35,17 +40,11 @@ export const initialTimelineStoreState: TimelineStoreState = {
   status: 'loading',
 };
 
-function cloneTimelineEvents(
-  events: readonly TimelineEvent[],
-): readonly TimelineEvent[] {
-  return events.map((event) => ({ ...event }));
-}
-
 export function createReadyTimelineStoreState(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
 ): TimelineStoreState {
   return {
-    events: cloneTimelineEvents(events),
+    events: cloneSemanticTimelineEvents(events),
     status: 'ready',
   };
 }
@@ -67,4 +66,16 @@ export function timelineStoreReducer(
         status: 'error',
       };
   }
+}
+
+export function createTimelineDiagnosticsFromState(
+  state: TimelineStoreState,
+): TimelineDiagnosticsSnapshot {
+  return {
+    activeEventCount: state.events.length,
+    migrationRecordCount: 0,
+    quarantinedCount: 0,
+    quarantinedRecords: [],
+    unsupportedSchemaCount: 0,
+  };
 }

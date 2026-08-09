@@ -14,19 +14,61 @@ import {
   setupIntegrationDom,
   teardownIntegrationDom,
 } from '../../platform/integration/tests/integration-dom-setup.mjs';
+import {
+  semanticGlucoseEarly,
+  semanticInsulinLater,
+} from './testing/timeline-store-test-fixtures.mjs';
 import { TimelineStoreProvider, useTimelineStore } from './timeline-store.tsx';
 
 after(() => {
   teardownIntegrationDom();
 });
 
-function createEvent(id, dateTime, overrides = {}) {
+function createSemanticEvent(id, occurredAt, overrides = {}) {
+  const kind = overrides.kind ?? 'glucose';
+
+  const defaultsByKind = {
+    activity: {
+      activityType: 'walk',
+      durationSeconds: 1800,
+      kind: 'activity',
+    },
+    glucose: {
+      concentrationMmolPerL: 6.4,
+      kind: 'glucose',
+    },
+    insulin: {
+      doseUnits: 4,
+      kind: 'insulin',
+      preparation: 'NovoRapid',
+    },
+    medication: {
+      dose: 400,
+      doseUnit: 'mg',
+      kind: 'medication',
+      medicationName: 'Метформин',
+    },
+    note: {
+      body: 'Текст заметки',
+      kind: 'note',
+      title: 'Заметка',
+    },
+    nutrition: {
+      carbohydratesGrams: 42,
+      kind: 'nutrition',
+      mealType: 'breakfast',
+      mode: 'carbs_only',
+    },
+  };
+
   return {
-    dateTime,
+    createdAt: '2026-08-09T08:30:00.000Z',
     id,
-    kind: 'glucose',
-    title: id,
-    value: id,
+    occurredAt,
+    schemaVersion: 1,
+    source: 'demo',
+    updatedAt: '2026-08-09T08:30:00.000Z',
+    ...defaultsByKind[kind],
     ...overrides,
   };
 }
@@ -254,6 +296,7 @@ async function mountTimelineStore({ initialEvents, repository } = {}) {
     const store = useTimelineStore();
     currentStore = store;
     observations.push({
+      diagnostics: store.diagnostics,
       error: store.error,
       eventIds: store.events.map((event) => event.id),
       events: store.events.map((event) => ({ ...event })),
@@ -296,11 +339,40 @@ async function mountTimelineStore({ initialEvents, repository } = {}) {
   };
 }
 
-const glucoseEarly = createEvent('glucose-0800', '2026-08-02T05:00:00.000Z');
-const insulinLater = createEvent('insulin-0805', '2026-08-02T05:05:00.000Z', {
-  kind: 'insulin',
+test('routine initialization reports zero migration diagnostics', async () => {
+  const mounted = await mountTimelineStore({
+    repository: createInMemoryTimelineRepository({
+      seedEvents: [semanticGlucoseEarly],
+    }),
+  });
+
+  try {
+    await waitFor(
+      () => mounted.observations.at(-1)?.status === 'ready',
+      'ready state',
+    );
+
+    assert.equal(
+      mounted.observations.at(-1)?.diagnostics.migrationRecordCount,
+      0,
+    );
+    assert.equal(mounted.observations.at(-1)?.diagnostics.quarantinedCount, 0);
+  } finally {
+    await mounted.unmount();
+  }
 });
-const nutritionLatest = createEvent(
+
+const glucoseEarly = createSemanticEvent(
+  'glucose-0800',
+  '2026-08-02T05:00:00.000Z',
+);
+
+const insulinLater = createSemanticEvent(
+  'insulin-0805',
+  '2026-08-02T05:05:00.000Z',
+  { kind: 'insulin' },
+);
+const nutritionLatest = createSemanticEvent(
   'nutrition-0820',
   '2026-08-02T05:20:00.000Z',
   {
@@ -326,7 +398,7 @@ test('provider exposes initial loading state before repository initialization re
   }
 });
 
-test('provider initializes repository and renders seeded events', async () => {
+test('provider initializes repository and renders seeded semantic events', async () => {
   const mounted = await mountTimelineStore({
     repository: createInMemoryTimelineRepository({
       seedEvents: [insulinLater, glucoseEarly],
@@ -343,6 +415,12 @@ test('provider initializes repository and renders seeded events', async () => {
       'glucose-0800',
       'insulin-0805',
     ]);
+    assert.equal(mounted.observations.at(-1)?.events[0]?.schemaVersion, 1);
+    assert.equal(
+      Object.hasOwn(mounted.observations.at(-1)?.events[0] ?? {}, 'value'),
+      false,
+    );
+    assert.equal(mounted.observations.at(-1)?.diagnostics.quarantinedCount, 0);
   } finally {
     await mounted.unmount();
   }
@@ -380,7 +458,7 @@ test('addEvent delegates to repository and refreshes from repository snapshot', 
     );
 
     await act(async () => {
-      mounted.currentStore.addEvent(insulinLater);
+      mounted.currentStore.addEvent(semanticInsulinLater);
     });
     await waitFor(
       () => mounted.observations.at(-1)?.eventIds.includes('insulin-0805'),
@@ -411,12 +489,15 @@ test('duplicate add follows repository replacement semantics', async () => {
 
     await act(async () => {
       mounted.currentStore.addEvent({
-        ...glucoseEarly,
-        value: '7,0 ммоль/л',
+        ...semanticGlucoseEarly,
+        concentrationMmolPerL: 7,
+        updatedAt: '2026-08-09T09:00:00.000Z',
       });
     });
     await waitFor(
-      () => mounted.observations.at(-1)?.events[0]?.value === '7,0 ммоль/л',
+      () =>
+        mounted.observations.at(-1)?.events[0]?.kind === 'glucose' &&
+        mounted.observations.at(-1)?.events[0]?.concentrationMmolPerL === 7,
       'repository replacement snapshot',
     );
 
@@ -441,16 +522,17 @@ test('updateEvent delegates to repository and refreshes from repository snapshot
 
     await act(async () => {
       mounted.currentStore.updateEvent({
-        ...insulinLater,
-        value: '5 ЕД',
+        ...semanticInsulinLater,
+        doseUnits: 5,
+        updatedAt: '2026-08-09T09:00:00.000Z',
       });
     });
     await waitFor(
       () =>
         mounted.observations
           .at(-1)
-          ?.events.find((event) => event.id === 'insulin-0805')?.value ===
-        '5 ЕД',
+          ?.events.find((event) => event.id === 'insulin-0805')?.doseUnits ===
+        5,
       'updated repository snapshot',
     );
   } finally {
@@ -530,7 +612,7 @@ test('missing update and delete remain no-ops from the user perspective', async 
     const readyRenderCount = mounted.observations.length;
 
     await act(async () => {
-      mounted.currentStore.updateEvent(insulinLater);
+      mounted.currentStore.updateEvent(semanticInsulinLater);
       mounted.currentStore.deleteEvent('unknown');
     });
     await flushAsyncWork();
@@ -554,8 +636,8 @@ test('mutations are serialized to prevent stale snapshot overwrite', async () =>
     );
 
     await act(async () => {
-      mounted.currentStore.addEvent(glucoseEarly);
-      mounted.currentStore.addEvent(insulinLater);
+      mounted.currentStore.addEvent(semanticGlucoseEarly);
+      mounted.currentStore.addEvent(semanticInsulinLater);
     });
     await flushAsyncWork();
 
@@ -585,7 +667,11 @@ test('mutations are serialized to prevent stale snapshot overwrite', async () =>
 test('mutation queue recovers after a rejected mutation', async () => {
   const repository = new RecoveringMutationRepository();
   const mounted = await mountTimelineStore({ repository });
-  const failingEvent = createEvent('failing-event', '2026-08-02T04:00:00.000Z');
+  const failingSemanticEvent = {
+    ...semanticGlucoseEarly,
+    id: 'failing-event',
+    occurredAt: '2026-08-02T04:00:00.000Z',
+  };
 
   try {
     await waitFor(
@@ -594,8 +680,8 @@ test('mutation queue recovers after a rejected mutation', async () => {
     );
 
     await act(async () => {
-      mounted.currentStore.addEvent(failingEvent);
-      mounted.currentStore.addEvent(glucoseEarly);
+      mounted.currentStore.addEvent(failingSemanticEvent);
+      mounted.currentStore.addEvent(semanticGlucoseEarly);
     });
     await waitFor(
       () => mounted.observations.at(-1)?.eventIds.includes('glucose-0800'),
@@ -620,7 +706,7 @@ test('async mutation completion does not render after unmount', async () => {
   );
 
   await act(async () => {
-    mounted.currentStore.addEvent(glucoseEarly);
+    mounted.currentStore.addEvent(semanticGlucoseEarly);
   });
   await waitFor(
     () => repository.addCalls.length === 1,

@@ -147,10 +147,10 @@ test('NA-001 suppresses unsupported Policy result without throwing', () => {
 test('NA-001 does not consume raw timestamps or glucose values', () => {
   const context = createContext({
     latestGlucose: {
-      get dateTime() {
+      get occurredAt() {
         throw new Error('NA-001 must not read raw timestamps.');
       },
-      get value() {
+      get concentrationMmolPerL() {
         throw new Error('NA-001 must not read glucose values.');
       },
     },

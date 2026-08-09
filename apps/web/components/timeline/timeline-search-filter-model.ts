@@ -1,7 +1,13 @@
 import type {
-  TimelineEvent,
+  SemanticTimelineEvent,
   TimelineEventKind,
 } from '@diabetes-universe/types';
+
+import {
+  mapTimelineSearchPresentation,
+  resolveTimelinePresentationLocale,
+  type TimelinePresentationDependencies,
+} from '../../lib/timeline/presentation';
 
 export type TimelineEventFilter = 'all' | TimelineEventKind;
 
@@ -12,32 +18,13 @@ export interface TimelineSearchFilterInput {
 
 export interface TimelineSearchFilterModel {
   readonly activeFilter: TimelineEventFilter;
-  readonly filteredEvents: readonly TimelineEvent[];
+  readonly filteredEvents: readonly SemanticTimelineEvent[];
   readonly hasActiveCriteria: boolean;
   readonly hasActiveFilter: boolean;
   readonly hasActiveSearch: boolean;
   readonly normalizedQuery: string;
   readonly resultCount: number;
 }
-
-export const timelineEventKindLabels: Record<TimelineEventKind, string> = {
-  activity: 'Активность',
-  glucose: 'Глюкоза',
-  insulin: 'Инсулин',
-  medication: 'Лекарство',
-  note: 'Заметка',
-  nutrition: 'Питание',
-};
-
-export const timelineEventFilterLabels: Record<TimelineEventFilter, string> = {
-  all: 'Все',
-  activity: 'Активность',
-  glucose: 'Глюкоза',
-  insulin: 'Инсулин',
-  medication: 'Лекарства',
-  note: 'Заметки',
-  nutrition: 'Питание',
-};
 
 export const timelineEventFilterOptions: readonly TimelineEventFilter[] = [
   'all',
@@ -49,48 +36,64 @@ export const timelineEventFilterOptions: readonly TimelineEventFilter[] = [
   'note',
 ];
 
-export function normalizeTimelineSearchQuery(query: string): string {
-  return query.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
+export function normalizeTimelineSearchQuery(
+  query: string,
+  locale: string,
+): string {
+  return query.trim().replace(/\s+/g, ' ').toLocaleLowerCase(locale);
 }
 
-function normalizeSearchField(value: string | undefined): string {
-  return normalizeTimelineSearchQuery(value ?? '');
+function normalizeSearchField(
+  value: string | undefined,
+  locale: string,
+): string {
+  return normalizeTimelineSearchQuery(value ?? '', locale);
 }
 
-function createSearchHaystack(event: TimelineEvent): string {
-  return [
-    event.title,
-    event.value,
-    event.unit,
-    event.context,
-    event.note,
-    timelineEventKindLabels[event.kind],
-    event.kind,
-  ]
-    .map(normalizeSearchField)
+function createSearchHaystack(
+  event: SemanticTimelineEvent,
+  dependencies: TimelinePresentationDependencies,
+): string {
+  const locale = resolveTimelinePresentationLocale(dependencies);
+  const presentation = mapTimelineSearchPresentation(event, dependencies);
+  const searchable = [
+    ...presentation.userContent,
+    ...presentation.localizedLabels,
+  ];
+
+  return searchable
+    .map((value) => normalizeSearchField(value, locale))
     .filter(Boolean)
     .join(' ');
 }
 
 function matchesFilter(
-  event: TimelineEvent,
+  event: SemanticTimelineEvent,
   filter: TimelineEventFilter,
 ): boolean {
   return filter === 'all' || event.kind === filter;
 }
 
-function matchesSearch(event: TimelineEvent, normalizedQuery: string): boolean {
+function matchesSearch(
+  event: SemanticTimelineEvent,
+  normalizedQuery: string,
+  dependencies: TimelinePresentationDependencies,
+): boolean {
   return (
     normalizedQuery.length === 0 ||
-    createSearchHaystack(event).includes(normalizedQuery)
+    createSearchHaystack(event, dependencies).includes(normalizedQuery)
   );
 }
 
 export function createTimelineSearchFilterModel(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
   input: TimelineSearchFilterInput,
+  dependencies: TimelinePresentationDependencies,
 ): TimelineSearchFilterModel {
-  const normalizedQuery = normalizeTimelineSearchQuery(input.query);
+  const normalizedQuery = normalizeTimelineSearchQuery(
+    input.query,
+    resolveTimelinePresentationLocale(dependencies),
+  );
   const activeFilter = timelineEventFilterOptions.includes(input.filter)
     ? input.filter
     : 'all';
@@ -99,7 +102,7 @@ export function createTimelineSearchFilterModel(
   const filteredEvents = events.filter(
     (event) =>
       matchesFilter(event, activeFilter) &&
-      matchesSearch(event, normalizedQuery),
+      matchesSearch(event, normalizedQuery, dependencies),
   );
 
   return {

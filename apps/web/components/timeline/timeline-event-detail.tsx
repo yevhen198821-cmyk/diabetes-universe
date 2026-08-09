@@ -1,6 +1,6 @@
 'use client';
 
-import type { TimelineEvent } from '@diabetes-universe/types';
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 import { Button, haptics } from '@diabetes-universe/ui';
 import { X } from 'lucide-react';
 import {
@@ -14,22 +14,24 @@ import {
 } from 'react';
 
 import {
-  createTimelineEventDetailModel,
-  createTimelineEventEditDraft,
-  updateTimelineEventFromDraft,
+  createTimelineSemanticEventEditDraft,
+  updateSemanticTimelineEventFromDraft,
   type TimelineEventEditDraft,
   type TimelineEventEditErrors,
 } from './timeline-event-detail-model';
+import { mapTimelineEventDetailPresentation } from '../../lib/timeline/presentation';
+import type { TimelinePresentationDependencies } from '../../lib/timeline/presentation';
 
 export type TimelineEventDetailMode = 'edit' | 'view';
 
 interface TimelineEventDetailProps {
-  readonly event: TimelineEvent;
+  readonly event: SemanticTimelineEvent;
   readonly mode: TimelineEventDetailMode;
   readonly onClose: () => void;
   readonly onDelete: (eventId: string) => void;
   readonly onModeChange: (mode: TimelineEventDetailMode) => void;
-  readonly onUpdate: (event: TimelineEvent) => void;
+  readonly onUpdate: (event: SemanticTimelineEvent) => void;
+  readonly presentationDependencies: TimelinePresentationDependencies;
 }
 
 const fieldClass =
@@ -264,6 +266,13 @@ function TimelineEventEditForm({
   );
 }
 
+const timelineEventSourceLabels = {
+  demo: 'Демо-данные',
+  device: 'Устройство',
+  import: 'Импорт',
+  manual: 'Вручную',
+} as const;
+
 export function TimelineEventDetail({
   event,
   mode,
@@ -271,6 +280,7 @@ export function TimelineEventDetail({
   onDelete,
   onModeChange,
   onUpdate,
+  presentationDependencies,
 }: TimelineEventDetailProps) {
   const titleId = useId();
   const descriptionId = useId();
@@ -278,16 +288,32 @@ export function TimelineEventDetail({
   const deleteDescriptionId = useId();
   const dialogRef = useRef<HTMLElement>(null);
   const deleteDialogRef = useRef<HTMLElement>(null);
-  const [draft, setDraft] = useState(() => createTimelineEventEditDraft(event));
+  const readPresentation = mapTimelineEventDetailPresentation(
+    event,
+    presentationDependencies,
+  );
+  const [draft, setDraft] = useState(() =>
+    createTimelineSemanticEventEditDraft(event),
+  );
   const [errors, setErrors] = useState<TimelineEventEditErrors>({});
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const model = createTimelineEventDetailModel(event);
+  const sourceLabel = event.source
+    ? timelineEventSourceLabels[event.source]
+    : null;
+  const displayDate = presentationDependencies.formatter.formatDate(
+    event.occurredAt,
+    { dateStyle: 'long' },
+  );
+  const displayTime = presentationDependencies.formatter.formatTime(
+    event.occurredAt,
+    { timeStyle: 'short' },
+  );
 
   useDialogFocusTrap(!deleteOpen, dialogRef, onClose);
   useDialogFocusTrap(deleteOpen, deleteDialogRef, () => setDeleteOpen(false));
 
   const handleSave = () => {
-    const result = updateTimelineEventFromDraft(event, draft);
+    const result = updateSemanticTimelineEventFromDraft(event, draft);
 
     setErrors(result.errors);
 
@@ -326,17 +352,17 @@ export function TimelineEventDetail({
         <header className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 sm:px-6 dark:border-slate-800">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-              {model.kindLabel}
+              {readPresentation.kindLabel}
             </p>
             <h2
               className="truncate text-lg font-bold text-slate-950 dark:text-slate-50"
               id={titleId}
             >
-              {mode === 'edit' ? 'Изменить событие' : model.title}
+              {mode === 'edit' ? 'Изменить событие' : readPresentation.title}
             </h2>
           </div>
           <button
-            aria-label="Закрыть"
+            aria-label="Закрыть детали"
             className="grid size-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
             onClick={onClose}
             type="button"
@@ -354,7 +380,7 @@ export function TimelineEventDetail({
               draft={draft}
               errors={errors}
               onCancel={() => {
-                setDraft(createTimelineEventEditDraft(event));
+                setDraft(createTimelineSemanticEventEditDraft(event));
                 setErrors({});
                 onModeChange('view');
               }}
@@ -365,27 +391,44 @@ export function TimelineEventDetail({
             <div className="space-y-5">
               <div>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {model.date} · {model.time}
+                  {displayDate} · {displayTime}
                 </p>
                 <p className="mt-2 text-2xl font-bold text-slate-950 dark:text-slate-50">
-                  {model.primaryText}
+                  {readPresentation.primaryText}
                 </p>
               </div>
 
               <dl className="grid gap-3">
-                {model.rows.map((row) => (
-                  <div
-                    className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900"
-                    key={row.label}
-                  >
+                {readPresentation.context ? (
+                  <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
                     <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                      {row.label}
+                      Контекст
                     </dt>
                     <dd className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      {row.value}
+                      {readPresentation.context}
                     </dd>
                   </div>
-                ))}
+                ) : null}
+                {readPresentation.note ? (
+                  <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
+                    <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                      Заметка
+                    </dt>
+                    <dd className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {readPresentation.note}
+                    </dd>
+                  </div>
+                ) : null}
+                {sourceLabel ? (
+                  <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
+                    <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                      Источник
+                    </dt>
+                    <dd className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {sourceLabel}
+                    </dd>
+                  </div>
+                ) : null}
               </dl>
             </div>
           )}
@@ -394,22 +437,31 @@ export function TimelineEventDetail({
         {mode === 'view' ? (
           <footer className="flex flex-col-reverse gap-3 border-t border-slate-100 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:flex-row sm:justify-between sm:px-6 dark:border-slate-800">
             <Button
-              className="border border-rose-200 bg-white text-rose-700 hover:bg-rose-50"
-              onClick={() => setDeleteOpen(true)}
+              className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              onClick={onClose}
               type="button"
             >
-              Удалить
+              Закрыть
             </Button>
-            <Button
-              onClick={() => {
-                setDraft(createTimelineEventEditDraft(event));
-                setErrors({});
-                onModeChange('edit');
-              }}
-              type="button"
-            >
-              Изменить
-            </Button>
+            <div className="flex flex-col-reverse gap-3 sm:flex-row">
+              <Button
+                className="border border-rose-200 bg-white text-rose-700 hover:bg-rose-50"
+                onClick={() => setDeleteOpen(true)}
+                type="button"
+              >
+                Удалить
+              </Button>
+              <Button
+                onClick={() => {
+                  setDraft(createTimelineSemanticEventEditDraft(event));
+                  setErrors({});
+                  onModeChange('edit');
+                }}
+                type="button"
+              >
+                Изменить
+              </Button>
+            </div>
           </footer>
         ) : null}
       </section>

@@ -15,6 +15,10 @@ export {
   type TimelineRepositorySnapshot,
 } from './contracts/timeline-repository';
 export {
+  liftLegacyToSemantic,
+  type LiftLegacyMigrationContext,
+} from './migration';
+export {
   createInMemoryTimelineRepository,
   InMemoryTimelineRepository,
   type InMemoryTimelineRepositoryOptions,

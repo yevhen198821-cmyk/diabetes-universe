@@ -7,17 +7,21 @@ import type {
   MedicationQuickAddEntry,
   NoteQuickAddEntry,
   NutritionQuickAddEntry,
-  TimelineEvent,
+  SemanticTimelineEvent,
 } from '@diabetes-universe/types';
-import { useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { createActivityTimelineEvent } from '../../lib/quick-add/create-activity-timeline-event';
-import { createGlucoseTimelineEvent } from '../../lib/quick-add/create-glucose-timeline-event';
-import { createInsulinTimelineEvent } from '../../lib/quick-add/create-insulin-timeline-event';
-import { createMedicationTimelineEvent } from '../../lib/quick-add/create-medication-timeline-event';
-import { createNoteTimelineEvent } from '../../lib/quick-add/create-note-timeline-event';
-import { createNutritionTimelineEvent } from '../../lib/quick-add/create-nutrition-timeline-event';
-import { compareTimelineDateTime } from '../../lib/timeline/timeline-date-time';
+import {
+  createSemanticActivityTimelineEvent,
+  createSemanticGlucoseTimelineEvent,
+  createSemanticInsulinTimelineEvent,
+  createSemanticMedicationTimelineEvent,
+  createSemanticNoteTimelineEvent,
+  createSemanticNutritionTimelineEvent,
+} from '../../lib/timeline/semantic-creators';
+import { compareSemanticTimelineEventsDescending } from '../../lib/timeline/semantic-timeline-ordering';
+import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
+import { resolveTimelinePresentationLocale } from '../../lib/timeline/presentation';
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
 import { createTimelineListModel } from './timeline-list-model';
 import { QuickAddRoot } from './quick-add-root';
@@ -38,22 +42,18 @@ import { TopBar } from './top-bar';
 const TIMELINE_PAGE_SIZE = 20;
 
 function sortTimelineEventsNewestFirst(
-  events: readonly TimelineEvent[],
-): readonly TimelineEvent[] {
-  return [...events].sort((left, right) => {
-    const comparison = compareTimelineDateTime(right.dateTime, left.dateTime);
-
-    if (comparison !== 0) {
-      return comparison;
-    }
-
-    return left.id.localeCompare(right.id);
-  });
+  events: readonly SemanticTimelineEvent[],
+): readonly SemanticTimelineEvent[] {
+  return [...events].sort(compareSemanticTimelineEventsDescending);
 }
 
 export function TimelineShell() {
   const { addEvent, deleteEvent, error, events, status, updateEvent } =
     useTimelineStore();
+  const presentationDependencies = useTimelinePresentationDependencies();
+  const presentationLocale = resolveTimelinePresentationLocale(
+    presentationDependencies,
+  );
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<TimelineEventFilter>('all');
@@ -63,6 +63,7 @@ export function TimelineShell() {
   const [returnFocusElement, setReturnFocusElement] =
     useState<HTMLElement | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const pendingSearchFocusRef = useRef(false);
   const referenceDate = useMemo(() => new Date(), []);
   const timeZone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -74,12 +75,32 @@ export function TimelineShell() {
   );
   const searchFilterModel = useMemo(
     () =>
-      createTimelineSearchFilterModel(displayOrderedEvents, {
-        filter: activeFilter,
-        query,
-      }),
-    [activeFilter, displayOrderedEvents, query],
+      createTimelineSearchFilterModel(
+        displayOrderedEvents,
+        {
+          filter: activeFilter,
+          query,
+        },
+        presentationDependencies,
+      ),
+    [activeFilter, displayOrderedEvents, presentationDependencies, query],
   );
+
+  useLayoutEffect(() => {
+    if (!pendingSearchFocusRef.current || selectedEventId !== null) {
+      return;
+    }
+
+    pendingSearchFocusRef.current = false;
+    const searchInput = document.getElementById('timeline-search');
+
+    if (searchInput instanceof HTMLElement) {
+      searchInput.focus();
+      return;
+    }
+
+    headingRef.current?.focus();
+  }, [selectedEventId]);
   const paginationModel = useMemo(
     () =>
       createTimelinePaginationModel({
@@ -95,6 +116,8 @@ export function TimelineShell() {
         error,
         events: paginationModel.visibleEvents,
         hasActiveCriteria: searchFilterModel.hasActiveCriteria,
+        locale: presentationLocale,
+        groupLabels: presentationDependencies.labels.groups,
         referenceDate,
         status,
         timeZone,
@@ -108,6 +131,8 @@ export function TimelineShell() {
       searchFilterModel.hasActiveCriteria,
       status,
       timeZone,
+      presentationLocale,
+      presentationDependencies.labels.groups,
     ],
   );
   const showToolbar = status === 'ready' && events.length > 0;
@@ -162,40 +187,30 @@ export function TimelineShell() {
     setDetailMode('view');
   };
 
-  const handleUpdateEvent = (event: TimelineEvent) => {
-    updateEvent(event);
+  const handleUpdateEvent = (updatedEvent: SemanticTimelineEvent) => {
+    updateEvent(updatedEvent);
 
     const nextEvents = sortTimelineEventsNewestFirst(
-      events.map((existingEvent) =>
-        existingEvent.id === event.id ? event : existingEvent,
+      events.map((event) =>
+        event.id === updatedEvent.id ? updatedEvent : event,
       ),
     );
-    const nextSearchFilterModel = createTimelineSearchFilterModel(nextEvents, {
-      filter: activeFilter,
-      query,
-    });
-    const nextPaginationModel = createTimelinePaginationModel({
-      events: nextSearchFilterModel.filteredEvents,
-      pageSize: TIMELINE_PAGE_SIZE,
-      visibleCount,
-    });
-    const isStillVisible = nextPaginationModel.visibleEvents.some(
-      (visibleEvent) => visibleEvent.id === event.id,
+    const nextSearchFilterModel = createTimelineSearchFilterModel(
+      nextEvents,
+      {
+        filter: activeFilter,
+        query,
+      },
+      presentationDependencies,
+    );
+    const isStillVisible = nextSearchFilterModel.filteredEvents.some(
+      (visibleEvent) => visibleEvent.id === updatedEvent.id,
     );
 
     if (!isStillVisible) {
+      pendingSearchFocusRef.current = true;
       setSelectedEventId(null);
       setDetailMode('view');
-      requestAnimationFrame(() => {
-        const searchInput = document.getElementById('timeline-search');
-
-        if (searchInput instanceof HTMLElement) {
-          searchInput.focus();
-          return;
-        }
-
-        headingRef.current?.focus();
-      });
     }
   };
 
@@ -207,27 +222,27 @@ export function TimelineShell() {
   };
 
   const handleGlucoseSubmit = (entry: GlucoseQuickAddEntry) => {
-    addEvent(createGlucoseTimelineEvent(entry));
+    addEvent(createSemanticGlucoseTimelineEvent(entry));
   };
 
   const handleInsulinSubmit = (entry: InsulinQuickAddEntry) => {
-    addEvent(createInsulinTimelineEvent(entry));
+    addEvent(createSemanticInsulinTimelineEvent(entry));
   };
 
   const handleNutritionSubmit = (entry: NutritionQuickAddEntry) => {
-    addEvent(createNutritionTimelineEvent(entry));
+    addEvent(createSemanticNutritionTimelineEvent(entry));
   };
 
   const handleMedicationSubmit = (entry: MedicationQuickAddEntry) => {
-    addEvent(createMedicationTimelineEvent(entry));
+    addEvent(createSemanticMedicationTimelineEvent(entry));
   };
 
   const handleActivitySubmit = (entry: ActivityQuickAddEntry) => {
-    addEvent(createActivityTimelineEvent(entry));
+    addEvent(createSemanticActivityTimelineEvent(entry));
   };
 
   const handleNoteSubmit = (entry: NoteQuickAddEntry) => {
-    addEvent(createNoteTimelineEvent(entry));
+    addEvent(createSemanticNoteTimelineEvent(entry));
   };
 
   return (
@@ -248,6 +263,7 @@ export function TimelineShell() {
 
         {showToolbar ? (
           <TimelineToolbar
+            filterLabels={presentationDependencies.labels.filters}
             model={searchFilterModel}
             onFilterChange={handleFilterChange}
             onQueryChange={handleQueryChange}
@@ -261,6 +277,7 @@ export function TimelineShell() {
           onAddEvent={() => setQuickAddOpen(true)}
           onOpenEvent={handleOpenEvent}
           onResetCriteria={resetCriteria}
+          presentationDependencies={presentationDependencies}
         />
 
         {status === 'ready' && paginationModel.hasMore ? (
@@ -289,11 +306,13 @@ export function TimelineShell() {
       {selectedEvent ? (
         <TimelineEventDetail
           event={selectedEvent}
+          key={selectedEvent.id}
           mode={detailMode}
           onClose={closeDetails}
           onDelete={handleDeleteEvent}
           onModeChange={setDetailMode}
           onUpdate={handleUpdateEvent}
+          presentationDependencies={presentationDependencies}
         />
       ) : null}
     </div>

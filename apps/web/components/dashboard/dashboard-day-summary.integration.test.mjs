@@ -10,6 +10,9 @@ import { renderToString } from 'react-dom/server';
 import test from 'node:test';
 
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model.ts';
+import { createTimelinePresentationDependencies } from '../../lib/timeline/presentation/index.ts';
+import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
+import { createTestTimelinePresentationDependencies } from '../../lib/timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import { createTestPlatformRuntime } from '../../lib/platform/react/testing/create-test-platform-runtime.ts';
 import { TestPlatformProvider } from '../../lib/platform/react/testing/test-platform-provider.ts';
 import {
@@ -33,8 +36,8 @@ const readySummary = {
   medicationDoses: 2,
   remindersCompleted: 1,
   remindersTotal: 3,
-  totalCarbohydrates: '120 г',
-  totalInsulin: '12 ЕД',
+  totalCarbohydrateGrams: 120,
+  totalInsulinUnits: 12,
 };
 
 after(() => {
@@ -134,6 +137,10 @@ test('deriveDaySummary invokes formatDate callback exactly once with referenceTi
     request: { acceptLanguage: 'en-GB', cookieTimeZone: 'UTC' },
   });
   const formatter = runtime.formatter;
+  const presentationDependencies = createTimelinePresentationDependencies({
+    formatter: runtime.formatter,
+    localization: runtime.localization,
+  });
   const referenceTime = new Date('2026-08-02T10:00:00.000Z');
   let formatDateCalls = 0;
   let receivedDate = null;
@@ -148,6 +155,7 @@ test('deriveDaySummary invokes formatDate callback exactly once with referenceTi
       },
       referenceTime,
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 
@@ -157,7 +165,9 @@ test('deriveDaySummary invokes formatDate callback exactly once with referenceTi
   assert.match(blocks.daySummary?.displayDayLabel ?? '', /August/i);
 });
 
-test('deriveDaySummary keeps dayDate independent from display label formatting', () => {
+test('deriveDaySummary keeps dayDate independent from display label formatting', async () => {
+  const presentationDependencies =
+    await createTestTimelinePresentationDependencies();
   const referenceTime = new Date('2026-08-02T10:00:00.000Z');
 
   const blocks = deriveDashboardQuickAddBlocks(
@@ -166,6 +176,7 @@ test('deriveDaySummary keeps dayDate independent from display label formatting',
       formatDaySummaryDisplayDate: () => 'custom-display-label',
       referenceTime,
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 
@@ -173,10 +184,12 @@ test('deriveDaySummary keeps dayDate independent from display label formatting',
   assert.equal(blocks.daySummary?.displayDayLabel, 'custom-display-label');
 });
 
-test('deriveDaySummary passes insulin and carbohydrate totals through unchanged', () => {
+test('deriveDaySummary passes insulin and carbohydrate totals through unchanged', async () => {
+  const presentationDependencies =
+    await createTestTimelinePresentationDependencies();
   const blocks = deriveDashboardQuickAddBlocks(
     {
-      events: [
+      events: liftLegacyTestFixtures([
         {
           context: 'Today',
           dateTime: '2026-08-02T08:05:00.000Z',
@@ -193,17 +206,18 @@ test('deriveDaySummary passes insulin and carbohydrate totals through unchanged'
           title: 'Breakfast',
           value: '42 г углеводов',
         },
-      ],
+      ]),
     },
     {
       formatDaySummaryDisplayDate: () => 'Sunday, 2 August 2026',
       referenceTime: new Date('2026-08-02T10:00:00.000Z'),
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 
-  assert.equal(blocks.daySummary?.totalInsulin, '4 ЕД');
-  assert.equal(blocks.daySummary?.totalCarbohydrates, '42 г');
+  assert.equal(blocks.daySummary?.totalInsulinUnits, 4);
+  assert.equal(blocks.daySummary?.totalCarbohydrateGrams, 42);
 });
 
 test('dashboard day summary formats counters with platform formatter', async () => {
@@ -240,8 +254,8 @@ test('dashboard day summary formats counters with platform formatter', async () 
   try {
     assert.equal(formatNumberCalls >= 4, true);
     assert.match(document.body.textContent ?? '', /1 \/ 3/);
-    assert.match(document.body.textContent ?? '', /12 ЕД/);
-    assert.match(document.body.textContent ?? '', /120 г/);
+    assert.match(document.body.textContent ?? '', /12 U/);
+    assert.match(document.body.textContent ?? '', /120 g/);
   } finally {
     formatter.formatNumber = originalFormatNumber;
     await act(async () => {

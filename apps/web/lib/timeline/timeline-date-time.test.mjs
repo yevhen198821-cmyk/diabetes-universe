@@ -2,17 +2,24 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { mapTimelineEventToCard } from '../../components/timeline/timeline-event-card.mapper.ts';
+import { createTestTimelinePresentationDependencies } from './presentation/testing/create-test-timeline-presentation-dependencies.ts';
+import { liftLegacyTestFixture } from './testing/lift-legacy-test-fixtures.ts';
 import {
   compareTimelineDateTime,
   createIsoDateTimeFromLocalTime,
   formatTimelineDayGroupLabel,
   formatTimelineDisplayTime,
   getTimelineDayGroupKey,
-  sortTimelineEvents,
 } from './timeline-date-time.ts';
 
 const referenceDate = new Date('2026-08-02T10:00:00.000Z');
 const timeZone = 'Europe/Moscow';
+
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
 
 test('creates ISO dateTime from selected local time', () => {
   const dateTime = createIsoDateTimeFromLocalTime('08:05', referenceDate);
@@ -27,37 +34,6 @@ test('throws for invalid selected time values', () => {
   );
 });
 
-test('sorts timeline events by dateTime and id', () => {
-  const sorted = sortTimelineEvents([
-    {
-      dateTime: '2026-08-02T07:15:00.000Z',
-      id: 'glucose-b',
-      kind: 'glucose',
-      title: 'Глюкоза',
-      value: '7,3',
-    },
-    {
-      dateTime: '2026-08-02T05:00:00.000Z',
-      id: 'glucose-a',
-      kind: 'glucose',
-      title: 'Глюкоза',
-      value: '6,4',
-    },
-    {
-      dateTime: '2026-08-02T05:00:00.000Z',
-      id: 'glucose-z',
-      kind: 'glucose',
-      title: 'Глюкоза',
-      value: '6,1',
-    },
-  ]);
-
-  assert.deepEqual(
-    sorted.map((event) => event.id),
-    ['glucose-a', 'glucose-z', 'glucose-b'],
-  );
-});
-
 test('places invalid dateTime values after valid events during sorting', () => {
   const comparison = compareTimelineDateTime(
     'invalid-date',
@@ -68,6 +44,12 @@ test('places invalid dateTime values after valid events during sorting', () => {
 });
 
 test('creates today, yesterday, and earlier grouping labels', () => {
+  const englishGroups = {
+    earlier: 'Earlier',
+    today: 'Today',
+    yesterday: 'Yesterday',
+  };
+
   assert.equal(
     getTimelineDayGroupKey('2026-08-02T05:00:00.000Z', referenceDate, timeZone),
     'today',
@@ -76,10 +58,11 @@ test('creates today, yesterday, and earlier grouping labels', () => {
     formatTimelineDayGroupLabel(
       'today',
       '2026-08-02T05:00:00.000Z',
-      'ru-RU',
+      'en-GB',
       timeZone,
+      englishGroups,
     ),
-    'Сегодня',
+    'Today',
   );
   assert.equal(
     getTimelineDayGroupKey('2026-08-01T12:00:00.000Z', referenceDate, timeZone),
@@ -89,10 +72,11 @@ test('creates today, yesterday, and earlier grouping labels', () => {
     formatTimelineDayGroupLabel(
       'yesterday',
       '2026-08-01T12:00:00.000Z',
-      'ru-RU',
+      'en-GB',
       timeZone,
+      englishGroups,
     ),
-    'Вчера',
+    'Yesterday',
   );
   assert.equal(
     getTimelineDayGroupKey('2026-07-30T09:00:00.000Z', referenceDate, timeZone),
@@ -101,19 +85,24 @@ test('creates today, yesterday, and earlier grouping labels', () => {
 });
 
 test('maps nutrition without legacy meal kind', () => {
-  const card = mapTimelineEventToCard({
-    context: 'После инсулина',
-    dateTime: '2026-08-02T05:20:00.000Z',
-    id: 'nutrition-0820',
-    kind: 'nutrition',
-    title: 'Завтрак',
-    value: '42 г углеводов',
-  });
+  const card = mapTimelineEventToCard(
+    liftLegacyTestFixture({
+      context: 'После инсулина',
+      dateTime: '2026-08-02T05:20:00.000Z',
+      id: 'nutrition-0820',
+      kind: 'nutrition',
+      title: 'Завтрак',
+      value: '42 г углеводов',
+    }),
+    presentationDependencies,
+  );
 
   assert.equal(card.type, 'nutrition');
   assert.equal(
     card.time,
-    formatTimelineDisplayTime('2026-08-02T05:20:00.000Z'),
+    presentationDependencies.formatter.formatTime('2026-08-02T05:20:00.000Z', {
+      timeStyle: 'short',
+    }),
   );
   assert.equal(card.value, '42');
 });
@@ -130,7 +119,7 @@ test('maps all six timeline kinds to event cards', () => {
         value: '6,4 ммоль/л',
       },
       expectedType: 'glucose',
-      expectedValue: '6,4',
+      expectedValue: '6.4',
     },
     {
       event: {
@@ -196,7 +185,10 @@ test('maps all six timeline kinds to event cards', () => {
   ];
 
   for (const testCase of cases) {
-    const card = mapTimelineEventToCard(testCase.event);
+    const card = mapTimelineEventToCard(
+      liftLegacyTestFixture(testCase.event),
+      presentationDependencies,
+    );
 
     assert.equal(card.type, testCase.expectedType);
     assert.equal(card.value, testCase.expectedValue);
@@ -204,16 +196,19 @@ test('maps all six timeline kinds to event cards', () => {
 });
 
 test('does not confuse note kind with optional note field on other events', () => {
-  const card = mapTimelineEventToCard({
-    context: 'Введено вручную',
-    dateTime: '2026-08-02T05:20:00.000Z',
-    id: 'nutrition-note-field',
-    kind: 'nutrition',
-    note: 'Без сахара',
-    title: 'Перекус',
-    value: '15 г углеводов',
-  });
+  const card = mapTimelineEventToCard(
+    liftLegacyTestFixture({
+      context: 'Введено вручную',
+      dateTime: '2026-08-02T05:20:00.000Z',
+      id: 'nutrition-note-field',
+      kind: 'nutrition',
+      note: 'Без сахара',
+      title: 'Перекус',
+      value: '15 г углеводов',
+    }),
+    presentationDependencies,
+  );
 
   assert.equal(card.type, 'nutrition');
-  assert.equal(card.context, 'Введено вручную');
+  assert.equal(card.context, undefined);
 });

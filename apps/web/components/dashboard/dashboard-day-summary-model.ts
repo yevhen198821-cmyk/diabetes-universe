@@ -7,14 +7,16 @@ export interface DashboardDaySummaryData {
   readonly medicationDoses: number;
   readonly remindersCompleted: number;
   readonly remindersTotal: number;
-  readonly totalCarbohydrates: string;
-  readonly totalInsulin: string;
+  readonly totalCarbohydrateGrams: number;
+  readonly totalInsulinUnits: number;
 }
 
 export interface DashboardDaySummaryFormattedMetrics {
   readonly glucoseMeasurements: string;
   readonly medicationDoses: string;
   readonly reminders: string;
+  readonly totalCarbohydrates: string;
+  readonly totalInsulin: string;
 }
 
 interface DashboardDaySummaryLoadingProps {
@@ -79,23 +81,25 @@ function isNonNegativeInteger(value: number): boolean {
   return Number.isInteger(value) && value >= 0;
 }
 
+function isNonNegativeNumber(value: number): boolean {
+  return Number.isFinite(value) && value >= 0;
+}
+
 function normalizeReadySummary(
   summary: DashboardDaySummaryData,
 ): DashboardDaySummaryData | null {
   const dayDate = summary.dayDate.trim();
   const displayDayLabel = summary.displayDayLabel.trim();
-  const totalInsulin = summary.totalInsulin.trim();
-  const totalCarbohydrates = summary.totalCarbohydrates.trim();
 
   if (
     !isValidDayDate(dayDate) ||
     displayDayLabel.length === 0 ||
-    totalInsulin.length === 0 ||
-    totalCarbohydrates.length === 0 ||
     !isNonNegativeInteger(summary.glucoseMeasurements) ||
     !isNonNegativeInteger(summary.medicationDoses) ||
     !isNonNegativeInteger(summary.remindersCompleted) ||
     !isNonNegativeInteger(summary.remindersTotal) ||
+    !isNonNegativeNumber(summary.totalCarbohydrateGrams) ||
+    !isNonNegativeNumber(summary.totalInsulinUnits) ||
     summary.remindersCompleted > summary.remindersTotal
   ) {
     return null;
@@ -108,8 +112,8 @@ function normalizeReadySummary(
     medicationDoses: summary.medicationDoses,
     remindersCompleted: summary.remindersCompleted,
     remindersTotal: summary.remindersTotal,
-    totalCarbohydrates,
-    totalInsulin,
+    totalCarbohydrateGrams: summary.totalCarbohydrateGrams,
+    totalInsulinUnits: summary.totalInsulinUnits,
   };
 }
 
@@ -126,11 +130,11 @@ function createReadyMetrics(
       },
       {
         label: labels.totalInsulin,
-        value: summary.totalInsulin,
+        value: formattedMetrics.totalInsulin,
       },
       {
         label: labels.totalCarbohydrates,
-        value: summary.totalCarbohydrates,
+        value: formattedMetrics.totalCarbohydrates,
       },
     ],
     secondaryMetrics: [

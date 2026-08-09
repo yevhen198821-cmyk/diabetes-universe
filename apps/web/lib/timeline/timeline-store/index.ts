@@ -1,3 +1,4 @@
+export { TimelineStoreBoundary } from './timeline-store-boundary';
 export {
   TimelineStoreProvider,
   useTimelineStore,
@@ -5,6 +6,7 @@ export {
 } from './timeline-store';
 export {
   createReadyTimelineStoreState,
+  createTimelineDiagnosticsFromState,
   initialTimelineStoreState,
   timelineStoreReducer,
   type TimelineStoreAction,

@@ -2,7 +2,15 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { selectDashboardRecentEvents } from '../../components/dashboard/dashboard-recent-events-model.ts';
+import { liftLegacyTestFixtures } from '../timeline/testing/lift-legacy-test-fixtures.ts';
+import { createTestTimelinePresentationDependencies } from '../timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import { deriveDashboardQuickAddBlocks } from './dashboard-quick-add-integration-model.ts';
+
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
 
 const referenceTime = new Date('2026-08-02T10:00:00.000Z');
 
@@ -34,7 +42,7 @@ test('deriveLastGlucose invokes formatter callback exactly once with event dateT
 
   const blocks = deriveDashboardQuickAddBlocks(
     {
-      events: [
+      events: liftLegacyTestFixtures([
         {
           context: 'Перед завтраком',
           dateTime: '2026-08-02T08:00:00.000Z',
@@ -51,7 +59,7 @@ test('deriveLastGlucose invokes formatter callback exactly once with event dateT
           title: 'Глюкоза',
           value: '7,3 ммоль/л',
         },
-      ],
+      ]),
     },
     {
       formatDaySummaryDisplayDate,
@@ -62,19 +70,23 @@ test('deriveLastGlucose invokes formatter callback exactly once with event dateT
       },
       referenceTime,
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 
   assert.equal(callCount, 1);
   assert.equal(receivedDateTime, '2026-08-02T08:00:00.000Z');
-  assert.equal(blocks.lastGlucose?.dateTime, '2026-08-02T08:00:00.000Z');
+  assert.equal(
+    blocks.lastGlucose?.event.occurredAt,
+    '2026-08-02T08:00:00.000Z',
+  );
   assert.equal(blocks.lastGlucose?.displayTime, '08:00');
 });
 
 test('derives last glucose from shared timeline events', () => {
   const blocks = deriveDashboardQuickAddBlocks(
     {
-      events: [
+      events: liftLegacyTestFixtures([
         {
           context: 'Перед завтраком',
           dateTime: '2026-08-02T08:00:00.000Z',
@@ -83,17 +95,18 @@ test('derives last glucose from shared timeline events', () => {
           title: 'Глюкоза',
           value: '6,4 ммоль/л',
         },
-      ],
+      ]),
     },
     {
       formatDaySummaryDisplayDate,
       formatLastGlucoseDisplayTime: formatUtcShortTime,
       referenceTime,
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 
-  assert.equal(blocks.lastGlucose?.value, '6,4 ммоль/л');
+  assert.equal(blocks.lastGlucose?.event.concentrationMmolPerL, 6.4);
   assert.equal(blocks.lastGlucose?.displayTime, '08:00');
   assert.equal(blocks.daySummary?.glucoseMeasurements, 1);
   assert.equal(blocks.recentEvents.length, 0);
@@ -102,7 +115,7 @@ test('derives last glucose from shared timeline events', () => {
 test('derives day summary only from today events', () => {
   const blocks = deriveDashboardQuickAddBlocks(
     {
-      events: [
+      events: liftLegacyTestFixtures([
         {
           context: 'Сегодня',
           dateTime: '2026-08-02T08:05:00.000Z',
@@ -135,23 +148,24 @@ test('derives day summary only from today events', () => {
           title: 'Завтрак',
           value: '60 г углеводов',
         },
-      ],
+      ]),
     },
     {
       formatDaySummaryDisplayDate,
       referenceTime,
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 
-  assert.equal(blocks.daySummary?.totalInsulin, '4 ЕД');
-  assert.equal(blocks.daySummary?.totalCarbohydrates, '42 г');
+  assert.equal(blocks.daySummary?.totalInsulinUnits, 4);
+  assert.equal(blocks.daySummary?.totalCarbohydrateGrams, 42);
 });
 
 test('updates day summary and recent events after insulin save', () => {
   const blocks = deriveDashboardQuickAddBlocks(
     {
-      events: [
+      events: liftLegacyTestFixtures([
         {
           context: 'Перед завтраком',
           dateTime: '2026-08-02T08:05:00.000Z',
@@ -160,16 +174,18 @@ test('updates day summary and recent events after insulin save', () => {
           title: 'NovoRapid',
           value: '4 ЕД',
         },
-      ],
+      ]),
     },
     {
       formatDaySummaryDisplayDate,
+      formatRecentEventDisplayTime: formatUtcShortTime,
       referenceTime,
       timeZone: 'UTC',
+      presentationDependencies,
     },
   );
 
-  assert.equal(blocks.daySummary?.totalInsulin, '4 ЕД');
+  assert.equal(blocks.daySummary?.totalInsulinUnits, 4);
   assert.equal(blocks.recentEvents[0]?.category, 'insulin');
   assert.equal(blocks.recentEvents[0]?.title, 'NovoRapid');
 });
@@ -177,7 +193,7 @@ test('updates day summary and recent events after insulin save', () => {
 test('derives recent event sources that can be sorted by latest event time', () => {
   const blocks = deriveDashboardQuickAddBlocks(
     {
-      events: [
+      events: liftLegacyTestFixtures([
         {
           context: 'Утром',
           dateTime: '2026-08-02T04:30:00.000Z',
@@ -203,9 +219,15 @@ test('derives recent event sources that can be sorted by latest event time', () 
           title: 'Завтрак',
           value: '42 г углеводов',
         },
-      ],
+      ]),
     },
-    { formatDaySummaryDisplayDate, referenceTime, timeZone: 'Europe/Moscow' },
+    {
+      formatDaySummaryDisplayDate,
+      formatRecentEventDisplayTime: formatUtcShortTime,
+      referenceTime,
+      timeZone: 'Europe/Moscow',
+      presentationDependencies,
+    },
   );
   const selected = selectDashboardRecentEvents(
     blocks.recentEvents,

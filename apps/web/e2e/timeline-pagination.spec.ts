@@ -1,12 +1,15 @@
 import { expect, test, type Page } from './support/test';
 
+import { waitForApplicationReady } from './support/wait-for-application-ready';
+
 const eventCards = (page: Page) =>
-  page.getByRole('button', { name: /Открыть событие/ });
+  page.getByRole('button', { name: /Open event/ });
 
 test('timeline load more reveals the next page and then disappears', async ({
   page,
 }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   await expect(eventCards(page)).toHaveCount(20);
   await expect(page.getByText('Осталось: 11')).toBeVisible();
@@ -19,6 +22,7 @@ test('timeline load more reveals the next page and then disappears', async ({
 
 test('timeline search paginates all matching results', async ({ page }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   await page.getByLabel('Поиск событий').fill('История');
 
@@ -35,8 +39,9 @@ test('timeline filter pagination resets visible count with criteria reset', asyn
   page,
 }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
-  await page.getByRole('button', { name: 'Заметки' }).click();
+  await page.getByRole('button', { name: 'Notes' }).click();
 
   await expect(page.getByText('Найдено: 25')).toBeVisible();
   await expect(eventCards(page)).toHaveCount(20);
@@ -57,10 +62,9 @@ test('timeline pagination recalculates after delete and keeps new add on top', a
   page,
 }) => {
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
-  await page
-    .getByRole('button', { name: /Открыть событие: NovoRapid/ })
-    .click();
+  await page.getByRole('button', { name: /Open event: NovoRapid/ }).click();
   await page.getByRole('button', { name: 'Удалить' }).click();
   await page
     .getByRole('dialog', { name: 'Удалить событие?' })
@@ -83,7 +87,7 @@ test('timeline pagination recalculates after delete and keeps new add on top', a
   await timePicker.getByRole('button', { name: 'Готово' }).click();
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
-  await expect(eventCards(page).first()).toContainText('8,8 ммоль/л');
+  await expect(eventCards(page).first()).toContainText('8.8 mmol/L');
   await expect(page.getByText('Осталось: 11')).toBeVisible();
 });
 
@@ -92,6 +96,7 @@ test('timeline load more is usable on mobile without FAB overlap or horizontal s
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
+  await waitForApplicationReady(page);
 
   const loadMore = page.getByRole('button', { name: 'Показать ещё' });
 

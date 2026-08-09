@@ -7,27 +7,59 @@ import {
   createInMemoryTimelineRepository,
 } from '../index.ts';
 
-function createEvent(id, dateTime, overrides = {}) {
-  return {
-    dateTime,
+function createSemanticEvent(id, occurredAt, overrides = {}) {
+  const kind = overrides.kind ?? 'glucose';
+  const envelope = {
+    createdAt: '2026-08-09T08:30:00.000Z',
     id,
-    kind: 'glucose',
-    title: id,
-    value: id,
-    ...overrides,
+    occurredAt,
+    schemaVersion: 1,
+    source: 'demo',
+    updatedAt: '2026-08-09T08:30:00.000Z',
   };
+
+  switch (kind) {
+    case 'insulin':
+      return {
+        ...envelope,
+        doseUnits: 4,
+        kind,
+        preparation: 'NovoRapid',
+        ...overrides,
+      };
+    case 'nutrition':
+      return {
+        ...envelope,
+        carbohydratesGrams: 42,
+        kind,
+        mealType: 'breakfast',
+        mode: 'manual',
+        ...overrides,
+      };
+    case 'glucose':
+    default:
+      return {
+        ...envelope,
+        concentrationMmolPerL: 6.4,
+        kind: 'glucose',
+        ...overrides,
+      };
+  }
 }
 
-const glucoseEarly = createEvent('glucose-0800', '2026-08-02T05:00:00.000Z');
-const insulinLater = createEvent('insulin-0805', '2026-08-02T05:05:00.000Z', {
-  kind: 'insulin',
-});
-const nutritionLatest = createEvent(
+const glucoseEarly = createSemanticEvent(
+  'glucose-0800',
+  '2026-08-02T05:00:00.000Z',
+);
+const insulinLater = createSemanticEvent(
+  'insulin-0805',
+  '2026-08-02T05:05:00.000Z',
+  { kind: 'insulin' },
+);
+const nutritionLatest = createSemanticEvent(
   'nutrition-0820',
   '2026-08-02T05:20:00.000Z',
-  {
-    kind: 'nutrition',
-  },
+  { kind: 'nutrition' },
 );
 
 test('getSnapshot fails with a machine-readable code before initialization', () => {
@@ -93,11 +125,13 @@ test('addEvent with a duplicate id replaces the existing event', async () => {
   const repository = createInMemoryTimelineRepository({
     seedEvents: [glucoseEarly, insulinLater],
   });
-  const replacement = {
-    ...glucoseEarly,
-    dateTime: '2026-08-02T06:00:00.000Z',
-    value: '7,0 ммоль/л',
-  };
+  const replacement = createSemanticEvent(
+    'glucose-0800',
+    '2026-08-02T06:00:00.000Z',
+    {
+      concentrationMmolPerL: 7,
+    },
+  );
 
   await repository.initialize();
   const result = await repository.addEvent(replacement);
@@ -106,8 +140,8 @@ test('addEvent with a duplicate id replaces the existing event', async () => {
   assert.deepEqual(result, { status: 'applied' });
   assert.equal(events.length, 2);
   assert.equal(
-    events.find((event) => event.id === 'glucose-0800')?.value,
-    '7,0 ммоль/л',
+    events.find((event) => event.id === 'glucose-0800')?.concentrationMmolPerL,
+    7,
   );
   assert.deepEqual(
     events.map((event) => event.id),
@@ -123,15 +157,15 @@ test('updateEvent changes an existing event without creating a new event', async
   await repository.initialize();
   const result = await repository.updateEvent({
     ...insulinLater,
-    value: '5 ЕД',
+    doseUnits: 5,
   });
   const events = repository.getSnapshot().events;
 
   assert.deepEqual(result, { status: 'applied' });
   assert.equal(events.length, 2);
   assert.equal(
-    events.find((event) => event.id === 'insulin-0805')?.value,
-    '5 ЕД',
+    events.find((event) => event.id === 'insulin-0805')?.doseUnits,
+    5,
   );
 });
 
@@ -198,11 +232,11 @@ test('replaceEvents hydrates the collection as a transitional capability', async
   );
 });
 
-test('orders matching dateTime values by id', async () => {
+test('orders matching occurredAt values by id', async () => {
   const repository = createInMemoryTimelineRepository({
     seedEvents: [
-      createEvent('same-b', '2026-08-02T05:00:00.000Z'),
-      createEvent('same-a', '2026-08-02T05:00:00.000Z'),
+      createSemanticEvent('same-b', '2026-08-02T05:00:00.000Z'),
+      createSemanticEvent('same-a', '2026-08-02T05:00:00.000Z'),
     ],
   });
 
@@ -214,11 +248,11 @@ test('orders matching dateTime values by id', async () => {
   );
 });
 
-test('invalid dateTime values follow the stable temporal fallback', async () => {
+test('invalid occurredAt values follow the stable temporal fallback', async () => {
   const repository = createInMemoryTimelineRepository({
     seedEvents: [
-      createEvent('invalid', 'invalid'),
-      createEvent('valid', '2026-08-02T05:00:00.000Z'),
+      createSemanticEvent('invalid', 'invalid'),
+      createSemanticEvent('valid', '2026-08-02T05:00:00.000Z'),
     ],
   });
 
@@ -231,23 +265,23 @@ test('invalid dateTime values follow the stable temporal fallback', async () => 
 });
 
 test('caller cannot mutate internal state through seed events or snapshots', async () => {
-  const seedEvent = createEvent('seed', '2026-08-02T05:00:00.000Z');
+  const seedEvent = createSemanticEvent('seed', '2026-08-02T05:00:00.000Z');
   const repository = new InMemoryTimelineRepository({
     seedEvents: [seedEvent],
   });
 
-  seedEvent.value = 'mutated before initialize';
+  seedEvent.concentrationMmolPerL = 9.9;
 
   await repository.initialize();
 
   const firstSnapshot = repository.getSnapshot();
-  firstSnapshot.events[0].value = 'mutated after snapshot';
+  firstSnapshot.events[0].concentrationMmolPerL = 9.1;
   firstSnapshot.events.push(
-    createEvent('external', '2026-08-02T06:00:00.000Z'),
+    createSemanticEvent('external', '2026-08-02T06:00:00.000Z'),
   );
 
   const secondSnapshot = repository.getSnapshot();
 
   assert.equal(secondSnapshot.events.length, 1);
-  assert.equal(secondSnapshot.events[0].value, 'seed');
+  assert.equal(secondSnapshot.events[0].concentrationMmolPerL, 6.4);
 });

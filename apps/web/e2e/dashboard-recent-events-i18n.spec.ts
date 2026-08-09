@@ -33,7 +33,7 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
     recentEvents.getByText('Метформин', { exact: true }),
   ).toBeVisible();
   await expect(
-    recentEvents.getByText('Завтрак', { exact: true }),
+    recentEvents.getByText('Breakfast', { exact: true }),
   ).toBeVisible();
   await expect(
     recentEvents.getByText('NovoRapid', { exact: true }),
@@ -56,7 +56,7 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await page.getByLabel('Доза').fill('5');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
-  await expect(recentEvents.getByText('5 ЕД', { exact: true })).toBeVisible();
+  await expect(recentEvents.getByText('5 U', { exact: true })).toBeVisible();
   await expect(recentEvents.locator('li')).toHaveCount(3);
 
   await page.getByRole('button', { name: 'Add event' }).click();
@@ -69,7 +69,7 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
   await expect(
-    recentEvents.getByText('10 г углеводов', { exact: true }),
+    recentEvents.getByText('10 g carbs', { exact: true }),
   ).toBeVisible();
 
   await page.getByRole('button', { name: 'Add event' }).click();
@@ -95,7 +95,7 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
   await expect(recentEvents.getByText('Ходьба', { exact: true })).toBeVisible();
-  await expect(recentEvents.getByText('45 мин', { exact: true })).toBeVisible();
+  await expect(recentEvents.getByText('45 min', { exact: true })).toBeVisible();
   await expect(recentEvents.locator('li')).toHaveCount(4);
 
   await page.getByRole('link', { name: 'All events', exact: true }).click();
@@ -103,7 +103,7 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await waitForApplicationReady(page);
 
   await page
-    .getByRole('button', { name: /Открыть событие: NovoRapid, 5 ЕД/ })
+    .getByRole('button', { name: /Open event: NovoRapid, 5 U/ })
     .click();
   await page.getByRole('button', { name: 'Изменить' }).click();
   await expect(
@@ -116,11 +116,11 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await page.getByRole('link', { name: 'На главную' }).click();
   await waitForApplicationReady(page);
 
-  await expect(recentEvents.getByText('6 ЕД', { exact: true })).toBeVisible();
+  await expect(recentEvents.getByText('6 U', { exact: true })).toBeVisible();
 
   await page.getByRole('link', { name: 'All events', exact: true }).click();
   await page
-    .getByRole('button', { name: /Открыть событие: NovoRapid, 6 ЕД/ })
+    .getByRole('button', { name: /Open event: NovoRapid, 6 U/ })
     .click();
   await page.getByRole('button', { name: 'Удалить' }).click();
   await page
@@ -131,13 +131,13 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await page.getByRole('link', { name: 'На главную' }).click();
   await waitForApplicationReady(page);
 
-  await expect(recentEvents.getByText('6 ЕД', { exact: true })).toHaveCount(0);
+  await expect(recentEvents.getByText('6 U', { exact: true })).toHaveCount(0);
   await expect(recentEvents.getByText('Ходьба', { exact: true })).toBeVisible();
   await expect(
     recentEvents.getByText('Jardiance', { exact: true }),
   ).toBeVisible();
   await expect(
-    recentEvents.getByText('10 г углеводов', { exact: true }),
+    recentEvents.getByText('10 g carbs', { exact: true }),
   ).toBeVisible();
   await expect(recentEvents.locator('li')).toHaveCount(3);
 });

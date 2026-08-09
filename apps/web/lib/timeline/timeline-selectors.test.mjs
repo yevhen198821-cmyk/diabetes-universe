@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { liftLegacyTestFixtures } from './testing/lift-legacy-test-fixtures.ts';
+import { createTestTimelinePresentationDependencies } from './presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import {
   getLatestGlucoseEvent,
   getRecentTimelineEvents,
@@ -10,9 +12,15 @@ import {
   getTodayTimelineEvents,
 } from './timeline-selectors.ts';
 
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
+
 const referenceDate = new Date('2026-08-02T12:00:00.000Z');
 
-const events = [
+const legacyEvents = [
   {
     dateTime: '2026-08-02T05:00:00.000Z',
     id: 'glucose-0800',
@@ -80,15 +88,21 @@ const events = [
   },
 ];
 
+const events = liftLegacyTestFixtures(legacyEvents);
+
 test('gets latest glucose event by dateTime', () => {
   assert.equal(getLatestGlucoseEvent(events)?.id, 'glucose-1015');
 });
 
 test('gets recent timeline events for dashboard-compatible categories', () => {
-  const recentEvents = getRecentTimelineEvents(events, {
-    limit: 3,
-    timeZone: 'UTC',
-  });
+  const recentEvents = getRecentTimelineEvents(
+    events,
+    presentationDependencies,
+    {
+      limit: 3,
+      timeZone: 'UTC',
+    },
+  );
 
   assert.deepEqual(
     recentEvents.map((event) => event.id),
@@ -125,7 +139,7 @@ test('counts medication events only for today', () => {
 });
 
 test('respects timezone offsets for local day membership', () => {
-  const boundaryEvents = [
+  const boundaryEvents = liftLegacyTestFixtures([
     {
       dateTime: '2026-08-02T01:30:00.000Z',
       id: 'tokyo-today',
@@ -140,7 +154,7 @@ test('respects timezone offsets for local day membership', () => {
       title: 'NovoRapid',
       value: '2 ЕД',
     },
-  ];
+  ]);
 
   assert.equal(
     getTodayInsulinTotal(

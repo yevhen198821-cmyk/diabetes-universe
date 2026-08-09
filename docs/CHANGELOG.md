@@ -1,5 +1,58 @@
 # Changelog
 
+## P3 Final Remediation — Documentation & Dead-Surface Cleanup
+
+Дата: 2026-08-09
+
+Завершено:
+
+- reconciled `docs/data/entities/timeline.md` current-state documentation with
+  post-P3h semantic repository architecture
+- updated stale `SemanticTimelineEvent` type comment in `packages/types`
+- removed inert `getMigrationRecord()` from routine `TimelineStoreValue` API
+- removed unused legacy `sortTimelineEvents(TimelineEvent[])` helper from
+  production timeline utilities
+- fixed targeted lint warnings from P3 Final Audit
+
+Не входит в этот этап:
+
+- P3 Feature Complete declaration
+- P4 durable persistence
+- runtime architecture changes beyond dead-surface removal
+
+Статус:
+
+P3 Final Remediation complete; PR remains Draft
+
+## P3h — Semantic Repository Cutover
+
+Дата: 2026-08-09
+
+Завершено:
+
+- `TimelineRepositoryEvent` cut over to native `SemanticTimelineEvent`
+- `InMemoryTimelineRepository` stores semantic records with `occurredAt` + `id`
+  ordering
+- `TimelineStoreProvider` reads semantic repository snapshots directly (no
+  routine `liftRepositorySnapshot()` re-lift)
+- removed temporary write projection bridge and `NativeSemanticEventSidecar`
+- production demo seed in `apps/web/lib/mocks/timeline.ts` is semantic-native;
+  preserved legacy demo fixture retained for migration regression only
+- routine store state no longer carries migration sidecar/quarantine state
+- `liftLegacyToSemantic()` / `liftRepositorySnapshot()` remain migration/import
+  utilities only
+- added production-runtime legacy isolation audit test
+
+Не входит в этот этап:
+
+- IndexedDB / SQLite / backend / API / auth / sync / outbox
+- P4 durable persistence
+- P3 Feature Complete declaration (awaiting Final Audit)
+
+Статус:
+
+P3h — Semantic Repository Cutover complete; PR remains Draft until Final Audit
+
 ## P2 Phase C — Timeline Repository Store Integration
 
 Дата: 2026-08-09

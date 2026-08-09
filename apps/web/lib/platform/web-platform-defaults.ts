@@ -53,12 +53,15 @@ export const WEB_PLATFORM_BOOTSTRAP_PRELOAD_NAMESPACE = asNamespace('common');
 export const WEB_PLATFORM_DASHBOARD_PRELOAD_NAMESPACE =
   asNamespace('dashboard');
 
+export const WEB_PLATFORM_TIMELINE_PRELOAD_NAMESPACE = asNamespace('timeline');
+
 /**
  * Application preload scope for production bootstrap.
  */
 export const WEB_PLATFORM_APPLICATION_PRELOAD_NAMESPACES = Object.freeze([
   WEB_PLATFORM_BOOTSTRAP_PRELOAD_NAMESPACE,
   WEB_PLATFORM_DASHBOARD_PRELOAD_NAMESPACE,
+  WEB_PLATFORM_TIMELINE_PRELOAD_NAMESPACE,
 ]);
 
 /**

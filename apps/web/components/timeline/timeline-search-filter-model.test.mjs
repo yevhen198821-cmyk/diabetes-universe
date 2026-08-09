@@ -1,12 +1,20 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
+import { createTestTimelinePresentationDependencies } from '../../lib/timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import {
   createTimelineSearchFilterModel,
   normalizeTimelineSearchQuery,
 } from './timeline-search-filter-model.ts';
 
-const events = [
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
+
+const legacyEvents = [
   {
     context: 'Перед завтраком',
     dateTime: '2026-08-02T05:00:00.000Z',
@@ -59,12 +67,21 @@ const events = [
   },
 ];
 
+const events = liftLegacyTestFixtures(legacyEvents);
+
 function filter(query, filter = 'all') {
-  return createTimelineSearchFilterModel(events, { filter, query });
+  return createTimelineSearchFilterModel(
+    events,
+    { filter, query },
+    presentationDependencies,
+  );
 }
 
-test('normalizes trim, case, and repeated spaces', () => {
-  assert.equal(normalizeTimelineSearchQuery('  После   ЕДЫ  '), 'после еды');
+test('normalizes trim, case, and repeated spaces for runtime locale', () => {
+  assert.equal(
+    normalizeTimelineSearchQuery('  After   MEAL  ', 'en-GB'),
+    'after meal',
+  );
 });
 
 test('empty query with all filter returns every event', () => {
@@ -88,7 +105,7 @@ test('search matches value and unit', () => {
     ['medication-1'],
   );
   assert.deepEqual(
-    filter('мг').filteredEvents.map((event) => event.id),
+    filter('mg').filteredEvents.map((event) => event.id),
     ['medication-1'],
   );
 });
@@ -104,13 +121,13 @@ test('search matches context and note', () => {
   );
 });
 
-test('search matches kind display label in Cyrillic', () => {
+test('search matches kind display label in runtime locale', () => {
   assert.deepEqual(
-    filter('инсулин').filteredEvents.map((event) => event.id),
-    ['insulin-1', 'nutrition-1'],
+    filter('insulin').filteredEvents.map((event) => event.id),
+    ['insulin-1'],
   );
   assert.deepEqual(
-    filter('заметка').filteredEvents.map((event) => event.id),
+    filter('note').filteredEvents.map((event) => event.id),
     ['note-1'],
   );
 });
@@ -172,7 +189,7 @@ test('combines search and filter criteria', () => {
 test('does not mutate input events', () => {
   const originalOrder = events.map((event) => event.id);
 
-  filter('глюкоза');
+  filter('glucose');
 
   assert.deepEqual(
     events.map((event) => event.id),

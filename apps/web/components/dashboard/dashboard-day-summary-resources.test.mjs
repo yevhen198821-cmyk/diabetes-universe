@@ -50,5 +50,6 @@ test('dashboard preload namespaces remain unchanged for day summary keys', async
   assert.deepEqual(WEB_PLATFORM_APPLICATION_PRELOAD_NAMESPACES, [
     'common',
     'dashboard',
+    'timeline',
   ]);
 });

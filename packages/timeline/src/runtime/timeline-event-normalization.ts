@@ -1,20 +1,22 @@
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
+
 import type { TimelineRepositoryEvent } from '../contracts/timeline-repository';
 
-function parseTimelineDateTime(dateTime: string): number {
-  return Date.parse(dateTime);
+function parseTimelineOccurredAt(occurredAt: string): number {
+  return Date.parse(occurredAt);
 }
 
-function compareTimelineDateTime(
-  leftDateTime: string,
-  rightDateTime: string,
+function compareTimelineOccurredAt(
+  leftOccurredAt: string,
+  rightOccurredAt: string,
 ): number {
-  const leftTime = parseTimelineDateTime(leftDateTime);
-  const rightTime = parseTimelineDateTime(rightDateTime);
+  const leftTime = parseTimelineOccurredAt(leftOccurredAt);
+  const rightTime = parseTimelineOccurredAt(rightOccurredAt);
   const leftInvalid = Number.isNaN(leftTime);
   const rightInvalid = Number.isNaN(rightTime);
 
   if (leftInvalid && rightInvalid) {
-    return leftDateTime.localeCompare(rightDateTime);
+    return leftOccurredAt.localeCompare(rightOccurredAt);
   }
 
   if (leftInvalid) {
@@ -28,10 +30,34 @@ function compareTimelineDateTime(
   return leftTime - rightTime;
 }
 
+function cloneSemanticTimelineEvent(
+  event: SemanticTimelineEvent,
+): SemanticTimelineEvent {
+  switch (event.kind) {
+    case 'activity':
+      return { ...event };
+    case 'glucose':
+      return { ...event };
+    case 'insulin':
+      return { ...event };
+    case 'medication':
+      return { ...event };
+    case 'note':
+      return { ...event };
+    case 'nutrition':
+      return {
+        ...event,
+        products: event.products
+          ? event.products.map((product) => ({ ...product }))
+          : undefined,
+      };
+  }
+}
+
 export function cloneTimelineRepositoryEvent(
   event: TimelineRepositoryEvent,
 ): TimelineRepositoryEvent {
-  return { ...event };
+  return cloneSemanticTimelineEvent(event);
 }
 
 export function cloneTimelineRepositoryEvents(
@@ -50,7 +76,10 @@ export function normalizeTimelineRepositoryEvents(
   }
 
   return [...byId.values()].sort((left, right) => {
-    const comparison = compareTimelineDateTime(left.dateTime, right.dateTime);
+    const comparison = compareTimelineOccurredAt(
+      left.occurredAt,
+      right.occurredAt,
+    );
 
     if (comparison !== 0) {
       return comparison;

@@ -1,105 +1,95 @@
-import type {
-  DaySummary,
-  LastGlucose,
-  TimelineEvent,
-} from '@diabetes-universe/types';
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
 export const DEMO_TIMELINE_REFERENCE_DATE = '2026-08-02T10:00:00.000Z';
 
-export const lastGlucose: LastGlucose = {
-  time: '08:00',
-  value: '6,4 ммоль/л',
-};
+const DEMO_EVENT_LIFECYCLE_AT = '2026-08-09T08:30:00.000Z';
 
-export const daySummary: DaySummary = {
-  timeInRange: '92%',
-};
+function createDemoSemanticEnvelope(
+  id: string,
+  occurredAt: string,
+): Pick<
+  SemanticTimelineEvent,
+  'createdAt' | 'id' | 'occurredAt' | 'schemaVersion' | 'source' | 'updatedAt'
+> {
+  return {
+    createdAt: DEMO_EVENT_LIFECYCLE_AT,
+    id,
+    occurredAt,
+    schemaVersion: 1,
+    source: 'demo',
+    updatedAt: DEMO_EVENT_LIFECYCLE_AT,
+  };
+}
 
-const historyNoteEvents: readonly TimelineEvent[] = Array.from(
+const historyNoteEvents: readonly SemanticTimelineEvent[] = Array.from(
   { length: 24 },
-  (_, index): TimelineEvent => {
+  (_, index): SemanticTimelineEvent => {
     const day = 29 - index;
     const date =
       day > 0
         ? `2026-07-${day.toString().padStart(2, '0')}`
         : `2026-06-${(30 + day).toString().padStart(2, '0')}`;
     const number = (index + 1).toString().padStart(2, '0');
+    const occurredAt = `${date}T09:00:00.000Z`;
 
     return {
-      dateTime: `${date}T09:00:00.000Z`,
-      id: `history-note-${number}`,
+      ...createDemoSemanticEnvelope(`history-note-${number}`, occurredAt),
+      body: `История наблюдения ${number}`,
       kind: 'note',
-      source: 'demo',
       title: `История дня ${number}`,
-      value: `История наблюдения ${number}`,
     };
   },
 );
 
-export const timelineEvents: readonly TimelineEvent[] = [
+export const timelineEvents: readonly SemanticTimelineEvent[] = [
   {
-    context: 'Перед завтраком',
-    dateTime: '2026-08-02T05:00:00.000Z',
-    id: 'glucose-0800',
+    ...createDemoSemanticEnvelope('glucose-0800', '2026-08-02T05:00:00.000Z'),
+    concentrationMmolPerL: 6.4,
+    context: 'before_meal',
     kind: 'glucose',
-    source: 'demo',
-    title: 'Глюкоза',
-    value: '6,4 ммоль/л',
   },
   {
+    ...createDemoSemanticEnvelope('insulin-0805', '2026-08-02T05:05:00.000Z'),
     context: 'Перед завтраком',
-    dateTime: '2026-08-02T05:05:00.000Z',
-    id: 'insulin-0805',
+    doseUnits: 4,
     kind: 'insulin',
-    source: 'demo',
-    title: 'NovoRapid',
-    value: '4 ЕД',
+    preparation: 'NovoRapid',
   },
   {
-    context: 'После инсулина',
-    dateTime: '2026-08-02T05:20:00.000Z',
-    id: 'nutrition-0820',
+    ...createDemoSemanticEnvelope('nutrition-0820', '2026-08-02T05:20:00.000Z'),
+    carbohydratesGrams: 42,
     kind: 'nutrition',
-    source: 'demo',
-    title: 'Завтрак',
-    value: '42 г углеводов',
+    mealType: 'breakfast',
+    mode: 'manual',
   },
   {
-    context: 'После завтрака',
-    dateTime: '2026-08-02T07:15:00.000Z',
-    id: 'glucose-1015',
+    ...createDemoSemanticEnvelope('glucose-1015', '2026-08-02T07:15:00.000Z'),
+    concentrationMmolPerL: 7.3,
+    context: 'after_meal',
     kind: 'glucose',
-    source: 'demo',
-    title: 'Глюкоза',
-    value: '7,3 ммоль/л',
   },
   {
+    ...createDemoSemanticEnvelope(
+      'medication-1130',
+      '2026-08-02T08:30:00.000Z',
+    ),
     context: 'После еды',
-    dateTime: '2026-08-02T08:30:00.000Z',
-    id: 'medication-1130',
+    dose: 400,
+    doseUnit: 'mass.mg',
     kind: 'medication',
-    source: 'demo',
-    title: 'Метформин',
-    unit: 'мг',
-    value: '400',
+    medicationName: 'Метформин',
   },
   {
-    context: 'После обеда',
-    dateTime: '2026-08-01T12:00:00.000Z',
-    id: 'activity-1500',
+    ...createDemoSemanticEnvelope('activity-1500', '2026-08-01T12:00:00.000Z'),
+    activityType: 'Прогулка',
+    durationSeconds: 1800,
     kind: 'activity',
-    source: 'demo',
-    title: 'Прогулка',
-    unit: 'минут',
-    value: '30',
   },
   {
-    dateTime: '2026-07-30T09:00:00.000Z',
-    id: 'note-1200',
+    ...createDemoSemanticEnvelope('note-1200', '2026-07-30T09:00:00.000Z'),
+    body: 'Чувствую усталость после обеда',
     kind: 'note',
-    source: 'demo',
     title: 'Самочувствие',
-    value: 'Чувствую усталость после обеда',
   },
   ...historyNoteEvents,
 ];

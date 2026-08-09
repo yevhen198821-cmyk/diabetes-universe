@@ -3,6 +3,14 @@ import test from 'node:test';
 
 import { createTimelinePaginationModel } from './timeline-pagination-model.ts';
 import { createTimelineSearchFilterModel } from './timeline-search-filter-model.ts';
+import { createTestTimelinePresentationDependencies } from '../../lib/timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
+import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
+
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
 
 function event(id, overrides = {}) {
   return {
@@ -20,6 +28,10 @@ function events(count) {
   return Array.from({ length: count }, (_, index) =>
     event(`event-${index + 1}`),
   );
+}
+
+function liftedEvents(count) {
+  return liftLegacyTestFixtures(events(count));
 }
 
 test('returns empty model for empty events', () => {
@@ -126,11 +138,17 @@ test('does not mutate input array', () => {
 
 test('paginates search results after filtering', () => {
   const filtered = createTimelineSearchFilterModel(
-    [...events(25), event('other-1', { title: 'Метформин', value: '400' })],
+    [
+      ...liftedEvents(25),
+      ...liftLegacyTestFixtures([
+        event('other-1', { title: 'Метформин', value: '400' }),
+      ]),
+    ],
     {
       filter: 'all',
       query: 'История',
     },
+    presentationDependencies,
   );
   const model = createTimelinePaginationModel({
     events: filtered.filteredEvents,
@@ -146,17 +164,20 @@ test('paginates search results after filtering', () => {
 test('paginates filter results after filtering', () => {
   const filtered = createTimelineSearchFilterModel(
     [
-      ...events(22),
-      event('glucose-1', {
-        kind: 'glucose',
-        title: 'Глюкоза',
-        value: '6,4 ммоль/л',
-      }),
+      ...liftedEvents(22),
+      ...liftLegacyTestFixtures([
+        event('glucose-1', {
+          kind: 'glucose',
+          title: 'Глюкоза',
+          value: '6,4 ммоль/л',
+        }),
+      ]),
     ],
     {
       filter: 'note',
       query: '',
     },
+    presentationDependencies,
   );
   const model = createTimelinePaginationModel({
     events: filtered.filteredEvents,

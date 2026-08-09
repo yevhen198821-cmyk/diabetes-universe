@@ -7,6 +7,10 @@ import {
   resolveDashboardNextActionPresentation,
 } from '../dashboard-next-action-integration.ts';
 import {
+  liftLegacyTestFixture,
+  liftLegacyTestFixtures,
+} from '../../timeline/testing/lift-legacy-test-fixtures.ts';
+import {
   NEXT_ACTION_DEFAULT_ACTION_LABEL_KEY,
   NEXT_ACTION_DEFAULT_DESCRIPTION_KEY,
   NEXT_ACTION_DEFAULT_MESSAGE_KEY,
@@ -32,13 +36,18 @@ import {
 const FIXED_NOW = new Date('2026-08-02T10:00:00.000Z');
 
 function createTestContext(overrides = {}) {
+  const { events: overrideEvents, ...rest } = overrides;
+  const events = Array.isArray(overrideEvents)
+    ? liftLegacyTestFixtures(overrideEvents)
+    : [];
+
   return createNextActionContext({
-    events: [],
+    events,
     now: FIXED_NOW,
     quickAddAvailability: {
       availableCategories: ['insulin'],
     },
-    ...overrides,
+    ...rest,
   });
 }
 
@@ -314,7 +323,7 @@ test('createNextActionContext does not mutate input events', () => {
   const inputEvents = [...events];
 
   const context = createNextActionContext({
-    events: inputEvents,
+    events: liftLegacyTestFixtures(inputEvents),
     now: FIXED_NOW,
     quickAddAvailability: {
       availableCategories: ['insulin'],
@@ -328,13 +337,15 @@ test('createNextActionContext does not mutate input events', () => {
     title: 'Glucose',
     value: '7.0',
   });
-  context.recentTimelineEvents.push({
-    dateTime: '2026-08-02T10:00:00.000Z',
-    id: 'glucose-3',
-    kind: 'glucose',
-    title: 'Glucose',
-    value: '7.5',
-  });
+  context.recentTimelineEvents.push(
+    liftLegacyTestFixture({
+      dateTime: '2026-08-02T10:00:00.000Z',
+      id: 'glucose-3',
+      kind: 'glucose',
+      title: 'Glucose',
+      value: '7.5',
+    }),
+  );
 
   assert.equal(events.length, 1);
   assert.equal(inputEvents.length, 2);

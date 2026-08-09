@@ -4,6 +4,8 @@ import { Droplets } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { useLocalization } from '../../lib/platform/react/use-localization';
+import { formatTimelineGlucoseDisplayValue } from '../../lib/timeline/presentation';
+import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
 import { resolveDashboardLastGlucoseLabels } from './dashboard-last-glucose-labels';
 import {
   createDashboardLastGlucoseViewModel,
@@ -14,13 +16,27 @@ const titleId = 'dashboard-last-glucose-title';
 
 export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
   const localization = useLocalization();
+  const presentationDependencies = useTimelinePresentationDependencies();
   const labels = useMemo(
     () => resolveDashboardLastGlucoseLabels(localization),
     [localization],
   );
+  const formattedValue = useMemo(() => {
+    if (props.state !== 'ready') {
+      return undefined;
+    }
+
+    return formatTimelineGlucoseDisplayValue(
+      props.glucose.event,
+      presentationDependencies,
+    );
+  }, [presentationDependencies, props]);
   const viewModel = useMemo(
-    () => createDashboardLastGlucoseViewModel(props, labels),
-    [labels, props],
+    () =>
+      createDashboardLastGlucoseViewModel(props, labels, {
+        formattedValue,
+      }),
+    [formattedValue, labels, props],
   );
   const isError = viewModel.state === 'error';
 

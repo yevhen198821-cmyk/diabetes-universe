@@ -1,16 +1,15 @@
-import type { TimelineEvent } from '@diabetes-universe/types';
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
-import { formatInsulinDose } from '../quick-add/format-insulin';
-import { formatNutritionCarbs } from '../quick-add/format-nutrition';
+import type { TimelinePresentationDependencies } from '../timeline/presentation';
 import { deriveDashboardRecentEventSources } from './dashboard-recent-events-derivation';
 import { getTimelineCalendarDateKey } from '../timeline/timeline-date-time';
 import {
   getLatestGlucoseEvent,
-  getRecentTimelineEvents,
   getTodayInsulinTotal,
   getTodayMedicationCount,
   getTodayNutritionTotal,
   getTodayTimelineEvents,
+  type TimelineRecentEvent,
 } from '../timeline/timeline-selectors';
 
 export interface DashboardDerivedAiInsight {
@@ -28,29 +27,19 @@ export interface DashboardDerivedDaySummary {
   readonly medicationDoses: number;
   readonly remindersCompleted: number;
   readonly remindersTotal: number;
-  readonly totalCarbohydrates: string;
-  readonly totalInsulin: string;
+  readonly totalCarbohydrateGrams: number;
+  readonly totalInsulinUnits: number;
 }
 
 export interface DashboardDerivedLastGlucose {
-  readonly dateTime: string;
   readonly displayTime: string;
-  readonly value: string;
+  readonly event: Extract<SemanticTimelineEvent, { kind: 'glucose' }>;
 }
 
-export interface DashboardDerivedRecentEvent {
-  readonly category: 'activity' | 'insulin' | 'medication' | 'nutrition';
-  readonly context: string;
-  readonly dateTime: string;
-  readonly displayTime: string;
-  readonly id: string;
-  readonly title: string;
-  readonly unit: string;
-  readonly value: string;
-}
+export type DashboardDerivedRecentEvent = TimelineRecentEvent;
 
 export interface DashboardTimelineState {
-  readonly events: readonly TimelineEvent[];
+  readonly events: readonly SemanticTimelineEvent[];
 }
 
 export interface DashboardQuickAddIntegrationOptions {
@@ -59,6 +48,7 @@ export interface DashboardQuickAddIntegrationOptions {
   readonly formatLastGlucoseDisplayTime?: (dateTime: string) => string;
   readonly formatRecentEventDisplayTime?: (dateTime: string) => string;
   readonly locale?: string;
+  readonly presentationDependencies: TimelinePresentationDependencies;
   readonly referenceTime?: Date;
   readonly remindersCompleted?: number;
   readonly remindersTotal?: number;
@@ -71,8 +61,6 @@ export interface DashboardQuickAddIntegrationResult {
   readonly lastGlucose: DashboardDerivedLastGlucose | null;
   readonly recentEvents: readonly DashboardDerivedRecentEvent[];
 }
-
-const DEFAULT_LOCALE = 'ru-RU';
 
 function createDashboardDayLabel(
   currentDate: Date,
@@ -105,7 +93,7 @@ function createDashboardDayLabel(
 }
 
 function deriveLastGlucose(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
   formatLastGlucoseDisplayTime?: (dateTime: string) => string,
 ): DashboardDerivedLastGlucose | null {
   const latestGlucose = getLatestGlucoseEvent(events);
@@ -115,7 +103,7 @@ function deriveLastGlucose(
   }
 
   const displayTime = formatLastGlucoseDisplayTime(
-    latestGlucose.dateTime,
+    latestGlucose.occurredAt,
   ).trim();
 
   if (displayTime.length === 0 || displayTime === '--:--') {
@@ -123,14 +111,13 @@ function deriveLastGlucose(
   }
 
   return {
-    dateTime: latestGlucose.dateTime,
     displayTime,
-    value: latestGlucose.value,
+    event: latestGlucose,
   };
 }
 
 function deriveDaySummary(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
   referenceTime: Date,
   timeZone: string | undefined,
   remindersCompleted: number,
@@ -178,29 +165,29 @@ function deriveDaySummary(
     medicationDoses,
     remindersCompleted,
     remindersTotal,
-    totalCarbohydrates: `${formatNutritionCarbs(totalCarbohydrateGrams)} г`,
-    totalInsulin: `${formatInsulinDose(totalInsulinUnits)} ЕД`,
+    totalCarbohydrateGrams,
+    totalInsulinUnits,
   };
 }
 
 export function deriveDashboardQuickAddBlocks(
   state: DashboardTimelineState,
-  options: DashboardQuickAddIntegrationOptions = {},
+  options: DashboardQuickAddIntegrationOptions,
 ): DashboardQuickAddIntegrationResult {
+  const { presentationDependencies } = options;
   const referenceTime = options.referenceTime ?? new Date();
-  const locale = options.locale ?? DEFAULT_LOCALE;
   const timeZone = options.timeZone?.trim() || undefined;
   const remindersCompleted = options.remindersCompleted ?? 0;
   const remindersTotal = options.remindersTotal ?? 0;
-
   const recentEvents = options.formatRecentEventDisplayTime
-    ? deriveDashboardRecentEventSources(state.events, {
-        formatDisplayTime: options.formatRecentEventDisplayTime,
-      })
-    : getRecentTimelineEvents(state.events, {
-        locale,
-        timeZone,
-      });
+    ? deriveDashboardRecentEventSources(
+        state.events,
+        presentationDependencies,
+        {
+          formatDisplayTime: options.formatRecentEventDisplayTime,
+        },
+      )
+    : [];
 
   return {
     aiInsight: options.aiInsight ?? null,

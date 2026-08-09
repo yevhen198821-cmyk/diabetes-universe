@@ -26,8 +26,8 @@ test('dashboard day summary renders English labels and syncs with timeline edits
   await expect(page.getByText('Сводка дня')).toHaveCount(0);
   await expect(daySummary.locator('time')).toBeVisible();
   await expect(metricValue(daySummary, 'Glucose measurements')).toHaveText('2');
-  await expect(daySummary.getByText('4 ЕД')).toBeVisible();
-  await expect(daySummary.getByText('42 г')).toBeVisible();
+  await expect(daySummary.getByText('4 U')).toBeVisible();
+  await expect(daySummary.getByText('42 g')).toBeVisible();
   await expect(metricValue(daySummary, 'Medication doses')).toHaveText('1');
   await expect(metricValue(daySummary, 'Reminders')).toHaveText('1 / 3');
 
@@ -49,7 +49,7 @@ test('dashboard day summary renders English labels and syncs with timeline edits
   await page.getByLabel('Доза').fill('2');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
-  await expect(daySummary.getByText('6 ЕД')).toBeVisible();
+  await expect(daySummary.getByText('6 U')).toBeVisible();
 
   await page.getByRole('button', { name: 'Add event' }).click();
   await page
@@ -60,7 +60,7 @@ test('dashboard day summary renders English labels and syncs with timeline edits
   await page.getByLabel('Углеводы').fill('10');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
-  await expect(daySummary.getByText('52 г')).toBeVisible();
+  await expect(daySummary.getByText('52 g')).toBeVisible();
 
   await page.getByRole('button', { name: 'Add event' }).click();
   await page
@@ -78,7 +78,7 @@ test('dashboard day summary renders English labels and syncs with timeline edits
   await waitForApplicationReady(page);
 
   await page
-    .getByRole('button', { name: /Открыть событие: Глюкоза, 7,7 ммоль\/л/ })
+    .getByRole('button', { name: /Open event: Glucose, 7\.7 mmol\/L/ })
     .click();
   await page.getByRole('button', { name: 'Изменить' }).click();
   await page.getByLabel('Значение').fill('8.2');
@@ -92,7 +92,7 @@ test('dashboard day summary renders English labels and syncs with timeline edits
 
   await page.getByRole('link', { name: 'All events' }).click();
   await page
-    .getByRole('button', { name: /Открыть событие: NovoRapid, 2 ЕД/ })
+    .getByRole('button', { name: /Open event: NovoRapid, 2 U/ })
     .click();
   await page.getByRole('button', { name: 'Удалить' }).click();
   await page
@@ -103,6 +103,6 @@ test('dashboard day summary renders English labels and syncs with timeline edits
   await page.getByRole('link', { name: 'На главную' }).click();
   await waitForApplicationReady(page);
 
-  await expect(daySummary.getByText('4 ЕД')).toBeVisible();
+  await expect(daySummary.getByText('4 U')).toBeVisible();
   await expect(metricValue(daySummary, 'Glucose measurements')).toHaveText('3');
 });

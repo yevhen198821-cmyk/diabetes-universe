@@ -1,25 +1,18 @@
-import type { TimelineEvent } from '@diabetes-universe/types';
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
-import { compareTimelineDateTime } from '../timeline/timeline-date-time';
+import {
+  mapTimelineEventCardPresentation,
+  type TimelinePresentationDependencies,
+} from '../timeline/presentation';
+import { compareSemanticTimelineEventsDescending } from '../timeline/semantic-timeline-ordering';
 import {
   DEFAULT_RECENT_TIMELINE_EVENTS_LIMIT,
   type TimelineRecentEvent,
 } from '../timeline/timeline-selectors';
 
-function parseLeadingNumber(value: string): number {
-  const match = value.trim().match(/^([\d.,]+)/);
-
-  if (!match) {
-    return 0;
-  }
-
-  const parsed = Number(match[1].replace(',', '.'));
-
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
 function mapDashboardRecentEventSource(
-  event: TimelineEvent,
+  event: SemanticTimelineEvent,
+  dependencies: TimelinePresentationDependencies,
   formatDisplayTime: (dateTime: string) => string,
 ): TimelineRecentEvent | null {
   switch (event.kind) {
@@ -32,60 +25,29 @@ function mapDashboardRecentEventSource(
       return null;
   }
 
-  const displayTime = formatDisplayTime(event.dateTime).trim();
+  const occurredAt = event.occurredAt;
+  const displayTime = formatDisplayTime(occurredAt).trim();
 
   if (displayTime.length === 0 || displayTime === '--:--') {
     return null;
   }
 
-  switch (event.kind) {
-    case 'activity':
-      return {
-        category: 'activity',
-        context: event.context ?? '',
-        dateTime: event.dateTime,
-        displayTime,
-        id: event.id,
-        title: event.title,
-        unit: event.unit ?? 'минут',
-        value: event.value,
-      };
-    case 'insulin':
-      return {
-        category: 'insulin',
-        context: event.context ?? '',
-        dateTime: event.dateTime,
-        displayTime,
-        id: event.id,
-        title: event.title,
-        unit: 'ЕД',
-        value: parseLeadingNumber(event.value).toString(),
-      };
-    case 'medication':
-      return {
-        category: 'medication',
-        context: event.context ?? '',
-        dateTime: event.dateTime,
-        displayTime,
-        id: event.id,
-        title: event.title,
-        unit: event.unit ?? '',
-        value: event.value,
-      };
-    case 'nutrition':
-      return {
-        category: 'nutrition',
-        context: event.context ?? '',
-        dateTime: event.dateTime,
-        displayTime,
-        id: event.id,
-        title: event.title,
-        unit: 'г углеводов',
-        value: parseLeadingNumber(event.value).toString(),
-      };
-    default:
-      return null;
-  }
+  const presentation = mapTimelineEventCardPresentation(
+    event,
+    dependencies,
+    displayTime,
+  );
+
+  return {
+    category: event.kind,
+    context: presentation.context ?? '',
+    dateTime: occurredAt,
+    displayTime,
+    id: event.id,
+    title: presentation.title,
+    unit: presentation.unit,
+    value: presentation.value,
+  };
 }
 
 /**
@@ -93,7 +55,8 @@ function mapDashboardRecentEventSource(
  * Mirrors `getRecentTimelineEvents` selection semantics with injected display-time formatting.
  */
 export function deriveDashboardRecentEventSources(
-  events: readonly TimelineEvent[],
+  events: readonly SemanticTimelineEvent[],
+  dependencies: TimelinePresentationDependencies,
   options: {
     readonly formatDisplayTime: (dateTime: string) => string;
     readonly limit?: number;
@@ -102,11 +65,13 @@ export function deriveDashboardRecentEventSources(
   const limit = options.limit ?? DEFAULT_RECENT_TIMELINE_EVENTS_LIMIT;
 
   return [...events]
-    .sort((left, right) =>
-      compareTimelineDateTime(right.dateTime, left.dateTime),
-    )
+    .sort(compareSemanticTimelineEventsDescending)
     .map((event) =>
-      mapDashboardRecentEventSource(event, options.formatDisplayTime),
+      mapDashboardRecentEventSource(
+        event,
+        dependencies,
+        options.formatDisplayTime,
+      ),
     )
     .filter((event): event is TimelineRecentEvent => event !== null)
     .slice(0, limit);

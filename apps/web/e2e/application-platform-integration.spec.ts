@@ -41,7 +41,7 @@ test('dashboard to timeline client navigation preserves timeline store state', a
 
   const daySummary = page.getByRole('region', { name: 'Day summary' });
 
-  await expect(daySummary.getByText('4 ЕД')).toBeVisible();
+  await expect(daySummary.getByText('4 U')).toBeVisible();
 
   await page.getByRole('button', { name: 'Add event' }).click();
   await page
@@ -52,10 +52,10 @@ test('dashboard to timeline client navigation preserves timeline store state', a
   await page.getByLabel('Доза').fill('3');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
-  await expect(daySummary.getByText('7 ЕД')).toBeVisible();
+  await expect(daySummary.getByText('7 U')).toBeVisible();
 
   await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
   await waitForApplicationReady(page);
-  await expect(page.getByText('3 ЕД').first()).toBeVisible();
+  await expect(page.getByText('3 U').first()).toBeVisible();
 });

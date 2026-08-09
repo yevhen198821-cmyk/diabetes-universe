@@ -2,9 +2,17 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { selectDashboardRecentEvents } from '../../components/dashboard/dashboard-recent-events-model.ts';
+import { liftLegacyTestFixtures } from '../timeline/testing/lift-legacy-test-fixtures.ts';
+import { createTestTimelinePresentationDependencies } from '../timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import { deriveDashboardRecentEventSources } from './dashboard-recent-events-derivation.ts';
 import { formatTimelineDisplayTime } from '../timeline/timeline-date-time.ts';
 import { getRecentTimelineEvents } from '../timeline/timeline-selectors.ts';
+
+let presentationDependencies;
+
+test.before(async () => {
+  presentationDependencies = await createTestTimelinePresentationDependencies();
+});
 
 const categoryLabels = {
   activity: 'Activity',
@@ -13,7 +21,7 @@ const categoryLabels = {
   nutrition: 'Nutrition',
 };
 
-const pipelineEvents = [
+const legacyPipelineEvents = [
   {
     dateTime: '2026-08-02T05:00:00.000Z',
     id: 'glucose-0800',
@@ -81,16 +89,26 @@ const pipelineEvents = [
   },
 ];
 
+const pipelineEvents = liftLegacyTestFixtures(legacyPipelineEvents);
+
 test('deriveDashboardRecentEventSources matches getRecentTimelineEvents selection baseline', () => {
-  const baseline = getRecentTimelineEvents(pipelineEvents, {
-    limit: 4,
-    timeZone: 'UTC',
-  });
-  const derived = deriveDashboardRecentEventSources(pipelineEvents, {
-    formatDisplayTime: (dateTime) =>
-      formatTimelineDisplayTime(dateTime, 'ru-RU', 'UTC'),
-    limit: 4,
-  });
+  const baseline = getRecentTimelineEvents(
+    pipelineEvents,
+    presentationDependencies,
+    {
+      limit: 4,
+      timeZone: 'UTC',
+    },
+  );
+  const derived = deriveDashboardRecentEventSources(
+    pipelineEvents,
+    presentationDependencies,
+    {
+      formatDisplayTime: (dateTime) =>
+        formatTimelineDisplayTime(dateTime, 'ru-RU', 'UTC'),
+      limit: 4,
+    },
+  );
 
   assert.deepEqual(
     derived.map((event) => event.id),
@@ -107,10 +125,14 @@ test('deriveDashboardRecentEventSources matches getRecentTimelineEvents selectio
 });
 
 test('deriveDashboardRecentEventSources preserves desc ordering and first limit', () => {
-  const derived = deriveDashboardRecentEventSources(pipelineEvents, {
-    formatDisplayTime: () => '10:00',
-    limit: 3,
-  });
+  const derived = deriveDashboardRecentEventSources(
+    pipelineEvents,
+    presentationDependencies,
+    {
+      formatDisplayTime: () => '10:00',
+      limit: 3,
+    },
+  );
 
   assert.deepEqual(
     derived.map((event) => event.id),
@@ -120,7 +142,7 @@ test('deriveDashboardRecentEventSources preserves desc ordering and first limit'
 
 test('deriveDashboardRecentEventSources excludes glucose and note kinds', () => {
   const derived = deriveDashboardRecentEventSources(
-    [
+    liftLegacyTestFixtures([
       {
         dateTime: '2026-08-02T08:05:00.000Z',
         id: 'insulin-0805',
@@ -149,7 +171,8 @@ test('deriveDashboardRecentEventSources excludes glucose and note kinds', () => 
         title: 'Note',
         value: 'Feeling fine',
       },
-    ],
+    ]),
+    presentationDependencies,
     {
       formatDisplayTime: () => '10:00',
     },
@@ -165,7 +188,7 @@ test('deriveDashboardRecentEventSources invokes formatter once per mappable even
   const formatCalls = [];
 
   const derived = deriveDashboardRecentEventSources(
-    [
+    liftLegacyTestFixtures([
       {
         dateTime: '2026-08-02T08:05:00.000Z',
         id: 'insulin-0805',
@@ -187,7 +210,8 @@ test('deriveDashboardRecentEventSources invokes formatter once per mappable even
         title: 'Breakfast',
         value: '42 г углеводов',
       },
-    ],
+    ]),
+    presentationDependencies,
     {
       formatDisplayTime: (dateTime) => {
         formatCalls.push(dateTime);
@@ -209,7 +233,7 @@ test('deriveDashboardRecentEventSources invokes formatter once per mappable even
 
 test('deriveDashboardRecentEventSources passes original dateTime through unchanged', () => {
   const derived = deriveDashboardRecentEventSources(
-    [
+    liftLegacyTestFixtures([
       {
         dateTime: '2026-08-02T08:05:00.000Z',
         id: 'insulin-0805',
@@ -217,7 +241,8 @@ test('deriveDashboardRecentEventSources passes original dateTime through unchang
         title: 'NovoRapid',
         value: '4 ЕД',
       },
-    ],
+    ]),
+    presentationDependencies,
     {
       formatDisplayTime: () => 'formatted-time',
     },
@@ -231,7 +256,7 @@ test('deriveDashboardRecentEventSources does not format excluded glucose or note
   const formatCalls = [];
 
   deriveDashboardRecentEventSources(
-    [
+    liftLegacyTestFixtures([
       {
         dateTime: '2026-08-02T07:15:00.000Z',
         id: 'glucose-1015',
@@ -246,7 +271,8 @@ test('deriveDashboardRecentEventSources does not format excluded glucose or note
         title: 'Note',
         value: 'Feeling fine',
       },
-    ],
+    ]),
+    presentationDependencies,
     {
       formatDisplayTime: (dateTime) => {
         formatCalls.push(dateTime);
@@ -259,10 +285,14 @@ test('deriveDashboardRecentEventSources does not format excluded glucose or note
 });
 
 test('getRecentTimelineEvents consumer behavior remains unchanged without dashboard formatter', () => {
-  const recentEvents = getRecentTimelineEvents(pipelineEvents, {
-    limit: 3,
-    timeZone: 'UTC',
-  });
+  const recentEvents = getRecentTimelineEvents(
+    pipelineEvents,
+    presentationDependencies,
+    {
+      limit: 3,
+      timeZone: 'UTC',
+    },
+  );
 
   assert.deepEqual(
     recentEvents.map((event) => event.id),
@@ -271,15 +301,23 @@ test('getRecentTimelineEvents consumer behavior remains unchanged without dashbo
 });
 
 test('dashboard pipeline keeps latest-per-category and final limit unchanged', () => {
-  const baselineSources = getRecentTimelineEvents(pipelineEvents, {
-    limit: 4,
-    timeZone: 'UTC',
-  });
-  const dashboardSources = deriveDashboardRecentEventSources(pipelineEvents, {
-    formatDisplayTime: (dateTime) =>
-      formatTimelineDisplayTime(dateTime, 'ru-RU', 'UTC'),
-    limit: 4,
-  });
+  const baselineSources = getRecentTimelineEvents(
+    pipelineEvents,
+    presentationDependencies,
+    {
+      limit: 4,
+      timeZone: 'UTC',
+    },
+  );
+  const dashboardSources = deriveDashboardRecentEventSources(
+    pipelineEvents,
+    presentationDependencies,
+    {
+      formatDisplayTime: (dateTime) =>
+        formatTimelineDisplayTime(dateTime, 'ru-RU', 'UTC'),
+      limit: 4,
+    },
+  );
 
   const baselineSelected = selectDashboardRecentEvents(
     baselineSources,

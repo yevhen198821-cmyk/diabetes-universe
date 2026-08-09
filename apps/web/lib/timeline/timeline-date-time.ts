@@ -1,6 +1,6 @@
-import type { TimelineEvent } from '@diabetes-universe/types';
+import { WEB_PLATFORM_DEFAULT_LOCALE } from '../platform/web-platform-defaults';
 
-export const DEFAULT_TIMELINE_LOCALE = 'ru-RU';
+export const DEFAULT_TIMELINE_LOCALE = WEB_PLATFORM_DEFAULT_LOCALE;
 
 export type TimelineDayGroupKey = 'earlier' | 'today' | 'yesterday';
 
@@ -143,20 +143,6 @@ export function compareTimelineDateTime(
   return leftTime - rightTime;
 }
 
-export function sortTimelineEvents(
-  events: readonly TimelineEvent[],
-): TimelineEvent[] {
-  return [...events].sort((left, right) => {
-    const comparison = compareTimelineDateTime(left.dateTime, right.dateTime);
-
-    if (comparison !== 0) {
-      return comparison;
-    }
-
-    return left.id.localeCompare(right.id);
-  });
-}
-
 export function formatTimelineDisplayTime(
   dateTime: string,
   locale: string = DEFAULT_TIMELINE_LOCALE,
@@ -240,19 +226,24 @@ export function formatTimelineDayGroupLabel(
   dateTime: string,
   locale: string = DEFAULT_TIMELINE_LOCALE,
   timeZone?: string,
+  groupLabels?: Readonly<{
+    readonly earlier: string;
+    readonly today: string;
+    readonly yesterday: string;
+  }>,
 ): string {
   if (groupKey === 'today') {
-    return 'Сегодня';
+    return groupLabels?.today ?? 'Today';
   }
 
   if (groupKey === 'yesterday') {
-    return 'Вчера';
+    return groupLabels?.yesterday ?? 'Yesterday';
   }
 
   const timestamp = parseTimelineDateTime(dateTime);
 
   if (Number.isNaN(timestamp)) {
-    return 'Ранее';
+    return groupLabels?.earlier ?? 'Earlier';
   }
 
   return new Intl.DateTimeFormat(locale, {
@@ -270,7 +261,7 @@ export function formatTimelineDisplayDate(
   const timestamp = parseTimelineDateTime(dateTime);
 
   if (Number.isNaN(timestamp)) {
-    return 'Ранее';
+    return 'Earlier';
   }
 
   return new Intl.DateTimeFormat(locale, {
@@ -285,11 +276,22 @@ export function formatTimelineDateGroupLabel(
   referenceDate: Date = new Date(),
   locale: string = DEFAULT_TIMELINE_LOCALE,
   timeZone?: string,
+  groupLabels?: Readonly<{
+    readonly earlier: string;
+    readonly today: string;
+    readonly yesterday: string;
+  }>,
 ): string {
   const groupKey = getTimelineDayGroupKey(dateTime, referenceDate, timeZone);
 
   if (groupKey === 'today' || groupKey === 'yesterday') {
-    return formatTimelineDayGroupLabel(groupKey, dateTime, locale, timeZone);
+    return formatTimelineDayGroupLabel(
+      groupKey,
+      dateTime,
+      locale,
+      timeZone,
+      groupLabels,
+    );
   }
 
   const timestamp = parseTimelineDateTime(dateTime);

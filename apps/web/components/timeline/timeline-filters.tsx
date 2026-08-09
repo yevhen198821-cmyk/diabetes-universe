@@ -1,16 +1,15 @@
 import type { TimelineEventFilter } from './timeline-search-filter-model';
-import {
-  timelineEventFilterLabels,
-  timelineEventFilterOptions,
-} from './timeline-search-filter-model';
+import { timelineEventFilterOptions } from './timeline-search-filter-model';
 
 interface TimelineFiltersProps {
   readonly activeFilter: TimelineEventFilter;
+  readonly filterLabels: Readonly<Record<TimelineEventFilter, string>>;
   readonly onChange: (filter: TimelineEventFilter) => void;
 }
 
 export function TimelineFilters({
   activeFilter,
+  filterLabels,
   onChange,
 }: TimelineFiltersProps) {
   return (
@@ -35,7 +34,7 @@ export function TimelineFilters({
               onClick={() => onChange(filter)}
               type="button"
             >
-              {timelineEventFilterLabels[filter]}
+              {filterLabels[filter]}
             </button>
           );
         })}
