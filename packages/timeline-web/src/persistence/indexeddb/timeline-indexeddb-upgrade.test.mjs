@@ -66,7 +66,10 @@ test('creates the complete v1 schema from a fresh database', () => {
     },
   ]);
   assert.equal(stores.get('timeline_metadata').keyPath, 'key');
-  assert.equal(stores.get('timeline_quarantine').keyPath, 'quarantineId');
+  assert.equal(
+    stores.get('timeline_quarantine').keyPath,
+    'quarantineId',
+  );
 });
 
 test('does not recreate schema when already at the current version', () => {
