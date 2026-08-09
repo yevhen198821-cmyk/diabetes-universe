@@ -4,11 +4,18 @@
 
 Draft
 
+## Audit Note
+
+This ADR remains Draft after architecture audit. Two blocking refinements are required before approval:
+
+1. **Platform-specific package boundary.** The IndexedDB adapter must not make the cross-platform `@diabetes-universe/timeline` package depend directly on the Web-only `idb` runtime. The approved direction is a dedicated Web adapter package (`@diabetes-universe/timeline-web`) that depends on `@diabetes-universe/timeline`, `@diabetes-universe/types`, and `idb`. `@diabetes-universe/timeline` remains platform-neutral and continues to own the repository contract and in-memory implementation.
+2. **First-run/bootstrap state machine.** Missing bootstrap metadata is not sufficient by itself to prove a true first run. If metadata is absent or corrupt while event/quarantine data exists, initialization must fail into an explicit inconsistent-bootstrap/recovery state and must not seed demo events. Demo seeding is allowed only when bootstrap metadata is absent and all P4 durable stores are structurally empty after database creation/upgrade.
+
+A non-blocking refinement is also required in P4a: `getSnapshot()` is transitional compatibility only and must not force the durable adapter to preload all history. Routine Web startup and product reads must move to bounded async reads before P4 completion.
+
 ## Context
 
-ADR-0014 approved a local-first persistence architecture and requires Web medical
-Timeline data to use an IndexedDB-class durable adapter behind the shared
-`TimelineRepository` boundary.
+ADR-0014 approved a local-first persistence architecture and requires Web medical Timeline data to use an IndexedDB-class durable adapter behind the shared `TimelineRepository` boundary.
 
 P3 is Feature Complete. The current repository contract is semantic-native:
 
@@ -22,31 +29,13 @@ TimelineRepository
 InMemoryTimelineRepository
 ```
 
-The current adapter is intentionally non-durable. P4 must add reload-surviving
-Web persistence without introducing backend, authentication, sync, mobile
-storage, or presentation coupling.
+The current adapter is intentionally non-durable. P4 must add reload-surviving Web persistence without introducing backend, authentication, sync, mobile storage, or presentation coupling.
 
-The P4 architecture design additionally requires:
-
-- persistent bootstrap metadata rather than empty-store detection;
-- bounded repository reads before P4 completion;
-- event `id` as durable primary identity;
-- compound chronological indexes;
-- durable quarantine for corrupt medical rows;
-- transaction commit as the successful-save boundary;
-- physical local deletion in P4;
-- no claim that local persistence is backup or recovery.
-
-This ADR chooses the concrete Web access layer, database schema, transaction
-boundaries, query/cursor direction, bootstrap metadata, quarantine representation,
-and adapter error model required before P4 runtime code starts.
+The P4 architecture design additionally requires persistent bootstrap metadata rather than empty-store detection, bounded repository reads before P4 completion, event `id` as durable primary identity, compound chronological indexes, durable quarantine for corrupt medical rows, transaction commit as the successful-save boundary, physical local deletion in P4, and no claim that local persistence is backup or recovery.
 
 ## Decision
 
-Diabetes Universe Web will implement durable Timeline persistence using the
-browser IndexedDB API through the `idb` package.
-
-The selected implementation direction is:
+Diabetes Universe Web will implement durable Timeline persistence using the browser IndexedDB API through the `idb` package, behind a Web-specific adapter package.
 
 ```text
 apps/web
@@ -55,6 +44,8 @@ TimelineStoreProvider
   ↓
 TimelineRepository
   ↓
+@diabetes-universe/timeline-web
+  ↓
 IndexedDbTimelineRepository
   ↓
 `idb`
@@ -62,65 +53,42 @@ IndexedDbTimelineRepository
 Browser IndexedDB
 ```
 
-`idb` is selected because it remains close to native IndexedDB semantics while
-providing Promise-based operations, typed database schemas, explicit upgrade
-callbacks, transaction completion through `tx.done`, and modern-browser support.
-It does not introduce a higher-level ORM/data-model abstraction that would
-become a second source of truth for Timeline semantics.
+`@diabetes-universe/timeline` remains platform-neutral and owns the repository contract, semantic repository types, migration utilities, and `InMemoryTimelineRepository`. The Web adapter package owns IndexedDB lifecycle, schema, record validation, quarantine persistence, bootstrap, bounded IndexedDB queries, and browser-specific error normalization.
 
-The implementation will target the current supported major line of `idb` at the
-time P4a begins. Dependency versions remain lockfile-pinned by the repository.
+`idb` is selected because it remains close to native IndexedDB semantics while providing Promise-based operations, typed database schemas, explicit upgrade callbacks, transaction completion through `tx.done`, and modern-browser support. It does not introduce a higher-level ORM/data-model abstraction that would become a second source of truth for Timeline semantics.
 
-For Node-based adapter tests, P4 will use `fake-indexeddb` as a development/test
-dependency. Browser E2E remains required because the fake implementation is a
-test double, not proof of browser persistence behavior.
-
-## Rejected Access-Layer Alternatives
-
-### Raw IndexedDB only
-
-Rejected for P4 because the event/request callback API adds substantial adapter
-boilerplate and error-prone transaction orchestration without giving Diabetes
-Universe a meaningful architectural advantage. The repository boundary already
-protects the product from library coupling.
-
-### Dexie
-
-Not selected for P4. Dexie is capable, but its richer abstraction/query model is
-more than this adapter requires. The product should keep canonical query and
-mutation semantics in `TimelineRepository`, rather than allowing a storage ORM
-to shape application architecture.
-
-### `idb-keyval`
-
-Rejected because Timeline requires compound indexes, bounded range queries,
-multiple object stores, schema upgrades, and transactions. A key/value-only
-abstraction is insufficient.
-
-### `localStorage`
-
-Rejected by ADR-0014 and remains prohibited for medical Timeline event bodies.
+The implementation will target the current supported major line of `idb` at the time P4a begins. Dependency versions remain lockfile-pinned by the repository. For Node-based adapter tests, P4 will use `fake-indexeddb` as a development/test dependency of `@diabetes-universe/timeline-web`. Browser E2E remains required because the fake implementation is a test double, not proof of browser persistence behavior.
 
 ## Package Ownership
-
-Durable Web persistence remains owned by `@diabetes-universe/timeline`.
 
 ```text
 @diabetes-universe/timeline
   ├── contracts/
   ├── runtime/in-memory-...
+  └── migration/...
+
+@diabetes-universe/timeline-web
   └── persistence/indexeddb/
 ```
 
-Allowed dependencies for the IndexedDB adapter:
+Allowed dependency direction:
 
-- `@diabetes-universe/types`
-- `idb`
+```text
+apps/web
+  → @diabetes-universe/timeline-web
+      → @diabetes-universe/timeline
+      → @diabetes-universe/types
+      → idb
 
-The package must not depend on React, Next.js, application components,
-localization, formatting, Dashboard, Quick Add, backend clients, or sync code.
+@diabetes-universe/timeline
+  → @diabetes-universe/types
+```
 
-`fake-indexeddb` is test-only.
+The Web adapter package must not depend on React, Next.js, application components, localization, formatting, Dashboard, Quick Add, backend clients, or sync code. `fake-indexeddb` is test-only.
+
+## Rejected Access-Layer Alternatives
+
+Raw IndexedDB-only access is rejected because callback/request orchestration adds error-prone boilerplate without architectural benefit behind the repository boundary. Dexie is not selected because its richer abstraction is unnecessary for this adapter and risks shaping application contracts. `idb-keyval` is insufficient because Timeline requires compound indexes, bounded range queries, multiple stores, upgrades, and transactions. `localStorage` remains prohibited for medical Timeline event bodies.
 
 ## Database Identity
 
@@ -132,32 +100,15 @@ IndexedDB version: 1
 Storage schema version: 1
 ```
 
-IndexedDB database version and application `storageSchemaVersion` are related but
-not interchangeable:
-
-- IndexedDB version controls physical object-store/index upgrades.
-- `storageSchemaVersion` identifies the row/envelope generation stored by the
-  adapter.
-- `SemanticTimelineEvent.schemaVersion` identifies the medical event schema.
-
-These versions must never be treated as the same value merely because all begin
-at `1`.
+IndexedDB version controls physical object-store/index upgrades. `storageSchemaVersion` identifies the adapter record generation. `SemanticTimelineEvent.schemaVersion` identifies the medical event schema. These are independent version domains.
 
 ## Object Stores
 
-P4 database version 1 contains three object stores.
+Database version 1 contains three object stores.
 
 ### `timeline_events`
 
-Primary durable medical-event store.
-
-Key path:
-
-```text
-id
-```
-
-Stored value:
+Key path: `id`.
 
 ```ts
 interface IndexedDbTimelineEventRecord {
@@ -170,38 +121,20 @@ interface IndexedDbTimelineEventRecord {
 }
 ```
 
-`id`, `occurredAt`, and `kind` are duplicated from `event` only as adapter index
-columns. `event` remains the canonical semantic content. Adapter validation must
-verify that duplicated columns equal the canonical event fields before returning
-records to application code.
+`id`, `occurredAt`, and `kind` are adapter index columns duplicated from `event`. The semantic event remains canonical. Reads must verify the duplicated columns match `event.id`, `event.occurredAt`, and `event.kind`.
 
-Indexes:
+Required indexes:
 
 ```text
-by_occurredAt_id
-  keyPath: [occurredAt, id]
-  unique: false
-
-by_kind_occurredAt_id
-  keyPath: [kind, occurredAt, id]
-  unique: false
+by_occurredAt_id          [occurredAt, id]
+by_kind_occurredAt_id     [kind, occurredAt, id]
 ```
 
-No persisted local-calendar-day key is approved in P4. Calendar-day semantics
-remain timezone-dependent and must be queried through occurrence ranges derived
-from the active presentation/user timezone.
+No persisted local-calendar-day key is approved in P4. Day queries derive an occurrence range from the active timezone.
 
 ### `timeline_metadata`
 
-Adapter metadata store.
-
-Key path:
-
-```text
-key
-```
-
-P4 defines one required bootstrap record:
+Key path: `key`.
 
 ```ts
 interface TimelineBootstrapMetadata {
@@ -212,24 +145,11 @@ interface TimelineBootstrapMetadata {
 }
 ```
 
-The presence of a valid bootstrap record means first-run bootstrap has completed.
-Event-store emptiness is never used as the first-run signal.
-
-This ensures that a user who intentionally deletes all Timeline events does not
-receive demo events again on the next reload.
+A valid bootstrap record means first-run bootstrap completed. Event-store emptiness alone is never the first-run signal.
 
 ### `timeline_quarantine`
 
-Durable isolation store for records that cannot safely be returned as semantic
-medical events.
-
-Key path:
-
-```text
-quarantineId
-```
-
-Stored value direction:
+Key path: `quarantineId`.
 
 ```ts
 interface IndexedDbTimelineQuarantineRecord {
@@ -242,7 +162,7 @@ interface IndexedDbTimelineQuarantineRecord {
 }
 ```
 
-Minimum P4 reasons:
+Minimum reasons:
 
 ```text
 invalid_record_shape
@@ -251,152 +171,72 @@ semantic_identity_mismatch
 invalid_event_schema
 ```
 
-Quarantine records are diagnostics/recovery material. They are not valid Timeline
-events and must not appear in Dashboard, Timeline list, search, totals, or Next
-Action inputs.
+Quarantine records are recovery/diagnostics material and never valid Timeline events.
 
 ## Database Upgrade Rules
 
-All physical IndexedDB schema changes occur in the `idb.openDB(..., { upgrade })`
-upgrade transaction.
-
-Rules:
-
-1. Upgrade functions are deterministic and version-gated.
-2. Object stores/indexes are created or changed only in explicit version steps.
-3. Upgrade failure prevents repository initialization from reaching `ready`.
-4. There is no silent database deletion/recreation on upgrade failure.
-5. Destructive reset is a separately approved recovery action, never an
-   automatic migration policy for medical data.
+All physical IndexedDB schema changes occur in the `openDB(..., { upgrade })` upgrade transaction. Upgrade functions are deterministic and version-gated. Upgrade failure prevents repository readiness. The adapter must never silently delete/recreate the database to recover from an upgrade failure.
 
 P4 version 1 creates all three stores and both event indexes atomically.
 
-## First-Run Bootstrap
+## First-Run Bootstrap State Machine
 
-First-run bootstrap is metadata-driven and atomic.
-
-Initialization sequence:
+First-run detection is metadata-driven **and integrity-aware**.
 
 ```text
 open / upgrade database
   ↓
-validate bootstrap metadata
+read bootstrap metadata + structural store counts
   ↓
-bootstrap record absent?
-  ├─ no  → normal startup
-  └─ yes → one readwrite transaction over timeline_events + timeline_metadata
-             ├─ insert semantic demo seed
-             └─ write bootstrap metadata
-  ↓
-transaction commit
-  ↓
-repository ready
+valid bootstrap record exists?
+  ├─ yes → normal startup (event store may legitimately be empty)
+  └─ no
+       ↓
+       are timeline_events AND timeline_quarantine empty?
+       ├─ yes → true first-run candidate
+       │        → one readwrite transaction:
+       │             seed semantic demo events
+       │             + write bootstrap metadata
+       │        → await commit
+       └─ no  → inconsistent bootstrap state
+                → fail initialization with normalized recovery-required error
+                → never reseed automatically
 ```
+
+A corrupt/unsupported bootstrap record is treated the same as missing metadata with existing durable evidence: initialization fails into recovery-required state rather than guessing.
 
 Required invariants:
 
-- Demo seed and bootstrap metadata commit in the same transaction.
-- If the transaction aborts, neither is considered completed.
-- Bootstrap must be idempotent across reload/crash/retry.
-- An empty event store with an existing valid bootstrap record remains empty.
-- A missing/corrupt bootstrap record is not repaired by blindly reseeding if
-  evidence suggests the database was previously initialized. Recovery policy for
-  inconsistent metadata must be explicit in adapter diagnostics/tests.
+- Seed and bootstrap metadata commit in one transaction.
+- Failed/aborted transaction leaves bootstrap incomplete.
+- Bootstrap is idempotent across reload/crash/retry.
+- Valid metadata + empty event store remains empty forever unless user adds data.
+- Missing/corrupt metadata + any existing event/quarantine evidence is **not** a first run.
+- No automatic destructive reset or blind reseed.
 
-P4 does not implement account/user-specific seeding because authentication and
-`ownerId` are out of scope.
+P4 does not implement account/user-specific seeding because authentication and `ownerId` are out of scope.
 
 ## Successful Save Boundary
 
-A mutation is successful only when the IndexedDB readwrite transaction commits.
-
-For `idb`, implementations must await both operation promises and `tx.done`.
-Updating React/application state before transaction completion is not the durable
-save contract.
-
-Example architectural sequence:
-
-```text
-repository.addEvent(event)
-  ↓
-open readwrite transaction
-  ↓
-validate + put record
-  ↓
-await operation
-  ↓
-await tx.done
-  ↓
-return { status: 'applied' }
-  ↓
-TimelineStoreProvider refreshes application projection
-```
-
-If the transaction aborts or `tx.done` rejects, the repository returns/throws the
-normalized repository failure and the application must not treat the mutation as
-saved.
+A mutation is successful only when the IndexedDB readwrite transaction commits. Implementations must await the write request and `tx.done`. React state must not report a durable save before transaction completion. On abort/rejection, the repository surfaces a normalized failure and the application preserves the last committed state.
 
 ## Mutation Semantics
 
-P4 preserves existing semantic repository behavior:
+P4 preserves existing repository semantics: duplicate-ID add replaces, missing update/delete returns `not-found`, mutation inputs/outputs are cloned, and `replaceEvents` remains transitional/test/hydration capability only.
 
-- add with a duplicate event ID replaces the record for that ID;
-- update missing ID returns `not-found`;
-- delete missing ID returns `not-found`;
-- replace is transitional/test/hydration capability, not a routine user flow;
-- mutation inputs are cloned/validated and storage outputs do not expose mutable
-  internal references.
-
-### Local deletion
-
-P4 `deleteEvent(id)` physically deletes the local record from `timeline_events`.
-
-This is intentional because sync, tombstones, revisions, and multi-device delete
-propagation are out of scope. P4 must not introduce fake tombstone semantics that
-would later conflict with the approved sync design.
-
-Before sync is implemented, product copy/documentation must not imply that local
-physical deletion represents server/account-wide medical-data erasure.
+P4 local delete physically removes the record. Sync tombstones, revisions, and multi-device delete propagation remain future scope.
 
 ## Record Validation and Corruption Policy
 
-Every record crossing from IndexedDB into `TimelineRepository` is validated as
-an adapter record and as a `SemanticTimelineEvent`.
+Every IndexedDB row crossing into the repository is validated for adapter shape, storage schema, identity duplication, semantic schema, event kind, required fields, and finite numeric values.
 
-At minimum validate:
+Corrupt data must never be silently interpreted or skipped. During initialization/integrity scan, invalid rows move to `timeline_quarantine` and are removed from `timeline_events` in one transaction. During a bounded query, an invalid row is quarantined durably before it is excluded from the returned result. If quarantine fails, initialization/read fails.
 
-- object/required-field shape;
-- `storageSchemaVersion` support;
-- `id === event.id`;
-- `occurredAt === event.occurredAt`;
-- `kind === event.kind`;
-- supported `event.schemaVersion`;
-- supported event kind;
-- kind-specific required semantic fields and finite numeric values.
-
-A corrupt record must never be silently interpreted as valid medical data.
-
-When corruption is discovered during initialization/integrity scan, the adapter
-must move the raw row into `timeline_quarantine` and remove it from
-`timeline_events` in one readwrite transaction. Repository readiness may continue
-only if quarantine succeeds and the remaining database is structurally usable.
-
-When corruption is discovered later during a bounded query, the adapter must:
-
-1. isolate the row through the quarantine transaction;
-2. expose the condition through diagnostics/error telemetry that contains no
-   PHI;
-3. exclude the quarantined record from the returned medical-event result;
-4. never silently skip without a durable quarantine record.
-
-P4 does not implement a user-facing quarantine repair UI. Recovery tooling is a
-future product/support capability.
+No PHI may be emitted to telemetry/logs as part of corruption handling.
 
 ## Bounded Repository Read Contract
 
-P4 extends the repository read surface before P4 is declared Feature Complete.
-The exact TypeScript may be refined during P4a, but the approved semantic shape
-is:
+P4 extends the repository read surface before Feature Complete:
 
 ```ts
 interface TimelineRepositoryQuery {
@@ -412,67 +252,28 @@ interface TimelineRepositoryQueryResult {
   readonly events: readonly SemanticTimelineEvent[];
   readonly nextCursor?: string;
 }
-
-interface TimelineRepository {
-  initialize(): Promise<void>;
-  getSnapshot(): TimelineRepositorySnapshot; // transitional/test compatibility
-  getById(eventId: string): Promise<SemanticTimelineEvent | null>;
-  queryEvents(query: TimelineRepositoryQuery): Promise<TimelineRepositoryQueryResult>;
-  addEvent(event: SemanticTimelineEvent): Promise<TimelineRepositoryMutationResult>;
-  updateEvent(event: SemanticTimelineEvent): Promise<TimelineRepositoryMutationResult>;
-  deleteEvent(eventId: string): Promise<TimelineRepositoryMutationResult>;
-  replaceEvents(events: readonly SemanticTimelineEvent[]): Promise<TimelineRepositoryMutationResult>;
-}
 ```
 
-### Query invariants
+The shared repository contract adds async `getById()` and `queryEvents()`. `limit` is mandatory and implementation-bounded. Cursors are opaque and query-compatible. General pagination uses `[occurredAt, id]`; single-kind reads use `[kind, occurredAt, id]`. Multi-kind filters must remain bounded and deterministic, either through a bounded merge of kind-index cursors or through the chronological index with bounded filtering; P4a must choose and test one strategy.
 
-- `limit` is required and bounded by an implementation maximum approved in P4a.
-- Cursor is opaque to consumers.
-- Cursor represents the last chronological compound key `(occurredAt, id)` plus
-  query direction/filter identity as needed to prevent incorrect reuse.
-- Timeline pagination uses chronological compound indexes, not full-array sort.
-- Latest glucose uses the `kind + occurredAt + id` index with descending limit 1.
-- Current-day Dashboard reads use an occurrence-time range derived from the
-  active timezone; no persisted `localDay` column.
-- Repository results preserve deterministic `occurredAt` + `id` ordering.
+### Transitional `getSnapshot()` rule
 
-By P4 completion, routine Timeline/Dashboard rendering must not require loading
-all historical events through `getSnapshot()`.
+`getSnapshot()` is legacy compatibility for the current in-memory/application-store transition only. **The durable IndexedDB adapter must not require preloading all historical records merely to implement this method.** P4a must either:
 
-`getSnapshot()` may remain temporarily for tests, bootstrap compatibility, or
-migration tooling, but it is not the long-term read path for large journals.
+- deprecate/remove `getSnapshot()` from the shared product read path and provide it only on explicit test/migration utilities; or
+- redefine it as an async bounded/debug compatibility operation that is never called during normal Web initialization.
+
+By P4c Web cutover, startup must not load all history merely to populate a synchronous snapshot. By P4d, routine Timeline and Dashboard rendering must exclusively use bounded repository/read-model operations.
 
 ## Cursor Encoding
 
-Cursor encoding is an adapter detail and must be opaque outside
-`@diabetes-universe/timeline`.
-
-P4 implementation may use a versioned base64url JSON cursor containing only
-non-PHI structural query state such as:
-
-```json
-{
-  "v": 1,
-  "occurredAt": "2026-08-09T10:00:00.000Z",
-  "id": "event-id",
-  "order": "occurredAt-desc"
-}
-```
-
-The cursor must not contain event payload values, medication names, notes, or
-other medical content.
-
-Malformed or query-incompatible cursors produce a normalized read error rather
-than falling back to an unbounded query.
+Cursor encoding is adapter-private. A versioned base64url JSON representation may contain only non-PHI structural query state such as cursor version, `(occurredAt, id)`, order, and filter identity. It must not contain event payload values, medication names, notes, or other medical content. Malformed or query-incompatible cursors fail with a normalized read error; no fallback to unbounded reads is permitted.
 
 ## Repository Error Model
 
-The adapter maps browser/IndexedDB failures to machine-readable repository codes.
-Raw `DOMException`, database names, record payloads, and PHI must not reach UI
-copy or telemetry.
+The adapter maps browser/IndexedDB failures to machine-readable repository codes and never exposes raw `DOMException`, database payloads, or PHI to UI/telemetry.
 
-P4 adds/uses normalized categories equivalent to:
+Required semantic categories include:
 
 ```text
 TIMELINE_REPOSITORY_INITIALIZE_FAILED
@@ -485,231 +286,93 @@ TIMELINE_REPOSITORY_STORAGE_QUOTA_EXCEEDED
 TIMELINE_REPOSITORY_SCHEMA_UPGRADE_FAILED
 TIMELINE_REPOSITORY_INVALID_CURSOR
 TIMELINE_REPOSITORY_QUARANTINE_FAILED
+TIMELINE_REPOSITORY_BOOTSTRAP_INCONSISTENT
 ```
 
-Mapping rules:
+The exact enum spelling may be finalized in P4a without changing these semantics.
 
-- quota exhaustion → `STORAGE_QUOTA_EXCEEDED`;
-- blocked open/upgrade → `STORAGE_OPEN_BLOCKED`;
-- unsupported/failed physical schema upgrade → `SCHEMA_UPGRADE_FAILED`;
-- invalid cursor → `INVALID_CURSOR`;
-- failed quarantine transaction → `QUARANTINE_FAILED`;
-- other read/write failures retain the generic P2 read/write categories.
+## IndexedDB Connection Lifecycle
 
-The exact enum spelling may be finalized in P4a provided semantics do not change.
-
-## Blocked / Blocking / Terminated Connections
-
-The adapter must explicitly handle IndexedDB lifecycle callbacks exposed by
-`idb`:
-
-- `blocked`: initialization remains unresolved/fails with normalized blocked
-  state rather than pretending the repository is ready;
-- `blocking`: close the stale connection so another tab/version can upgrade;
-- `terminated`: mark the adapter unusable and require repository reinitialize or
-  application recovery rather than continuing with a dead connection.
-
-Cross-tab live synchronization is not introduced in P4. These callbacks exist to
-protect schema reliability, not to implement multi-tab event replication.
+The adapter explicitly handles `blocked`, `blocking`, and `terminated` lifecycle conditions. A blocked open/upgrade must never transition the repository to ready. A blocking stale connection closes so another tab/version can upgrade. A terminated connection marks the adapter unusable until reinitialization/recovery. Cross-tab live synchronization is out of scope.
 
 ## Storage Quota
 
-Quota errors are first-class write failures.
-
-P4 requirements:
-
-- never delete old medical records automatically to make room;
-- never fall back to in-memory success after quota failure;
-- preserve the last committed database state;
-- expose a safe application error state/copy through the existing presentation
-  layer;
-- no PHI in diagnostic logs.
-
-Requesting browser persistent-storage permission (`navigator.storage.persist()`)
-is not required for the first P4 adapter slice and must not be treated as a
-guarantee of backup or non-eviction. A later Web storage policy may evaluate it
-separately.
+Quota exhaustion is a first-class write failure. P4 never deletes older medical records automatically, never falls back to in-memory success, and preserves the last committed database state. Browser persistent-storage permission may be evaluated later and is not a backup guarantee.
 
 ## Backup and Recovery Boundary
 
-IndexedDB persistence improves reload/session continuity. It is **not** backup.
-
-P4 provides no guarantee against:
-
-- browser/site-data deletion;
-- storage eviction;
-- device loss;
-- profile reset;
-- disk failure;
-- browser corruption.
-
-Cloud backup/recovery requires backend/auth/sync architecture and remains out of
-scope. Product language must not describe P4 as secure cloud backup or account
-recovery.
+IndexedDB persistence improves same-profile continuity; it is not backup. P4 does not guarantee recovery from site-data clearing, eviction, device loss, profile reset, disk failure, or browser corruption. Cloud backup/recovery requires backend/auth/sync.
 
 ## Testing Strategy
 
-### Unit / adapter tests
+Node adapter tests use `fake-indexeddb` with isolated factories. Browser E2E must prove real reload persistence.
 
-Use `fake-indexeddb` with isolated `IDBFactory` instances.
+Required coverage includes schema/store/index creation; first-run atomic bootstrap; valid-bootstrap empty-store no-reseed; **missing/corrupt metadata with existing event/quarantine rows fails without reseed**; reopen persistence; duplicate-ID behavior; update/delete not-found; `(occurredAt,id)` ordering; bounded asc/desc reads; single-kind and multi-kind filters; cursor continuation and incompatibility; corruption quarantine; quarantine failure; transaction abort; quota normalization where simulatable; connection lifecycle behavior; immutable values; and the existing P3 semantic regression suite.
 
-Required coverage:
-
-- database v1 schema creation;
-- object stores and indexes;
-- empty initialization;
-- atomic first-run seed + metadata;
-- no reseed after user deletes every event;
-- add/update/delete/replace semantics;
-- transaction completion before `applied`;
-- deterministic bounded ascending/descending queries;
-- kind-filtered query and latest-glucose pattern;
-- cursor continuation and invalid cursor;
-- duplicate chronological timestamps resolved by `id`;
-- quota/error normalization through injected/test failures where feasible;
-- corrupt record quarantine;
-- quarantine transaction failure;
-- unsupported storage schema;
-- immutability;
-- reopen same database instance and recover persisted events.
-
-### Browser integration / E2E
-
-At least one real Chromium Playwright journey must prove:
+Minimum browser journeys:
 
 ```text
-open app
-  → add semantic event
-  → reload page
-  → event still present
+add event → reload → event remains
+delete event → reload → event remains deleted
+delete all events → reload → demo seed does not return
 ```
 
-Also verify:
+## P4 Waves
 
-- delete persists across reload;
-- first-run demo seed does not reappear after all events are deleted;
-- existing Dashboard ↔ Timeline coherence remains;
-- current 29 E2E journeys remain green or are intentionally updated for durable
-  persistence semantics.
+### P4a — Web Storage Contract & Schema Foundation
 
-Cross-browser persistence coverage for Firefox/WebKit is desirable but is not a
-P4 release gate unless separately approved.
+- create `@diabetes-universe/timeline-web`;
+- add `idb` and test-only `fake-indexeddb` there;
+- extend bounded shared repository contracts;
+- resolve/remove routine synchronous `getSnapshot()` dependency;
+- define IndexedDB schema types, open/upgrade lifecycle, bootstrap metadata, validators, quarantine/error contracts;
+- implement schema/transaction/query-contract unit tests;
+- no default Web repository cutover yet.
 
-## Implementation Waves
+### P4b — IndexedDB Repository Adapter
 
-### P4a — Contract and storage foundation
+- durable semantic CRUD;
+- integrity-aware first-run bootstrap;
+- compound indexes;
+- bounded query/cursor implementation;
+- durable quarantine;
+- adapter test suite;
+- `InMemoryTimelineRepository` remains available for tests/explicit injection.
 
-- add `idb` runtime dependency and `fake-indexeddb` dev dependency;
-- add bounded query contracts/cursor types;
-- define typed IDB schema;
-- implement database open/upgrade lifecycle;
-- implement adapter validation/error normalization primitives;
-- unit-test schema and transactions;
-- no default Web adapter cutover yet.
+### P4c — Web Cutover & Reload Durability
 
-### P4b — Durable repository adapter
+- apps/web composition selects `IndexedDbTimelineRepository` by default;
+- no silent in-memory fallback;
+- startup uses bounded read/bootstrap flow rather than full-history preload;
+- reload/delete/no-reseed browser coverage;
+- existing product journeys remain green.
 
-- implement `IndexedDbTimelineRepository`;
-- mutations, bounded reads, cursor pagination;
-- first-run bootstrap metadata;
-- quarantine behavior;
-- full adapter tests;
-- in-memory adapter remains available for tests/explicit injection.
+### P4d — Bounded Product Reads
 
-### P4c — Web default cutover and reload durability
+- Timeline pagination backed by bounded repository queries;
+- Dashboard latest-glucose/recent/day-range reads backed by bounded query/read models;
+- routine product rendering no longer requires full historical arrays;
+- scale/regression audit before P4 Feature Complete.
 
-- change Web repository factory/default injection to IndexedDB adapter;
-- retain component/store facade;
-- add reload/delete/bootstrap E2E;
-- no silent in-memory fallback on durable init failure.
+## Completion Gate
 
-### P4d — Bounded consumer reads
-
-- Timeline pagination/query path moves off full-history snapshot reads;
-- Dashboard latest glucose/recent/today reads use bounded repository queries or
-  approved read-model service;
-- preserve semantic derivation and presentation boundaries;
-- prove routine rendering does not require loading 10k–100k history into React
-  state;
-- final P4 architecture/regression audit.
-
-P4 is not Feature Complete until P4d is complete and validation is green.
-
-## Security and Privacy
-
-P4 stores sensitive medical data locally in browser-managed IndexedDB.
-
-The adapter must:
-
-- never put PHI in keys other than stable event ID and structural index values;
-- never put medical payloads into URLs;
-- never log event payloads or raw quarantine records to telemetry;
-- keep UI independent of IndexedDB APIs;
-- treat local database access as device/profile-local access, not authentication;
-- avoid claims of cryptographic at-rest protection that browsers do not provide
-  to application JavaScript by default.
-
-Application-level encryption/key management is not selected by this ADR. It
-requires a separate security architecture because storing the decryption key in
-the same unauthenticated Web origin can create false security.
+P4 cannot be Feature Complete merely because events survive reload. Completion requires durable semantic Web repository, committed transaction save boundary, stable bootstrap state machine, durable quarantine, bounded routine reads, no silent in-memory fallback, reload/delete/no-reseed regression coverage, green validation, and documentation aligned with runtime reality.
 
 ## Explicit Non-Scope
 
-P4 does not implement:
-
-- SQLite / iOS / Android storage adapters;
-- backend persistence or API;
-- authentication or authorization;
-- `ownerId`;
-- sync/outbox/retry/conflict resolution;
-- revision vectors;
-- tombstones for sync;
-- device integrations;
-- cross-tab live synchronization;
-- cloud backup/recovery;
-- export/import backup UX;
-- encryption/key-management vendor or protocol;
-- Analytics, Reports, AI, caregiver, or HCP functionality.
-
-## Consequences
-
-Positive:
-
-- Web writes become durable before UI reports success;
-- reload continuity without changing semantic domain ownership;
-- first-run behavior remains correct even after an intentionally empty journal;
-- bounded indexes/query contract create a path to 10k–100k event histories;
-- corrupt medical rows are isolated rather than silently trusted or discarded;
-- P4 does not pre-implement sync semantics that would later need replacement.
-
-Costs:
-
-- IndexedDB lifecycle and schema upgrades add complexity;
-- `TimelineRepository` read surface expands;
-- tests require both fake IndexedDB and browser E2E coverage;
-- local persistence remains vulnerable to browser/device data loss until backend
-  backup/sync exists.
+SQLite/native mobile storage; backend/API; authentication/authorization; `ownerId`; sync/outbox/retry/conflict resolution; tombstones; device integrations; cross-tab live synchronization; cloud backup/recovery; export/import backup UX; encryption/key management; Analytics/Reports/AI changes; caregiver/HCP access.
 
 ## Approval Gate
 
-This ADR is a **Draft**. No runtime persistence implementation is authorized by
-this document until it is reviewed and changed to **Approved**.
-
-Approval authorizes P4a only. Later waves still require normal code review and
-validation, but they do not require a new architecture decision unless they
-change the decisions recorded here.
+This ADR remains **Draft** until the P4 architecture audit confirms the package boundary and bootstrap/read-contract refinements above. After approval, P4a runtime work may begin. No IndexedDB runtime code may land before that status transition.
 
 ## Dependencies
 
-- [ADR-0014 — Local-First Medical Event Persistence Architecture](./0014-local-first-medical-event-persistence-architecture.md)
-- [P4 Durable Local Persistence Architecture Design](../architecture/timeline/p4-durable-local-persistence.md)
-- [Timeline Entity](../data/entities/timeline.md)
-- [Timeline Shared State](../architecture/timeline/shared-state.md)
+- ADR-0014 — Local-First Medical Event Persistence Architecture
+- P4 Durable Local Persistence Architecture Design
+- Timeline Entity
+- Timeline Shared State
 
 ## Date
 
 2026-08-09
-
-## Author
-
-OpenAI — Architecture Draft
