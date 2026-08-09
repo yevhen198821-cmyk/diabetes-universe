@@ -1,5 +1,29 @@
 # Changelog
 
+## P3 Final Remediation — Documentation & Dead-Surface Cleanup
+
+Дата: 2026-08-09
+
+Завершено:
+
+- reconciled `docs/data/entities/timeline.md` current-state documentation with
+  post-P3h semantic repository architecture
+- updated stale `SemanticTimelineEvent` type comment in `packages/types`
+- removed inert `getMigrationRecord()` from routine `TimelineStoreValue` API
+- removed unused legacy `sortTimelineEvents(TimelineEvent[])` helper from
+  production timeline utilities
+- fixed targeted lint warnings from P3 Final Audit
+
+Не входит в этот этап:
+
+- P3 Feature Complete declaration
+- P4 durable persistence
+- runtime architecture changes beyond dead-surface removal
+
+Статус:
+
+P3 Final Remediation complete; PR remains Draft
+
 ## P3h — Semantic Repository Cutover
 
 Дата: 2026-08-09

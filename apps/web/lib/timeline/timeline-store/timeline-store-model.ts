@@ -1,5 +1,4 @@
 import type {
-  MigrationRecord,
   SemanticTimelineEvent,
   TimelineDiagnosticsSnapshot,
 } from '@diabetes-universe/types';
@@ -79,10 +78,4 @@ export function createTimelineDiagnosticsFromState(
     quarantinedRecords: [],
     unsupportedSchemaCount: 0,
   };
-}
-
-export function getMigrationRecord(
-  _eventId: string,
-): MigrationRecord | undefined {
-  return undefined;
 }

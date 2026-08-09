@@ -1,5 +1,3 @@
-import type { TimelineEvent } from '@diabetes-universe/types';
-
 import { WEB_PLATFORM_DEFAULT_LOCALE } from '../platform/web-platform-defaults';
 
 export const DEFAULT_TIMELINE_LOCALE = WEB_PLATFORM_DEFAULT_LOCALE;
@@ -143,20 +141,6 @@ export function compareTimelineDateTime(
   }
 
   return leftTime - rightTime;
-}
-
-export function sortTimelineEvents(
-  events: readonly TimelineEvent[],
-): TimelineEvent[] {
-  return [...events].sort((left, right) => {
-    const comparison = compareTimelineDateTime(left.dateTime, right.dateTime);
-
-    if (comparison !== 0) {
-      return comparison;
-    }
-
-    return left.id.localeCompare(right.id);
-  });
 }
 
 export function formatTimelineDisplayTime(

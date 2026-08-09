@@ -85,10 +85,6 @@ test('native semantic add does not create migration evidence', async () => {
     });
 
     assert.equal(mounted.currentStore.events.length, 1);
-    assert.equal(
-      mounted.currentStore.getMigrationRecord(semanticEvent.id),
-      undefined,
-    );
     assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
     assert.equal(mounted.currentStore.diagnostics.quarantinedCount, 0);
 

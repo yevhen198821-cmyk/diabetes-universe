@@ -23,7 +23,6 @@ import { timelineEvents as demoTimelineEvents } from '../../mocks/timeline';
 import { cloneSemanticTimelineEvents } from '../semantic-timeline-clone';
 import {
   createTimelineDiagnosticsFromState,
-  getMigrationRecord,
   initialTimelineStoreState,
   timelineStoreReducer,
   type TimelineStoreErrorCode,
@@ -36,7 +35,6 @@ export interface TimelineStoreValue {
   readonly diagnostics: ReturnType<typeof createTimelineDiagnosticsFromState>;
   readonly error?: string;
   readonly events: readonly SemanticTimelineEvent[];
-  readonly getMigrationRecord: typeof getMigrationRecord;
   readonly replaceEvents: (events: readonly SemanticTimelineEvent[]) => void;
   readonly status: TimelineStoreStatus;
   readonly updateEvent: (event: SemanticTimelineEvent) => void;
@@ -181,7 +179,6 @@ export function TimelineStoreProvider({
       diagnostics,
       error: state.error,
       events: state.events,
-      getMigrationRecord,
       replaceEvents,
       status: state.status,
       updateEvent,

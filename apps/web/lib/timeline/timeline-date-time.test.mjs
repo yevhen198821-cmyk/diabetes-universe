@@ -10,7 +10,6 @@ import {
   formatTimelineDayGroupLabel,
   formatTimelineDisplayTime,
   getTimelineDayGroupKey,
-  sortTimelineEvents,
 } from './timeline-date-time.ts';
 
 const referenceDate = new Date('2026-08-02T10:00:00.000Z');
@@ -32,37 +31,6 @@ test('throws for invalid selected time values', () => {
   assert.throws(
     () => createIsoDateTimeFromLocalTime('25:00', referenceDate),
     /Invalid timeline time value/,
-  );
-});
-
-test('sorts timeline events by dateTime and id', () => {
-  const sorted = sortTimelineEvents([
-    {
-      dateTime: '2026-08-02T07:15:00.000Z',
-      id: 'glucose-b',
-      kind: 'glucose',
-      title: 'Глюкоза',
-      value: '7,3',
-    },
-    {
-      dateTime: '2026-08-02T05:00:00.000Z',
-      id: 'glucose-a',
-      kind: 'glucose',
-      title: 'Глюкоза',
-      value: '6,4',
-    },
-    {
-      dateTime: '2026-08-02T05:00:00.000Z',
-      id: 'glucose-z',
-      kind: 'glucose',
-      title: 'Глюкоза',
-      value: '6,1',
-    },
-  ]);
-
-  assert.deepEqual(
-    sorted.map((event) => event.id),
-    ['glucose-a', 'glucose-z', 'glucose-b'],
   );
 });
 

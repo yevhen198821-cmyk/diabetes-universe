@@ -17,10 +17,7 @@ import {
   setupIntegrationDom,
   teardownIntegrationDom,
 } from '../../platform/integration/tests/integration-dom-setup.mjs';
-import {
-  semanticGlucoseEarly,
-  semanticInsulinLater,
-} from './testing/timeline-store-test-fixtures.mjs';
+import { semanticInsulinLater } from './testing/timeline-store-test-fixtures.mjs';
 import { getTestTimelinePresentationDependencies } from './testing/timeline-store-test-fixtures.mjs';
 import { TimelineStoreProvider, useTimelineStore } from './timeline-store.tsx';
 
@@ -283,10 +280,6 @@ test('edit flow keeps zero migration diagnostics for semantic repository events'
 
     assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
     assert.equal(mounted.currentStore.diagnostics.quarantinedCount, 0);
-    assert.equal(
-      mounted.currentStore.getMigrationRecord('insulin-0805'),
-      undefined,
-    );
     assert.equal(mounted.currentStore.events[0]?.doseUnits, 6);
     assert.equal(repository.getSnapshot().events[0]?.doseUnits, 6);
   } finally {

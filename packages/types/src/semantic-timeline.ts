@@ -143,9 +143,10 @@ export interface NoteTimelineEvent extends SemanticEventEnvelope {
 /**
  * Canonical semantic timeline event model for application and domain logic.
  *
- * Legacy `TimelineEvent` remains the P2 repository compatibility contract until
- * the semantic repository cutover (P3h). Presentation strings must not be treated
- * as canonical medical data once an event is represented by this model.
+ * `TimelineRepository` stores `SemanticTimelineEvent` natively. Legacy
+ * `TimelineEvent` is retained in `@diabetes-universe/types` for migration and
+ * import compatibility only. Presentation strings must not be treated as
+ * canonical medical data once an event is represented by this model.
  */
 export type SemanticTimelineEvent =
   | GlucoseTimelineEvent

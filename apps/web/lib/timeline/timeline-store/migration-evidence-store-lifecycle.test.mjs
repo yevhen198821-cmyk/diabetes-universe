@@ -112,14 +112,6 @@ test('routine store initialize does not record migration evidence', async () => 
   try {
     await waitFor(() => mounted.currentStore.status === 'ready', 'ready state');
 
-    assert.equal(
-      mounted.currentStore.getMigrationRecord('glucose-0800'),
-      undefined,
-    );
-    assert.equal(
-      mounted.currentStore.getMigrationRecord('insulin-0805'),
-      undefined,
-    );
     assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
     assert.equal(mounted.currentStore.diagnostics.quarantinedCount, 0);
   } finally {
@@ -154,10 +146,6 @@ test('routine store update does not create migration evidence', async () => {
       'semantic glucose refresh',
     );
 
-    assert.equal(
-      mounted.currentStore.getMigrationRecord('glucose-0800'),
-      undefined,
-    );
     assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
   } finally {
     await mounted.unmount();
@@ -182,10 +170,6 @@ test('routine store native semantic add does not create migration evidence', asy
       'added glucose event',
     );
 
-    assert.equal(
-      mounted.currentStore.getMigrationRecord('glucose-c'),
-      undefined,
-    );
     assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
   } finally {
     await mounted.unmount();
@@ -212,10 +196,6 @@ test('routine store delete does not leave migration evidence', async () => {
       'deleted glucose event',
     );
 
-    assert.equal(
-      mounted.currentStore.getMigrationRecord('glucose-0800'),
-      undefined,
-    );
     assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
   } finally {
     await mounted.unmount();
@@ -245,10 +225,6 @@ test('routine store edit flow does not create migration evidence', async () => {
       'semantic glucose refresh',
     );
 
-    assert.equal(
-      mounted.currentStore.getMigrationRecord('glucose-0800'),
-      undefined,
-    );
     assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
   } finally {
     await mounted.unmount();

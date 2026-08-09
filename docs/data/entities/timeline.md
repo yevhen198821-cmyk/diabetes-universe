@@ -7,9 +7,56 @@ Approved
 ## Purpose
 
 Define the canonical Timeline event contract shared by Dashboard derivations,
-Timeline UI, demo data, and future API integration.
+Timeline UI, demo data, repository storage, and future API integration.
 
-## TimelineEvent contract
+## Current state (post-P3h)
+
+- **`SemanticTimelineEvent`** is the canonical application and repository event
+  model.
+- **`TimelineRepository`** stores `SemanticTimelineEvent` natively through
+  `InMemoryTimelineRepository`.
+- The production demo seed in `apps/web/lib/mocks/timeline.ts` is semantic-native
+  (`readonly SemanticTimelineEvent[]`).
+- **Legacy `TimelineEvent`** remains in `@diabetes-universe/types` for
+  migration and import utilities only (`liftLegacyToSemantic`,
+  `liftRepositorySnapshot`).
+- **Durable persistence** (IndexedDB, SQLite, backend, auth, sync) is **not**
+  implemented.
+- **P4** has **not** started.
+
+## SemanticTimelineEvent contract
+
+`SemanticTimelineEvent` is a discriminated union of six approved kinds defined in
+`@diabetes-universe/types`. Every variant shares `SemanticEventEnvelope` fields:
+
+```ts
+interface SemanticEventEnvelope {
+  readonly id: string;
+  readonly occurredAt: string; // ISO 8601 medical occurrence time
+  readonly createdAt: string; // ISO 8601 local lifecycle metadata
+  readonly updatedAt: string; // ISO 8601 local lifecycle metadata
+  readonly schemaVersion: 1;
+  readonly source: TimelineEventSource;
+  readonly provenance?: EventProvenance;
+}
+```
+
+Per-kind semantic payloads store canonical numeric values (for example
+`concentrationMmolPerL`, `doseUnits`, `carbohydratesGrams`) and
+`CanonicalUnitId` for medication doses. Presentation strings (`title`, `value`,
+`unit` on legacy records) are **not** part of the semantic domain model except
+for note `title?` and `body`, which are user-authored semantic content.
+
+`occurredAt` is the single source of truth for event ordering and day grouping.
+Display-only strings such as `displayTime`, `displayDate`, and relative labels
+are derived in the presentation layer through `PlatformFormatter` and i18n
+labels.
+
+## Legacy TimelineEvent (migration-only)
+
+Legacy `TimelineEvent` with presentation-oriented `dateTime`, `title`, `value`,
+and `unit` fields is retained only for explicit migration and import paths. It is
+**not** the routine application or repository model after P3h.
 
 ```ts
 interface TimelineEvent {
@@ -27,9 +74,8 @@ interface TimelineEvent {
 }
 ```
 
-`dateTime` is the single source of truth for event ordering and day grouping.
-Display-only strings such as `displayTime`, `displayDate`, and relative labels
-are derived in the presentation/model layer.
+Preserved legacy demo data for regression lives in
+`apps/web/lib/mocks/preserved-legacy-demo-timeline-events.ts`.
 
 ## TimelineEventKind
 
@@ -62,58 +108,59 @@ type TimelineEventSource = 'manual' | 'demo' | 'device' | 'import';
 
 ## Temporal model
 
-- `dateTime` must be ISO 8601.
-- Sorting uses parsed timestamps, never raw `HH:mm` string comparison.
-- Invalid `dateTime` values sort after valid values and format to `--:--`.
-- Invalid selected Quick Add time values throw during event creation.
+- `occurredAt` must be ISO 8601 on every `SemanticTimelineEvent`.
+- Sorting uses parsed `occurredAt` timestamps with `id` as deterministic
+  tie-breaker, never raw `HH:mm` string comparison.
+- Invalid `occurredAt` values sort after valid values and format to `--:--`.
+- Invalid selected Quick Add time values throw during semantic event creation.
 - Browser-local timezone is used on the demo stage unless a caller supplies an
   explicit `timeZone` to formatter utilities.
 - Dashboard summaries and Timeline grouping use the user's local calendar day.
   Account-level timezone settings are future scope.
 
-## Field semantics
+## Semantic field semantics
 
-| Field       | Required | Meaning                                       |
-| ----------- | -------- | --------------------------------------------- |
-| `id`        | yes      | Stable event identifier                       |
-| `kind`      | yes      | Event category                                |
-| `dateTime`  | yes      | Canonical event timestamp                     |
-| `title`     | yes      | Primary label shown in cards and details      |
-| `value`     | yes      | Primary displayed value                       |
-| `unit`      | no       | Measurement unit when not embedded in `value` |
-| `context`   | no       | Secondary situational label                   |
-| `note`      | no       | Optional free-text note on non-note events    |
-| `source`    | no       | Origin of the record                          |
-| `createdAt` | no       | Reserved for future persistence metadata      |
-| `updatedAt` | no       | Reserved for future edit metadata             |
+| Field           | Required | Meaning                                             |
+| --------------- | -------- | --------------------------------------------------- |
+| `id`            | yes      | Stable event identifier                             |
+| `kind`          | yes      | Event category discriminator                        |
+| `occurredAt`    | yes      | Canonical medical occurrence timestamp              |
+| `schemaVersion` | yes      | Semantic schema generation (`1` in P3)              |
+| `source`        | yes      | Origin of the record                                |
+| `createdAt`     | yes      | Local first-seen timestamp (immutable after create) |
+| `updatedAt`     | yes      | Local last-mutation timestamp                       |
+| kind fields     | varies   | Canonical numeric/text payloads per variant         |
 
-For `kind: 'note'`, the main journal content lives in `title` and `value`. The
-optional `note` field is not used as a second body for note events.
+For `kind: 'note'`, journal content lives in optional `title` and required
+`body`. These are user-authored semantic fields, not presentation DTO strings.
 
 ## Invariants
 
 - Every persisted or demo Timeline event has a valid `kind` from the approved set.
 - `nutrition` is the only canonical nutrition/meal kind.
-- UI must not store presentation-only time strings on the domain object.
+- UI must not store presentation-only time strings on semantic domain objects.
 - Dashboard recent-events preview excludes `glucose` and `note` by product rules,
   but both remain valid Timeline events.
 - Type-specific medical payloads must not be flattened into unrelated optional
   fields on the base event.
+- Migration evidence (`MigrationRecord`, quarantine records) is external to
+  `SemanticTimelineEvent`; routine application state does not carry migration
+  sidecar data.
 
 ## Relationships
 
-- Dashboard derives Last Glucose, Day Summary, and Recent Events from collections
-  of `TimelineEvent`.
-- Timeline renders the full journal from the same event contract.
-- Event cards consume mapped presentation props derived from `TimelineEvent`.
+- Dashboard derives Last Glucose, Day Summary, and Recent Events from
+  `SemanticTimelineEvent[]`.
+- Timeline renders the full journal from the same semantic contract.
+- Event cards consume mapped presentation props derived from semantic events.
 - During the demo stage, Dashboard and Timeline share one app-level in-memory
-  Timeline store.
+  Timeline store backed by a semantic repository.
 
 ## API readiness
 
-The contract is backend-agnostic and maps cleanly to future API responses:
+The semantic contract is backend-agnostic and maps cleanly to future API responses:
 
-- sort/filter/paginate by `dateTime`
+- sort/filter/paginate by `occurredAt`
 - patch/delete by `id`
 - preserve `source`, `createdAt`, and `updatedAt` when the API provides them
 
@@ -129,31 +176,34 @@ GET /timeline/events?cursor=<cursor>&limit=20&kind=<kind>&query=<query>
 
 ```ts
 interface TimelinePage {
-  readonly items: readonly TimelineEvent[];
+  readonly items: readonly SemanticTimelineEvent[];
   readonly nextCursor?: string;
   readonly hasMore: boolean;
 }
 ```
 
 The server applies search/filter before pagination, sorts descending by
-`dateTime`, uses `id` as the stable tie-breaker, and owns cursor generation.
+`occurredAt`, uses `id` as the stable tie-breaker, and owns cursor generation.
 The client must not derive cursors from event fields.
 
 ## Editing semantics
 
-Timeline editing operates on the base event fields used by the demo model:
+Timeline editing operates on semantic events through edit drafts:
 
-- editable: `dateTime` through date/time inputs, `title`, `value`, `unit`,
-  `context`, `note`;
+- editable per kind: numeric payloads, note body, activity type, insulin
+  preparation, medication name, context fields, and `occurredAt` through date/time
+  inputs;
 - immutable: `id`, `kind`, `source`, `createdAt`;
 - successful edits set `updatedAt`;
-- `dateTime` remains ISO 8601 after save.
+- `occurredAt` changes only when the user edits date/time inputs.
 
-Current demo values are strings. The edit model therefore owns a safe
-parse/format layer for numeric kinds instead of parsing display text in JSX.
-Future API payloads can replace this with type-specific structured payloads.
+Quick Add and edit flows create or update `SemanticTimelineEvent` records
+directly. Presentation formatting belongs to the presentation boundary (P3d).
 
 ## Migration notes
+
+Historical lifecycle record. Sections below describe state **at that wave**, not
+current architecture unless the P3h / current-state summary above says otherwise.
 
 Stage 2 migration changes:
 
@@ -195,53 +245,48 @@ Stage 7 migration changes:
 - grouping happens after pagination;
 - documented future cursor API without implementing backend transport.
 
-P2 Repository Foundation changes:
+P2 Repository Foundation changes (historical — superseded by P3h):
 
 - introduced `@diabetes-universe/timeline` as the repository boundary package;
-- introduced `InMemoryTimelineRepository` as the current non-durable adapter;
+- introduced `InMemoryTimelineRepository` as the non-durable adapter;
 - integrated `TimelineStoreProvider` with `TimelineRepository`;
-- kept the existing `TimelineEvent` shape as a temporary P2 compatibility type;
+- at this wave, `TimelineEvent` was the temporary repository compatibility type;
 - reload persistence remains not implemented.
 
-P3a Semantic Types Foundation changes:
+P3a Semantic Types Foundation changes (historical state at P3a):
 
 - introduced `SemanticTimelineEvent` and per-kind semantic variants in
   `@diabetes-universe/types`;
 - introduced P3 migration and diagnostics contracts (`MigrationRecord`,
   `MigrationResult`, `QuarantineRecord`, `TimelineDiagnosticsSnapshot`) as
   separate types outside the semantic domain event;
-- legacy `TimelineEvent` remains the active P2 repository compatibility contract;
-- semantic repository cutover (P3h) has not occurred.
+- at this wave, legacy `TimelineEvent` was still the active repository contract;
+  semantic repository cutover followed in P3h.
 
-P3b Legacy Migration Runtime changes:
+P3b Legacy Migration Runtime changes (historical state at P3b):
 
 - introduced `liftLegacyToSemantic()` in `@diabetes-universe/timeline`;
 - pure legacy presentation lift into `SemanticTimelineEvent` with external
   `MigrationRecord` evidence and explicit quarantine results;
-- application still uses legacy `TimelineEvent` through the P2 repository;
-- semantic application store is not wired (P3c);
-- repository cutover (P3h) has not occurred.
+- at this wave, the application still used legacy `TimelineEvent` through the
+  P2 repository; semantic application store followed in P3c; repository cutover
+  in P3h.
 
-## Semantic model (P3a)
+## Semantic model reference (P3a+)
 
-`SemanticTimelineEvent` is the target application/domain representation defined
-in `@diabetes-universe/types`. It uses a single `kind` discriminator with
-per-variant fields and canonical numeric values plus `CanonicalUnitId` where
-required.
-
-- legacy `TimelineEvent` with presentation-oriented `title`, `value`, and `unit`
-  fields remains in `@diabetes-universe/types` as a migration-only contract;
-- routine application and repository runtime use `SemanticTimelineEvent` after P3h.
+`SemanticTimelineEvent` is defined in `@diabetes-universe/types`. It uses a
+single `kind` discriminator with per-variant fields and canonical numeric values
+plus `CanonicalUnitId` where required.
 
 `ownerId` and other persistence-envelope fields from ADR-0014 are intentionally
 absent from `SemanticTimelineEvent`. Ownership belongs to a future persistence
 record wrapper, not to the semantic domain event.
 
-P3b implements legacy lift runtime in `@diabetes-universe/timeline` via
-`liftLegacyToSemantic()`. Application integration, sidecar stores, and
-presentation mapping remain future waves.
+P3b added legacy lift runtime in `@diabetes-universe/timeline` via
+`liftLegacyToSemantic()` for explicit import/migration paths only.
 
-P3c Semantic Application Store changes (superseded by P3h for routine runtime):
+P3c Semantic Application Store changes (historical — superseded by P3h for
+routine runtime):
 
 - `TimelineStoreProvider` previously lifted P2 repository snapshots into
   `SemanticTimelineEvent[]` on initialization and after legacy repository
@@ -254,12 +299,11 @@ P3c Semantic Application Store changes (superseded by P3h for routine runtime):
   until P3h;
 - repository cutover completed in P3h.
 
-P3f Dashboard Semantic Closure changes:
+P3f Dashboard Semantic Closure changes (historical state at P3f):
 
 - Dashboard read/business derivations consume `SemanticTimelineEvent[]` only;
 - presentation strings are produced at component/container boundaries;
-- production demo legacy seed remains in `apps/web/lib/mocks/timeline.ts` until
-  P3h repository cutover.
+- at this wave, the production demo seed was still legacy until P3g/P3h cutover.
 
 P3g Demo Fixture & Migration Closure changes:
 
@@ -299,42 +343,43 @@ P3h Semantic Repository Cutover changes:
 
 - reminder and `ai_insight` as Timeline events
 - backend/API implementation
-- type-specific nested payloads on legacy `TimelineEvent` (semantic payloads are
-  defined separately in P3a)
-- P3d presentation mappers and P3e semantic Quick Add write path
-- P4 durable persistence and sync
+- durable persistence (IndexedDB, SQLite, backend, auth, sync) — P4 not started
+- routine migration lift in application store (migration utilities remain for
+  explicit import paths only)
 
-## Quick Add mapping
+## Quick Add mapping (semantic write path)
+
+Quick Add creates `SemanticTimelineEvent` records directly through semantic
+creators in `apps/web/lib/timeline/semantic-creators/`. Presentation strings are
+not written to the repository.
 
 ### Activity
 
-`ActivityQuickAddEntry` creates:
+`ActivityQuickAddEntry` creates a semantic activity event:
 
-| Field      | Value                          |
-| ---------- | ------------------------------ |
-| `kind`     | `activity`                     |
-| `source`   | `manual`                       |
-| `title`    | selected activity type         |
-| `value`    | duration as string             |
-| `unit`     | `мин`                          |
-| `note`     | optional user note             |
-| `dateTime` | ISO 8601 from approved utility |
+| Semantic field    | Value                          |
+| ----------------- | ------------------------------ |
+| `kind`            | `activity`                     |
+| `source`          | `manual`                       |
+| `activityType`    | selected activity type         |
+| `durationSeconds` | duration in seconds            |
+| `note`            | optional user note             |
+| `occurredAt`      | ISO 8601 from approved utility |
 
 Validation: `activityType` required; `durationMinutes` integer in `1..1440`;
 `time` required; `note` max 200 characters.
 
 ### Note
 
-`NoteQuickAddEntry` creates:
+`NoteQuickAddEntry` creates a semantic note event:
 
-| Field      | Value                           |
-| ---------- | ------------------------------- |
-| `kind`     | `note`                          |
-| `source`   | `manual`                        |
-| `title`    | user title or `Заметка`         |
-| `value`    | note text                       |
-| `note`     | omitted to avoid duplicate body |
-| `dateTime` | ISO 8601 from approved utility  |
+| Semantic field | Value                          |
+| -------------- | ------------------------------ |
+| `kind`         | `note`                         |
+| `source`       | `manual`                       |
+| `title`        | user title or default label    |
+| `body`         | note text                      |
+| `occurredAt`   | ISO 8601 from approved utility |
 
 Validation: trimmed `text` required; `text` max 500; `title` max 80; `time`
 required.
