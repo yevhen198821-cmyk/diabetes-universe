@@ -53,33 +53,36 @@ test('getById returns a clone and null for a missing event', async () => {
   assert.equal(await repository.getById('missing'), null);
 });
 
-test('queryEvents returns bounded ascending pages with deterministic id tie-break', async () => {
-  const repository = createInMemoryTimelineRepository({ seedEvents: events });
-  await repository.initialize();
+test(
+  'queryEvents returns bounded ascending pages with deterministic id tie-break',
+  async () => {
+    const repository = createInMemoryTimelineRepository({ seedEvents: events });
+    await repository.initialize();
 
-  const first = await repository.queryEvents({
-    order: 'occurredAt-asc',
-    limit: 2,
-  });
-  assert.deepEqual(first.events.map((event) => event.id), ['g-1', 'i-1']);
-  assert.ok(first.nextCursor);
+    const first = await repository.queryEvents({
+      order: 'occurredAt-asc',
+      limit: 2,
+    });
+    assert.deepEqual(first.events.map((event) => event.id), ['g-1', 'i-1']);
+    assert.ok(first.nextCursor);
 
-  const second = await repository.queryEvents({
-    order: 'occurredAt-asc',
-    limit: 2,
-    cursor: first.nextCursor,
-  });
-  assert.deepEqual(second.events.map((event) => event.id), ['g-2', 'g-3']);
-  assert.ok(second.nextCursor);
+    const second = await repository.queryEvents({
+      order: 'occurredAt-asc',
+      limit: 2,
+      cursor: first.nextCursor,
+    });
+    assert.deepEqual(second.events.map((event) => event.id), ['g-2', 'g-3']);
+    assert.ok(second.nextCursor);
 
-  const third = await repository.queryEvents({
-    order: 'occurredAt-asc',
-    limit: 2,
-    cursor: second.nextCursor,
-  });
-  assert.deepEqual(third.events.map((event) => event.id), ['i-2']);
-  assert.equal(third.nextCursor, undefined);
-});
+    const third = await repository.queryEvents({
+      order: 'occurredAt-asc',
+      limit: 2,
+      cursor: second.nextCursor,
+    });
+    assert.deepEqual(third.events.map((event) => event.id), ['i-2']);
+    assert.equal(third.nextCursor, undefined);
+  },
+);
 
 test('queryEvents supports descending and kind-filtered reads', async () => {
   const repository = createInMemoryTimelineRepository({ seedEvents: events });
@@ -106,7 +109,11 @@ test('queryEvents applies an occurredAt half-open range', async () => {
     limit: 10,
   });
 
-  assert.deepEqual(result.events.map((event) => event.id), ['i-1', 'g-2', 'g-3']);
+  assert.deepEqual(result.events.map((event) => event.id), [
+    'i-1',
+    'g-2',
+    'g-3',
+  ]);
 });
 
 test('queryEvents rejects invalid and query-incompatible cursors', async () => {
@@ -149,7 +156,12 @@ test('queryEvents enforces a mandatory implementation-bounded limit', async () =
   const repository = createInMemoryTimelineRepository({ seedEvents: events });
   await repository.initialize();
 
-  for (const limit of [0, -1, 1.5, IN_MEMORY_TIMELINE_REPOSITORY_MAX_QUERY_LIMIT + 1]) {
+  for (const limit of [
+    0,
+    -1,
+    1.5,
+    IN_MEMORY_TIMELINE_REPOSITORY_MAX_QUERY_LIMIT + 1,
+  ]) {
     await assert.rejects(
       () => repository.queryEvents({ order: 'occurredAt-asc', limit }),
       (error) =>
