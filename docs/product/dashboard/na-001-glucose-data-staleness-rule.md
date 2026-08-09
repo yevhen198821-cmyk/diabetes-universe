@@ -20,8 +20,15 @@ Feature Slice Complete
 | Final Review              | Complete   |
 | Feature Slice Complete    | Complete   |
 
-NA-001 is complete. The contextual rule consumes only the governed GP-001 Policy
-Result and integrates with SD-001 as an injectable rule factory.
+NA-001 is complete as a **repository Feature Slice**. The contextual rule
+implementation consumes only the governed GP-001 Policy Result and integrates with
+SD-001 as an injectable rule factory.
+
+**Production activation:** NA-001 is **not registered or active in production**.
+`getContextualNextActionRules()` in `apps/web/lib/dashboard/next-action/next-action-rules.ts`
+returns an empty registry per SD-001. The rule does **not** influence current
+Dashboard Next Action behavior until a separate governed activation slice registers
+it. Feature Slice Complete does not imply automatic production activation.
 
 ## Rule Identity
 

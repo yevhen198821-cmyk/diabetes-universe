@@ -6,7 +6,7 @@ This section documents system structure, boundaries, responsibilities, and depen
 
 ## Status
 
-<!-- Allowed values: Draft | Approved | Deprecated -->
+Approved
 
 ## Responsibility
 
@@ -26,29 +26,58 @@ Feature acceptance criteria, visual design rules, source code, and transient imp
 
 ## System shape
 
-Diabetes Universe starts as a frontend monorepo. Turborepo coordinates tasks,
-while pnpm provides deterministic workspace dependency management.
+Diabetes Universe is a frontend monorepo. Turborepo coordinates tasks, while pnpm
+provides deterministic workspace dependency management.
+
+Layering follows [ADR-0011 — Platform Infrastructure Layer](../adr/0011-platform-infrastructure-layer.md):
 
 ```text
-apps/web ───────> packages/ui
-     │
-     └──────────> packages/types (when shared contracts are required)
+apps/web (Application + Web Composition Root wiring)
+  → packages/platform-web
+  → packages/platform, i18n, i18n-locales, locales, formatting
+  → packages/ui, packages/types
+
+packages/platform, i18n, formatting, locales
+  → must not depend on apps/web
 ```
 
 ## Boundaries
 
-- `apps/web` owns routing, page composition, metadata, and web-only concerns.
-- `packages/ui` owns reusable, presentation-focused React primitives.
-- `packages/types` owns platform-agnostic contracts, not runtime behavior.
-- Applications may depend on packages; packages must not depend on applications.
-- Domain and infrastructure layers will be introduced through explicit
-  architecture decisions when their requirements exist.
+| Workspace               | Responsibility                                                           |
+| ----------------------- | ------------------------------------------------------------------------ |
+| `apps/web`              | Routing, page composition, Dashboard/Timeline demo, web Composition Root |
+| `packages/platform-web` | Web-specific platform runtime assembly                                   |
+| `packages/platform`     | `PlatformRuntime` aggregate (`createPlatformRuntime`)                    |
+| `packages/i18n`         | Localization Platform contracts and runtime                              |
+| `packages/i18n-locales` | In-memory translation bundle loaders (Infrastructure adapter)            |
+| `packages/locales`      | Canonical translation resources                                          |
+| `packages/formatting`   | Platform Formatting library                                              |
+| `packages/ui`           | Reusable, presentation-focused React primitives                          |
+| `packages/types`        | Platform-agnostic contracts, not runtime behavior                        |
 
-## Deliberate exclusions
+Applications may depend on packages; packages must not depend on applications.
 
-The current foundation contains no backend, database, authentication, API,
-mobile, marketplace, or AI implementation. Adding any of these requires a
-documented architecture decision and an explicit product requirement.
+## Current demo surfaces
+
+- **Dashboard** (`/`) — seven approved blocks with shared Timeline store integration
+- **Timeline** (`/timeline`) — event journal, search, filters, edit/delete, Quick Add
+
+## Deliberate exclusions (future / not implemented)
+
+The repository does **not** currently provide:
+
+- backend services, databases, or APIs;
+- authentication or authorization;
+- production AI runtime;
+- marketplace runtime;
+- native mobile applications;
+- offline/sync persistence;
+- analytics domain;
+- device integrations (CGM, insulin pumps, wearables, and similar connected
+  devices).
+
+Adding any of these requires a documented architecture decision and an explicit
+product requirement.
 
 ## Quality attributes
 
@@ -76,3 +105,7 @@ documented architecture decision and an explicit product requirement.
 - [@diabetes-universe/platform-web](../../packages/platform-web/README.md)
 
 ## Notes
+
+- Dashboard block localization (I18N-02A–02B5) is complete; Timeline and Quick Add
+  localization migrations remain future work.
+- Runtime locale switching is not production-ready.

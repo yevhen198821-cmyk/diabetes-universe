@@ -331,9 +331,9 @@ itself changes.
 The Next Action Engine Epic may depend on governed platform policies that are not
 Next Action rules and do not belong to the NA-xxx candidate registry.
 
-| ID     | Name                          | Category | Status                | Relationship to Next Action                                                                                                    | Foundation Change Required | Owner    | Notes                                                                                              |
-| ------ | ----------------------------- | -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
-| GP-001 | Glucose Data Staleness Policy | Platform | Approved Backlog Item | Blocking policy dependency for any future glucose-staleness consumer, including a future qualified NA-001 implementation path. | No                         | Platform | See [GP-001 — Glucose Data Staleness Policy](../platform/gp-001-glucose-data-staleness-policy.md). |
+| ID     | Name                          | Category | Status                 | Relationship to Next Action                                                                                              | Foundation Change Required | Owner    | Notes                                                                                              |
+| ------ | ----------------------------- | -------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
+| GP-001 | Glucose Data Staleness Policy | Platform | Feature Slice Complete | Blocking policy dependency for glucose-staleness consumers, including NA-001. Policy contract implemented in repository. | No                         | Platform | See [GP-001 — Glucose Data Staleness Policy](../platform/gp-001-glucose-data-staleness-policy.md). |
 
 GP-001 does not select a Next Action, participate in SD-001 resolution, define
 Dashboard behavior, or implement a rule. Consumers must not rederive glucose
@@ -342,12 +342,12 @@ staleness independently after GP-001 is approved.
 ## 14. Approved Backlog Items
 
 Approved Backlog Items have passed Backlog Qualification and use the Governed
-Backlog Item contract. They are not active Feature Slices until development is
-formally initiated.
+Backlog Item contract. A completed Feature Slice remains listed here for planning
+traceability even after Repository Implementation reaches Feature Slice Complete.
 
-| ID     | Name                        | Category | Goal                                                          | Priority | Status                | Item-specific Dependencies                      | Foundation Change Required | Owner   | Notes                                                         |
-| ------ | --------------------------- | -------- | ------------------------------------------------------------- | -------- | --------------------- | ----------------------------------------------- | -------------------------- | ------- | ------------------------------------------------------------- |
-| NA-001 | Glucose Data Staleness Rule | Medical  | Clarify glucose data quality for future Next Action planning. | Medium   | Approved Backlog Item | Approved Glucose Data Staleness Policy (future) | No                         | Medical | Qualified in [NA-001](na-001-glucose-data-staleness-rule.md). |
+| ID     | Name                        | Category | Goal                                                          | Priority | Status                 | Item-specific Dependencies                                                | Foundation Change Required | Owner   | Notes                                                                                                                                                                                                                                                                              |
+| ------ | --------------------------- | -------- | ------------------------------------------------------------- | -------- | ---------------------- | ------------------------------------------------------------------------- | -------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NA-001 | Glucose Data Staleness Rule | Medical  | Clarify glucose data quality for future Next Action planning. | Medium   | Feature Slice Complete | GP-001 — Glucose Data Staleness Policy (Blocking, Feature Slice Complete) | No                         | Medical | Repository implementation complete per [NA-001](na-001-glucose-data-staleness-rule.md). **Not registered or active in production** — `getContextualNextActionRules()` remains empty per SD-001; rule does not affect current Dashboard behavior until a separate activation slice. |
 
 ## 15. Initial Candidate Registry
 
@@ -360,9 +360,9 @@ not approve implementation.
 
 ### Medical
 
-| Candidate | Status    | Linked Backlog Item                             |
-| --------- | --------- | ----------------------------------------------- |
-| NA-001    | Qualified | [NA-001](na-001-glucose-data-staleness-rule.md) |
+| Candidate | Status                 | Linked Backlog Item                             |
+| --------- | ---------------------- | ----------------------------------------------- |
+| NA-001    | Feature Slice Complete | [NA-001](na-001-glucose-data-staleness-rule.md) |
 
 Proposed:
 

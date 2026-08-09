@@ -129,8 +129,10 @@ Option B (fail-fast nested guard) was **not** selected.
 | `createTestPlatformRuntime`    | test-only (uses Composition Root)        |
 | `createRequestPlatformRuntime` | server-only; must not import React layer |
 
-Production routes now mount `ApplicationRuntimeGate` from the root layout.
-Product modules are not wired to platform hooks yet (I18N-02).
+Production routes mount `ApplicationRuntimeGate` from the root layout.
+Dashboard blocks (I18N-02A–02B5) consume platform hooks in production.
+Timeline and Quick Add remain on pre-migration localization. Runtime locale
+switching is not production-ready.
 
 Browser time-zone resolver (`presentation/client.ts`) is not part of the CR-03B
 runtime path.
@@ -200,9 +202,17 @@ remain unchanged. See
 [Application Platform Integration](application-platform-integration.md) and
 [ADR-0013](../../adr/0013-web-client-runtime-ownership.md).
 
-## Future I18N-02 integration
+## I18N-02 integration status
 
-## Definition of Done
+| Surface                          | Status                                                          |
+| -------------------------------- | --------------------------------------------------------------- |
+| Dashboard blocks (I18N-02A–02B5) | Migrated — `useLocalization()` / `useFormatter()` in production |
+| Timeline                         | Not migrated                                                    |
+| Quick Add                        | Not migrated                                                    |
+| Runtime locale switching         | Not production-ready                                            |
+
+CR-03B hooks are unchanged. Product migration is tracked per surface, not as a
+single future toggle.
 
 - [x] `PlatformProvider` and hooks implemented
 - [x] fail-fast missing-provider contract

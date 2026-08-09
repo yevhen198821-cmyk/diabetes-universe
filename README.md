@@ -4,15 +4,21 @@ Frontend monorepo for the Diabetes Universe commercial product.
 
 ## Current scope
 
-This repository currently contains only the project foundation:
+This repository contains the approved frontend foundation and a **demo web
+application** with Dashboard (`/`) and Timeline (`/timeline`) surfaces:
 
-- a Next.js web application;
-- a shared React UI package;
-- a shared TypeScript contracts package;
+- a Next.js web application (`apps/web`);
+- platform packages (localization, formatting, runtime aggregate, web composition
+  root) per [ADR-0011](docs/adr/0011-platform-infrastructure-layer.md);
+- shared React UI primitives (`packages/ui`);
+- shared platform-agnostic contracts (`packages/types`);
 - architecture, product, and developer documentation.
 
-Backend services, databases, authentication, APIs, mobile applications,
-marketplace capabilities, and AI features are intentionally out of scope.
+**Not implemented in this repository (future / out of scope):** backend
+services, databases, authentication, production AI, marketplace runtime, native
+mobile applications, offline/sync persistence, analytics domain, and device
+integrations (CGM, insulin pumps, wearables, and similar connected devices are
+not product capabilities today).
 
 ## Technology
 
@@ -50,6 +56,7 @@ pnpm build         # Create production builds
 pnpm lint          # Run static analysis
 pnpm typecheck     # Check all TypeScript workspaces
 pnpm test          # Run unit tests across all workspaces
+pnpm test:e2e      # Run Playwright end-to-end tests (requires browser install)
 pnpm format        # Format supported files
 pnpm format:check  # Verify formatting without writing files
 ```
@@ -69,16 +76,38 @@ python3 scripts/validate-markdown-links.py
 
 ## Repository structure
 
+Per [ADR-0011 — Platform Infrastructure Layer](docs/adr/0011-platform-infrastructure-layer.md):
+
 ```text
 apps/
-  web/                 Next.js web application
+  web/                          Next.js application (Composition Root wiring)
+
 packages/
-  ui/                  Shared React UI primitives
-  types/               Shared platform-agnostic types
+  platform/                     Platform Runtime aggregate (createPlatformRuntime)
+  platform-web/                 Web Composition Root adapter
+  i18n/                         Localization Platform contracts + runtime
+  i18n-locales/                 Localization Infrastructure adapters (in-memory loaders)
+  locales/                      Canonical translation resources
+  formatting/                   Platform Formatting library
+  ui/                           Shared React UI primitives
+  types/                        Shared platform-agnostic contracts
+
 docs/
-  architecture/        Architecture decisions and boundaries
-  product-bible/       Product principles and scope
-  developer-bible/     Engineering workflow and conventions
+  architecture/                 System boundaries and dependencies
+  product/                      Product policies and living backlogs
+  product-bible/                Product principles and scope
+  developer-bible/              Engineering workflow and conventions
+```
+
+Dependency direction (simplified):
+
+```text
+apps/web
+  → platform-web, ui, types
+  → platform, i18n, i18n-locales, locales, formatting (via composition paths)
+
+packages/platform, i18n, formatting, locales
+  → no dependency on apps/web
 ```
 
 ## Documentation
@@ -106,6 +135,7 @@ docs/
 - [19 Illustration System Specification](docs/design-system/19-illustration-system-specification.md)
 - [20 Motion System Specification](docs/design-system/20-motion-system-specification.md)
 - [Architecture](docs/architecture/README.md)
+- [ADR Index](docs/adr/index.md)
 - [Product Bible](docs/product-bible/README.md)
 - [Developer Bible](docs/developer-bible/README.md)
 

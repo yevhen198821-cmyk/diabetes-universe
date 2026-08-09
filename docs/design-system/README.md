@@ -10,6 +10,11 @@ Design tokens, typography, spacing, icon, component, form, and motion guidance b
 
 ## Specifications
 
+Authoritative design-system specifications are the numbered documents (10–20).
+Legacy placeholder files (`colors.md`, `typography.md`, `spacing.md`, `icons.md`,
+`buttons.md`, `cards.md`, `forms.md`, `motion.md`) are **deprecated stubs** —
+do not edit them for normative guidance; use the numbered specifications below.
+
 - [10 Visual Design System Specification](10-visual-design-system-specification.md)
 - [11 Design Tokens Specification](11-design-tokens-specification.md)
 - [12 UI Component Specification](12-ui-component-specification.md)

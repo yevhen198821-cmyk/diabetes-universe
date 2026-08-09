@@ -8,13 +8,36 @@ wiring).
 
 ## Status
 
-Draft
+Approved — platform foundation implemented; product-surface migration partial
 
 ## Responsibility
 
 - Describe layer roles for localization without fixing physical package paths.
 - Link runtime behavior to ADR-0011 layer model.
 - Capture cross-cutting concepts such as Platform Readiness.
+- Distinguish **platform foundation** (implemented) from **product-surface
+  migration** (partial).
+
+## Platform foundation (implemented)
+
+| Package / area                    | Role                                                   |
+| --------------------------------- | ------------------------------------------------------ |
+| `@diabetes-universe/i18n`         | Localization Platform contracts and runtime            |
+| `@diabetes-universe/i18n-locales` | In-memory Infrastructure adapters                      |
+| `@diabetes-universe/locales`      | Canonical translation resources                        |
+| `apps/web/lib/platform/`          | Web Composition Root wiring, `PlatformProvider`, hooks |
+
+Dashboard blocks I18N-02A–02B5 consume `useLocalization()` / `useFormatter()` in
+production.
+
+## Product-surface migration (partial)
+
+| Surface                  | Status                                   |
+| ------------------------ | ---------------------------------------- |
+| Dashboard blocks         | Feature Complete (I18N-02A–02B5)         |
+| Timeline                 | Not migrated — Russian UI strings remain |
+| Quick Add                | Not migrated — Russian UI strings remain |
+| Runtime locale switching | Not production-ready                     |
 
 ## Layer roles
 

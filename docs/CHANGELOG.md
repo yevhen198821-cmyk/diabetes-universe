@@ -1,5 +1,29 @@
 # Changelog
 
+## Wave 10 — Documentation Source-of-Truth Remediation
+
+Дата: 2026-08-09
+
+Завершено:
+
+- aligned EB-001 backlog tables with GP-001 and NA-001 Feature Slice Complete status
+- separated NA-001 repository completion from production contextual rule registry activation
+- updated root, architecture, developer-bible, and apps/web README package and I18N status
+- refreshed localization architecture docs (platform foundation vs product-surface migration)
+- completed ADR navigation in INDEX (0009–0013); clarified adr/README as pointer to canonical index
+- added glossary terms: Feature Slice Complete, Living Backlog, Governed Backlog Item, Candidate Registry Entry
+- deprecated legacy design-system stub docs in favor of numbered specifications
+- updated Product Bible current milestone vs future ecosystem scope
+
+Не входит в этот этап:
+
+- runtime code changes, NA-001 production registry wiring, Timeline/Quick Add localization,
+  Dashboard state wiring, or fixes from Waves 4–9 audits
+
+Статус:
+
+Documentation remediation — Wave 10 complete
+
 ## EB-001 — Dependency Type Architecture Refinement Merged
 
 Дата: 2026-08-07

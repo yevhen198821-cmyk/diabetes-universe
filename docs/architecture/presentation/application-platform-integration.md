@@ -323,12 +323,12 @@ CR-03C does **not** implement:
 - account-profile time zone source;
 - production locale cookie wiring in `readNextRequestPresentationContext()`.
 
-## Future I18N-02 integration
+## I18N-02 integration status
 
-I18N-02 will migrate Dashboard, Timeline, and Quick Add to platform hooks.
-CR-03C keeps those modules on existing mock/local state while ensuring
-`PlatformProvider` is mounted at the application root when the product tree
-renders.
+`ApplicationRuntimeGate` mounts `PlatformProvider` when runtime is ready.
+Dashboard blocks (I18N-02A–02B5) consume platform hooks in production. Timeline and
+Quick Add remain on pre-migration localization. Runtime locale switching is not
+production-ready.
 
 ## Definition of Done
 

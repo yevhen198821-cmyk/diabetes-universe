@@ -1,11 +1,11 @@
 # Architecture Decision Records
 
-## Status
+Canonical ADR registry: [ADR Index](index.md)
 
-## Purpose
-
-## Index
+All approved ADRs (0009–0013), status, and dates are listed in the index. Use
+that file as the single source of truth for ADR navigation.
 
 ## Process
 
-## Notes
+New architecture decisions are recorded as numbered ADRs under `docs/adr/`,
+indexed in [index.md](index.md), and linked from [Documentation Index](../INDEX.md).
