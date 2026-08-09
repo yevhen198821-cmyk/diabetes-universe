@@ -88,9 +88,13 @@ function validateOccurrenceRange(
   query: TimelineRepositoryQuery,
 ): ValidatedOccurrenceRange {
   const fromTime =
-    query.occurredFrom === undefined ? undefined : Date.parse(query.occurredFrom);
+    query.occurredFrom === undefined
+      ? undefined
+      : Date.parse(query.occurredFrom);
   const toTime =
-    query.occurredTo === undefined ? undefined : Date.parse(query.occurredTo);
+    query.occurredTo === undefined
+      ? undefined
+      : Date.parse(query.occurredTo);
 
   if (
     (fromTime !== undefined && Number.isNaN(fromTime)) ||
@@ -197,10 +201,14 @@ export class InMemoryTimelineRepository implements TimelineRepository {
 
     const range = validateOccurrenceRange(query);
     const cursor =
-      query.cursor === undefined ? undefined : decodeCursor(query.cursor, query);
+      query.cursor === undefined
+        ? undefined
+        : decodeCursor(query.cursor, query);
     const allowedKinds = query.kinds ? new Set(query.kinds) : null;
     const sourceEvents =
-      query.order === 'occurredAt-desc' ? [...this.#events].reverse() : this.#events;
+      query.order === 'occurredAt-desc'
+        ? [...this.#events].reverse()
+        : this.#events;
     const page: TimelineRepositoryEvent[] = [];
     let scanned = 0;
 
