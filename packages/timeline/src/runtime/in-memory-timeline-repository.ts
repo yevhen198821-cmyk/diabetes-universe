@@ -14,12 +14,18 @@ import {
 } from './timeline-event-normalization';
 
 export const IN_MEMORY_TIMELINE_REPOSITORY_MAX_QUERY_LIMIT = 200;
+export const IN_MEMORY_TIMELINE_REPOSITORY_MAX_QUERY_SCAN = 1_000;
 
 interface InMemoryTimelineCursorPayload {
   readonly version: 1;
   readonly occurredAt: string;
   readonly id: string;
   readonly signature: string;
+}
+
+interface ValidatedOccurrenceRange {
+  readonly fromTime?: number;
+  readonly toTime?: number;
 }
 
 export interface InMemoryTimelineRepositoryOptions {
@@ -63,6 +69,7 @@ function decodeCursor(
       value.version !== 1 ||
       !('occurredAt' in value) ||
       typeof value.occurredAt !== 'string' ||
+      Number.isNaN(Date.parse(value.occurredAt)) ||
       !('id' in value) ||
       typeof value.id !== 'string' ||
       !('signature' in value) ||
@@ -77,9 +84,28 @@ function decodeCursor(
   }
 }
 
+function validateOccurrenceRange(
+  query: TimelineRepositoryQuery,
+): ValidatedOccurrenceRange {
+  const fromTime =
+    query.occurredFrom === undefined ? undefined : Date.parse(query.occurredFrom);
+  const toTime =
+    query.occurredTo === undefined ? undefined : Date.parse(query.occurredTo);
+
+  if (
+    (fromTime !== undefined && Number.isNaN(fromTime)) ||
+    (toTime !== undefined && Number.isNaN(toTime)) ||
+    (fromTime !== undefined && toTime !== undefined && fromTime >= toTime)
+  ) {
+    throw new TimelineRepositoryError('TIMELINE_REPOSITORY_READ_FAILED');
+  }
+
+  return { fromTime, toTime };
+}
+
 function isInOccurrenceRange(
   event: TimelineRepositoryEvent,
-  query: TimelineRepositoryQuery,
+  range: ValidatedOccurrenceRange,
 ): boolean {
   const eventTime = Date.parse(event.occurredAt);
 
@@ -87,21 +113,40 @@ function isInOccurrenceRange(
     return false;
   }
 
-  if (query.occurredFrom !== undefined) {
-    const fromTime = Date.parse(query.occurredFrom);
-    if (Number.isNaN(fromTime) || eventTime < fromTime) {
-      return false;
-    }
+  if (range.fromTime !== undefined && eventTime < range.fromTime) {
+    return false;
   }
 
-  if (query.occurredTo !== undefined) {
-    const toTime = Date.parse(query.occurredTo);
-    if (Number.isNaN(toTime) || eventTime >= toTime) {
-      return false;
-    }
+  if (range.toTime !== undefined && eventTime >= range.toTime) {
+    return false;
   }
 
   return true;
+}
+
+function compareEventToCursor(
+  event: TimelineRepositoryEvent,
+  cursor: InMemoryTimelineCursorPayload,
+): number {
+  const timeComparison = event.occurredAt.localeCompare(cursor.occurredAt);
+  if (timeComparison !== 0) {
+    return timeComparison;
+  }
+
+  return event.id.localeCompare(cursor.id);
+}
+
+function isAfterCursor(
+  event: TimelineRepositoryEvent,
+  cursor: InMemoryTimelineCursorPayload | undefined,
+  query: TimelineRepositoryQuery,
+): boolean {
+  if (cursor === undefined) {
+    return true;
+  }
+
+  const comparison = compareEventToCursor(event, cursor);
+  return query.order === 'occurredAt-asc' ? comparison > 0 : comparison < 0;
 }
 
 export class InMemoryTimelineRepository implements TimelineRepository {
@@ -150,37 +195,44 @@ export class InMemoryTimelineRepository implements TimelineRepository {
       throw new TimelineRepositoryError('TIMELINE_REPOSITORY_READ_FAILED');
     }
 
+    const range = validateOccurrenceRange(query);
+    const cursor =
+      query.cursor === undefined ? undefined : decodeCursor(query.cursor, query);
     const allowedKinds = query.kinds ? new Set(query.kinds) : null;
-    let events = this.#events.filter(
-      (event) =>
-        (allowedKinds === null || allowedKinds.has(event.kind)) &&
-        isInOccurrenceRange(event, query),
-    );
+    const sourceEvents =
+      query.order === 'occurredAt-desc' ? [...this.#events].reverse() : this.#events;
+    const page: TimelineRepositoryEvent[] = [];
+    let scanned = 0;
 
-    if (query.order === 'occurredAt-desc') {
-      events = [...events].reverse();
-    }
-
-    if (query.cursor !== undefined) {
-      const cursor = decodeCursor(query.cursor, query);
-      const cursorIndex = events.findIndex(
-        (event) =>
-          event.id === cursor.id && event.occurredAt === cursor.occurredAt,
-      );
-
-      if (cursorIndex === -1) {
-        throw new TimelineRepositoryError('TIMELINE_REPOSITORY_INVALID_CURSOR');
+    for (const event of sourceEvents) {
+      if (!isAfterCursor(event, cursor, query)) {
+        continue;
       }
 
-      events = events.slice(cursorIndex + 1);
+      scanned += 1;
+      if (scanned > IN_MEMORY_TIMELINE_REPOSITORY_MAX_QUERY_SCAN) {
+        throw new TimelineRepositoryError('TIMELINE_REPOSITORY_READ_FAILED');
+      }
+
+      if (
+        !isInOccurrenceRange(event, range) ||
+        (allowedKinds !== null && !allowedKinds.has(event.kind))
+      ) {
+        continue;
+      }
+
+      page.push(event);
+      if (page.length > query.limit) {
+        break;
+      }
     }
 
-    const page = events.slice(0, query.limit);
-    const hasMore = events.length > page.length;
-    const lastEvent = page.at(-1);
+    const hasMore = page.length > query.limit;
+    const visiblePage = hasMore ? page.slice(0, query.limit) : page;
+    const lastEvent = visiblePage.at(-1);
 
     return {
-      events: cloneTimelineRepositoryEvents(page),
+      events: cloneTimelineRepositoryEvents(visiblePage),
       nextCursor:
         hasMore && lastEvent !== undefined
           ? encodeCursor(lastEvent, query)
