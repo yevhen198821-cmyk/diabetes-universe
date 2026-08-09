@@ -12,9 +12,9 @@ concurrency:
 
 jobs:
   quality:
-    name: Format, lint, typecheck, test, build, and link validation
+    name: Format, lint, typecheck, test, build, E2E, and link validation
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
 
     steps:
       - name: Checkout
@@ -48,6 +48,12 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: E2E
+        run: pnpm test:e2e
 
       - name: Validate Markdown links
         run: python3 scripts/validate-markdown-links.py

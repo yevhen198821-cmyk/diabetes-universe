@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import {
   createInMemoryTimelineRepository,
-  InMemoryTimelineRepository,
+  TimelineRepositoryError,
 } from '@diabetes-universe/timeline';
 
 import { createWebTimelineRepository } from './create-web-timeline-repository.ts';
@@ -14,7 +14,7 @@ test('createWebTimelineRepository uses an injected repository when provided', ()
   assert.equal(createWebTimelineRepository({ repository }), repository);
 });
 
-test('createWebTimelineRepository falls back to in-memory when indexedDB is unavailable', () => {
+test('createWebTimelineRepository fails closed when indexedDB is unavailable', async () => {
   const originalIndexedDb = globalThis.indexedDB;
   // @ts-expect-error test override
   delete globalThis.indexedDB;
@@ -22,7 +22,14 @@ test('createWebTimelineRepository falls back to in-memory when indexedDB is unav
   try {
     const repository = createWebTimelineRepository();
 
-    assert.ok(repository instanceof InMemoryTimelineRepository);
+    await assert.rejects(
+      () => repository.initialize(),
+      (error) => {
+        assert.ok(error instanceof TimelineRepositoryError);
+        assert.equal(error.code, 'TIMELINE_REPOSITORY_STORAGE_UNAVAILABLE');
+        return true;
+      },
+    );
   } finally {
     globalThis.indexedDB = originalIndexedDb;
   }
