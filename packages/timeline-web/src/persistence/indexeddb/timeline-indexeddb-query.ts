@@ -9,12 +9,12 @@ import {
 } from '@diabetes-universe/timeline';
 import type { IDBPDatabase } from 'idb';
 
-import { readIndexedDbTimelineEventRecord } from './timeline-indexeddb-record';
+import { createIndexedDbTimelineQuarantineRecord } from './timeline-indexeddb-quarantine';
 import {
   TIMELINE_INDEXEDDB_EVENT_INDEXES,
   TIMELINE_INDEXEDDB_STORES,
-  type IndexedDbTimelineEventRecord,
 } from './timeline-indexeddb-schema';
+import { validateIndexedDbTimelineEventRecord } from './timeline-indexeddb-validation';
 
 interface TimelineIndexedDbCursorPayload {
   readonly version: 1;
@@ -169,6 +169,7 @@ function createIndexKeyRange(
 export async function queryIndexedDbTimelineEvents(
   database: IDBPDatabase,
   query: TimelineRepositoryQuery,
+  now: () => string = () => new Date().toISOString(),
 ): Promise<TimelineRepositoryQueryResult> {
   if (
     !Number.isInteger(query.limit) ||
@@ -187,6 +188,7 @@ export async function queryIndexedDbTimelineEvents(
   const allowedKinds = query.kinds ? new Set(query.kinds) : null;
   const page: TimelineRepositoryEvent[] = [];
   let scanned = 0;
+  let quarantineAttempted = false;
   const direction = query.order === 'occurredAt-desc' ? 'prev' : 'next';
   const indexName =
     query.kinds?.length === 1
@@ -194,12 +196,15 @@ export async function queryIndexedDbTimelineEvents(
       : TIMELINE_INDEXEDDB_EVENT_INDEXES.byOccurredAtId;
 
   const transaction = database.transaction(
-    TIMELINE_INDEXEDDB_STORES.events,
-    'readonly',
+    [TIMELINE_INDEXEDDB_STORES.events, TIMELINE_INDEXEDDB_STORES.quarantine],
+    'readwrite',
   );
 
   try {
     const store = transaction.objectStore(TIMELINE_INDEXEDDB_STORES.events);
+    const quarantineStore = transaction.objectStore(
+      TIMELINE_INDEXEDDB_STORES.quarantine,
+    );
     const index = store.index(indexName);
     let position = await index.openCursor(
       createIndexKeyRange(query),
@@ -212,9 +217,26 @@ export async function queryIndexedDbTimelineEvents(
         throw new TimelineRepositoryError('TIMELINE_REPOSITORY_READ_FAILED');
       }
 
-      const event = readIndexedDbTimelineEventRecord(
-        position.value as IndexedDbTimelineEventRecord,
-      );
+      const rawRecord = position.value;
+      const validation = validateIndexedDbTimelineEventRecord(rawRecord);
+      if (validation.status === 'quarantine') {
+        quarantineAttempted = true;
+        quarantineStore.put(
+          createIndexedDbTimelineQuarantineRecord(
+            rawRecord,
+            validation,
+            position.primaryKey,
+            now(),
+          ),
+        );
+        store.delete(position.primaryKey);
+        await transaction.done;
+        throw new TimelineRepositoryError('TIMELINE_REPOSITORY_READ_FAILED');
+      }
+
+      const event = cloneTimelineRepositoryEvents([
+        validation.record.event,
+      ])[0]!;
 
       if (
         isAfterCursor(event, cursor, query) &&
@@ -232,12 +254,15 @@ export async function queryIndexedDbTimelineEvents(
 
     await transaction.done;
   } catch (error) {
-    transaction.abort();
     if (error instanceof TimelineRepositoryError) {
       throw error;
     }
 
-    throw new TimelineRepositoryError('TIMELINE_REPOSITORY_READ_FAILED');
+    throw new TimelineRepositoryError(
+      quarantineAttempted
+        ? 'TIMELINE_REPOSITORY_QUARANTINE_FAILED'
+        : 'TIMELINE_REPOSITORY_READ_FAILED',
+    );
   }
 
   const hasMore = page.length > query.limit;
