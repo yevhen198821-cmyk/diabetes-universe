@@ -8,3 +8,4 @@
 | ADR-0012   | [User Time Zone Policy](./0012-user-time-zone-policy.md)                                                           | Approved                           | 2026-08-02 |
 | ADR-0013   | [Web Client Runtime Ownership and Bootstrap Gate](./0013-web-client-runtime-ownership.md)                          | Approved                           | 2026-08-02 |
 | ADR-0014   | [Local-First Medical Event Persistence Architecture](./0014-local-first-medical-event-persistence-architecture.md) | Approved                           | 2026-08-09 |
+| ADR-0015   | [Web IndexedDB Timeline Persistence Implementation](./0015-web-indexeddb-timeline-persistence-implementation.md)   | Approved                           | 2026-08-09 |
