@@ -1,4 +1,3 @@
-import type { TimelineRepositoryErrorCode } from '@diabetes-universe/timeline';
 import type {
   SemanticTimelineEvent,
   TimelineDiagnosticsSnapshot,
@@ -8,7 +7,19 @@ import { cloneSemanticTimelineEvents } from '../semantic-timeline-clone';
 
 export type TimelineStoreStatus = 'error' | 'loading' | 'ready';
 
-export type TimelineStoreErrorCode = TimelineRepositoryErrorCode | 'TIMELINE_STORE_UNKNOWN_ERROR';
+export type TimelineStoreErrorCode =
+  | 'TIMELINE_REPOSITORY_INITIALIZE_FAILED'
+  | 'TIMELINE_REPOSITORY_NOT_INITIALIZED'
+  | 'TIMELINE_REPOSITORY_READ_FAILED'
+  | 'TIMELINE_REPOSITORY_WRITE_FAILED'
+  | 'TIMELINE_REPOSITORY_STORAGE_UNAVAILABLE'
+  | 'TIMELINE_REPOSITORY_STORAGE_OPEN_BLOCKED'
+  | 'TIMELINE_REPOSITORY_STORAGE_QUOTA_EXCEEDED'
+  | 'TIMELINE_REPOSITORY_SCHEMA_UPGRADE_FAILED'
+  | 'TIMELINE_REPOSITORY_INVALID_CURSOR'
+  | 'TIMELINE_REPOSITORY_QUARANTINE_FAILED'
+  | 'TIMELINE_REPOSITORY_BOOTSTRAP_INCONSISTENT'
+  | 'TIMELINE_STORE_UNKNOWN_ERROR';
 
 export interface TimelineStoreState {
   readonly error?: string;
