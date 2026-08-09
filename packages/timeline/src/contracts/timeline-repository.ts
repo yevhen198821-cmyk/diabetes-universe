@@ -21,9 +21,7 @@ export interface TimelineRepositoryMutationResult {
   readonly status: TimelineRepositoryMutationStatus;
 }
 
-export type TimelineRepositoryOrder =
-  | 'occurredAt-asc'
-  | 'occurredAt-desc';
+export type TimelineRepositoryOrder = 'occurredAt-asc' | 'occurredAt-desc';
 
 export interface TimelineRepositoryQuery {
   readonly occurredFrom?: string;
