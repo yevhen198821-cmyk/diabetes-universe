@@ -8,9 +8,7 @@ import { cloneSemanticTimelineEvents } from '../semantic-timeline-clone';
 
 export type TimelineStoreStatus = 'error' | 'loading' | 'ready';
 
-export type TimelineStoreErrorCode =
-  | TimelineRepositoryErrorCode
-  | 'TIMELINE_STORE_UNKNOWN_ERROR';
+export type TimelineStoreErrorCode = TimelineRepositoryErrorCode | 'TIMELINE_STORE_UNKNOWN_ERROR';
 
 export interface TimelineStoreState {
   readonly error?: string;
