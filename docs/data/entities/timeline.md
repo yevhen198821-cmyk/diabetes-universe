@@ -211,8 +211,16 @@ P3a Semantic Types Foundation changes:
   `MigrationResult`, `QuarantineRecord`, `TimelineDiagnosticsSnapshot`) as
   separate types outside the semantic domain event;
 - legacy `TimelineEvent` remains the active P2 repository compatibility contract;
-- semantic repository cutover (P3h) has not occurred;
-- migration runtime (`liftLegacyToSemantic`) is not implemented (P3b).
+- semantic repository cutover (P3h) has not occurred.
+
+P3b Legacy Migration Runtime changes:
+
+- introduced `liftLegacyToSemantic()` in `@diabetes-universe/timeline`;
+- pure legacy presentation lift into `SemanticTimelineEvent` with external
+  `MigrationRecord` evidence and explicit quarantine results;
+- application still uses legacy `TimelineEvent` through the P2 repository;
+- semantic application store is not wired (P3c);
+- repository cutover (P3h) has not occurred.
 
 ## Semantic model (P3a)
 
@@ -230,9 +238,9 @@ is represented semantically.
 absent from `SemanticTimelineEvent`. Ownership belongs to a future persistence
 record wrapper, not to the semantic domain event.
 
-P3b will implement legacy lift and migration runtime. P3h will cut the
-repository over to native semantic storage before any durable IndexedDB/SQLite
-persistence work.
+P3b implements legacy lift runtime in `@diabetes-universe/timeline` via
+`liftLegacyToSemantic()`. Application integration, sidecar stores, and
+presentation mapping remain future waves.
 
 ## Out of scope
 
@@ -240,7 +248,8 @@ persistence work.
 - backend/API implementation
 - type-specific nested payloads on legacy `TimelineEvent` (semantic payloads are
   defined separately in P3a)
-- P3b migration runtime, P3h repository cutover, and durable persistence
+- P3c semantic application store wiring and P3h repository cutover
+- durable persistence
 
 ## Quick Add mapping
 
