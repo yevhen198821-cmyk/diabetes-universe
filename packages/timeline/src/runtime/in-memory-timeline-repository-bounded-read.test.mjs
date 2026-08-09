@@ -78,17 +78,20 @@ test('bounded reads require repository initialization', async () => {
   );
 });
 
-test('getById returns a cloned semantic event and null for a missing id', async () => {
-  const repository = await createReadyRepository();
-  const event = await repository.getById('glucose-0800');
+test(
+  'getById returns a cloned semantic event and null for a missing id',
+  async () => {
+    const repository = await createReadyRepository();
+    const event = await repository.getById('glucose-0800');
 
-  assert.equal(event?.id, 'glucose-0800');
-  event.concentrationMmolPerL = 99;
+    assert.equal(event?.id, 'glucose-0800');
+    event.concentrationMmolPerL = 99;
 
-  const reread = await repository.getById('glucose-0800');
-  assert.equal(reread?.concentrationMmolPerL, 6.4);
-  assert.equal(await repository.getById('missing'), null);
-});
+    const reread = await repository.getById('glucose-0800');
+    assert.equal(reread?.concentrationMmolPerL, 6.4);
+    assert.equal(await repository.getById('missing'), null);
+  },
+);
 
 test('queryEvents paginates ascending by occurredAt then id', async () => {
   const repository = await createReadyRepository();
@@ -166,32 +169,42 @@ test('queryEvents applies half-open occurrence ranges', async () => {
   );
 });
 
-test('queryEvents filters one or multiple kinds without widening the result', async () => {
-  const repository = await createReadyRepository();
-  const result = await repository.queryEvents({
-    kinds: ['glucose', 'insulin'],
-    limit: 10,
-    order: 'occurredAt-asc',
-  });
+test(
+  'queryEvents filters one or multiple kinds without widening the result',
+  async () => {
+    const repository = await createReadyRepository();
+    const result = await repository.queryEvents({
+      kinds: ['glucose', 'insulin'],
+      limit: 10,
+      order: 'occurredAt-asc',
+    });
 
-  assert.deepEqual(
-    result.events.map((event) => event.id),
-    ['glucose-0800', 'insulin-0810', 'glucose-0830', 'insulin-0840'],
-  );
-});
-
-test('queryEvents rejects zero, fractional, and above-cap limits', async () => {
-  const repository = await createReadyRepository();
-
-  for (const limit of [0, 1.5, IN_MEMORY_TIMELINE_REPOSITORY_MAX_QUERY_LIMIT + 1]) {
-    await assert.rejects(
-      () => repository.queryEvents({ limit, order: 'occurredAt-asc' }),
-      (error) =>
-        error instanceof TimelineRepositoryError &&
-        error.code === 'TIMELINE_REPOSITORY_READ_FAILED',
+    assert.deepEqual(
+      result.events.map((event) => event.id),
+      ['glucose-0800', 'insulin-0810', 'glucose-0830', 'insulin-0840'],
     );
-  }
-});
+  },
+);
+
+test(
+  'queryEvents rejects zero, fractional, and above-cap limits',
+  async () => {
+    const repository = await createReadyRepository();
+
+    for (const limit of [
+      0,
+      1.5,
+      IN_MEMORY_TIMELINE_REPOSITORY_MAX_QUERY_LIMIT + 1,
+    ]) {
+      await assert.rejects(
+        () => repository.queryEvents({ limit, order: 'occurredAt-asc' }),
+        (error) =>
+          error instanceof TimelineRepositoryError &&
+          error.code === 'TIMELINE_REPOSITORY_READ_FAILED',
+      );
+    }
+  },
+);
 
 test('queryEvents rejects malformed cursors', async () => {
   const repository = await createReadyRepository();
@@ -209,41 +222,44 @@ test('queryEvents rejects malformed cursors', async () => {
   );
 });
 
-test('queryEvents rejects a cursor reused with incompatible filters or order', async () => {
-  const repository = await createReadyRepository();
-  const first = await repository.queryEvents({
-    kinds: ['glucose'],
-    limit: 1,
-    order: 'occurredAt-asc',
-  });
+test(
+  'queryEvents rejects a cursor reused with incompatible filters or order',
+  async () => {
+    const repository = await createReadyRepository();
+    const first = await repository.queryEvents({
+      kinds: ['glucose'],
+      limit: 1,
+      order: 'occurredAt-asc',
+    });
 
-  assert.ok(first.nextCursor);
+    assert.ok(first.nextCursor);
 
-  await assert.rejects(
-    () =>
-      repository.queryEvents({
-        cursor: first.nextCursor,
-        kinds: ['insulin'],
-        limit: 1,
-        order: 'occurredAt-asc',
-      }),
-    (error) =>
-      error instanceof TimelineRepositoryError &&
-      error.code === 'TIMELINE_REPOSITORY_INVALID_CURSOR',
-  );
-  await assert.rejects(
-    () =>
-      repository.queryEvents({
-        cursor: first.nextCursor,
-        kinds: ['glucose'],
-        limit: 1,
-        order: 'occurredAt-desc',
-      }),
-    (error) =>
-      error instanceof TimelineRepositoryError &&
-      error.code === 'TIMELINE_REPOSITORY_INVALID_CURSOR',
-  );
-});
+    await assert.rejects(
+      () =>
+        repository.queryEvents({
+          cursor: first.nextCursor,
+          kinds: ['insulin'],
+          limit: 1,
+          order: 'occurredAt-asc',
+        }),
+      (error) =>
+        error instanceof TimelineRepositoryError &&
+        error.code === 'TIMELINE_REPOSITORY_INVALID_CURSOR',
+    );
+    await assert.rejects(
+      () =>
+        repository.queryEvents({
+          cursor: first.nextCursor,
+          kinds: ['glucose'],
+          limit: 1,
+          order: 'occurredAt-desc',
+        }),
+      (error) =>
+        error instanceof TimelineRepositoryError &&
+        error.code === 'TIMELINE_REPOSITORY_INVALID_CURSOR',
+    );
+  },
+);
 
 test('queryEvents results cannot mutate repository state', async () => {
   const repository = await createReadyRepository();
