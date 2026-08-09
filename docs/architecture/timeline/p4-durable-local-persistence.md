@@ -223,19 +223,19 @@ P4 protects same-browser continuity, not browser-data deletion, eviction, device
 
 ## Failure Model
 
-| Scenario | Required behavior |
-| --- | --- |
-| Storage unavailable | Repository initialization error |
-| Open/upgrade blocked | Explicit blocked lifecycle; never false-ready |
-| Schema upgrade failure | Initialization error; no reset |
-| Missing/corrupt bootstrap + existing durable evidence | Inconsistent-bootstrap error; no reseed |
-| Write transaction failure | Mutation not applied |
-| Quota exhaustion | Explicit failure; no automatic deletion/fallback |
-| Invalid cursor | Bounded read error |
-| Corrupt row | Durable quarantine |
-| Quarantine failure | Read/init error |
-| User deleted all events after bootstrap | Remains empty after reload |
-| Terminated IndexedDB connection | Adapter unusable until recovery/reinitialize |
+| Scenario                                              | Required behavior                                |
+| ----------------------------------------------------- | ------------------------------------------------ |
+| Storage unavailable                                   | Repository initialization error                  |
+| Open/upgrade blocked                                  | Explicit blocked lifecycle; never false-ready    |
+| Schema upgrade failure                                | Initialization error; no reset                   |
+| Missing/corrupt bootstrap + existing durable evidence | Inconsistent-bootstrap error; no reseed          |
+| Write transaction failure                             | Mutation not applied                             |
+| Quota exhaustion                                      | Explicit failure; no automatic deletion/fallback |
+| Invalid cursor                                        | Bounded read error                               |
+| Corrupt row                                           | Durable quarantine                               |
+| Quarantine failure                                    | Read/init error                                  |
+| User deleted all events after bootstrap               | Remains empty after reload                       |
+| Terminated IndexedDB connection                       | Adapter unusable until recovery/reinitialize     |
 
 UI copy remains presentation-layer responsibility; raw browser/storage exceptions and PHI must not leak to user copy or telemetry.
 
