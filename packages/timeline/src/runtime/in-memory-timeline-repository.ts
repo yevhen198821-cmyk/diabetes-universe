@@ -87,14 +87,16 @@ function decodeCursor(
 function validateOccurrenceRange(
   query: TimelineRepositoryQuery,
 ): ValidatedOccurrenceRange {
-  const fromTime =
-    query.occurredFrom === undefined
-      ? undefined
-      : Date.parse(query.occurredFrom);
-  const toTime =
-    query.occurredTo === undefined
-      ? undefined
-      : Date.parse(query.occurredTo);
+  let fromTime: number | undefined;
+  let toTime: number | undefined;
+
+  if (query.occurredFrom !== undefined) {
+    fromTime = Date.parse(query.occurredFrom);
+  }
+
+  if (query.occurredTo !== undefined) {
+    toTime = Date.parse(query.occurredTo);
+  }
 
   if (
     (fromTime !== undefined && Number.isNaN(fromTime)) ||
@@ -150,7 +152,11 @@ function isAfterCursor(
   }
 
   const comparison = compareEventToCursor(event, cursor);
-  return query.order === 'occurredAt-asc' ? comparison > 0 : comparison < 0;
+  if (query.order === 'occurredAt-asc') {
+    return comparison > 0;
+  }
+
+  return comparison < 0;
 }
 
 export class InMemoryTimelineRepository implements TimelineRepository {
@@ -200,15 +206,17 @@ export class InMemoryTimelineRepository implements TimelineRepository {
     }
 
     const range = validateOccurrenceRange(query);
-    const cursor =
-      query.cursor === undefined
-        ? undefined
-        : decodeCursor(query.cursor, query);
+    let cursor: InMemoryTimelineCursorPayload | undefined;
+    if (query.cursor !== undefined) {
+      cursor = decodeCursor(query.cursor, query);
+    }
+
     const allowedKinds = query.kinds ? new Set(query.kinds) : null;
-    const sourceEvents =
-      query.order === 'occurredAt-desc'
-        ? [...this.#events].reverse()
-        : this.#events;
+    let sourceEvents = this.#events;
+    if (query.order === 'occurredAt-desc') {
+      sourceEvents = [...this.#events].reverse();
+    }
+
     const page: TimelineRepositoryEvent[] = [];
     let scanned = 0;
 
