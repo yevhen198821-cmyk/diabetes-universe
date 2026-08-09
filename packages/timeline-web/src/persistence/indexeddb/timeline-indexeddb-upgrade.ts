@@ -34,9 +34,12 @@ export function applyTimelineIndexedDbSchemaUpgrade(
 
   assertFreshDatabase(database);
 
-  const eventStore = database.createObjectStore(TIMELINE_INDEXEDDB_STORES.events, {
-    keyPath: 'id',
-  });
+  const eventStore = database.createObjectStore(
+    TIMELINE_INDEXEDDB_STORES.events,
+    {
+      keyPath: 'id',
+    },
+  );
   eventStore.createIndex(
     TIMELINE_INDEXEDDB_EVENT_INDEXES.byOccurredAtId,
     ['occurredAt', 'id'],
