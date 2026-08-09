@@ -1,12 +1,6 @@
 import type {
-  ActivityTimelineEvent,
   CanonicalUnitId,
-  GlucoseTimelineEvent,
-  InsulinTimelineEvent,
-  MedicationTimelineEvent,
-  NoteTimelineEvent,
   NutritionProductSnapshot,
-  NutritionTimelineEvent,
   SemanticTimelineEvent,
   TimelineEventKind,
   TimelineEventSource,
@@ -78,11 +72,17 @@ function isFiniteNumber(value: unknown): value is number {
 }
 
 function isTimelineEventKind(value: unknown): value is TimelineEventKind {
-  return typeof value === 'string' && TIMELINE_EVENT_KINDS.has(value as TimelineEventKind);
+  return (
+    typeof value === 'string' &&
+    TIMELINE_EVENT_KINDS.has(value as TimelineEventKind)
+  );
 }
 
 function isTimelineEventSource(value: unknown): value is TimelineEventSource {
-  return typeof value === 'string' && TIMELINE_EVENT_SOURCES.has(value as TimelineEventSource);
+  return (
+    typeof value === 'string' &&
+    TIMELINE_EVENT_SOURCES.has(value as TimelineEventSource)
+  );
 }
 
 function hasValidEnvelope(value: Record<string, unknown>): boolean {
@@ -94,18 +94,6 @@ function hasValidEnvelope(value: Record<string, unknown>): boolean {
     isIsoTimestamp(value.updatedAt) &&
     value.schemaVersion === 1 &&
     isTimelineEventSource(value.source)
-  );
-}
-
-function isGlucoseEvent(value: Record<string, unknown>): value is unknown & GlucoseTimelineEvent {
-  return value.kind === 'glucose' && isFiniteNumber(value.concentrationMmolPerL);
-}
-
-function isInsulinEvent(value: Record<string, unknown>): value is unknown & InsulinTimelineEvent {
-  return (
-    value.kind === 'insulin' &&
-    isNonEmptyString(value.preparation) &&
-    isFiniteNumber(value.doseUnits)
   );
 }
 
@@ -123,79 +111,67 @@ function isNutritionProduct(value: unknown): value is NutritionProductSnapshot {
   );
 }
 
-function isNutritionEvent(value: Record<string, unknown>): value is unknown & NutritionTimelineEvent {
-  const products = value.products;
-  return (
-    value.kind === 'nutrition' &&
-    (value.mode === 'manual' || value.mode === 'products') &&
-    isNonEmptyString(value.mealType) &&
-    isFiniteNumber(value.carbohydratesGrams) &&
-    (products === undefined ||
-      (Array.isArray(products) && products.every(isNutritionProduct))) &&
-    isOptionalString(value.note)
-  );
-}
-
-function isMedicationEvent(value: Record<string, unknown>): value is unknown & MedicationTimelineEvent {
-  return (
-    value.kind === 'medication' &&
-    isOptionalString(value.medicationId) &&
-    isNonEmptyString(value.medicationName) &&
-    isFiniteNumber(value.dose) &&
-    typeof value.doseUnit === 'string' &&
-    CANONICAL_UNIT_IDS.has(value.doseUnit as CanonicalUnitId) &&
-    isOptionalString(value.context) &&
-    isOptionalString(value.note)
-  );
-}
-
-function isActivityEvent(value: Record<string, unknown>): value is unknown & ActivityTimelineEvent {
-  return (
-    value.kind === 'activity' &&
-    isNonEmptyString(value.activityType) &&
-    isFiniteNumber(value.durationSeconds) &&
-    isOptionalString(value.note)
-  );
-}
-
-function isNoteEvent(value: Record<string, unknown>): value is unknown & NoteTimelineEvent {
-  return (
-    value.kind === 'note' &&
-    isOptionalString(value.title) &&
-    isNonEmptyString(value.body)
-  );
-}
-
-function isSemanticTimelineEvent(value: unknown): value is SemanticTimelineEvent {
-  if (!isRecord(value) || !hasValidEnvelope(value)) {
-    return false;
-  }
-
+function hasValidKindPayload(value: Record<string, unknown>): boolean {
   switch (value.kind) {
     case 'glucose':
-      return isGlucoseEvent(value);
+      return isFiniteNumber(value.concentrationMmolPerL);
     case 'insulin':
-      return isInsulinEvent(value);
-    case 'nutrition':
-      return isNutritionEvent(value);
+      return (
+        isNonEmptyString(value.preparation) && isFiniteNumber(value.doseUnits)
+      );
+    case 'nutrition': {
+      const products = value.products;
+      return (
+        (value.mode === 'manual' || value.mode === 'products') &&
+        isNonEmptyString(value.mealType) &&
+        isFiniteNumber(value.carbohydratesGrams) &&
+        (products === undefined ||
+          (Array.isArray(products) && products.every(isNutritionProduct))) &&
+        isOptionalString(value.note)
+      );
+    }
     case 'medication':
-      return isMedicationEvent(value);
+      return (
+        isOptionalString(value.medicationId) &&
+        isNonEmptyString(value.medicationName) &&
+        isFiniteNumber(value.dose) &&
+        typeof value.doseUnit === 'string' &&
+        CANONICAL_UNIT_IDS.has(value.doseUnit as CanonicalUnitId) &&
+        isOptionalString(value.context) &&
+        isOptionalString(value.note)
+      );
     case 'activity':
-      return isActivityEvent(value);
+      return (
+        isNonEmptyString(value.activityType) &&
+        isFiniteNumber(value.durationSeconds) &&
+        isOptionalString(value.note)
+      );
     case 'note':
-      return isNoteEvent(value);
+      return isOptionalString(value.title) && isNonEmptyString(value.body);
     default:
       return false;
   }
 }
 
-function readOptionalStorageSchemaVersion(value: Record<string, unknown>): number | undefined {
+function isSemanticTimelineEvent(
+  value: unknown,
+): value is SemanticTimelineEvent {
+  return (
+    isRecord(value) && hasValidEnvelope(value) && hasValidKindPayload(value)
+  );
+}
+
+function readOptionalStorageSchemaVersion(
+  value: Record<string, unknown>,
+): number | undefined {
   return typeof value.storageSchemaVersion === 'number'
     ? value.storageSchemaVersion
     : undefined;
 }
 
-function readOptionalRecordId(value: Record<string, unknown>): string | undefined {
+function readOptionalRecordId(
+  value: Record<string, unknown>,
+): string | undefined {
   return typeof value.id === 'string' ? value.id : undefined;
 }
 
@@ -222,13 +198,21 @@ export function validateIndexedDbTimelineEventRecord(
     !isNonEmptyString(raw.id) ||
     !isIsoTimestamp(raw.occurredAt) ||
     !isTimelineEventKind(raw.kind) ||
-    !isIsoTimestamp(raw.persistedAt) ||
-    !isSemanticTimelineEvent(raw.event)
+    !isIsoTimestamp(raw.persistedAt)
   ) {
     return {
       status: 'quarantine',
       reason: 'invalid_record_shape',
       sourceRecordId,
+      storageSchemaVersion,
+    };
+  }
+
+  if (!isSemanticTimelineEvent(raw.event)) {
+    return {
+      status: 'quarantine',
+      reason: 'invalid_event_schema',
+      sourceRecordId: raw.id,
       storageSchemaVersion,
     };
   }
@@ -248,7 +232,7 @@ export function validateIndexedDbTimelineEventRecord(
 
   return {
     status: 'ok',
-    record: raw as unknown as IndexedDbTimelineEventRecord,
+    record: raw as IndexedDbTimelineEventRecord,
   };
 }
 
