@@ -1,3 +1,4 @@
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 import { openDB, type IDBPDatabase } from 'idb';
 import { TimelineRepositoryError } from '@diabetes-universe/timeline';
 
@@ -19,6 +20,7 @@ import { applyTimelineIndexedDbSchemaUpgrade } from './timeline-indexeddb-upgrad
 export interface TimelineIndexedDbOpenOptions {
   readonly databaseName?: string;
   readonly now?: () => string;
+  readonly seedEvents?: readonly SemanticTimelineEvent[];
 }
 
 export interface TimelineIndexedDbOpenResult {
@@ -101,6 +103,7 @@ export async function openTimelineIndexedDB(
 
     const bootstrapState = await runTimelineIndexedDbBootstrap(database, {
       now: options.now,
+      seedEvents: options.seedEvents,
     });
 
     if (bootstrapState.phase === 'failed' || bootstrapState.error) {

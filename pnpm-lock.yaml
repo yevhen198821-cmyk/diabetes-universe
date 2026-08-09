@@ -47,6 +47,9 @@ importers:
       '@diabetes-universe/timeline':
         specifier: workspace:*
         version: link:../../packages/timeline
+      '@diabetes-universe/timeline-web':
+        specifier: workspace:*
+        version: link:../../packages/timeline-web
       '@diabetes-universe/types':
         specifier: workspace:*
         version: link:../../packages/types

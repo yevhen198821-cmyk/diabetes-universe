@@ -65,7 +65,7 @@ async function waitFor(predicate, description, maxAttempts = 30) {
   throw new Error(`Timed out waiting for ${description}`);
 }
 
-async function mountTimelineStore({ initialEvents, repository } = {}) {
+async function mountTimelineStore({ repository } = {}) {
   setupIntegrationDom();
 
   let currentStore;
@@ -88,7 +88,7 @@ async function mountTimelineStore({ initialEvents, repository } = {}) {
     root.render(
       createElement(
         TimelineStoreProvider,
-        { initialEvents, repository },
+        { repository },
         createElement(StoreProbe),
       ),
     );

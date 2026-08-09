@@ -1,7 +1,8 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 
+import { createWebTimelineRepository } from '../create-web-timeline-repository';
 import { TimelineStoreProvider } from './timeline-store';
 
 interface TimelineStoreBoundaryProps {
@@ -11,5 +12,11 @@ interface TimelineStoreBoundaryProps {
 export function TimelineStoreBoundary({
   children,
 }: TimelineStoreBoundaryProps) {
-  return <TimelineStoreProvider>{children}</TimelineStoreProvider>;
+  const repository = useMemo(() => createWebTimelineRepository(), []);
+
+  return (
+    <TimelineStoreProvider repository={repository}>
+      {children}
+    </TimelineStoreProvider>
+  );
 }

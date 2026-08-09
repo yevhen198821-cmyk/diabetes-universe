@@ -107,6 +107,9 @@ test('repository failure does not commit native semantic mutation', async () => 
     getSnapshot() {
       return { events: [] };
     },
+    async queryEvents() {
+      return { events: [] };
+    },
     async addEvent() {
       this.addCalls += 1;
       throw new TimelineRepositoryError('TIMELINE_REPOSITORY_WRITE_FAILED');

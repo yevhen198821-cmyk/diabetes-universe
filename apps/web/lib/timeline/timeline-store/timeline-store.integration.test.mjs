@@ -108,6 +108,22 @@ async function waitFor(predicate, description, maxAttempts = 30) {
   throw new Error(`Timed out waiting for ${description}`);
 }
 
+function createRepositoryQueryEvents(getEvents, assertInitialized) {
+  return async function queryEvents(query) {
+    assertInitialized();
+
+    let events = cloneEvents(getEvents());
+
+    if (query.order === 'occurredAt-desc') {
+      events = [...events].reverse();
+    }
+
+    return {
+      events: events.slice(0, query.limit),
+    };
+  };
+}
+
 class DeferredInitializeRepository {
   #events;
   #initialized = false;
@@ -130,6 +146,11 @@ class DeferredInitializeRepository {
 
     return { events: cloneEvents(this.#events) };
   }
+
+  queryEvents = createRepositoryQueryEvents(
+    () => this.#events,
+    () => this.#assertInitialized(),
+  );
 
   async addEvent() {
     this.#assertInitialized();
@@ -184,6 +205,11 @@ class RecoveringMutationRepository {
 
     return { events: cloneEvents(this.#events) };
   }
+
+  queryEvents = createRepositoryQueryEvents(
+    () => this.#events,
+    () => this.#assertInitialized(),
+  );
 
   async addEvent(event) {
     this.#assertInitialized();
@@ -244,6 +270,11 @@ class SerializedMutationRepository {
     return { events: cloneEvents(this.#events) };
   }
 
+  queryEvents = createRepositoryQueryEvents(
+    () => this.#events,
+    () => this.#assertInitialized(),
+  );
+
   async addEvent(event) {
     this.#assertInitialized();
     this.addCalls.push(event.id);
@@ -283,7 +314,7 @@ class SerializedMutationRepository {
   }
 }
 
-async function mountTimelineStore({ initialEvents, repository } = {}) {
+async function mountTimelineStore({ repository } = {}) {
   setupIntegrationDom();
 
   const observations = [];
@@ -314,7 +345,7 @@ async function mountTimelineStore({ initialEvents, repository } = {}) {
     root.render(
       createElement(
         TimelineStoreProvider,
-        { initialEvents, repository },
+        { repository },
         createElement(StoreProbe),
       ),
     );

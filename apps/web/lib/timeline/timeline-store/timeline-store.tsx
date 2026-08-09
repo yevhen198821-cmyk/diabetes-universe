@@ -2,7 +2,6 @@
 
 import {
   TimelineRepositoryError,
-  createInMemoryTimelineRepository,
   type TimelineRepository,
   type TimelineRepositoryMutationResult,
 } from '@diabetes-universe/timeline';
@@ -15,12 +14,11 @@ import {
   useMemo,
   useReducer,
   useRef,
-  useState,
   type ReactNode,
 } from 'react';
 
-import { timelineEvents as demoTimelineEvents } from '../../mocks/timeline';
 import { cloneSemanticTimelineEvents } from '../semantic-timeline-clone';
+import { createWebTimelineRepository } from '../create-web-timeline-repository';
 import {
   createTimelineDiagnosticsFromState,
   initialTimelineStoreState,
@@ -28,6 +26,7 @@ import {
   type TimelineStoreErrorCode,
   type TimelineStoreStatus,
 } from './timeline-store-model';
+import { loadTimelineRepositoryEvents } from './load-timeline-repository-events';
 
 export interface TimelineStoreValue {
   readonly addEvent: (event: SemanticTimelineEvent) => void;
@@ -42,17 +41,10 @@ export interface TimelineStoreValue {
 
 interface TimelineStoreProviderProps {
   readonly children: ReactNode;
-  readonly initialEvents?: readonly SemanticTimelineEvent[];
   readonly repository?: TimelineRepository;
 }
 
 const TimelineStoreContext = createContext<TimelineStoreValue | null>(null);
-
-function createDefaultTimelineRepository(
-  initialEvents: readonly SemanticTimelineEvent[],
-): TimelineRepository {
-  return createInMemoryTimelineRepository({ seedEvents: initialEvents });
-}
 
 function resolveTimelineStoreErrorCode(error: unknown): TimelineStoreErrorCode {
   if (error instanceof TimelineRepositoryError) {
@@ -64,26 +56,28 @@ function resolveTimelineStoreErrorCode(error: unknown): TimelineStoreErrorCode {
 
 export function TimelineStoreProvider({
   children,
-  initialEvents = demoTimelineEvents,
-  repository,
+  repository: repositoryOverride,
 }: TimelineStoreProviderProps) {
   const isMountedRef = useRef(false);
   const operationQueueRef = useRef<Promise<void>>(Promise.resolve());
-  const [timelineRepository] = useState<TimelineRepository>(
-    () => repository ?? createDefaultTimelineRepository(initialEvents),
+  const timelineRepository = useMemo(
+    () => repositoryOverride ?? createWebTimelineRepository(),
+    [repositoryOverride],
   );
   const [state, dispatch] = useReducer(
     timelineStoreReducer,
     initialTimelineStoreState,
   );
 
-  const dispatchReadySnapshot = useCallback(() => {
-    dispatch({
-      events: cloneSemanticTimelineEvents(
-        timelineRepository.getSnapshot().events,
-      ),
-      type: 'setReady',
-    });
+  const dispatchReadySnapshot = useCallback(async () => {
+    const events = await loadTimelineRepositoryEvents(timelineRepository);
+
+    if (isMountedRef.current) {
+      dispatch({
+        events: cloneSemanticTimelineEvents(events),
+        type: 'setReady',
+      });
+    }
   }, [timelineRepository]);
 
   const dispatchRepositoryError = useCallback((error: unknown) => {
@@ -125,7 +119,7 @@ export function TimelineStoreProvider({
           const result = await mutation();
 
           if (isMountedRef.current && result.status === 'applied') {
-            dispatchReadySnapshot();
+            await dispatchReadySnapshot();
           }
         })
         .catch((error: unknown) => {

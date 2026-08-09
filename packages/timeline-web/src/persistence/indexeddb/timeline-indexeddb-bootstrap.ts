@@ -1,6 +1,11 @@
 import type { IDBPDatabase } from 'idb';
-import { TimelineRepositoryError } from '@diabetes-universe/timeline';
+import {
+  TimelineRepositoryError,
+  normalizeTimelineRepositoryEvents,
+  type TimelineRepositoryEvent,
+} from '@diabetes-universe/timeline';
 
+import { createIndexedDbTimelineEventRecord } from './timeline-indexeddb-record';
 import {
   TIMELINE_BOOTSTRAP_STATE_METADATA_KEY,
   TIMELINE_BOOTSTRAP_VERSION,
@@ -23,6 +28,7 @@ export interface TimelineBootstrapRuntimeState {
 
 export interface TimelineIndexedDbBootstrapDependencies {
   readonly now?: () => string;
+  readonly seedEvents?: readonly TimelineRepositoryEvent[];
 }
 
 async function readMetadataRecord(
@@ -76,21 +82,28 @@ function createBootstrapStateMetadata(
 async function writeFirstRunBootstrap(
   database: IDBPDatabase,
   completedAt: string,
+  seedEvents: readonly TimelineRepositoryEvent[],
 ): Promise<TimelineBootstrapMetadata> {
   const bootstrapMetadata = createBootstrapMetadata(completedAt);
   const transaction = database.transaction(
-    TIMELINE_INDEXEDDB_STORES.metadata,
+    [TIMELINE_INDEXEDDB_STORES.metadata, TIMELINE_INDEXEDDB_STORES.events],
     'readwrite',
   );
   const metadataStore = transaction.objectStore(
     TIMELINE_INDEXEDDB_STORES.metadata,
   );
+  const eventsStore = transaction.objectStore(TIMELINE_INDEXEDDB_STORES.events);
 
   metadataStore.put(
     createBootstrapStateMetadata('migrating', completedAt, {
       lastMigrationAt: completedAt,
     }),
   );
+
+  for (const event of normalizeTimelineRepositoryEvents(seedEvents)) {
+    eventsStore.put(createIndexedDbTimelineEventRecord(event, completedAt));
+  }
+
   metadataStore.put(bootstrapMetadata);
   metadataStore.put(createBootstrapStateMetadata('ready', completedAt));
 
@@ -142,7 +155,11 @@ export async function runTimelineIndexedDbBootstrap(
   }
 
   try {
-    const metadata = await writeFirstRunBootstrap(database, completedAt);
+    const metadata = await writeFirstRunBootstrap(
+      database,
+      completedAt,
+      dependencies.seedEvents ?? [],
+    );
 
     return {
       phase: 'ready',
