@@ -1,19 +1,6 @@
-import type {
-  DaySummary,
-  LastGlucose,
-  TimelineEvent,
-} from '@diabetes-universe/types';
+import type { TimelineEvent } from '@diabetes-universe/types';
 
 export const DEMO_TIMELINE_REFERENCE_DATE = '2026-08-02T10:00:00.000Z';
-
-export const lastGlucose: LastGlucose = {
-  time: '08:00',
-  value: '6,4 ммоль/л',
-};
-
-export const daySummary: DaySummary = {
-  timeInRange: '92%',
-};
 
 const historyNoteEvents: readonly TimelineEvent[] = Array.from(
   { length: 24 },

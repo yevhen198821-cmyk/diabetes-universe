@@ -256,6 +256,27 @@ P3c Semantic Application Store changes:
 - presentation mappers are not migrated (P3d);
 - repository cutover (P3h) has not occurred.
 
+P3f Dashboard Semantic Closure changes:
+
+- Dashboard read/business derivations consume `SemanticTimelineEvent[]` only;
+- presentation strings are produced at component/container boundaries;
+- production demo legacy seed remains in `apps/web/lib/mocks/timeline.ts` until
+  P3h repository cutover.
+
+P3g Demo Fixture & Migration Closure changes:
+
+- production demo legacy records in `apps/web/lib/mocks/timeline.ts` validated
+  through `liftRepositorySnapshot()` with `quarantinedCount === 0` and
+  `unsupportedSchemaCount === 0`;
+- deterministic regression coverage in
+  `apps/web/lib/mocks/demo-fixture-migration-closure.test.mjs` against the real
+  production demo dataset (31 events across all 6 kinds);
+- semantic integrity, migration evidence, and P3d presentation fidelity verified
+  for representative demo records;
+- obsolete presentation-only demo exports (`lastGlucose`, `daySummary`) removed
+  from the mock module;
+- P2 repository contract and legacy seed format remain unchanged until P3h.
+
 ## Out of scope
 
 - reminder and `ai_insight` as Timeline events
