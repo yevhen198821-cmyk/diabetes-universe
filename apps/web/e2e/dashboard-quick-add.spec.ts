@@ -177,7 +177,9 @@ test('timeline search and filters combine without changing store', async ({
 
   await page.goto('/timeline');
   await waitForApplicationReady(page);
-  await page.keyboard.press('Tab');
+  const homeLink = page.getByRole('link', { name: 'На главную' });
+  await homeLink.focus();
+  await expect(homeLink).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(search).toBeFocused();
   await page.keyboard.type('glucose');
