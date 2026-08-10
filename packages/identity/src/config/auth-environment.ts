@@ -69,8 +69,11 @@ function resolveDatabaseMode(env: NodeJS.ProcessEnv): AuthDatabaseMode {
   );
 }
 
-function resolveTrustedOrigins(baseUrl: string): string[] {
-  const configured = process.env.AUTH_TRUSTED_ORIGINS?.split(',')
+function resolveTrustedOrigins(
+  baseUrl: string,
+  env: NodeJS.ProcessEnv,
+): string[] {
+  const configured = env.AUTH_TRUSTED_ORIGINS?.split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
 
@@ -102,7 +105,7 @@ export function resolveAuthEnvironment(
         : undefined,
     emailFrom: readOptionalString(env.AUTH_EMAIL_FROM),
     resendApiKey: readOptionalString(env.RESEND_API_KEY),
-    trustedOrigins: resolveTrustedOrigins(baseUrl),
+    trustedOrigins: resolveTrustedOrigins(baseUrl, env),
     webauthnOrigin: readOptionalString(env.AUTH_WEBAUTHN_ORIGIN),
     webauthnRpId: readOptionalString(env.AUTH_WEBAUTHN_RP_ID),
     webauthnRpName:

@@ -1,4 +1,5 @@
 import {
+  AUTH_UNAVAILABLE_MESSAGE,
   AuthConfigurationError,
   isAuthEnvironmentConfigured,
   resolveAuthEnvironment,
@@ -14,7 +15,7 @@ export function isWebAuthConfigured(): boolean {
   return isAuthEnvironmentConfigured();
 }
 
-export function getWebAuthConfigurationError(): string | null {
+export function getWebAuthConfigurationDiagnostic(): string | null {
   try {
     resolveAuthEnvironment();
     return null;
@@ -27,6 +28,6 @@ export function getWebAuthConfigurationError(): string | null {
   }
 }
 
-export function getAuthUnavailableMessage(): string | null {
-  return getWebAuthConfigurationError();
+export function getAuthUnavailableMessage(): string {
+  return AUTH_UNAVAILABLE_MESSAGE;
 }

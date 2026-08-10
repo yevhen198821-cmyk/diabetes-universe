@@ -3,10 +3,12 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-import { resolveSafeAuthCallbackPath } from '@diabetes-universe/identity';
+import {
+  AUTH_UNAVAILABLE_MESSAGE,
+  resolveSafeAuthCallbackPath,
+} from '@diabetes-universe/identity';
 
 import {
-  getAuthUnavailableMessage,
   getWebIdentityService,
   isWebAuthConfigured,
 } from './get-web-identity-service';
@@ -22,7 +24,7 @@ export async function requestMagicLinkAction(
 ): Promise<RequestMagicLinkState> {
   if (!isWebAuthConfigured()) {
     return {
-      message: getAuthUnavailableMessage() ?? undefined,
+      message: AUTH_UNAVAILABLE_MESSAGE,
       status: 'unavailable',
     };
   }

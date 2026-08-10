@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   assertProductionCapableEmailDelivery,
   isAuthE2eFixtureEndpointEnabled,
+  isAuthE2eRuntime,
   isCapturingEmailDeliveryAllowed,
   isExplicitAuthTestRuntime,
   isProductionAuthDeployment,
@@ -13,6 +14,13 @@ import {
   AuthConfigurationError,
   resolveAuthEnvironment,
 } from './auth-environment.ts';
+
+const pgliteE2eEnv = {
+  AUTH_DATABASE_MODE: 'pglite',
+  AUTH_E2E_FIXTURES: 'true',
+  AUTH_RUNTIME_ENV: 'e2e',
+  AUTH_USE_PGLITE: 'true',
+};
 
 test('isProductionAuthDeployment is true only for explicit production markers', () => {
   assert.equal(isProductionAuthDeployment({ VERCEL_ENV: 'production' }), true);
@@ -27,6 +35,12 @@ test('isProductionAuthDeployment is true only for explicit production markers', 
     }),
     false,
   );
+});
+
+test('isAuthE2eRuntime requires AUTH_RUNTIME_ENV=e2e', () => {
+  assert.equal(isAuthE2eRuntime({ AUTH_RUNTIME_ENV: 'e2e' }), true);
+  assert.equal(isAuthE2eRuntime({ AUTH_RUNTIME_ENV: 'production' }), false);
+  assert.equal(isAuthE2eRuntime({}), false);
 });
 
 test('isExplicitAuthTestRuntime requires pglite or NODE_ENV=test', () => {
@@ -48,45 +62,69 @@ test('isExplicitAuthTestRuntime requires pglite or NODE_ENV=test', () => {
 test('AUTH_E2E_FIXTURES alone cannot enable the fixture endpoint', () => {
   assert.equal(
     isAuthE2eFixtureEndpointEnabled({
+      AUTH_DATABASE_MODE: 'pglite',
       AUTH_E2E_FIXTURES: 'true',
+      AUTH_USE_PGLITE: 'true',
       NODE_ENV: 'production',
     }),
     false,
   );
 });
 
-test('production deployment always disables the fixture endpoint', () => {
+test('fixture endpoint returns 404 for production runtime', () => {
   assert.equal(
     isAuthE2eFixtureEndpointEnabled({
-      AUTH_DATABASE_MODE: 'pglite',
-      AUTH_E2E_FIXTURES: 'true',
-      AUTH_USE_PGLITE: 'true',
+      ...pgliteE2eEnv,
+      AUTH_RUNTIME_ENV: 'production',
+    }),
+    false,
+  );
+
+  assert.equal(
+    isAuthE2eFixtureEndpointEnabled({
+      ...pgliteE2eEnv,
+      AUTH_RUNTIME_ENV: undefined,
       VERCEL_ENV: 'production',
     }),
     false,
   );
+});
 
+test('fixture endpoint returns 404 for preview runtime', () => {
+  assert.equal(
+    isAuthE2eFixtureEndpointEnabled({
+      ...pgliteE2eEnv,
+      AUTH_RUNTIME_ENV: 'preview',
+      VERCEL_ENV: 'preview',
+    }),
+    false,
+  );
+});
+
+test('fixture endpoint returns 404 for development runtime', () => {
+  assert.equal(
+    isAuthE2eFixtureEndpointEnabled({
+      ...pgliteE2eEnv,
+      AUTH_RUNTIME_ENV: 'development',
+      VERCEL_ENV: 'development',
+    }),
+    false,
+  );
+});
+
+test('fixture endpoint returns 404 when runtime is unspecified', () => {
   assert.equal(
     isAuthE2eFixtureEndpointEnabled({
       AUTH_DATABASE_MODE: 'pglite',
       AUTH_E2E_FIXTURES: 'true',
-      AUTH_RUNTIME_ENV: 'production',
       AUTH_USE_PGLITE: 'true',
     }),
     false,
   );
 });
 
-test('fixture endpoint stays enabled for explicit pglite E2E runtime', () => {
-  assert.equal(
-    isAuthE2eFixtureEndpointEnabled({
-      AUTH_DATABASE_MODE: 'pglite',
-      AUTH_E2E_FIXTURES: 'true',
-      AUTH_USE_PGLITE: 'true',
-      NODE_ENV: 'production',
-    }),
-    true,
-  );
+test('fixture endpoint is enabled only for explicit e2e runtime with fixtures and pglite', () => {
+  assert.equal(isAuthE2eFixtureEndpointEnabled(pgliteE2eEnv), true);
 });
 
 test('shouldAutoMigrateAuthSchema is pglite-only', () => {

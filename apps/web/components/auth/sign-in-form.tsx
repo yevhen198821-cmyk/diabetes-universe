@@ -2,6 +2,8 @@
 
 import { useActionState } from 'react';
 
+import { AUTH_UNAVAILABLE_MESSAGE } from '@diabetes-universe/identity';
+
 import {
   requestMagicLinkAction,
   type RequestMagicLinkState,
@@ -14,13 +16,11 @@ const initialState: RequestMagicLinkState = {
 interface SignInFormProps {
   readonly callbackPath?: string;
   readonly isAuthAvailable: boolean;
-  readonly unavailableMessage?: string;
 }
 
 export function SignInForm({
   callbackPath = '/account',
   isAuthAvailable,
-  unavailableMessage,
 }: SignInFormProps) {
   const [state, formAction, isPending] = useActionState(
     requestMagicLinkAction,
@@ -33,7 +33,7 @@ export function SignInForm({
         className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200"
         role="alert"
       >
-        {unavailableMessage ?? 'Вход временно недоступен. Попробуйте позже.'}
+        {AUTH_UNAVAILABLE_MESSAGE}
       </div>
     );
   }

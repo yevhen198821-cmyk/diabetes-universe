@@ -15,6 +15,12 @@ export function isProductionAuthDeployment(
   return false;
 }
 
+export function isAuthE2eRuntime(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  return env.AUTH_RUNTIME_ENV === 'e2e';
+}
+
 export function isExplicitAuthTestRuntime(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
@@ -36,11 +42,11 @@ export function isExplicitAuthTestRuntime(
 export function isAuthE2eFixtureEndpointEnabled(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
-  if (isProductionAuthDeployment(env)) {
+  if (env.AUTH_E2E_FIXTURES !== 'true') {
     return false;
   }
 
-  if (env.AUTH_E2E_FIXTURES !== 'true') {
+  if (!isAuthE2eRuntime(env)) {
     return false;
   }
 

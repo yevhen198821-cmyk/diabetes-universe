@@ -5,6 +5,7 @@ export type {
   SessionSummary,
 } from './contracts/auth-contracts';
 export {
+  AUTH_UNAVAILABLE_MESSAGE,
   GENERIC_AUTH_ERROR_MESSAGE,
   GENERIC_MAGIC_LINK_REQUEST_MESSAGE,
 } from './contracts/auth-contracts';
@@ -25,6 +26,7 @@ export {
 } from './config/auth-environment';
 export {
   isAuthE2eFixtureEndpointEnabled,
+  isAuthE2eRuntime,
   isCapturingEmailDeliveryAllowed,
   isExplicitAuthTestRuntime,
   isProductionAuthDeployment,

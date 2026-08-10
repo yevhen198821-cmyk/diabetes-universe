@@ -18,6 +18,7 @@ export default defineConfig({
       AUTH_DATABASE_MODE: 'pglite',
       AUTH_E2E_FIXTURES: 'true',
       AUTH_PGLITE_DATA_DIR: '/tmp/du-auth-pglite-e2e',
+      AUTH_RUNTIME_ENV: 'e2e',
       AUTH_USE_PGLITE: 'true',
       BETTER_AUTH_SECRET: 'test-secret-should-be-at-least-32-characters',
       BETTER_AUTH_URL: 'http://127.0.0.1:3010',

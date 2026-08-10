@@ -5,10 +5,7 @@ import { redirect } from 'next/navigation';
 import { AuthShell } from '../../components/auth/auth-shell';
 import { SignInForm } from '../../components/auth/sign-in-form';
 import { getAuthenticatedPrincipal } from '../../lib/auth/get-authenticated-principal';
-import {
-  getAuthUnavailableMessage,
-  isWebAuthConfigured,
-} from '../../lib/auth/get-web-identity-service';
+import { isWebAuthConfigured } from '../../lib/auth/get-web-identity-service';
 
 export const metadata: Metadata = {
   title: 'Вход',
@@ -39,7 +36,6 @@ export default async function AuthPage({ searchParams }: AuthPageProps) {
       <SignInForm
         callbackPath={callbackPath}
         isAuthAvailable={isWebAuthConfigured()}
-        unavailableMessage={getAuthUnavailableMessage() ?? undefined}
       />
       <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-300">
         Продолжая, вы подтверждаете, что это ваш email.{' '}

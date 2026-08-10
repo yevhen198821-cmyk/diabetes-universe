@@ -23,3 +23,6 @@ export const GENERIC_MAGIC_LINK_REQUEST_MESSAGE =
 
 export const GENERIC_AUTH_ERROR_MESSAGE =
   'Не удалось выполнить вход. Попробуйте ещё раз позже.';
+
+export const AUTH_UNAVAILABLE_MESSAGE =
+  'Вход временно недоступен. Попробуйте позже.';

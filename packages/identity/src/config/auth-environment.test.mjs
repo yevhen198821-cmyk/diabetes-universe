@@ -28,6 +28,20 @@ test('resolveAuthEnvironment accepts pglite test mode without DATABASE_URL', () 
   assert.equal(environment.baseUrl, 'http://localhost:3000');
 });
 
+test('resolveAuthEnvironment reads trusted origins from supplied env', () => {
+  const environment = resolveAuthEnvironment({
+    AUTH_DATABASE_MODE: 'pglite',
+    AUTH_TRUSTED_ORIGINS: 'https://one.example, https://two.example',
+    BETTER_AUTH_SECRET: 'x'.repeat(32),
+    BETTER_AUTH_URL: 'http://localhost:3000',
+  });
+
+  assert.deepEqual(environment.trustedOrigins, [
+    'https://one.example',
+    'https://two.example',
+  ]);
+});
+
 test('resolveSafeAuthCallbackPath rejects external redirects', () => {
   assert.equal(
     resolveSafeAuthCallbackPath('https://evil.example/phish'),
