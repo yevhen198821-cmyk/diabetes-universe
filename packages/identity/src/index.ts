@@ -23,3 +23,10 @@ export {
   resolveSafeAuthCallbackPath,
   type AuthEnvironment,
 } from './config/auth-environment';
+export {
+  isAuthE2eFixtureEndpointEnabled,
+  isCapturingEmailDeliveryAllowed,
+  isExplicitAuthTestRuntime,
+  isProductionAuthDeployment,
+  shouldAutoMigrateAuthSchema,
+} from './config/auth-runtime-guards';

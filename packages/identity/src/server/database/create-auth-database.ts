@@ -7,6 +7,7 @@ import type { PgliteDatabase } from 'drizzle-orm/pglite';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
 import type { AuthEnvironment } from '../../config/auth-environment';
+import { shouldAutoMigrateAuthSchema } from '../../config/auth-runtime-guards';
 import { AUTH_FOUNDATION_MIGRATION_SQL } from './auth-foundation-migration';
 import { authSchema } from './auth-schema';
 
@@ -17,28 +18,11 @@ let pgliteClient: PGlite | null = null;
 let postgresClient: ReturnType<typeof postgres> | null = null;
 let migrationPromise: Promise<void> | null = null;
 
-async function ensureAuthSchema(
-  environment: AuthEnvironment,
-  database: AuthDatabase,
-): Promise<void> {
+async function ensurePgliteAuthSchema(): Promise<void> {
   if (!migrationPromise) {
-    migrationPromise = (async () => {
-      const migrationSql = AUTH_FOUNDATION_MIGRATION_SQL;
-
-      if (environment.databaseMode === 'pglite') {
-        await pgliteClient!.exec(migrationSql);
-        return;
-      }
-
-      const statements = migrationSql
-        .split(';')
-        .map((statement) => statement.trim())
-        .filter(Boolean);
-
-      for (const statement of statements) {
-        await database.execute(`${statement};`);
-      }
-    })();
+    migrationPromise = pgliteClient!
+      .exec(AUTH_FOUNDATION_MIGRATION_SQL)
+      .then(() => undefined);
   }
 
   await migrationPromise;
@@ -54,7 +38,11 @@ export async function createAuthDatabase(
     }
 
     const database = drizzlePglite(pgliteClient, { schema: authSchema });
-    await ensureAuthSchema(environment, database);
+
+    if (shouldAutoMigrateAuthSchema(environment.databaseMode)) {
+      await ensurePgliteAuthSchema();
+    }
+
     return database;
   }
 
@@ -65,9 +53,7 @@ export async function createAuthDatabase(
     });
   }
 
-  const database = drizzlePostgres(postgresClient, { schema: authSchema });
-  await ensureAuthSchema(environment, database);
-  return database;
+  return drizzlePostgres(postgresClient, { schema: authSchema });
 }
 
 export async function closeAuthDatabase(): Promise<void> {

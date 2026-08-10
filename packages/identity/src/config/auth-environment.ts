@@ -2,6 +2,7 @@ import {
   AUTH_ALLOWED_CALLBACK_PATHS,
   type AuthAllowedCallbackPath,
 } from './auth-constants';
+import { assertProductionCapableEmailDelivery } from './auth-runtime-guards';
 
 export class AuthConfigurationError extends Error {
   constructor(message: string) {
@@ -86,7 +87,7 @@ export function resolveAuthEnvironment(
   const databaseMode = resolveDatabaseMode(env);
   const baseUrl = readRequiredString('BETTER_AUTH_URL', env.BETTER_AUTH_URL);
 
-  return {
+  const environment = {
     appName: readOptionalString(env.AUTH_APP_NAME) ?? 'Diabetes Universe',
     baseUrl,
     betterAuthSecret: readRequiredString(
@@ -107,6 +108,10 @@ export function resolveAuthEnvironment(
     webauthnRpName:
       readOptionalString(env.AUTH_WEBAUTHN_RP_NAME) ?? 'Diabetes Universe',
   };
+
+  assertProductionCapableEmailDelivery(environment);
+
+  return environment;
 }
 
 export function isAuthEnvironmentConfigured(

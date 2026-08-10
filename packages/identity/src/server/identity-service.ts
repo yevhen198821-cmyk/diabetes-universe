@@ -7,7 +7,9 @@ import {
 import {
   resolveSafeAuthCallbackPath,
   type AuthEnvironment,
+  AuthConfigurationError,
 } from '../config/auth-environment';
+import { isCapturingEmailDeliveryAllowed } from '../config/auth-runtime-guards';
 import type { AuthEmailDelivery } from './email/auth-email-delivery';
 import { createCapturingAuthEmailDelivery } from './email/capturing-auth-email-delivery';
 import { createResendAuthEmailDelivery } from './email/resend-auth-email-delivery';
@@ -42,7 +44,10 @@ export interface CreateIdentityServiceOptions {
 
 let identityServicePromise: Promise<IdentityService> | null = null;
 
-function createEmailDelivery(environment: AuthEnvironment): AuthEmailDelivery {
+function createEmailDelivery(
+  environment: AuthEnvironment,
+  env: NodeJS.ProcessEnv = process.env,
+): AuthEmailDelivery {
   if (environment.resendApiKey && environment.emailFrom) {
     return createResendAuthEmailDelivery({
       apiKey: environment.resendApiKey,
@@ -50,19 +55,13 @@ function createEmailDelivery(environment: AuthEnvironment): AuthEmailDelivery {
     });
   }
 
-  if (
-    process.env.NODE_ENV === 'test' ||
-    process.env.AUTH_USE_PGLITE === 'true' ||
-    environment.databaseMode === 'pglite'
-  ) {
+  if (isCapturingEmailDeliveryAllowed(environment, env)) {
     return createCapturingAuthEmailDelivery();
   }
 
-  return {
-    async sendMagicLinkEmail() {
-      // Delivery is intentionally unavailable outside configured environments.
-    },
-  };
+  throw new AuthConfigurationError(
+    'Auth email delivery is not configured for this runtime',
+  );
 }
 
 async function createIdentityServiceInternal(
@@ -70,7 +69,8 @@ async function createIdentityServiceInternal(
 ): Promise<IdentityService> {
   const database: AuthDatabase = await createAuthDatabase(options.environment);
   const emailDelivery =
-    options.emailDelivery ?? createEmailDelivery(options.environment);
+    options.emailDelivery ??
+    createEmailDelivery(options.environment, process.env);
   const auth = createBetterAuth({
     database,
     emailDelivery,

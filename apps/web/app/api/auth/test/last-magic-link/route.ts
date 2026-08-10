@@ -1,7 +1,8 @@
+import { isAuthE2eFixtureEndpointEnabled } from '@diabetes-universe/identity';
 import { getLastCapturedMagicLinkEmail } from '@diabetes-universe/identity/server';
 
 export async function GET() {
-  if (process.env.AUTH_E2E_FIXTURES !== 'true') {
+  if (!isAuthE2eFixtureEndpointEnabled(process.env)) {
     return new Response('Not found', { status: 404 });
   }
 
