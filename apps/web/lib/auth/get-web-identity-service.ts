@@ -15,6 +15,14 @@ export function isWebAuthConfigured(): boolean {
   return isAuthEnvironmentConfigured();
 }
 
+export function isWebPasskeyConfigured(): boolean {
+  try {
+    return resolveAuthEnvironment().passkeyEnabled;
+  } catch {
+    return false;
+  }
+}
+
 export function getWebAuthConfigurationDiagnostic(): string | null {
   try {
     resolveAuthEnvironment();

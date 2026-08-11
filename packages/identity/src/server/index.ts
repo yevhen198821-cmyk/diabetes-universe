@@ -14,6 +14,7 @@ export {
   type AuthDatabase,
 } from './database/create-auth-database';
 export {
+  getCapturedMagicLinkEmailForAddress,
   getLastCapturedMagicLinkEmail,
   resetCapturedMagicLinkEmail,
 } from './email/capturing-auth-email-delivery';

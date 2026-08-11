@@ -2,12 +2,15 @@ export type {
   AuthRequestResult,
   AuthRequestStatus,
   AuthenticatedPrincipal,
+  PasskeyClientResult,
+  PasskeySummary,
   SessionSummary,
 } from './contracts/auth-contracts';
 export {
   AUTH_UNAVAILABLE_MESSAGE,
   GENERIC_AUTH_ERROR_MESSAGE,
   GENERIC_MAGIC_LINK_REQUEST_MESSAGE,
+  GENERIC_PASSKEY_ERROR_MESSAGE,
 } from './contracts/auth-contracts';
 export {
   AUTH_ALLOWED_CALLBACK_PATHS,

@@ -3,6 +3,7 @@ import {
   GENERIC_MAGIC_LINK_REQUEST_MESSAGE,
   type AuthRequestResult,
   type AuthenticatedPrincipal,
+  type PasskeySummary,
 } from '../contracts/auth-contracts';
 import {
   resolveSafeAuthCallbackPath,
@@ -35,6 +36,12 @@ export interface IdentityService {
     readonly callbackPath?: string;
     readonly headers: RequestHeaders;
   }): Promise<AuthRequestResult>;
+  listPasskeys(headers: RequestHeaders): Promise<readonly PasskeySummary[]>;
+  deletePasskey(input: {
+    readonly passkeyId: string;
+    readonly headers: RequestHeaders;
+  }): Promise<void>;
+  signOutCurrentSession(headers: RequestHeaders): Promise<void>;
 }
 
 export interface CreateIdentityServiceOptions {
@@ -42,7 +49,13 @@ export interface CreateIdentityServiceOptions {
   readonly emailDelivery?: AuthEmailDelivery;
 }
 
-let identityServicePromise: Promise<IdentityService> | null = null;
+type IdentityServiceGlobal = typeof globalThis & {
+  __duIdentityServicePromise?: Promise<IdentityService> | null;
+};
+
+function readIdentityServiceGlobal(): IdentityServiceGlobal {
+  return globalThis as IdentityServiceGlobal;
+}
 
 function createEmailDelivery(
   environment: AuthEnvironment,
@@ -124,17 +137,49 @@ async function createIdentityServiceInternal(
         status: 'sent',
       };
     },
+    async listPasskeys(headers) {
+      if (!options.environment.passkeyEnabled) {
+        return [];
+      }
+
+      const passkeys = await auth.api.listPasskeys({ headers });
+
+      return passkeys.map((credential) => ({
+        passkeyId: credential.id,
+        name: credential.name?.trim() || 'Passkey',
+        createdAt: credential.createdAt
+          ? new Date(credential.createdAt).toISOString()
+          : null,
+      }));
+    },
+    async deletePasskey({ passkeyId, headers }) {
+      if (!options.environment.passkeyEnabled) {
+        throw new AuthConfigurationError('Passkey authentication is disabled.');
+      }
+
+      await auth.api.deletePasskey({
+        body: { id: passkeyId },
+        headers,
+      });
+    },
+    async signOutCurrentSession(headers) {
+      await auth.api.signOut({ headers });
+    },
   };
 }
 
 export async function getIdentityService(
   environment: AuthEnvironment,
 ): Promise<IdentityService> {
-  if (!identityServicePromise) {
-    identityServicePromise = createIdentityServiceInternal({ environment });
+  const global = readIdentityServiceGlobal();
+
+  if (!global.__duIdentityServicePromise) {
+    global.__duIdentityServicePromise = createIdentityServiceInternal({
+      environment,
+    });
   }
 
-  return identityServicePromise;
+  return global.__duIdentityServicePromise;
 }
 
 export async function createIdentityService(
@@ -144,7 +189,7 @@ export async function createIdentityService(
 }
 
 export function resetIdentityServiceForTests(): void {
-  identityServicePromise = null;
+  readIdentityServiceGlobal().__duIdentityServicePromise = null;
 }
 
 export { GENERIC_AUTH_ERROR_MESSAGE };

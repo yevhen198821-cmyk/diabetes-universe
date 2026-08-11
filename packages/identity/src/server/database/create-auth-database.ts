@@ -14,58 +14,74 @@ import { authSchema } from './auth-schema';
 export type AuthDatabase =
   PgliteDatabase<typeof authSchema> | PostgresJsDatabase<typeof authSchema>;
 
-let pgliteClient: PGlite | null = null;
-let postgresClient: ReturnType<typeof postgres> | null = null;
-let migrationPromise: Promise<void> | null = null;
+type AuthDatabaseGlobal = typeof globalThis & {
+  __duAuthPgliteClient?: PGlite | null;
+  __duAuthPgliteMigrationPromise?: Promise<void> | null;
+  __duAuthPostgresClient?: ReturnType<typeof postgres> | null;
+};
 
-async function ensurePgliteAuthSchema(): Promise<void> {
-  if (!migrationPromise) {
-    migrationPromise = pgliteClient!
+function readAuthDatabaseGlobal(): AuthDatabaseGlobal {
+  return globalThis as AuthDatabaseGlobal;
+}
+
+async function ensurePgliteAuthSchema(pgliteClient: PGlite): Promise<void> {
+  const global = readAuthDatabaseGlobal();
+
+  if (!global.__duAuthPgliteMigrationPromise) {
+    global.__duAuthPgliteMigrationPromise = pgliteClient
       .exec(AUTH_FOUNDATION_MIGRATION_SQL)
       .then(() => undefined);
   }
 
-  await migrationPromise;
+  await global.__duAuthPgliteMigrationPromise;
 }
 
 export async function createAuthDatabase(
   environment: AuthEnvironment,
 ): Promise<AuthDatabase> {
+  const global = readAuthDatabaseGlobal();
+
   if (environment.databaseMode === 'pglite') {
-    if (!pgliteClient) {
+    if (!global.__duAuthPgliteClient) {
       const dataDir = process.env.AUTH_PGLITE_DATA_DIR?.trim();
-      pgliteClient = dataDir ? new PGlite(dataDir) : new PGlite();
+      global.__duAuthPgliteClient = dataDir
+        ? new PGlite(dataDir)
+        : new PGlite();
     }
 
-    const database = drizzlePglite(pgliteClient, { schema: authSchema });
+    const database = drizzlePglite(global.__duAuthPgliteClient, {
+      schema: authSchema,
+    });
 
     if (shouldAutoMigrateAuthSchema(environment.databaseMode)) {
-      await ensurePgliteAuthSchema();
+      await ensurePgliteAuthSchema(global.__duAuthPgliteClient);
     }
 
     return database;
   }
 
-  if (!postgresClient) {
-    postgresClient = postgres(environment.databaseUrl!, {
+  if (!global.__duAuthPostgresClient) {
+    global.__duAuthPostgresClient = postgres(environment.databaseUrl!, {
       max: 10,
       prepare: false,
     });
   }
 
-  return drizzlePostgres(postgresClient, { schema: authSchema });
+  return drizzlePostgres(global.__duAuthPostgresClient, { schema: authSchema });
 }
 
 export async function closeAuthDatabase(): Promise<void> {
-  if (postgresClient) {
-    await postgresClient.end();
-    postgresClient = null;
+  const global = readAuthDatabaseGlobal();
+
+  if (global.__duAuthPostgresClient) {
+    await global.__duAuthPostgresClient.end();
+    global.__duAuthPostgresClient = null;
   }
 
-  if (pgliteClient) {
-    await pgliteClient.close();
-    pgliteClient = null;
+  if (global.__duAuthPgliteClient) {
+    await global.__duAuthPgliteClient.close();
+    global.__duAuthPgliteClient = null;
   }
 
-  migrationPromise = null;
+  global.__duAuthPgliteMigrationPromise = null;
 }
