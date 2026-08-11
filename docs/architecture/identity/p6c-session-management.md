@@ -2,9 +2,11 @@
 
 ## Status
 
-**Architecture Design — Proposed**
+**Architecture Design — Approved**
 
 Date: 2026-08-11
+
+Architecture approval records the final session-list fresh-auth policy (Option B) and identity-boundary listing approach required for P6c implementation.
 
 ## Context
 
@@ -131,8 +133,9 @@ Better Auth primitives are sufficient, but Diabetes Universe must add policy and
 2. **Current session must be determined server-side.**
    Compare the validated current session's `id` from `getSession()` with each listed session. Do not infer current session from list order, IP, or user-agent.
 
-3. **Fresh-auth policy is not uniform across Better Auth endpoints.**
-   `listSessions` already requires a fresh session. Revoke endpoints use `sensitiveSessionMiddleware` only. Diabetes Universe must enforce additional fresh-auth policy for destructive session operations at the identity/application boundary, using the same `AUTH_FRESH_AUTH_WINDOW_SECONDS` concept already used for passkey mutations.
+3. **Fresh-auth policy is not uniform across Better Auth endpoints, and DU session-list policy differs from Better Auth defaults.**
+   Better Auth `auth.api.listSessions()` uses `freshSessionMiddleware`. P6c adopts **Option B**: viewing `/account/security/sessions` requires only a normal authenticated session; fresh authentication is required for destructive operations only. Therefore `listAccountSessions` must **not** use `auth.api.listSessions()` as its public identity primitive. The identity boundary loads caller-owned active sessions server-side from auth persistence (or an equivalent server-only path), maps them into `AccountSessionSummary`, and never forwards Better Auth raw list output to UI.
+   Revoke endpoints use `sensitiveSessionMiddleware` only. Diabetes Universe must enforce additional fresh-auth policy for destructive session operations at the identity/application boundary, using the same `AUTH_FRESH_AUTH_WINDOW_SECONDS` concept already used for passkey mutations.
 
 4. **`revokeSession` is idempotent and may return success without deleting a foreign session.**
    Better Auth returns `{ status: true }` even when the target token is absent or not owned by the caller after lookup. The identity boundary must translate this into safe, non-enumerating user messaging while preserving idempotent server semantics.
@@ -290,15 +293,18 @@ revokeAllAccountSessions(headers) -> SessionManagementResult
 signOutCurrentSession(headers) -> void   // existing P6b operation, reused
 ```
 
-Implementation must call Better Auth server APIs behind this boundary:
+Implementation must keep Better Auth behind this boundary:
 
 ```text
-listAccountSessions      -> auth.api.listSessions()
-revokeAccountSession     -> resolve sessionId to owned token -> auth.api.revokeSession()
+listAccountSessions        -> server-side owned-session read + sanitize -> AccountSessionSummary[]
+                             (NOT auth.api.listSessions() as the public identity primitive)
+revokeAccountSession       -> resolve sessionId to owned token -> auth.api.revokeSession()
 revokeOtherAccountSessions -> auth.api.revokeOtherSessions()
-revokeAllAccountSessions -> auth.api.revokeSessions()
-signOutCurrentSession    -> auth.api.signOut()
+revokeAllAccountSessions   -> auth.api.revokeSessions()
+signOutCurrentSession      -> auth.api.signOut()
 ```
+
+`listAccountSessions` may reuse the same auth persistence records Better Auth stores, but the public identity operation must authenticate with a normal validated session and return only sanitized DU read models. Do not expose `auth.api.listSessions()` response shape, middleware behavior, or secret fields to UI/server-action consumers.
 
 UI and server actions depend only on Diabetes Universe contracts.
 
@@ -354,7 +360,7 @@ Server algorithm:
 
 ```text
 current = auth.api.getSession({ headers })
-listed = auth.api.listSessions({ headers })
+listed = listAccountSessions server-side owned-session read for authenticated user
 for each session in listed:
   isCurrentSession = session.id === current.session.id
 ```
@@ -389,28 +395,39 @@ Reuse the existing fresh-session window configured for P6:
 AUTH_FRESH_AUTH_WINDOW_SECONDS = 10 minutes
 ```
 
+### Session list fresh-auth decision — Option B (approved)
+
+Final architecture decision:
+
+- viewing `/account/security/sessions` requires a **normal authenticated session** only;
+- fresh authentication is **not** required to view the session list;
+- fresh authentication **is** required for destructive operations;
+- current-session sign-out continues to use existing P6b `signOutCurrentSession` semantics without an additional fresh-auth requirement.
+
+Better Auth note: `auth.api.listSessions()` is protected by `freshSessionMiddleware`. P6c therefore does **not** use `auth.api.listSessions()` as the public identity primitive for UI listing. The identity boundary loads sessions server-side, sanitizes them, and returns `AccountSessionSummary[]`.
+
 Policy by operation:
 
-| Operation                                    | Fresh auth required | Additional UX                                                                                                                |
-| -------------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| View active sessions (`listAccountSessions`) | **Yes**             | Better Auth already enforces via `freshSessionMiddleware`; if stale, prompt user to reauthenticate via magic link or passkey |
-| Revoke one other session                     | **Yes**             | Reauthenticate if stale before destructive action                                                                            |
-| Sign out other sessions                      | **Yes**             | Confirmation dialog + fresh auth                                                                                             |
-| Sign out everywhere                          | **Yes**             | Strong confirmation + fresh auth                                                                                             |
-| Sign out current session                     | **No**              | Reuse existing P6b sign-out semantics                                                                                        |
+| Operation                                    | Fresh auth required | Additional UX                                                                 |
+| -------------------------------------------- | ------------------- | ----------------------------------------------------------------------------- |
+| View active sessions (`listAccountSessions`) | **No**              | Normal authenticated session; no reauthentication prompt for read-only access |
+| Revoke one other session                     | **Yes**             | Reauthenticate if stale before destructive action                             |
+| Sign out other sessions                      | **Yes**             | Confirmation dialog + fresh auth                                              |
+| Sign out everywhere                          | **Yes**             | Strong confirmation + fresh auth                                              |
+| Sign out current session                     | **No**              | Reuse existing P6b sign-out semantics                                         |
 
 Rationale:
 
-- listing sessions is sensitive account intelligence and already requires freshness in Better Auth;
+- read-only session listing follows the same authenticated-session pattern already used for passkey listing in P6b;
 - remote revocation is destructive and must not run from a stale borrowed session;
 - current-session sign-out is an ordinary logout and should remain low friction;
-- do not apply one identical friction level to every operation without review.
+- Better Auth's fresh requirement on `listSessions` is an implementation constraint handled inside the identity boundary, not a product UX requirement for `/account/security/sessions`.
 
 Implementation note:
 
 - passkey fresh-session enforcement already uses Better Auth hooks in `create-better-auth.ts`;
-- P6c should add a parallel identity-boundary fresh-session guard for session-management mutations, or equivalent server-side pre-check before calling Better Auth revoke APIs;
-- do not weaken Better Auth's existing `listSessions` fresh requirement.
+- P6c must add a parallel identity-boundary fresh-session guard for destructive session-management mutations, or an equivalent server-side pre-check before calling Better Auth revoke APIs;
+- `listAccountSessions` must authenticate with a normal validated session and must not depend on `freshSessionMiddleware` behavior reaching the UI path.
 
 ## Revocation Semantics
 
@@ -444,6 +461,11 @@ Authenticated fresh session
 → current session remains valid
 → return refreshed list containing only current session
 ```
+
+Semantics:
+
+- when no other active sessions exist, treat as **successful idempotent no-op**;
+- safe user message may confirm completion without implying another device was removed.
 
 Partial failure:
 
@@ -546,7 +568,7 @@ These codes are for server/logs/tests. They must not all map 1:1 to distinct use
 Use short, actionable Russian copy similar to existing auth messages:
 
 - unauthenticated → redirect to `/auth`;
-- stale session on list/revoke → "Подтвердите вход и повторите действие";
+- stale session on destructive action → "Подтвердите вход и повторите действие";
 - revoke success → "Сессия завершена";
 - bulk revoke success → "Выход на других устройствах выполнен";
 - sign-out everywhere success → redirect to `/auth` with neutral confirmation;
@@ -570,6 +592,7 @@ Design for concurrent and delayed client actions:
 | Two devices revoke same other session concurrently     | Idempotent success                                                                        |
 | Current session disappears during bulk revoke          | Return unauthenticated result and redirect to `/auth`                                     |
 | `revokeOtherSessions` while another device signs in    | New device may create a new session afterward; refreshed list reflects current truth only |
+| `revokeOtherAccountSessions` with no other sessions    | Treat as successful idempotent no-op; refreshed list shows current session only           |
 | `revokeSessions` while current request still finishing | Current session must end; client redirects to `/auth`                                     |
 
 Implementation should prefer:
@@ -595,9 +618,9 @@ Architecture-only in this wave; implementation must add the following coverage.
 
 ### Integration tests
 
-- authenticated user lists only own active sessions;
+- authenticated user lists only own active sessions with a normal authenticated session;
 - unauthenticated list/revoke rejected;
-- stale session list/revoke rejected with fresh-auth result;
+- stale session on destructive actions rejected with fresh-auth result; list remains available on normal authenticated session;
 - revoke other session removes authentication for that session token;
 - current session remains after `revokeOtherAccountSessions`;
 - `revokeAllAccountSessions` removes current and other sessions;
@@ -660,6 +683,27 @@ P6c must preserve at minimum:
 11. Timeline/P4 remain independent from auth session metadata.
 12. P6c does not become sync architecture.
 
+### Browser / UI delivery invariants
+
+The browser and UI receive only sanitized `AccountSessionSummary` read models from server-side identity operations.
+
+Never deliver to the browser:
+
+- `session.token`;
+- raw Better Auth session objects or other internal auth transport objects;
+- raw `userId` / `accountId` values for authorization decisions;
+- raw IP address;
+- raw User-Agent strings.
+
+Allowed:
+
+- `sessionId` (= Better Auth `session.id`) as an opaque target identifier for revoke-one-other-session actions.
+
+Forbidden interpretation:
+
+- `sessionId` is not authorization proof;
+- ownership is determined only from the server-side authenticated principal and server-side owned-session lookup.
+
 ## Future Boundaries
 
 The following remain explicitly out of scope for P6c and require separate architecture approval:
@@ -683,10 +727,11 @@ Recommended implementation order after architecture approval:
 ### P6c-a — Identity contracts and mapping
 
 - add `AccountSessionSummary` and session-management service methods;
-- map Better Auth list/revoke APIs;
+- implement server-side owned-session read + sanitize for `listAccountSessions` (not `auth.api.listSessions()` as the public primitive);
+- map Better Auth revoke APIs for destructive operations;
 - strip secrets and add current-session detection;
 - add user-agent presentation mapper;
-- add fresh-auth guards for destructive session operations;
+- add fresh-auth guards for destructive session operations only;
 - unit + integration tests without UI.
 
 ### P6c-b — Web sessions surface
@@ -707,13 +752,13 @@ No slice may introduce OAuth, Timeline changes, sync, or auth DDL auto-migration
 
 ## Definition of Done
 
-P6c architecture may be approved when:
+P6c architecture is approved with the following conditions satisfied:
 
 1. P6b invariants remain intact.
 2. Better Auth capability reuse is explicit and sufficient without a custom session protocol.
 3. Session UI identifier, current-session detection, and revoke semantics are unambiguous.
 4. Privacy rules forbid fingerprinting and raw IP/UA display.
-5. Fresh-auth policy distinguishes view/revoke/current sign-out behavior.
+5. Fresh-auth policy distinguishes view/revoke/current sign-out behavior, including approved Option B for session-list viewing.
 6. Sign-out-everywhere scope is explicitly decided and safe.
 7. Identity-boundary contracts and error model are defined.
 8. Test strategy covers unit, integration, and multi-context E2E.
@@ -724,7 +769,11 @@ P6c implementation is complete only after a separate runtime PR passes the stand
 
 ## Open Questions
 
-No blocking open questions remain for architecture approval.
+No blocking open questions remain.
+
+Resolved for implementation:
+
+- Session-list fresh-auth policy is **Option B**: normal authenticated session for viewing; fresh auth for destructive operations only; do not expose `auth.api.listSessions()` as the public identity primitive.
 
 Non-blocking notes for implementation review:
 
