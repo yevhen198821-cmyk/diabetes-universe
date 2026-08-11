@@ -3,6 +3,7 @@ import {
   GENERIC_MAGIC_LINK_REQUEST_MESSAGE,
   type AuthRequestResult,
   type AuthenticatedPrincipal,
+  type PasskeySummary,
 } from '../contracts/auth-contracts';
 import {
   resolveSafeAuthCallbackPath,
@@ -35,6 +36,12 @@ export interface IdentityService {
     readonly callbackPath?: string;
     readonly headers: RequestHeaders;
   }): Promise<AuthRequestResult>;
+  listPasskeys(headers: RequestHeaders): Promise<readonly PasskeySummary[]>;
+  deletePasskey(input: {
+    readonly passkeyId: string;
+    readonly headers: RequestHeaders;
+  }): Promise<void>;
+  signOutCurrentSession(headers: RequestHeaders): Promise<void>;
 }
 
 export interface CreateIdentityServiceOptions {
@@ -123,6 +130,34 @@ async function createIdentityServiceInternal(
         message: GENERIC_MAGIC_LINK_REQUEST_MESSAGE,
         status: 'sent',
       };
+    },
+    async listPasskeys(headers) {
+      if (!options.environment.passkeyEnabled) {
+        return [];
+      }
+
+      const passkeys = await auth.api.listPasskeys({ headers });
+
+      return passkeys.map((credential) => ({
+        passkeyId: credential.id,
+        name: credential.name?.trim() || 'Passkey',
+        createdAt: credential.createdAt
+          ? new Date(credential.createdAt).toISOString()
+          : null,
+      }));
+    },
+    async deletePasskey({ passkeyId, headers }) {
+      if (!options.environment.passkeyEnabled) {
+        throw new AuthConfigurationError('Passkey authentication is disabled.');
+      }
+
+      await auth.api.deletePasskey({
+        body: { id: passkeyId },
+        headers,
+      });
+    },
+    async signOutCurrentSession(headers) {
+      await auth.api.signOut({ headers });
     },
   };
 }
