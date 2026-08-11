@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
+import type { PasskeySummary } from '@diabetes-universe/identity';
+
 import { PasskeyManager } from '../../../components/auth/passkey-manager';
 import { getAuthenticatedPrincipal } from '../../../lib/auth/get-authenticated-principal';
 import {
@@ -23,7 +25,7 @@ export default async function AccountSecurityPage() {
   }
 
   const passkeyEnabled = isWebPasskeyConfigured();
-  let passkeys = [];
+  let passkeys: PasskeySummary[] = [];
 
   if (passkeyEnabled) {
     try {
