@@ -49,7 +49,13 @@ export interface CreateIdentityServiceOptions {
   readonly emailDelivery?: AuthEmailDelivery;
 }
 
-let identityServicePromise: Promise<IdentityService> | null = null;
+type IdentityServiceGlobal = typeof globalThis & {
+  __duIdentityServicePromise?: Promise<IdentityService> | null;
+};
+
+function readIdentityServiceGlobal(): IdentityServiceGlobal {
+  return globalThis as IdentityServiceGlobal;
+}
 
 function createEmailDelivery(
   environment: AuthEnvironment,
@@ -165,11 +171,15 @@ async function createIdentityServiceInternal(
 export async function getIdentityService(
   environment: AuthEnvironment,
 ): Promise<IdentityService> {
-  if (!identityServicePromise) {
-    identityServicePromise = createIdentityServiceInternal({ environment });
+  const global = readIdentityServiceGlobal();
+
+  if (!global.__duIdentityServicePromise) {
+    global.__duIdentityServicePromise = createIdentityServiceInternal({
+      environment,
+    });
   }
 
-  return identityServicePromise;
+  return global.__duIdentityServicePromise;
 }
 
 export async function createIdentityService(
@@ -179,7 +189,7 @@ export async function createIdentityService(
 }
 
 export function resetIdentityServiceForTests(): void {
-  identityServicePromise = null;
+  readIdentityServiceGlobal().__duIdentityServicePromise = null;
 }
 
 export { GENERIC_AUTH_ERROR_MESSAGE };

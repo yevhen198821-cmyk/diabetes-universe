@@ -14,10 +14,16 @@ async function signInWithMagicLink(
   await page.getByRole('button', { name: 'Продолжить' }).click();
   await expect(page).toHaveURL(/\/auth\/check-email/);
 
-  const fixtureResponse = await request.get('/api/auth/test/last-magic-link');
+  const fixtureResponse = await request.get(
+    `/api/auth/test/last-magic-link?email=${encodeURIComponent(email)}`,
+  );
   expect(fixtureResponse.ok()).toBeTruthy();
-  const fixture = (await fixtureResponse.json()) as { url: string | null };
+  const fixture = (await fixtureResponse.json()) as {
+    email: string | null;
+    url: string | null;
+  };
   assert(fixture.url);
+  expect(fixture.email).toBe(email.trim().toLowerCase());
 
   await page.goto(fixture.url!, { waitUntil: 'load' });
   await page.waitForURL(/\/account/, { timeout: 10_000 });
@@ -78,19 +84,8 @@ test('user can enroll a passkey, revoke current session, and sign in with the pa
   page,
   request,
 }) => {
+  await page.context().credentials.install();
   await page.context().clearCookies();
-  const cdp = await page.context().newCDPSession(page);
-  await cdp.send('WebAuthn.enable');
-  await cdp.send('WebAuthn.addVirtualAuthenticator', {
-    options: {
-      protocol: 'ctap2',
-      transport: 'internal',
-      hasResidentKey: true,
-      hasUserVerification: true,
-      isUserVerified: true,
-      automaticPresenceSimulation: true,
-    },
-  });
 
   await signInWithMagicLink(page, request, 'p6b-passkey@example.com');
   await page.goto('/account/security');
