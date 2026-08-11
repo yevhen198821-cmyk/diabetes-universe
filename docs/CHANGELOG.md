@@ -1,5 +1,38 @@
 # Changelog
 
+## P6b — Passkey Enrollment, Sign-In & Current-Session Sign-Out: Feature Complete
+
+Дата: 2026-08-11
+
+Завершено (architecture + runtime, PR #81 closure HEAD `5c66c3a`):
+
+- passkey enrollment behind `@diabetes-universe/identity` with fresh-session guard
+- passkey sign-in on `/auth` with email magic-link fallback
+- account-scoped passkey list/add/remove on `/account/security`
+- current-session sign-out with server session revocation
+- explicit WebAuthn relying-party configuration with fail-closed validation
+- auth migrations `0000_auth_foundation.sql` + `0001_passkey_foundation.sql` applied and verified on Neon externally
+- auth tables present: `user`, `session`, `account`, `verification`, `passkey`
+- Playwright auth baseline **38/38 E2E**
+- Timeline/P4 ownership unchanged; no OAuth; no sync
+
+Не входит в этот этап:
+
+- active-session/device listing
+- remote session revocation beyond current session
+- OAuth/passwords
+- Timeline ownership/adoption changes
+- backend medical persistence / cloud sync
+- P6c sessions/device management
+
+Статус:
+
+**P6b — Passkey Enrollment, Sign-In & Current-Session Sign-Out: Feature Complete**
+
+Следующий этап:
+
+**P6c — Active Sessions & Account Security Management**
+
 ## P3 — Semantic Timeline Event Model: Feature Complete
 
 Дата: 2026-08-09

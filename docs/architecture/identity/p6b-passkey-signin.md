@@ -2,9 +2,101 @@
 
 ## Status
 
-**Architecture Design — Proposed**
+**Feature Complete**
 
 Date: 2026-08-11
+
+This lifecycle record closes P6b for the approved Web scope. The architecture sections below remain the governing design baseline.
+
+## Completion Baseline
+
+Implementation and closure were delivered through:
+
+- PR #80 — `docs(p6b): define passkey enrollment and sign-in architecture`
+  - merge commit: `107a651378ce8465696249a8bb7a9a34575c83b6`
+- PR #81 — `feat(p6b): passkey enrollment, sign-in, and current-session sign-out`
+  - branch: `feature/p6b-passkey-runtime`
+  - closure HEAD: `5c66c3ab4becc1c38473c2f7d7f62e3d2c9da13f`
+
+## Delivered Runtime
+
+P6b implementation is complete:
+
+- Passkey enrollment complete — authenticated account can register a passkey after fresh-session verification;
+- Passkey sign-in complete — `/auth` supports WebAuthn authentication with email magic-link fallback;
+- current-session sign-out complete — server session is revoked and the session cookie is cleared;
+- `@better-auth/passkey` remains isolated behind `@diabetes-universe/identity`;
+- explicit WebAuthn relying-party configuration (`AUTH_WEBAUTHN_RP_ID`, `AUTH_WEBAUTHN_RP_NAME`, `AUTH_WEBAUTHN_ORIGIN`) fails closed when invalid;
+- minimal `/account/security` surface lists account-scoped passkeys and supports add/remove with server-side authorization;
+- Better Auth user IDs and passkey credential IDs remain separate from canonical Diabetes Universe `accountId`;
+- Timeline/P4 ownership, adoption, and local IndexedDB contracts are unchanged;
+- OAuth, cloud sync, backend medical persistence, and delegated medical access are not implemented;
+- active-session/device listing and remote session revocation remain future P6c scope.
+
+## Neon Auth Database
+
+Neon schema migration was applied and verified externally outside this agent runtime:
+
+- P6a foundation migration `0000_auth_foundation.sql` applied;
+- P6b passkey migration `0001_passkey_foundation.sql` applied;
+- auth tables present: `user`, `session`, `account`, `verification`, `passkey`;
+- passkey indexes and constraints verified;
+- temporary Neon migration branch deleted;
+- PostgreSQL/Neon runtime startup does not auto-run DDL.
+
+Neon schema migration verified externally; Cursor runtime smoke unavailable because runtime secrets are not exposed to agent.
+
+## Validation Baseline
+
+The implementation completion gate was validated on PR #81 closure HEAD `5c66c3ab4becc1c38473c2f7d7f62e3d2c9da13f` with:
+
+- `pnpm format:check`
+- `pnpm lint`
+- `pnpm typecheck`
+- `pnpm test`
+- `pnpm build`
+- Playwright auth baseline **38/38 E2E**
+- Markdown link validation
+- GitHub CI green
+- Vercel Preview green
+
+This lifecycle closure must also pass the current standard CI/Vercel gate before merge.
+
+## P6b Completion Gate
+
+All approved P6b completion conditions are satisfied for the current Web scope:
+
+1. Dependency and lockfile are pinned — complete.
+2. Auth migration is explicit and reviewed — complete.
+3. Authenticated passkey registration works — complete.
+4. Passkey sign-in creates the normal server session — complete.
+5. Email magic-link fallback still works — complete.
+6. Current-session sign-out revokes the session — complete.
+7. Passkey management is account-scoped server-side — complete.
+8. Security/configuration diagnostics do not leak to UI — complete.
+9. Full implementation validation and Vercel validation are green — complete.
+10. Canonical architecture documentation matches runtime reality — complete with this closure change.
+
+## Explicit Non-Scope Remains Unchanged
+
+P6b does not implement:
+
+- active-session/device listing;
+- remote session revocation beyond the current session;
+- Google/Apple OAuth;
+- passwords;
+- Timeline ownership/adoption changes;
+- medical backend/sync/outbox/conflicts;
+- delegated medical access;
+- Marketplace permissions.
+
+These remain P6c and later platform waves and must not be retrofitted into P6b.
+
+## Next Slice
+
+After P6b: **P6c — Active Sessions & Account Security Management**.
+
+P6 as a whole is not Feature Complete; only P6b is closed by this record.
 
 ## Purpose
 
@@ -195,6 +287,6 @@ P6b is complete only when:
 - architecture/security audit passes;
 - implementation is merged and post-merge validation is green.
 
-## Next Slice
+## Architecture Next Slice
 
 After P6b: **P6c — Active Sessions & Account Security Management**.
