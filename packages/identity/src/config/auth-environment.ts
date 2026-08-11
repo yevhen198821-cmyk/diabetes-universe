@@ -21,6 +21,7 @@ export interface AuthEnvironment {
   readonly databaseMode: AuthDatabaseMode;
   readonly databaseUrl?: string;
   readonly emailFrom?: string;
+  readonly passkeyEnabled: boolean;
   readonly resendApiKey?: string;
   readonly trustedOrigins: readonly string[];
   readonly webauthnOrigin?: string;
@@ -84,13 +85,104 @@ function resolveTrustedOrigins(
   return [baseUrl];
 }
 
+function isLocalWebAuthnHostname(hostname: string): boolean {
+  return (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '::1' ||
+    hostname === '[::1]'
+  );
+}
+
+function resolveWebAuthnConfiguration(
+  baseUrl: string,
+  env: NodeJS.ProcessEnv,
+): Pick<
+  AuthEnvironment,
+  'passkeyEnabled' | 'webauthnOrigin' | 'webauthnRpId' | 'webauthnRpName'
+> {
+  const origin = readOptionalString(env.AUTH_WEBAUTHN_ORIGIN);
+  const rpId = readOptionalString(env.AUTH_WEBAUTHN_RP_ID);
+  const rpName =
+    readOptionalString(env.AUTH_WEBAUTHN_RP_NAME) ?? 'Diabetes Universe';
+
+  if (!origin && !rpId) {
+    return {
+      passkeyEnabled: false,
+      webauthnRpName: rpName,
+    };
+  }
+
+  if (!origin || !rpId) {
+    throw new AuthConfigurationError(
+      'Passkey configuration requires both AUTH_WEBAUTHN_ORIGIN and AUTH_WEBAUTHN_RP_ID.',
+    );
+  }
+
+  let originUrl: URL;
+  let baseUrlObject: URL;
+
+  try {
+    originUrl = new URL(origin);
+    baseUrlObject = new URL(baseUrl);
+  } catch {
+    throw new AuthConfigurationError('Passkey origin configuration is invalid.');
+  }
+
+  if (originUrl.origin !== origin || originUrl.origin !== baseUrlObject.origin) {
+    throw new AuthConfigurationError(
+      'AUTH_WEBAUTHN_ORIGIN must be the exact BETTER_AUTH_URL origin.',
+    );
+  }
+
+  if (
+    originUrl.protocol !== 'https:' &&
+    !(originUrl.protocol === 'http:' && isLocalWebAuthnHostname(originUrl.hostname))
+  ) {
+    throw new AuthConfigurationError(
+      'Passkeys require HTTPS except for localhost development.',
+    );
+  }
+
+  if (
+    rpId.includes('://') ||
+    rpId.includes('/') ||
+    rpId.includes(':') ||
+    rpId.trim() !== rpId
+  ) {
+    throw new AuthConfigurationError(
+      'AUTH_WEBAUTHN_RP_ID must contain only a relying-party hostname.',
+    );
+  }
+
+  const hostname = originUrl.hostname.toLowerCase();
+  const normalizedRpId = rpId.toLowerCase();
+
+  if (
+    hostname !== normalizedRpId &&
+    !hostname.endsWith(`.${normalizedRpId}`)
+  ) {
+    throw new AuthConfigurationError(
+      'AUTH_WEBAUTHN_RP_ID must match the configured WebAuthn origin hostname or its registrable parent domain.',
+    );
+  }
+
+  return {
+    passkeyEnabled: true,
+    webauthnOrigin: origin,
+    webauthnRpId: normalizedRpId,
+    webauthnRpName: rpName,
+  };
+}
+
 export function resolveAuthEnvironment(
   env: NodeJS.ProcessEnv = process.env,
 ): AuthEnvironment {
   const databaseMode = resolveDatabaseMode(env);
   const baseUrl = readRequiredString('BETTER_AUTH_URL', env.BETTER_AUTH_URL);
+  const webauthn = resolveWebAuthnConfiguration(baseUrl, env);
 
-  const environment = {
+  const environment: AuthEnvironment = {
     appName: readOptionalString(env.AUTH_APP_NAME) ?? 'Diabetes Universe',
     baseUrl,
     betterAuthSecret: readRequiredString(
@@ -106,10 +198,7 @@ export function resolveAuthEnvironment(
     emailFrom: readOptionalString(env.AUTH_EMAIL_FROM),
     resendApiKey: readOptionalString(env.RESEND_API_KEY),
     trustedOrigins: resolveTrustedOrigins(baseUrl, env),
-    webauthnOrigin: readOptionalString(env.AUTH_WEBAUTHN_ORIGIN),
-    webauthnRpId: readOptionalString(env.AUTH_WEBAUTHN_RP_ID),
-    webauthnRpName:
-      readOptionalString(env.AUTH_WEBAUTHN_RP_NAME) ?? 'Diabetes Universe',
+    ...webauthn,
   };
 
   assertProductionCapableEmailDelivery(environment);
