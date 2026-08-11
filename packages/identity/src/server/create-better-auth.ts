@@ -1,9 +1,15 @@
 import { randomUUID } from 'node:crypto';
 
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
+import { passkey } from '@better-auth/passkey';
 import { betterAuth } from 'better-auth';
-import { magicLink } from 'better-auth/plugins';
+import {
+  APIError,
+  createAuthMiddleware,
+  getSessionFromCtx,
+} from 'better-auth/api';
 import { nextCookies } from 'better-auth/next-js';
+import { magicLink } from 'better-auth/plugins';
 
 import {
   AUTH_COOKIE_PREFIX,
@@ -13,9 +19,13 @@ import {
   AUTH_SESSION_UPDATE_AGE_SECONDS,
 } from '../config/auth-constants';
 import type { AuthEnvironment } from '../config/auth-environment';
-import type { AuthEmailDelivery } from './email/auth-email-delivery';
 import { authSchema } from './database/auth-schema';
 import type { AuthDatabase } from './database/create-auth-database';
+import type { AuthEmailDelivery } from './email/auth-email-delivery';
+import {
+  isPasskeyFreshSessionPath,
+  isSessionFreshForPasskeyMutation,
+} from './passkey-freshness';
 
 export interface CreateBetterAuthOptions {
   readonly database: AuthDatabase;
@@ -29,6 +39,20 @@ export function createBetterAuth({
   environment,
 }: CreateBetterAuthOptions) {
   const useSecureCookies = environment.baseUrl.startsWith('https://');
+  const passkeyPlugin = environment.passkeyEnabled
+    ? passkey({
+        authenticatorSelection: {
+          residentKey: 'preferred',
+          userVerification: 'required',
+        },
+        origin: environment.webauthnOrigin!,
+        registration: {
+          requireSession: true,
+        },
+        rpID: environment.webauthnRpId!,
+        rpName: environment.webauthnRpName ?? environment.appName,
+      })
+    : null;
 
   return betterAuth({
     appName: environment.appName,
@@ -75,6 +99,24 @@ export function createBetterAuth({
         },
       },
     },
+    hooks: {
+      before: createAuthMiddleware(async (ctx) => {
+        if (!passkeyPlugin || !isPasskeyFreshSessionPath(ctx.path)) {
+          return;
+        }
+
+        const session = await getSessionFromCtx(ctx);
+
+        if (
+          !session?.session ||
+          !isSessionFreshForPasskeyMutation(session.session.createdAt)
+        ) {
+          throw new APIError('FORBIDDEN', {
+            message: 'Fresh authentication required.',
+          });
+        }
+      }),
+    },
     plugins: [
       magicLink({
         disableSignUp: false,
@@ -84,6 +126,7 @@ export function createBetterAuth({
           await emailDelivery.sendMagicLinkEmail({ email, url });
         },
       }),
+      ...(passkeyPlugin ? [passkeyPlugin] : []),
       nextCookies(),
     ],
   });
