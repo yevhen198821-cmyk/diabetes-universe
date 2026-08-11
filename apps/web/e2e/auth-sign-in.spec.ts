@@ -31,7 +31,9 @@ test('sign-in page renders passkey-first entry with email fallback', async ({
   await expect(
     page.getByRole('heading', { name: 'Вход в аккаунт' }),
   ).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Войти с Passkey' })).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Войти с Passkey' }),
+  ).toBeVisible();
   await expect(page.getByLabel('Email')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Продолжить' })).toBeVisible();
 });

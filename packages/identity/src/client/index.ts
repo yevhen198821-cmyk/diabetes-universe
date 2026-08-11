@@ -26,9 +26,7 @@ export async function signInWithPasskey(): Promise<PasskeyClientResult> {
   }
 }
 
-export async function addPasskey(
-  name?: string,
-): Promise<PasskeyClientResult> {
+export async function addPasskey(name?: string): Promise<PasskeyClientResult> {
   try {
     const result = await authClient.passkey.addPasskey({
       name: name?.trim() || undefined,

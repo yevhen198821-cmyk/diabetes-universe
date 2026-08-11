@@ -126,10 +126,15 @@ function resolveWebAuthnConfiguration(
     originUrl = new URL(origin);
     baseUrlObject = new URL(baseUrl);
   } catch {
-    throw new AuthConfigurationError('Passkey origin configuration is invalid.');
+    throw new AuthConfigurationError(
+      'Passkey origin configuration is invalid.',
+    );
   }
 
-  if (originUrl.origin !== origin || originUrl.origin !== baseUrlObject.origin) {
+  if (
+    originUrl.origin !== origin ||
+    originUrl.origin !== baseUrlObject.origin
+  ) {
     throw new AuthConfigurationError(
       'AUTH_WEBAUTHN_ORIGIN must be the exact BETTER_AUTH_URL origin.',
     );
@@ -137,7 +142,10 @@ function resolveWebAuthnConfiguration(
 
   if (
     originUrl.protocol !== 'https:' &&
-    !(originUrl.protocol === 'http:' && isLocalWebAuthnHostname(originUrl.hostname))
+    !(
+      originUrl.protocol === 'http:' &&
+      isLocalWebAuthnHostname(originUrl.hostname)
+    )
   ) {
     throw new AuthConfigurationError(
       'Passkeys require HTTPS except for localhost development.',
@@ -158,10 +166,7 @@ function resolveWebAuthnConfiguration(
   const hostname = originUrl.hostname.toLowerCase();
   const normalizedRpId = rpId.toLowerCase();
 
-  if (
-    hostname !== normalizedRpId &&
-    !hostname.endsWith(`.${normalizedRpId}`)
-  ) {
+  if (hostname !== normalizedRpId && !hostname.endsWith(`.${normalizedRpId}`)) {
     throw new AuthConfigurationError(
       'AUTH_WEBAUTHN_RP_ID must match the configured WebAuthn origin hostname or its registrable parent domain.',
     );
