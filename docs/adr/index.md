@@ -9,4 +9,4 @@
 | ADR-0013   | [Web Client Runtime Ownership and Bootstrap Gate](./0013-web-client-runtime-ownership.md)                          | Approved                           | 2026-08-02 |
 | ADR-0014   | [Local-First Medical Event Persistence Architecture](./0014-local-first-medical-event-persistence-architecture.md) | Approved                           | 2026-08-09 |
 | ADR-0015   | [Web IndexedDB Timeline Persistence Implementation](./0015-web-indexeddb-timeline-persistence-implementation.md)   | Approved                           | 2026-08-09 |
-| ADR-0018   | [P6c Session Management Implementation](./0018-p6c-session-management-implementation.md)                           | Proposed                           | 2026-08-11 |
+| ADR-0018   | [P6c Session Management Implementation](./0018-p6c-session-management-implementation.md)                           | Accepted                           | 2026-08-11 |

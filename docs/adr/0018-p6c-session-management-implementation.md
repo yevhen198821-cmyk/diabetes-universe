@@ -2,11 +2,40 @@
 
 ## Status
 
-Proposed
+Accepted
+
+Final architecture audit verdict: **APPROVE WITH NON-BLOCKING NOTES** (2026-08-12).
+
+P6c-a implementation may start only after this ADR is merged to `main`.
 
 ## Date
 
 2026-08-11
+
+## Architecture Audit Closure
+
+Confirmed decisions from the final read-only audit of this ADR and Better Auth `1.6.25` source:
+
+- Direct Drizzle owned-session read inside `@diabetes-universe/identity` is approved.
+- The identity package uses the same canonical auth schema as the Better Auth Drizzle adapter.
+- This is not a second session source of truth; Better Auth remains owner of session lifecycle and mutations.
+- Active owned-session filter: authenticated user ownership plus `expiresAt > now()`.
+- Revoked Better Auth `1.6.25` sessions are physically deleted; no separate revoked-state column is required for v1.
+- Current-session determination remains server-authoritative.
+- Missing current session in the owned active list fails closed.
+- Revoke-one TOCTOU behavior is safe and idempotent.
+- `revokeSessions()` → `signOut()` sequence is verified against Better Auth `1.6.25` source.
+- `signOut()` clears session cookies even when database session deletion fails or already occurred.
+- No database migration is required for initial P6c.
+
+Non-blocking implementation requirements for P6c-a onward:
+
+1. If Better Auth cookie cache is introduced later, reassess the list path and use authoritative/no-cache session validation where required.
+2. `clientLabel` v1 must remain controlled neutral presentation output; localization belongs to Web presentation.
+3. Use minimal server-side user-agent classification; do not introduce a third-party UA dependency for P6c v1.
+4. P6c-a must include PGlite/Postgres repository parity coverage.
+5. Add explicit regression proving sign-out-everywhere clears browser auth state after server sessions are revoked.
+6. Add explicit regression proving a revoked current session cannot list account sessions.
 
 ## Context
 
