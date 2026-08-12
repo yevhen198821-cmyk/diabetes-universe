@@ -1,18 +1,9 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import test from 'node:test';
 
-import { PGlite } from '@electric-sql/pglite';
-import { PGLiteSocketServer } from '@electric-sql/pglite-socket';
-import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
-import { drizzle as drizzlePostgres } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-
-import { AUTH_FOUNDATION_MIGRATION_SQL } from '../database/auth-foundation-migration.ts';
 import { session, user } from '../database/auth-schema.ts';
-import { createOwnedSessionsRepository } from './owned-sessions-repository.ts';
 
-async function seedOwnedSessionScenario(database) {
+export async function seedOwnedSessionScenario(database) {
   const now = new Date('2026-08-11T12:00:00.000Z');
   const userId = randomUUID();
   const ownedSessionId = randomUUID();
@@ -134,54 +125,3 @@ export async function runOwnedSessionsRepositoryParityScenarios(
     `${label}: foreign user token`,
   );
 }
-
-test('owned sessions repository parity on PGlite drizzle adapter', async () => {
-  const client = new PGlite();
-  await client.exec(AUTH_FOUNDATION_MIGRATION_SQL);
-  const database = drizzlePglite(client, {
-    schema: { session, user },
-  });
-
-  await runOwnedSessionsRepositoryParityScenarios(
-    async () => ({
-      database,
-      repository: createOwnedSessionsRepository(database),
-    }),
-    'pglite',
-  );
-
-  await client.close();
-});
-
-test('owned sessions repository parity on postgres-js drizzle adapter', async () => {
-  const client = new PGlite();
-  await client.exec(AUTH_FOUNDATION_MIGRATION_SQL);
-  const port = 55000 + Math.floor(Math.random() * 1000);
-  const server = new PGLiteSocketServer({
-    db: client,
-    host: '127.0.0.1',
-    port,
-  });
-  await server.start();
-
-  const sql = postgres(`postgres://postgres@127.0.0.1:${port}/postgres`, {
-    max: 1,
-  });
-  const database = drizzlePostgres(sql, {
-    schema: { session, user },
-  });
-
-  try {
-    await runOwnedSessionsRepositoryParityScenarios(
-      async () => ({
-        database,
-        repository: createOwnedSessionsRepository(database),
-      }),
-      'postgres-js',
-    );
-  } finally {
-    await sql.end({ timeout: 1 });
-    await server.stop();
-    await client.close();
-  }
-});

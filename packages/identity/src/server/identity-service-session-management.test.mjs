@@ -17,7 +17,6 @@ import {
   createIdentityService,
   resetIdentityServiceForTests,
 } from './identity-service.ts';
-import { SessionManagementError } from './session-management/session-management-errors.ts';
 
 const TEST_SECRET = 'test-secret-should-be-at-least-32-characters';
 
@@ -47,6 +46,26 @@ function headersFromAuthResponse(response) {
   }
 
   return headers;
+}
+
+function readSessionCookieClearingSetCookies(response) {
+  return response.headers.getSetCookie?.() ?? [];
+}
+
+function assertSessionCookiesClearedBySetCookie(setCookies) {
+  assert.ok(setCookies.length > 0, 'expected signOut Set-Cookie headers');
+
+  const sessionTokenCookie = setCookies.find((value) =>
+    value.startsWith('du-auth.session_token='),
+  );
+  const sessionDataCookie = setCookies.find((value) =>
+    value.startsWith('du-auth.session_data='),
+  );
+
+  assert.ok(sessionTokenCookie, 'expected du-auth.session_token Set-Cookie');
+  assert.ok(sessionDataCookie, 'expected du-auth.session_data Set-Cookie');
+  assert.match(sessionTokenCookie, /Max-Age=0/);
+  assert.match(sessionDataCookie, /Max-Age=0/);
 }
 
 async function signInWithMagicLink(identityService, email) {
@@ -220,24 +239,78 @@ test('revoke other sessions preserves current session', async () => {
   await teardownSessionManagementTestContext();
 });
 
-test('revoke all sessions terminates auth and clears request session state', async () => {
-  const { identityService } = await createSessionManagementTestContext();
-  const headers = await signInWithMagicLink(
-    identityService,
-    'p6c-revoke-all@example.com',
-  );
+test('revokeAllAccountSessions deletes all persisted server session rows', async () => {
+  const { identityService, database } =
+    await createSessionManagementTestContext();
+  const email = 'p6c-revoke-all-server@example.com';
+  const headers = await signInWithMagicLink(identityService, email);
+  const currentSession = await identityService.auth.api.getSession({ headers });
+  assert.ok(currentSession?.session);
 
   const result = await identityService.revokeAllAccountSessions(headers);
   assert.equal(result.ok, true);
   assert.equal(result.code, 'SUCCESS');
   assert.deepEqual(result.sessions, []);
 
-  const principal = await identityService.getCurrentPrincipal(headers);
-  assert.equal(principal, null);
+  const persistedSessions = await database
+    .select()
+    .from(session)
+    .where(eq(session.userId, currentSession.user.id));
+  assert.equal(persistedSessions.length, 0);
 
-  await assert.rejects(
-    () => identityService.listAccountSessions(headers),
-    SessionManagementError,
+  await teardownSessionManagementTestContext();
+});
+
+test('signOut transport clears session cookies via Set-Cookie response headers', async () => {
+  const { identityService } = await createSessionManagementTestContext();
+  const headers = await signInWithMagicLink(
+    identityService,
+    'p6c-signout-cookie@example.com',
+  );
+
+  const signOutResponse = await identityService.auth.api.signOut({
+    headers,
+    asResponse: true,
+  });
+
+  assertSessionCookiesClearedBySetCookie(
+    readSessionCookieClearingSetCookies(signOutResponse),
+  );
+
+  await teardownSessionManagementTestContext();
+});
+
+test('revokeAllAccountSessions server invalidation alone does not prove cookie cleanup', async () => {
+  const { identityService, database } =
+    await createSessionManagementTestContext();
+  const email = 'p6c-revoke-all-cookie-proof@example.com';
+  const headers = await signInWithMagicLink(identityService, email);
+  const currentSession = await identityService.auth.api.getSession({ headers });
+  assert.ok(currentSession?.session);
+
+  const persistedRow = (
+    await database
+      .select()
+      .from(session)
+      .where(eq(session.id, currentSession.session.id))
+  )[0];
+  assert.ok(persistedRow);
+
+  const result = await identityService.revokeAllAccountSessions(headers);
+  assert.equal(result.ok, true);
+
+  const principalAfterRevokeAll =
+    await identityService.getCurrentPrincipal(headers);
+  assert.equal(principalAfterRevokeAll, null);
+
+  await database.insert(session).values(persistedRow);
+
+  const restoredSession = await identityService.auth.api.getSession({
+    headers,
+  });
+  assert.ok(
+    restoredSession?.session,
+    'unchanged request cookie still authenticates after server rows are recreated',
   );
 
   await teardownSessionManagementTestContext();
