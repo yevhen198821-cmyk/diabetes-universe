@@ -4,6 +4,20 @@ export {
   resetIdentityServiceForTests,
   type IdentityService,
 } from './identity-service';
+export type {
+  AccountSessionClientKind,
+  AccountSessionSummary,
+  SessionManagementCode,
+  SessionManagementResult,
+} from '../contracts/session-management-contracts';
+export {
+  SessionManagementError,
+  SESSION_CURRENT_REQUIRES_SIGN_OUT_MESSAGE,
+  SESSION_FRESH_AUTH_REQUIRED_MESSAGE,
+  SESSION_MANAGEMENT_GENERIC_FAILURE_MESSAGE,
+  SESSION_MANAGEMENT_SUCCESS_MESSAGE,
+} from './session-management/session-management-errors';
+export { mapUserAgentLabel } from '../presentation/map-user-agent-label';
 export {
   createBetterAuth,
   type BetterAuthInstance,

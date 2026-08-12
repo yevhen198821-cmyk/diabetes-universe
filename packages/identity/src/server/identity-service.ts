@@ -5,6 +5,10 @@ import {
   type AuthenticatedPrincipal,
   type PasskeySummary,
 } from '../contracts/auth-contracts';
+import type {
+  AccountSessionSummary,
+  SessionManagementResult,
+} from '../contracts/session-management-contracts';
 import {
   resolveSafeAuthCallbackPath,
   type AuthEnvironment,
@@ -23,6 +27,15 @@ import {
   type AuthDatabase,
 } from './database/create-auth-database';
 import { mapAuthenticatedPrincipal } from './map-auth-session';
+import { mapAccountSessionSummaries } from './session-management/map-account-session-summary';
+import {
+  createSessionManagementError,
+  createSessionManagementResult,
+  SessionManagementError,
+} from './session-management/session-management-errors';
+import { isSessionFreshForSessionManagement } from './session-management/session-management-freshness';
+import { createOwnedSessionsRepository } from './session-management/owned-sessions-repository';
+import { resolveOwnedSessionToken } from './session-management/resolve-owned-session-token';
 
 type RequestHeaders = Headers | Record<string, string>;
 
@@ -42,6 +55,19 @@ export interface IdentityService {
     readonly headers: RequestHeaders;
   }): Promise<void>;
   signOutCurrentSession(headers: RequestHeaders): Promise<void>;
+  listAccountSessions(
+    headers: RequestHeaders,
+  ): Promise<readonly AccountSessionSummary[]>;
+  revokeAccountSession(input: {
+    readonly sessionId: string;
+    readonly headers: RequestHeaders;
+  }): Promise<SessionManagementResult>;
+  revokeOtherAccountSessions(
+    headers: RequestHeaders,
+  ): Promise<SessionManagementResult>;
+  revokeAllAccountSessions(
+    headers: RequestHeaders,
+  ): Promise<SessionManagementResult>;
 }
 
 export interface CreateIdentityServiceOptions {
@@ -52,6 +78,20 @@ export interface CreateIdentityServiceOptions {
 type IdentityServiceGlobal = typeof globalThis & {
   __duIdentityServicePromise?: Promise<IdentityService> | null;
 };
+
+interface AuthenticatedBetterAuthSession {
+  readonly session: {
+    readonly id: string;
+    readonly createdAt: Date;
+  };
+  readonly user: {
+    readonly id: string;
+    readonly email: string;
+    readonly emailVerified: boolean;
+    readonly name: string;
+    readonly accountId?: string | null;
+  };
+}
 
 function readIdentityServiceGlobal(): IdentityServiceGlobal {
   return globalThis as IdentityServiceGlobal;
@@ -81,6 +121,7 @@ async function createIdentityServiceInternal(
   options: CreateIdentityServiceOptions,
 ): Promise<IdentityService> {
   const database: AuthDatabase = await createAuthDatabase(options.environment);
+  const ownedSessionsRepository = createOwnedSessionsRepository(database);
   const emailDelivery =
     options.emailDelivery ??
     createEmailDelivery(options.environment, process.env);
@@ -89,6 +130,47 @@ async function createIdentityServiceInternal(
     emailDelivery,
     environment: options.environment,
   });
+
+  async function resolveAuthenticatedSession(
+    headers: RequestHeaders,
+  ): Promise<AuthenticatedBetterAuthSession | null> {
+    const session = await auth.api.getSession({ headers });
+
+    if (!session?.session || !session.user) {
+      return null;
+    }
+
+    return {
+      session: {
+        id: session.session.id,
+        createdAt: session.session.createdAt,
+      },
+      user: session.user,
+    };
+  }
+
+  async function listSanitizedAccountSessions(
+    headers: RequestHeaders,
+  ): Promise<readonly AccountSessionSummary[]> {
+    const current = await resolveAuthenticatedSession(headers);
+
+    if (!current) {
+      throw createSessionManagementError('AUTHENTICATION_REQUIRED');
+    }
+
+    const ownedRows = await ownedSessionsRepository.listActiveSessions(
+      current.user.id,
+    );
+    const currentSessionPresent = ownedRows.some(
+      (row) => row.id === current.session.id,
+    );
+
+    if (!currentSessionPresent) {
+      throw createSessionManagementError('SESSION_STATE_INVALID');
+    }
+
+    return mapAccountSessionSummaries(ownedRows, current.session.id);
+  }
 
   return {
     auth,
@@ -164,6 +246,161 @@ async function createIdentityServiceInternal(
     },
     async signOutCurrentSession(headers) {
       await auth.api.signOut({ headers });
+    },
+    async listAccountSessions(headers) {
+      return listSanitizedAccountSessions(headers);
+    },
+    async revokeAccountSession({ sessionId, headers }) {
+      const current = await resolveAuthenticatedSession(headers);
+
+      if (!current) {
+        return createSessionManagementResult({
+          ok: false,
+          code: 'AUTHENTICATION_REQUIRED',
+        });
+      }
+
+      if (!isSessionFreshForSessionManagement(current.session.createdAt)) {
+        return createSessionManagementResult({
+          ok: false,
+          code: 'FRESH_AUTH_REQUIRED',
+        });
+      }
+
+      if (sessionId === current.session.id) {
+        return createSessionManagementResult({
+          ok: false,
+          code: 'CURRENT_SESSION_REQUIRES_SIGN_OUT',
+        });
+      }
+
+      const token = await resolveOwnedSessionToken(ownedSessionsRepository, {
+        userId: current.user.id,
+        sessionId,
+      });
+
+      if (token) {
+        try {
+          await auth.api.revokeSession({
+            body: { token },
+            headers,
+          });
+        } catch {
+          return createSessionManagementResult({
+            ok: false,
+            code: 'SESSION_REVOKE_FAILED',
+          });
+        }
+      }
+
+      try {
+        const sessions = await listSanitizedAccountSessions(headers);
+        return createSessionManagementResult({
+          ok: true,
+          code: 'SUCCESS',
+          sessions,
+        });
+      } catch (error) {
+        if (error instanceof SessionManagementError) {
+          return createSessionManagementResult({
+            ok: false,
+            code: error.code,
+          });
+        }
+
+        return createSessionManagementResult({
+          ok: false,
+          code: 'SESSION_STATE_INVALID',
+        });
+      }
+    },
+    async revokeOtherAccountSessions(headers) {
+      const current = await resolveAuthenticatedSession(headers);
+
+      if (!current) {
+        return createSessionManagementResult({
+          ok: false,
+          code: 'AUTHENTICATION_REQUIRED',
+        });
+      }
+
+      if (!isSessionFreshForSessionManagement(current.session.createdAt)) {
+        return createSessionManagementResult({
+          ok: false,
+          code: 'FRESH_AUTH_REQUIRED',
+        });
+      }
+
+      try {
+        await auth.api.revokeOtherSessions({ headers });
+      } catch {
+        return createSessionManagementResult({
+          ok: false,
+          code: 'SESSION_REVOKE_FAILED',
+        });
+      }
+
+      try {
+        const sessions = await listSanitizedAccountSessions(headers);
+        return createSessionManagementResult({
+          ok: true,
+          code: 'SUCCESS',
+          sessions,
+        });
+      } catch (error) {
+        if (error instanceof SessionManagementError) {
+          return createSessionManagementResult({
+            ok: false,
+            code: error.code,
+          });
+        }
+
+        return createSessionManagementResult({
+          ok: false,
+          code: 'SESSION_STATE_INVALID',
+        });
+      }
+    },
+    async revokeAllAccountSessions(headers) {
+      const current = await resolveAuthenticatedSession(headers);
+
+      if (!current) {
+        return createSessionManagementResult({
+          ok: false,
+          code: 'AUTHENTICATION_REQUIRED',
+        });
+      }
+
+      if (!isSessionFreshForSessionManagement(current.session.createdAt)) {
+        return createSessionManagementResult({
+          ok: false,
+          code: 'FRESH_AUTH_REQUIRED',
+        });
+      }
+
+      try {
+        await auth.api.revokeSessions({ headers });
+      } catch {
+        return createSessionManagementResult({
+          ok: false,
+          code: 'SESSION_REVOKE_FAILED',
+        });
+      }
+
+      try {
+        await auth.api.signOut({ headers });
+      } catch {
+        return createSessionManagementResult({
+          ok: false,
+          code: 'SESSION_REVOKE_FAILED',
+        });
+      }
+
+      return createSessionManagementResult({
+        ok: true,
+        code: 'SUCCESS',
+        sessions: [],
+      });
     },
   };
 }

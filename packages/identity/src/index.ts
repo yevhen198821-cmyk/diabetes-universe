@@ -6,6 +6,12 @@ export type {
   PasskeySummary,
   SessionSummary,
 } from './contracts/auth-contracts';
+export type {
+  AccountSessionClientKind,
+  AccountSessionSummary,
+  SessionManagementCode,
+  SessionManagementResult,
+} from './contracts/session-management-contracts';
 export {
   AUTH_UNAVAILABLE_MESSAGE,
   GENERIC_AUTH_ERROR_MESSAGE,
