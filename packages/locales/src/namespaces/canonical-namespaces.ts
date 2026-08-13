@@ -7,6 +7,7 @@ export const QUICK_ADD_NAMESPACE = 'quick-add' as const;
  * Approved resource namespaces for Localization Platform v1.0.
  */
 export const CANONICAL_NAMESPACES = [
+  'account',
   'common',
   'dashboard',
   'timeline',

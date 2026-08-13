@@ -61,6 +61,7 @@ test('dashboard preload namespaces remain unchanged for recent events keys', asy
 
   assert.deepEqual(WEB_PLATFORM_APPLICATION_PRELOAD_NAMESPACES, [
     'common',
+    'account',
     'dashboard',
     'timeline',
   ]);

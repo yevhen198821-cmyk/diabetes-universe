@@ -57,6 +57,7 @@ test('createWebPlatformConfig declares application preload scope for bootstrap a
   assert.deepEqual(config.preload, {
     namespaces: [
       WEB_PLATFORM_BOOTSTRAP_PRELOAD_NAMESPACE,
+      'account',
       WEB_PLATFORM_DASHBOARD_PRELOAD_NAMESPACE,
       WEB_PLATFORM_TIMELINE_PRELOAD_NAMESPACE,
     ],
