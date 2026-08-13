@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import type { AccountSessionSummary } from '@diabetes-universe/identity';
 import { SessionManagementError } from '@diabetes-universe/identity/server';
 
+import { SessionManagerPageHeader } from '../../../../components/auth/session-manager-page-header';
 import { SessionManager } from '../../../../components/auth/session-manager';
 import { getAuthenticatedPrincipal } from '../../../../lib/auth/get-authenticated-principal';
 import {
@@ -50,17 +50,7 @@ export default async function AccountSecuritySessionsPage() {
   return (
     <div className="min-h-dvh bg-slate-50 px-4 py-8 dark:bg-slate-950">
       <main className="mx-auto w-full max-w-2xl space-y-6">
-        <header className="space-y-2">
-          <Link
-            className="text-sm font-semibold text-teal-700 hover:underline dark:text-teal-300"
-            href="/account/security"
-          >
-            ← Безопасность входа
-          </Link>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-950 dark:text-slate-50">
-            Безопасность входа
-          </h1>
-        </header>
+        <SessionManagerPageHeader />
 
         <SessionManager
           passkeyManagementEnabled={isWebPasskeyConfigured()}

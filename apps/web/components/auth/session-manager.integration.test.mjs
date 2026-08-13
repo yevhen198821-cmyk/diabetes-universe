@@ -72,7 +72,6 @@ test('session manager renders localized English copy and current badge', async (
   try {
     const text = document.body.textContent ?? '';
 
-    assert.match(text, /Active sessions/);
     assert.match(text, /Current session/);
     assert.match(text, /Chrome · macOS/);
     assert.match(text, /Safari · iPhone/);

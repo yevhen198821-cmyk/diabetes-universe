@@ -354,9 +354,6 @@ export function SessionManager({
     <div className="space-y-6">
       <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="space-y-2">
-          <h2 className="text-xl font-bold text-slate-950 dark:text-slate-50">
-            {labels.title}
-          </h2>
           <p className="text-sm text-slate-600 dark:text-slate-300">
             {labels.description}
           </p>
