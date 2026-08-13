@@ -13,7 +13,8 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   webServer: {
-    command: 'pnpm --dir apps/web exec next start -p 3010',
+    command:
+      'rm -rf /tmp/du-auth-pglite-e2e && pnpm --dir apps/web exec next start -p 3010',
     env: {
       AUTH_DATABASE_MODE: 'pglite',
       AUTH_E2E_FIXTURES: 'true',

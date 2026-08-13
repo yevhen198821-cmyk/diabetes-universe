@@ -1,5 +1,23 @@
 # Changelog
 
+## P6c — Active Sessions & Account Security Management: Feature Complete
+
+Дата: 2026-08-13
+
+Завершено (P6c-a + P6c-b + P6c-c closure, merge HEAD `874f459` + closure PR):
+
+- P6c-a Identity Core — sanitized session read, ownership-scoped revoke, fresh-auth guard, cross-account isolation (PR #85)
+- P6c-b Web Sessions Surface — `/account/security/sessions`, confirmations, bulk actions, fresh-auth UX (PR #86)
+- P6c-c E2E / Closure — multi-context Playwright coverage, stale-session fixture, regression gates, documentation closure
+
+Статус:
+
+**P6c — Active Sessions & Account Security Management: Feature Complete**
+
+Следующий этап:
+
+Оценка следующей approved identity wave отдельно. P6c-c multi-browser closure завершён; OAuth/MFA/sync не начаты.
+
 ## P6b — Passkey Enrollment, Sign-In & Current-Session Sign-Out: Feature Complete
 
 Дата: 2026-08-11

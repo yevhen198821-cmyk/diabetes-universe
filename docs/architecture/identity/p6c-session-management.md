@@ -792,6 +792,10 @@ Non-blocking notes for implementation review:
 
 ## Next Slice
 
-After P6c architecture approval: **P6c implementation — Active Sessions & Session Revocation**.
+P6c implementation closure:
 
-After P6c implementation closure: evaluate the next approved identity wave separately. Do not begin OAuth, MFA, or sync merely because session management exists.
+- **P6c-a** — Accepted & Merged (PR #85)
+- **P6c-b** — Accepted & Merged (PR #86)
+- **P6c-c** — E2E / closure candidate (multi-context browser verification, stale-session fixture, regression gates)
+
+After P6c feature-complete closure: evaluate the next approved identity wave separately. Do not begin OAuth, MFA, or sync merely because session management exists.
