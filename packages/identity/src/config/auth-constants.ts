@@ -11,6 +11,7 @@ export const AUTH_FRESH_AUTH_WINDOW_SECONDS = 10 * 60;
 export const AUTH_ALLOWED_CALLBACK_PATHS = [
   '/',
   '/account',
+  '/account/security/sessions',
   '/timeline',
   '/auth/error',
 ] as const;

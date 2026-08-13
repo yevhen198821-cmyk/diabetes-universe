@@ -6,6 +6,45 @@ import { defineApprovedMessages } from '../../contracts/translation-resource';
  * This object is the source of truth for approved translation keys.
  */
 export const englishCanonicalMessages = defineApprovedMessages({
+  'account.security.sessions.back': 'Sign-in security',
+  'account.security.sessions.confirmRevokeAll.confirm': 'Sign out everywhere',
+  'account.security.sessions.confirmRevokeAll.description':
+    'You will be signed out on this device and all other devices.',
+  'account.security.sessions.confirmRevokeAll.title': 'Sign out everywhere?',
+  'account.security.sessions.confirmRevokeOne.confirm': 'End session',
+  'account.security.sessions.confirmRevokeOne.description':
+    'Access from {clientLabel} will be revoked.',
+  'account.security.sessions.confirmRevokeOne.title': 'End this session?',
+  'account.security.sessions.confirmRevokeOthers.confirm':
+    'Sign out other sessions',
+  'account.security.sessions.confirmRevokeOthers.description':
+    'Other active sessions will be signed out. This device stays signed in.',
+  'account.security.sessions.confirmRevokeOthers.title':
+    'Sign out other sessions?',
+  'account.security.sessions.currentBadge': 'Current session',
+  'account.security.sessions.description':
+    'Where your account is currently signed in.',
+  'account.security.sessions.emptyOthers':
+    'No other active sessions were found.',
+  'account.security.sessions.error.generic':
+    'Could not complete the action. Please try again.',
+  'account.security.sessions.expires': 'Expires',
+  'account.security.sessions.freshAuth.action': 'Confirm sign-in',
+  'account.security.sessions.freshAuth.message':
+    'Confirm sign-in and try the action again.',
+  'account.security.sessions.passkeysLink': 'Manage Passkeys',
+  'account.security.sessions.revokeAll': 'Sign out everywhere',
+  'account.security.sessions.revokeAllPending': 'Signing out everywhere…',
+  'account.security.sessions.revokeOne': 'End session',
+  'account.security.sessions.revokeOnePending': 'Ending session…',
+  'account.security.sessions.revokeOthers': 'Sign out other sessions',
+  'account.security.sessions.revokeOthersPending':
+    'Signing out other sessions…',
+  'account.security.sessions.signOut': 'Sign out',
+  'account.security.sessions.signOutPending': 'Signing out…',
+  'account.security.sessions.signedIn': 'Signed in',
+  'account.security.sessions.success': 'Action completed.',
+  'account.security.sessions.title': 'Active sessions',
   'common.actions.save': 'Save',
   'common.actions.cancel': 'Cancel',
   'common.actions.close': 'Close',

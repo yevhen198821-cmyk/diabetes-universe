@@ -68,6 +68,19 @@ export default async function AccountSecurityPage() {
             </p>
           </section>
         )}
+
+        <Link
+          className="flex min-h-14 items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 font-semibold text-slate-900 shadow-sm transition hover:border-teal-300 hover:bg-teal-50/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 dark:hover:border-teal-800 dark:hover:bg-slate-900"
+          href="/account/security/sessions"
+        >
+          <span>
+            <span className="block">Активные сессии</span>
+            <span className="mt-1 block text-sm font-normal text-slate-500 dark:text-slate-400">
+              Устройства, на которых выполнен вход
+            </span>
+          </span>
+          <span aria-hidden="true">→</span>
+        </Link>
       </main>
     </div>
   );

@@ -110,6 +110,10 @@ test('resolveSafeAuthCallbackPath rejects external redirects', () => {
     '/account',
   );
   assert.equal(resolveSafeAuthCallbackPath('/account'), '/account');
+  assert.equal(
+    resolveSafeAuthCallbackPath('/account/security/sessions'),
+    '/account/security/sessions',
+  );
   assert.equal(resolveSafeAuthCallbackPath('/timeline'), '/timeline');
   assert.equal(resolveSafeAuthCallbackPath('//evil.example'), '/account');
 });
