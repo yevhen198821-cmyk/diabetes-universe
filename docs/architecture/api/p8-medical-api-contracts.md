@@ -2,9 +2,9 @@
 
 ## Status
 
-**Architecture Design — Remediation Candidate**
+**Architecture Design — Approved**
 
-Date: 2026-08-14
+Date: 2026-08-14 (architecture/security re-audit passed)
 
 ## Purpose
 
@@ -486,4 +486,4 @@ P8 may move to Approved only when review confirms:
 
 ## Current decision
 
-**Remediation applied. Re-audit required before approval. Do not implement production medical API routes yet.**
+**P8 architecture/security audit passed. P8 is approved for merge. Production medical API implementation must not begin before the separate P9 Cloud Medical Persistence Implementation Design stage.**
