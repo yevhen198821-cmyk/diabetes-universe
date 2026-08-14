@@ -1,9 +1,7 @@
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
 import type { MedicalEventResource } from '../types/medical-event-resource';
-import {
-  medicalRevisionFromDb,
-} from '../types/medical-revision';
+import { medicalRevisionFromDb } from '../types/medical-revision';
 
 const SERVER_OWNED_SEMANTIC_FIELDS = new Set(['id', 'createdAt', 'updatedAt']);
 
