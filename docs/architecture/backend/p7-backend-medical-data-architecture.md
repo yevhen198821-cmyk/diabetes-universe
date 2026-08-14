@@ -2,9 +2,9 @@
 
 ## Status
 
-**Architecture Design — Remediation Candidate**
+**Architecture Design — Approved**
 
-Date: 2026-08-14
+Date: 2026-08-14 (merged; canonical baseline for P8/P9)
 
 ## Purpose
 
@@ -450,4 +450,4 @@ P7 may move to Approved only when review confirms:
 
 ## Current decision
 
-**Remediation applied. Re-audit required before approval. Do not start backend implementation yet.**
+**P7 architecture/security audit passed. P7 is approved as the canonical backend medical data baseline for P8/P9. Cloud persistence implementation must follow the separate P9 implementation design and must not begin production API routes before that design is approved.**
