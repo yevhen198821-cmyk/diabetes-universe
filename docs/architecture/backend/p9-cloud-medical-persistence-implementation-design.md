@@ -2,9 +2,9 @@
 
 ## Status
 
-**Architecture Design — Remediation Candidate**
+**Architecture Design — Approved**
 
-Date: 2026-08-14 (architecture/security remediation applied; final security remediation applied)
+Date: 2026-08-14 (final architecture/security re-audit passed)
 
 ## Purpose
 
@@ -1094,7 +1094,7 @@ P9 may move from **Remediation Candidate** to **Approved** only when review conf
 
 ## Current decision
 
-**Remediation applied. Architecture/security re-audit required before approval. Production medical API routes and cloud sync must not begin until P9 is approved and a subsequent implementation PR is explicitly chartered.**
+**Final architecture/security re-audit passed. P9 is approved for merge. Production medical API routes and cloud sync must not begin yet. A subsequent P9 implementation PR may contain schema, repository, and service implementation only within this approved scope (no public API routes until separately chartered).**
 
 ## Recommended sequence after P9
 
