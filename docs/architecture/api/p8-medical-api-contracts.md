@@ -2,7 +2,7 @@
 
 ## Status
 
-**Architecture Design — Draft**
+**Architecture Design — Remediation Candidate**
 
 Date: 2026-08-14
 
@@ -98,6 +98,20 @@ This is preferred over making every self-only client request send an arbitrary `
 
 If later APIs accept a subject selector for caregiver/clinician scenarios, the selector remains non-authoritative and is re-authorized server-side on every request.
 
+## Authorization non-enumeration policy
+
+Authorization and resource existence are separate concerns, but the public API must not leak protected resource existence.
+
+Normative v1 behavior:
+
+- unauthenticated requests return `401 AUTH_REQUIRED`;
+- authenticated requests that attempt to access a resource outside the caller's resolved subject scope must return the same public response as an unavailable resource: `404 RESOURCE_NOT_FOUND`;
+- this non-enumeration rule applies consistently to GET, PATCH, and DELETE resource operations;
+- internal authorization telemetry/audit may distinguish denied-vs-absent outcomes, but public status/body must not;
+- collection-level operations that are denied by policy may use `403 SUBJECT_ACCESS_DENIED` when no individual protected resource existence is disclosed.
+
+Clients must never infer ownership or existence from differences between 403/404 for individual medical resources.
+
 ## Resource representation
 
 Conceptual public representation:
@@ -105,7 +119,7 @@ Conceptual public representation:
 ```json
 {
   "resourceId": "opaque-server-id",
-  "revision": "opaque-or-monotonic-version",
+  "revision": "opaque-revision",
   "createdAt": "server-timestamp",
   "updatedAt": "server-timestamp",
   "deletedAt": null,
@@ -113,18 +127,11 @@ Conceptual public representation:
 }
 ```
 
-Public contracts must not expose:
-
-- database primary-key implementation details when avoidable;
-- Better Auth user/session IDs as ownership fields;
-- DB role/schema names;
-- raw audit rows;
-- internal stack traces;
-- secrets or PHI-bearing diagnostic metadata.
+Public contracts must not expose database primary-key implementation details when avoidable, Better Auth user/session IDs as ownership fields, DB role/schema names, raw audit rows, internal stack traces, secrets, or PHI-bearing diagnostic metadata.
 
 ## Endpoint capability model
 
-The first medical-event contract should support these capabilities:
+The first medical-event contract supports:
 
 ```text
 GET    collection      list medical events
@@ -138,7 +145,7 @@ Exact paths remain implementation ADR detail, but behavior below is normative.
 
 ## List contract
 
-Collection reads must be bounded and cursor-paginated.
+Collection reads are bounded and cursor-paginated.
 
 Conceptual request:
 
@@ -151,11 +158,25 @@ Rules:
 - default limit is bounded;
 - maximum limit is server-enforced;
 - no endpoint returns complete lifetime history by default;
-- cursor is opaque to the client;
-- cursor must not encode secrets/PHI in readable URL form;
-- ordering is deterministic;
-- the contract defines whether deleted resources are omitted by default;
-- filters must be allow-listed and indexed before production adoption.
+- filters are allow-listed and indexed before production adoption;
+- deleted resources are omitted by default unless a later sync contract explicitly exposes them.
+
+### Cursor integrity and ordering
+
+The v1 cursor is an opaque server-issued continuation token.
+
+Normative requirements:
+
+- clients must treat cursor bytes as opaque and must not construct/modify them;
+- cursor content must be integrity-protected using a server-controlled signature/MAC or equivalent authenticated encoding;
+- invalid, expired, malformed, or tampered cursors return `400 INVALID_CURSOR` without revealing internal cursor structure;
+- cursors contain no plaintext PHI, secrets, auth credentials, or user-readable medical free text;
+- every cursor is scoped to the resolved subject, API version, effective filter set, and deterministic sort definition; reusing it under a materially different query is rejected;
+- ordering uses an immutable/stable keyset tuple rather than offset pagination; implementation must choose a deterministic tuple that includes a unique server tie-breaker such as `(eventObservedAt, resourceId)` or `(createdAt, resourceId)` according to the approved query contract;
+- records inserted after page 1 must not cause already-returned rows to shift backward and be duplicated solely because offsets moved;
+- continuation semantics are **stable keyset traversal**, not a full transaction snapshot: concurrent inserts/updates may appear on later refreshes, but a single forward traversal must not silently duplicate or skip records that were already part of the traversed ordering because of offset movement;
+- if a future use case requires immutable snapshot pagination, it must define a separate snapshot/version contract rather than pretending normal cursors provide snapshot isolation;
+- cursor lifetime is bounded and defined in implementation documentation.
 
 Conceptual response:
 
@@ -171,66 +192,70 @@ Conceptual response:
 
 ## Read-one contract
 
-A resource lookup is always authorized within the resolved subject scope.
+A resource lookup is always authorized within the resolved subject scope. Knowledge of `resourceId` is never sufficient authorization.
 
-Knowledge of `resourceId` is never sufficient authorization.
-
-Cross-subject and cross-account resource probing must fail closed without leaking whether a protected resource exists where that distinction would create an information leak.
+Cross-subject/cross-account probing follows the non-enumeration policy above.
 
 ## Create contract
 
 Create requests contain semantic medical input, not server lifecycle fields.
 
-Client must not set canonical:
+Client must not set canonical `resourceId`, authoritative `createdAt`/`updatedAt`, server revision, or ownership/audit actor fields.
 
-- `resourceId`;
-- authoritative `createdAt`/`updatedAt`;
-- server revision;
-- ownership/audit actor fields.
-
-Create operations that can be retried use an idempotency contract.
-
-Recommended transport:
+Retryable creates use:
 
 ```text
 Idempotency-Key: <opaque client-generated mutation key>
 ```
 
-Rules:
+### Idempotency semantics
 
-- key scope is bound to authenticated actor + operation/resource domain;
-- same key + same semantic request returns/reconciles to the original result;
-- same key + materially different request is rejected;
-- retention window is explicitly defined in implementation;
-- key itself contains no PHI.
+The idempotency contract is normative for v1 create operations.
+
+- key scope is bound server-side to authenticated actor + resolved subject + API version + operation/resource domain;
+- reuse of the same textual key by another account/subject can never collide with or replay the first actor's result;
+- key itself contains no PHI and must have bounded length/character rules;
+- the server stores a canonical request fingerprint derived after transport validation/normalization together with the authoritative outcome;
+- same scoped key + same semantic request replays/reconciles to the original operation and must not create a second resource;
+- same scoped key + materially different semantic request returns `409 IDEMPOTENCY_CONFLICT`;
+- when the original operation completed successfully, replay returns the same semantic result, same canonical `resourceId`, same authoritative revision and same success status class; implementation may regenerate non-semantic headers such as correlation IDs;
+- when the original request reached a deterministic client error that is explicitly stored by the implementation contract, replay behavior must be documented and tested; transient infrastructure failures must not be cached as permanent success;
+- ambiguous client timeout is reconciled using the same key rather than by generating a new mutation key;
+- the production implementation must define a minimum retention window long enough to cover mobile/background retry behavior and document it as part of the supported client contract;
+- after the retention window expires, the server may treat reuse as a new request, therefore clients must not depend on indefinite replay; released SDKs must generate globally high-entropy mutation keys so accidental late reuse is negligible.
 
 ## Update contract
 
-Updates use optimistic concurrency.
-
-Preferred contract:
+Updates use one normative optimistic-concurrency mechanism in v1:
 
 ```text
-If-Match: <revision/etag>
+If-Match: "<opaque-revision>"
 ```
 
-or an equivalent explicit expected-revision field.
+No request-body `expectedRevision` alternative is part of v1.
 
 Rules:
 
-- server compares expected revision with current authoritative revision;
-- stale revision does not silently overwrite newer data;
-- conflict returns a dedicated conflict/precondition error;
-- PATCH semantics are explicitly allow-listed; arbitrary server-field patching is forbidden;
-- successful update returns the new authoritative revision.
+- every mutable resource representation includes the current opaque `revision` and responses may expose the equivalent `ETag` value;
+- PATCH requires `If-Match`; missing precondition returns `428 PRECONDITION_REQUIRED`;
+- the server compares `If-Match` to the current authoritative revision;
+- stale/mismatched revision returns **HTTP 412** with stable code `REVISION_CONFLICT`;
+- stale revision never silently overwrites newer data;
+- PATCH fields are explicitly allow-listed; arbitrary server-field patching is forbidden;
+- successful update returns the new authoritative revision/ETag;
+- revision tokens are opaque to clients and are not parsed/incremented client-side.
 
 ## Delete contract
 
 DELETE means application-level medical resource deletion, not account deletion and not immediate backup erasure.
 
-The API must not expose internal tombstone/sync details before the later sync architecture is approved.
+DELETE resource operations use the same v1 `If-Match` precondition semantics:
 
-Deletion still participates in expected-revision/concurrency rules where necessary.
+- missing `If-Match` → `428 PRECONDITION_REQUIRED`;
+- stale revision → `412 REVISION_CONFLICT`;
+- unauthorized/out-of-scope resource → `404 RESOURCE_NOT_FOUND` under non-enumeration policy.
+
+The API does not expose internal tombstone/sync details before the later sync architecture is approved.
 
 ## Time semantics
 
@@ -245,12 +270,10 @@ Medical/source event time and server lifecycle time are separate.
 
 All API errors use a stable machine-readable envelope.
 
-Conceptually:
-
 ```json
 {
   "error": {
-    "code": "MEDICAL_REVISION_CONFLICT",
+    "code": "REVISION_CONFLICT",
     "message": "Safe user-presentable summary",
     "correlationId": "opaque-id",
     "details": null
@@ -265,6 +288,8 @@ Initial error families:
 - `SUBJECT_ACCESS_DENIED`
 - `RESOURCE_NOT_FOUND`
 - `VALIDATION_FAILED`
+- `INVALID_CURSOR`
+- `PRECONDITION_REQUIRED`
 - `REVISION_CONFLICT`
 - `IDEMPOTENCY_CONFLICT`
 - `RATE_LIMITED`
@@ -278,88 +303,71 @@ Rules:
 - validation errors identify safe field-level problems without echoing unnecessary PHI;
 - authorization errors do not expose cross-subject resource existence;
 - client behavior keys off stable `code`, not localized message text;
-- localization of user-facing error presentation happens in the client/application presentation layer.
+- localization happens in the presentation layer.
 
 ## HTTP semantics
 
-Expected status mapping conceptually:
+Normative v1 mapping:
 
 - 200 — successful read/update;
-- 201 — successful create;
+- 201 — successful create/replayed successful create;
 - 204 — successful delete when no body is returned;
-- 400 — malformed request;
+- 400 — malformed request or invalid cursor;
 - 401 — authentication required/invalid;
-- 403 — authenticated but operation not authorized;
-- 404 — resource unavailable/not exposed;
-- 409 — idempotency/domain conflict when appropriate;
-- 412 — revision/precondition conflict when using HTTP preconditions;
+- 403 — authenticated collection/action policy denied where no individual resource enumeration risk exists;
+- 404 — resource unavailable/not exposed, including out-of-subject resource access;
+- 409 — idempotency/domain conflict;
+- 412 — revision conflict (`REVISION_CONFLICT`);
 - 413 — request too large;
-- 422 — semantic validation failure where adopted consistently;
+- 422 — semantic validation failure;
+- 428 — required `If-Match` missing for update/delete;
 - 429 — rate limited;
 - 503 — temporarily unavailable.
 
-The implementation must choose one consistent revision-conflict mapping and test it contractually.
-
 ## Validation contract
 
-All external payloads are runtime-validated at the API boundary even when TypeScript types exist.
+All external payloads are runtime-validated at the API boundary even when generated/TypeScript types exist.
 
 Rules:
 
-- reject unknown dangerous server-owned fields rather than ignoring them silently where ambiguity creates risk;
+- reject dangerous/unknown server-owned fields rather than silently accepting them;
 - enforce payload size/depth limits;
-- validate numeric ranges and date formats according to semantic-domain contracts;
-- do not let transport DTOs directly become persistence writes without application mapping;
-- never trust generated client types as runtime validation.
+- validate numeric ranges/date formats using semantic-domain contracts;
+- transport DTOs are mapped through application contracts before persistence;
+- generated client types never replace runtime validation.
 
-## Versioning
+## Versioning and compatibility
 
 Public medical API begins at `v1`.
 
-Breaking changes require a new version or an explicitly compatible migration strategy.
+Breaking changes require a new version or explicitly compatible migration strategy. Additive response fields may evolve within a version when supported clients ignore unknown fields safely.
 
-Non-breaking additions may evolve within a version when clients are required to ignore unknown response fields safely.
+Because Android/iOS upgrades can lag:
 
-Server must support a defined deprecation window before removing a public contract used by released mobile clients.
-
-This is critical because native apps cannot be upgraded instantly.
-
-## Compatibility policy
-
-Web may deploy rapidly; Android/iOS may lag by weeks or months.
-
-Therefore:
-
-- backend cannot assume all clients update simultaneously;
-- response additions are additive by default;
+- backend cannot assume simultaneous client upgrades;
 - required request fields are introduced carefully;
-- mobile minimum-supported API/client versions are explicit;
-- emergency server changes must preserve safe behavior for older supported clients.
+- minimum supported API/client versions are explicit;
+- a defined deprecation window exists before removing contracts used by released clients;
+- emergency server changes preserve safe behavior for older supported clients.
 
 ## Correlation and observability
 
-Every request receives a server correlation ID.
+Every request receives a server correlation ID. Correlation IDs may be returned to clients and included in safe logs.
 
-Correlation IDs may be returned to clients and included in safe logs.
-
-Logs/metrics must not include full medical payloads by default.
-
-Never place PHI, auth credentials, or medical free text into URLs, metric labels, tracing span names, or exception titles.
+Logs/metrics do not include full medical payloads by default. PHI, auth credentials, medical free text, and secrets must never appear in URLs, metric labels, tracing span names, or exception titles.
 
 ## Rate limiting and abuse protection
 
-Medical APIs require layered server-side limits.
-
-At minimum:
+Medical APIs require layered limits:
 
 - per authenticated actor/session/account limits;
-- stricter mutation limits than normal reads where appropriate;
-- payload-size limits;
+- stricter mutation limits where appropriate;
+- payload-size/depth limits;
 - bounded pagination;
 - protection against high-cardinality filter abuse;
-- explicit retry guidance for 429 responses.
+- stable 429 envelope and retry guidance.
 
-Rate limiting must not be the only authorization control.
+Rate limiting is never an authorization mechanism.
 
 ## Caching
 
@@ -368,94 +376,79 @@ Authenticated medical responses are private/sensitive.
 Default posture:
 
 - no shared/public CDN caching of personalized medical payloads;
-- explicit private/no-store semantics until a reviewed caching strategy exists;
-- never allow one user's response to be served to another through an incorrect cache key;
-- metadata-only caching must be separately reviewed.
+- explicit `private, no-store` semantics until a reviewed caching strategy exists;
+- one user's response must never be reusable under another user's cache key;
+- metadata-only caching requires separate review.
 
 ## Mutation atomicity
 
-If an API operation requires authoritative medical mutation plus required idempotency/audit/outbox state, the application contract considers the operation successful only when the required atomic boundary succeeds.
+If an API operation requires authoritative medical mutation plus mandatory idempotency/audit/outbox state, the application contract considers success only when that required atomic boundary succeeds.
 
-A response must not claim durable success while mandatory transaction-side evidence failed.
+The API must not claim durable success while mandatory transaction-side evidence failed.
 
 ## Retry semantics
 
-Clients may retry safe reads.
+Clients may retry safe reads. Mutation retries use the idempotency/precondition rules above.
 
-Mutation retries require idempotency/preconditions as applicable.
-
-For ambiguous timeout outcomes, clients reconcile via idempotency key/resource read rather than blindly repeating non-idempotent writes.
+For ambiguous timeout outcomes, clients reconcile via the same idempotency key or authoritative resource read rather than blindly repeating non-idempotent writes.
 
 ## Bulk operations
 
 Unbounded bulk create/update/delete is not part of the first API slice.
 
-Local-data adoption/import gets a separate architecture because it requires batching, resumability, idempotency, verification, and partial-failure semantics.
+Local-data adoption/import receives separate architecture because it requires batching, resumability, idempotency, verification, and partial-failure semantics.
 
 ## File/media boundary
 
-Medical attachments/images/files are not part of the initial Timeline API contract unless separately approved.
+Medical attachments/images/files are not part of the initial Timeline API contract unless separately approved. Large binary/base64 media must not be embedded in normal event JSON.
 
-Do not embed large binary/base64 media directly into normal event JSON contracts.
-
-Future media storage requires signed upload/download architecture, malware/content controls, lifecycle, retention, and authorization.
+Future media requires signed upload/download architecture, malware/content controls, lifecycle, retention, and authorization.
 
 ## AI boundary
 
-AI does not receive privileged API bypasses.
-
-Any future AI feature calls application services under the same authenticated subject authorization constraints as deterministic features.
+AI receives no privileged API bypass. Future AI features call application services under the same authenticated subject authorization constraints as deterministic features.
 
 AI-generated text is not persisted as a medical record by default.
 
 ## OpenAPI / generated clients
 
-P8 recommends maintaining a machine-readable API contract (OpenAPI or equivalent) once implementation begins.
+Once implementation begins, maintain a machine-readable OpenAPI (or equivalent) contract in version control and CI-validate it for breaking changes.
 
-Generated SDK/types may improve consistency across Web/Android/iOS, but generated code does not replace runtime server validation or authorization.
-
-The canonical contract must be version-controlled and CI-validated for breaking changes.
+Generated SDK/types improve consistency across Web/Android/iOS but do not replace runtime server validation or authorization.
 
 ## Contract testing
 
-Implementation must include contract-level tests for at least:
+Implementation must include contract tests for at least:
 
 1. unauthenticated request rejected;
 2. authenticated self-subject access succeeds;
-3. cross-subject access fails closed;
-4. client cannot set server-owned lifecycle/ownership fields;
-5. pagination limit is bounded;
-6. opaque cursor behavior;
-7. create idempotency replay;
-8. idempotency-key payload mismatch rejection;
-9. stale revision update rejected;
-10. current revision update succeeds and advances revision;
-11. delete follows authorization/revision rules;
-12. error envelope contains stable code/correlation ID and no stack trace;
-13. oversized payload rejected;
-14. rate-limit response is stable;
-15. medical response is not publicly cacheable;
-16. PHI/secrets are absent from URL/logging fixtures;
-17. older supported client contract remains compatible with additive changes.
+3. cross-subject GET returns non-enumerating 404;
+4. cross-subject PATCH/DELETE return the same non-enumerating 404 behavior;
+5. client cannot set server-owned lifecycle/ownership fields;
+6. pagination limit is bounded;
+7. cursor is opaque and tamper detection rejects modified cursor;
+8. cursor cannot be replayed under a materially different subject/filter/query;
+9. keyset traversal does not duplicate/skip previously traversed rows solely because concurrent inserts move offsets;
+10. create idempotency replay returns the original resource/result;
+11. same idempotency key under a different account cannot collide;
+12. idempotency-key payload mismatch returns 409;
+13. documented retention-expiry behavior is exercised;
+14. PATCH without `If-Match` returns 428;
+15. stale PATCH revision returns 412 `REVISION_CONFLICT`;
+16. current revision PATCH succeeds and advances revision;
+17. DELETE uses the same 428/412 precondition contract;
+18. error envelope contains stable code/correlation ID and no stack trace;
+19. oversized payload rejected;
+20. rate-limit response is stable;
+21. medical response is not publicly cacheable;
+22. PHI/secrets are absent from URL/logging fixtures;
+23. older supported client contract remains compatible with additive changes.
 
 ## Explicit non-scope
 
-P8 does not implement:
+P8 does not implement concrete Next.js route handlers, production medical DB schema/migrations, cloud persistence repository, local IndexedDB adoption/import, offline outbox/sync, conflict-resolution UX, caregiver/HCP delegation, OAuth/MFA, media uploads, CGM/device ingestion, Community/Recipes/Marketplace APIs, or AI clinical decision-making.
 
-- concrete Next.js route handlers;
-- production medical DB schema/migrations;
-- cloud persistence repository;
-- local IndexedDB adoption/import;
-- offline outbox/sync;
-- conflict-resolution UX;
-- caregiver/HCP subject delegation;
-- OAuth/MFA;
-- media uploads;
-- CGM/device ingestion;
-- community/recipes/marketplace APIs;
-- AI clinical decision-making.
-
-Community, Recipes, Marketplace and other future product domains must receive their own APIs/bounded contexts and must never inherit medical-data access merely because they share the same account.
+Community, Recipes, Marketplace and future product domains receive their own bounded-context APIs and never inherit medical-data access merely because they share the same account.
 
 ## Recommended sequence after P8
 
@@ -470,22 +463,24 @@ P8 API Contracts Architecture
 
 ## Architecture approval gate
 
-P8 may move from Draft to Approved only when review confirms:
+P8 may move to Approved only when review confirms:
 
 - no account/provider ownership leakage into medical contracts;
 - self-subject authorization is server-resolved;
-- all collection reads are bounded/cursor-paginated;
+- individual-resource authorization uses consistent non-enumerating behavior;
+- collection reads are bounded with integrity-protected keyset cursors;
+- pagination semantics under concurrent writes are explicit;
 - server-owned IDs/revisions/timestamps cannot be client-authored;
-- create idempotency is explicit;
-- update concurrency/preconditions are explicit;
+- create idempotency scope/replay/retention semantics are explicit;
+- v1 uses one normative `If-Match` revision contract with 428/412 mappings;
 - error taxonomy is stable and non-leaky;
-- API versioning accounts for slow mobile upgrades;
+- API versioning supports slow mobile upgrades;
 - medical responses are private by default;
 - PHI-safe logging/correlation rules are explicit;
 - rate/payload limits exist;
-- implementation contract tests are enumerated;
+- implementation contract tests cover the normative behaviors;
 - adoption/sync/media/community/recipes/marketplace remain outside P8.
 
 ## Current decision
 
-**Recommended:** proceed with P8 architecture/security audit. Do not implement production medical API routes yet.
+**Remediation applied. Re-audit required before approval. Do not implement production medical API routes yet.**
