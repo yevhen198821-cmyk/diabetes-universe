@@ -32,3 +32,4 @@ export {
   getLastCapturedMagicLinkEmail,
   resetCapturedMagicLinkEmail,
 } from './email/capturing-auth-email-delivery';
+export { markCurrentSessionStaleForE2eFixture } from './e2e/mark-current-session-stale-for-fixture';

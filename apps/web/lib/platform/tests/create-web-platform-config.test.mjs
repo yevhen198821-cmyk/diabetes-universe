@@ -99,8 +99,5 @@ test('createWebPlatformConfig does not embed request objects or functions', () =
   const serialized = JSON.parse(JSON.stringify(config));
 
   assert.deepEqual(serialized.localeContext.locale, 'de-DE');
-  assert.equal(
-    serialized.fallbackPolicy.defaultLocale,
-    WEB_PLATFORM_DEFAULT_LOCALE,
-  );
+  assert.equal(serialized.fallbackPolicy.defaultLocale, 'en-GB');
 });

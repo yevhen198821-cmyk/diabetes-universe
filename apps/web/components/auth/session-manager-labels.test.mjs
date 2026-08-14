@@ -26,6 +26,20 @@ test('resolveSessionManagerLabels returns canonical English session strings', as
   assert.equal(labels.freshAuthAction, 'Confirm sign-in');
 });
 
+test('resolveSessionManagerLabels returns Russian session strings for ru-RU locale', async () => {
+  const runtime = await createTestPlatformRuntime({
+    request: { acceptLanguage: 'ru-RU', cookieTimeZone: 'Europe/Moscow' },
+  });
+
+  const labels = resolveSessionManagerLabels(runtime.localization);
+
+  assert.equal(labels.title, 'Активные сессии');
+  assert.equal(labels.currentBadge, 'Текущая сессия');
+  assert.equal(labels.revokeOne, 'Завершить сессию');
+  assert.notEqual(labels.title, 'Active sessions');
+  assert.notEqual(labels.currentBadge, 'Current session');
+});
+
 test('formatRevokeOneConfirmationDescription interpolates clientLabel only', () => {
   const description = formatRevokeOneConfirmationDescription(
     'Access from {clientLabel} will be revoked.',

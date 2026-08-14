@@ -1,33 +1,11 @@
 import { expect, test } from '@playwright/test';
 
-import type { APIRequestContext, Page } from '@playwright/test';
+import {
+  removeExistingPasskeys,
+  signInWithMagicLink,
+} from './support/auth-helpers';
 
 test.describe.configure({ mode: 'serial' });
-
-async function signInWithMagicLink(
-  page: Page,
-  request: APIRequestContext,
-  email: string,
-) {
-  await page.goto('/auth');
-  await page.getByLabel('Email').fill(email);
-  await page.getByRole('button', { name: 'Продолжить' }).click();
-  await expect(page).toHaveURL(/\/auth\/check-email/);
-
-  const fixtureResponse = await request.get(
-    `/api/auth/test/last-magic-link?email=${encodeURIComponent(email)}`,
-  );
-  expect(fixtureResponse.ok()).toBeTruthy();
-  const fixture = (await fixtureResponse.json()) as {
-    email: string | null;
-    url: string | null;
-  };
-  assert(fixture.url);
-  expect(fixture.email).toBe(email.trim().toLowerCase());
-
-  await page.goto(fixture.url!, { waitUntil: 'load' });
-  await page.waitForURL(/\/account/, { timeout: 10_000 });
-}
 
 test('sign-in page renders passkey-first entry with email fallback', async ({
   page,
@@ -88,6 +66,7 @@ test('user can enroll a passkey, revoke current session, and sign in with the pa
   await page.context().clearCookies();
 
   await signInWithMagicLink(page, request, 'p6b-passkey@example.com');
+  await removeExistingPasskeys(page);
   await page.goto('/account/security');
   await expect(
     page.getByRole('heading', { name: 'Безопасность входа' }),
@@ -95,7 +74,7 @@ test('user can enroll a passkey, revoke current session, and sign in with the pa
 
   await page.getByRole('button', { name: 'Добавить Passkey' }).click();
   await expect(page.getByText('Passkey добавлен.')).toBeVisible();
-  await expect(page.getByText('Мой Passkey')).toBeVisible();
+  await expect(page.getByText('Мой Passkey')).toHaveCount(1);
 
   await page.goto('/account');
   await page.getByRole('button', { name: 'Выйти из аккаунта' }).click();
@@ -114,7 +93,3 @@ test('user can enroll a passkey, revoke current session, and sign in with the pa
   };
   expect(restored.user?.email).toBe('p6b-passkey@example.com');
 });
-
-function assert(value: unknown): asserts value {
-  expect(value).toBeTruthy();
-}

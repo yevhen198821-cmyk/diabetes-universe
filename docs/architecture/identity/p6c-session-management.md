@@ -792,6 +792,19 @@ Non-blocking notes for implementation review:
 
 ## Next Slice
 
-After P6c architecture approval: **P6c implementation — Active Sessions & Session Revocation**.
+P6c implementation closure:
 
-After P6c implementation closure: evaluate the next approved identity wave separately. Do not begin OAuth, MFA, or sync merely because session management exists.
+- **P6c-a** — Accepted & Merged (PR #85)
+- **P6c-b** — Accepted & Merged (PR #86)
+- **P6c-c** — Closure candidate on PR #87 (E2E, production validation completed on Vercel, localization remediation complete)
+
+Production validation (2026-08-14) confirmed Neon-backed auth, magic-link delivery via Resend, session management UI, and cross-device remote revoke. Temporary Resend sender `onboarding@resend.dev` is acceptable for engineering validation; verified custom domain required before public production launch.
+
+### Sessions localization boundary (closure remediation)
+
+- Global web platform default locale remains **`en-GB`** (`WEB_PLATFORM_DEFAULT_LOCALE`).
+- `/account/security/sessions` resolves copy through the existing Localization Platform from request locale (`Accept-Language` / cookie), not a second locale system.
+- `SessionManagerPageHeader` and `SessionManager` share the same `useLocalization` path so header and body stay in one locale per request.
+- Account shell pages outside the sessions vertical slice (`/account`, `/account/security`) still use transitional hardcoded Russian presentation. That is a documented limitation until account shell i18n migration; it does not change global platform locale policy.
+
+After P6c post-merge closure acceptance: evaluate the next approved identity wave separately. Do not begin OAuth, MFA, or sync merely because session management exists.

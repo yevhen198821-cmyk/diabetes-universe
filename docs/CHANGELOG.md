@@ -1,5 +1,40 @@
 # Changelog
 
+## P6c — Active Sessions & Account Security Management: Closure Candidate
+
+Дата: 2026-08-13 (обновлено 2026-08-14)
+
+Статус implementation wave:
+
+- P6c-a Identity Core — Accepted & Merged (PR #85)
+- P6c-b Web Sessions Surface — Accepted & Merged (PR #86)
+- P6c-c E2E / Closure — closure candidate на PR #87; production validation на Vercel завершена; финальный architecture/security audit после merge не выполнен
+
+Завершено в closure candidate (PR #87, HEAD `874f459` + closure work):
+
+- multi-context Playwright coverage, stale-session fixture, regression gates
+- Turborepo `build.env` для production auth variables
+- production validation: magic-link, sessions UI, remote revoke (desktop ↔ mobile)
+- remediation: sessions localization via request locale (global default `en-GB` preserved), proxy stale-cookie redirect-loop fix
+
+Не объявлять **Feature Complete** до post-merge closure acceptance.
+
+Следующий этап:
+
+Финальный P6c architecture/security audit после merge PR #87. OAuth/MFA/sync не начаты.
+
+### Production email (temporary)
+
+До публичного production launch требуется verified custom sending domain в Resend. Текущая production validation использует временный sender `onboarding@resend.dev` — это infrastructure-only, не изменение auth semantics.
+
+---
+
+## P6c — Active Sessions & Account Security Management: Feature Complete (superseded)
+
+Дата: 2026-08-13
+
+Эта секция заменена статусом **Closure Candidate** выше. Feature Complete будет зафиксирован только после post-merge closure acceptance.
+
 ## P6b — Passkey Enrollment, Sign-In & Current-Session Sign-Out: Feature Complete
 
 Дата: 2026-08-11

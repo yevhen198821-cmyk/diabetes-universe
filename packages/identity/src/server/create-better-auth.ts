@@ -19,6 +19,7 @@ import {
   AUTH_SESSION_UPDATE_AGE_SECONDS,
 } from '../config/auth-constants';
 import type { AuthEnvironment } from '../config/auth-environment';
+import { isAuthE2eRuntime } from '../config/auth-runtime-guards';
 import { authSchema } from './database/auth-schema';
 import type { AuthDatabase } from './database/create-auth-database';
 import type { AuthEmailDelivery } from './email/auth-email-delivery';
@@ -63,6 +64,7 @@ export function createBetterAuth({
     }),
     secret: environment.betterAuthSecret,
     trustedOrigins: [...environment.trustedOrigins],
+    rateLimit: isAuthE2eRuntime() ? { enabled: false } : undefined,
     advanced: {
       cookiePrefix: environment.cookiePrefix || AUTH_COOKIE_PREFIX,
       defaultCookieAttributes: {

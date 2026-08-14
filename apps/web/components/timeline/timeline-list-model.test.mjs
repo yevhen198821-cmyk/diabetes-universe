@@ -56,6 +56,7 @@ test('creates empty model for ready state without events', () => {
     referenceDate,
     status: 'ready',
     timeZone: 'UTC',
+    locale: 'en-GB',
   });
 
   assert.equal(model.status, 'empty');
@@ -108,6 +109,7 @@ test('creates ready model for one date with newest events first', () => {
     referenceDate,
     status: 'ready',
     timeZone: 'UTC',
+    locale: 'en-GB',
   });
 
   assert.equal(model.status, 'ready');
@@ -135,6 +137,7 @@ test('creates separate today, yesterday, and older date groups', () => {
     referenceDate,
     status: 'ready',
     timeZone: 'UTC',
+    locale: 'en-GB',
   });
 
   assert.deepEqual(
@@ -153,6 +156,7 @@ test('shows year for groups outside the current year', () => {
     referenceDate,
     status: 'ready',
     timeZone: 'UTC',
+    locale: 'en-GB',
   });
 
   assert.equal(model.groups[0].label, '31 December 2025');
@@ -167,6 +171,7 @@ test('keeps same dateTime events stable by id', () => {
     referenceDate,
     status: 'ready',
     timeZone: 'UTC',
+    locale: 'en-GB',
   });
 
   assert.deepEqual(
@@ -186,6 +191,7 @@ test('places invalid dateTime in a predictable fallback group', () => {
     referenceDate,
     status: 'ready',
     timeZone: 'UTC',
+    locale: 'en-GB',
   });
 
   assert.deepEqual(
@@ -207,6 +213,7 @@ test('does not mutate the input event array', () => {
     referenceDate,
     status: 'ready',
     timeZone: 'UTC',
+    locale: 'en-GB',
   });
 
   assert.deepEqual(
