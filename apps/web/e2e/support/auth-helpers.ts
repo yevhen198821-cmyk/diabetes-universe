@@ -74,6 +74,24 @@ export async function createLocalizedAuthContext(
   });
 }
 
+export async function createRussianAuthContext(
+  browser: Browser,
+  userAgent: string,
+) {
+  return browser.newContext({
+    userAgent,
+    locale: 'ru-RU',
+    extraHTTPHeaders: {
+      'Accept-Language': 'ru-RU',
+    },
+  });
+}
+
+export async function expectUnauthenticatedViaNavigation(page: Page) {
+  await page.goto('/account');
+  await expect(page).toHaveURL(/\/auth\?callback=(%2Faccount|\/account)/);
+}
+
 export async function expectAuthenticated(page: Page) {
   await page.goto('/account');
   await expect(page).not.toHaveURL(/\/auth/);

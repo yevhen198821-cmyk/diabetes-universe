@@ -18,7 +18,7 @@ export function SessionManagerPageHeader() {
         className="text-sm font-semibold text-teal-700 hover:underline dark:text-teal-300"
         href="/account/security"
       >
-        ← Безопасность входа
+        ← {labels.back}
       </a>
       <h1 className="text-3xl font-bold tracking-tight text-slate-950 dark:text-slate-50">
         {labels.title}

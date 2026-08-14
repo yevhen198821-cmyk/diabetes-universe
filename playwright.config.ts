@@ -11,6 +11,9 @@ export default defineConfig({
     timezoneId: 'UTC',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    extraHTTPHeaders: {
+      'Accept-Language': 'en-GB',
+    },
   },
   webServer: {
     command:

@@ -18,7 +18,7 @@ export type WebPlatformSupportedLocale =
 /**
  * Platform default locale from Localization Platform v1.0 registry.
  */
-export const WEB_PLATFORM_DEFAULT_LOCALE = asLocaleCode('en-GB');
+export const WEB_PLATFORM_DEFAULT_LOCALE = asLocaleCode('ru-RU');
 
 /**
  * Default hour cycle for web presentation context when not supplied by request.

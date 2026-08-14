@@ -5,6 +5,8 @@ import {
   createLocalizedAuthContext,
   expectAuthenticated,
   expectUnauthenticated,
+  createRussianAuthContext,
+  expectUnauthenticatedViaNavigation,
   gotoSessionsPage,
   markCurrentSessionStale,
   readSessionId,
@@ -73,6 +75,67 @@ test.describe('P6c session management', () => {
 
     await contextA.close();
     await contextB.close();
+  });
+
+  test('revoked session navigates to auth without proxy redirect loop', async ({
+    browser,
+    request,
+  }) => {
+    const email = 'p6c-revoked-navigation@example.com';
+    const contextA = await createLocalizedAuthContext(
+      browser,
+      CHROME_MAC_USER_AGENT,
+    );
+    const contextB = await createLocalizedAuthContext(
+      browser,
+      SAFARI_IPHONE_USER_AGENT,
+    );
+    const pageA = await contextA.newPage();
+    const pageB = await contextB.newPage();
+
+    await signInWithMagicLink(pageA, request, email);
+    await signInWithMagicLink(pageB, request, email);
+
+    await gotoSessionsPage(pageA);
+    await pageA
+      .getByRole('button', { name: 'End session', exact: true })
+      .click();
+    await pageA
+      .getByRole('dialog')
+      .getByRole('button', { name: 'End session', exact: true })
+      .click();
+
+    await expectUnauthenticatedViaNavigation(pageB);
+    await pageB.goto('/auth');
+    await expect(
+      pageB.getByRole('heading', { name: 'Вход в аккаунт' }),
+    ).toBeVisible();
+
+    await contextA.close();
+    await contextB.close();
+  });
+
+  test('renders a single-locale Russian sessions surface for ru-RU requests', async ({
+    browser,
+    request,
+  }) => {
+    const context = await createRussianAuthContext(
+      browser,
+      CHROME_MAC_USER_AGENT,
+    );
+    const page = await context.newPage();
+
+    await signInWithMagicLink(page, request, 'p6c-ru-locale@example.com');
+    await page.goto('/account/security/sessions');
+
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Активные сессии' }),
+    ).toBeVisible();
+    await expect(page.getByText('Current session')).toHaveCount(0);
+    await expect(page.getByText('Текущая сессия')).toBeVisible();
+    await expect(page.getByText('Active sessions')).toHaveCount(0);
+
+    await context.close();
   });
 
   test('signs out other sessions while keeping the current session active', async ({

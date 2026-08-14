@@ -1,22 +1,39 @@
 # Changelog
 
-## P6c — Active Sessions & Account Security Management: Feature Complete
+## P6c — Active Sessions & Account Security Management: Closure Candidate
 
-Дата: 2026-08-13
+Дата: 2026-08-13 (обновлено 2026-08-14)
 
-Завершено (P6c-a + P6c-b + P6c-c closure, merge HEAD `874f459` + closure PR):
+Статус implementation wave:
 
-- P6c-a Identity Core — sanitized session read, ownership-scoped revoke, fresh-auth guard, cross-account isolation (PR #85)
-- P6c-b Web Sessions Surface — `/account/security/sessions`, confirmations, bulk actions, fresh-auth UX (PR #86)
-- P6c-c E2E / Closure — multi-context Playwright coverage, stale-session fixture, regression gates, documentation closure
+- P6c-a Identity Core — Accepted & Merged (PR #85)
+- P6c-b Web Sessions Surface — Accepted & Merged (PR #86)
+- P6c-c E2E / Closure — closure candidate на PR #87; production validation на Vercel завершена; финальный architecture/security audit после merge не выполнен
 
-Статус:
+Завершено в closure candidate (PR #87, HEAD `874f459` + closure work):
 
-**P6c — Active Sessions & Account Security Management: Feature Complete**
+- multi-context Playwright coverage, stale-session fixture, regression gates
+- Turborepo `build.env` для production auth variables
+- production validation: magic-link, sessions UI, remote revoke (desktop ↔ mobile)
+- remediation: Russian sessions localization alignment, proxy stale-cookie redirect-loop fix
+
+Не объявлять **Feature Complete** до post-merge closure acceptance.
 
 Следующий этап:
 
-Оценка следующей approved identity wave отдельно. P6c-c multi-browser closure завершён; OAuth/MFA/sync не начаты.
+Финальный P6c architecture/security audit после merge PR #87. OAuth/MFA/sync не начаты.
+
+### Production email (temporary)
+
+До публичного production launch требуется verified custom sending domain в Resend. Текущая production validation использует временный sender `onboarding@resend.dev` — это infrastructure-only, не изменение auth semantics.
+
+---
+
+## P6c — Active Sessions & Account Security Management: Feature Complete (superseded)
+
+Дата: 2026-08-13
+
+Эта секция заменена статусом **Closure Candidate** выше. Feature Complete будет зафиксирован только после post-merge closure acceptance.
 
 ## P6b — Passkey Enrollment, Sign-In & Current-Session Sign-Out: Feature Complete
 

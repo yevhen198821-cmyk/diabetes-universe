@@ -66,12 +66,12 @@ test('time-zone-required seed preserves Accept-Language locale when cookie is ab
   assert.equal(result.seed.language, 'uk');
 });
 
-test('time-zone-required seed preserves default en-GB locale when no locale input exists', async () => {
+test('time-zone-required seed preserves default ru-RU locale when no locale input exists', async () => {
   const result = await createRequestPlatformRuntime({});
 
   assert.equal(result.status, 'time-zone-required');
-  assert.equal(result.seed.locale, 'en-GB');
-  assert.equal(result.seed.language, 'en');
+  assert.equal(result.seed.locale, 'ru-RU');
+  assert.equal(result.seed.language, 'ru');
 });
 
 test('time-zone-required seed does not contain timeZone', async () => {

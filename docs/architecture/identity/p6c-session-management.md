@@ -796,6 +796,8 @@ P6c implementation closure:
 
 - **P6c-a** — Accepted & Merged (PR #85)
 - **P6c-b** — Accepted & Merged (PR #86)
-- **P6c-c** — E2E / closure candidate (multi-context browser verification, stale-session fixture, regression gates)
+- **P6c-c** — Closure candidate on PR #87 (E2E, production validation completed on Vercel, remediation in progress)
 
-After P6c feature-complete closure: evaluate the next approved identity wave separately. Do not begin OAuth, MFA, or sync merely because session management exists.
+Production validation (2026-08-14) confirmed Neon-backed auth, magic-link delivery via Resend, session management UI, and cross-device remote revoke. Temporary Resend sender `onboarding@resend.dev` is acceptable for engineering validation; verified custom domain required before public production launch.
+
+After P6c post-merge closure acceptance: evaluate the next approved identity wave separately. Do not begin OAuth, MFA, or sync merely because session management exists.
