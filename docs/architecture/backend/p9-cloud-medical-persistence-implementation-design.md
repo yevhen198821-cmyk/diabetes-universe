@@ -4,7 +4,7 @@
 
 **Architecture Design — Remediation Candidate**
 
-Date: 2026-08-14 (architecture/security remediation applied)
+Date: 2026-08-14 (architecture/security remediation applied; final security remediation applied)
 
 ## Purpose
 
@@ -106,27 +106,86 @@ Why this preserves soft-delete and audit integrity:
 - outbox publication is a separate worker concern, not a silent in-request rewrite;
 - runtime cannot physically erase medical history, idempotency evidence, or audit trails through SQL permissions alone.
 
-#### `medical_migrator` (deploy / CI only)
+#### `medical_migrator` (deployment / CI only — not DDL-only)
 
-- `CREATE`, `ALTER`, `DROP` on schema `medical` for forward migrations;
-- not used by request-serving runtime;
-- credentials rotated separately from `medical_app`.
+`medical_migrator` is a **deployment/CI-only principal**, never available to request-serving runtime.
+
+Properties:
+
+- executes reviewed medical migrations from `packages/medical-persistence/migrations`;
+- permitted operations include required **DDL** (schema changes, indexes) and **migration-scoped DML** (expand/contract backfills, batched `UPDATE`/`INSERT`, and explicitly reviewed destructive steps encoded in migration scripts);
+- **not** a general application credential;
+- `MEDICAL_MIGRATOR_DATABASE_URL` is available only in controlled deployment/migration environments (CI deploy job, migration runner, break-glass runbook);
+- normal application processes, web servers, and background workers must not receive this secret.
+
+Clarifications:
+
+- production backfills may require `INSERT`/`UPDATE`/`DELETE` where explicitly encoded in reviewed migration scripts;
+- destructive DML in migrations must be explicit, named in the migration file, and separately reviewed;
+- application rollback must **not** depend on unrestricted migrator use or ad-hoc migrator credentials in runtime pods;
+- expand/contract backfills run under migrator control with batch limits and monitoring, not under `medical_app`.
 
 #### `medical_outbox_worker` (future background worker)
 
 - `SELECT` on `medical_outbox_events`;
-- `UPDATE` on `outbox` status/publish columns only;
+- `UPDATE` on outbox status/publish columns only;
 - no access to medical resource payloads unless a separate reviewed contract requires it.
 
 #### `medical_idempotency_maintenance` (scheduled job)
 
-- `SELECT`, `DELETE` on `medical_idempotency_records` where `expires_at < now()`;
-- no `INSERT`/`UPDATE` on medical resources.
+**No direct `DELETE` privilege on `medical_idempotency_records`.**
+
+PostgreSQL table-level `GRANT DELETE` cannot enforce a row predicate such as `expires_at < now()`. A role with `DELETE` on the table can delete any row unless row-level security or a hardened definer function restricts behavior. Predicate-like grant wording is therefore **incorrect** as a security architecture.
+
+**Selected approach:** narrowly scoped database cleanup function owned by a privileged maintenance owner.
+
+Conceptual function:
+
+```sql
+-- owned by medical_maintenance_owner (not medical_idempotency_maintenance)
+CREATE OR REPLACE FUNCTION medical.purge_expired_idempotency_records(p_batch_limit integer)
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = medical, pg_temp
+AS $$
+  -- deletes only rows where expires_at < now(), capped by p_batch_limit
+  -- returns deleted row count only
+$$;
+```
+
+Hardening requirements:
+
+- `SECURITY DEFINER` only with fixed, `search_path`-safe schema qualification;
+- no caller-controlled SQL or dynamic identifiers;
+- deletes **only** rows with `expires_at < now()`;
+- bounded `p_batch_limit` enforced inside the function;
+- returns only safe operational counts/metadata (deleted count), not row payloads;
+- function body and grants reviewed like migration code.
+
+Grants:
+
+- `medical_idempotency_maintenance` receives `EXECUTE` on `medical.purge_expired_idempotency_records(integer)` only;
+- **no** `SELECT`, `INSERT`, `UPDATE`, or `DELETE` on `medical_idempotency_records` or other medical tables;
+- owner role `medical_maintenance_owner` holds table privileges needed by the function but is not granted to application runtime or scheduled job callers.
 
 #### `medical_compliance_purge` (future, compliance-approved only)
 
-- explicit hard-purge permissions granted only after separate compliance/security approval;
-- not part of v1 runtime or default deploy role set.
+- separately approved high-privilege purge workflow for legally required hard deletion;
+- explicit hard-purge permissions granted only after compliance/security review;
+- not part of v1 runtime or default deploy role set;
+- must not reuse `medical_migrator` or `medical_idempotency_maintenance` credentials casually.
+
+### Role permission summary
+
+| Role                              | Runtime use                     | Direct table `DELETE`                | Primary capability                                                     |
+| --------------------------------- | ------------------------------- | ------------------------------------ | ---------------------------------------------------------------------- |
+| `medical_app`                     | request-serving API/service     | **none**                             | subject-scoped `SELECT`/`INSERT`/`UPDATE` per table grant matrix above |
+| `medical_migrator`                | deploy/CI migration runner only | only via reviewed migration scripts  | DDL + migration-scoped DML/backfills                                   |
+| `medical_outbox_worker`           | outbox dispatcher worker        | **none**                             | `SELECT` + narrow `UPDATE` on outbox status columns                    |
+| `medical_idempotency_maintenance` | scheduled expiry job            | **none** (no table DELETE grant)     | `EXECUTE` on `purge_expired_idempotency_records` only                  |
+| `medical_compliance_purge`        | future compliance workflow      | separately reviewed purge paths only | future high-privilege purge (not v1)                                   |
+| `medical_maintenance_owner`       | function owner only             | internal to definer functions        | owns SECURITY DEFINER cleanup routines; not a caller credential        |
 
 Environment variables:
 
@@ -603,7 +662,7 @@ Replay path:
 
 **Recommendation:** 72-hour minimum retention window for v1, configurable via environment with documented client contract.
 
-- `medical_idempotency_maintenance` role deletes rows past `expires_at`;
+- scheduled job calls `medical.purge_expired_idempotency_records(batch_limit)` under `medical_idempotency_maintenance` (`EXECUTE` only);
 - after expiry, reuse of same key may create a new resource — clients must use high-entropy keys;
 - contract tests must exercise expiry behavior per P8.
 
@@ -865,12 +924,13 @@ Only `@diabetes-universe/medical-service` (or equivalent) is imported.
 
 ## 12. Migration strategy
 
-### Ownership
+### Ownership and migrator execution
 
-- medical DDL owned by `packages/medical-persistence/migrations`;
+- medical DDL/DML migrations owned by `packages/medical-persistence/migrations`;
 - auth DDL remains in `packages/identity`;
 - CI runs both pipelines independently;
-- deploy job applies medical migrations before enabling medical routes.
+- deploy job applies medical migrations via `medical_migrator` before enabling medical routes;
+- migrator may execute reviewed migration-scoped DML/backfills required by expand/contract steps.
 
 ### Forward-only production strategy
 
@@ -892,6 +952,7 @@ Example future semantic field addition:
 
 - application rollback does not assume backward-compatible DDL;
 - if deploy fails, forward fix preferred over automatic DDL rollback;
+- application rollback must not depend on unrestricted migrator credentials in runtime processes;
 - `medical_migrator` keeps migration history table;
 - document manual recovery for failed mid-migration state.
 
@@ -930,18 +991,22 @@ Restore procedures must include medical schema version verification and migratio
 
 ## 14. Security
 
-| Area                 | Requirement                                                                                     |
-| -------------------- | ----------------------------------------------------------------------------------------------- |
-| Credential isolation | separate `medical_app` role and URL                                                             |
-| Table-level grants   | no runtime `DELETE`; audit append-only; outbox insert-only for app                              |
-| TLS                  | required for all production DB connections                                                      |
-| Secrets              | `MEDICAL_DATABASE_URL` and `MEDICAL_REVISION_TOKEN_SECRET` in managed secret store only         |
-| PHI-safe logs        | no full `semantic_event` in app logs by default                                                 |
-| Idempotency PHI      | minimal reference storage; reconstruct on replay; same backup/access controls as medical tables |
-| SQL injection        | parameterized queries / typed query builder only                                                |
-| DB permissions       | least privilege; migrator and worker roles separated                                            |
-| Audit scope          | actor, subject, resource IDs, action, outcome, correlation ID                                   |
-| Network              | medical DB not publicly reachable; Neon IP allow/VPC as deployed                                |
+| Area                 | Requirement                                                                                                                         |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Credential isolation | separate `medical_app` role and URL                                                                                                 |
+| Table-level grants   | `medical_app`: no runtime `DELETE`; audit append-only; outbox insert-only                                                           |
+| Migrator principal   | `medical_migrator`: deploy/CI-only; DDL + reviewed migration DML; never in request runtime                                          |
+| Idempotency cleanup  | `medical_idempotency_maintenance`: `EXECUTE` on scoped purge function only; no table `DELETE`                                       |
+| Outbox worker        | `medical_outbox_worker`: narrow `SELECT`/`UPDATE` on outbox status columns only                                                     |
+| Compliance purge     | `medical_compliance_purge`: future separately approved high-privilege workflow only                                                 |
+| TLS                  | required for all production DB connections                                                                                          |
+| Secrets              | `MEDICAL_DATABASE_URL`, `MEDICAL_MIGRATOR_DATABASE_URL` (deploy-only), `MEDICAL_REVISION_TOKEN_SECRET` in managed secret store only |
+| PHI-safe logs        | no full `semantic_event` in app logs by default                                                                                     |
+| Idempotency PHI      | minimal reference storage; reconstruct on replay; same backup/access controls as medical tables                                     |
+| SQL injection        | parameterized queries / typed query builder only; definer functions must not accept dynamic SQL                                     |
+| DB permissions       | least privilege; migrator, worker, and maintenance roles separated                                                                  |
+| Audit scope          | actor, subject, resource IDs, action, outcome, correlation ID                                                                       |
+| Network              | medical DB not publicly reachable; Neon IP allow/VPC as deployed                                                                    |
 
 Authorization non-enumeration is enforced in application/API layer; persistence returns `not found` for cross-subject resource lookups.
 
@@ -983,18 +1048,19 @@ P9 does **not** implement or approve:
 
 ## 17. Architecture decision records (summary)
 
-| Topic                   | Recommendation                                   | Rejected alternatives                     |
-| ----------------------- | ------------------------------------------------ | ----------------------------------------- |
-| DB credential boundary  | separate `medical_app` role + table-level grants | blanket DELETE; shared auth credential    |
-| Semantic storage        | JSONB + envelope projections                     | per-event normalized tables (v1)          |
-| Public resource ID      | UUID v4 server-generated                         | client semantic `id` as PK                |
-| Revision / ETag         | HMAC-bound opaque token + bigint CAS             | client-visible bigint                     |
-| Idempotency storage     | minimal outcome reference + reconstruct replay   | full PHI response body in idempotency row |
-| Idempotency concurrency | single transaction; no durable `in_progress`     | orphaned in_progress lease model (v1)     |
-| Pagination              | keyset + `traversalStartedAt` boundary           | OFFSET; naive mutable-keyset only         |
-| Delete                  | soft delete default                              | physical delete default                   |
-| Outbox table            | include in schema for atomic mutations           | best-effort post-commit audit only        |
-| Partitioning            | defer                                            | premature sharding                        |
+| Topic                  | Recommendation                                            | Rejected alternatives                     |
+| ---------------------- | --------------------------------------------------------- | ----------------------------------------- |
+| DB credential boundary | separate roles + table-level grants; migrator deploy-only | blanket DELETE; shared auth credential    |
+| Semantic storage       | JSONB + envelope projections                              | per-event normalized tables (v1)          |
+| Public resource ID     | UUID v4 server-generated                                  | client semantic `id` as PK                |
+| Revision / ETag        | HMAC-bound opaque token + bigint CAS                      | client-visible bigint                     |
+| Idempotency storage    | minimal outcome reference + reconstruct replay            | full PHI response body in idempotency row |
+| Idempotency expiry     | SECURITY DEFINER purge function; EXECUTE only             | table `DELETE` with pseudo-predicate      |
+| Migrator principal     | deploy/CI-only; DDL + reviewed migration DML              | DDL-only wording; runtime migrator secret |
+| Pagination             | keyset + `traversalStartedAt` boundary                    | OFFSET; naive mutable-keyset only         |
+| Delete                 | soft delete default                                       | physical delete default                   |
+| Outbox table           | include in schema for atomic mutations                    | best-effort post-commit audit only        |
+| Partitioning           | defer                                                     | premature sharding                        |
 
 ---
 
@@ -1005,7 +1071,7 @@ P9 may move from **Remediation Candidate** to **Approved** only when review conf
 1. P7/P8 invariants preserved without contract drift.
 2. medical and auth credentials/migrations are isolated with **table-specific** least privilege.
 3. `medical_app` has no blanket `DELETE`; soft-delete and audit integrity preserved by grant design.
-4. separate worker/maintenance roles exist for outbox publish, idempotency expiry, and future compliance purge.
+4. separate worker/maintenance roles exist: outbox worker (narrow UPDATE), idempotency maintenance (`EXECUTE` purge function only, no table DELETE), and future compliance purge; `medical_migrator` is deploy/CI-only with reviewed migration DML, not runtime.
 5. no auth→medical cascade deletion path exists in schema or code design.
 6. self-subject provisioning is transaction-safe, idempotent, and uniqueness-enforced on both account and subject sides for active `self` relationships.
 7. `SemanticTimelineEvent` persistence strategy is explicit with validation before write.
@@ -1019,7 +1085,7 @@ P9 may move from **Remediation Candidate** to **Approved** only when review conf
 15. delete lifecycle is soft-delete default without P12 tombstone leakage.
 16. mutation transaction boundaries include audit/outbox when contract requires.
 17. repository access is application-service-only.
-18. migration ownership, expand/contract, and rollback posture are documented.
+18. migration ownership, expand/contract, migrator-reviewed DML/backfills, and rollback posture are documented; migrator is not described as DDL-only.
 19. backup/PITR/restore test requirements are captured.
 20. security, PHI-safe logging, and SQL injection controls are explicit.
 21. scale approach avoids OFFSET and premature partitioning.
