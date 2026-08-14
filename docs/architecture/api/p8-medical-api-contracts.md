@@ -34,10 +34,12 @@ P8 inherits these approved invariants:
 Not selected for the first production slice.
 
 Pros:
+
 - flexible field selection;
 - strong schema tooling.
 
 Cons:
+
 - more authorization/query-complexity surface than required now;
 - greater risk of unbounded/nested queries;
 - unnecessary operational complexity before product needs justify it.
@@ -47,6 +49,7 @@ Cons:
 **Selected.**
 
 Reasons:
+
 - simple and inspectable contracts;
 - predictable authorization boundary;
 - straightforward mobile/Web support;
