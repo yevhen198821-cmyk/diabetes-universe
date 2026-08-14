@@ -8,21 +8,22 @@ import {
   MalformedRevisionTokenError,
 } from './revision-token-service.ts';
 
-const service = createRevisionTokenService('test-secret-key-material');
+const STRONG_SECRET = 'production-grade-medical-revision-token-secret-value-32';
+const service = createRevisionTokenService(STRONG_SECRET);
 
 test('revision token round trip for same resource and revision', () => {
-  const token = service.createToken('11111111-1111-4111-8111-111111111111', 3);
+  const token = service.createToken('11111111-1111-4111-8111-111111111111', 3n);
   const parsed = service.verifyAndParse(
     token,
     '11111111-1111-4111-8111-111111111111',
   );
 
-  assert.equal(parsed.revision, 3);
+  assert.equal(parsed.revision, 3n);
   assert.match(token, /^v1\./);
 });
 
 test('tampered revision token is rejected', () => {
-  const token = service.createToken('11111111-1111-4111-8111-111111111111', 2);
+  const token = service.createToken('11111111-1111-4111-8111-111111111111', 2n);
   const payload = Buffer.from(token.slice('v1.'.length), 'base64url');
   payload[payload.length - 1] ^= 0xff;
   const tampered = `v1.${payload.toString('base64url')}`;
@@ -35,7 +36,7 @@ test('tampered revision token is rejected', () => {
 });
 
 test('token for resource A is invalid when verified for resource B', () => {
-  const token = service.createToken('11111111-1111-4111-8111-111111111111', 2);
+  const token = service.createToken('11111111-1111-4111-8111-111111111111', 2n);
 
   assert.throws(
     () => service.verifyAndParse(token, '22222222-2222-4222-8222-222222222222'),
@@ -45,8 +46,8 @@ test('token for resource A is invalid when verified for resource B', () => {
 
 test('different revisions produce different tokens', () => {
   const resourceId = '11111111-1111-4111-8111-111111111111';
-  const tokenOne = service.createToken(resourceId, 1);
-  const tokenTwo = service.createToken(resourceId, 2);
+  const tokenOne = service.createToken(resourceId, 1n);
+  const tokenTwo = service.createToken(resourceId, 2n);
 
   assert.notEqual(tokenOne, tokenTwo);
 });

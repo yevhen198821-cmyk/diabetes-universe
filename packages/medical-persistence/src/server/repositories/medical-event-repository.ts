@@ -3,6 +3,8 @@ import { randomUUID } from 'node:crypto';
 import { and, desc, eq, lt, or, sql } from 'drizzle-orm';
 
 import {
+  INITIAL_MEDICAL_REVISION,
+  incrementMedicalRevision,
   mapRowToMedicalEventResource,
   projectEventKind,
   projectEventObservedAt,
@@ -12,6 +14,7 @@ import {
   type MedicalEventResource,
   type MedicalEventResourceInsert,
   type MedicalEventResourcePatch,
+  type MedicalRevision,
 } from '@diabetes-universe/medical-domain';
 
 import type { MedicalDatabase } from '../database/create-medical-database';
@@ -42,13 +45,13 @@ export interface MedicalEventRepository {
   updateWithRevision(
     subjectId: string,
     resourceId: string,
-    expectedRevision: number,
+    expectedRevision: MedicalRevision,
     patch: MedicalEventResourcePatch,
   ): Promise<MedicalEventResource | null>;
   markDeletedWithRevision(
     subjectId: string,
     resourceId: string,
-    expectedRevision: number,
+    expectedRevision: MedicalRevision,
     actorAccountId: string,
   ): Promise<MedicalEventResource | null>;
 }
@@ -123,7 +126,7 @@ export function createMedicalEventRepository(
           resourceId,
           subjectId,
           lifecycleState: 'active',
-          revision: 1,
+          revision: INITIAL_MEDICAL_REVISION,
           eventObservedAt: projectEventObservedAt(semanticEvent),
           eventKind: projectEventKind(semanticEvent),
           schemaVersion: projectSchemaVersion(semanticEvent),
@@ -152,7 +155,7 @@ export function createMedicalEventRepository(
           eventKind: projectEventKind(semanticEvent),
           schemaVersion: projectSchemaVersion(semanticEvent),
           sourceLabel: projectSourceLabel(semanticEvent),
-          revision: expectedRevision + 1,
+          revision: incrementMedicalRevision(expectedRevision),
           updatedAt: now,
           updatedByAccountId: patch.updatedByAccountId,
         })
@@ -184,7 +187,7 @@ export function createMedicalEventRepository(
           deletedAt: now,
           updatedAt: now,
           updatedByAccountId: actorAccountId,
-          revision: expectedRevision + 1,
+          revision: incrementMedicalRevision(expectedRevision),
         })
         .where(
           and(

@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS medical.account_subject_relationships (
   account_id TEXT NOT NULL,
   subject_id UUID NOT NULL REFERENCES medical.medical_subjects(subject_id) ON DELETE RESTRICT,
   relationship_type TEXT NOT NULL,
+  -- Extensible relationship label (self today; caregiver/clinician future).
   status TEXT NOT NULL CHECK (status IN ('active', 'revoked')),
   created_at TIMESTAMPTZ NOT NULL,
   updated_at TIMESTAMPTZ NOT NULL
@@ -36,7 +37,9 @@ CREATE TABLE IF NOT EXISTS medical.medical_event_resources (
   resource_id UUID PRIMARY KEY,
   subject_id UUID NOT NULL REFERENCES medical.medical_subjects(subject_id) ON DELETE RESTRICT,
   lifecycle_state TEXT NOT NULL CHECK (lifecycle_state IN ('active', 'deleted')),
-  revision BIGINT NOT NULL CHECK (revision > 0),
+  revision BIGINT NOT NULL CHECK (
+    revision > 0 AND revision <= 9007199254740991
+  ),
   event_observed_at TIMESTAMPTZ NOT NULL,
   event_kind TEXT NOT NULL,
   schema_version SMALLINT NOT NULL,
@@ -73,7 +76,9 @@ CREATE TABLE IF NOT EXISTS medical.medical_idempotency_records (
   idempotency_key TEXT NOT NULL,
   request_fingerprint TEXT NOT NULL,
   result_resource_id UUID NOT NULL,
-  result_revision BIGINT NOT NULL,
+  result_revision BIGINT NOT NULL CHECK (
+    result_revision > 0 AND result_revision <= 9007199254740991
+  ),
   result_etag_token TEXT NOT NULL,
   stored_http_status SMALLINT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL,
@@ -151,3 +156,5 @@ BEGIN
   RETURN v_deleted;
 END;
 $$;
+
+REVOKE ALL ON FUNCTION medical.purge_expired_idempotency_records(integer) FROM PUBLIC;

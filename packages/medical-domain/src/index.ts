@@ -1,6 +1,7 @@
 export type {
   AccountSubjectRelationshipStatus,
   AccountSubjectRelationshipType,
+  SupportedAccountSubjectRelationshipType,
   MedicalAuditOutcome,
   MedicalEventLifecycleState,
   MedicalOutboxStatus,
@@ -19,6 +20,14 @@ export type {
   IdempotencyScope,
 } from './types/idempotency';
 export { createIdempotencyConflictError } from './types/idempotency';
+export type { MedicalRevision } from './types/medical-revision';
+export {
+  assertMedicalRevision,
+  INITIAL_MEDICAL_REVISION,
+  incrementMedicalRevision,
+  MAX_MEDICAL_REVISION,
+  medicalRevisionFromDb,
+} from './types/medical-revision';
 export {
   mapRowToMedicalEventResource,
   projectEventKind,

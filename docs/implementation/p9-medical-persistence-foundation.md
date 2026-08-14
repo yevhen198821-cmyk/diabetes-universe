@@ -8,7 +8,7 @@ Date: 2026-08-14
 
 ## Scope delivered (this PR)
 
-- `@diabetes-universe/medical-domain` — infrastructure-neutral domain types and semantic mappers
+- `@diabetes-universe/medical-domain` — infrastructure-neutral domain types, semantic mappers, `MedicalRevision` bigint safety
 - `@diabetes-universe/medical-persistence` — PostgreSQL schema (`medical` namespace), migrations, repositories, revision tokens, idempotency fingerprinting, purge function
 - `@diabetes-universe/medical-service` — subject provisioning and transactional medical event create with idempotency, audit, and outbox atomicity
 
@@ -20,18 +20,63 @@ Date: 2026-08-14
 
 ## Local database bootstrap
 
-- Test/local: `MEDICAL_DATABASE_MODE=pglite` or `NODE_ENV=test`
-- Production: `MEDICAL_DATABASE_URL` + `MEDICAL_REVISION_TOKEN_SECRET` required (fail closed)
+- Test/local: `MEDICAL_DATABASE_MODE=pglite` or `NODE_ENV=test` (applies `0000` only; **skips privilege migration**)
+- Production: `MEDICAL_DATABASE_URL` + `MEDICAL_REVISION_TOKEN_SECRET` (≥32 chars, not a weak placeholder) required (fail closed)
 
-## Migrations
+## Migrations and privileges (production mandatory)
 
-```bash
-pnpm --filter @diabetes-universe/medical-persistence db:generate
-```
+Canonical migration source: `packages/medical-persistence/drizzle/0000_medical_foundation.sql`
 
-Apply `packages/medical-persistence/drizzle/0000_medical_foundation.sql` with `medical_migrator` in deployment/CI.
+PGlite/test bootstrap loads this file via `medical-foundation-migration.ts` (no duplicate SQL).
 
-Review `packages/medical-persistence/drizzle/grants.sql` for production role grants.
+### Deploy sequence (Neon)
+
+1. **Create roles** (platform admin / Neon console — not applied by migrations):
+   - `medical_app` — request-serving runtime
+   - `medical_outbox_worker` — future outbox dispatcher
+   - `medical_idempotency_maintenance` — scheduled purge caller
+   - `medical_maintenance_owner` — SECURITY DEFINER function owner (not a caller credential)
+   - `medical_migrator` — deploy/CI migration runner only
+
+2. **Apply foundation migration** with `medical_migrator` via `MEDICAL_MIGRATOR_DATABASE_URL`:
+
+   ```bash
+   psql "$MEDICAL_MIGRATOR_DATABASE_URL" -f packages/medical-persistence/drizzle/0000_medical_foundation.sql
+   ```
+
+   `medical_migrator` owns created objects; it does **not** receive blanket `GRANT ALL ON SCHEMA medical` for runtime convenience.
+
+3. **Apply privilege migration** (mandatory for production isolation):
+
+   ```bash
+   psql "$MEDICAL_MIGRATOR_DATABASE_URL" -f packages/medical-persistence/drizzle/0001_medical_privileges.sql
+   ```
+
+   This script **fails clearly** if required Neon roles are missing. Do not skip in production.
+
+### Privilege model summary
+
+| Role                              | Runtime   | DELETE on medical tables            | Notes                                                                 |
+| --------------------------------- | --------- | ----------------------------------- | --------------------------------------------------------------------- |
+| `medical_app`                     | yes       | **none**                            | SELECT/INSERT/UPDATE per table; audit INSERT-only; outbox INSERT-only |
+| `medical_outbox_worker`           | worker    | **none**                            | SELECT + UPDATE(status, published_at) on outbox only                  |
+| `medical_idempotency_maintenance` | job       | **none**                            | EXECUTE on `purge_expired_idempotency_records` only                   |
+| `medical_maintenance_owner`       | internal  | idempotency only (function owner)   | not granted to callers                                                |
+| `medical_migrator`                | deploy/CI | via reviewed migration scripts only | not request-serving                                                   |
+
+`REVOKE` from `PUBLIC`, hardened `SECURITY DEFINER` purge function owned by `medical_maintenance_owner`, default privileges prevent future objects leaking to runtime roles.
+
+## Relationship type extensibility
+
+- PostgreSQL stores `relationship_type` as extensible TEXT
+- Partial unique indexes scope only active `self` rows
+- Domain v1 exposes `SupportedAccountSubjectRelationshipType = 'self'` for provisioning; persistence accepts future caregiver/clinician labels without schema redesign
+
+## Revision representation
+
+- Database: `BIGINT` with `CHECK (revision <= 9007199254740991)`
+- Application/domain: `MedicalRevision` (`bigint`) through persistence and services
+- Revision tokens encode bigint revisions; secrets require minimum strength in production
 
 ## Next step
 

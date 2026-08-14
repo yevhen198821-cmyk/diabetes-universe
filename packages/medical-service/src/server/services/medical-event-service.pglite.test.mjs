@@ -10,7 +10,7 @@ import {
 test('createWithIdempotency replays same key and fingerprint without duplicate resource', async () => {
   const environment = resolveMedicalEnvironment({
     NODE_ENV: 'test',
-    MEDICAL_REVISION_TOKEN_SECRET: 'test-secret',
+    MEDICAL_REVISION_TOKEN_SECRET: 'test-medical-revision-token-secret',
   });
 
   const bundle = await createMedicalServiceBundle(environment);
@@ -58,7 +58,7 @@ test('createWithIdempotency replays same key and fingerprint without duplicate r
 test('createWithIdempotency rejects same key with different fingerprint', async () => {
   const environment = resolveMedicalEnvironment({
     NODE_ENV: 'test',
-    MEDICAL_REVISION_TOKEN_SECRET: 'test-secret',
+    MEDICAL_REVISION_TOKEN_SECRET: 'test-medical-revision-token-secret',
   });
 
   const bundle = await createMedicalServiceBundle(environment);

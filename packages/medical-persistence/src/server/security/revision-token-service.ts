@@ -1,5 +1,12 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
+import {
+  assertMedicalRevision,
+  type MedicalRevision,
+} from '@diabetes-universe/medical-domain';
+
+import { validateRevisionTokenSecret } from './revision-token-secret';
+
 export type RevisionTokenErrorCode =
   | 'MALFORMED_REVISION_TOKEN'
   | 'REVISION_TOKEN_RESOURCE_MISMATCH'
@@ -8,11 +15,11 @@ export type RevisionTokenErrorCode =
 export interface ParsedRevisionToken {
   readonly tokenVersion: string;
   readonly resourceId: string;
-  readonly revision: number;
+  readonly revision: MedicalRevision;
 }
 
 export interface RevisionTokenService {
-  createToken(resourceId: string, revision: number): string;
+  createToken(resourceId: string, revision: MedicalRevision): string;
   verifyAndParse(
     token: string,
     expectedResourceId: string,
@@ -34,42 +41,44 @@ const MAC_LENGTH = 32;
 function createMac(
   secret: Buffer,
   resourceId: string,
-  revision: number,
+  revision: MedicalRevision,
 ): Buffer {
   return createHmac('sha256', secret)
-    .update(`${TOKEN_VERSION}|${resourceId}|${revision}`, 'utf8')
+    .update(`${TOKEN_VERSION}|${resourceId}|${revision.toString()}`, 'utf8')
     .digest()
     .subarray(0, MAC_LENGTH);
 }
 
-function encodeRevision(revision: number): Buffer {
+function encodeRevision(revision: MedicalRevision): Buffer {
   const buffer = Buffer.alloc(8);
-  buffer.writeBigUInt64BE(BigInt(revision));
+  buffer.writeBigUInt64BE(revision);
   return buffer;
 }
 
-function decodeRevision(buffer: Buffer): number {
+function decodeRevision(buffer: Buffer): MedicalRevision {
   if (buffer.length !== 8) {
     throw new MalformedRevisionTokenError('Revision token payload is invalid.');
   }
 
-  const revision = Number(buffer.readBigUInt64BE());
-  if (!Number.isSafeInteger(revision) || revision <= 0) {
+  try {
+    return assertMedicalRevision(buffer.readBigUInt64BE());
+  } catch {
     throw new MalformedRevisionTokenError('Revision token payload is invalid.');
   }
-
-  return revision;
 }
 
 export function createRevisionTokenService(
   secret: string,
+  options: { allowTestDefault?: boolean } = {},
 ): RevisionTokenService {
+  validateRevisionTokenSecret(secret, options);
   const key = Buffer.from(secret, 'utf8');
 
   return {
-    createToken(resourceId: string, revision: number): string {
-      const revisionBytes = encodeRevision(revision);
-      const mac = createMac(key, resourceId, revision);
+    createToken(resourceId: string, revision: MedicalRevision): string {
+      const normalizedRevision = assertMedicalRevision(revision);
+      const revisionBytes = encodeRevision(normalizedRevision);
+      const mac = createMac(key, resourceId, normalizedRevision);
       const payload = Buffer.concat([revisionBytes, mac]);
       return `${TOKEN_PREFIX}${payload.toString('base64url')}`;
     },
@@ -125,6 +134,6 @@ export function verifyRevisionTokenForResource(
   service: RevisionTokenService,
   token: string,
   resourceId: string,
-): number {
+): MedicalRevision {
   return service.verifyAndParse(token, resourceId).revision;
 }

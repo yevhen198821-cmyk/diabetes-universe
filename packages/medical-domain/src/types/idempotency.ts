@@ -1,3 +1,5 @@
+import type { MedicalRevision } from './medical-revision';
+
 export interface IdempotencyScope {
   readonly accountId: string;
   readonly subjectId: string;
@@ -8,7 +10,7 @@ export interface IdempotencyScope {
 
 export interface IdempotencyOutcomeReference {
   readonly resultResourceId: string;
-  readonly resultRevision: number;
+  readonly resultRevision: MedicalRevision;
   readonly resultEtagToken: string;
   readonly storedHttpStatus: number;
 }

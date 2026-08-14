@@ -1,6 +1,9 @@
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
 import type { MedicalEventResource } from '../types/medical-event-resource';
+import {
+  medicalRevisionFromDb,
+} from '../types/medical-revision';
 
 const SERVER_OWNED_SEMANTIC_FIELDS = new Set(['id', 'createdAt', 'updatedAt']);
 
@@ -47,7 +50,7 @@ export function mapRowToMedicalEventResource(row: {
   resourceId: string;
   subjectId: string;
   lifecycleState: string;
-  revision: number;
+  revision: bigint | number;
   eventObservedAt: Date;
   eventKind: string;
   schemaVersion: number;
@@ -64,7 +67,7 @@ export function mapRowToMedicalEventResource(row: {
     subjectId: row.subjectId,
     lifecycleState:
       row.lifecycleState as MedicalEventResource['lifecycleState'],
-    revision: row.revision,
+    revision: medicalRevisionFromDb(row.revision),
     eventObservedAt: row.eventObservedAt.toISOString(),
     eventKind: row.eventKind,
     schemaVersion: row.schemaVersion,

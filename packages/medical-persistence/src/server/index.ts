@@ -9,6 +9,7 @@ export {
   type MedicalDatabase,
 } from './database/create-medical-database';
 export { MEDICAL_FOUNDATION_MIGRATION_SQL } from './database/medical-foundation-migration';
+export { MEDICAL_PRIVILEGES_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { medicalSchema } from './database/medical-schema';
 export {
   createMedicalSubjectRepository,
@@ -42,4 +43,8 @@ export {
   InvalidRevisionTokenError,
   type RevisionTokenService,
 } from './security/revision-token-service';
+export {
+  validateRevisionTokenSecret,
+  WeakRevisionTokenSecretError,
+} from './security/revision-token-secret';
 export { purgeExpiredIdempotencyRecords } from './maintenance/purge-expired-idempotency';

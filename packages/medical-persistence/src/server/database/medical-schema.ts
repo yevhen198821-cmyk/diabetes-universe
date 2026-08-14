@@ -41,7 +41,7 @@ export const medicalEventResources = medical.table('medical_event_resources', {
     .notNull()
     .references(() => medicalSubjects.subjectId, { onDelete: 'restrict' }),
   lifecycleState: text('lifecycle_state').notNull(),
-  revision: bigint('revision', { mode: 'number' }).notNull(),
+  revision: bigint('revision', { mode: 'bigint' }).notNull(),
   eventObservedAt: timestamp('event_observed_at', {
     withTimezone: true,
   }).notNull(),
@@ -69,7 +69,7 @@ export const medicalIdempotencyRecords = medical.table(
     idempotencyKey: text('idempotency_key').notNull(),
     requestFingerprint: text('request_fingerprint').notNull(),
     resultResourceId: uuid('result_resource_id').notNull(),
-    resultRevision: bigint('result_revision', { mode: 'number' }).notNull(),
+    resultRevision: bigint('result_revision', { mode: 'bigint' }).notNull(),
     resultEtagToken: text('result_etag_token').notNull(),
     storedHttpStatus: smallint('stored_http_status').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull(),

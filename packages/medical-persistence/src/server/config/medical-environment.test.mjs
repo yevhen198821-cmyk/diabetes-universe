@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { resolveMedicalEnvironment } from './medical-environment.ts';
+import { WeakRevisionTokenSecretError } from '../security/revision-token-secret.ts';
+import { createRevisionTokenService } from '../security/revision-token-service.ts';
 
 test('resolveMedicalEnvironment fails closed without MEDICAL_DATABASE_URL in production mode', () => {
   assert.throws(
@@ -21,5 +23,17 @@ test('resolveMedicalEnvironment requires revision secret for postgres mode', () 
         MEDICAL_DATABASE_URL: 'postgres://user:pass@localhost:5432/medical',
       }),
     /MEDICAL_REVISION_TOKEN_SECRET is required/,
+  );
+});
+
+test('postgres mode rejects weak revision token secrets at service creation', () => {
+  const environment = resolveMedicalEnvironment({
+    MEDICAL_DATABASE_URL: 'postgres://user:pass@localhost:5432/medical',
+    MEDICAL_REVISION_TOKEN_SECRET: 'weak',
+  });
+
+  assert.throws(
+    () => createRevisionTokenService(environment.revisionTokenSecret),
+    WeakRevisionTokenSecretError,
   );
 });

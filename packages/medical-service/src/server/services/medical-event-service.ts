@@ -47,6 +47,7 @@ export function createMedicalEventService(
 ): MedicalEventService {
   const revisionTokens = createRevisionTokenService(
     environment.revisionTokenSecret,
+    { allowTestDefault: environment.databaseMode === 'pglite' },
   );
 
   return {

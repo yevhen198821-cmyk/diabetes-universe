@@ -119,7 +119,7 @@ test('updateWithRevision rejects stale revision via CAS', async () => {
     },
   );
 
-  assert.equal(updated?.revision, 2);
+  assert.equal(updated?.revision, 2n);
 
   const stale = await repository.updateWithRevision(
     subjectId,
