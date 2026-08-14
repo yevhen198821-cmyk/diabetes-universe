@@ -2,7 +2,7 @@
 
 ## Status
 
-**Architecture Design — Draft**
+**Architecture Design — Remediation Candidate**
 
 Date: 2026-08-14
 
@@ -98,18 +98,11 @@ This would make Better Auth/provider identity part of the medical-domain ownersh
 
 **Selected.**
 
-This gives the platform a durable model for:
+This gives the platform a durable model for self-management, future delegation, account recovery, and explicit consent/policy expansion without ownership transfer.
 
-- self-management;
-- future caregivers;
-- future clinicians;
-- account recovery or credential changes;
-- delegated access without ownership transfer;
-- explicit consent/policy expansion later.
+## Initial consumer relationship and provisioning
 
-## Initial consumer relationship
-
-The first production consumer slice may use one authenticated account mapped to one medical subject through an explicit server-side relationship.
+The first production consumer slice uses one authenticated account mapped to one medical subject through an explicit server-side relationship.
 
 Conceptually:
 
@@ -124,6 +117,22 @@ AccountSubjectRelationship
 - updatedAt
 ```
 
+### Self-subject provisioning invariant
+
+Creation of the initial `MedicalSubject` plus its `self` relationship must be **server-authoritative, idempotent and concurrency-safe**.
+
+Required properties:
+
+- the authenticated `accountId` comes only from the validated session;
+- the client cannot choose the canonical `subjectId` for provisioning;
+- at most one active canonical `self` relationship may exist for the initial consumer account model;
+- uniqueness must be enforced at the persistence layer, not only by an application pre-check;
+- provisioning must execute in a transaction or equivalent atomic unit so concurrent/retried requests cannot create duplicate subjects/relationships;
+- retries return/reconcile to the already-created canonical relationship instead of creating another subject;
+- provisioning a subject does **not** adopt, upload, claim, or mutate existing IndexedDB history.
+
+The concrete constraint/index and provisioning API belong to the implementation ADR/API-contract wave.
+
 Future relationship types such as caregiver or clinician require separate architecture approval and must not be enabled implicitly by this model.
 
 ## Canonical backend resource envelope
@@ -132,33 +141,45 @@ Conceptual minimum:
 
 ```text
 MedicalEventResource
-- resourceId: opaque stable server ID
+- resourceId: opaque stable server-generated ID
 - subjectId: canonical medical-subject ID
 - semanticEvent: SemanticTimelineEvent
 - lifecycleState: active | deleted
 - revision: monotonic server revision or equivalent opaque version
-- createdAt: server timestamp
-- updatedAt: server timestamp
-- deletedAt: timestamp | null
+- createdAt: server-generated timestamp
+- updatedAt: server-generated timestamp
+- deletedAt: server-generated timestamp | null
 - createdByAccountId: audit actor reference
 - updatedByAccountId: audit actor reference
 ```
 
 Important boundaries:
 
+- canonical `resourceId` values are generated/assigned by the trusted server persistence boundary; a client-supplied identifier may be an idempotency/import key but cannot become a canonical resource ID merely by assertion;
+- authoritative lifecycle timestamps are server-generated; client/device timestamps may exist only as explicitly modeled medical/source data;
 - `resourceId` is not the same thing as local Timeline event identity unless a later sync ADR explicitly defines that mapping;
 - `subjectId` is server-authoritative;
 - actor account IDs are audit metadata, not medical ownership;
 - semantic event data does not carry authentication/session/provider IDs;
 - deletion is a lifecycle state; exact tombstone semantics belong to the later sync architecture.
 
-## Database bounded contexts
+## Database bounded contexts and credential isolation
 
-P7 recommends **logical separation** between identity/auth persistence and medical persistence.
+P7 requires **logical and security separation** between identity/auth persistence and medical persistence.
 
-Initial physical deployment may use the same managed PostgreSQL platform if operationally justified, but medical tables must not be coupled to Better Auth tables through application-level shortcuts.
+Initial physical deployment may use the same managed PostgreSQL/Neon platform or project if operationally justified, but that does not permit shared application credentials or shared migration ownership.
 
-Target conceptual boundaries:
+Mandatory boundaries:
+
+- medical runtime uses a dedicated database credential/role with least privileges for medical persistence;
+- Better Auth/identity runtime credentials are not reused as the medical repository credential;
+- medical migrations have independent ownership/tooling and must not be executed implicitly by Better Auth lifecycle code;
+- auth runtime must not gain broad read/write privileges over medical tables merely because both contexts share a PostgreSQL deployment;
+- medical runtime must not gain write access to Better Auth credential/session tables;
+- secret rotation for one bounded context must be possible without rotating the other context's application credential;
+- a future physical database split must not change domain/application contracts.
+
+Conceptual boundaries:
 
 ```text
 Identity/Auth
@@ -179,31 +200,31 @@ Security/Audit
 - medical_access_audit_events (when required)
 ```
 
-Better Auth's `user` or `session` table must never become the parent table for medical records.
+Better Auth's `user` or `session` table must never become the ownership parent for medical records.
+
+### No auth-to-medical cascade invariant
+
+Authentication/account lifecycle and medical-data lifecycle are separate.
+
+Forbidden:
+
+- database `ON DELETE CASCADE` or equivalent application cascade from Better Auth user/session/credential deletion into `medical_subjects` or medical resources;
+- treating logout/session revocation as medical-data deletion;
+- deleting medical history automatically because an authentication identity/credential is removed.
+
+Account deletion must be an explicit orchestrated product/compliance workflow that resolves subject ownership, retention, audit and deletion policy independently. Exact policy is deferred; accidental cascade is prohibited now.
 
 ## PostgreSQL decision
 
 ### Option A — Separate database technology for medical data immediately
 
-Not selected for the first backend slice.
-
-It increases operational complexity before scale or workload evidence requires it.
+Not selected for the first backend slice because it increases operational complexity before scale/workload evidence requires it.
 
 ### Option B — PostgreSQL behind a dedicated medical repository/service boundary
 
 **Recommended for the first production backend.**
 
-Reasons:
-
-- transactional integrity;
-- mature indexing and backup tooling;
-- strong constraints;
-- reliable migration tooling;
-- straightforward managed scaling;
-- consistent operations with current infrastructure experience;
-- does not prevent later partitioning, replicas, archival, or service extraction.
-
-The architecture must permit later database separation without changing product/domain contracts.
+Reasons include transactional integrity, mature indexing/backup tooling, constraints, migrations and managed scaling while retaining the option for later physical separation.
 
 ## Service boundary
 
@@ -212,7 +233,7 @@ Web, iOS, and Android clients must not connect directly to the medical database.
 Target layering:
 
 ```text
-Client / Web Server Actions
+Client / Web Server Action / Route Handler
         ↓
 Application/API boundary
         ↓
@@ -225,9 +246,9 @@ Medical Repository
 PostgreSQL
 ```
 
-No browser-side Neon/PostgreSQL access.
+Hard module-boundary rule: UI code, route handlers and server actions must not import or instantiate the medical repository directly. They call the application/API boundary; only the medical application/service layer may reach the repository after authenticated actor and subject authorization have been established.
 
-No medical repository credentials in client bundles.
+No browser-side Neon/PostgreSQL access. No medical repository credentials in client bundles.
 
 ## Authorization flow
 
@@ -240,7 +261,7 @@ request
 → resolve authorized subject relationship
 → validate requested operation
 → load/mutate subject-scoped resource
-→ write audit metadata where required
+→ write required audit/outbox state atomically with the mutation where the contract requires it
 → return sanitized application contract
 ```
 
@@ -268,42 +289,31 @@ MedicalEventRepository
 - delete(subjectId, resourceId, expectedRevision)
 ```
 
-The exact API is deferred to the API architecture wave.
+The exact API is deferred. Every repository operation remains subject-scoped.
 
-Key property: every repository operation is subject-scoped.
+## Transaction boundary
+
+A medical mutation must have an explicit atomicity contract.
+
+When a mutation contract requires medical audit state, idempotency state, or an outbox record for reliable downstream processing, those writes must commit atomically with the authoritative medical mutation in the same database transaction or through an architecture with equivalent atomic guarantees.
+
+Forbidden: commit the medical mutation, then perform a best-effort audit/outbox write whose failure can leave the system claiming a fully successful operation while required security/integration evidence is missing.
+
+Not every read requires an audit row, and the exact outbox schema is deferred to later architecture.
 
 ## Concurrency and revisions
 
-Cloud medical persistence requires explicit optimistic concurrency.
-
-P7 requires every mutable server resource to have an authoritative revision/version.
-
-A future mutation contract must support an expected revision or equivalent precondition so one client cannot silently overwrite a newer server version.
-
-P7 does not yet define conflict-resolution UX or offline merge policy. Those belong to the sync/conflict architecture after API contracts exist.
+Every mutable server resource has authoritative revision/version state. Future mutation contracts must support an expected revision or equivalent precondition so one client cannot silently overwrite a newer server version. Conflict-resolution UX/offline merge policy remains deferred.
 
 ## Idempotency
 
-Create/import/adoption operations that may be retried must be idempotent.
+Create/import/adoption operations that may be retried must be idempotent. A later API design must define an idempotency key or stable mutation identity independent of transport retries.
 
-A later API design must define an idempotency key or stable mutation identity independent of transport retries.
-
-This is mandatory for:
-
-- local-data adoption;
-- offline replay;
-- retry after timeout;
-- mobile background synchronization.
-
-Do not rely only on HTTP request uniqueness or generated timestamps.
+This is mandatory for local-data adoption, offline replay, retry after timeout and mobile background synchronization. Do not rely only on HTTP request uniqueness or generated timestamps.
 
 ## Local data adoption boundary
 
-P5 established that existing IndexedDB data is **unattached local medical data**.
-
-P7 preserves that state.
-
-Sign-in still must not automatically upload or claim it.
+P5 established that existing IndexedDB data is **unattached local medical data**. P7 preserves that state. Sign-in or self-subject provisioning must not automatically upload or claim it.
 
 A later Local Data Adoption architecture must define:
 
@@ -321,55 +331,21 @@ P7 deliberately does not add `ownerId` to existing IndexedDB events.
 
 ## API boundary entering the next wave
 
-P7 defines principles, not endpoints.
-
-The subsequent API Contracts wave must define at minimum:
-
-- authenticated actor derivation;
-- subject selection and authorization;
-- medical resource identifiers;
-- pagination/cursors;
-- create/update/delete mutation contracts;
-- revision preconditions;
-- idempotency;
-- error taxonomy;
-- rate limits;
-- audit correlation;
-- PHI-safe logging rules;
-- versioning strategy.
+The subsequent API Contracts wave must define at minimum authenticated actor derivation, subject authorization, resource IDs, pagination, mutation contracts, revision preconditions, idempotency, errors, rate limits, audit correlation, PHI-safe logging and versioning.
 
 ## Data minimization
 
-Server persistence must store only information needed for product, safety, legal, security, and operational purposes.
-
-Do not persist:
-
-- raw auth cookies or session tokens in medical tables;
-- provider access tokens in medical resources;
-- unnecessary IP/user-agent data with every medical event;
-- AI prompts/responses as medical records by default;
-- duplicated derived presentation strings that can be reconstructed from canonical data.
+Do not persist raw auth cookies/session tokens in medical tables, provider access tokens in medical resources, unnecessary network/device metadata with every event, AI prompts/responses as medical records by default, or reconstructable presentation strings.
 
 ## Encryption
 
-Minimum production requirement:
+Minimum production requirement: TLS in transit, managed encryption at rest, secrets outside source/client bundles, least-privilege context-specific database credentials, independent rotation capability and backup encryption.
 
-- TLS in transit;
-- managed encryption at rest;
-- secrets outside source control and client bundles;
-- least-privilege service/database credentials;
-- rotation capability;
-- backup encryption.
-
-Application-level field encryption should be introduced only where threat model, legal requirements, or key-separation needs justify it. It must not be added ad hoc in individual features.
+Application-level field encryption requires an approved threat/key-management model; it must not be added ad hoc.
 
 ## Audit model
 
-Authentication/session audit and medical-data access audit are different concerns.
-
-P7 requires an auditable boundary for medical mutations and later sensitive access, but does not require logging every routine read before the audit architecture is approved.
-
-Medical audit records must not contain full medical payloads when identifiers and action metadata are sufficient.
+Authentication/session audit and medical-data access audit are separate concerns. Medical audit records should contain identifiers/action metadata rather than full medical payloads when sufficient.
 
 Conceptually:
 
@@ -386,80 +362,29 @@ MedicalAuditEvent
 - correlationId
 ```
 
-Retention and immutable-storage requirements require a separate compliance/security decision.
+Retention/immutable-storage requirements require a separate compliance/security decision.
 
 ## Backup and recovery
 
-Production medical persistence cannot depend on provider-default assumptions alone.
-
-Implementation design must define:
-
-- automated backups;
-- point-in-time recovery where supported;
-- tested restore procedure;
-- recovery-point objective;
-- recovery-time objective;
-- migration rollback strategy;
-- corruption/partial-migration handling;
-- disaster-recovery ownership.
-
-Backups are not a substitute for sync or local copies.
+Implementation design must define automated backups, point-in-time recovery where supported, tested restore, RPO, RTO, migration rollback, corruption/partial-migration handling and disaster-recovery ownership. Backups are not a substitute for sync/local copies.
 
 ## Deletion and retention
 
-P7 distinguishes:
-
-- user-visible delete of a medical resource;
-- synchronization tombstone lifecycle;
-- account deletion;
-- subject deletion;
-- backup retention;
-- security/audit retention;
-- legally required retention.
-
-One delete flag must not represent all of these concerns.
-
-Exact retention periods are not set in P7 because jurisdiction/compliance policy is not yet approved.
+P7 distinguishes user-visible resource delete, sync tombstones, account deletion, subject deletion, backup retention, security/audit retention and legally required retention. One delete flag must not represent all concerns. Exact retention periods are deferred pending jurisdiction/compliance policy.
 
 ## Internationalization and regional deployment
 
-The data architecture must allow future regional storage and legal-residency requirements without changing semantic event contracts.
-
-Do not embed country-specific assumptions in medical record primary keys or event schemas.
-
-Regional routing/data residency is a later infrastructure architecture concern.
+Architecture must allow future regional storage/residency requirements without changing semantic event contracts. Country-specific assumptions must not be embedded in medical record primary keys/event schemas.
 
 ## Performance and scale
 
-The architecture must support millions of users without changing core identity or resource semantics.
+The architecture must support millions of users without changing core identity/resource semantics. Start with relational patterns/indexes rather than premature sharding.
 
-Initial implementation should use ordinary relational patterns with explicit indexes rather than premature sharding.
-
-Required scale-ready properties:
-
-- opaque non-sequential public IDs where appropriate;
-- subject-scoped indexes;
-- bounded queries and pagination;
-- no full-history read requirement for routine screens;
-- database connection pooling;
-- server-side query limits;
-- migration strategy for large tables;
-- observability without PHI leakage.
-
-Partitioning/sharding is deferred until measured scale requires it.
+Required properties include opaque non-sequential public IDs where appropriate, subject-scoped indexes, bounded pagination, no routine full-history reads, connection pooling, server-side query limits, large-table migration strategy and observability without PHI leakage.
 
 ## Failure semantics
 
-Medical writes must fail explicitly.
-
-Forbidden behavior:
-
-- silently falling back from cloud persistence to an unrelated local source of truth;
-- returning success before authoritative persistence when the operation claims server durability;
-- swallowing authorization failures;
-- treating a timeout as confirmed failure or confirmed success without idempotent reconciliation.
-
-Local-first UX may continue functioning according to the later sync architecture, but local and server durability states must remain distinguishable.
+Medical writes fail explicitly. The system must not silently fall back to an unrelated local source of truth, return authoritative success before durability, swallow authorization failures, or treat a timeout as confirmed success/failure without idempotent reconciliation.
 
 ## Security invariants
 
@@ -478,32 +403,21 @@ P7 must preserve:
 11. Cross-account/cross-subject access fails closed.
 12. Secrets and PHI are excluded from URLs and unsafe telemetry/logs.
 13. Backup/restore is part of production readiness.
-14. Local medical history is not silently adopted on sign-in.
+14. Local medical history is not silently adopted on sign-in/provisioning.
 15. AI operates under the same authorization boundary as deterministic application services.
+16. Identity/auth and medical persistence use separate least-privilege runtime credentials even when physically co-located.
+17. Auth/session/credential deletion cannot cascade-delete medical subjects/resources.
+18. Initial self-subject provisioning is server-authoritative, idempotent, unique and concurrency-safe.
+19. Route handlers/server actions cannot bypass the medical application service to access repositories directly.
+20. Canonical resource IDs and lifecycle timestamps are server-authoritative.
+21. Medical migrations are independently owned from Better Auth migrations.
+22. Required mutation + audit/idempotency/outbox state has an explicit atomic transaction boundary.
 
 ## Explicit non-scope
 
-P7 does not implement or approve:
-
-- API endpoint shapes;
-- cloud sync/outbox;
-- conflict resolution;
-- tombstone protocol;
-- local-data adoption UI/runtime;
-- mobile persistence adapters;
-- OAuth;
-- MFA/TOTP;
-- caregiver/HCP delegation;
-- organization tenancy;
-- Marketplace permissions;
-- AI diagnosis/treatment authority;
-- production retention periods;
-- regional hosting topology;
-- database vendor migration.
+P7 does not implement or approve API endpoint shapes, cloud sync/outbox protocol, conflict resolution, tombstone protocol, local-data adoption UI/runtime, mobile persistence adapters, OAuth, MFA/TOTP, caregiver/HCP delegation, organization tenancy, Marketplace permissions, AI diagnosis/treatment authority, production retention periods, regional hosting topology or database vendor migration.
 
 ## Recommended sequence after P7
-
-If P7 is approved:
 
 ```text
 P7 Backend Medical Data Architecture
@@ -516,23 +430,24 @@ P7 Backend Medical Data Architecture
 → Mobile persistence/sync integration
 ```
 
-Implementation must not begin until P7 passes architecture audit and an implementation ADR selects concrete schema, migration, repository, and deployment choices.
+Implementation must not begin until P7 passes architecture audit and an implementation ADR selects concrete schema, migration, repository, credential, transaction and deployment choices.
 
 ## Architecture approval gate
 
-P7 may move from Draft to Approved only when review confirms:
+P7 may move to Approved only when review confirms:
 
 - alignment with P5 identity/ownership invariants;
-- no provider/account ID leakage into medical-domain ownership;
-- subject-centric authorization model is unambiguous;
-- `SemanticTimelineEvent` remains infrastructure-neutral;
-- local P4 persistence is not silently redefined;
-- adoption and sync remain explicitly deferred;
-- revision/idempotency requirements are captured;
-- backup/recovery and failure semantics are captured;
-- Web/iOS/Android compatibility is preserved;
-- no implementation/schema migration has been smuggled into the architecture wave.
+- subject-centric authorization and infrastructure-neutral `SemanticTimelineEvent`;
+- local P4 persistence/adoption boundaries preserved;
+- revision/idempotency/backup/failure requirements captured;
+- dedicated medical credential/migration boundary captured;
+- no auth-to-medical cascade path;
+- self-subject provisioning uniqueness/concurrency semantics captured;
+- application-service-only repository access captured;
+- server-authoritative IDs/timestamps and mutation atomicity captured;
+- Web/iOS/Android compatibility preserved;
+- no production schema/API implementation smuggled into this architecture wave.
 
 ## Current decision
 
-**Recommended:** proceed with P7 architecture audit. Do not start backend implementation yet.
+**Remediation applied. Re-audit required before approval. Do not start backend implementation yet.**
