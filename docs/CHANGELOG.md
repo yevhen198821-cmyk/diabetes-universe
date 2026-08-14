@@ -15,7 +15,7 @@
 - multi-context Playwright coverage, stale-session fixture, regression gates
 - Turborepo `build.env` для production auth variables
 - production validation: magic-link, sessions UI, remote revoke (desktop ↔ mobile)
-- remediation: Russian sessions localization alignment, proxy stale-cookie redirect-loop fix
+- remediation: sessions localization via request locale (global default `en-GB` preserved), proxy stale-cookie redirect-loop fix
 
 Не объявлять **Feature Complete** до post-merge closure acceptance.
 
