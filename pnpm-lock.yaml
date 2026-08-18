@@ -147,6 +147,60 @@ importers:
         specifier: workspace:*
         version: link:../i18n
 
+  packages/medical-domain:
+    dependencies:
+      '@diabetes-universe/types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.2
+        version: 26.1.2
+
+  packages/medical-persistence:
+    dependencies:
+      '@diabetes-universe/medical-domain':
+        specifier: workspace:*
+        version: link:../medical-domain
+      '@diabetes-universe/types':
+        specifier: workspace:*
+        version: link:../types
+      drizzle-orm:
+        specifier: 0.45.2
+        version: 0.45.2(@electric-sql/pglite@0.3.16)(kysely@0.29.4)(postgres@3.4.9)
+      postgres:
+        specifier: ^3.4.9
+        version: 3.4.9
+    devDependencies:
+      '@electric-sql/pglite':
+        specifier: ^0.3.15
+        version: 0.3.16
+      '@types/node':
+        specifier: ^26.1.2
+        version: 26.1.2
+      drizzle-kit:
+        specifier: 0.31.10
+        version: 0.31.10
+
+  packages/medical-service:
+    dependencies:
+      '@diabetes-universe/medical-domain':
+        specifier: workspace:*
+        version: link:../medical-domain
+      '@diabetes-universe/medical-persistence':
+        specifier: workspace:*
+        version: link:../medical-persistence
+      '@diabetes-universe/types':
+        specifier: workspace:*
+        version: link:../types
+      drizzle-orm:
+        specifier: 0.45.2
+        version: 0.45.2(@electric-sql/pglite@0.3.16)(kysely@0.29.4)(postgres@3.4.9)
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.2
+        version: 26.1.2
+
   packages/platform:
     dependencies:
       '@diabetes-universe/formatting':

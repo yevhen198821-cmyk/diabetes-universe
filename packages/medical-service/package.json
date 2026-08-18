@@ -1,0 +1,23 @@
+{
+  "name": "@diabetes-universe/medical-service",
+  "version": "0.0.0",
+  "private": true,
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server/index.ts"
+  },
+  "scripts": {
+    "test": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test 'src/**/*.test.mjs'",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@diabetes-universe/medical-domain": "workspace:*",
+    "@diabetes-universe/medical-persistence": "workspace:*",
+    "@diabetes-universe/types": "workspace:*",
+    "drizzle-orm": "0.45.2"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2"
+  }
+}

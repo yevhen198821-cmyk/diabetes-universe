@@ -1,0 +1,26 @@
+{
+  "name": "@diabetes-universe/medical-persistence",
+  "version": "0.0.0",
+  "private": true,
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server/index.ts"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "test": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test 'src/**/*.test.mjs'",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@diabetes-universe/medical-domain": "workspace:*",
+    "@diabetes-universe/types": "workspace:*",
+    "drizzle-orm": "0.45.2",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.3.15",
+    "@types/node": "^26.1.2",
+    "drizzle-kit": "0.31.10"
+  }
+}
