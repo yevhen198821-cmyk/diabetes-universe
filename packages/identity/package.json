@@ -14,16 +14,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@better-auth/drizzle-adapter": "1.6.25",
-    "@better-auth/passkey": "1.6.25",
-    "better-auth": "1.6.25",
+    "@better-auth/drizzle-adapter": "1.6.29",
+    "@better-auth/passkey": "1.6.29",
+    "better-auth": "1.6.29",
     "drizzle-orm": "0.45.2",
     "postgres": "^3.4.9",
-    "resend": "6.18.1"
+    "resend": "6.20.0"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.3.15",
-    "@types/node": "^26.1.2",
+    "@electric-sql/pglite": "^0.5.5",
+    "@types/node": "^26.2.0",
     "drizzle-kit": "0.31.10"
   }
 }
