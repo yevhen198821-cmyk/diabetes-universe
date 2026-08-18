@@ -54,17 +54,26 @@ PGlite/test bootstrap loads this file via `medical-foundation-migration.ts` (no 
 
    This script **fails clearly** if required Neon roles are missing. Do not skip in production.
 
+4. **Run a live Neon privilege smoke check before enabling medical persistence runtime.** Verify from PostgreSQL system catalogs or an equivalent deployment smoke script that the effective state is:
+   - `medical_app`: no `DELETE`, no DDL; table-specific privileges only;
+   - `medical_idempotency_maintenance`: schema `USAGE` + `EXECUTE` only on `medical.purge_expired_idempotency_records(integer)`, with no direct table privileges;
+   - `medical_maintenance_owner`: schema `USAGE` + `SELECT, DELETE` only on `medical.medical_idempotency_records`; no privileges on unrelated medical tables;
+   - `PUBLIC`: no unintended access to medical schema/tables/functions;
+   - the purge function owner is `medical_maintenance_owner` and PUBLIC EXECUTE remains revoked.
+
+   PGlite does not model the production role system sufficiently to replace this deployment gate. Do not enable production medical persistence until the live privilege check passes.
+
 ### Privilege model summary
 
 | Role                              | Runtime   | DELETE on medical tables            | Notes                                                                 |
 | --------------------------------- | --------- | ----------------------------------- | --------------------------------------------------------------------- |
 | `medical_app`                     | yes       | **none**                            | SELECT/INSERT/UPDATE per table; audit INSERT-only; outbox INSERT-only |
 | `medical_outbox_worker`           | worker    | **none**                            | SELECT + UPDATE(status, published_at) on outbox only                  |
-| `medical_idempotency_maintenance` | job       | **none**                            | EXECUTE on `purge_expired_idempotency_records` only                   |
-| `medical_maintenance_owner`       | internal  | idempotency only (function owner)   | not granted to callers                                                |
+| `medical_idempotency_maintenance` | job       | **none**                            | schema USAGE + EXECUTE on `purge_expired_idempotency_records` only   |
+| `medical_maintenance_owner`       | internal  | idempotency only (function owner)   | SELECT + DELETE on idempotency only; not granted to callers           |
 | `medical_migrator`                | deploy/CI | via reviewed migration scripts only | not request-serving                                                   |
 
-`REVOKE` from `PUBLIC`, hardened `SECURITY DEFINER` purge function owned by `medical_maintenance_owner`, default privileges prevent future objects leaking to runtime roles.
+`REVOKE` from `PUBLIC`, hardened `SECURITY DEFINER` purge function owned by `medical_maintenance_owner`, and default privileges prevent future objects leaking to runtime roles.
 
 ## Relationship type extensibility
 
