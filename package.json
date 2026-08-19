@@ -10,7 +10,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format:check": "prettier --write . && git diff -- docs/architecture/sync/p10-local-data-adoption-architecture.md && git diff --exit-code",
     "lint": "eslint .",
     "test": "turbo run test",
     "test:e2e": "playwright test",
