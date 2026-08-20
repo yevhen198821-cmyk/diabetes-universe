@@ -2,9 +2,14 @@
 
 ## Status
 
-**P9 IMPLEMENTATION CANDIDATE**
+**Implementation foundation delivered — formal production readiness pending**
 
-Date: 2026-08-14
+Date: 2026-08-14 (implementation merged via PR #93)
+
+Lifecycle note: security/code remediation was merged after the initial foundation
+PR. This document does **not** declare production medical runtime readiness. A
+formal implementation/security re-audit closure record is still required before
+production enablement.
 
 ## Scope delivered (this PR)
 
@@ -89,4 +94,7 @@ PGlite/test bootstrap loads this file via `medical-foundation-migration.ts` (no 
 
 ## Next step
 
-Separate chartered PR for continued implementation within approved P9 scope. Public medical API routes remain blocked until explicitly approved.
+Formal implementation/security re-audit closure, live Neon privilege smoke
+verification, public medical API transport (P8), and P13 operational hardening
+implementation remain separate gated work. Public medical API routes remain
+blocked until explicitly approved.

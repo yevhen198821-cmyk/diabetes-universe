@@ -1,24 +1,60 @@
 # Diabetes Universe
 
-Frontend monorepo for the Diabetes Universe commercial product.
+Monorepo for the Diabetes Universe commercial product — web application,
+platform foundation, identity, local Timeline persistence, and cloud medical
+persistence foundation.
 
 ## Current scope
 
-This repository contains the approved frontend foundation and a **demo web
-application** with Dashboard (`/`) and Timeline (`/timeline`) surfaces:
+### Implemented
 
-- a Next.js web application (`apps/web`);
-- platform packages (localization, formatting, runtime aggregate, web composition
-  root) per [ADR-0011](docs/adr/0011-platform-infrastructure-layer.md);
-- shared React UI primitives (`packages/ui`);
-- shared platform-agnostic contracts (`packages/types`);
-- architecture, product, and developer documentation.
+- **Next.js web application** (`apps/web`) with Dashboard (`/`) and Timeline
+  (`/timeline`) surfaces, account security, and auth entry flows
+- **Platform / i18n / formatting / UI foundation** per
+  [ADR-0011](docs/adr/0011-platform-infrastructure-layer.md)
+- **Timeline domain** (`packages/timeline`) and **durable local Timeline
+  persistence** via IndexedDB (`packages/timeline-web`, ADR-0015)
+- **Identity / authentication foundation** (`packages/identity`) — Better Auth
+  with PostgreSQL/Drizzle, magic-link sign-in, passkey (WebAuthn)
+  enrollment/sign-in, and session management (P6/P6c)
+- **Medical platform packages** (P9 implementation foundation, merged):
+  - `@diabetes-universe/medical-domain`
+  - `@diabetes-universe/medical-persistence` — PostgreSQL `medical` schema,
+    migrations, repositories, revision/CAS, idempotency, audit/outbox atomicity
+  - `@diabetes-universe/medical-service` — subject provisioning and transactional
+    medical event create (server-side; not exposed via public web routes)
+- Architecture, product, and developer documentation through the P7–P13 medical
+  platform architecture wave
 
-**Not implemented in this repository (future / out of scope):** backend
-services, databases, authentication, production AI, marketplace runtime, native
-mobile applications, offline/sync persistence, analytics domain, and device
-integrations (CGM, insulin pumps, wearables, and similar connected devices are
-not product capabilities today).
+`apps/web` does **not** import `@diabetes-universe/medical-persistence`
+directly; medical persistence remains a server-side bounded context.
+
+### Architecture complete, runtime not yet complete
+
+Approved architecture exists; product/runtime implementation for these stages is
+**not** yet delivered in this repository:
+
+- **P10** — local medical data adoption
+- **P11** — offline sync
+- **P12** — conflict / revision / tombstone runtime
+- **P13** — security, privacy, and production hardening controls
+
+See [Architecture Overview](docs/architecture/README.md) for lifecycle status.
+
+### Not yet implemented
+
+- Public medical API transport (`/api/v1/medical/*`)
+- Adoption runtime (P10)
+- Continuous offline sync runtime (P11)
+- Conflict / tombstone runtime (P12)
+- Outbox dispatcher / consumer
+- Complete production medical deployment controls (live Neon privilege enforcement,
+  P13 operational gates)
+- Production AI runtime
+- CGM, insulin pump, and wearable device integrations
+- Marketplace, Community, and Recipes product runtimes (architecture placeholders
+  only unless source code proves otherwise)
+- Native mobile applications
 
 ## Technology
 
@@ -91,9 +127,16 @@ packages/
   formatting/                   Platform Formatting library
   ui/                           Shared React UI primitives
   types/                        Shared platform-agnostic contracts
+  timeline/                     Timeline repository contract + in-memory adapter
+  timeline-web/                 Web IndexedDB durable Timeline persistence
+  identity/                     Authentication, sessions, Better Auth + Drizzle
+  medical-domain/               Infrastructure-neutral medical domain types
+  medical-persistence/          PostgreSQL medical schema, migrations, repositories
+  medical-service/              Server-side medical application services
 
 docs/
   architecture/                 System boundaries and dependencies
+  implementation/               Implementation status and closure records
   product/                      Product policies and living backlogs
   product-bible/                Product principles and scope
   developer-bible/              Engineering workflow and conventions
@@ -103,11 +146,18 @@ Dependency direction (simplified):
 
 ```text
 apps/web
-  → platform-web, ui, types
+  → platform-web, ui, types, timeline, timeline-web, identity
   → platform, i18n, i18n-locales, locales, formatting (via composition paths)
+  → must NOT import medical-persistence directly
 
-packages/platform, i18n, formatting, locales
-  → no dependency on apps/web
+packages/medical-service
+  → medical-persistence, medical-domain
+
+packages/medical-persistence
+  → medical-domain
+
+packages/platform, timeline, i18n, formatting, locales, identity, medical-*
+  → must not depend on apps/web
 ```
 
 ## Documentation

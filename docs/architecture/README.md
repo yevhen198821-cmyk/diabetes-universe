@@ -26,59 +26,99 @@ Feature acceptance criteria, visual design rules, source code, and transient imp
 
 ## System shape
 
-Diabetes Universe is a frontend monorepo. Turborepo coordinates tasks, while pnpm
-provides deterministic workspace dependency management.
+Diabetes Universe is a TypeScript monorepo spanning web application composition,
+platform infrastructure, identity, local Timeline persistence, and server-side
+medical persistence foundation. Turborepo coordinates tasks; pnpm provides
+deterministic workspace dependency management.
 
 Layering follows [ADR-0011 — Platform Infrastructure Layer](../adr/0011-platform-infrastructure-layer.md):
 
 ```text
 apps/web (Application + Web Composition Root wiring)
-  → packages/platform-web
-  → packages/platform, timeline, i18n, i18n-locales, locales, formatting
-  → packages/ui, packages/types
+  → platform-web, ui, types, timeline, timeline-web, identity
+  → platform, i18n, i18n-locales, locales, formatting
+  → must NOT import medical-persistence directly
 
-packages/platform, timeline, i18n, formatting, locales
+packages/medical-service
+  → medical-persistence → medical-domain
+
+packages/platform, timeline, i18n, formatting, locales, identity, medical-*
   → must not depend on apps/web
 ```
 
-## Boundaries
+## Bounded contexts and layers
 
-| Workspace               | Responsibility                                                           |
-| ----------------------- | ------------------------------------------------------------------------ |
-| `apps/web`              | Routing, page composition, Dashboard/Timeline demo, web Composition Root |
-| `packages/platform-web` | Web-specific platform runtime assembly                                   |
-| `packages/platform`     | `PlatformRuntime` aggregate (`createPlatformRuntime`)                    |
-| `packages/timeline`     | Timeline repository contract and current in-memory adapter               |
-| `packages/i18n`         | Localization Platform contracts and runtime                              |
-| `packages/i18n-locales` | In-memory translation bundle loaders (Infrastructure adapter)            |
-| `packages/locales`      | Canonical translation resources                                          |
-| `packages/formatting`   | Platform Formatting library                                              |
-| `packages/ui`           | Reusable, presentation-focused React primitives                          |
-| `packages/types`        | Platform-agnostic contracts, not runtime behavior                        |
+| Workspace                      | Layer               | Responsibility                                                               |
+| ------------------------------ | ------------------- | ---------------------------------------------------------------------------- |
+| `apps/web`                     | Application         | Routing, page composition, Dashboard/Timeline, auth UI, web Composition Root |
+| `packages/platform-web`        | Platform            | Web-specific platform runtime assembly                                       |
+| `packages/platform`            | Platform            | `PlatformRuntime` aggregate (`createPlatformRuntime`)                        |
+| `packages/i18n`                | Platform            | Localization Platform contracts and runtime                                  |
+| `packages/i18n-locales`        | Platform            | In-memory translation bundle loaders                                         |
+| `packages/locales`             | Platform            | Canonical translation resources                                              |
+| `packages/formatting`          | Platform            | Platform Formatting library                                                  |
+| `packages/ui`                  | Presentation        | Reusable React UI primitives                                                 |
+| `packages/types`               | Contracts           | Platform-agnostic shared types                                               |
+| `packages/timeline`            | Domain              | Timeline repository contract and in-memory adapter                           |
+| `packages/timeline-web`        | Infrastructure      | Web IndexedDB durable Timeline persistence                                   |
+| `packages/identity`            | Identity            | Better Auth, sessions, magic-link, passkey, Drizzle auth DB                  |
+| `packages/medical-domain`      | Medical domain      | Infrastructure-neutral medical types and mappers                             |
+| `packages/medical-persistence` | Medical persistence | PostgreSQL schema, migrations, repositories (server-only)                    |
+| `packages/medical-service`     | Medical application | Server-side medical services (not web-importable persistence)                |
 
 Applications may depend on packages; packages must not depend on applications.
 
-## Current demo surfaces
+### Medical import boundary
 
-- **Dashboard** (`/`) — seven approved blocks with shared Timeline store integration
+`apps/web` must not import `@diabetes-universe/medical-persistence` or database
+internals. Enforcement: `apps/web/lib/medical/medical-import-boundary.test.mjs`.
+
+Server-side medical composition uses `@diabetes-universe/medical-service` only in
+future approved server paths; public medical API routes are not yet implemented.
+
+## Current product surfaces
+
+- **Dashboard** (`/`) — approved blocks with shared Timeline store integration
 - **Timeline** (`/timeline`) — event journal, search, filters, edit/delete, Quick Add
+- **Auth / account security** — magic-link and passkey sign-in, session management
 
-## Deliberate exclusions (future / not implemented)
+## Medical platform architecture status
 
-The repository does **not** currently provide:
+| Phase             | Document                                                                                          | Lifecycle status                                                                        | Runtime in repo                            |
+| ----------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------ |
+| P7                | [Backend medical data](backend/p7-backend-medical-data-architecture.md)                           | Approved                                                                                | N/A (architecture)                         |
+| P8                | [Medical API contracts](api/p8-medical-api-contracts.md)                                          | Approved                                                                                | Public API not implemented                 |
+| P9 design         | [Cloud medical persistence design](backend/p9-cloud-medical-persistence-implementation-design.md) | Approved                                                                                | N/A (architecture)                         |
+| P9 implementation | [Medical persistence foundation](../implementation/p9-medical-persistence-foundation.md)          | Foundation delivered; formal production readiness pending                               | Packages merged; no public routes          |
+| P10               | [Local data adoption](sync/p10-local-data-adoption-architecture.md)                               | Draft (PR #95 merged spec; approval closure pending)                                    | Not implemented                            |
+| P11               | [Offline sync](sync/p11-offline-sync-architecture.md)                                             | Approved ([closure record](sync/p11-approval-closure.md))                               | Not implemented                            |
+| P12               | [Conflict / revision / tombstone](sync/p12-conflict-revision-tombstone-architecture.md)           | Approved with clarifications ([audit closure](sync/p12-architecture-security-audit.md)) | Not implemented                            |
+| P13               | [Security & privacy hardening](security/p13-security-privacy-hardening.md)                        | Approved (closing architecture gate)                                                    | Operational controls not fully implemented |
 
-- backend services, databases, or APIs;
-- authentication or authorization;
+Architecture-complete stages are not permission to ship runtime behavior without
+their separate implementation and security gates.
+
+## Deliberate exclusions (not yet in repository runtime)
+
+The repository does **not** currently provide product/runtime capabilities for:
+
+- public medical API transport and controllers;
+- P10 adoption runtime, P11 continuous sync runtime, P12 conflict/tombstone runtime;
+- medical outbox dispatcher / consumer;
+- complete production medical deployment controls (live Neon privilege smoke,
+  P13 operational hardening implementation);
 - production AI runtime;
-- marketplace runtime;
+- marketplace, community, or recipes product runtimes;
 - native mobile applications;
-- offline/sync persistence;
-- analytics domain;
-- device integrations (CGM, insulin pumps, wearables, and similar connected
-  devices).
+- analytics domain runtime;
+- CGM, insulin pump, wearable, and similar device integrations.
 
-Adding any of these requires a documented architecture decision and an explicit
-product requirement.
+Auth databases, local IndexedDB Timeline persistence, and server-side medical
+persistence **foundation packages** are implemented; the exclusions above refer
+to product/runtime capabilities not yet wired or operational at production scale.
+
+Adding excluded capabilities requires documented architecture decisions, explicit
+implementation gates, and product requirements.
 
 ## Quality attributes
 
@@ -87,6 +127,7 @@ product requirement.
 - Explicit package ownership
 - Reproducible builds
 - Minimal dependency surface
+- Fail-closed medical and auth configuration in production-capable modes
 
 ## Platform modules
 
@@ -102,8 +143,19 @@ product requirement.
 - [Presentation Context Foundation](presentation/presentation-context.md) — CR-03A, Feature Complete
 - [React Platform Provider Foundation](presentation/react-platform-provider.md) — CR-03B, Feature Complete
 - [Application Platform Integration](presentation/application-platform-integration.md) — CR-03C, Feature Complete (ADR-0013)
-- [@diabetes-universe/web](../../apps/web/README.md) — thin Next.js bootstrap (CR-02, Feature Complete)
+- [@diabetes-universe/web](../../apps/web/README.md) — Next.js application (CR-02, Feature Complete)
 - [@diabetes-universe/platform-web](../../packages/platform-web/README.md)
+
+## Medical platform documents
+
+- [P7 — Backend Medical Data Architecture](backend/p7-backend-medical-data-architecture.md)
+- [P8 — Medical API Contracts](api/p8-medical-api-contracts.md)
+- [P9 — Cloud Medical Persistence Implementation Design](backend/p9-cloud-medical-persistence-implementation-design.md)
+- [P9 — Medical Persistence Foundation Implementation](../implementation/p9-medical-persistence-foundation.md)
+- [P10 — Local Medical Data Adoption Architecture](sync/p10-local-data-adoption-architecture.md)
+- [P11 — Offline Sync Architecture](sync/p11-offline-sync-architecture.md) · [P11 approval closure](sync/p11-approval-closure.md)
+- [P12 — Conflict / Revision / Tombstone Architecture](sync/p12-conflict-revision-tombstone-architecture.md) · [P12 audit closure](sync/p12-architecture-security-audit.md)
+- [P13 — Security, Privacy, and Production Hardening](security/p13-security-privacy-hardening.md)
 
 ## Notes
 

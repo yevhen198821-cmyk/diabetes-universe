@@ -2,9 +2,12 @@
 
 ## Status
 
-**Architecture Design — Draft**
+**Architecture Design — Approved with normative clarifications**
 
 Date: 2026-08-19
+
+Lifecycle authority: see [P12 architecture/security audit closure](p12-architecture-security-audit.md).
+The original P12 document plus that closure form the approved P12 contract.
 
 ## Purpose
 

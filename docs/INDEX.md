@@ -94,6 +94,25 @@
 - [Reports](architecture/reports/overview.md)
 - [Settings](architecture/settings/overview.md)
 
+### Identity and authentication
+
+- [P5 — Identity, Account & Data Ownership](architecture/identity/p5-identity-account-data-ownership.md)
+- [P6 — Authentication & Session Implementation Design](architecture/identity/p6-authentication-session-implementation.md)
+- [P6b — Passkey Sign-In](architecture/identity/p6b-passkey-signin.md)
+- [P6c — Session Management](architecture/identity/p6c-session-management.md)
+- [P6c — Feature Complete](architecture/identity/p6c-feature-complete.md)
+
+### Medical platform (P7–P13)
+
+- [P7 — Backend Medical Data Architecture](architecture/backend/p7-backend-medical-data-architecture.md) — Approved
+- [P8 — Medical API Contracts](architecture/api/p8-medical-api-contracts.md) — Approved
+- [P9 — Cloud Medical Persistence Implementation Design](architecture/backend/p9-cloud-medical-persistence-implementation-design.md) — Approved
+- [P9 — Medical Persistence Foundation Implementation](implementation/p9-medical-persistence-foundation.md) — foundation delivered; production readiness pending
+- [P10 — Local Medical Data Adoption Architecture](architecture/sync/p10-local-data-adoption-architecture.md) — Draft
+- [P11 — Offline Sync Architecture](architecture/sync/p11-offline-sync-architecture.md) — Approved · [closure](architecture/sync/p11-approval-closure.md)
+- [P12 — Conflict / Revision / Tombstone Architecture](architecture/sync/p12-conflict-revision-tombstone-architecture.md) — Approved · [audit closure](architecture/sync/p12-architecture-security-audit.md)
+- [P13 — Security, Privacy, and Production Hardening](architecture/security/p13-security-privacy-hardening.md) — Approved
+
 ## Specifications
 
 - [Specifications Overview](specs/README.md)

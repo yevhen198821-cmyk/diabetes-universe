@@ -2,9 +2,13 @@
 
 ## Status
 
-**Architecture Design — Draft**
+**Architecture Design — Approved**
 
 Date: 2026-08-19
+
+Lifecycle authority: see [P11 approval closure](p11-approval-closure.md) for the
+merged approval record that corrected this document's prior Draft header after
+PR #96.
 
 ## Purpose
 

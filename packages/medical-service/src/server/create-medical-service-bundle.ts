@@ -29,8 +29,9 @@ export async function createMedicalServiceBundle(
 }
 
 export async function closeMedicalServiceBundle(
-  _bundle: MedicalServiceBundle,
+  bundle: MedicalServiceBundle,
 ): Promise<void> {
+  void bundle;
   await closeMedicalDatabase();
 }
 
