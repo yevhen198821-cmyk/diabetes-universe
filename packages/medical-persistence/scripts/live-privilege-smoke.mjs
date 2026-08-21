@@ -121,7 +121,10 @@ try {
       !checks.maintenance_direct_delete,
       'maintenance caller unexpectedly has direct DELETE',
     );
-    assert(checks.maintenance_execute, 'maintenance caller lacks purge EXECUTE');
+    assert(
+      checks.maintenance_execute,
+      'maintenance caller lacks purge EXECUTE',
+    );
     assert(
       checks.owner_idempotency_select,
       'maintenance owner lacks idempotency SELECT',
