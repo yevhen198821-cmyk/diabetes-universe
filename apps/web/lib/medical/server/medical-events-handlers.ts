@@ -1,22 +1,30 @@
 import {
   InvalidMedicalListCursorError,
   InvalidRevisionPreconditionError,
+  InvalidRevisionTokenError,
   MedicalResourceNotFoundError,
   MedicalRevisionConflictError,
+  MedicalServiceUnavailableError,
 } from '@diabetes-universe/medical-domain';
 
 import {
   MEDICAL_API_VERSION,
   MEDICAL_CREATE_OPERATION_SCOPE,
   MEDICAL_IDEMPOTENCY_HEADER,
-  MEDICAL_MAX_REQUEST_BYTES,
 } from './constants';
 import { getMedicalServiceBundle } from './get-medical-service-bundle';
+import { isTransientInfrastructureError } from './medical-api-infrastructure-errors';
 import {
   createCorrelationId,
   medicalApiErrorResponse,
   medicalApiJsonResponse,
 } from './medical-api-error';
+import {
+  getMedicalApiRateLimiter,
+  setMedicalApiRateLimiterForTests,
+  type MedicalApiRateLimitInput,
+  type MedicalApiRateLimiter,
+} from './medical-api-rate-limit';
 import { resolveMedicalApiScope } from './resolve-medical-api-scope';
 import {
   MedicalApiValidationError,
@@ -28,6 +36,40 @@ import {
   validateResourceId,
   validateUpdateRequestBody,
 } from './medical-api-validation';
+import { readBoundedRequestBody } from './read-bounded-request-body';
+
+function operationFromMethod(method: string): 'read' | 'mutation' {
+  return method === 'GET' || method === 'HEAD' ? 'read' : 'mutation';
+}
+
+function enforceRateLimit(
+  scopeAccountId: string,
+  request: Request,
+  correlationId: string,
+): Response | null {
+  const limiter = getMedicalApiRateLimiter();
+  const decision = limiter.check({
+    accountId: scopeAccountId,
+    operation: operationFromMethod(request.method),
+    path: new URL(request.url).pathname,
+  } satisfies MedicalApiRateLimitInput);
+
+  if (decision.allowed) {
+    return null;
+  }
+
+  const retryAfterSeconds = decision.retryAfterSeconds ?? 60;
+  return medicalApiErrorResponse(
+    429,
+    'RATE_LIMITED',
+    'Too many requests. Retry later.',
+    correlationId,
+    null,
+    {
+      'Retry-After': String(retryAfterSeconds),
+    },
+  );
+}
 
 export async function handleListMedicalEvents(
   request: Request,
@@ -39,6 +81,11 @@ export async function handleListMedicalEvents(
 
   const { scope } = resolved.value;
   const correlationId = scope.correlationId;
+  const rateLimited = enforceRateLimit(scope.accountId, request, correlationId);
+  if (rateLimited) {
+    return rateLimited;
+  }
+
   const url = new URL(request.url);
 
   try {
@@ -76,9 +123,13 @@ export async function handleCreateMedicalEvent(
 
   const { scope } = resolved.value;
   const correlationId = scope.correlationId;
+  const rateLimited = enforceRateLimit(scope.accountId, request, correlationId);
+  if (rateLimited) {
+    return rateLimited;
+  }
 
   try {
-    const rawBody = await readRequestBody(request);
+    const rawBody = await readBoundedRequestBody(request);
     const semanticEvent = validateCreateRequestBody(parseJsonBody(rawBody));
     const idempotencyKey = validateIdempotencyKey(
       request.headers.get(MEDICAL_IDEMPOTENCY_HEADER),
@@ -116,6 +167,10 @@ export async function handleGetMedicalEvent(
 
   const { scope } = resolved.value;
   const correlationId = scope.correlationId;
+  const rateLimited = enforceRateLimit(scope.accountId, request, correlationId);
+  if (rateLimited) {
+    return rateLimited;
+  }
 
   try {
     validateResourceId(resourceId);
@@ -145,11 +200,15 @@ export async function handleUpdateMedicalEvent(
 
   const { scope } = resolved.value;
   const correlationId = scope.correlationId;
+  const rateLimited = enforceRateLimit(scope.accountId, request, correlationId);
+  if (rateLimited) {
+    return rateLimited;
+  }
 
   try {
     validateResourceId(resourceId);
     const ifMatch = parseIfMatchHeader(request.headers.get('if-match'));
-    const rawBody = await readRequestBody(request);
+    const rawBody = await readBoundedRequestBody(request);
     const semanticEvent = validateUpdateRequestBody(parseJsonBody(rawBody));
 
     const bundle = await getMedicalServiceBundle();
@@ -183,6 +242,10 @@ export async function handleDeleteMedicalEvent(
 
   const { scope } = resolved.value;
   const correlationId = scope.correlationId;
+  const rateLimited = enforceRateLimit(scope.accountId, request, correlationId);
+  if (rateLimited) {
+    return rateLimited;
+  }
 
   try {
     validateResourceId(resourceId);
@@ -218,14 +281,6 @@ function parseIfMatchHeader(value: string | null): string {
   return trimmed;
 }
 
-async function readRequestBody(request: Request): Promise<string> {
-  const rawBody = await request.text();
-  if (rawBody.length > MEDICAL_MAX_REQUEST_BYTES) {
-    throw new MedicalApiValidationError('Request body is too large.');
-  }
-  return rawBody;
-}
-
 function mapMedicalApiError(error: unknown, correlationId: string): Response {
   if (error instanceof MedicalApiValidationError) {
     const status = error.message === 'Request body is too large.' ? 413 : 422;
@@ -253,7 +308,16 @@ function mapMedicalApiError(error: unknown, correlationId: string): Response {
     return medicalApiErrorResponse(
       428,
       'PRECONDITION_REQUIRED',
-      error.message,
+      'If-Match header is required.',
+      correlationId,
+    );
+  }
+
+  if (error instanceof InvalidRevisionTokenError) {
+    return medicalApiErrorResponse(
+      400,
+      'VALIDATION_FAILED',
+      'If-Match revision token is invalid.',
       correlationId,
     );
   }
@@ -289,6 +353,18 @@ function mapMedicalApiError(error: unknown, correlationId: string): Response {
     );
   }
 
+  if (
+    error instanceof MedicalServiceUnavailableError ||
+    isTransientInfrastructureError(error)
+  ) {
+    return medicalApiErrorResponse(
+      503,
+      'SERVICE_UNAVAILABLE',
+      'The medical API is temporarily unavailable.',
+      correlationId,
+    );
+  }
+
   return medicalApiErrorResponse(
     500,
     'INTERNAL_ERROR',
@@ -297,4 +373,5 @@ function mapMedicalApiError(error: unknown, correlationId: string): Response {
   );
 }
 
-export { createCorrelationId };
+export { createCorrelationId, setMedicalApiRateLimiterForTests };
+export type { MedicalApiRateLimiter };

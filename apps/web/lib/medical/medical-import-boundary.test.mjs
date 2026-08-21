@@ -22,6 +22,16 @@ const FORBIDDEN_PATTERNS = [
 ];
 
 const FORBIDDEN_MEDICAL_SERVICE_PATTERN = '@diabetes-universe/medical-service';
+const USE_CLIENT_DIRECTIVE = "'use client'";
+const USE_CLIENT_DIRECTIVE_DOUBLE = '"use client"';
+
+function isUseClientSource(source) {
+  const trimmed = source.trimStart();
+  return (
+    trimmed.startsWith(USE_CLIENT_DIRECTIVE) ||
+    trimmed.startsWith(USE_CLIENT_DIRECTIVE_DOUBLE)
+  );
+}
 
 function collectSourceFiles(directory) {
   const files = [];
@@ -85,6 +95,20 @@ test('boundary: apps/web source tree does not import medical persistence interna
         offenders.push(
           `${relative(WEB_ROOT, filePath)}: ${FORBIDDEN_MEDICAL_SERVICE_PATTERN}`,
         );
+      }
+    }
+
+    if (isUseClientSource(source)) {
+      for (const pattern of [
+        ...FORBIDDEN_PATTERNS,
+        FORBIDDEN_MEDICAL_SERVICE_PATTERN,
+        'lib/medical/server/',
+      ]) {
+        if (source.includes(pattern)) {
+          offenders.push(
+            `${relative(WEB_ROOT, filePath)}: client-boundary:${pattern}`,
+          );
+        }
       }
     }
   }

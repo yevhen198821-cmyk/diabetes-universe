@@ -13,3 +13,11 @@ export class InvalidMedicalListCursorError extends Error {
 export class InvalidRevisionPreconditionError extends Error {
   readonly code = 'PRECONDITION_REQUIRED' as const;
 }
+
+export class InvalidRevisionTokenError extends Error {
+  readonly code = 'VALIDATION_FAILED' as const;
+}
+
+export class MedicalServiceUnavailableError extends Error {
+  readonly code = 'SERVICE_UNAVAILABLE' as const;
+}

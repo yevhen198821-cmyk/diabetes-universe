@@ -14,9 +14,11 @@
     "lint": "eslint .",
     "test": "turbo run test",
     "test:e2e": "playwright test",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "validate:openapi": "node scripts/validate-openapi.mjs"
   },
   "devDependencies": {
+    "@apidevtools/swagger-parser": "^12.1.0",
     "@playwright/test": "^1.62.1",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.2.12",

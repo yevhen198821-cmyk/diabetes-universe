@@ -7,8 +7,10 @@ import {
   createCorrelationId,
   medicalApiErrorResponse,
 } from './medical-api-error';
+import { MEDICAL_VALIDATION_BOUNDS } from './medical-api-validation-bounds';
 
 const TEST_ACCOUNT_HEADER = 'x-test-account-id';
+const CLIENT_REQUEST_ID_HEADER = 'x-request-id';
 
 function resolvePrincipalForRequest(
   request: Request,
@@ -34,9 +36,31 @@ function resolvePrincipalForRequest(
   };
 }
 
+function parseOptionalClientRequestId(request: Request): string | undefined {
+  const raw = request.headers.get(CLIENT_REQUEST_ID_HEADER);
+  if (raw === null) {
+    return undefined;
+  }
+
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) {
+    return undefined;
+  }
+
+  if (
+    trimmed.length > MEDICAL_VALIDATION_BOUNDS.MAX_CLIENT_REQUEST_ID_LENGTH ||
+    !MEDICAL_VALIDATION_BOUNDS.MAX_CLIENT_REQUEST_ID_PATTERN.test(trimmed)
+  ) {
+    return undefined;
+  }
+
+  return trimmed;
+}
+
 export interface ResolvedMedicalApiScope {
   readonly principal: AuthenticatedPrincipal;
   readonly scope: AuthorizationScope;
+  readonly clientRequestId?: string;
 }
 
 export async function resolveMedicalApiScope(
@@ -45,8 +69,8 @@ export async function resolveMedicalApiScope(
   | { ok: true; value: ResolvedMedicalApiScope }
   | { ok: false; response: Response }
 > {
-  const correlationId =
-    request.headers.get('x-correlation-id')?.trim() || createCorrelationId();
+  const correlationId = createCorrelationId();
+  const clientRequestId = parseOptionalClientRequestId(request);
   const testPrincipal = resolvePrincipalForRequest(request);
   const principal =
     testPrincipal !== undefined
@@ -89,14 +113,9 @@ export async function resolveMedicalApiScope(
         subjectId: activeRelationship.subjectId,
         correlationId,
       },
+      ...(clientRequestId ? { clientRequestId } : {}),
     },
   };
 }
 
-export function getRequestCorrelationId(request: Request): string {
-  return (
-    request.headers.get('x-correlation-id')?.trim() || createCorrelationId()
-  );
-}
-
-export { TEST_ACCOUNT_HEADER };
+export { TEST_ACCOUNT_HEADER, CLIENT_REQUEST_ID_HEADER };

@@ -6,6 +6,7 @@ import {
   createIdempotencyConflictError,
   InvalidMedicalListCursorError,
   InvalidRevisionPreconditionError,
+  InvalidRevisionTokenError,
   type IdempotencyScope,
   type MedicalEventResource,
   type MedicalEventResourcePatch,
@@ -22,7 +23,7 @@ import {
   createRequestFingerprint,
   createRevisionTokenService,
   InvalidListCursorError,
-  InvalidRevisionTokenError,
+  InvalidRevisionTokenError as InvalidPersistenceRevisionTokenError,
   MalformedListCursorError,
   MalformedRevisionTokenError,
   type MedicalDatabase,
@@ -138,9 +139,9 @@ export function createMedicalEventService(
     } catch (error) {
       if (
         error instanceof MalformedRevisionTokenError ||
-        error instanceof InvalidRevisionTokenError
+        error instanceof InvalidPersistenceRevisionTokenError
       ) {
-        throw new InvalidRevisionPreconditionError(
+        throw new InvalidRevisionTokenError(
           'If-Match revision token is invalid.',
         );
       }

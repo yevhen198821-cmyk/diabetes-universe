@@ -1,12 +1,16 @@
 export type MedicalApiErrorCode =
   | 'AUTH_REQUIRED'
+  | 'AUTH_INSUFFICIENT'
+  | 'SUBJECT_ACCESS_DENIED'
   | 'VALIDATION_FAILED'
   | 'RESOURCE_NOT_FOUND'
   | 'INVALID_CURSOR'
   | 'PRECONDITION_REQUIRED'
   | 'REVISION_CONFLICT'
   | 'IDEMPOTENCY_CONFLICT'
+  | 'RATE_LIMITED'
   | 'REQUEST_TOO_LARGE'
+  | 'SERVICE_UNAVAILABLE'
   | 'INTERNAL_ERROR';
 
 export interface MedicalApiErrorBody {
@@ -28,6 +32,7 @@ export function medicalApiErrorResponse(
   message: string,
   correlationId: string,
   details: Record<string, unknown> | null = null,
+  extraHeaders: Record<string, string> = {},
 ): Response {
   const body: MedicalApiErrorBody = {
     error: {
@@ -40,7 +45,7 @@ export function medicalApiErrorResponse(
 
   return Response.json(body, {
     status,
-    headers: privateNoStoreHeaders(),
+    headers: privateNoStoreHeaders(extraHeaders),
   });
 }
 
