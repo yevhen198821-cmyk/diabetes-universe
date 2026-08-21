@@ -6,6 +6,10 @@
 
 Date: 2026-08-19
 
+Lifecycle note: PR #95 merged this architecture specification. Formal architecture
+approval remains pending a dedicated audit/closure record comparable to
+`p11-approval-closure.md` and `p12-architecture-security-audit.md`.
+
 ## Purpose
 
 P10 defines how pre-existing durable local medical Timeline data is safely adopted into the authoritative cloud medical subject created by P9. It sits between the approved cloud persistence foundation and the later P11 offline-sync architecture.
