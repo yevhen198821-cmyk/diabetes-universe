@@ -1,6 +1,13 @@
 -- P9 medical privilege deployment (mandatory for production Neon).
 -- PGlite/local CI intentionally skips this script during test bootstrap.
--- Prerequisites: create Neon roles before apply; script fails if roles are missing.
+-- Prerequisites:
+--   1. create all required Neon roles;
+--   2. run this script as medical_migrator;
+--   3. before execution, an operator temporarily grants medical_migrator SET-role
+--      capability for medical_maintenance_owner so function ownership can be transferred;
+--   4. revoke that temporary role membership immediately after this migration succeeds.
+
+BEGIN;
 
 DO $verify_roles$
 DECLARE
@@ -9,7 +16,8 @@ DECLARE
     'medical_app',
     'medical_outbox_worker',
     'medical_idempotency_maintenance',
-    'medical_maintenance_owner'
+    'medical_maintenance_owner',
+    'medical_migrator'
   ];
 BEGIN
   FOREACH role_name IN ARRAY required_roles
@@ -20,6 +28,17 @@ BEGIN
         role_name;
     END IF;
   END LOOP;
+
+  IF current_user <> 'medical_migrator' THEN
+    RAISE EXCEPTION
+      '0001_medical_privileges.sql must execute as medical_migrator; current_user is "%".',
+      current_user;
+  END IF;
+
+  IF NOT pg_has_role(current_user, 'medical_maintenance_owner', 'SET') THEN
+    RAISE EXCEPTION
+      'medical_migrator must temporarily be able to SET ROLE medical_maintenance_owner for SECURITY DEFINER ownership transfer.';
+  END IF;
 END $verify_roles$;
 
 -- Baseline PUBLIC lockdown on medical schema.
@@ -34,11 +53,6 @@ REVOKE ALL ON ALL TABLES IN SCHEMA medical FROM medical_idempotency_maintenance;
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA medical FROM medical_idempotency_maintenance;
 REVOKE ALL ON ALL SEQUENCES IN SCHEMA medical FROM medical_idempotency_maintenance;
 REVOKE ALL ON SCHEMA medical FROM medical_idempotency_maintenance;
-
--- SECURITY DEFINER purge function: isolated owner, no PUBLIC execute.
-ALTER FUNCTION medical.purge_expired_idempotency_records(integer)
-  OWNER TO medical_maintenance_owner;
-REVOKE ALL ON FUNCTION medical.purge_expired_idempotency_records(integer) FROM PUBLIC;
 
 -- The definer function SELECTs/locks candidate rows and DELETEs them. Its owner therefore
 -- needs SELECT + DELETE on this table only. No INSERT/UPDATE and no access to other tables.
@@ -77,27 +91,33 @@ GRANT UPDATE (status, published_at) ON TABLE medical.medical_outbox_events
 
 -- medical_migrator is deploy/CI-only: objects are owned by the migrator connection user.
 -- Do not grant blanket ALL ON SCHEMA to medical_migrator for runtime convenience.
-DO $migrator_default_privileges$
-BEGIN
-  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'medical_migrator') THEN
-    ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-      REVOKE ALL ON TABLES FROM PUBLIC;
-    ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-      REVOKE ALL ON FUNCTIONS FROM PUBLIC;
-    ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-      REVOKE ALL ON SEQUENCES FROM PUBLIC;
+ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
+  REVOKE ALL ON TABLES FROM PUBLIC;
+ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
+  REVOKE ALL ON FUNCTIONS FROM PUBLIC;
+ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
+  REVOKE ALL ON SEQUENCES FROM PUBLIC;
+ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
+  REVOKE ALL ON TABLES FROM medical_app;
+ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
+  REVOKE ALL ON FUNCTIONS FROM medical_app;
+ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
+  REVOKE ALL ON TABLES FROM medical_outbox_worker;
+ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
+  REVOKE ALL ON FUNCTIONS FROM medical_outbox_worker;
+ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
+  REVOKE ALL ON TABLES FROM medical_idempotency_maintenance;
+ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
+  REVOKE ALL ON FUNCTIONS FROM medical_idempotency_maintenance;
 
-    ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-      REVOKE ALL ON TABLES FROM medical_app;
-    ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-      REVOKE ALL ON FUNCTIONS FROM medical_app;
-    ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-      REVOKE ALL ON TABLES FROM medical_outbox_worker;
-    ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-      REVOKE ALL ON FUNCTIONS FROM medical_outbox_worker;
-    ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-      REVOKE ALL ON TABLES FROM medical_idempotency_maintenance;
-    ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-      REVOKE ALL ON FUNCTIONS FROM medical_idempotency_maintenance;
-  END IF;
-END $migrator_default_privileges$;
+-- PostgreSQL requires the new function owner to have CREATE on the containing schema.
+-- Grant it only inside this transaction, transfer ownership, then immediately revoke it.
+GRANT CREATE ON SCHEMA medical TO medical_maintenance_owner;
+ALTER FUNCTION medical.purge_expired_idempotency_records(integer)
+  OWNER TO medical_maintenance_owner;
+REVOKE CREATE ON SCHEMA medical FROM medical_maintenance_owner;
+
+-- PUBLIC execute was revoked by 0000 while the migrator owned the function and the ACL
+-- survives ownership transfer. Keep the explicit assertion in the live privilege smoke.
+
+COMMIT;
