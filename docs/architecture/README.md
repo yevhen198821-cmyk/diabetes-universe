@@ -95,8 +95,9 @@ future approved server paths; public medical API routes are not yet implemented.
 | P12               | [Conflict / revision / tombstone](sync/p12-conflict-revision-tombstone-architecture.md)           | Approved with clarifications ([audit closure](sync/p12-architecture-security-audit.md)) | Not implemented                            |
 | P13               | [Security & privacy hardening](security/p13-security-privacy-hardening.md)                        | Approved (closing architecture gate)                                                    | Operational controls not fully implemented |
 
-Architecture-complete stages are not permission to ship runtime behavior without
-their separate implementation and security gates.
+The table records design and lifecycle state only. A merged or approved architecture
+document is not permission to ship runtime behavior without a separate implementation
+and security gate; P10 additionally still requires formal architecture approval.
 
 ## Deliberate exclusions (not yet in repository runtime)
 
