@@ -11,6 +11,8 @@ PR. This document does **not** declare production medical runtime readiness. A
 formal implementation/security re-audit closure record is still required before
 production enablement.
 
+Production gate: [P9 Medical Persistence Production Readiness Runbook](p9-production-readiness-runbook.md).
+
 ## Scope delivered (this PR)
 
 - `@diabetes-universe/medical-domain` — infrastructure-neutral domain types, semantic mappers, `MedicalRevision` bigint safety
@@ -60,15 +62,14 @@ PGlite/test bootstrap loads this file via `medical-foundation-migration.ts` (no 
 
    This script **fails clearly** if required Neon roles are missing. Do not skip in production.
 
-4. **Run a live Neon privilege smoke check before enabling medical persistence runtime.** Verify from PostgreSQL system catalogs or an equivalent deployment smoke script that the effective state is:
+4. **Run the automated live privilege smoke check before enabling medical persistence runtime:**
 
-   - `medical_app`: no `DELETE`, no DDL; table-specific privileges only
-   - `medical_idempotency_maintenance`: schema `USAGE` + `EXECUTE` only on `medical.purge_expired_idempotency_records(integer)`, with no direct table privileges
-   - `medical_maintenance_owner`: schema `USAGE` + `SELECT, DELETE` only on `medical.medical_idempotency_records`; no privileges on unrelated medical tables
-   - `PUBLIC`: no unintended access to medical schema/tables/functions
-   - the purge function owner is `medical_maintenance_owner` and PUBLIC EXECUTE remains revoked
+   ```bash
+   MEDICAL_PRIVILEGE_SMOKE_DATABASE_URL="$MEDICAL_ADMIN_INSPECTION_DATABASE_URL" \
+     pnpm --filter @diabetes-universe/medical-persistence db:smoke:privileges
+   ```
 
-   PGlite does not model the production role system sufficiently to replace this deployment gate. Do not enable production medical persistence until the live privilege check passes.
+   The smoke verifier inspects effective PostgreSQL ACLs and the hardened purge function. PGlite does not model the production role system sufficiently to replace this deployment gate.
 
 ### Privilege model summary
 
@@ -92,9 +93,12 @@ PGlite/test bootstrap loads this file via `medical-foundation-migration.ts` (no 
 - Application/domain: `MedicalRevision` (`bigint`) through persistence and services
 - Revision tokens encode bigint revisions; secrets require minimum strength in production
 
+## Verified environment state for this closure wave
+
+The existing Neon project `diabetes-universe-auth` primary branch was inspected read-only on 2026-08-21. At inspection time it contained the existing auth/public database state but **did not contain the `medical` schema or the required P9 medical roles**.
+
+That observation confirms the intended lifecycle boundary: the P9 implementation foundation is in source control, but production medical persistence has not yet been deployed to that Neon primary branch. No public medical runtime may be enabled until the runbook closure criteria pass on the selected target environment.
+
 ## Next step
 
-Formal implementation/security re-audit closure, live Neon privilege smoke
-verification, public medical API transport (P8), and P13 operational hardening
-implementation remain separate gated work. Public medical API routes remain
-blocked until explicitly approved.
+Complete the production-readiness runbook: approved role provisioning, migrations `0000` + `0001`, live privilege smoke, runtime-credential verification, backup/PITR evidence, and formal implementation/security closure. Public medical API transport (P8) remains a separate later gate and must not be enabled as part of P9 closure.
