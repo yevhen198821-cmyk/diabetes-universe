@@ -49,7 +49,10 @@ try {
     assert(roleNames.has(role), `required role is missing: ${role}`);
   }
 
-  if (environment.medical_schema_exists && roleNames.size === expectedRoles.length) {
+  if (
+    environment.medical_schema_exists &&
+    roleNames.size === expectedRoles.length
+  ) {
     const [checks] = await sql`
       SELECT
         has_schema_privilege('medical_app', 'medical', 'USAGE') AS app_schema_usage,
@@ -78,31 +81,79 @@ try {
     `;
 
     assert(checks.app_schema_usage, 'medical_app lacks schema USAGE');
-    assert(!checks.app_schema_create, 'medical_app unexpectedly has schema CREATE');
+    assert(
+      !checks.app_schema_create,
+      'medical_app unexpectedly has schema CREATE',
+    );
     assert(checks.app_subject_select, 'medical_app lacks subject SELECT');
     assert(checks.app_subject_insert, 'medical_app lacks subject INSERT');
     assert(checks.app_subject_update, 'medical_app lacks subject UPDATE');
-    assert(!checks.app_subject_delete, 'medical_app unexpectedly has subject DELETE');
+    assert(
+      !checks.app_subject_delete,
+      'medical_app unexpectedly has subject DELETE',
+    );
     assert(checks.app_audit_insert, 'medical_app lacks audit INSERT');
-    assert(!checks.app_audit_select, 'medical_app unexpectedly has audit SELECT');
+    assert(
+      !checks.app_audit_select,
+      'medical_app unexpectedly has audit SELECT',
+    );
     assert(checks.app_outbox_insert, 'medical_app lacks outbox INSERT');
-    assert(!checks.app_outbox_select, 'medical_app unexpectedly has outbox SELECT');
-    assert(checks.worker_outbox_select, 'medical_outbox_worker lacks outbox SELECT');
-    assert(checks.worker_status_update, 'medical_outbox_worker lacks status UPDATE');
-    assert(checks.worker_published_update, 'medical_outbox_worker lacks published_at UPDATE');
-    assert(!checks.worker_payload_update, 'medical_outbox_worker unexpectedly has payload UPDATE');
-    assert(!checks.maintenance_direct_select, 'maintenance caller unexpectedly has direct SELECT');
-    assert(!checks.maintenance_direct_delete, 'maintenance caller unexpectedly has direct DELETE');
-    assert(checks.maintenance_execute, 'maintenance caller lacks purge EXECUTE');
-    assert(checks.owner_idempotency_select, 'maintenance owner lacks idempotency SELECT');
-    assert(checks.owner_idempotency_delete, 'maintenance owner lacks idempotency DELETE');
-    assert(!checks.owner_event_select, 'maintenance owner unexpectedly has event SELECT');
-    assert(!checks.owner_schema_create, 'maintenance owner unexpectedly retains schema CREATE');
+    assert(
+      !checks.app_outbox_select,
+      'medical_app unexpectedly has outbox SELECT',
+    );
+    assert(
+      checks.worker_outbox_select,
+      'medical_outbox_worker lacks outbox SELECT',
+    );
+    assert(
+      checks.worker_status_update,
+      'medical_outbox_worker lacks status UPDATE',
+    );
+    assert(
+      checks.worker_published_update,
+      'medical_outbox_worker lacks published_at UPDATE',
+    );
+    assert(
+      !checks.worker_payload_update,
+      'medical_outbox_worker unexpectedly has payload UPDATE',
+    );
+    assert(
+      !checks.maintenance_direct_select,
+      'maintenance caller unexpectedly has direct SELECT',
+    );
+    assert(
+      !checks.maintenance_direct_delete,
+      'maintenance caller unexpectedly has direct DELETE',
+    );
+    assert(
+      checks.maintenance_execute,
+      'maintenance caller lacks purge EXECUTE',
+    );
+    assert(
+      checks.owner_idempotency_select,
+      'maintenance owner lacks idempotency SELECT',
+    );
+    assert(
+      checks.owner_idempotency_delete,
+      'maintenance owner lacks idempotency DELETE',
+    );
+    assert(
+      !checks.owner_event_select,
+      'maintenance owner unexpectedly has event SELECT',
+    );
+    assert(
+      !checks.owner_schema_create,
+      'maintenance owner unexpectedly retains schema CREATE',
+    );
     assert(
       !checks.migrator_can_set_maintenance_owner,
       'medical_migrator still has temporary maintenance-owner SET-role capability',
     );
-    assert(!checks.public_purge_execute, 'PUBLIC unexpectedly has purge EXECUTE');
+    assert(
+      !checks.public_purge_execute,
+      'PUBLIC unexpectedly has purge EXECUTE',
+    );
 
     const [functionSecurity] = await sql`
       SELECT
@@ -119,8 +170,14 @@ try {
 
     assert(functionSecurity, 'purge function is missing');
     if (functionSecurity) {
-      assert(functionSecurity.owner_name === 'medical_maintenance_owner', 'purge function has wrong owner');
-      assert(functionSecurity.security_definer === true, 'purge function is not SECURITY DEFINER');
+      assert(
+        functionSecurity.owner_name === 'medical_maintenance_owner',
+        'purge function has wrong owner',
+      );
+      assert(
+        functionSecurity.security_definer === true,
+        'purge function is not SECURITY DEFINER',
+      );
       assert(
         Array.isArray(functionSecurity.proconfig) &&
           functionSecurity.proconfig.includes('search_path=medical, pg_temp'),
