@@ -29,17 +29,20 @@ persistence foundation.
 `apps/web` does **not** import `@diabetes-universe/medical-persistence`
 directly; medical persistence remains a server-side bounded context.
 
-### Architecture complete, runtime not yet complete
+### Architecture defined; runtime not yet complete
 
-Approved architecture exists; product/runtime implementation for these stages is
-**not** yet delivered in this repository:
+Design documentation exists for the following stages, but lifecycle approval varies
+by stage and product/runtime implementation is **not** yet delivered in this
+repository:
 
-- **P10** — local medical data adoption
-- **P11** — offline sync
-- **P12** — conflict / revision / tombstone runtime
-- **P13** — security, privacy, and production hardening controls
+- **P10** — local medical data adoption (Draft; approval closure pending)
+- **P11** — offline sync (Approved)
+- **P12** — conflict / revision / tombstone architecture (Approved with normative clarifications)
+- **P13** — security, privacy, and production hardening architecture (Approved)
 
-See [Architecture Overview](docs/architecture/README.md) for lifecycle status.
+See [Architecture Overview](docs/architecture/README.md) for authoritative lifecycle
+status. A merged architecture document is not, by itself, permission to enable
+runtime behavior.
 
 ### Not yet implemented
 
