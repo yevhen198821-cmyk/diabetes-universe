@@ -106,6 +106,7 @@
 
 - [P7 — Backend Medical Data Architecture](architecture/backend/p7-backend-medical-data-architecture.md) — Approved
 - [P8 — Medical API Contracts](architecture/api/p8-medical-api-contracts.md) — Approved
+- [P8 — Medical API Transport Implementation](implementation/p8-medical-api-transport.md) — implementation candidate
 - [P9 — Cloud Medical Persistence Implementation Design](architecture/backend/p9-cloud-medical-persistence-implementation-design.md) — Approved
 - [P9 — Medical Persistence Foundation Implementation](implementation/p9-medical-persistence-foundation.md) — implementation complete; PostgreSQL rehearsal validated; production deployment deferred
 - [P9 — Medical Persistence Readiness Runbook](implementation/p9-production-readiness-runbook.md) — rehearsal gate closed; production launch gate deferred

@@ -26,10 +26,22 @@ test('resolveMedicalEnvironment requires revision secret for postgres mode', () 
   );
 });
 
+test('resolveMedicalEnvironment requires list cursor secret for postgres mode', () => {
+  assert.throws(
+    () =>
+      resolveMedicalEnvironment({
+        MEDICAL_DATABASE_URL: 'postgres://user:pass@localhost:5432/medical',
+        MEDICAL_REVISION_TOKEN_SECRET: 'x'.repeat(32),
+      }),
+    /MEDICAL_LIST_CURSOR_SECRET is required/,
+  );
+});
+
 test('postgres mode rejects weak revision token secrets at service creation', () => {
   const environment = resolveMedicalEnvironment({
     MEDICAL_DATABASE_URL: 'postgres://user:pass@localhost:5432/medical',
     MEDICAL_REVISION_TOKEN_SECRET: 'weak',
+    MEDICAL_LIST_CURSOR_SECRET: 'y'.repeat(32),
   });
 
   assert.throws(

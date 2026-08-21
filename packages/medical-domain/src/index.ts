@@ -20,6 +20,12 @@ export type {
   IdempotencyScope,
 } from './types/idempotency';
 export { createIdempotencyConflictError } from './types/idempotency';
+export {
+  InvalidMedicalListCursorError,
+  InvalidRevisionPreconditionError,
+  MedicalResourceNotFoundError,
+  MedicalRevisionConflictError,
+} from './errors/medical-service-errors';
 export type { MedicalRevision } from './types/medical-revision';
 export {
   assertMedicalRevision,

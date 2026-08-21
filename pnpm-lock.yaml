@@ -41,6 +41,12 @@ importers:
       '@diabetes-universe/identity':
         specifier: workspace:*
         version: link:../../packages/identity
+      '@diabetes-universe/medical-domain':
+        specifier: workspace:*
+        version: link:../../packages/medical-domain
+      '@diabetes-universe/medical-service':
+        specifier: workspace:*
+        version: link:../../packages/medical-service
       '@diabetes-universe/platform':
         specifier: workspace:*
         version: link:../../packages/platform

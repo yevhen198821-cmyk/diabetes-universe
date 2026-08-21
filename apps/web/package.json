@@ -20,6 +20,8 @@
     "@diabetes-universe/formatting": "workspace:*",
     "@diabetes-universe/i18n": "workspace:*",
     "@diabetes-universe/identity": "workspace:*",
+    "@diabetes-universe/medical-domain": "workspace:*",
+    "@diabetes-universe/medical-service": "workspace:*",
     "@diabetes-universe/platform": "workspace:*",
     "@diabetes-universe/platform-web": "workspace:*",
     "@diabetes-universe/timeline": "workspace:*",
