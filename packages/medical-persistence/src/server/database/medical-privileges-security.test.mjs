@@ -88,9 +88,24 @@ test('maintenance caller final state is schema USAGE plus one EXECUTE grant only
 });
 
 test('SECURITY DEFINER function is isolated from PUBLIC and owned by maintenance owner', () => {
-  assert.match(privilegesSql, /OWNER TO medical_maintenance_owner/);
+  const grantCreatePosition = positionOf(
+    /GRANT CREATE ON SCHEMA medical TO medical_maintenance_owner;/,
+  );
+  const ownerTransferPosition = positionOf(
+    /OWNER TO medical_maintenance_owner/,
+  );
+  const revokeCreatePosition = positionOf(
+    /REVOKE CREATE ON SCHEMA medical FROM medical_maintenance_owner;/,
+  );
+
+  assert.ok(grantCreatePosition < ownerTransferPosition);
+  assert.ok(ownerTransferPosition < revokeCreatePosition);
   assert.match(
     privilegesSql,
+    /REVOKE ALL ON ALL FUNCTIONS IN SCHEMA medical FROM PUBLIC;/,
+  );
+  assert.match(
+    foundationSql,
     /REVOKE ALL ON FUNCTION medical\.purge_expired_idempotency_records\(integer\) FROM PUBLIC;/,
   );
 });

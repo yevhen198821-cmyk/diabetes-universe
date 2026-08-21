@@ -9,6 +9,7 @@
   },
   "scripts": {
     "db:generate": "drizzle-kit generate",
+    "db:smoke:privileges": "node ./scripts/live-privilege-smoke.mjs",
     "test": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test 'src/**/*.test.mjs'",
     "typecheck": "tsc --noEmit"
   },
