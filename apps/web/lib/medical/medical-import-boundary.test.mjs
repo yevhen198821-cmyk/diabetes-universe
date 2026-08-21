@@ -64,7 +64,8 @@ test('boundary: apps/web source tree does not import medical persistence interna
 
   for (const filePath of collectSourceFiles(WEB_ROOT)) {
     const source = readFileSync(filePath, 'utf8');
-    const allowedServerComposition = isAllowedMedicalServerCompositionPath(filePath);
+    const allowedServerComposition =
+      isAllowedMedicalServerCompositionPath(filePath);
 
     for (const pattern of FORBIDDEN_PATTERNS) {
       if (source.includes(pattern)) {

@@ -66,10 +66,9 @@ export async function resolveMedicalApiScope(
   }
 
   const bundle = await getMedicalServiceBundle();
-  const relationship =
-    await bundle.subjectService.findActiveSelfRelationship(
-      principal.accountId,
-    );
+  const relationship = await bundle.subjectService.findActiveSelfRelationship(
+    principal.accountId,
+  );
 
   if (!relationship) {
     await bundle.subjectService.provisionSelfSubject(principal.accountId);
@@ -95,7 +94,9 @@ export async function resolveMedicalApiScope(
 }
 
 export function getRequestCorrelationId(request: Request): string {
-  return request.headers.get('x-correlation-id')?.trim() || createCorrelationId();
+  return (
+    request.headers.get('x-correlation-id')?.trim() || createCorrelationId()
+  );
 }
 
 export { TEST_ACCOUNT_HEADER };

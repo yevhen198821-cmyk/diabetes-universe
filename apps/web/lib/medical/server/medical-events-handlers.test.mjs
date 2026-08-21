@@ -12,9 +12,7 @@ import {
   getMedicalServiceBundle,
   resetMedicalServiceBundleForTests,
 } from './get-medical-service-bundle.ts';
-import {
-  TEST_ACCOUNT_HEADER,
-} from './resolve-medical-api-scope.ts';
+import { TEST_ACCOUNT_HEADER } from './resolve-medical-api-scope.ts';
 import {
   MEDICAL_EVENTS_BASE_PATH,
   MEDICAL_IDEMPOTENCY_HEADER,
