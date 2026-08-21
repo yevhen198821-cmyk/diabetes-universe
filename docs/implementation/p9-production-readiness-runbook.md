@@ -1,32 +1,143 @@
-# P9 — Medical Persistence Production Readiness Runbook
+# P9 — Medical Persistence Readiness Runbook
 
 ## Status
 
-**Implementation / security closure candidate**
+| Gate                                | State                   |
+| ----------------------------------- | ----------------------- |
+| **A. Development / rehearsal gate** | **CLOSED** (2026-08-21) |
+| **B. Production launch gate**       | **DEFERRED**            |
 
 Date: 2026-08-21
 
 ## Purpose
 
-This runbook defines the final production-readiness gate for the P9 medical persistence foundation before public medical API transport or later adoption/sync runtime may be enabled.
+This runbook records the P9 medical persistence readiness model across two
+separate gates:
 
-It does not approve public medical routes, P10 adoption runtime, P11 sync runtime, P12 conflict/tombstone runtime, or P13 operational rollout by itself.
+- **Gate A** — implementation validation, PostgreSQL migration rehearsal, and
+  privilege smoke on an isolated target.
+- **Gate B** — future production launch controls before real medical traffic and
+  production medical data are enabled.
 
-## Preconditions
+It does not approve public medical routes, P10 adoption runtime, P11 sync runtime,
+P12 conflict/tombstone runtime, or P13 operational rollout by itself.
 
-The target Neon/PostgreSQL environment must provide a dedicated medical deployment path and the following roles:
+## Infrastructure decision
 
-- `medical_migrator` — deploy/CI only;
-- `medical_app` — request-runtime least privilege;
-- `medical_outbox_worker` — narrow outbox publication access;
-- `medical_idempotency_maintenance` — EXECUTE-only maintenance caller;
-- `medical_maintenance_owner` — non-runtime SECURITY DEFINER owner.
+Neon currently serves as:
 
-Production request runtime must never use an owner/migrator credential.
+- development PostgreSQL;
+- migration rehearsal environment;
+- privilege and security validation environment.
+
+Neon Free is **not** the permanent mandatory production platform for Diabetes
+Universe. We are not upgrading to Neon Scale as part of this gate, and we are not
+deploying medical persistence to the Neon primary branch now.
+
+P9 must remain portable PostgreSQL. Application runtime depends on PostgreSQL
+semantics — standard SQL, role-based privileges, and the `postgres` driver — not
+Neon-specific application APIs, branching APIs, or HTTP database drivers.
+
+Production PostgreSQL provider selection is deferred until launch planning.
+
+The selected launch provider must support required capabilities including, at
+minimum:
+
+- supported PostgreSQL version compatible with reviewed migrations;
+- encryption in transit;
+- encryption at rest;
+- automated backups;
+- point-in-time recovery or equivalent;
+- defined retention;
+- tested restore procedure;
+- monitoring;
+- least-privilege database roles;
+- secret rotation;
+- regional/data residency requirements where applicable;
+- required healthcare/privacy/compliance controls for launch markets.
+
+Compliance requirements depend on launch jurisdiction and business/legal model. This
+runbook does not prescribe a universal legal certification.
+
+## RPO/RTO decision
+
+RPO and RTO are launch-SLA decisions. They remain **unresolved** until production
+infrastructure is selected and launch planning completes.
+
+They become a blocking **production launch gate**. Development/rehearsal completion
+does **not** require final production RPO/RTO values.
+
+## Gate A — Development / rehearsal (CLOSED)
+
+Gate A confirms that the P9 implementation foundation is complete and that the
+portable PostgreSQL deployment path was validated on real PostgreSQL outside PGlite.
+
+### Gate A closure criteria (met)
+
+- repository CI green on the closure HEAD;
+- P9 security/code audit with no unresolved blocking findings in scope;
+- canonical migrations `0000` and corrected transactional `0001` reviewed;
+- isolated PostgreSQL rehearsal performed on disposable branch
+  `p9-prod-readiness-rehearsal`;
+- primary Neon branch **not** modified during rehearsal;
+- ownership-transfer issue discovered and corrected during rehearsal;
+- live privilege smoke PASS on rehearsal target;
+- no public medical API routes in scope;
+- no P10/P11/P12 runtime in scope;
+- no production medical data stored;
+- no production medical traffic enabled.
+
+### Gate A lifecycle wording
+
+**P9 implementation foundation — COMPLETE**
+**PostgreSQL deployment rehearsal — VALIDATED**
+**Production deployment — DEFERRED to launch infrastructure gate**
+
+### Rehearsal evidence
+
+A disposable Neon branch `p9-prod-readiness-rehearsal` was created from the primary
+branch on 2026-08-21 and used only for deployment rehearsal.
+
+The rehearsal established:
+
+- `0000` requires deploy-only database CREATE for `medical_migrator`;
+- the original `0001` ordering could not transfer function ownership safely on real
+  PostgreSQL because the new owner lacked schema CREATE and ownership-transfer role
+  capability;
+- granting permanent CREATE to `medical_maintenance_owner` would violate least
+  privilege, so the migration was corrected to grant it only transactionally for the
+  ownership transfer;
+- temporary migrator membership in `medical_maintenance_owner` is required only for
+  the transfer and must be revoked after deployment;
+- after the corrected sequence, observed effective privileges matched the intended
+  model for `medical_app`, idempotency maintenance, and maintenance-owner schema
+  CREATE denial;
+- final rehearsal verification confirmed:
+  - purge function owner = `medical_maintenance_owner`;
+  - `SECURITY DEFINER` enabled;
+  - hardened `search_path=medical, pg_temp`;
+  - PUBLIC EXECUTE denied;
+  - maintenance owner schema CREATE removed;
+  - temporary migrator SET-role capability removed.
+
+No credentials or connection strings are recorded in repository documentation. No
+changes were applied to the primary Neon branch during this rehearsal.
+
+### Rehearsal deployment order
+
+1. Create the required roles through the approved platform/admin path.
+2. Grant deploy-only database CREATE to `medical_migrator`.
+3. Apply `packages/medical-persistence/drizzle/0000_medical_foundation.sql` through the `medical_migrator` credential.
+4. Temporarily grant `medical_migrator` SET-role capability for `medical_maintenance_owner`.
+5. Apply `packages/medical-persistence/drizzle/0001_medical_privileges.sql` through the `medical_migrator` credential. The migration is transactional and fails closed if its role prerequisites are not met.
+6. Immediately revoke the temporary `medical_maintenance_owner` membership from `medical_migrator`.
+7. Run the live privilege smoke verifier against the exact rehearsal database.
+8. Record rehearsal evidence: environment name, branch/target, migration revision, smoke result, operator/change reference, and confirmation that temporary membership was revoked.
 
 ### Ownership-transfer prerequisite
 
-A real Neon rehearsal on 2026-08-21 confirmed two PostgreSQL requirements that are not modeled by PGlite:
+A real PostgreSQL rehearsal on 2026-08-21 confirmed two requirements that are not
+modeled by PGlite:
 
 1. `medical_migrator` needs database-level CREATE capability to create the `medical` schema during `0000`.
 2. Transferring the purge function to `medical_maintenance_owner` requires the migrator to be able to SET ROLE to that owner, and the new owner must temporarily have CREATE on the `medical` schema.
@@ -40,18 +151,15 @@ The approved deployment pattern is therefore:
 
 The temporary membership must not remain after deployment. `medical_maintenance_owner` remains a non-login, non-runtime owner role.
 
-## Required deployment order
+Production request runtime must never use an owner/migrator credential.
 
-1. Create the required roles through the approved platform/admin path.
-2. Grant deploy-only database CREATE to `medical_migrator`.
-3. Apply `packages/medical-persistence/drizzle/0000_medical_foundation.sql` through the `medical_migrator` credential.
-4. Temporarily grant `medical_migrator` SET-role capability for `medical_maintenance_owner`.
-5. Apply `packages/medical-persistence/drizzle/0001_medical_privileges.sql` through the `medical_migrator` credential. The migration is transactional and fails closed if its role prerequisites are not met.
-6. Immediately revoke the temporary `medical_maintenance_owner` membership from `medical_migrator`.
-7. Configure the request runtime with the dedicated `medical_app` credential only.
-8. Configure maintenance/outbox workers with their own dedicated credentials only when those workers are implemented and approved.
-9. Run the live privilege smoke verifier against the exact target database.
-10. Record the environment, migration revision, smoke result, operator/change reference, temporary-membership revocation, and rollback point in the deployment evidence.
+Required roles:
+
+- `medical_migrator` — deploy/CI only;
+- `medical_app` — request-runtime least privilege;
+- `medical_outbox_worker` — narrow outbox publication access;
+- `medical_idempotency_maintenance` — EXECUTE-only maintenance caller;
+- `medical_maintenance_owner` — non-runtime SECURITY DEFINER owner.
 
 ## Live privilege smoke
 
@@ -82,6 +190,32 @@ It validates at least:
 
 Any privilege-smoke failure blocks production medical enablement. Do not compensate by granting broader privileges. Fix the role/migration mismatch and rerun the full gate.
 
+## Gate B — Future production launch (DEFERRED)
+
+Gate B remains a future checklist. Completing Gate A does **not** authorize
+production medical traffic, production medical data storage, or Neon primary-branch
+deployment.
+
+Before production medical runtime is enabled, all of the following must be satisfied
+on the selected launch target:
+
+1. select exact production PostgreSQL provider and environment;
+2. define launch RPO/RTO targets;
+3. establish backup/PITR or equivalent and record retention;
+4. perform and record a restore drill or equivalent evidence;
+5. complete security/compliance review for launch markets;
+6. create required roles through approved administration;
+7. grant deploy-only database CREATE to `medical_migrator`;
+8. apply reviewed migrations `0000` and transactional `0001`;
+9. immediately revoke temporary migrator → maintenance-owner membership;
+10. run live privilege smoke PASS on the exact production target;
+11. configure request runtime with dedicated `medical_app` credential only;
+12. configure maintenance/outbox workers with dedicated credentials when implemented;
+13. explicitly authorize production medical traffic through product/feature gates;
+14. record deployment evidence and rollback/backup point.
+
+P13 remains authoritative for the broader disaster-recovery and production-hardening model.
+
 ## Rollback posture
 
 P9 rollback is configuration/traffic first, not destructive data rollback:
@@ -93,52 +227,21 @@ P9 rollback is configuration/traffic first, not destructive data rollback:
 5. repair privilege/configuration drift through a reviewed migration;
 6. do not drop the `medical` schema or purge user data as an operational rollback mechanism.
 
-## Backup / recovery gate
-
-Before production medical runtime is enabled, the owning environment must document and verify:
-
-- backup/PITR availability for the target Neon project;
-- named RPO and RTO targets;
-- a restore drill or equivalent evidence that the medical schema can be recovered;
-- separation of backup/recovery administration from request-runtime credentials.
-
-P13 remains authoritative for the broader disaster-recovery and production-hardening model.
-
-## Rehearsal evidence
-
-A disposable Neon branch `p9-prod-readiness-rehearsal` was created from the primary branch on 2026-08-21 and used only for deployment rehearsal.
-
-The rehearsal established:
-
-- `0000` requires deploy-only database CREATE for `medical_migrator`;
-- the original `0001` ordering could not transfer function ownership safely on real PostgreSQL because the new owner lacked schema CREATE and ownership-transfer role capability;
-- granting permanent CREATE to `medical_maintenance_owner` would violate least privilege, so the migration was corrected to grant it only transactionally for the ownership transfer;
-- temporary migrator membership in `medical_maintenance_owner` is required only for the transfer and must be revoked after deployment;
-- after the corrected sequence, observed effective privileges matched the intended model for `medical_app`, idempotency maintenance, and maintenance-owner schema CREATE denial.
-
-No changes were applied to the primary Neon branch during this rehearsal.
-
 ## Current environment observation
 
-During this closure wave, the existing Neon project `diabetes-universe-auth` was inspected read-only. Its current primary branch did not contain the `medical` schema or the P9 medical roles at the time of inspection.
+During this closure wave, the existing Neon project `diabetes-universe-auth` was
+inspected read-only. Its primary branch did not contain the `medical` schema or the
+P9 medical roles at the time of inspection.
 
-Therefore P9 code is merged, but live production medical persistence is **not deployed** to that current Neon primary branch. This is a deliberate blocker, not a reason to weaken the gate.
+That is expected and intentional:
 
-## Closure criteria
+- P9 source is merged and rehearsal-validated;
+- Neon Free remains development/rehearsal infrastructure only;
+- production medical persistence is **not deployed**;
+- production medical data is **not enabled**.
 
-P9 production-readiness closure requires all of the following:
+## Medical API baseline note
 
-- repository CI green on the exact closure HEAD;
-- P9 security/code re-audit with no unresolved blocking findings;
-- real target environment identified;
-- required roles created through approved administration;
-- deploy-only database CREATE granted to `medical_migrator`;
-- migrations `0000` and corrected transactional `0001` applied successfully;
-- temporary migrator → maintenance-owner membership revoked after `0001`;
-- live privilege smoke PASS on the exact deployed target;
-- runtime credential confirmed as `medical_app`-scoped rather than owner/migrator;
-- backup/PITR and recovery evidence recorded;
-- no public medical API route enabled as part of this closure PR;
-- no P10/P11/P12 runtime scope mixed into this gate.
-
-Until every criterion is satisfied, lifecycle status remains **foundation delivered — production readiness pending**.
+Gate A closure prepares the repository for a separate **Medical API implementation
+wave (P8 transport)**. Public HTTP routes, controllers, error mapping, rate limits,
+and contract tests are out of scope for this runbook gate and remain future work.

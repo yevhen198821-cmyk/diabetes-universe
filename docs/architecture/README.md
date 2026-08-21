@@ -89,7 +89,7 @@ future approved server paths; public medical API routes are not yet implemented.
 | P7                | [Backend medical data](backend/p7-backend-medical-data-architecture.md)                           | Approved                                                                                | N/A (architecture)                         |
 | P8                | [Medical API contracts](api/p8-medical-api-contracts.md)                                          | Approved                                                                                | Public API not implemented                 |
 | P9 design         | [Cloud medical persistence design](backend/p9-cloud-medical-persistence-implementation-design.md) | Approved                                                                                | N/A (architecture)                         |
-| P9 implementation | [Medical persistence foundation](../implementation/p9-medical-persistence-foundation.md)          | Foundation delivered; formal production readiness pending                               | Packages merged; no public routes          |
+| P9 implementation | [Medical persistence foundation](../implementation/p9-medical-persistence-foundation.md)          | Implementation complete; PostgreSQL rehearsal validated; production deployment deferred | Packages merged; no public routes          |
 | P10               | [Local data adoption](sync/p10-local-data-adoption-architecture.md)                               | Draft (PR #95 merged spec; approval closure pending)                                    | Not implemented                            |
 | P11               | [Offline sync](sync/p11-offline-sync-architecture.md)                                             | Approved ([closure record](sync/p11-approval-closure.md))                               | Not implemented                            |
 | P12               | [Conflict / revision / tombstone](sync/p12-conflict-revision-tombstone-architecture.md)           | Approved with clarifications ([audit closure](sync/p12-architecture-security-audit.md)) | Not implemented                            |
@@ -106,7 +106,8 @@ The repository does **not** currently provide product/runtime capabilities for:
 - public medical API transport and controllers;
 - P10 adoption runtime, P11 continuous sync runtime, P12 conflict/tombstone runtime;
 - medical outbox dispatcher / consumer;
-- complete production medical deployment controls (live Neon privilege smoke,
+- complete production medical launch controls (production PostgreSQL provider
+  selection, backup/PITR/RPO/RTO, live privilege smoke on launch target,
   P13 operational hardening implementation);
 - production AI runtime;
 - marketplace, community, or recipes product runtimes;
@@ -153,6 +154,7 @@ implementation gates, and product requirements.
 - [P8 — Medical API Contracts](api/p8-medical-api-contracts.md)
 - [P9 — Cloud Medical Persistence Implementation Design](backend/p9-cloud-medical-persistence-implementation-design.md)
 - [P9 — Medical Persistence Foundation Implementation](../implementation/p9-medical-persistence-foundation.md)
+- [P9 — Medical Persistence Readiness Runbook](../implementation/p9-production-readiness-runbook.md)
 - [P10 — Local Medical Data Adoption Architecture](sync/p10-local-data-adoption-architecture.md)
 - [P11 — Offline Sync Architecture](sync/p11-offline-sync-architecture.md) · [P11 approval closure](sync/p11-approval-closure.md)
 - [P12 — Conflict / Revision / Tombstone Architecture](sync/p12-conflict-revision-tombstone-architecture.md) · [P12 audit closure](sync/p12-architecture-security-audit.md)

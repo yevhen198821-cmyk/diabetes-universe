@@ -51,7 +51,8 @@ runtime behavior.
 - Continuous offline sync runtime (P11)
 - Conflict / tombstone runtime (P12)
 - Outbox dispatcher / consumer
-- Complete production medical deployment controls (live Neon privilege enforcement,
+- Complete production medical launch controls (production PostgreSQL provider
+  selection, backup/PITR/RPO/RTO, live privilege enforcement on launch target,
   P13 operational gates)
 - Production AI runtime
 - CGM, insulin pump, and wearable device integrations
