@@ -4,6 +4,7 @@ export interface MedicalEnvironment {
   readonly databaseMode: MedicalDatabaseMode;
   readonly databaseUrl?: string;
   readonly revisionTokenSecret: string;
+  readonly listCursorSecret: string;
   readonly idempotencyRetentionHours: number;
 }
 
@@ -26,10 +27,14 @@ export function resolveMedicalEnvironment(
     const revisionTokenSecret =
       readTrimmed(env.MEDICAL_REVISION_TOKEN_SECRET) ??
       'test-medical-revision-token-secret';
+    const listCursorSecret =
+      readTrimmed(env.MEDICAL_LIST_CURSOR_SECRET) ??
+      'test-medical-list-cursor-secret';
 
     return {
       databaseMode: 'pglite',
       revisionTokenSecret,
+      listCursorSecret,
       idempotencyRetentionHours: readRetentionHours(env),
     };
   }
@@ -47,10 +52,18 @@ export function resolveMedicalEnvironment(
     );
   }
 
+  const listCursorSecret = readTrimmed(env.MEDICAL_LIST_CURSOR_SECRET);
+  if (!listCursorSecret) {
+    throw new Error(
+      'MEDICAL_LIST_CURSOR_SECRET is required when MEDICAL_DATABASE_URL is configured.',
+    );
+  }
+
   return {
     databaseMode: 'postgres',
     databaseUrl,
     revisionTokenSecret,
+    listCursorSecret,
     idempotencyRetentionHours: readRetentionHours(env),
   };
 }

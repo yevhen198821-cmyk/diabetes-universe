@@ -47,4 +47,16 @@ export {
   validateRevisionTokenSecret,
   WeakRevisionTokenSecretError,
 } from './security/revision-token-secret';
+export {
+  createListCursorTokenService,
+  MalformedListCursorError,
+  InvalidListCursorError,
+  type ListCursorTokenService,
+  type ListCursorScope,
+  type ListCursorPosition,
+} from './security/list-cursor-token-service';
+export {
+  validateListCursorSecret,
+  WeakListCursorSecretError,
+} from './security/list-cursor-token-secret';
 export { purgeExpiredIdempotencyRecords } from './maintenance/purge-expired-idempotency';
