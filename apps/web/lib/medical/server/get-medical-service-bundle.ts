@@ -7,6 +7,7 @@ import {
 
 let cachedBundle: MedicalServiceBundle | null = null;
 let cachedEnvironmentKey: string | null = null;
+let bundleAccessCountForTests = 0;
 
 function environmentCacheKey(): string {
   const env = process.env;
@@ -21,6 +22,7 @@ function environmentCacheKey(): string {
 }
 
 export async function getMedicalServiceBundle(): Promise<MedicalServiceBundle> {
+  bundleAccessCountForTests += 1;
   const key = environmentCacheKey();
 
   if (cachedBundle && cachedEnvironmentKey === key) {
@@ -43,4 +45,9 @@ export async function resetMedicalServiceBundleForTests(): Promise<void> {
   }
   cachedBundle = null;
   cachedEnvironmentKey = null;
+  bundleAccessCountForTests = 0;
+}
+
+export function getMedicalServiceBundleAccessCountForTests(): number {
+  return bundleAccessCountForTests;
 }

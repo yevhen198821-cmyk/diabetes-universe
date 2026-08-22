@@ -6,6 +6,7 @@ import {
   MedicalRevisionConflictError,
   MedicalServiceUnavailableError,
 } from '@diabetes-universe/medical-domain';
+import type { AuthorizationScope } from '@diabetes-universe/medical-service/server';
 
 import {
   MEDICAL_API_VERSION,
@@ -19,6 +20,7 @@ import {
   medicalApiErrorResponse,
   medicalApiJsonResponse,
 } from './medical-api-error';
+import { beginMedicalApiRequest } from './medical-api-request-entry';
 import {
   getMedicalApiRateLimiter,
   setMedicalApiRateLimiterForTests,
@@ -54,8 +56,17 @@ function enforceRateLimit(
     path: new URL(request.url).pathname,
   } satisfies MedicalApiRateLimitInput);
 
-  if (decision.allowed) {
+  if (decision.outcome === 'allowed') {
     return null;
+  }
+
+  if (decision.outcome === 'backend_unavailable') {
+    return medicalApiErrorResponse(
+      503,
+      'SERVICE_UNAVAILABLE',
+      'The medical API is temporarily unavailable.',
+      correlationId,
+    );
   }
 
   const retryAfterSeconds = decision.retryAfterSeconds ?? 60;
@@ -71,21 +82,45 @@ function enforceRateLimit(
   );
 }
 
-export async function handleListMedicalEvents(
+async function prepareMedicalApiHandler(
   request: Request,
-): Promise<Response> {
-  const resolved = await resolveMedicalApiScope(request);
+): Promise<
+  | { ok: false; response: Response }
+  | { ok: true; scope: AuthorizationScope; correlationId: string }
+> {
+  const begun = beginMedicalApiRequest(request);
+  if (!begun.ok) {
+    return begun;
+  }
+
+  const resolved = await resolveMedicalApiScope(request, begun.value);
   if (!resolved.ok) {
-    return resolved.response;
+    return resolved;
   }
 
   const { scope } = resolved.value;
   const correlationId = scope.correlationId;
-  const rateLimited = enforceRateLimit(scope.accountId, request, correlationId);
-  if (rateLimited) {
-    return rateLimited;
+  const rateLimitResponse = enforceRateLimit(
+    scope.accountId,
+    request,
+    correlationId,
+  );
+  if (rateLimitResponse) {
+    return { ok: false, response: rateLimitResponse };
   }
 
+  return { ok: true, scope, correlationId };
+}
+
+export async function handleListMedicalEvents(
+  request: Request,
+): Promise<Response> {
+  const prepared = await prepareMedicalApiHandler(request);
+  if (!prepared.ok) {
+    return prepared.response;
+  }
+
+  const { scope, correlationId } = prepared;
   const url = new URL(request.url);
 
   try {
@@ -116,17 +151,12 @@ export async function handleListMedicalEvents(
 export async function handleCreateMedicalEvent(
   request: Request,
 ): Promise<Response> {
-  const resolved = await resolveMedicalApiScope(request);
-  if (!resolved.ok) {
-    return resolved.response;
+  const prepared = await prepareMedicalApiHandler(request);
+  if (!prepared.ok) {
+    return prepared.response;
   }
 
-  const { scope } = resolved.value;
-  const correlationId = scope.correlationId;
-  const rateLimited = enforceRateLimit(scope.accountId, request, correlationId);
-  if (rateLimited) {
-    return rateLimited;
-  }
+  const { scope, correlationId } = prepared;
 
   try {
     const rawBody = await readBoundedRequestBody(request);
@@ -160,17 +190,12 @@ export async function handleGetMedicalEvent(
   request: Request,
   resourceId: string,
 ): Promise<Response> {
-  const resolved = await resolveMedicalApiScope(request);
-  if (!resolved.ok) {
-    return resolved.response;
+  const prepared = await prepareMedicalApiHandler(request);
+  if (!prepared.ok) {
+    return prepared.response;
   }
 
-  const { scope } = resolved.value;
-  const correlationId = scope.correlationId;
-  const rateLimited = enforceRateLimit(scope.accountId, request, correlationId);
-  if (rateLimited) {
-    return rateLimited;
-  }
+  const { scope, correlationId } = prepared;
 
   try {
     validateResourceId(resourceId);
@@ -193,17 +218,12 @@ export async function handleUpdateMedicalEvent(
   request: Request,
   resourceId: string,
 ): Promise<Response> {
-  const resolved = await resolveMedicalApiScope(request);
-  if (!resolved.ok) {
-    return resolved.response;
+  const prepared = await prepareMedicalApiHandler(request);
+  if (!prepared.ok) {
+    return prepared.response;
   }
 
-  const { scope } = resolved.value;
-  const correlationId = scope.correlationId;
-  const rateLimited = enforceRateLimit(scope.accountId, request, correlationId);
-  if (rateLimited) {
-    return rateLimited;
-  }
+  const { scope, correlationId } = prepared;
 
   try {
     validateResourceId(resourceId);
@@ -235,17 +255,12 @@ export async function handleDeleteMedicalEvent(
   request: Request,
   resourceId: string,
 ): Promise<Response> {
-  const resolved = await resolveMedicalApiScope(request);
-  if (!resolved.ok) {
-    return resolved.response;
+  const prepared = await prepareMedicalApiHandler(request);
+  if (!prepared.ok) {
+    return prepared.response;
   }
 
-  const { scope } = resolved.value;
-  const correlationId = scope.correlationId;
-  const rateLimited = enforceRateLimit(scope.accountId, request, correlationId);
-  if (rateLimited) {
-    return rateLimited;
-  }
+  const { scope, correlationId } = prepared;
 
   try {
     validateResourceId(resourceId);

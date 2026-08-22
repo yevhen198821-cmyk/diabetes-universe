@@ -4,8 +4,11 @@ export interface MedicalApiRateLimitInput {
   readonly path: string;
 }
 
+export type MedicalApiRateLimitOutcome =
+  'allowed' | 'rate_limited' | 'backend_unavailable';
+
 export interface MedicalApiRateLimitDecision {
-  readonly allowed: boolean;
+  readonly outcome: MedicalApiRateLimitOutcome;
   readonly retryAfterSeconds?: number;
 }
 
@@ -19,13 +22,22 @@ const DEFAULT_RETRY_AFTER_SECONDS = 60;
 
 class PassthroughMedicalApiRateLimiter implements MedicalApiRateLimiter {
   check(): MedicalApiRateLimitDecision {
-    return { allowed: true };
+    return { outcome: 'allowed' };
   }
 }
 
-class FailClosedMedicalApiRateLimiter implements MedicalApiRateLimiter {
+class BackendUnavailableMedicalApiRateLimiter implements MedicalApiRateLimiter {
   check(): MedicalApiRateLimitDecision {
-    return { allowed: false, retryAfterSeconds: DEFAULT_RETRY_AFTER_SECONDS };
+    return { outcome: 'backend_unavailable' };
+  }
+}
+
+class FailClosedRateLimitedMedicalApiRateLimiter implements MedicalApiRateLimiter {
+  check(): MedicalApiRateLimitDecision {
+    return {
+      outcome: 'rate_limited',
+      retryAfterSeconds: DEFAULT_RETRY_AFTER_SECONDS,
+    };
   }
 }
 
@@ -53,16 +65,16 @@ class TestMedicalApiRateLimiter implements MedicalApiRateLimiter {
 
   check(input: MedicalApiRateLimitInput): MedicalApiRateLimitDecision {
     if (!this.blockedAccounts.has(input.accountId)) {
-      return { allowed: true };
+      return { outcome: 'allowed' };
     }
 
     const operations = this.blockedOperations.get(input.accountId);
     if (operations && operations.size > 0 && !operations.has(input.operation)) {
-      return { allowed: true };
+      return { outcome: 'allowed' };
     }
 
     return {
-      allowed: false,
+      outcome: 'rate_limited',
       retryAfterSeconds: DEFAULT_RETRY_AFTER_SECONDS,
     };
   }
@@ -71,6 +83,7 @@ class TestMedicalApiRateLimiter implements MedicalApiRateLimiter {
 let configuredRateLimiter: MedicalApiRateLimiter | null = null;
 let configuredMode: MedicalApiRateLimitMode | null = null;
 let testOverrideLimiter: MedicalApiRateLimiter | null = null;
+let productionRateLimitAdapter: MedicalApiRateLimiter | null = null;
 const testRateLimiter = new TestMedicalApiRateLimiter();
 
 export function resolveMedicalApiRateLimitMode(
@@ -90,6 +103,14 @@ export function resolveMedicalApiRateLimitMode(
   }
 
   return 'disabled';
+}
+
+export function registerMedicalApiRateLimitBackendAdapter(
+  adapter: MedicalApiRateLimiter | null,
+): void {
+  productionRateLimitAdapter = adapter;
+  configuredRateLimiter = null;
+  configuredMode = null;
 }
 
 export function getMedicalApiRateLimiter(
@@ -113,7 +134,20 @@ export function getMedicalApiRateLimiter(
   }
 
   if (mode === 'distributed') {
-    configuredRateLimiter = new FailClosedMedicalApiRateLimiter();
+    if (
+      isMedicalApiRateLimitProductionReady(env) &&
+      productionRateLimitAdapter
+    ) {
+      configuredRateLimiter = productionRateLimitAdapter;
+      return configuredRateLimiter;
+    }
+
+    if (isMedicalApiRateLimitProductionReady(env)) {
+      configuredRateLimiter = new BackendUnavailableMedicalApiRateLimiter();
+      return configuredRateLimiter;
+    }
+
+    configuredRateLimiter = new FailClosedRateLimitedMedicalApiRateLimiter();
     return configuredRateLimiter;
   }
 
@@ -145,7 +179,8 @@ export function blockMedicalApiRateLimitForTests(
 export function isMedicalApiRateLimitProductionReady(
   env: Record<string, string | undefined> = process.env,
 ): boolean {
-  return resolveMedicalApiRateLimitMode(env) === 'distributed'
-    ? Boolean(env.MEDICAL_RATE_LIMIT_BACKEND?.trim())
-    : false;
+  return (
+    resolveMedicalApiRateLimitMode(env) === 'distributed' &&
+    Boolean(env.MEDICAL_RATE_LIMIT_BACKEND?.trim())
+  );
 }

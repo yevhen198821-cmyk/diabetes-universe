@@ -13,10 +13,8 @@ import {
   getMedicalServiceBundle,
   resetMedicalServiceBundleForTests,
 } from './get-medical-service-bundle.ts';
-import {
-  CLIENT_REQUEST_ID_HEADER,
-  TEST_ACCOUNT_HEADER,
-} from './resolve-medical-api-scope.ts';
+import { CLIENT_REQUEST_ID_HEADER } from './medical-api-request-entry.ts';
+import { TEST_ACCOUNT_HEADER } from './resolve-medical-api-scope.ts';
 import {
   MEDICAL_EVENTS_BASE_PATH,
   MEDICAL_IDEMPOTENCY_HEADER,
@@ -84,7 +82,12 @@ async function createSampleEvent(
 }
 
 test.beforeEach(async () => {
+  process.env.NODE_ENV = 'test';
   process.env.MEDICAL_RATE_LIMIT_MODE = 'disabled';
+  delete process.env.MEDICAL_RATE_LIMIT_BACKEND;
+  delete process.env.MEDICAL_API_PRODUCTION_GATE;
+  delete process.env.MEDICAL_API_ENABLE_TEST_AUTH;
+  setMedicalApiRateLimiterForTests(null);
   await resetMedicalServiceBundleForTests();
 });
 
@@ -559,7 +562,7 @@ test('delete succeeds with matching If-Match', async () => {
 test('rate-limit returns stable 429 envelope with Retry-After', async (t) => {
   setMedicalApiRateLimiterForTests({
     check() {
-      return { allowed: false, retryAfterSeconds: 60 };
+      return { outcome: 'rate_limited', retryAfterSeconds: 60 };
     },
   });
   t.after(() => {
@@ -583,6 +586,34 @@ test('rate-limit returns stable 429 envelope with Retry-After', async (t) => {
   assert.equal(body.error.code, 'RATE_LIMITED');
   assert.match(body.error.correlationId, UUID_PATTERN);
   assert.ok(Number(response.headers.get('retry-after')) > 0);
+});
+
+test('rate-limit backend unavailable returns 503 not 429', async (t) => {
+  setMedicalApiRateLimiterForTests({
+    check() {
+      return { outcome: 'backend_unavailable' };
+    },
+  });
+  t.after(() => {
+    setMedicalApiRateLimiterForTests(null);
+  });
+
+  const response = await handleCreateMedicalEvent(
+    createRequest(medicalEventsUrl(), {
+      method: 'POST',
+      headers: {
+        ...authHeaders('acct-backend-down'),
+        [MEDICAL_IDEMPOTENCY_HEADER]: 'backend-down-key',
+        'content-type': 'application/json',
+      },
+      body: sampleCreateBody(),
+    }),
+  );
+
+  assert.equal(response.status, 503);
+  const body = await response.json();
+  assert.equal(body.error.code, 'SERVICE_UNAVAILABLE');
+  assert.equal(response.headers.get('retry-after'), null);
 });
 
 test('oversized payload returns REQUEST_TOO_LARGE without PHI echo', async () => {

@@ -108,19 +108,62 @@ Defined in `apps/web/lib/medical/server/medical-api-validation-bounds.ts`:
 
 These are transport safety bounds, not clinical treatment rules.
 
+## Production API readiness gate
+
+Central gate: `apps/web/lib/medical/server/medical-api-runtime-readiness.ts` and `medical-api-request-entry.ts`.
+
+Request order:
+
+1. server `correlationId` generation;
+2. production readiness gate (`beginMedicalApiRequest`);
+3. authentication/session;
+4. subject resolution;
+5. rate-limit decision;
+6. validation / service / persistence.
+
+Capabilities:
+
+| Capability                         | Meaning                                                                                                                            |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `AVAILABLE`                        | Production traffic allowed (`NODE_ENV=production` with `MEDICAL_RATE_LIMIT_MODE=distributed` and `MEDICAL_RATE_LIMIT_BACKEND` set) |
+| `UNAVAILABLE_MISSING_RATE_LIMITER` | Production or misconfigured distributed mode without approved backend                                                              |
+| `TEST_DEV_ONLY`                    | Non-production `disabled` or `test` modes                                                                                          |
+
+Production (`NODE_ENV=production`) without a configured distributed/shared rate limiter **must not serve medical traffic**. The gate returns `503 SERVICE_UNAVAILABLE` before authentication, subject provisioning, or persistence.
+
+Development/test may use `disabled` or `test` modes explicitly. Production never silently falls back to passthrough.
+
+Production enablement condition:
+
+```text
+NODE_ENV=production
+MEDICAL_RATE_LIMIT_MODE=distributed
+MEDICAL_RATE_LIMIT_BACKEND=<approved backend identifier>
+```
+
+Backend credentials (if required later) remain server-only placeholders — never `NEXT_PUBLIC_*`.
+
 ## Rate limiting architecture
 
 Pluggable limiter: `apps/web/lib/medical/server/medical-api-rate-limit.ts`
 
-| Mode                          | Behavior                                                      |
-| ----------------------------- | ------------------------------------------------------------- |
-| `disabled` (default)          | Allows all traffic; used for current implementation candidate |
-| `test` (`NODE_ENV=test` only) | Deterministic in-memory limiter for contract tests            |
-| `distributed`                 | Fail-closed until `MEDICAL_RATE_LIMIT_BACKEND` is configured  |
+| Mode                          | Non-production                                           | Production                                                     |
+| ----------------------------- | -------------------------------------------------------- | -------------------------------------------------------------- |
+| `disabled` (default)          | Passthrough allowed                                      | Gate blocks API (`503`)                                        |
+| `test` (`NODE_ENV=test` only) | Deterministic in-memory limiter                          | Treated as `distributed` (gate blocks unless production-ready) |
+| `distributed`                 | Requires backend identifier + adapter for limiter checks | Requires backend identifier; gate passes only when configured  |
 
-- exceeded limits return `429 RATE_LIMITED` with stable envelope and `Retry-After`;
-- no unsafe per-instance in-memory limiter is used in production mode;
-- **public production medical traffic must not be enabled until a shared/distributed limiter backend is configured and verified**.
+Limiter outcomes (after gate + auth):
+
+| Outcome                  | HTTP | Code                  | When                                                             |
+| ------------------------ | ---- | --------------------- | ---------------------------------------------------------------- |
+| Quota exceeded           | 429  | `RATE_LIMITED`        | Shared limiter rejects request; includes `Retry-After`           |
+| Backend unavailable      | 503  | `SERVICE_UNAVAILABLE` | Distributed mode configured but no registered production adapter |
+| Infrastructure transient | 503  | `SERVICE_UNAVAILABLE` | DB/connectivity failures during handler execution                |
+
+Do not confuse quota exceeded (`429`) with limiter/infrastructure unavailable (`503`).
+
+No fake distributed implementation is registered by default. `registerMedicalApiRateLimitBackendAdapter()` is the integration point for a future shared limiter.
 
 ## Error mapping
 
@@ -146,8 +189,20 @@ Low-level database/service exceptions are not exposed verbatim to clients.
 ## OpenAPI artifact
 
 - path: `docs/api/openapi/medical-v1.yaml`;
-- CI validation: `pnpm validate:openapi` (`scripts/validate-openapi.mjs` using `@apidevtools/swagger-parser`);
+- structural validation: `pnpm validate:openapi` (`scripts/validate-openapi.mjs`);
+- breaking-change validation: `pnpm validate:openapi:breaking` (`scripts/validate-openapi-breaking.mjs`);
+- diff engine: `scripts/lib/openapi-contract-diff.mjs` with fixture tests in `scripts/openapi-contract-diff.test.mjs`;
 - documents all five endpoints, auth requirement, idempotency/revision headers, pagination, schemas, and applicable error responses.
+
+### Breaking-change CI policy
+
+CI compares the PR OpenAPI document against the merge-base on `main` (via `git show` / `GITHUB_BASE_REF`).
+
+Detected breaking changes include: removed paths/methods, removed success responses, removed required headers/parameters, removed required fields, optional→required promotions, enum narrowing, incompatible type changes, and removed documented response properties.
+
+Additive changes pass: new endpoints, new optional properties, new optional response fields.
+
+**First baseline (PR #102):** `main` does not yet contain `docs/api/openapi/medical-v1.yaml`. The breaking-change step skips comparison and establishes this file as the initial baseline. Future PRs must not introduce breaking changes without an approved version migration.
 
 ## Security boundaries
 
@@ -176,10 +231,10 @@ Production-capable modes fail closed when required secrets are absent.
 - medical-persistence list cursor token tests;
 - medical-persistence idempotency purge/retention tests;
 - medical-service PGlite contract tests for CRUD, idempotency, pagination, and non-enumeration;
-- apps/web handler contract matrix (auth, cross-account 404, If-Match 428/400/412, body size, rate limit 429, correlation ID, cache headers, import boundary);
+- apps/web handler contract matrix including production fail-closed gate, 429 vs 503 rate-limit semantics, auth, cross-account 404, If-Match 428/400/412, body size, correlation ID, cache headers, import boundary;
 - bounded request-body reader tests (ASCII/multibyte/absent or misleading Content-Length);
 - validation bounds/depth tests;
-- OpenAPI syntactic validation in CI.
+- OpenAPI structural + breaking-change validation in CI.
 
 ## Explicit non-scope
 
@@ -193,10 +248,12 @@ Production-capable modes fail closed when required secrets are absent.
 
 ## Known remaining production blockers
 
-- shared/distributed rate limiter backend not configured (`MEDICAL_RATE_LIMIT_BACKEND`);
+- shared/distributed rate limiter **backend adapter** not implemented (`registerMedicalApiRateLimitBackendAdapter` integration point only);
 - production medical database deployment and launch gate remain separate;
 - dedicated authenticated Playwright HTTP E2E for medical routes;
 - architecture/security/code re-audit required before lifecycle promotion beyond implementation candidate.
+
+Note: production gate now blocks accidental medical API exposure without rate-limit configuration; registering a real distributed limiter adapter remains required before production medical traffic can succeed end-to-end.
 
 ## Lifecycle
 

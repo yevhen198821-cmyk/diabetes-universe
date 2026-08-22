@@ -3,19 +3,19 @@ import type { AuthorizationScope } from '@diabetes-universe/medical-service/serv
 
 import { getAuthenticatedPrincipal } from '../../auth/get-authenticated-principal';
 import { getMedicalServiceBundle } from './get-medical-service-bundle';
-import {
-  createCorrelationId,
-  medicalApiErrorResponse,
-} from './medical-api-error';
-import { MEDICAL_VALIDATION_BOUNDS } from './medical-api-validation-bounds';
+import type { MedicalApiRequestContext } from './medical-api-request-entry';
+import { medicalApiErrorResponse } from './medical-api-error';
 
 const TEST_ACCOUNT_HEADER = 'x-test-account-id';
-const CLIENT_REQUEST_ID_HEADER = 'x-request-id';
 
 function resolvePrincipalForRequest(
   request: Request,
 ): AuthenticatedPrincipal | null | undefined {
-  if (process.env.NODE_ENV !== 'test') {
+  const allowTestAuth =
+    process.env.NODE_ENV === 'test' ||
+    process.env.MEDICAL_API_ENABLE_TEST_AUTH === '1';
+
+  if (!allowTestAuth) {
     return undefined;
   }
 
@@ -36,27 +36,6 @@ function resolvePrincipalForRequest(
   };
 }
 
-function parseOptionalClientRequestId(request: Request): string | undefined {
-  const raw = request.headers.get(CLIENT_REQUEST_ID_HEADER);
-  if (raw === null) {
-    return undefined;
-  }
-
-  const trimmed = raw.trim();
-  if (trimmed.length === 0) {
-    return undefined;
-  }
-
-  if (
-    trimmed.length > MEDICAL_VALIDATION_BOUNDS.MAX_CLIENT_REQUEST_ID_LENGTH ||
-    !MEDICAL_VALIDATION_BOUNDS.MAX_CLIENT_REQUEST_ID_PATTERN.test(trimmed)
-  ) {
-    return undefined;
-  }
-
-  return trimmed;
-}
-
 export interface ResolvedMedicalApiScope {
   readonly principal: AuthenticatedPrincipal;
   readonly scope: AuthorizationScope;
@@ -65,12 +44,12 @@ export interface ResolvedMedicalApiScope {
 
 export async function resolveMedicalApiScope(
   request: Request,
+  requestContext: MedicalApiRequestContext,
 ): Promise<
   | { ok: true; value: ResolvedMedicalApiScope }
   | { ok: false; response: Response }
 > {
-  const correlationId = createCorrelationId();
-  const clientRequestId = parseOptionalClientRequestId(request);
+  const { correlationId, clientRequestId } = requestContext;
   const testPrincipal = resolvePrincipalForRequest(request);
   const principal =
     testPrincipal !== undefined
@@ -118,4 +97,4 @@ export async function resolveMedicalApiScope(
   };
 }
 
-export { TEST_ACCOUNT_HEADER, CLIENT_REQUEST_ID_HEADER };
+export { TEST_ACCOUNT_HEADER };

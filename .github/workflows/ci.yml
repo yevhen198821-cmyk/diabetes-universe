@@ -90,3 +90,9 @@ jobs:
 
       - name: Validate OpenAPI
         run: pnpm validate:openapi
+
+      - name: Validate OpenAPI breaking changes
+        run: pnpm validate:openapi:breaking
+
+      - name: Test OpenAPI contract diff
+        run: pnpm test:openapi-diff
