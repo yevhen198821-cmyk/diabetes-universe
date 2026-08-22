@@ -17,7 +17,7 @@
     "typecheck": "turbo run typecheck",
     "validate:openapi": "node scripts/validate-openapi.mjs",
     "validate:openapi:breaking": "node scripts/validate-openapi-breaking.mjs",
-    "test:openapi-diff": "node --test scripts/openapi-contract-diff.test.mjs"
+    "test:openapi-diff": "node --test scripts/openapi-contract-diff.test.mjs scripts/openapi-baseline-resolution.test.mjs"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^12.1.0",

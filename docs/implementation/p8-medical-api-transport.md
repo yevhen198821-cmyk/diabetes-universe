@@ -133,13 +133,16 @@ Production (`NODE_ENV=production`) without a configured distributed/shared rate 
 
 Development/test may use `disabled` or `test` modes explicitly. Production never silently falls back to passthrough.
 
-Production enablement condition:
+Production enablement requires all of:
 
 ```text
 NODE_ENV=production
 MEDICAL_RATE_LIMIT_MODE=distributed
 MEDICAL_RATE_LIMIT_BACKEND=<approved backend identifier>
+registered production distributed rate-limit adapter (registerMedicalApiRateLimitBackendAdapter)
 ```
+
+`isMedicalApiRateLimitAdapterRegistered()` is the narrow readiness signal exposed from the rate-limit module. Production `AVAILABLE` runtime capability is impossible without a registered adapter, even when env vars are configured. Missing adapter returns `503 SERVICE_UNAVAILABLE` at request entry before authentication, subject provisioning, or persistence.
 
 Backend credentials (if required later) remain server-only placeholders — never `NEXT_PUBLIC_*`.
 
@@ -147,11 +150,11 @@ Backend credentials (if required later) remain server-only placeholders — neve
 
 Pluggable limiter: `apps/web/lib/medical/server/medical-api-rate-limit.ts`
 
-| Mode                          | Non-production                                           | Production                                                     |
-| ----------------------------- | -------------------------------------------------------- | -------------------------------------------------------------- |
-| `disabled` (default)          | Passthrough allowed                                      | Gate blocks API (`503`)                                        |
-| `test` (`NODE_ENV=test` only) | Deterministic in-memory limiter                          | Treated as `distributed` (gate blocks unless production-ready) |
-| `distributed`                 | Requires backend identifier + adapter for limiter checks | Requires backend identifier; gate passes only when configured  |
+| Mode                          | Non-production                                           | Production                                                                                  |
+| ----------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `disabled` (default)          | Passthrough allowed                                      | Gate blocks API (`503`)                                                                     |
+| `test` (`NODE_ENV=test` only) | Deterministic in-memory limiter                          | Treated as `distributed` (gate blocks unless production-ready)                              |
+| `distributed`                 | Requires backend identifier + adapter for limiter checks | Requires backend identifier + registered adapter; gate passes only when both are configured |
 
 Limiter outcomes (after gate + auth):
 
@@ -196,13 +199,21 @@ Low-level database/service exceptions are not exposed verbatim to clients.
 
 ### Breaking-change CI policy
 
-CI compares the PR OpenAPI document against the merge-base on `main` (via `git show` / `GITHUB_BASE_REF`).
+CI checks out full history (`fetch-depth: 0`) and passes the exact PR base commit SHA via `OPENAPI_BASE_SHA` (`github.event.pull_request.base.sha` on pull requests, `github.event.before` on pushes to `main`).
+
+`scripts/lib/openapi-baseline-resolution.mjs` resolves the baseline deterministically:
+
+| Resolution             | Meaning                                                        | CI behavior                                     |
+| ---------------------- | -------------------------------------------------------------- | ----------------------------------------------- |
+| `BASELINE_FILE_ABSENT` | OpenAPI file genuinely does not exist at the exact base commit | First-baseline skip allowed (PR #102 on `main`) |
+| `BASELINE_AVAILABLE`   | Baseline loaded from base commit                               | Run breaking diff against head spec             |
+| `BASELINE_UNAVAILABLE` | Base commit or baseline file could not be retrieved            | **Fail closed** — CI must not silently skip     |
 
 Detected breaking changes include: removed paths/methods, removed success responses, removed required headers/parameters, removed required fields, optional→required promotions, enum narrowing, incompatible type changes, and removed documented response properties.
 
 Additive changes pass: new endpoints, new optional properties, new optional response fields.
 
-**First baseline (PR #102):** `main` does not yet contain `docs/api/openapi/medical-v1.yaml`. The breaking-change step skips comparison and establishes this file as the initial baseline. Future PRs must not introduce breaking changes without an approved version migration.
+**First baseline (PR #102):** `main` does not yet contain `docs/api/openapi/medical-v1.yaml` at the PR base commit. The breaking-change step skips comparison only when baseline resolution reports `BASELINE_FILE_ABSENT`. Once the baseline exists on `main`, inability to load it (shallow checkout, missing base SHA, git errors) is a CI failure — not a silent skip. Future PRs must not introduce breaking changes without an approved version migration.
 
 ## Security boundaries
 

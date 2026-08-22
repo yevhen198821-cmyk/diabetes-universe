@@ -9,7 +9,12 @@ import {
   getMedicalServiceBundleAccessCountForTests,
   resetMedicalServiceBundleForTests,
 } from './get-medical-service-bundle.ts';
-import { setMedicalApiRateLimiterForTests } from './medical-events-handlers.ts';
+import {
+  getMedicalApiRateLimiter,
+  resetMedicalApiRateLimiterForTests,
+  setMedicalApiRateLimiterForTests,
+} from './medical-api-rate-limit.ts';
+import { registerMedicalApiRateLimitBackendAdapter } from './medical-api-runtime-readiness.ts';
 import { TEST_ACCOUNT_HEADER } from './resolve-medical-api-scope.ts';
 import {
   MEDICAL_EVENTS_BASE_PATH,
@@ -50,6 +55,8 @@ test.afterEach(async () => {
   delete process.env.MEDICAL_DATABASE_MODE;
   process.env.MEDICAL_RATE_LIMIT_MODE = 'disabled';
   delete process.env.MEDICAL_RATE_LIMIT_BACKEND;
+  registerMedicalApiRateLimitBackendAdapter(null);
+  resetMedicalApiRateLimiterForTests();
   setMedicalApiRateLimiterForTests(null);
   await resetMedicalServiceBundleForTests();
 });
@@ -94,11 +101,13 @@ test('production with incomplete distributed config returns 503 before persisten
   assert.equal(getMedicalServiceBundleAccessCountForTests(), 0);
 });
 
-test('production with configured backend but no adapter returns 503 from limiter', async () => {
+test('production with configured backend but no adapter returns 503 before auth and persistence', async () => {
   process.env.MEDICAL_API_PRODUCTION_GATE = '1';
   process.env.MEDICAL_API_ENABLE_TEST_AUTH = '1';
   process.env.MEDICAL_RATE_LIMIT_MODE = 'distributed';
   process.env.MEDICAL_RATE_LIMIT_BACKEND = 'approved-backend';
+  registerMedicalApiRateLimitBackendAdapter(null);
+  resetMedicalApiRateLimiterForTests();
   setMedicalApiRateLimiterForTests(null);
 
   const response = await handleCreateMedicalEvent(
@@ -116,5 +125,58 @@ test('production with configured backend but no adapter returns 503 from limiter
   assert.equal(response.status, 503);
   const body = await response.json();
   assert.equal(body.error.code, 'SERVICE_UNAVAILABLE');
+  assert.equal(getMedicalServiceBundleAccessCountForTests(), 0);
   assert.doesNotMatch(JSON.stringify(body), /approved-backend/i);
+});
+
+test('production with registered adapter may proceed past readiness gate', async () => {
+  process.env.MEDICAL_API_PRODUCTION_GATE = '1';
+  process.env.MEDICAL_API_ENABLE_TEST_AUTH = '1';
+  process.env.MEDICAL_RATE_LIMIT_MODE = 'distributed';
+  process.env.MEDICAL_RATE_LIMIT_BACKEND = 'approved-backend';
+  registerMedicalApiRateLimitBackendAdapter({
+    check: () => ({ outcome: 'allowed' }),
+  });
+  resetMedicalApiRateLimiterForTests();
+  setMedicalApiRateLimiterForTests(null);
+
+  const response = await handleListMedicalEvents(
+    new Request(medicalEventsUrl(), {
+      headers: authHeaders('acct-prod-adapter-ready'),
+    }),
+  );
+
+  assert.notEqual(response.status, 503);
+});
+
+test('removing registered adapter returns production gate to unavailable', async () => {
+  process.env.MEDICAL_API_PRODUCTION_GATE = '1';
+  process.env.MEDICAL_API_ENABLE_TEST_AUTH = '1';
+  process.env.MEDICAL_RATE_LIMIT_MODE = 'distributed';
+  process.env.MEDICAL_RATE_LIMIT_BACKEND = 'approved-backend';
+
+  registerMedicalApiRateLimitBackendAdapter({
+    check: () => ({ outcome: 'allowed' }),
+  });
+  resetMedicalApiRateLimiterForTests();
+
+  const allowed = await handleListMedicalEvents(
+    new Request(medicalEventsUrl(), {
+      headers: authHeaders('acct-prod-adapter-removed'),
+    }),
+  );
+  assert.notEqual(allowed.status, 503);
+
+  registerMedicalApiRateLimitBackendAdapter(null);
+  resetMedicalApiRateLimiterForTests();
+  await resetMedicalServiceBundleForTests();
+
+  const blocked = await handleListMedicalEvents(
+    new Request(medicalEventsUrl(), {
+      headers: authHeaders('acct-prod-adapter-removed'),
+    }),
+  );
+
+  assert.equal(blocked.status, 503);
+  assert.equal(getMedicalServiceBundleAccessCountForTests(), 0);
 });

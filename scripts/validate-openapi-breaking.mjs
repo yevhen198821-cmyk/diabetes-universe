@@ -1,42 +1,24 @@
-import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import {
+  BASELINE_RESOLUTION,
+  resolveOpenApiBaseline,
+} from './lib/openapi-baseline-resolution.mjs';
 import { findOpenApiBreakingChanges } from './lib/openapi-contract-diff.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SPEC_RELATIVE_PATH = 'docs/api/openapi/medical-v1.yaml';
 const HEAD_SPEC_PATH = join(ROOT, SPEC_RELATIVE_PATH);
 
-function readBaseSpecFromGit(baseRef) {
-  try {
-    return execFileSync('git', ['show', `${baseRef}:${SPEC_RELATIVE_PATH}`], {
-      cwd: ROOT,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-  } catch {
-    return null;
-  }
-}
-
-function resolveBaseRef() {
-  const candidates = [
+function resolveFallbackRefs() {
+  return [
     process.env.GITHUB_BASE_REF,
     process.env.BASE_REF,
     'origin/main',
     'main',
-  ].filter(Boolean);
-
-  for (const candidate of candidates) {
-    const source = readBaseSpecFromGit(candidate);
-    if (source) {
-      return { baseRef: candidate, source };
-    }
-  }
-
-  return { baseRef: null, source: null };
+  ];
 }
 
 async function main() {
@@ -45,16 +27,31 @@ async function main() {
   }
 
   const headSource = readFileSync(HEAD_SPEC_PATH, 'utf8');
-  const { baseRef, source: baseSource } = resolveBaseRef();
+  const resolution = resolveOpenApiBaseline({
+    cwd: ROOT,
+    specRelativePath: SPEC_RELATIVE_PATH,
+    explicitBaseSha: process.env.OPENAPI_BASE_SHA,
+    fallbackRefs: resolveFallbackRefs(),
+  });
 
-  if (!baseSource) {
+  if (resolution.status === BASELINE_RESOLUTION.BASELINE_FILE_ABSENT) {
     console.log(
-      `OpenAPI breaking-change check skipped: no baseline found on base ref (${baseRef ?? 'none'}). Establishing first baseline from ${SPEC_RELATIVE_PATH}.`,
+      `OpenAPI breaking-change check skipped: baseline file absent at ${resolution.baseRef}. Establishing first baseline from ${SPEC_RELATIVE_PATH}.`,
     );
     return;
   }
 
-  const result = await findOpenApiBreakingChanges(baseSource, headSource);
+  if (resolution.status === BASELINE_RESOLUTION.BASELINE_UNAVAILABLE) {
+    throw new Error(
+      resolution.reason ??
+        'OpenAPI baseline is unavailable and breaking-change validation cannot proceed.',
+    );
+  }
+
+  const result = await findOpenApiBreakingChanges(
+    resolution.source,
+    headSource,
+  );
   if (result.breaking) {
     console.error('OpenAPI breaking changes detected against baseline:');
     for (const change of result.changes) {
@@ -65,7 +62,7 @@ async function main() {
   }
 
   console.log(
-    `OpenAPI breaking-change validation passed against baseline ${baseRef}.`,
+    `OpenAPI breaking-change validation passed against baseline ${resolution.baseRef}.`,
   );
 }
 

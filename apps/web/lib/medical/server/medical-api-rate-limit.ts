@@ -113,6 +113,10 @@ export function registerMedicalApiRateLimitBackendAdapter(
   configuredMode = null;
 }
 
+export function isMedicalApiRateLimitAdapterRegistered(): boolean {
+  return productionRateLimitAdapter !== null;
+}
+
 export function getMedicalApiRateLimiter(
   env: Record<string, string | undefined> = process.env,
 ): MedicalApiRateLimiter {

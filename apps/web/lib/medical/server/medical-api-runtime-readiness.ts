@@ -1,6 +1,13 @@
 import {
+  isMedicalApiRateLimitAdapterRegistered,
   isMedicalApiRateLimitProductionReady,
+  registerMedicalApiRateLimitBackendAdapter,
   resolveMedicalApiRateLimitMode,
+} from './medical-api-rate-limit';
+
+export {
+  isMedicalApiRateLimitAdapterRegistered,
+  registerMedicalApiRateLimitBackendAdapter,
 } from './medical-api-rate-limit';
 
 export type MedicalApiRuntimeCapability =
@@ -17,9 +24,12 @@ export function resolveMedicalApiRuntimeCapability(
 ): MedicalApiRuntimeCapability {
   const mode = resolveMedicalApiRateLimitMode(env);
   const productionReady = isMedicalApiRateLimitProductionReady(env);
+  const adapterRegistered = isMedicalApiRateLimitAdapterRegistered();
 
   if (isProductionRuntime(env)) {
-    return productionReady ? 'AVAILABLE' : 'UNAVAILABLE_MISSING_RATE_LIMITER';
+    return productionReady && adapterRegistered
+      ? 'AVAILABLE'
+      : 'UNAVAILABLE_MISSING_RATE_LIMITER';
   }
 
   if (mode === 'disabled' || mode === 'test') {

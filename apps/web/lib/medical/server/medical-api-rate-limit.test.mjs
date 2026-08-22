@@ -11,7 +11,9 @@ import {
   resolveMedicalApiRateLimitMode,
 } from './medical-api-rate-limit.ts';
 import {
+  isMedicalApiRateLimitAdapterRegistered,
   isMedicalApiProductionTrafficAllowed,
+  registerMedicalApiRateLimitBackendAdapter,
   resolveMedicalApiRuntimeCapability,
 } from './medical-api-runtime-readiness.ts';
 
@@ -21,6 +23,7 @@ test.afterEach(() => {
   delete process.env.MEDICAL_RATE_LIMIT_MODE;
   delete process.env.MEDICAL_RATE_LIMIT_BACKEND;
   delete process.env.NODE_ENV;
+  registerMedicalApiRateLimitBackendAdapter(null);
   resetMedicalApiRateLimiterForTests();
 });
 
@@ -43,15 +46,55 @@ test('production without distributed backend is unavailable', () => {
   );
 });
 
-test('production with distributed backend configured is available', () => {
+test('production with distributed backend but no adapter is unavailable', () => {
   const env = {
     NODE_ENV: 'production',
     MEDICAL_RATE_LIMIT_MODE: 'distributed',
     MEDICAL_RATE_LIMIT_BACKEND: 'redis-cluster',
   };
 
+  assert.equal(isMedicalApiRateLimitAdapterRegistered(), false);
+  assert.equal(
+    resolveMedicalApiRuntimeCapability(env),
+    'UNAVAILABLE_MISSING_RATE_LIMITER',
+  );
+  assert.equal(isMedicalApiProductionTrafficAllowed(env), false);
+});
+
+test('production with distributed backend and registered adapter is available', () => {
+  const env = {
+    NODE_ENV: 'production',
+    MEDICAL_RATE_LIMIT_MODE: 'distributed',
+    MEDICAL_RATE_LIMIT_BACKEND: 'redis-cluster',
+  };
+
+  registerMedicalApiRateLimitBackendAdapter({
+    check: () => ({ outcome: 'allowed' }),
+  });
+
+  assert.equal(isMedicalApiRateLimitAdapterRegistered(), true);
   assert.equal(resolveMedicalApiRuntimeCapability(env), 'AVAILABLE');
   assert.equal(isMedicalApiProductionTrafficAllowed(env), true);
+});
+
+test('unregistering production adapter returns unavailable state', () => {
+  const env = {
+    NODE_ENV: 'production',
+    MEDICAL_RATE_LIMIT_MODE: 'distributed',
+    MEDICAL_RATE_LIMIT_BACKEND: 'redis-cluster',
+  };
+
+  registerMedicalApiRateLimitBackendAdapter({
+    check: () => ({ outcome: 'allowed' }),
+  });
+  assert.equal(resolveMedicalApiRuntimeCapability(env), 'AVAILABLE');
+
+  registerMedicalApiRateLimitBackendAdapter(null);
+  assert.equal(isMedicalApiRateLimitAdapterRegistered(), false);
+  assert.equal(
+    resolveMedicalApiRuntimeCapability(env),
+    'UNAVAILABLE_MISSING_RATE_LIMITER',
+  );
 });
 
 test('development disabled mode is test/dev only', () => {
