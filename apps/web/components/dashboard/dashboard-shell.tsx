@@ -6,6 +6,7 @@ export interface DashboardShellProps {
   readonly header: ReactNode;
   readonly lastGlucose: ReactNode;
   readonly nextAction: ReactNode;
+  readonly quickActions?: ReactNode;
   readonly recentEvents: ReactNode;
 }
 
@@ -15,17 +16,23 @@ export function DashboardShell({
   header,
   lastGlucose,
   nextAction,
+  quickActions,
   recentEvents,
 }: DashboardShellProps) {
   return (
-    <div className="bg-background text-text-primary min-h-screen">
+    <div className="bg-background text-text-primary relative min-h-screen overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[34rem] bg-[radial-gradient(circle_at_12%_12%,rgba(45,212,191,0.16),transparent_30%),radial-gradient(circle_at_88%_8%,rgba(251,146,60,0.16),transparent_32%),radial-gradient(circle_at_58%_18%,rgba(167,139,250,0.12),transparent_30%)] dark:opacity-40"
+      />
       {header}
       <main
-        className="mx-auto grid max-w-6xl grid-cols-1 gap-4 py-6 pr-[max(1rem,env(safe-area-inset-right))] pb-[calc(6rem+env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] sm:grid-cols-2 sm:gap-5 sm:py-8 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:grid-cols-12 lg:gap-6 lg:pb-10"
+        className="relative mx-auto grid max-w-6xl grid-cols-1 gap-4 py-5 pr-[max(1rem,env(safe-area-inset-right))] pb-[calc(6.5rem+env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] sm:grid-cols-2 sm:gap-5 sm:py-7 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:grid-cols-12 lg:gap-6 lg:py-8 lg:pb-12"
         id="main-content"
       >
         {lastGlucose}
         {daySummary}
+        {quickActions}
         {nextAction}
         {recentEvents}
         {children}
