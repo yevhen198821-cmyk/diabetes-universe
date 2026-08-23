@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { selectDashboardRecentEvents } from '../../components/dashboard/dashboard-recent-events-model.ts';
+import { formatTimelineGlucoseDisplayValue } from '../timeline/presentation/index.ts';
 import { liftLegacyTestFixtures } from '../timeline/testing/lift-legacy-test-fixtures.ts';
 import { createTestTimelinePresentationDependencies } from '../timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import { deriveDashboardQuickAddBlocks } from './dashboard-quick-add-integration-model.ts';
@@ -238,4 +239,160 @@ test('derives recent event sources that can be sorted by latest event time', () 
     selected.map((event) => event.id),
     ['insulin-1800', 'nutrition-0820', 'medication-0730'],
   );
+});
+
+test('today glucose metric ignores yesterday measurement when no glucose exists today', () => {
+  const blocks = deriveDashboardQuickAddBlocks(
+    {
+      events: liftLegacyTestFixtures([
+        {
+          context: 'Yesterday',
+          dateTime: '2026-08-01T08:00:00.000Z',
+          id: 'glucose-yesterday',
+          kind: 'glucose',
+          title: 'Glucose',
+          value: '5.0 mmol/L',
+        },
+      ]),
+    },
+    {
+      formatDaySummaryDisplayDate,
+      formatLastGlucoseDisplayTime: formatUtcShortTime,
+      referenceTime,
+      timeZone: 'UTC',
+      presentationDependencies,
+    },
+  );
+
+  assert.equal(blocks.lastGlucose?.event.id, 'glucose-yesterday');
+  assert.match(
+    formatTimelineGlucoseDisplayValue(
+      blocks.lastGlucose.event,
+      presentationDependencies,
+    ),
+    /5 mmol\/L/,
+  );
+  assert.equal(blocks.daySummary?.glucoseMeasurements, 0);
+  assert.equal(blocks.daySummary?.latestTodayGlucoseDisplay, null);
+  assert.equal(blocks.daySummary?.latestTodayGlucoseDisplayTime, null);
+});
+
+test('today glucose metric uses today measurement when yesterday and today both exist', () => {
+  const blocks = deriveDashboardQuickAddBlocks(
+    {
+      events: liftLegacyTestFixtures([
+        {
+          context: 'Yesterday',
+          dateTime: '2026-08-01T08:00:00.000Z',
+          id: 'glucose-yesterday',
+          kind: 'glucose',
+          title: 'Glucose',
+          value: '5.0 mmol/L',
+        },
+        {
+          context: 'Today',
+          dateTime: '2026-08-02T07:15:00.000Z',
+          id: 'glucose-today',
+          kind: 'glucose',
+          title: 'Glucose',
+          value: '6.4 mmol/L',
+        },
+      ]),
+    },
+    {
+      formatDaySummaryDisplayDate,
+      formatLastGlucoseDisplayTime: formatUtcShortTime,
+      referenceTime,
+      timeZone: 'UTC',
+      presentationDependencies,
+    },
+  );
+
+  assert.equal(blocks.lastGlucose?.event.id, 'glucose-today');
+  assert.match(
+    blocks.daySummary?.latestTodayGlucoseDisplay ?? '',
+    /6\.4 mmol\/L/,
+  );
+  assert.equal(blocks.daySummary?.latestTodayGlucoseDisplayTime, '07:15');
+  assert.equal(blocks.daySummary?.glucoseMeasurements, 1);
+});
+
+test('today glucose metric uses the latest glucose event from today only', () => {
+  const blocks = deriveDashboardQuickAddBlocks(
+    {
+      events: liftLegacyTestFixtures([
+        {
+          context: 'Earlier today',
+          dateTime: '2026-08-02T07:15:00.000Z',
+          id: 'glucose-0715',
+          kind: 'glucose',
+          title: 'Glucose',
+          value: '7.3 mmol/L',
+        },
+        {
+          context: 'Later today',
+          dateTime: '2026-08-02T08:00:00.000Z',
+          id: 'glucose-0800',
+          kind: 'glucose',
+          title: 'Glucose',
+          value: '6.4 mmol/L',
+        },
+      ]),
+    },
+    {
+      formatDaySummaryDisplayDate,
+      formatLastGlucoseDisplayTime: formatUtcShortTime,
+      referenceTime,
+      timeZone: 'UTC',
+      presentationDependencies,
+    },
+  );
+
+  assert.equal(blocks.lastGlucose?.event.id, 'glucose-0800');
+  assert.match(
+    blocks.daySummary?.latestTodayGlucoseDisplay ?? '',
+    /6\.4 mmol\/L/,
+  );
+  assert.equal(blocks.daySummary?.latestTodayGlucoseDisplayTime, '08:00');
+  assert.equal(blocks.daySummary?.glucoseMeasurements, 2);
+});
+
+test('today glucose metric respects timezone boundaries for local day membership', () => {
+  const blocks = deriveDashboardQuickAddBlocks(
+    {
+      events: liftLegacyTestFixtures([
+        {
+          context: 'Previous local day in Tokyo',
+          dateTime: '2026-08-01T14:00:00.000Z',
+          id: 'glucose-previous-local-day',
+          kind: 'glucose',
+          title: 'Glucose',
+          value: '5.0 mmol/L',
+        },
+        {
+          context: 'Current local day in Tokyo',
+          dateTime: '2026-08-02T01:30:00.000Z',
+          id: 'glucose-today-tokyo',
+          kind: 'glucose',
+          title: 'Glucose',
+          value: '6.4 mmol/L',
+        },
+      ]),
+    },
+    {
+      formatDaySummaryDisplayDate,
+      formatLastGlucoseDisplayTime: formatUtcShortTime,
+      referenceTime: new Date('2026-08-02T12:00:00.000Z'),
+      timeZone: 'Asia/Tokyo',
+      presentationDependencies,
+    },
+  );
+
+  assert.equal(blocks.lastGlucose?.event.id, 'glucose-today-tokyo');
+  assert.match(
+    blocks.daySummary?.latestTodayGlucoseDisplay ?? '',
+    /6\.4 mmol\/L/,
+  );
+  assert.equal(blocks.daySummary?.latestTodayGlucoseDisplayTime, '01:30');
+  assert.equal(blocks.daySummary?.glucoseMeasurements, 1);
 });

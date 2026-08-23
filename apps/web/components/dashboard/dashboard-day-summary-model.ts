@@ -4,8 +4,8 @@ export interface DashboardDaySummaryData {
   readonly dayDate: string;
   readonly displayDayLabel: string;
   readonly glucoseMeasurements: number;
-  readonly latestGlucoseDisplay: string | null;
-  readonly latestGlucoseDisplayTime: string | null;
+  readonly latestTodayGlucoseDisplay: string | null;
+  readonly latestTodayGlucoseDisplayTime: string | null;
   readonly medicationDoses: number;
   readonly totalActivitySeconds: number;
   readonly totalCarbohydrateGrams: number;
@@ -90,9 +90,10 @@ function normalizeReadySummary(
 ): DashboardDaySummaryData | null {
   const dayDate = summary.dayDate.trim();
   const displayDayLabel = summary.displayDayLabel.trim();
-  const latestGlucoseDisplay = summary.latestGlucoseDisplay?.trim() || null;
-  const latestGlucoseDisplayTime =
-    summary.latestGlucoseDisplayTime?.trim() || null;
+  const latestTodayGlucoseDisplay =
+    summary.latestTodayGlucoseDisplay?.trim() || null;
+  const latestTodayGlucoseDisplayTime =
+    summary.latestTodayGlucoseDisplayTime?.trim() || null;
 
   if (
     !isValidDayDate(dayDate) ||
@@ -110,8 +111,8 @@ function normalizeReadySummary(
     dayDate,
     displayDayLabel,
     glucoseMeasurements: summary.glucoseMeasurements,
-    latestGlucoseDisplay,
-    latestGlucoseDisplayTime,
+    latestTodayGlucoseDisplay,
+    latestTodayGlucoseDisplayTime,
     medicationDoses: summary.medicationDoses,
     totalActivitySeconds: summary.totalActivitySeconds,
     totalCarbohydrateGrams: summary.totalCarbohydrateGrams,
@@ -127,7 +128,7 @@ function createReadyMetrics(
   return [
     {
       label: labels.glucose,
-      secondaryText: summary.latestGlucoseDisplayTime,
+      secondaryText: summary.latestTodayGlucoseDisplayTime,
       value: formattedMetrics.glucose,
     },
     {

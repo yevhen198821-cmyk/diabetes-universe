@@ -140,7 +140,7 @@ function createFormattedMetrics(
   const activityMinutes = Math.floor(summary.summary.totalActivitySeconds / 60);
 
   return {
-    glucose: summary.summary.latestGlucoseDisplay ?? '—',
+    glucose: summary.summary.latestTodayGlucoseDisplay ?? '—',
     totalActivity: formatter.formatDuration({ minutes: activityMinutes }),
     totalCarbohydrates: `${formattedCarbs} ${labels.units.compactMassG}`,
     totalInsulin: `${formattedInsulin} ${labels.units.compactInsulinDose}`,

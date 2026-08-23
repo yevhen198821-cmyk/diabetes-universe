@@ -20,8 +20,8 @@ export interface DashboardDerivedDaySummary {
   readonly dayDate: string;
   readonly displayDayLabel: string;
   readonly glucoseMeasurements: number;
-  readonly latestGlucoseDisplay: string | null;
-  readonly latestGlucoseDisplayTime: string | null;
+  readonly latestTodayGlucoseDisplay: string | null;
+  readonly latestTodayGlucoseDisplayTime: string | null;
   readonly medicationDoses: number;
   readonly totalActivitySeconds: number;
   readonly totalCarbohydrateGrams: number;
@@ -155,24 +155,24 @@ function deriveDaySummary(
     referenceTime,
     timeZone,
   );
-  const latestGlucose = getLatestGlucoseEvent(events);
-  let latestGlucoseDisplay: string | null = null;
-  let latestGlucoseDisplayTime: string | null = null;
+  const latestTodayGlucose = getLatestGlucoseEvent(todayEvents);
+  let latestTodayGlucoseDisplay: string | null = null;
+  let latestTodayGlucoseDisplayTime: string | null = null;
 
-  if (latestGlucose && presentationDependencies) {
+  if (latestTodayGlucose && presentationDependencies) {
     const display = formatTimelineGlucoseDisplayValue(
-      latestGlucose,
+      latestTodayGlucose,
       presentationDependencies,
     ).trim();
 
-    latestGlucoseDisplay = display.length > 0 ? display : null;
+    latestTodayGlucoseDisplay = display.length > 0 ? display : null;
 
     if (formatLastGlucoseDisplayTime) {
       const displayTime = formatLastGlucoseDisplayTime(
-        latestGlucose.occurredAt,
+        latestTodayGlucose.occurredAt,
       ).trim();
 
-      latestGlucoseDisplayTime =
+      latestTodayGlucoseDisplayTime =
         displayTime.length > 0 && displayTime !== '--:--' ? displayTime : null;
     }
   }
@@ -181,8 +181,8 @@ function deriveDaySummary(
     dayDate: dayLabel.dayDate,
     displayDayLabel: dayLabel.displayDayLabel,
     glucoseMeasurements,
-    latestGlucoseDisplay,
-    latestGlucoseDisplayTime,
+    latestTodayGlucoseDisplay,
+    latestTodayGlucoseDisplayTime,
     medicationDoses,
     totalActivitySeconds,
     totalCarbohydrateGrams,
