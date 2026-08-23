@@ -14,8 +14,12 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
     page.getByRole('heading', { name: 'Last glucose' }),
   ).toBeVisible();
   await expect(page.getByText('Последняя глюкоза')).toHaveCount(0);
-  await expect(lastGlucoseRegion.getByText('7.3', { exact: true })).toBeVisible();
-  await expect(lastGlucoseRegion.getByText('mmol/L', { exact: true })).toBeVisible();
+  await expect(
+    lastGlucoseRegion.getByText('7.3', { exact: true }),
+  ).toBeVisible();
+  await expect(
+    lastGlucoseRegion.getByText('mmol/L', { exact: true }),
+  ).toBeVisible();
   await expect(lastGlucoseRegion.locator('time')).toBeVisible();
 
   await page.getByRole('button', { name: 'Add event' }).click();
@@ -25,7 +29,9 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   await page.getByLabel('Уровень глюкозы').fill('7,7');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
-  await expect(lastGlucoseRegion.getByText('7.7', { exact: true })).toBeVisible();
+  await expect(
+    lastGlucoseRegion.getByText('7.7', { exact: true }),
+  ).toBeVisible();
 
   await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
