@@ -137,6 +137,9 @@
 ## UX and UI
 
 - [UX Overview](ux/README.md)
+- [Dashboard + Timeline Current-State Audit](ux/dashboard-timeline-current-state-audit.md) — Wave 1 audit (2026-08-23)
+- [Dashboard + Timeline Component Map](ux/dashboard-timeline-component-map.md)
+- [UX/UI Wave 1 Plan](ux/ux-ui-wave-1-plan.md)
 - [UI Overview](ui/README.md)
 - [Dashboard Layout UI](ui/dashboard/layout.md)
 - [Dashboard Header UI](ui/dashboard/header.md)
