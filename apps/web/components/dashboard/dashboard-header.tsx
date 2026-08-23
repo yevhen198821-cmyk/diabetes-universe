@@ -5,7 +5,7 @@ import { Plus, UserRound } from 'lucide-react';
 import Image from 'next/image';
 import { useMemo, useState, type ReactNode, type RefObject } from 'react';
 
-import { BrandSymbol } from '../brand/brand-symbol';
+import { DashboardBrandMark } from './dashboard-brand-mark';
 
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
@@ -136,52 +136,39 @@ export function DashboardHeader({
     date: headerDate,
     labels,
   });
-  const dateContent = viewModel.dateLabel ?? viewModel.dateUnavailableLabel;
 
   return (
     <header
       aria-busy={viewModel.isLoading}
       className="relative z-30 pt-[env(safe-area-inset-top)]"
     >
-      <div className="mx-auto grid min-h-20 max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-4 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-24 lg:py-5">
+      <div className="mx-auto flex min-h-[4.25rem] max-w-6xl items-center justify-between gap-3 py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:min-h-20 sm:py-4 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-24 lg:py-5">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-teal-400 via-cyan-400 to-blue-500 shadow-[0_12px_28px_rgba(14,165,233,0.24)] [&_svg]:drop-shadow-sm">
-            <BrandSymbol />
-          </span>
+          <DashboardBrandMark />
           <div className="min-w-0">
-            <h1 className="truncate text-lg font-extrabold tracking-tight text-slate-950 sm:text-xl lg:text-2xl dark:text-white">
+            <h1 className="truncate text-base font-extrabold tracking-tight text-[#1e3a5f] sm:text-xl lg:text-2xl dark:text-white">
               {viewModel.brandName}
             </h1>
             <p className="sr-only">{viewModel.productName}</p>
-            <p className="mt-0.5 hidden text-xs font-medium text-slate-500 sm:block dark:text-slate-400">
-              {dateContent}
-            </p>
           </div>
         </div>
 
-        {viewModel.isLoading ? (
-          <span
-            aria-hidden="true"
-            className="col-span-2 row-start-2 h-5 w-48 max-w-full animate-pulse rounded bg-white/70 motion-reduce:animate-none sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center dark:bg-slate-800"
-          />
-        ) : viewModel.dateLabel && viewModel.dateTime ? (
-          <time
-            aria-label={viewModel.currentDateAriaLabel ?? undefined}
-            className="col-span-2 row-start-2 min-w-0 rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm backdrop-blur sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center lg:text-sm dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-300"
-            dateTime={viewModel.dateTime}
-          >
-            {viewModel.dateLabel}
-          </time>
-        ) : (
-          <span
-            className="text-text-secondary col-span-2 row-start-2 min-w-0 text-sm sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center"
-            role="status"
-          >
-            {dateContent}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {viewModel.isLoading ? (
+            <span
+              aria-hidden="true"
+              className="hidden h-5 w-40 animate-pulse rounded bg-white/70 motion-reduce:animate-none lg:block dark:bg-slate-800"
+            />
+          ) : viewModel.dateLabel && viewModel.dateTime ? (
+            <time
+              aria-label={viewModel.currentDateAriaLabel ?? undefined}
+              className="hidden min-w-0 rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm backdrop-blur lg:inline-flex dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-300"
+              dateTime={viewModel.dateTime}
+            >
+              {viewModel.dateLabel}
+            </time>
+          ) : null}
 
-        <div className="col-start-2 row-start-1 flex items-center gap-2 sm:col-start-3">
           <Button
             aria-label={viewModel.addEventLabel}
             className={`${desktopActionClassName} border-0 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 text-white shadow-[0_10px_24px_rgba(6,182,212,0.22)] hover:brightness-105`}
@@ -211,7 +198,7 @@ export function DashboardHeader({
 
         {viewModel.isError ? (
           <p
-            className="text-status-danger col-span-full m-0 text-xs font-medium"
+            className="text-status-danger absolute inset-x-4 bottom-1 m-0 text-xs font-medium"
             role="status"
           >
             {viewModel.errorMessage}

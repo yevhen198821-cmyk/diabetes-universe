@@ -25,22 +25,44 @@ function HeroScenery() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 overflow-hidden"
       >
-        <div className="absolute bottom-0 -left-10 h-32 w-[120%] rounded-[50%] bg-gradient-to-r from-teal-300/35 via-cyan-200/25 to-blue-400/30 blur-[1px]" />
-        <div className="absolute bottom-8 left-[8%] h-16 w-24 rotate-[-8deg] rounded-full bg-emerald-300/25 blur-sm" />
-        <div className="absolute bottom-10 left-[28%] h-24 w-32 rotate-[6deg] rounded-full bg-teal-400/20 blur-sm" />
-        <div className="absolute right-[18%] bottom-6 h-20 w-28 rotate-[-4deg] rounded-full bg-cyan-300/25 blur-sm" />
+        <div className="absolute inset-0 bg-gradient-to-b from-sky-300/55 via-cyan-400/35 to-teal-500/75" />
+        <svg
+          className="absolute inset-x-0 bottom-0 h-[58%] w-full"
+          preserveAspectRatio="none"
+          viewBox="0 0 400 220"
+        >
+          <path
+            d="M0 150 C60 110 120 170 190 130 C250 95 320 150 400 115 L400 220 L0 220 Z"
+            fill="rgba(16,185,129,0.35)"
+          />
+          <path
+            d="M0 175 C70 145 150 195 230 160 C300 130 350 180 400 165 L400 220 L0 220 Z"
+            fill="rgba(34,197,94,0.42)"
+          />
+          <path
+            d="M0 190 C90 170 170 205 260 185 C320 172 360 198 400 188 L400 220 L0 220 Z"
+            fill="rgba(74,222,128,0.38)"
+          />
+          <path
+            d="M250 120 C290 95 330 110 400 88 L400 170 C360 178 310 160 250 175 Z"
+            fill="rgba(56,189,248,0.28)"
+          />
+        </svg>
+        <div className="absolute top-[18%] right-[16%] size-16 rounded-full bg-white/25 blur-xl" />
+        <div className="absolute top-[12%] left-[20%] size-24 rounded-full bg-white/20 blur-2xl" />
       </div>
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-8 -right-6 grid size-[clamp(7.5rem,28vw,11rem)] place-items-center"
+        className="pointer-events-none absolute top-6 -right-2 grid size-[clamp(8rem,31vw,12rem)] place-items-center sm:top-8 sm:right-2"
       >
-        <span className="absolute size-full rounded-full bg-white/15 blur-md" />
-        <span className="absolute size-[88%] rounded-full border border-white/25 bg-white/10" />
-        <span className="relative grid size-[72%] place-items-center rounded-full bg-gradient-to-br from-white/90 via-cyan-50 to-teal-100 shadow-[0_18px_50px_rgba(8,145,178,0.28)]">
+        <span className="absolute size-full animate-pulse rounded-full bg-cyan-200/25 motion-reduce:animate-none" />
+        <span className="absolute size-[92%] rounded-full border border-white/30 bg-white/10" />
+        <span className="absolute size-[78%] rounded-full border border-white/20 bg-white/5" />
+        <span className="relative grid size-[62%] place-items-center rounded-full bg-gradient-to-br from-white via-cyan-50 to-teal-100 shadow-[0_20px_55px_rgba(8,145,178,0.35)]">
           <Droplets
             aria-hidden="true"
-            className="text-cyan-500 drop-shadow-sm"
-            size={56}
+            className="text-cyan-500 drop-shadow-[0_4px_12px_rgba(6,182,212,0.45)]"
+            size={58}
             strokeWidth={2.1}
           />
         </span>
@@ -98,16 +120,18 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
   const isError = viewModel.state === 'error';
   const hasColorHero =
     viewModel.state === 'ready' || viewModel.state === 'loading';
+  const statusMessage =
+    viewModel.staleMessage ?? viewModel.freshMessage ?? null;
 
   return (
     <section
       aria-busy={viewModel.isLoading}
       aria-labelledby={titleId}
-      className={`relative min-h-[17.5rem] overflow-hidden rounded-[2rem] border p-5 shadow-[0_24px_70px_rgba(14,116,144,0.18)] sm:min-h-[19rem] sm:p-7 lg:min-h-[20.5rem] ${
+      className={`relative min-h-[18.5rem] overflow-hidden rounded-[2rem] border p-5 shadow-[0_28px_80px_rgba(14,116,144,0.22)] sm:min-h-[20rem] sm:p-7 lg:min-h-[21rem] ${
         isError
           ? 'border-status-danger/40 bg-surface'
           : hasColorHero
-            ? 'border-white/50 bg-gradient-to-br from-cyan-400 via-teal-400 to-blue-600 text-white dark:border-white/10'
+            ? 'border-white/40 bg-gradient-to-br from-sky-400 via-cyan-400 to-teal-500 text-white dark:border-white/10'
             : 'border-border-default bg-surface'
       }`}
     >
@@ -130,45 +154,58 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
       ) : null}
 
       {viewModel.state === 'ready' && measurement ? (
-        <div className="relative z-10 flex h-full max-w-[62%] flex-col justify-between sm:max-w-[58%] lg:max-w-[52%]">
+        <div className="relative z-10 flex h-full max-w-[58%] flex-col justify-between sm:max-w-[54%] lg:max-w-[48%]">
           <div>
-            <div className="flex items-center gap-2 text-sm font-bold tracking-[0.08em] text-white/90 uppercase sm:text-base">
-              <span className="grid size-8 place-items-center rounded-full bg-white/20">
-                <Droplets aria-hidden="true" size={16} />
+            <div className="flex items-center gap-2.5 text-sm font-semibold text-white sm:text-base">
+              <span className="grid size-9 place-items-center rounded-full bg-white text-teal-500 shadow-[0_8px_20px_rgba(15,23,42,0.12)]">
+                <Droplets aria-hidden="true" size={18} strokeWidth={2.3} />
               </span>
               <h2 id={titleId}>{labels.title}</h2>
             </div>
             <p className="mt-5 flex flex-wrap items-end gap-x-3 gap-y-1 text-white drop-shadow-sm">
-              <span className="text-[clamp(3.2rem,12vw,6.3rem)] leading-[0.86] font-black tracking-[-0.06em] tabular-nums">
+              <span className="text-[clamp(3.4rem,13vw,6.5rem)] leading-[0.84] font-black tracking-[-0.06em] tabular-nums">
                 {measurement.value}
               </span>
-              <span className="pb-1 text-lg font-bold sm:pb-2 sm:text-2xl">
+              <span className="pb-1 text-xl font-bold sm:pb-2 sm:text-2xl">
                 {measurement.unit}
               </span>
             </p>
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center gap-2.5 text-sm font-semibold text-white/95 sm:text-base">
-            <time
-              className="inline-flex min-h-9 items-center gap-2 rounded-full border border-white/25 bg-white/[0.12] px-3 py-1.5 backdrop-blur-sm"
-              dateTime={viewModel.dateTime ?? undefined}
-            >
-              <Clock aria-hidden="true" size={17} />
-              {viewModel.displayTime}
-            </time>
-            {viewModel.sourceLabel ? (
-              <span className="inline-flex min-h-9 items-center rounded-full border border-white/25 bg-white/[0.12] px-3 py-1.5 backdrop-blur-sm">
-                {viewModel.sourceLabel}
-              </span>
-            ) : null}
-            {viewModel.isStale && viewModel.staleMessage ? (
-              <span
-                className="inline-flex min-h-9 items-center gap-2 rounded-full border border-white/30 bg-slate-950/20 px-3 py-1.5 backdrop-blur-sm"
-                role="status"
+          <div className="mt-6 space-y-2 text-sm font-medium text-white/95 sm:text-base">
+            <p className="flex flex-wrap items-center gap-2">
+              <time
+                className="inline-flex items-center gap-2"
+                dateTime={viewModel.dateTime ?? undefined}
               >
-                <ClockAlert aria-hidden="true" size={17} />
-                {viewModel.staleMessage}
-              </span>
+                <Clock aria-hidden="true" size={16} />
+                {viewModel.displayTime}
+              </time>
+              {statusMessage ? (
+                <>
+                  <span aria-hidden="true" className="text-white/70">
+                    •
+                  </span>
+                  <span
+                    className={
+                      viewModel.isStale
+                        ? 'inline-flex items-center gap-1.5'
+                        : undefined
+                    }
+                    role={viewModel.isStale ? 'status' : undefined}
+                  >
+                    {viewModel.isStale ? (
+                      <ClockAlert aria-hidden="true" size={16} />
+                    ) : null}
+                    {statusMessage}
+                  </span>
+                </>
+              ) : null}
+            </p>
+            {viewModel.sourceLabel ? (
+              <p className="text-xs text-white/80 sm:text-sm">
+                {viewModel.sourceLabel}
+              </p>
             ) : null}
           </div>
         </div>

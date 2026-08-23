@@ -15,18 +15,13 @@ const visibleCategories: readonly QuickAddOpenCategory[] = [
   'activity',
 ];
 
-const toneByCategory: Record<QuickAddOpenCategory, string> = {
-  glucose:
-    'from-emerald-400/25 via-teal-300/15 to-cyan-300/25 text-teal-700 dark:text-teal-200',
-  insulin:
-    'from-violet-400/25 via-fuchsia-300/15 to-purple-300/25 text-violet-700 dark:text-violet-200',
-  nutrition:
-    'from-amber-300/30 via-orange-300/20 to-rose-200/25 text-orange-700 dark:text-orange-200',
-  activity:
-    'from-sky-400/25 via-blue-300/15 to-indigo-300/25 text-sky-700 dark:text-sky-200',
-  medication:
-    'from-rose-300/25 via-pink-300/15 to-violet-300/20 text-rose-700 dark:text-rose-200',
-  note: 'from-slate-300/25 via-slate-200/20 to-slate-300/25 text-slate-700 dark:text-slate-200',
+const iconToneByCategory: Record<QuickAddOpenCategory, string> = {
+  glucose: 'bg-teal-500 text-white',
+  insulin: 'bg-violet-500 text-white',
+  nutrition: 'bg-orange-500 text-white',
+  activity: 'bg-blue-500 text-white',
+  medication: 'bg-rose-500 text-white',
+  note: 'bg-slate-500 text-white',
 };
 
 const eventKindByCategory = {
@@ -35,6 +30,26 @@ const eventKindByCategory = {
   insulin: 'insulin',
   nutrition: 'nutrition',
 } as const;
+
+function FloralSilhouette({ side }: { readonly side: 'left' | 'right' }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={`pointer-events-none absolute bottom-2 ${side === 'left' ? 'left-0' : 'right-0'} h-28 w-20 opacity-35`}
+      viewBox="0 0 80 112"
+    >
+      <path
+        d={
+          side === 'left'
+            ? 'M40 90 C20 70 8 45 18 20 C24 8 34 12 40 28 C46 12 56 8 62 20 C72 45 60 70 40 90 Z'
+            : 'M40 90 C60 70 72 45 62 20 C56 8 46 12 40 28 C34 12 24 8 18 20 C8 45 20 70 40 90 Z'
+        }
+        fill="currentColor"
+        className={side === 'left' ? 'text-violet-300' : 'text-cyan-300'}
+      />
+    </svg>
+  );
+}
 
 export interface DashboardQuickActionsProps {
   readonly disabled?: boolean;
@@ -62,18 +77,16 @@ export function DashboardQuickActions({
   return (
     <section
       aria-label={sectionLabel}
-      className="relative col-span-full overflow-hidden rounded-[1.75rem] border border-white/60 bg-white/80 p-4 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-5 dark:border-white/10 dark:bg-slate-900/80"
+      className="relative col-span-full overflow-hidden rounded-[1.75rem] px-1 py-2 sm:px-2"
     >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-12 -right-10 size-40 rounded-full bg-gradient-to-br from-emerald-200/45 via-cyan-200/30 to-violet-200/40 blur-2xl dark:opacity-20"
-      />
+      <FloralSilhouette side="left" />
+      <FloralSilhouette side="right" />
       <div className="relative">
-        <h2 className="text-text-primary mb-4 text-lg font-extrabold tracking-tight sm:text-xl">
+        <h2 className="mb-4 text-[1.35rem] font-extrabold tracking-tight text-[#1e3a5f] dark:text-white">
           {sectionLabel}
         </h2>
 
-        <div className="grid grid-cols-4 gap-2 sm:gap-3">
+        <div className="grid grid-cols-4 gap-2 sm:gap-4">
           {actions.map((action) => {
             const category = toQuickAddOpenCategory(action.category);
             const eventKind =
@@ -93,11 +106,15 @@ export function DashboardQuickActions({
               >
                 <span
                   aria-hidden="true"
-                  className={`mx-auto grid size-14 place-items-center rounded-full bg-gradient-to-br shadow-[0_10px_28px_rgba(15,23,42,0.10)] ring-1 ring-white/70 transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95 sm:size-16 ${toneByCategory[category]}`}
+                  className="mx-auto grid size-[4.5rem] place-items-center rounded-full bg-white shadow-[0_14px_34px_rgba(15,23,42,0.10)] ring-1 ring-slate-100 transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95 sm:size-[5rem]"
                 >
-                  {action.icon}
+                  <span
+                    className={`grid size-12 place-items-center rounded-full sm:size-[3.25rem] ${iconToneByCategory[category]}`}
+                  >
+                    {action.icon}
+                  </span>
                 </span>
-                <span className="text-text-primary mt-2 block truncate text-xs font-semibold sm:text-sm">
+                <span className="mt-2 block truncate text-xs font-semibold text-slate-700 sm:text-sm dark:text-slate-200">
                   {label}
                 </span>
               </button>

@@ -52,6 +52,7 @@ export const CANONICAL_TRANSLATION_KEYS = [
   'dashboard.lastGlucose.eyebrow',
   'dashboard.lastGlucose.empty.default',
   'dashboard.lastGlucose.error.default',
+  'dashboard.lastGlucose.fresh',
   'dashboard.lastGlucose.loading',
   'dashboard.lastGlucose.stale',
   'dashboard.lastGlucose.title',

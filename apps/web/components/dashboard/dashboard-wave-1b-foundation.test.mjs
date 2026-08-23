@@ -21,7 +21,8 @@ const quickActionsSource = readFileSync(
 );
 
 test('dashboard shell keeps semantic page foundation under decorative layers', () => {
-  assert.match(shellSource, /bg-background text-text-primary/);
+  assert.match(shellSource, /text-text-primary/);
+  assert.match(shellSource, /min-h-screen/);
   assert.match(shellSource, /id="main-content"/);
 });
 

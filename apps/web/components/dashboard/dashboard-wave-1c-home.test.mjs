@@ -43,9 +43,10 @@ test('Home composition keeps trust-first blocks and excludes deferred AI insight
 test('glucose hero preserves explicit stale and source presentation', () => {
   assert.match(heroSource, /viewModel\.sourceLabel/);
   assert.match(heroSource, /viewModel\.staleMessage/);
+  assert.match(heroSource, /viewModel\.freshMessage/);
   assert.match(heroSource, /ClockAlert/);
   assert.match(heroSource, /dateTime=/);
-  assert.match(heroSource, /from-cyan-400 via-teal-400 to-blue-600/);
+  assert.match(heroSource, /from-sky-400 via-cyan-400 to-teal-500/);
 });
 
 test('today summary presents four distinct metric visual slots', () => {
@@ -65,6 +66,7 @@ test('mobile navigation links only to real routes', () => {
   assert.match(mobileNavSource, /href="\/"/);
   assert.match(mobileNavSource, /href="\/timeline"/);
   assert.match(mobileNavSource, /href="\/account"/);
+  assert.match(mobileNavSource, /Clock/);
   assert.doesNotMatch(mobileNavSource, /href="\/analytics"/);
   assert.doesNotMatch(mobileNavSource, /Anna/);
 });
