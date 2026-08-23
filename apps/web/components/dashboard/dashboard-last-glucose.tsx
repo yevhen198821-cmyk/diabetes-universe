@@ -1,6 +1,6 @@
 'use client';
 
-import { ClockAlert, Droplets } from 'lucide-react';
+import { Clock, ClockAlert, Droplets, Sparkles } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { resolveDashboardMedicalEventSourceLabel } from '../../lib/dashboard/dashboard-event-source-labels';
@@ -56,10 +56,38 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
     <section
       aria-busy={viewModel.isLoading}
       aria-labelledby={titleId}
-      className={`bg-surface h-full rounded-2xl border p-5 shadow-sm sm:col-span-1 lg:col-span-7 ${
-        isError ? 'border-status-danger/40' : 'border-border-default'
+      className={`relative min-h-[15.5rem] overflow-hidden rounded-[2rem] border p-5 shadow-[0_24px_70px_rgba(14,116,144,0.16)] sm:col-span-2 sm:min-h-[17rem] sm:p-7 lg:col-span-12 lg:min-h-[18rem] ${
+        isError
+          ? 'border-status-danger/40 bg-surface'
+          : 'border-white/60 bg-gradient-to-br from-[#ff6654] via-[#ff9a54] to-[#16bfb4] text-white dark:border-white/10'
       }`}
     >
+      {!isError ? (
+        <>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-16 -top-16 size-72 rounded-full border border-white/25 bg-white/10 shadow-[inset_0_0_60px_rgba(255,255,255,0.15)] sm:size-80"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute right-7 top-10 grid size-32 place-items-center rounded-full border border-white/30 bg-white/20 shadow-[0_18px_50px_rgba(90,45,18,0.16)] backdrop-blur-sm sm:right-16 sm:size-40"
+          >
+            <span className="grid size-20 place-items-center rounded-full bg-white/90 text-[#ff5b4f] shadow-[0_12px_30px_rgba(83,48,28,0.18)] sm:size-24">
+              <Droplets aria-hidden="true" size={42} strokeWidth={2.2} />
+            </span>
+          </div>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-20 left-[35%] h-44 w-[75%] -rotate-3 rounded-[50%] bg-gradient-to-r from-rose-500/30 via-violet-500/20 to-teal-500/40 blur-sm"
+          />
+          <Sparkles
+            aria-hidden="true"
+            className="absolute right-5 top-5 hidden text-white/75 sm:block"
+            size={22}
+          />
+        </>
+      ) : null}
+
       {viewModel.state === 'loading' ? (
         <>
           <h2 className="sr-only" id={titleId}>
@@ -68,64 +96,47 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
           <span className="sr-only" role="status">
             {viewModel.message}
           </span>
-          <div aria-hidden="true" className="flex items-center gap-4">
-            <div className="rounded-control bg-surface-subtle size-11 shrink-0 animate-pulse motion-reduce:animate-none" />
-            <div className="min-w-0 flex-1 space-y-2">
-              <div className="bg-surface-subtle h-4 w-28 animate-pulse rounded motion-reduce:animate-none" />
-              <div className="bg-surface-subtle h-5 w-36 max-w-full animate-pulse rounded motion-reduce:animate-none" />
-            </div>
-            <div className="w-24 shrink-0 space-y-2">
-              <div className="bg-surface-subtle ml-auto h-6 w-24 animate-pulse rounded motion-reduce:animate-none" />
-              <div className="bg-surface-subtle ml-auto h-4 w-12 animate-pulse rounded motion-reduce:animate-none" />
-            </div>
+          <div aria-hidden="true" className="relative z-10 space-y-5">
+            <div className="h-5 w-36 animate-pulse rounded bg-white/35 motion-reduce:animate-none" />
+            <div className="h-16 w-52 animate-pulse rounded-2xl bg-white/35 motion-reduce:animate-none" />
+            <div className="h-10 w-64 max-w-full animate-pulse rounded-full bg-white/25 motion-reduce:animate-none" />
           </div>
         </>
       ) : null}
 
       {viewModel.state === 'ready' ? (
-        <div className="flex items-center gap-4">
-          <div
-            aria-hidden="true"
-            className="grid size-11 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-600"
-          >
-            <Droplets size={20} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-text-secondary text-sm">{labels.eyebrow}</p>
-            <h2
-              className="text-text-primary mt-0.5 text-lg font-bold"
-              id={titleId}
-            >
-              {labels.title}
-            </h2>
-            {viewModel.sourceLabel ? (
-              <p className="text-text-secondary mt-1 text-xs">
-                {viewModel.sourceLabel}
-              </p>
-            ) : null}
-          </div>
-          <div className="shrink-0 text-right">
-            <p className="text-text-primary text-xl font-bold">
+        <div className="relative z-10 flex h-full max-w-[68%] flex-col justify-between sm:max-w-[62%] lg:max-w-[56%]">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.08em] text-white/90 sm:text-base">
+              <Droplets aria-hidden="true" size={18} />
+              <h2 id={titleId}>{labels.title}</h2>
+            </div>
+            <p className="mt-5 text-[clamp(3rem,11vw,6.2rem)] font-black leading-none tracking-[-0.06em] text-white drop-shadow-sm tabular-nums">
               {viewModel.value}
             </p>
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-2.5 text-sm font-semibold text-white/95 sm:text-base">
             <time
-              className="text-text-secondary mt-0.5 block text-sm tabular-nums"
+              className="inline-flex min-h-9 items-center gap-2 rounded-full border border-white/25 bg-white/12 px-3 py-1.5 backdrop-blur-sm"
               dateTime={viewModel.dateTime ?? undefined}
             >
+              <Clock aria-hidden="true" size={17} />
               {viewModel.displayTime}
             </time>
+            {viewModel.sourceLabel ? (
+              <span className="inline-flex min-h-9 items-center rounded-full border border-white/25 bg-white/12 px-3 py-1.5 backdrop-blur-sm">
+                {viewModel.sourceLabel}
+              </span>
+            ) : null}
             {viewModel.isStale && viewModel.staleMessage ? (
-              <p
-                className="mt-1 inline-flex items-center gap-1 text-xs text-amber-800"
+              <span
+                className="inline-flex min-h-9 items-center gap-2 rounded-full border border-white/30 bg-slate-950/20 px-3 py-1.5 backdrop-blur-sm"
                 role="status"
               >
-                <ClockAlert
-                  aria-hidden="true"
-                  className="size-3.5 shrink-0"
-                  size={14}
-                />
-                <span>{viewModel.staleMessage}</span>
-              </p>
+                <ClockAlert aria-hidden="true" size={17} />
+                {viewModel.staleMessage}
+              </span>
             ) : null}
           </div>
         </div>
@@ -134,21 +145,21 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
       {viewModel.state === 'empty' || viewModel.state === 'error' ? (
         <div
           aria-live={isError ? 'assertive' : 'polite'}
-          className="flex items-start gap-4"
+          className="relative z-10 flex items-start gap-4"
           role={isError ? 'alert' : 'status'}
         >
           <div
             aria-hidden="true"
-            className={`grid size-11 shrink-0 place-items-center rounded-xl ${
+            className={`grid size-12 shrink-0 place-items-center rounded-2xl ${
               isError
                 ? 'bg-status-danger/10 text-status-danger'
-                : 'bg-sky-500/10 text-sky-600'
+                : 'bg-gradient-to-br from-rose-400/25 via-orange-300/20 to-teal-300/25 text-teal-700 dark:text-teal-200'
             }`}
           >
-            <Droplets size={20} />
+            <Droplets size={22} />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-text-primary text-lg font-bold" id={titleId}>
+            <h2 className="text-text-primary text-xl font-extrabold" id={titleId}>
               {labels.title}
             </h2>
             <p
