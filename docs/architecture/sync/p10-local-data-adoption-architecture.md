@@ -2,13 +2,13 @@
 
 ## Status
 
-**Architecture Design — Draft**
+**Architecture Design — Approved**
 
-Date: 2026-08-19
+Date: 2026-08-19 (architecture/security audit closure: 2026-08-23)
 
-Lifecycle note: PR #95 merged this architecture specification. Formal architecture
-approval remains pending a dedicated audit/closure record comparable to
-`p11-approval-closure.md` and `p12-architecture-security-audit.md`.
+Lifecycle authority: see [P10 approval closure](p10-approval-closure.md) for the audit
+record and [P10 runtime implementation charter](p10-runtime-implementation-charter.md)
+for the next implementation scope.
 
 ## Purpose
 
@@ -109,7 +109,8 @@ Authenticated account
 → mark session complete
 ```
 
-The workflow may be user-visible or system-guided, but it must not silently migrate medical history without an approved product/privacy decision.
+The workflow is **system-guided but user-visible**. It must not silently migrate
+medical history without the approved product/privacy contract in §44.
 
 ## 4. Import session
 
@@ -124,9 +125,28 @@ Minimum session metadata:
 - source platform/app version;
 - source schema range summary;
 - created/started/completed timestamps;
-- lifecycle state: `open`, `completed`, `failed`, `cancelled` as appropriate;
+- lifecycle state: `open`, `completed`, `failed`, `cancelled`;
 - bounded aggregate counters only;
 - no duplicated medical payload blob.
+
+### Session lifecycle semantics
+
+| State       | Terminal? | Accepts new item batches? | Meaning                                                              |
+| ----------- | --------- | ------------------------- | -------------------------------------------------------------------- |
+| `open`      | No        | Yes                       | Active adoption; batches may be submitted                            |
+| `failed`    | No        | Yes (after resume)        | Progress paused after recoverable error; same session may be resumed |
+| `completed` | Yes       | No                        | Terminal success for the declared adoption set                       |
+| `cancelled` | Yes       | No                        | Terminal stop; does not roll back committed resources                |
+
+`failed` is **not** terminal. A client may resume the same `adoptionSessionId` with
+the same `clientAdoptionRunId` after transient infrastructure, partial-batch, or
+timeout failures. Per-item outcomes remain authoritative via adoption mappings;
+resume never mints new `localEventId` values for already-submitted identities.
+
+Only `completed` and `cancelled` close the session to future submissions.
+
+Cancellation stops future submissions and does **not** roll back already committed
+medical resources, audit rows, outbox rows, or adoption mappings.
 
 The session is authorization-scoped server-side. Knowing `adoptionSessionId` never grants access.
 
@@ -174,12 +194,41 @@ Properties:
 
 If a local installation identity is unavailable, P10 implementation must define a safe migration-generated namespace before upload.
 
-## 7. Adoption mapping persistence
+## 7. Adoption persistence
 
-P10 requires durable deduplication evidence. Recommended implementation-level entity:
+P10 requires durable session tracking and deduplication evidence. Recommended
+implementation-level entities:
+
+### `medical_adoption_sessions`
 
 ```text
-medical_adoption_mappings
+medical_adoption_sessions
+- adoption_session_id          (server-generated PK)
+- account_id
+- subject_id
+- client_adoption_run_id       (client high-entropy retry key)
+- source_platform              (web | ios | android)
+- source_app_version
+- source_schema_summary        (bounded summary, no PHI)
+- lifecycle_state              (open | failed | completed | cancelled)
+- eligible_count               (aggregate counter only)
+- adopted_count                (aggregate counter only)
+- already_adopted_count        (aggregate counter only)
+- rejected_count               (aggregate counter only)
+- quarantined_count            (aggregate counter only)
+- created_at / started_at / completed_at / updated_at
+```
+
+Constraints:
+
+- unique `(account_id, client_adoption_run_id)` for retry reconciliation;
+- subject binding matches authenticated self-subject;
+- no auth-table foreign key;
+- no medical payload blob;
+- session identifiers do not grant authorization.
+
+### `medical_adoption_mappings`
+
 - adoption_mapping_id
 - subject_id
 - source_namespace
@@ -190,7 +239,8 @@ medical_adoption_mappings
 - payload_fingerprint
 - adopted_at
 - adoption_session_id
-```
+
+````
 
 Constraints:
 
@@ -215,7 +265,7 @@ accountId
 + apiVersion/importVersion
 + sourceNamespace
 + localEventId
-```
+````
 
 Server also stores/derives a canonical semantic payload fingerprint after validation and normalization.
 
@@ -232,13 +282,17 @@ Adoption uses bounded batches, not an unbounded lifetime-history request.
 
 Recommended first-slice properties:
 
-- maximum item count per batch;
-- maximum encoded request size;
-- maximum per-event semantic payload size;
-- deterministic client batch ordering;
+- maximum item count per batch (implementation must choose a bounded value ≤ 100 before runtime enablement; default recommendation: 25);
+- maximum encoded request size (must not exceed P8 transport ceiling; current P8 implementation uses 65 536 bytes per request);
+- maximum per-event semantic payload size (must fit within batch and request ceilings after JSON encoding);
+- deterministic client batch ordering (stable sort by `localEventId` or `(occurredAt, localEventId)`);
 - per-item result array;
 - batch-level correlation ID;
 - no requirement that all items in a batch succeed together.
+
+Exact numeric limits are implementation parameters, but bounded values must be
+documented in the implementation charter and enforced before production adoption
+enablement. Unbounded batch sizes are rejected.
 
 A single malformed item should not automatically roll back unrelated valid items unless the implementation deliberately chooses smaller atomic groups. Per-item outcomes are preferable for resumability.
 
@@ -490,7 +544,7 @@ The runtime medical role must remain P9 least-privilege. If new adoption mapping
 
 ## 28. Repository/service ownership
 
-Route/transport code never writes adoption mapping tables directly.
+Route/transport code never writes adoption session or mapping tables directly.
 
 Recommended application boundary:
 
@@ -500,6 +554,7 @@ MedicalAdoptionService
 - adoptBatch(...)
 - getSessionStatus(...)
 - completeSession(...)
+- cancelSession(...)
 ```
 
 Service orchestration owns transaction boundaries and uses repositories for:
@@ -509,6 +564,28 @@ Service orchestration owns transaction boundaries and uses repositories for:
 - medical event creation;
 - audit/outbox;
 - idempotency/replay state.
+
+### P8/P9 integration (post-implementation audit baseline)
+
+P10 adoption must reuse existing P9 application boundaries rather than parallel
+infrastructure:
+
+- authenticated scope via `getAuthenticatedPrincipal()` and self-subject resolution (`findActiveSelfRelationship` / `provisionSelfSubject`);
+- semantic validation and `toServerSemanticEvent` normalization (server strips client `id`, lifecycle timestamps);
+- per-mutation transaction pattern in `medical-event-service` (resource + audit + outbox in one transaction);
+- existing `medical_idempotency_records` with adoption-specific `operationScope` (e.g. `adoption.import`) and scoped key derived from `sourceNamespace` + `localEventId`;
+- revision token generation and PHI-safe P8 error envelope concepts;
+- `MedicalAdoptionService` added alongside `MedicalEventService` in the medical-service bundle, not a duplicate persistence stack.
+
+Adoption HTTP transport inherits P8 production readiness gates:
+
+- production requires distributed rate limiting with registered backend adapter (`resolveMedicalApiRuntimeCapability`);
+- bounded request bodies and validation bounds;
+- PHI-safe logging and non-enumeration;
+- adoption remains behind `ADOPTION_NOT_ENABLED` / feature gate until explicit launch approval.
+
+Adoption APIs are **separate** from ordinary P8 CRUD routes and from future P11 sync
+and P12 conflict/tombstone APIs. Do not route adoption through `/me/medical-events` create.
 
 ## 29. Medical event create reuse
 
@@ -691,34 +768,111 @@ Pros would include simple identity continuity. Cons are decisive: it violates P9
 
 **Selected:** adoption handles initial authoritative creation only; later mutation convergence belongs to P11/P12.
 
-## 42. Approval checklist
+## 43. Adoption API transport surface (conceptual)
 
-P10 may move to Approved only when review confirms:
+P10 requires a dedicated adoption API surface separate from ordinary P8 CRUD and
+from future P11 sync and P12 conflict/tombstone APIs.
 
-- [ ] P10 remains adoption/import, not continuous sync.
-- [ ] P9 canonical `resourceId` remains server-generated.
-- [ ] local event identity is only source/dedup identity.
-- [ ] durable subject-scoped adoption mapping prevents duplicate creates.
-- [ ] another account/subject cannot collide with or enumerate mappings.
-- [ ] per-item payload fingerprint mismatch produces conflict, not overwrite.
-- [ ] batch size and transaction duration are bounded.
-- [ ] partial failure is resumable.
-- [ ] server commit + client acknowledgement crash is retry-safe.
-- [ ] semantic occurrence time remains distinct from adoption lifecycle time.
-- [ ] ambiguous legacy presentation data is not guessed into medical semantics.
-- [ ] heuristic clinical deduplication is rejected.
-- [ ] existing cloud records are not overwritten by similarity.
-- [ ] local deletions/post-adoption edits are deferred to P11/P12.
-- [ ] audit and outbox evidence remain atomic with each adopted medical resource.
-- [ ] no full payload duplication in mapping/session tables.
-- [ ] adoption runtime remains behind medical-service/repository boundaries.
-- [ ] production DB privileges remain least-privilege and explicit for new tables.
-- [ ] PHI-safe logging/transport rules are explicit.
-- [ ] large histories are handled through bounded batches/indexed lookups.
-- [ ] production rollout is feature-gated and reversible without data deletion.
-- [ ] external device/file imports remain outside P10.
-- [ ] P11 Offline Sync Architecture remains a separate next stage.
+Normative conceptual operations (paths are illustrative; exact routing is implementation detail):
+
+```text
+POST /api/v1/medical/me/adoption-sessions
+  → start or resume session (returns adoptionSessionId, lifecycle state)
+
+GET  /api/v1/medical/me/adoption-sessions/:adoptionSessionId
+  → session status, aggregate counters only
+
+POST /api/v1/medical/me/adoption-sessions/:adoptionSessionId/items
+  → submit bounded adoption batch; per-item outcomes
+
+POST /api/v1/medical/me/adoption-sessions/:adoptionSessionId/complete
+  → terminal completion after verification
+
+POST /api/v1/medical/me/adoption-sessions/:adoptionSessionId/cancel
+  → terminal cancellation without rollback
+```
+
+Properties:
+
+- all routes require authenticated session; subject resolved server-side;
+- `adoptionSessionId` in URL is lookup metadata only and does not grant access;
+- mutations use PHI-safe P8 error envelope extensions (`ADOPTION_*` codes);
+- transport inherits P8 bounded bodies, rate limiting, and production readiness gates;
+- OpenAPI for adoption is a separate artifact from `medical-v1.yaml` until explicitly versioned.
+
+## 44. Privacy and UX adoption contract
+
+**Product/privacy decision (approved for architecture):**
+
+Adoption is **not silent**. The client must:
+
+1. Explain that eligible local Timeline history will be copied to the authenticated account cloud subject;
+2. Show the count of eligible records (excluding `source: demo` and quarantined items);
+3. Require an explicit user action to start adoption;
+4. Show progress using aggregate counters only (no PHI-rich analytics);
+5. Surface skipped/problem items with safe summaries (reason codes, not raw payloads);
+6. Never automatically delete local history after success;
+7. Never block account access solely because adoption was declined.
+
+UI design is out of scope for this architecture PR. This section defines the
+required privacy/UX contract implementation must satisfy.
+
+## 45. Local storage implementation delta (Web baseline)
+
+Current repository state (post-P8/P9, pre-P10 runtime):
+
+| Capability               | Current (`packages/timeline-web`)                     | P10 runtime delta                                                                 |
+| ------------------------ | ----------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Stable `localEventId`    | `SemanticTimelineEvent.id` / IndexedDB key            | Reuse; no rename required                                                         |
+| `sourceNamespace`        | **Missing**                                           | Generate once; persist in `timeline_metadata`                                     |
+| Adoption acknowledgement | **Missing**                                           | New store or metadata (`canonicalResourceId`, revision snapshot, `adoptedAt`)     |
+| Session/run state        | Bootstrap metadata only                               | New local session mirror (`clientAdoptionRunId`, `adoptionSessionId`, checkpoint) |
+| Retry/resume state       | **Missing**                                           | Per-item status + batch cursor in durable store                                   |
+| Adoption quarantine      | Storage corruption quarantine only                    | Adoption-specific quarantine reasons for unsupported/ambiguous legacy             |
+| IndexedDB version        | `TIMELINE_INDEXEDDB_VERSION = 1`                      | Requires v2+ migration for adoption stores                                        |
+| Legacy lift to semantic  | `liftLegacyToSemantic` exists; sidecar in-memory only | P10-D must wire durable conversion or pre-scan                                    |
+| `source: import`         | Type allows; IndexedDB validation currently rejects   | Implementation must allow `import` when semantically valid                        |
+
+Demo seed events (`source: demo`) must be excluded from eligibility. User-authored
+semantic events with `source: manual | device | import` are eligible when validated.
+
+No localStorage for medical adoption state. Mobile native stores follow the same
+contract with platform adapters in later implementation waves.
+
+## 46. Approval checklist
+
+P10 architecture/security audit (2026-08-23) confirmed:
+
+- [x] P10 remains adoption/import, not continuous sync.
+- [x] P9 canonical `resourceId` remains server-generated.
+- [x] local event identity is only source/dedup identity.
+- [x] durable subject-scoped adoption mapping prevents duplicate creates.
+- [x] another account/subject cannot collide with or enumerate mappings.
+- [x] per-item payload fingerprint mismatch produces conflict, not overwrite.
+- [x] batch size and transaction duration are bounded.
+- [x] partial failure is resumable.
+- [x] server commit + client acknowledgement crash is retry-safe.
+- [x] semantic occurrence time remains distinct from adoption lifecycle time.
+- [x] ambiguous legacy presentation data is not guessed into medical semantics.
+- [x] heuristic clinical deduplication is rejected.
+- [x] existing cloud records are not overwritten by similarity.
+- [x] local deletions/post-adoption edits are deferred to P11/P12.
+- [x] audit and outbox evidence remain atomic with each adopted medical resource.
+- [x] no full payload duplication in mapping/session tables.
+- [x] adoption runtime remains behind medical-service/repository boundaries.
+- [x] production DB privileges remain least-privilege and explicit for new tables.
+- [x] PHI-safe logging/transport rules are explicit.
+- [x] large histories are handled through bounded batches/indexed lookups.
+- [x] production rollout is feature-gated and reversible without data deletion.
+- [x] external device/file imports remain outside P10.
+- [x] P11 Offline Sync Architecture remains a separate next stage.
 
 ## Current decision
 
-P10 Local Data Adoption Architecture is drafted and ready for architecture/security audit. No adoption runtime implementation is approved until this document passes the approval gate.
+**P10 architecture/security audit passed (2026-08-23). P10 Local Data Adoption
+Architecture is approved as the baseline for implementation design.**
+
+Adoption runtime is **not** implemented and is **not** approved for production
+enablement until the [P10 runtime implementation charter](p10-runtime-implementation-charter.md)
+waves complete their merge gates. P11 continuous sync remains the next architecture
+stage after P10 runtime foundation; P10 must not implement P11/P12 semantics.
