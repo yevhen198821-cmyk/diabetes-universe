@@ -5,7 +5,10 @@ import { useMemo } from 'react';
 
 import { resolveDashboardMedicalEventSourceLabel } from '../../lib/dashboard/dashboard-event-source-labels';
 import { useLocalization } from '../../lib/platform/react/use-localization';
-import { formatTimelineGlucoseDisplayValue } from '../../lib/timeline/presentation';
+import {
+  formatTimelineGlucoseDisplayValue,
+  mapTimelineEventCardPresentation,
+} from '../../lib/timeline/presentation';
 import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
 import { resolveDashboardLastGlucoseLabels } from './dashboard-last-glucose-labels';
 import {
@@ -32,6 +35,17 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
       presentationDependencies,
     );
   }, [presentationDependencies, props]);
+  const measurement = useMemo(() => {
+    if (props.state !== 'ready') {
+      return null;
+    }
+
+    return mapTimelineEventCardPresentation(
+      props.glucose.event,
+      presentationDependencies,
+      props.glucose.displayTime,
+    );
+  }, [presentationDependencies, props]);
   const sourceLabel = useMemo(() => {
     if (props.state !== 'ready') {
       return null;
@@ -51,6 +65,8 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
     [formattedValue, labels, props, sourceLabel],
   );
   const isError = viewModel.state === 'error';
+  const hasColorHero =
+    viewModel.state === 'ready' || viewModel.state === 'loading';
 
   return (
     <section
@@ -59,10 +75,12 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
       className={`relative min-h-[15.5rem] overflow-hidden rounded-[2rem] border p-5 shadow-[0_24px_70px_rgba(14,116,144,0.16)] sm:col-span-2 sm:min-h-[17rem] sm:p-7 lg:col-span-12 lg:min-h-[18rem] ${
         isError
           ? 'border-status-danger/40 bg-surface'
-          : 'border-white/60 bg-gradient-to-br from-[#ff6654] via-[#ff9a54] to-[#16bfb4] text-white dark:border-white/10'
+          : hasColorHero
+            ? 'border-white/60 bg-gradient-to-br from-[#ff6654] via-[#ff9a54] to-[#16bfb4] text-white dark:border-white/10'
+            : 'border-border-default bg-surface'
       }`}
     >
-      {!isError ? (
+      {hasColorHero ? (
         <>
           <div
             aria-hidden="true"
@@ -104,28 +122,33 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
         </>
       ) : null}
 
-      {viewModel.state === 'ready' ? (
+      {viewModel.state === 'ready' && measurement ? (
         <div className="relative z-10 flex h-full max-w-[68%] flex-col justify-between sm:max-w-[62%] lg:max-w-[56%]">
           <div>
             <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.08em] text-white/90 sm:text-base">
               <Droplets aria-hidden="true" size={18} />
               <h2 id={titleId}>{labels.title}</h2>
             </div>
-            <p className="mt-5 text-[clamp(3rem,11vw,6.2rem)] font-black leading-none tracking-[-0.06em] text-white drop-shadow-sm tabular-nums">
-              {viewModel.value}
+            <p className="mt-5 flex flex-wrap items-end gap-x-3 gap-y-1 text-white drop-shadow-sm">
+              <span className="text-[clamp(3.2rem,12vw,6.3rem)] font-black leading-[0.86] tracking-[-0.06em] tabular-nums">
+                {measurement.value}
+              </span>
+              <span className="pb-1 text-lg font-bold sm:pb-2 sm:text-2xl">
+                {measurement.unit}
+              </span>
             </p>
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-2.5 text-sm font-semibold text-white/95 sm:text-base">
             <time
-              className="inline-flex min-h-9 items-center gap-2 rounded-full border border-white/25 bg-white/12 px-3 py-1.5 backdrop-blur-sm"
+              className="inline-flex min-h-9 items-center gap-2 rounded-full border border-white/25 bg-white/[0.12] px-3 py-1.5 backdrop-blur-sm"
               dateTime={viewModel.dateTime ?? undefined}
             >
               <Clock aria-hidden="true" size={17} />
               {viewModel.displayTime}
             </time>
             {viewModel.sourceLabel ? (
-              <span className="inline-flex min-h-9 items-center rounded-full border border-white/25 bg-white/12 px-3 py-1.5 backdrop-blur-sm">
+              <span className="inline-flex min-h-9 items-center rounded-full border border-white/25 bg-white/[0.12] px-3 py-1.5 backdrop-blur-sm">
                 {viewModel.sourceLabel}
               </span>
             ) : null}
