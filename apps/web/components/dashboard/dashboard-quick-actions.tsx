@@ -1,5 +1,9 @@
 'use client';
 
+import type { TranslationKey } from '@diabetes-universe/i18n';
+import { useMemo } from 'react';
+
+import { useLocalization } from '../../lib/platform/react/use-localization';
 import { quickAddActions } from '../../lib/quick-add/actions';
 import type { QuickAddOpenCategory } from '../../lib/quick-add/quick-add-controller-model';
 
@@ -33,13 +37,21 @@ export function DashboardQuickActions({
   disabled = false,
   onOpenCategory,
 }: DashboardQuickActionsProps) {
+  const localization = useLocalization();
+  const sectionLabel = useMemo(
+    () =>
+      localization.translate({
+        key: 'quick-add.button.label' as TranslationKey,
+      }).value,
+    [localization],
+  );
   const actions = quickAddActions.filter((action) =>
     visibleCategories.includes(action.category),
   );
 
   return (
     <section
-      aria-label="Quick add"
+      aria-label={sectionLabel}
       className="relative col-span-full overflow-hidden rounded-[1.75rem] border border-white/60 bg-white/80 p-4 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/80 sm:p-5"
     >
       <div
@@ -47,16 +59,9 @@ export function DashboardQuickActions({
         className="pointer-events-none absolute -right-10 -top-12 size-40 rounded-full bg-gradient-to-br from-emerald-200/45 via-cyan-200/30 to-violet-200/40 blur-2xl dark:opacity-20"
       />
       <div className="relative">
-        <div className="mb-4 flex items-end justify-between gap-4">
-          <div>
-            <h2 className="text-text-primary text-lg font-extrabold tracking-tight sm:text-xl">
-              Quick add
-            </h2>
-            <p className="text-text-secondary mt-1 text-sm">
-              Add a record with one tap
-            </p>
-          </div>
-        </div>
+        <h2 className="text-text-primary mb-4 text-lg font-extrabold tracking-tight sm:text-xl">
+          {sectionLabel}
+        </h2>
 
         <div className="grid grid-cols-4 gap-2 sm:gap-3">
           {actions.map((action) => (
