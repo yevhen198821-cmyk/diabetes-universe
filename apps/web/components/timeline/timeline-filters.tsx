@@ -3,18 +3,20 @@ import { timelineEventFilterOptions } from './timeline-search-filter-model';
 
 interface TimelineFiltersProps {
   readonly activeFilter: TimelineEventFilter;
+  readonly ariaLabel: string;
   readonly filterLabels: Readonly<Record<TimelineEventFilter, string>>;
   readonly onChange: (filter: TimelineEventFilter) => void;
 }
 
 export function TimelineFilters({
   activeFilter,
+  ariaLabel,
   filterLabels,
   onChange,
 }: TimelineFiltersProps) {
   return (
     <div
-      aria-label="Фильтр событий"
+      aria-label={ariaLabel}
       className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0"
       role="group"
     >

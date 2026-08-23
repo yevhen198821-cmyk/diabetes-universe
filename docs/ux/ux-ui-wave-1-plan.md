@@ -27,6 +27,8 @@ Sequence is dependency-ordered based on repository evidence (i18n split, token g
 
 **Goal:** Remove misleading UI; align hierarchy with diabetes user mental models.
 
+**Status:** **IMPLEMENTATION CANDIDATE** — see [UX Wave 1A Implementation](../implementation/ux-wave-1a-ia-trust-cleanup.md)
+
 Scope:
 
 - Remove or gate AI Insight mock from production UI

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 
+import { SkipLink } from '../components/accessibility/skip-link';
 import { TimelineStoreBoundary } from '../lib/timeline/timeline-store/timeline-store-boundary';
 
 interface AppProvidersProps {
@@ -9,5 +10,10 @@ interface AppProvidersProps {
 }
 
 export function AppProviders({ children }: AppProvidersProps) {
-  return <TimelineStoreBoundary>{children}</TimelineStoreBoundary>;
+  return (
+    <TimelineStoreBoundary>
+      <SkipLink />
+      {children}
+    </TimelineStoreBoundary>
+  );
 }

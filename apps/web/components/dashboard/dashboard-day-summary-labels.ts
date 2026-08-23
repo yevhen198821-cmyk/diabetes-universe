@@ -10,7 +10,6 @@ export interface DashboardDaySummaryLabels {
   readonly glucoseMeasurements: string;
   readonly loading: string;
   readonly medicationDoses: string;
-  readonly reminders: string;
   readonly title: string;
   readonly totalCarbohydrates: string;
   readonly totalInsulin: string;
@@ -36,7 +35,6 @@ const DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS = {
   medicationDoses: asTranslationKey(
     'dashboard.daySummary.metrics.medicationDoses',
   ),
-  reminders: asTranslationKey('dashboard.daySummary.metrics.reminders'),
   title: asTranslationKey('dashboard.daySummary.title'),
   totalCarbohydrates: asTranslationKey(
     'dashboard.daySummary.metrics.totalCarbohydrates',
@@ -87,10 +85,6 @@ export function resolveDashboardDaySummaryLabels(
     medicationDoses: translateDashboardDaySummaryKey(
       localization,
       DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.medicationDoses,
-    ),
-    reminders: translateDashboardDaySummaryKey(
-      localization,
-      DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.reminders,
     ),
     title: translateDashboardDaySummaryKey(
       localization,

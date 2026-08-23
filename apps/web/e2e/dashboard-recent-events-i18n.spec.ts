@@ -105,15 +105,15 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await page
     .getByRole('button', { name: /Open event: NovoRapid, 5 U/ })
     .click();
-  await page.getByRole('button', { name: 'Изменить' }).click();
-  await expect(
-    page.getByRole('dialog', { name: 'Изменить событие' }),
-  ).toBeVisible();
-  await page.getByLabel('Значение').fill('6');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
-  await page.getByRole('button', { exact: true, name: 'Закрыть' }).click();
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await expect(page.getByRole('dialog', { name: 'Edit event' })).toBeVisible();
+  await page.getByLabel('Value').fill('6');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await page
+    .getByRole('button', { exact: true, name: 'Close details' })
+    .click();
 
-  await page.getByRole('link', { name: 'На главную' }).click();
+  await page.getByRole('link', { name: 'Go to home' }).click();
   await waitForApplicationReady(page);
 
   await expect(recentEvents.getByText('6 U', { exact: true })).toBeVisible();
@@ -122,13 +122,13 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await page
     .getByRole('button', { name: /Open event: NovoRapid, 6 U/ })
     .click();
-  await page.getByRole('button', { name: 'Удалить' }).click();
+  await page.getByRole('button', { name: 'Delete' }).click();
   await page
-    .getByRole('dialog', { name: 'Удалить событие?' })
-    .getByRole('button', { name: 'Удалить' })
+    .getByRole('dialog', { name: 'Delete event?' })
+    .getByRole('button', { name: 'Delete' })
     .click();
 
-  await page.getByRole('link', { name: 'На главную' }).click();
+  await page.getByRole('link', { name: 'Go to home' }).click();
   await waitForApplicationReady(page);
 
   await expect(recentEvents.getByText('6 U', { exact: true })).toHaveCount(0);

@@ -353,7 +353,7 @@ test('preparePlatformReadiness supports selective preload scope', async () => {
     key: asTranslationKey('dashboard.header.title'),
   });
 
-  assert.equal(dashboardTitle.value, 'Diabetes Universe');
+  assert.equal(dashboardTitle.value, 'Home');
 });
 
 test('createWebPlatformRuntime rejects when preload fails', async () => {

@@ -12,21 +12,11 @@ import {
   type TimelineRecentEvent,
 } from '../timeline/timeline-selectors';
 
-export interface DashboardDerivedAiInsight {
-  readonly generatedAt: string;
-  readonly id: string;
-  readonly relatedEventIds: readonly string[];
-  readonly summary: string;
-  readonly title: string;
-}
-
 export interface DashboardDerivedDaySummary {
   readonly dayDate: string;
   readonly displayDayLabel: string;
   readonly glucoseMeasurements: number;
   readonly medicationDoses: number;
-  readonly remindersCompleted: number;
-  readonly remindersTotal: number;
   readonly totalCarbohydrateGrams: number;
   readonly totalInsulinUnits: number;
 }
@@ -43,20 +33,16 @@ export interface DashboardTimelineState {
 }
 
 export interface DashboardQuickAddIntegrationOptions {
-  readonly aiInsight?: DashboardDerivedAiInsight | null;
   readonly formatDaySummaryDisplayDate?: (referenceTime: Date) => string;
   readonly formatLastGlucoseDisplayTime?: (dateTime: string) => string;
   readonly formatRecentEventDisplayTime?: (dateTime: string) => string;
   readonly locale?: string;
   readonly presentationDependencies: TimelinePresentationDependencies;
   readonly referenceTime?: Date;
-  readonly remindersCompleted?: number;
-  readonly remindersTotal?: number;
   readonly timeZone?: string;
 }
 
 export interface DashboardQuickAddIntegrationResult {
-  readonly aiInsight: DashboardDerivedAiInsight | null;
   readonly daySummary: DashboardDerivedDaySummary | null;
   readonly lastGlucose: DashboardDerivedLastGlucose | null;
   readonly recentEvents: readonly DashboardDerivedRecentEvent[];
@@ -120,8 +106,6 @@ function deriveDaySummary(
   events: readonly SemanticTimelineEvent[],
   referenceTime: Date,
   timeZone: string | undefined,
-  remindersCompleted: number,
-  remindersTotal: number,
   formatDaySummaryDisplayDate?: (referenceTime: Date) => string,
 ): DashboardDerivedDaySummary | null {
   if (!formatDaySummaryDisplayDate) {
@@ -163,8 +147,6 @@ function deriveDaySummary(
     displayDayLabel: dayLabel.displayDayLabel,
     glucoseMeasurements,
     medicationDoses,
-    remindersCompleted,
-    remindersTotal,
     totalCarbohydrateGrams,
     totalInsulinUnits,
   };
@@ -177,8 +159,6 @@ export function deriveDashboardQuickAddBlocks(
   const { presentationDependencies } = options;
   const referenceTime = options.referenceTime ?? new Date();
   const timeZone = options.timeZone?.trim() || undefined;
-  const remindersCompleted = options.remindersCompleted ?? 0;
-  const remindersTotal = options.remindersTotal ?? 0;
   const recentEvents = options.formatRecentEventDisplayTime
     ? deriveDashboardRecentEventSources(
         state.events,
@@ -190,13 +170,10 @@ export function deriveDashboardQuickAddBlocks(
     : [];
 
   return {
-    aiInsight: options.aiInsight ?? null,
     daySummary: deriveDaySummary(
       state.events,
       referenceTime,
       timeZone,
-      remindersCompleted,
-      remindersTotal,
       options.formatDaySummaryDisplayDate,
     ),
     lastGlucose: deriveLastGlucose(

@@ -47,7 +47,7 @@ test('loads draft bundles for supported draft locales', async () => {
     });
 
     assert.equal(bundle.locale, locale);
-    assert.equal(bundle.entries['dashboard.header.title'], 'Diabetes Universe');
+    assert.equal(bundle.entries['dashboard.header.title'], 'Home');
   }
 });
 

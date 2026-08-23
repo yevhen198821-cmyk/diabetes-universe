@@ -2,10 +2,15 @@
 
 import { useState } from 'react';
 
+import type { TimelineUiLabels } from './timeline-ui-labels';
+import { formatTimelineLoadMoreAnnouncement } from './timeline-ui-labels';
+
 interface TimelineLoadMoreProps {
   readonly addedCount?: number;
   readonly ariaControls: string;
+  readonly formatCount: (count: number) => string;
   readonly isLoading?: boolean;
+  readonly labels: TimelineUiLabels['loadMore'];
   readonly onLoadMore: () => void;
   readonly remainingCount?: number;
   readonly showRemainingCount?: boolean;
@@ -14,7 +19,9 @@ interface TimelineLoadMoreProps {
 export function TimelineLoadMore({
   addedCount = 0,
   ariaControls,
+  formatCount,
   isLoading = false,
+  labels,
   onLoadMore,
   remainingCount,
   showRemainingCount = true,
@@ -29,7 +36,13 @@ export function TimelineLoadMore({
     onLoadMore();
 
     if (addedCount > 0) {
-      setAnnouncement(`Показано ещё ${addedCount} событий`);
+      setAnnouncement(
+        formatTimelineLoadMoreAnnouncement(
+          labels.announced,
+          addedCount,
+          formatCount,
+        ),
+      );
     }
   };
 
@@ -43,11 +56,11 @@ export function TimelineLoadMore({
         onClick={handleClick}
         type="button"
       >
-        {isLoading ? 'Загрузка…' : 'Показать ещё'}
+        {isLoading ? labels.loading : labels.button}
       </button>
       {showRemainingCount && remainingCount !== undefined ? (
         <p className="text-center text-xs text-slate-500 dark:text-slate-400">
-          Осталось: {remainingCount}
+          {labels.remaining.replace('{count}', formatCount(remainingCount))}
         </p>
       ) : null}
       <p aria-live="polite" className="sr-only">

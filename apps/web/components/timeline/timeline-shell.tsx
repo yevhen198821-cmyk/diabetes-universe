@@ -23,7 +23,10 @@ import { compareSemanticTimelineEventsDescending } from '../../lib/timeline/sema
 import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
 import { resolveTimelinePresentationLocale } from '../../lib/timeline/presentation';
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
+import { useFormatter } from '../../lib/platform/react/use-formatter';
+import { useLocalization } from '../../lib/platform/react/use-localization';
 import { createTimelineListModel } from './timeline-list-model';
+import { resolveTimelineUiLabels } from './timeline-ui-labels';
 import { QuickAddRoot } from './quick-add-root';
 import { TimelineList } from './timeline-list';
 import {
@@ -48,6 +51,16 @@ function sortTimelineEventsNewestFirst(
 }
 
 export function TimelineShell() {
+  const localization = useLocalization();
+  const formatter = useFormatter();
+  const uiLabels = useMemo(
+    () => resolveTimelineUiLabels(localization),
+    [localization],
+  );
+  const formatCount = useMemo(
+    () => (count: number) => formatter.formatNumber(count),
+    [formatter],
+  );
   const {
     addEvent,
     deleteEvent,
@@ -123,6 +136,7 @@ export function TimelineShell() {
   const listModel = useMemo(
     () =>
       createTimelineListModel({
+        defaultErrorMessage: uiLabels.error.default,
         error,
         events: paginationModel.visibleEvents,
         hasActiveCriteria: searchFilterModel.hasActiveCriteria,
@@ -132,20 +146,23 @@ export function TimelineShell() {
         status,
         timeZone,
         totalSourceEventCount: events.length,
+        unknownDateLabel: uiLabels.group.unknownDate,
       }),
     [
       error,
       events.length,
       paginationModel.visibleEvents,
+      presentationDependencies.labels.groups,
+      presentationLocale,
       referenceDate,
       searchFilterModel.hasActiveCriteria,
       status,
       timeZone,
-      presentationLocale,
-      presentationDependencies.labels.groups,
+      uiLabels.error.default,
+      uiLabels.group.unknownDate,
     ],
   );
-  const showToolbar = status === 'ready' && events.length > 0;
+  const showToolbar = status === 'ready';
   const selectedEvent =
     selectedEventId !== null
       ? events.find((event) => event.id === selectedEventId)
@@ -273,21 +290,28 @@ export function TimelineShell() {
     <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-950">
       <TopBar />
 
-      <main className="timeline-content mx-auto max-w-3xl space-y-6 px-4 pt-6 pb-24 sm:px-6 lg:pt-8">
+      <main
+        className="timeline-content mx-auto max-w-3xl space-y-6 px-4 pt-6 pb-24 sm:px-6 lg:pt-8"
+        id="main-content"
+      >
         <div>
-          <p className="text-sm font-medium text-slate-500">Журнал событий</p>
+          <p className="text-sm font-medium text-slate-500">
+            {uiLabels.shell.eyebrow}
+          </p>
           <h1
             className="mt-1 text-2xl font-bold text-slate-950 focus:outline-none"
             ref={headingRef}
             tabIndex={-1}
           >
-            Timeline
+            {uiLabels.header.title}
           </h1>
         </div>
 
         {showToolbar ? (
           <TimelineToolbar
             filterLabels={presentationDependencies.labels.filters}
+            formatCount={formatCount}
+            labels={uiLabels}
             model={searchFilterModel}
             onFilterChange={handleFilterChange}
             onQueryChange={handleQueryChange}
@@ -297,6 +321,7 @@ export function TimelineShell() {
         ) : null}
 
         <TimelineList
+          labels={uiLabels}
           model={listModel}
           onAddEvent={() => setQuickAddOpen(true)}
           onOpenEvent={handleOpenEvent}
@@ -313,7 +338,9 @@ export function TimelineShell() {
                 : 0
             }
             ariaControls="timeline-events-list"
+            formatCount={formatCount}
             isLoading={isLoadingRepositoryHistory}
+            labels={uiLabels.loadMore}
             onLoadMore={handleLoadMore}
             remainingCount={
               paginationModel.hasMore
@@ -329,8 +356,7 @@ export function TimelineShell() {
             className="text-center text-sm text-red-600 dark:text-red-400"
             role="status"
           >
-            Не удалось загрузить более ранние события. Попробуйте обновить
-            страницу.
+            {uiLabels.historyLoad.error}
           </p>
         ) : null}
       </main>

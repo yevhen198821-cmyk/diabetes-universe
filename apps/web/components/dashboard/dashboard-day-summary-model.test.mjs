@@ -10,7 +10,6 @@ const labels = {
   glucoseMeasurements: 'Glucose measurements',
   loading: 'Loading day summary',
   medicationDoses: 'Medication doses',
-  reminders: 'Reminders',
   title: 'Day summary',
   totalCarbohydrates: 'Total carbohydrates',
   totalInsulin: 'Total insulin',
@@ -26,8 +25,6 @@ const validSummary = {
   displayDayLabel: 'Sunday, 2 August 2026',
   glucoseMeasurements: 4,
   medicationDoses: 2,
-  remindersCompleted: 1,
-  remindersTotal: 3,
   totalCarbohydrateGrams: 120,
   totalInsulinUnits: 12,
 };
@@ -35,7 +32,6 @@ const validSummary = {
 const formattedMetrics = {
   glucoseMeasurements: '4',
   medicationDoses: '2',
-  reminders: '1 / 3',
   totalCarbohydrates: '120 g',
   totalInsulin: '12 U',
 };
@@ -54,13 +50,12 @@ test('creates ready state with primary and secondary metrics', () => {
   assert.equal(model.dayDate, '2026-08-02');
   assert.equal(model.displayDayLabel, 'Sunday, 2 August 2026');
   assert.equal(model.primaryMetrics.length, 3);
-  assert.equal(model.secondaryMetrics.length, 2);
+  assert.equal(model.secondaryMetrics.length, 1);
   assert.equal(model.primaryMetrics[0]?.label, 'Glucose measurements');
   assert.equal(model.primaryMetrics[0]?.value, '4');
   assert.equal(model.primaryMetrics[1]?.value, '12 U');
   assert.equal(model.primaryMetrics[2]?.value, '120 g');
   assert.equal(model.secondaryMetrics[0]?.value, '2');
-  assert.equal(model.secondaryMetrics[1]?.value, '1 / 3');
   assert.equal(model.isLoading, false);
 });
 
@@ -73,8 +68,6 @@ test('normalizes ready summary values without changing their meaning', () => {
         displayDayLabel: ' Sunday, 2 August 2026 ',
         glucoseMeasurements: 4,
         medicationDoses: 2,
-        remindersCompleted: 1,
-        remindersTotal: 3,
         totalCarbohydrateGrams: 120,
         totalInsulinUnits: 12,
       },
@@ -123,24 +116,6 @@ test('downgrades negative totals to the safe empty fallback', () => {
   assert.equal(model.message, labels.unavailable);
 });
 
-test('downgrades reminders completed above total to the safe empty fallback', () => {
-  const model = createDashboardDaySummaryViewModel(
-    {
-      state: 'ready',
-      summary: {
-        ...validSummary,
-        remindersCompleted: 4,
-        remindersTotal: 3,
-      },
-    },
-    labels,
-    formattedMetrics,
-  );
-
-  assert.equal(model.state, 'empty');
-  assert.equal(model.message, labels.unavailable);
-});
-
 test('keeps machine-readable dayDate separate from the display label', () => {
   const model = createDashboardDaySummaryViewModel(
     {
@@ -161,7 +136,7 @@ test('keeps machine-readable dayDate separate from the display label', () => {
   assert.notEqual(model.dayDate, model.displayDayLabel);
 });
 
-test('does not expose charts, comparisons, tir, gmi, or ai fields', () => {
+test('does not expose charts, comparisons, tir, gmi, ai fields, or reminders', () => {
   const model = createDashboardDaySummaryViewModel(
     {
       state: 'ready',
@@ -179,8 +154,12 @@ test('does not expose charts, comparisons, tir, gmi, or ai fields', () => {
   assert.equal('aiInsight' in model, false);
   assert.equal(
     model.primaryMetrics.some((metric) =>
-      /tir|gmi|диапазон/i.test(metric.label),
+      /reminder|tir|gmi|диапазон/i.test(metric.label),
     ),
+    false,
+  );
+  assert.equal(
+    model.secondaryMetrics.some((metric) => /reminder/i.test(metric.label)),
     false,
   );
 });
@@ -193,8 +172,6 @@ test('accepts zero counts when the owner supplies valid current-day totals', () 
         ...validSummary,
         glucoseMeasurements: 0,
         medicationDoses: 0,
-        remindersCompleted: 0,
-        remindersTotal: 0,
         totalCarbohydrateGrams: 0,
         totalInsulinUnits: 0,
       },
@@ -203,7 +180,6 @@ test('accepts zero counts when the owner supplies valid current-day totals', () 
     {
       glucoseMeasurements: '0',
       medicationDoses: '0',
-      reminders: '0 / 0',
       totalCarbohydrates: '0 g',
       totalInsulin: '0 U',
     },
@@ -211,7 +187,6 @@ test('accepts zero counts when the owner supplies valid current-day totals', () 
 
   assert.equal(model.state, 'ready');
   assert.equal(model.primaryMetrics[0]?.value, '0');
-  assert.equal(model.secondaryMetrics[1]?.value, '0 / 0');
 });
 
 test('creates loading state with the default accessible label', () => {

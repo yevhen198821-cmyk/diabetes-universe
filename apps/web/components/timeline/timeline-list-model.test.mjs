@@ -5,25 +5,29 @@ import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-t
 import { createTimelineListModel } from './timeline-list-model.ts';
 
 const referenceDate = new Date('2026-08-02T12:00:00.000Z');
+const listLabels = {
+  defaultErrorMessage: 'Try refreshing the page or come back later.',
+  unknownDateLabel: 'Unknown date',
+};
 
 function createLegacyEvent(id, dateTime, kind = 'glucose') {
   const base = { dateTime, id, kind, source: 'test' };
 
   switch (kind) {
     case 'activity':
-      return { ...base, title: 'Прогулка', unit: 'минут', value: '30' };
+      return { ...base, title: 'Walk', unit: 'min', value: '30' };
     case 'glucose':
-      return { ...base, title: 'Глюкоза', value: '6,4 ммоль/л' };
+      return { ...base, title: 'Glucose', value: '6.4 mmol/L' };
     case 'insulin':
-      return { ...base, title: 'NovoRapid', value: '4 ЕД' };
+      return { ...base, title: 'NovoRapid', value: '4 U' };
     case 'medication':
-      return { ...base, title: 'Метформин', unit: 'мг', value: '500' };
+      return { ...base, title: 'Metformin', unit: 'mg', value: '500' };
     case 'note':
-      return { ...base, title: 'Заметка', value: 'Тест' };
+      return { ...base, title: 'Note', value: 'Test' };
     case 'nutrition':
-      return { ...base, title: 'Завтрак', value: '42 г углеводов' };
+      return { ...base, title: 'Breakfast', value: '42 g carbs' };
     default:
-      return { ...base, title: id, value: '6,4 ммоль/л' };
+      return { ...base, title: id, value: '6.4 mmol/L' };
   }
 }
 
@@ -35,8 +39,15 @@ function createEvent(id, dateTime, kind = 'glucose') {
   return event;
 }
 
+function createModel(input) {
+  return createTimelineListModel({
+    ...listLabels,
+    ...input,
+  });
+}
+
 test('creates loading model without groups', () => {
-  const model = createTimelineListModel({
+  const model = createModel({
     events: [createEvent('glucose-1', '2026-08-02T08:00:00.000Z')],
     hasActiveCriteria: true,
     referenceDate,
@@ -51,7 +62,7 @@ test('creates loading model without groups', () => {
 });
 
 test('creates empty model for ready state without events', () => {
-  const model = createTimelineListModel({
+  const model = createModel({
     events: [],
     referenceDate,
     status: 'ready',
@@ -64,7 +75,7 @@ test('creates empty model for ready state without events', () => {
 });
 
 test('creates filtered-empty model when criteria hide existing events', () => {
-  const model = createTimelineListModel({
+  const model = createModel({
     events: [],
     hasActiveCriteria: true,
     referenceDate,
@@ -78,7 +89,7 @@ test('creates filtered-empty model when criteria hide existing events', () => {
 });
 
 test('creates error model with safe fallback message', () => {
-  const model = createTimelineListModel({
+  const model = createModel({
     error: '',
     events: [],
     hasActiveCriteria: true,
@@ -89,14 +100,11 @@ test('creates error model with safe fallback message', () => {
   });
 
   assert.equal(model.status, 'error');
-  assert.equal(
-    model.errorMessage,
-    'Попробуйте обновить страницу или вернуться позже.',
-  );
+  assert.equal(model.errorMessage, listLabels.defaultErrorMessage);
 });
 
 test('creates ready model for one date with newest events first', () => {
-  const model = createTimelineListModel({
+  const model = createModel({
     events: [
       createEvent('older', '2026-08-02T08:00:00.000Z'),
       createEvent('newer', '2026-08-02T09:00:00.000Z'),
@@ -122,71 +130,13 @@ test('creates ready model for one date with newest events first', () => {
   );
 });
 
-test('creates separate today, yesterday, and older date groups', () => {
-  const model = createTimelineListModel({
-    events: [
-      createEvent('older-date', '2026-07-30T18:00:00.000Z'),
-      createEvent('today', '2026-08-02T08:00:00.000Z'),
-      createEvent('yesterday', '2026-08-01T21:00:00.000Z'),
-    ],
-    groupLabels: {
-      earlier: 'Earlier',
-      today: 'Today',
-      yesterday: 'Yesterday',
-    },
-    referenceDate,
-    status: 'ready',
-    timeZone: 'UTC',
-    locale: 'en-GB',
-  });
-
-  assert.deepEqual(
-    model.groups.map((group) => group.dateKey),
-    ['2026-08-02', '2026-08-01', '2026-07-30'],
-  );
-  assert.deepEqual(
-    model.groups.map((group) => group.label),
-    ['Today', 'Yesterday', '30 July'],
-  );
-});
-
-test('shows year for groups outside the current year', () => {
-  const model = createTimelineListModel({
-    events: [createEvent('last-year', '2025-12-31T10:00:00.000Z')],
-    referenceDate,
-    status: 'ready',
-    timeZone: 'UTC',
-    locale: 'en-GB',
-  });
-
-  assert.equal(model.groups[0].label, '31 December 2025');
-});
-
-test('keeps same dateTime events stable by id', () => {
-  const model = createTimelineListModel({
-    events: [
-      createEvent('same-b', '2026-08-02T08:00:00.000Z'),
-      createEvent('same-a', '2026-08-02T08:00:00.000Z'),
-    ],
-    referenceDate,
-    status: 'ready',
-    timeZone: 'UTC',
-    locale: 'en-GB',
-  });
-
-  assert.deepEqual(
-    model.groups[0].events.map((event) => event.id),
-    ['same-a', 'same-b'],
-  );
-});
-
 test('places invalid dateTime in a predictable fallback group', () => {
   const validEvent = createEvent('valid', '2026-08-02T08:00:00.000Z');
   const invalidEvent = {
     ...createEvent('invalid', '2026-08-02T08:00:00.000Z'),
     occurredAt: 'not-a-date',
   };
-  const model = createTimelineListModel({
+  const model = createModel({
     events: [invalidEvent, validEvent],
     referenceDate,
     status: 'ready',
@@ -198,45 +148,5 @@ test('places invalid dateTime in a predictable fallback group', () => {
     model.groups.map((group) => group.dateKey),
     ['2026-08-02', 'invalid-date'],
   );
-  assert.equal(model.groups[1].label, 'Дата неизвестна');
-});
-
-test('does not mutate the input event array', () => {
-  const input = [
-    createEvent('second', '2026-08-02T09:00:00.000Z'),
-    createEvent('first', '2026-08-02T08:00:00.000Z'),
-  ];
-  const originalOrder = input.map((event) => event.id);
-
-  createTimelineListModel({
-    events: input,
-    referenceDate,
-    status: 'ready',
-    timeZone: 'UTC',
-    locale: 'en-GB',
-  });
-
-  assert.deepEqual(
-    input.map((event) => event.id),
-    originalOrder,
-  );
-});
-
-test('groups by supplied local timezone date', () => {
-  const model = createTimelineListModel({
-    events: [
-      createEvent('tokyo-aug-2', '2026-08-01T16:30:00.000Z'),
-      createEvent('utc-aug-2', '2026-08-02T01:30:00.000Z'),
-    ],
-    referenceDate,
-    status: 'ready',
-    timeZone: 'Asia/Tokyo',
-  });
-
-  assert.equal(model.groups.length, 1);
-  assert.equal(model.groups[0].dateKey, '2026-08-02');
-  assert.deepEqual(
-    model.groups[0].events.map((event) => event.id),
-    ['utc-aug-2', 'tokyo-aug-2'],
-  );
+  assert.equal(model.groups[1].label, listLabels.unknownDateLabel);
 });

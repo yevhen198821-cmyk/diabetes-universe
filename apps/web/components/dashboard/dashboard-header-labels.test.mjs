@@ -11,7 +11,7 @@ test('resolveDashboardHeaderLabels returns canonical English dashboard header st
 
   const labels = resolveDashboardHeaderLabels(runtime.localization);
 
-  assert.equal(labels.productName, 'Diabetes Universe');
+  assert.equal(labels.productName, 'Home');
   assert.equal(labels.addEvent, 'Add event');
   assert.equal(labels.avatar, 'User profile');
   assert.equal(labels.avatarAction, 'Open profile');

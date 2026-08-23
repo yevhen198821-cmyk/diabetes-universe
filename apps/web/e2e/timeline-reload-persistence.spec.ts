@@ -35,7 +35,7 @@ test('timeline note persists across page reload', async ({ page }) => {
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await page.getByRole('button', { name: 'Добавить событие' }).click();
+  await page.getByRole('button', { name: 'Add event' }).click();
   await page.getByRole('button', { name: 'Заметка. Добавить запись' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Добавить заметку' }),
@@ -60,18 +60,18 @@ test('deleted timeline note remains deleted across page reload', async ({
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await page.getByRole('button', { name: 'Добавить событие' }).click();
+  await page.getByRole('button', { name: 'Add event' }).click();
   await page.getByRole('button', { name: 'Заметка. Добавить запись' }).click();
   await page.getByLabel('Текст заметки').fill(noteText);
   await page.getByRole('button', { name: 'Сохранить' }).click();
   await expect(page.getByText(noteText).first()).toBeVisible();
 
   await page.getByText(noteText).first().click();
-  await page.getByRole('button', { name: 'Удалить', exact: true }).click();
-  const confirmation = page.getByRole('dialog', { name: 'Удалить событие?' });
+  await page.getByRole('button', { name: 'Delete', exact: true }).click();
+  const confirmation = page.getByRole('dialog', { name: 'Delete event?' });
   await expect(confirmation).toBeVisible();
   await confirmation
-    .getByRole('button', { name: 'Удалить', exact: true })
+    .getByRole('button', { name: 'Delete', exact: true })
     .click();
 
   await expect(page.getByText(noteText)).toHaveCount(0);
@@ -94,7 +94,7 @@ test('empty durable timeline does not reseed demo data after reload', async ({
   await waitForApplicationReady(page);
 
   await expect(
-    page.getByRole('heading', { name: 'Событий пока нет' }),
+    page.getByRole('heading', { name: 'No events yet' }),
   ).toBeVisible();
   await expect(page.locator('#timeline-events-list')).toHaveCount(0);
 
@@ -102,7 +102,7 @@ test('empty durable timeline does not reseed demo data after reload', async ({
   await waitForApplicationReady(page);
 
   await expect(
-    page.getByRole('heading', { name: 'Событий пока нет' }),
+    page.getByRole('heading', { name: 'No events yet' }),
   ).toBeVisible();
   await expect(page.locator('#timeline-events-list')).toHaveCount(0);
 });

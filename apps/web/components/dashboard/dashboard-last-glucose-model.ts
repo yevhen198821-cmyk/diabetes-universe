@@ -41,6 +41,7 @@ export interface DashboardLastGlucoseViewModel {
   readonly isLoading: boolean;
   readonly isStale: boolean;
   readonly message: string | null;
+  readonly sourceLabel: string | null;
   readonly staleMessage: string | null;
   readonly state: 'empty' | 'error' | 'loading' | 'ready';
   readonly value: string | null;
@@ -48,6 +49,7 @@ export interface DashboardLastGlucoseViewModel {
 
 export interface DashboardLastGlucoseViewModelOptions {
   readonly referenceTime?: Date;
+  readonly sourceLabel?: string | null;
 }
 
 export const DEFAULT_LAST_GLUCOSE_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
@@ -84,6 +86,7 @@ function createEmptyViewModel(message: string): DashboardLastGlucoseViewModel {
     isLoading: false,
     isStale: false,
     message,
+    sourceLabel: null,
     staleMessage: null,
     state: 'empty',
     value: null,
@@ -119,6 +122,7 @@ export function createDashboardLastGlucoseViewModel(
         isLoading: true,
         isStale: false,
         message: props.loadingLabel?.trim() || labels.loading,
+        sourceLabel: null,
         staleMessage: null,
         state: props.state,
         value: null,
@@ -147,6 +151,7 @@ export function createDashboardLastGlucoseViewModel(
         isLoading: false,
         isStale,
         message: null,
+        sourceLabel: options.sourceLabel?.trim() || null,
         staleMessage: isStale ? labels.stale : null,
         state: props.state,
         value: formattedValue,
@@ -159,6 +164,7 @@ export function createDashboardLastGlucoseViewModel(
         isLoading: false,
         isStale: false,
         message: props.message?.trim() || labels.defaultEmpty,
+        sourceLabel: null,
         staleMessage: null,
         state: props.state,
         value: null,
@@ -170,6 +176,7 @@ export function createDashboardLastGlucoseViewModel(
         isLoading: false,
         isStale: false,
         message: props.message?.trim() || labels.defaultError,
+        sourceLabel: null,
         staleMessage: null,
         state: props.state,
         value: null,

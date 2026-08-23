@@ -33,5 +33,6 @@ test('account namespace remains in application preload scope', async () => {
     'account',
     'dashboard',
     'timeline',
+    'quick-add',
   ]);
 });

@@ -21,7 +21,6 @@ test('resolveDashboardDaySummaryLabels returns canonical English strings', async
   assert.equal(labels.totalInsulin, 'Total insulin');
   assert.equal(labels.totalCarbohydrates, 'Total carbohydrates');
   assert.equal(labels.medicationDoses, 'Medication doses');
-  assert.equal(labels.reminders, 'Reminders');
   assert.equal(labels.units.compactMassG, 'g');
   assert.equal(labels.units.compactInsulinDose, 'U');
 });

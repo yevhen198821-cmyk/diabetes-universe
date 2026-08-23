@@ -68,10 +68,6 @@ function createFormattedMetrics(
   formatter: ReturnType<typeof useFormatter>,
   labels: DashboardDaySummaryLabels,
 ): DashboardDaySummaryFormattedMetrics {
-  const formattedCompleted = formatter.formatNumber(
-    summary.summary.remindersCompleted,
-  );
-  const formattedTotal = formatter.formatNumber(summary.summary.remindersTotal);
   const formattedInsulin = formatter.formatNumber(
     summary.summary.totalInsulinUnits,
     { maximumFractionDigits: 1, minimumFractionDigits: 0 },
@@ -86,7 +82,6 @@ function createFormattedMetrics(
       summary.summary.glucoseMeasurements,
     ),
     medicationDoses: formatter.formatNumber(summary.summary.medicationDoses),
-    reminders: `${formattedCompleted} / ${formattedTotal}`,
     totalCarbohydrates: `${formattedCarbs} ${labels.units.compactMassG}`,
     totalInsulin: `${formattedInsulin} ${labels.units.compactInsulinDose}`,
   };

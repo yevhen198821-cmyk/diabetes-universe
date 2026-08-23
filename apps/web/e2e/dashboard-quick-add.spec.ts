@@ -8,7 +8,7 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
 
   await expect(page).toHaveTitle(/Dashboard \| Diabetes Universe/);
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
+    page.getByRole('heading', { level: 1, name: 'Home' }),
   ).toBeVisible();
   await expect(
     page.getByRole('heading', { name: 'Last glucose' }),
@@ -69,13 +69,11 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Yesterday' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '30 July' })).toBeVisible();
-  await expect(
-    page.getByRole('group', { name: 'Фильтр событий' }),
-  ).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Event filter' })).toBeVisible();
   await expect(page.getByText('6.4 mmol/L').first()).toBeVisible();
   await expect(page.getByText('5 U').first()).toBeVisible();
 
-  await page.getByRole('button', { name: 'Добавить событие' }).click();
+  await page.getByRole('button', { name: 'Add event' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Добавить событие' }),
   ).toBeVisible();
@@ -150,13 +148,13 @@ test('timeline search and filters combine without changing store', async ({
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  const search = page.getByLabel('Поиск событий');
+  const search = page.getByLabel('Search events');
 
   await search.fill('Метформин');
   await expect(page.getByText('Метформин').first()).toBeVisible();
   await expect(page.getByText('NovoRapid').first()).toBeHidden();
 
-  await page.getByRole('button', { name: 'Очистить поиск' }).click();
+  await page.getByRole('button', { name: 'Clear search' }).click();
   await expect(search).toHaveValue('');
   await page.getByRole('button', { name: 'Insulin' }).click();
   await expect(page.getByText('NovoRapid').first()).toBeVisible();
@@ -164,9 +162,9 @@ test('timeline search and filters combine without changing store', async ({
 
   await search.fill('Метформин');
   await expect(
-    page.getByRole('heading', { name: 'Ничего не найдено' }),
+    page.getByRole('heading', { name: 'No matching events' }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Сбросить фильтры' }).first().click();
+  await page.getByRole('button', { name: 'Reset filters' }).first().click();
   await expect(search).toHaveValue('');
   await expect(page.getByRole('button', { name: 'All' })).toHaveAttribute(
     'aria-pressed',
@@ -177,7 +175,7 @@ test('timeline search and filters combine without changing store', async ({
 
   await page.goto('/timeline');
   await waitForApplicationReady(page);
-  const homeLink = page.getByRole('link', { name: 'На главную' });
+  const homeLink = page.getByRole('link', { name: 'Go to home' });
   await homeLink.focus();
   await expect(homeLink).toBeFocused();
   await page.keyboard.press('Tab');
@@ -197,7 +195,7 @@ test('timeline quick add updates shared dashboard state', async ({ page }) => {
     page.getByRole('heading', { level: 1, name: 'Timeline' }),
   ).toBeVisible();
 
-  await page.getByRole('button', { name: 'Добавить событие' }).click();
+  await page.getByRole('button', { name: 'Add event' }).click();
   const quickAddDialog = page.getByRole('dialog', { name: 'Добавить событие' });
   await expect(
     quickAddDialog.getByRole('button', { name: /Активность/ }),
@@ -220,11 +218,11 @@ test('timeline quick add updates shared dashboard state', async ({ page }) => {
 
   await expect(page.getByText('8.8 mmol/L').first()).toBeVisible();
 
-  await page.getByRole('link', { name: 'На главную' }).click();
+  await page.getByRole('link', { name: 'Go to home' }).click();
 
   await expect(page).toHaveURL('/');
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
+    page.getByRole('heading', { level: 1, name: 'Home' }),
   ).toBeVisible();
   await expect(
     page.getByRole('region', { name: 'Last glucose' }).getByText('8.8 mmol/L'),
@@ -237,6 +235,6 @@ test('/dashboard redirects to home dashboard', async ({ page }) => {
 
   await expect(page).toHaveURL('/');
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
+    page.getByRole('heading', { level: 1, name: 'Home' }),
   ).toBeVisible();
 });

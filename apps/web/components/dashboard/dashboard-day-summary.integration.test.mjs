@@ -34,8 +34,6 @@ const readySummary = {
   displayDayLabel: 'Sunday, 2 August 2026',
   glucoseMeasurements: 4,
   medicationDoses: 2,
-  remindersCompleted: 1,
-  remindersTotal: 3,
   totalCarbohydrateGrams: 120,
   totalInsulinUnits: 12,
 };
@@ -74,7 +72,7 @@ test('dashboard day summary renders localized English copy inside platform provi
     assert.match(document.body.textContent ?? '', /Total insulin/);
     assert.match(document.body.textContent ?? '', /Total carbohydrates/);
     assert.match(document.body.textContent ?? '', /Medication doses/);
-    assert.match(document.body.textContent ?? '', /Reminders/);
+    assert.equal(document.body.textContent?.includes('Reminders'), false);
     assert.match(document.body.textContent ?? '', /Sunday, 2 August 2026/);
     assert.equal(document.body.textContent?.includes('Сводка дня'), false);
     assert.equal(document.querySelector('time[dateTime]') !== null, true);
@@ -253,7 +251,7 @@ test('dashboard day summary formats counters with platform formatter', async () 
 
   try {
     assert.equal(formatNumberCalls >= 4, true);
-    assert.match(document.body.textContent ?? '', /1 \/ 3/);
+    assert.equal(document.body.textContent?.includes('1 / 3'), false);
     assert.match(document.body.textContent ?? '', /12 U/);
     assert.match(document.body.textContent ?? '', /120 g/);
   } finally {

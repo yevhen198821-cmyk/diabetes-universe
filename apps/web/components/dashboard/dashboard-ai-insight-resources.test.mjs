@@ -54,5 +54,6 @@ test('dashboard preload namespaces remain unchanged for ai insight keys', async 
     'account',
     'dashboard',
     'timeline',
+    'quick-add',
   ]);
 });

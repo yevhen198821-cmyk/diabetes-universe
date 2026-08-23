@@ -5,8 +5,6 @@ export interface DashboardDaySummaryData {
   readonly displayDayLabel: string;
   readonly glucoseMeasurements: number;
   readonly medicationDoses: number;
-  readonly remindersCompleted: number;
-  readonly remindersTotal: number;
   readonly totalCarbohydrateGrams: number;
   readonly totalInsulinUnits: number;
 }
@@ -14,7 +12,6 @@ export interface DashboardDaySummaryData {
 export interface DashboardDaySummaryFormattedMetrics {
   readonly glucoseMeasurements: string;
   readonly medicationDoses: string;
-  readonly reminders: string;
   readonly totalCarbohydrates: string;
   readonly totalInsulin: string;
 }
@@ -96,11 +93,8 @@ function normalizeReadySummary(
     displayDayLabel.length === 0 ||
     !isNonNegativeInteger(summary.glucoseMeasurements) ||
     !isNonNegativeInteger(summary.medicationDoses) ||
-    !isNonNegativeInteger(summary.remindersCompleted) ||
-    !isNonNegativeInteger(summary.remindersTotal) ||
     !isNonNegativeNumber(summary.totalCarbohydrateGrams) ||
-    !isNonNegativeNumber(summary.totalInsulinUnits) ||
-    summary.remindersCompleted > summary.remindersTotal
+    !isNonNegativeNumber(summary.totalInsulinUnits)
   ) {
     return null;
   }
@@ -110,15 +104,12 @@ function normalizeReadySummary(
     displayDayLabel,
     glucoseMeasurements: summary.glucoseMeasurements,
     medicationDoses: summary.medicationDoses,
-    remindersCompleted: summary.remindersCompleted,
-    remindersTotal: summary.remindersTotal,
     totalCarbohydrateGrams: summary.totalCarbohydrateGrams,
     totalInsulinUnits: summary.totalInsulinUnits,
   };
 }
 
 function createReadyMetrics(
-  summary: DashboardDaySummaryData,
   labels: DashboardDaySummaryLabels,
   formattedMetrics: DashboardDaySummaryFormattedMetrics,
 ): Pick<DashboardDaySummaryViewModel, 'primaryMetrics' | 'secondaryMetrics'> {
@@ -141,10 +132,6 @@ function createReadyMetrics(
       {
         label: labels.medicationDoses,
         value: formattedMetrics.medicationDoses,
-      },
-      {
-        label: labels.reminders,
-        value: formattedMetrics.reminders,
       },
     ],
   };
@@ -188,7 +175,7 @@ export function createDashboardDaySummaryViewModel(
         return createEmptyViewModel(labels, labels.unavailable);
       }
 
-      const metrics = createReadyMetrics(summary, labels, formattedMetrics);
+      const metrics = createReadyMetrics(labels, formattedMetrics);
 
       return {
         dayDate: summary.dayDate,

@@ -23,6 +23,7 @@ export interface TimelineListModel {
 }
 
 export interface TimelineListModelInput {
+  readonly defaultErrorMessage: string;
   readonly error?: string;
   readonly events: readonly SemanticTimelineEvent[];
   readonly groupLabels?: Readonly<{
@@ -36,10 +37,9 @@ export interface TimelineListModelInput {
   readonly status: TimelineStoreStatus;
   readonly timeZone?: string;
   readonly totalSourceEventCount?: number;
+  readonly unknownDateLabel: string;
 }
 
-const DEFAULT_ERROR_MESSAGE =
-  'Попробуйте обновить страницу или вернуться позже.';
 const INVALID_DATE_KEY = 'invalid-date';
 
 function getGroupDateKey(
@@ -77,6 +77,7 @@ function createGroupLabel(
   events: readonly SemanticTimelineEvent[],
   referenceDate: Date,
   locale: string,
+  unknownDateLabel: string,
   timeZone?: string,
   groupLabels?: TimelineListModelInput['groupLabels'],
 ): string {
@@ -85,7 +86,7 @@ function createGroupLabel(
   );
 
   if (!firstValidEvent) {
-    return 'Дата неизвестна';
+    return unknownDateLabel;
   }
 
   return formatTimelineDateGroupLabel(
@@ -101,6 +102,7 @@ function createGroups(
   events: readonly SemanticTimelineEvent[],
   referenceDate: Date,
   locale: string,
+  unknownDateLabel: string,
   timeZone?: string,
   groupLabels?: TimelineListModelInput['groupLabels'],
 ): readonly TimelineListGroup[] {
@@ -128,6 +130,7 @@ function createGroups(
           sortedEvents,
           referenceDate,
           locale,
+          unknownDateLabel,
           timeZone,
           groupLabels,
         ),
@@ -136,6 +139,7 @@ function createGroups(
 }
 
 export function createTimelineListModel({
+  defaultErrorMessage,
   error,
   events,
   groupLabels,
@@ -145,6 +149,7 @@ export function createTimelineListModel({
   status,
   timeZone,
   totalSourceEventCount = events.length,
+  unknownDateLabel,
 }: TimelineListModelInput): TimelineListModel {
   if (status === 'loading') {
     return {
@@ -156,7 +161,7 @@ export function createTimelineListModel({
 
   if (status === 'error') {
     return {
-      errorMessage: error?.trim() || DEFAULT_ERROR_MESSAGE,
+      errorMessage: error?.trim() || defaultErrorMessage,
       groups: [],
       status: 'error',
       totalEventCount: 0,
@@ -180,7 +185,14 @@ export function createTimelineListModel({
   }
 
   return {
-    groups: createGroups(events, referenceDate, locale, timeZone, groupLabels),
+    groups: createGroups(
+      events,
+      referenceDate,
+      locale,
+      unknownDateLabel,
+      timeZone,
+      groupLabels,
+    ),
     status: 'ready',
     totalEventCount: events.length,
   };

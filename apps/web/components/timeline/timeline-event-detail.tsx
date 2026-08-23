@@ -2,10 +2,12 @@
 
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 import { Button, haptics } from '@diabetes-universe/ui';
+import type { TranslationKey } from '@diabetes-universe/i18n';
 import { X } from 'lucide-react';
 import {
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
   type ChangeEvent,
@@ -13,6 +15,12 @@ import {
   type RefObject,
 } from 'react';
 
+import { useLocalization } from '../../lib/platform/react/use-localization';
+import {
+  resolveTimelineEventSourcePresentation,
+  resolveTimelineUiLabels,
+  type TimelineUiLabels,
+} from './timeline-ui-labels';
 import {
   createTimelineSemanticEventEditDraft,
   updateSemanticTimelineEventFromDraft,
@@ -112,12 +120,14 @@ function ErrorText({
 function TimelineEventEditForm({
   draft,
   errors,
+  labels,
   onCancel,
   onChange,
   onSubmit,
 }: {
   readonly draft: TimelineEventEditDraft;
   readonly errors: TimelineEventEditErrors;
+  readonly labels: TimelineUiLabels['detail'];
   readonly onCancel: () => void;
   readonly onChange: (draft: TimelineEventEditDraft) => void;
   readonly onSubmit: () => void;
@@ -141,7 +151,7 @@ function TimelineEventEditForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className={labelClass} htmlFor="timeline-edit-date">
-            Дата
+            {labels.form.date}
           </label>
           <input
             aria-describedby={
@@ -158,7 +168,7 @@ function TimelineEventEditForm({
         </div>
         <div>
           <label className={labelClass} htmlFor="timeline-edit-time">
-            Время
+            {labels.form.time}
           </label>
           <input
             aria-describedby={
@@ -177,7 +187,7 @@ function TimelineEventEditForm({
 
       <div>
         <label className={labelClass} htmlFor="timeline-edit-title">
-          Название
+          {labels.form.title}
         </label>
         <input
           aria-describedby={
@@ -195,7 +205,7 @@ function TimelineEventEditForm({
       <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_8rem]">
         <div>
           <label className={labelClass} htmlFor="timeline-edit-value">
-            Значение
+            {labels.form.value}
           </label>
           <textarea
             aria-describedby={
@@ -211,7 +221,7 @@ function TimelineEventEditForm({
         </div>
         <div>
           <label className={labelClass} htmlFor="timeline-edit-unit">
-            Ед.
+            {labels.form.unit}
           </label>
           <input
             aria-describedby={
@@ -229,7 +239,7 @@ function TimelineEventEditForm({
 
       <div>
         <label className={labelClass} htmlFor="timeline-edit-context">
-          Контекст
+          {labels.form.context}
         </label>
         <input
           className={fieldClass}
@@ -241,7 +251,7 @@ function TimelineEventEditForm({
 
       <div>
         <label className={labelClass} htmlFor="timeline-edit-note">
-          Заметка
+          {labels.form.note}
         </label>
         <textarea
           className={`${fieldClass} min-h-24 py-3`}
@@ -258,20 +268,13 @@ function TimelineEventEditForm({
           onClick={onCancel}
           type="button"
         >
-          Отмена
+          {labels.close}
         </Button>
-        <Button type="submit">Сохранить</Button>
+        <Button type="submit">{labels.form.save}</Button>
       </div>
     </form>
   );
 }
-
-const timelineEventSourceLabels = {
-  demo: 'Демо-данные',
-  device: 'Устройство',
-  import: 'Импорт',
-  manual: 'Вручную',
-} as const;
 
 export function TimelineEventDetail({
   event,
@@ -282,6 +285,18 @@ export function TimelineEventDetail({
   onUpdate,
   presentationDependencies,
 }: TimelineEventDetailProps) {
+  const localization = useLocalization();
+  const uiLabels = useMemo(
+    () => resolveTimelineUiLabels(localization),
+    [localization],
+  );
+  const cancelLabel = useMemo(
+    () =>
+      localization.translate({
+        key: 'common.actions.cancel' as TranslationKey,
+      }).value,
+    [localization],
+  );
   const titleId = useId();
   const descriptionId = useId();
   const deleteTitleId = useId();
@@ -297,9 +312,10 @@ export function TimelineEventDetail({
   );
   const [errors, setErrors] = useState<TimelineEventEditErrors>({});
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const sourceLabel = event.source
-    ? timelineEventSourceLabels[event.source]
-    : null;
+  const sourcePresentation = resolveTimelineEventSourcePresentation(
+    event.source,
+    uiLabels.sources,
+  );
   const displayDate = presentationDependencies.formatter.formatDate(
     event.occurredAt,
     { dateStyle: 'long' },
@@ -335,7 +351,7 @@ export function TimelineEventDetail({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
       <button
-        aria-label="Закрыть детали события"
+        aria-label={uiLabels.detail.closeOverlay}
         className="absolute inset-0 bg-slate-950/40 backdrop-blur-[1px]"
         onClick={onClose}
         type="button"
@@ -358,11 +374,13 @@ export function TimelineEventDetail({
               className="truncate text-lg font-bold text-slate-950 dark:text-slate-50"
               id={titleId}
             >
-              {mode === 'edit' ? 'Изменить событие' : readPresentation.title}
+              {mode === 'edit'
+                ? uiLabels.detail.editTitle
+                : readPresentation.title}
             </h2>
           </div>
           <button
-            aria-label="Закрыть детали"
+            aria-label={uiLabels.detail.closeButton}
             className="grid size-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
             onClick={onClose}
             type="button"
@@ -379,6 +397,10 @@ export function TimelineEventDetail({
             <TimelineEventEditForm
               draft={draft}
               errors={errors}
+              labels={{
+                ...uiLabels.detail,
+                close: cancelLabel,
+              }}
               onCancel={() => {
                 setDraft(createTimelineSemanticEventEditDraft(event));
                 setErrors({});
@@ -402,7 +424,7 @@ export function TimelineEventDetail({
                 {readPresentation.context ? (
                   <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
                     <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                      Контекст
+                      {uiLabels.detail.context}
                     </dt>
                     <dd className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
                       {readPresentation.context}
@@ -412,20 +434,32 @@ export function TimelineEventDetail({
                 {readPresentation.note ? (
                   <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
                     <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                      Заметка
+                      {uiLabels.detail.note}
                     </dt>
                     <dd className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
                       {readPresentation.note}
                     </dd>
                   </div>
                 ) : null}
-                {sourceLabel ? (
-                  <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
+                {sourcePresentation ? (
+                  <div
+                    className={`rounded-xl p-3 ${
+                      sourcePresentation.isDemo
+                        ? 'border border-dashed border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/30'
+                        : 'bg-slate-50 dark:bg-slate-900'
+                    }`}
+                  >
                     <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                      Источник
+                      {uiLabels.detail.source}
                     </dt>
-                    <dd className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      {sourceLabel}
+                    <dd
+                      className={`mt-1 text-sm font-semibold ${
+                        sourcePresentation.isDemo
+                          ? 'text-amber-800 dark:text-amber-200'
+                          : 'text-slate-900 dark:text-slate-100'
+                      }`}
+                    >
+                      {sourcePresentation.label}
                     </dd>
                   </div>
                 ) : null}
@@ -441,7 +475,7 @@ export function TimelineEventDetail({
               onClick={onClose}
               type="button"
             >
-              Закрыть
+              {uiLabels.detail.close}
             </Button>
             <div className="flex flex-col-reverse gap-3 sm:flex-row">
               <Button
@@ -449,7 +483,7 @@ export function TimelineEventDetail({
                 onClick={() => setDeleteOpen(true)}
                 type="button"
               >
-                Удалить
+                {uiLabels.detail.delete}
               </Button>
               <Button
                 onClick={() => {
@@ -459,7 +493,7 @@ export function TimelineEventDetail({
                 }}
                 type="button"
               >
-                Изменить
+                {uiLabels.detail.edit}
               </Button>
             </div>
           </footer>
@@ -469,7 +503,7 @@ export function TimelineEventDetail({
       {deleteOpen ? (
         <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-6">
           <button
-            aria-label="Закрыть подтверждение удаления"
+            aria-label={uiLabels.detail.deleteConfirm.closeOverlay}
             className="absolute inset-0 bg-slate-950/50"
             onClick={() => setDeleteOpen(false)}
             type="button"
@@ -487,13 +521,13 @@ export function TimelineEventDetail({
               className="text-lg font-bold text-slate-950 dark:text-slate-50"
               id={deleteTitleId}
             >
-              Удалить событие?
+              {uiLabels.detail.deleteConfirm.title}
             </h3>
             <p
               className="mt-2 text-sm text-slate-600 dark:text-slate-300"
               id={deleteDescriptionId}
             >
-              Это действие нельзя отменить.
+              {uiLabels.detail.deleteConfirm.description}
             </p>
             <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <Button
@@ -501,14 +535,14 @@ export function TimelineEventDetail({
                 onClick={() => setDeleteOpen(false)}
                 type="button"
               >
-                Отмена
+                {cancelLabel}
               </Button>
               <button
                 className="min-h-11 rounded-xl bg-rose-600 px-5 text-sm font-semibold text-white transition hover:bg-rose-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700"
                 onClick={handleDelete}
                 type="button"
               >
-                Удалить
+                {uiLabels.detail.deleteConfirm.confirm}
               </button>
             </div>
           </section>
