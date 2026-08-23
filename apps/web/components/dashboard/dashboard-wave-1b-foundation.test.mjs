@@ -15,22 +15,31 @@ const nextActionSource = readFileSync(
   fileURLToPath(new URL('./dashboard-next-action.tsx', import.meta.url)),
   'utf8',
 );
+const quickActionsSource = readFileSync(
+  fileURLToPath(new URL('./dashboard-quick-actions.tsx', import.meta.url)),
+  'utf8',
+);
 
-test('dashboard shell uses semantic background tokens', () => {
+test('dashboard shell keeps semantic page foundation under decorative layers', () => {
   assert.match(shellSource, /bg-background text-text-primary/);
-  assert.doesNotMatch(shellSource, /dark:/);
+  assert.match(shellSource, /id="main-content"/);
 });
 
 test('dashboard blocks preserve Wave 1A status-first order in shell', () => {
   const lastGlucoseIndex = shellSource.indexOf('{lastGlucose}');
+  const daySummaryIndex = shellSource.indexOf('{daySummary}');
   const nextActionIndex = shellSource.indexOf('{nextAction}');
+  const recentEventsIndex = shellSource.indexOf('{recentEvents}');
 
   assert.ok(lastGlucoseIndex >= 0);
-  assert.ok(nextActionIndex > lastGlucoseIndex);
+  assert.ok(daySummaryIndex > lastGlucoseIndex);
+  assert.ok(nextActionIndex > daySummaryIndex);
+  assert.ok(recentEventsIndex > nextActionIndex);
 });
 
-test('dashboard migrated blocks avoid raw slate page surfaces', () => {
-  assert.match(lastGlucoseSource, /bg-surface|border-border-default/);
-  assert.doesNotMatch(lastGlucoseSource, /dark:/);
-  assert.doesNotMatch(nextActionSource, /dark:/);
+test('Wave 1C decorative color does not remove semantic accessibility states', () => {
+  assert.match(lastGlucoseSource, /role="status"/);
+  assert.match(lastGlucoseSource, /text-text-primary/);
+  assert.match(nextActionSource, /text-text-primary/);
+  assert.match(quickActionsSource, /focus-visible:outline-interactive-primary/);
 });
