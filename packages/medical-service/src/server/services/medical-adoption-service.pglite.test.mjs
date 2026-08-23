@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { AdoptionNotEnabledError } from '@diabetes-universe/medical-domain';
 import { resolveMedicalEnvironment } from '@diabetes-universe/medical-persistence/server';
 import {
   closeMedicalServiceBundle,
   createMedicalServiceBundle,
 } from '../create-medical-service-bundle.ts';
-import { AdoptionNotEnabledError } from '@diabetes-universe/medical-domain';
 
 const TEST_ENV = {
   NODE_ENV: 'test',
@@ -173,6 +173,121 @@ test('adoption disabled when feature gate is off', async () => {
   await closeMedicalServiceBundle(bundle);
 });
 
+test('already_adopted replay does not inflate session counters', async () => {
+  const bundle = await createMedicalServiceBundle(
+    resolveMedicalEnvironment(TEST_ENV),
+  );
+  const relationship = await bundle.subjectService.provisionSelfSubject(
+    'acct-replay-counter',
+  );
+  const scope = {
+    accountId: 'acct-replay-counter',
+    subjectId: relationship.subjectId,
+    correlationId: 'corr-replay-counter',
+  };
+
+  const session = await bundle.adoptionService.createOrResumeSession({
+    scope,
+    apiVersion: 'v1',
+    clientAdoptionRunId: 'run-replay-counter',
+    sourcePlatform: 'web',
+    sourceAppVersion: '1.0.0',
+    sourceSchemaMin: 1,
+    sourceSchemaMax: 1,
+  });
+
+  const item = {
+    sourceNamespace: 'ns_replay_counter',
+    localEventId: 'local-replay-counter',
+    sourceSchemaVersion: 1,
+    event: sampleEvent('local-replay-counter'),
+  };
+
+  await bundle.adoptionService.adoptBatch({
+    scope,
+    apiVersion: 'v1',
+    adoptionSessionId: session.adoptionSessionId,
+    items: [item],
+  });
+
+  await bundle.adoptionService.adoptBatch({
+    scope,
+    apiVersion: 'v1',
+    adoptionSessionId: session.adoptionSessionId,
+    items: [item],
+  });
+
+  const afterReplay = await bundle.adoptionService.getSession(
+    scope,
+    session.adoptionSessionId,
+  );
+  assert.equal(afterReplay.adoptedCount, 1);
+  assert.equal(afterReplay.skippedCount, 0);
+  assert.equal(afterReplay.failedCount, 0);
+
+  await closeMedicalServiceBundle(bundle);
+});
+
+test('completeSession rejects unresolved failed items', async () => {
+  const bundle = await createMedicalServiceBundle(
+    resolveMedicalEnvironment(TEST_ENV),
+  );
+  const relationship =
+    await bundle.subjectService.provisionSelfSubject('acct-incomplete');
+  const scope = {
+    accountId: 'acct-incomplete',
+    subjectId: relationship.subjectId,
+    correlationId: 'corr-incomplete',
+  };
+
+  const session = await bundle.adoptionService.createOrResumeSession({
+    scope,
+    apiVersion: 'v1',
+    clientAdoptionRunId: 'run-incomplete',
+    sourcePlatform: 'web',
+    sourceAppVersion: '1.0.0',
+    sourceSchemaMin: 1,
+    sourceSchemaMax: 1,
+  });
+
+  const conflictItem = {
+    sourceNamespace: 'ns_incomplete',
+    localEventId: 'local-incomplete-fail',
+    sourceSchemaVersion: 1,
+    event: sampleEvent('local-incomplete-fail'),
+  };
+
+  await bundle.adoptionService.adoptBatch({
+    scope,
+    apiVersion: 'v1',
+    adoptionSessionId: session.adoptionSessionId,
+    items: [conflictItem],
+  });
+
+  await bundle.adoptionService.adoptBatch({
+    scope,
+    apiVersion: 'v1',
+    adoptionSessionId: session.adoptionSessionId,
+    items: [
+      {
+        ...conflictItem,
+        event: {
+          ...sampleEvent('local-incomplete-fail'),
+          concentrationMmolPerL: 8.1,
+        },
+      },
+    ],
+  });
+
+  await assert.rejects(
+    () =>
+      bundle.adoptionService.completeSession(scope, session.adoptionSessionId),
+    (error) => error?.code === 'ADOPTION_SESSION_INCOMPLETE',
+  );
+
+  await closeMedicalServiceBundle(bundle);
+});
+
 test('terminal session rejects new batches', async () => {
   const bundle = await createMedicalServiceBundle(
     resolveMedicalEnvironment(TEST_ENV),
@@ -201,23 +316,22 @@ test('terminal session rejects new batches', async () => {
     session.adoptionSessionId,
   );
 
-  await assert.rejects(
-    () =>
-      bundle.adoptionService.adoptBatch({
-        scope,
-        apiVersion: 'v1',
-        adoptionSessionId: session.adoptionSessionId,
-        items: [
-          {
-            sourceNamespace: 'ns_terminal',
-            localEventId: 'local-terminal-1',
-            sourceSchemaVersion: 1,
-            event: sampleEvent('local-terminal-1'),
-          },
-        ],
-      }),
-    (error) => error?.code === 'ADOPTION_SESSION_CLOSED',
-  );
+  const batch = await bundle.adoptionService.adoptBatch({
+    scope,
+    apiVersion: 'v1',
+    adoptionSessionId: session.adoptionSessionId,
+    items: [
+      {
+        sourceNamespace: 'ns_terminal',
+        localEventId: 'local-terminal-1',
+        sourceSchemaVersion: 1,
+        event: sampleEvent('local-terminal-1'),
+      },
+    ],
+  });
+
+  assert.equal(batch.items[0].status, 'failed');
+  assert.equal(batch.items[0].code, 'ADOPTION_SESSION_CLOSED');
 
   await closeMedicalServiceBundle(bundle);
 });

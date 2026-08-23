@@ -1,11 +1,13 @@
 import {
   bigint,
+  foreignKey,
   integer,
   jsonb,
   pgSchema,
   smallint,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
 
@@ -36,28 +38,37 @@ export const accountSubjectRelationships = medical.table(
   },
 );
 
-export const medicalEventResources = medical.table('medical_event_resources', {
-  resourceId: uuid('resource_id').primaryKey(),
-  subjectId: uuid('subject_id')
-    .notNull()
-    .references(() => medicalSubjects.subjectId, { onDelete: 'restrict' }),
-  lifecycleState: text('lifecycle_state').notNull(),
-  revision: bigint('revision', { mode: 'bigint' }).notNull(),
-  eventObservedAt: timestamp('event_observed_at', {
-    withTimezone: true,
-  }).notNull(),
-  eventKind: text('event_kind').notNull(),
-  schemaVersion: smallint('schema_version').notNull(),
-  semanticEvent: jsonb('semantic_event')
-    .$type<SemanticTimelineEvent>()
-    .notNull(),
-  sourceLabel: text('source_label'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
-  deletedAt: timestamp('deleted_at', { withTimezone: true }),
-  createdByAccountId: text('created_by_account_id').notNull(),
-  updatedByAccountId: text('updated_by_account_id').notNull(),
-});
+export const medicalEventResources = medical.table(
+  'medical_event_resources',
+  {
+    resourceId: uuid('resource_id').primaryKey(),
+    subjectId: uuid('subject_id')
+      .notNull()
+      .references(() => medicalSubjects.subjectId, { onDelete: 'restrict' }),
+    lifecycleState: text('lifecycle_state').notNull(),
+    revision: bigint('revision', { mode: 'bigint' }).notNull(),
+    eventObservedAt: timestamp('event_observed_at', {
+      withTimezone: true,
+    }).notNull(),
+    eventKind: text('event_kind').notNull(),
+    schemaVersion: smallint('schema_version').notNull(),
+    semanticEvent: jsonb('semantic_event')
+      .$type<SemanticTimelineEvent>()
+      .notNull(),
+    sourceLabel: text('source_label'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+    createdByAccountId: text('created_by_account_id').notNull(),
+    updatedByAccountId: text('updated_by_account_id').notNull(),
+  },
+  (table) => [
+    uniqueIndex('medical_event_resources_subject_resource').on(
+      table.subjectId,
+      table.resourceId,
+    ),
+  ],
+);
 
 export const medicalIdempotencyRecords = medical.table(
   'medical_idempotency_records',
@@ -136,11 +147,7 @@ export const medicalAdoptionMappings = medical.table(
       .references(() => medicalSubjects.subjectId, { onDelete: 'restrict' }),
     sourceNamespace: text('source_namespace').notNull(),
     localEventId: text('local_event_id').notNull(),
-    canonicalResourceId: uuid('canonical_resource_id')
-      .notNull()
-      .references(() => medicalEventResources.resourceId, {
-        onDelete: 'restrict',
-      }),
+    canonicalResourceId: uuid('canonical_resource_id').notNull(),
     canonicalRevision: bigint('canonical_revision', {
       mode: 'bigint',
     }).notNull(),
@@ -153,6 +160,16 @@ export const medicalAdoptionMappings = medical.table(
         onDelete: 'restrict',
       }),
   },
+  (table) => [
+    foreignKey({
+      name: 'medical_adoption_mappings_canonical_subject_resource',
+      columns: [table.subjectId, table.canonicalResourceId],
+      foreignColumns: [
+        medicalEventResources.subjectId,
+        medicalEventResources.resourceId,
+      ],
+    }).onDelete('restrict'),
+  ],
 );
 
 export const medicalSchema = {

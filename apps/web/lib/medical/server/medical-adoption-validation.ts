@@ -1,5 +1,4 @@
 import type { AdoptionItemInput } from '@diabetes-universe/medical-domain';
-import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
 import { MEDICAL_IDEMPOTENCY_KEY_PATTERN } from './constants';
 import {

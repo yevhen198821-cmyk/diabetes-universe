@@ -27,6 +27,15 @@ export class AdoptionItemInvalidError extends Error {
   }
 }
 
+export class AdoptionSessionIncompleteError extends Error {
+  readonly code = 'ADOPTION_SESSION_INCOMPLETE' as const;
+
+  constructor(message: string) {
+    super(message);
+    this.name = 'AdoptionSessionIncompleteError';
+  }
+}
+
 export class AdoptionBatchTooLargeError extends Error {
   readonly code = 'ADOPTION_BATCH_TOO_LARGE' as const;
 }

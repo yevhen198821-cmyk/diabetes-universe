@@ -10,6 +10,7 @@ export {
 } from './database/create-medical-database';
 export { MEDICAL_FOUNDATION_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { MEDICAL_ADOPTION_MIGRATION_SQL } from './database/medical-foundation-migration';
+export { MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { MEDICAL_ADOPTION_PRIVILEGES_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { medicalSchema } from './database/medical-schema';
 export {

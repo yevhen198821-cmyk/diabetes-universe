@@ -6,6 +6,7 @@ import {
   TIMELINE_SOURCE_NAMESPACE_METADATA_KEY,
   type IndexedDbTimelineAdoptionAcknowledgement,
   type IndexedDbTimelineAdoptionSession,
+  type TimelineAdoptionSessionLifecycle,
 } from '../persistence/indexeddb/timeline-indexeddb-schema';
 
 export interface TimelineAdoptionLocalStore {
@@ -20,12 +21,24 @@ export interface TimelineAdoptionLocalStore {
   getSessionByRunId(
     clientAdoptionRunId: string,
   ): Promise<IndexedDbTimelineAdoptionSession | null>;
+  getResumableSessionCheckpoint(): Promise<IndexedDbTimelineAdoptionSession | null>;
 }
 
 interface TimelineSourceNamespaceRecord {
   readonly key: typeof TIMELINE_SOURCE_NAMESPACE_METADATA_KEY;
   readonly sourceNamespace: string;
   readonly createdAt: string;
+}
+
+const RESUMABLE_LIFECYCLES: readonly TimelineAdoptionSessionLifecycle[] = [
+  'open',
+  'failed',
+];
+
+function isResumableLifecycle(
+  lifecycle: TimelineAdoptionSessionLifecycle,
+): boolean {
+  return RESUMABLE_LIFECYCLES.includes(lifecycle);
 }
 
 export function createTimelineAdoptionLocalStore(
@@ -85,14 +98,17 @@ export function createTimelineAdoptionLocalStore(
         TIMELINE_INDEXEDDB_STORES.adoptionSessions,
         'readwrite',
       );
+      const store = tx.objectStore(TIMELINE_INDEXEDDB_STORES.adoptionSessions);
+      const existing = (await store.get(session.clientAdoptionRunId)) as
+        IndexedDbTimelineAdoptionSession | undefined;
+
       const record: IndexedDbTimelineAdoptionSession = {
         ...session,
+        createdAt: existing?.createdAt ?? session.createdAt,
         updatedAt: new Date().toISOString(),
         storageSchemaVersion: TIMELINE_ADOPTION_STORAGE_SCHEMA_VERSION,
       };
-      await tx
-        .objectStore(TIMELINE_INDEXEDDB_STORES.adoptionSessions)
-        .put(record);
+      await store.put(record);
       await tx.done;
     },
 
@@ -106,6 +122,23 @@ export function createTimelineAdoptionLocalStore(
         .get(clientAdoptionRunId);
       await tx.done;
       return (record as IndexedDbTimelineAdoptionSession | undefined) ?? null;
+    },
+
+    async getResumableSessionCheckpoint() {
+      const tx = database.transaction(
+        TIMELINE_INDEXEDDB_STORES.adoptionSessions,
+        'readonly',
+      );
+      const records = (await tx
+        .objectStore(TIMELINE_INDEXEDDB_STORES.adoptionSessions)
+        .getAll()) as IndexedDbTimelineAdoptionSession[];
+      await tx.done;
+
+      const resumable = records
+        .filter((record) => isResumableLifecycle(record.lifecycle))
+        .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+
+      return resumable[0] ?? null;
     },
   };
 }

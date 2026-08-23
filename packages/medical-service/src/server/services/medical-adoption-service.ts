@@ -1,12 +1,11 @@
 import { sql } from 'drizzle-orm';
 
-import type { SemanticTimelineEvent } from '@diabetes-universe/types';
-
 import {
   AdoptionBatchTooLargeError,
   AdoptionItemInvalidError,
   AdoptionNotEnabledError,
   AdoptionSessionClosedError,
+  AdoptionSessionIncompleteError,
   AdoptionSessionNotFoundError,
   AdoptionSourceConflictError,
   type AdoptionBatchResult,
@@ -86,6 +85,13 @@ function toAdoptionIdempotencyKey(
   return `${sourceNamespace}:${localEventId}`;
 }
 
+interface AdoptSingleItemOutcome {
+  readonly result: AdoptionItemResult;
+  readonly adoptedDelta: number;
+  readonly skippedDelta: number;
+  readonly failedDelta: number;
+}
+
 export function createMedicalAdoptionService(
   database: MedicalDatabase,
   environment: MedicalEnvironment,
@@ -128,7 +134,7 @@ export function createMedicalAdoptionService(
     apiVersion: string,
     session: MedicalAdoptionSession,
     item: AdoptionItemInput,
-  ): Promise<AdoptionItemResult> {
+  ): Promise<AdoptSingleItemOutcome> {
     const fingerprint = createRequestFingerprint(item.event);
     const idempotencyKey = toAdoptionIdempotencyKey(
       item.sourceNamespace,
@@ -136,7 +142,19 @@ export function createMedicalAdoptionService(
     );
 
     try {
-      return await database.transaction(async (tx) => {
+      const result = await database.transaction(async (tx) => {
+        const sessionRepository = createAdoptionSessionRepository(tx);
+        const lifecycle = await sessionRepository.lockSessionLifecycleForUpdate(
+          scope.subjectId,
+          session.adoptionSessionId,
+        );
+
+        if (!lifecycle || !acceptsBatches(lifecycle)) {
+          throw new AdoptionSessionClosedError(
+            'Adoption session is closed to new batches.',
+          );
+        }
+
         const lockKey = [
           scope.subjectId,
           item.sourceNamespace,
@@ -183,7 +201,7 @@ export function createMedicalAdoptionService(
             status: 'already_adopted',
             resourceId: resource.resourceId,
             revision: etagToken,
-          };
+          } satisfies AdoptionItemResult;
         }
 
         const idempotencyScope = {
@@ -213,7 +231,7 @@ export function createMedicalAdoptionService(
             status: 'already_adopted',
             resourceId: resource.resourceId,
             revision: existingOutcome.resultEtagToken,
-          };
+          } satisfies AdoptionItemResult;
         }
 
         await idempotencyRepository.assertNoConflictingOutcome(
@@ -291,23 +309,62 @@ export function createMedicalAdoptionService(
           resourceId: resource.resourceId,
           revision: etagToken,
           createdAt: resource.createdAt,
-        };
+        } satisfies AdoptionItemResult;
       });
+
+      if (result.status === 'adopted') {
+        return {
+          result,
+          adoptedDelta: 1,
+          skippedDelta: 0,
+          failedDelta: 0,
+        };
+      }
+
+      return {
+        result,
+        adoptedDelta: 0,
+        skippedDelta: 0,
+        failedDelta: 0,
+      };
     } catch (error) {
       if (error instanceof AdoptionSourceConflictError) {
         return {
-          localEventId: item.localEventId,
-          status: 'failed',
-          code: 'ADOPTION_SOURCE_CONFLICT',
-          message: 'Source identity already adopted with different payload.',
+          result: {
+            localEventId: item.localEventId,
+            status: 'failed',
+            code: 'ADOPTION_SOURCE_CONFLICT',
+            message: 'Source identity already adopted with different payload.',
+          },
+          adoptedDelta: 0,
+          skippedDelta: 0,
+          failedDelta: 1,
+        };
+      }
+      if (error instanceof AdoptionSessionClosedError) {
+        return {
+          result: {
+            localEventId: item.localEventId,
+            status: 'failed',
+            code: 'ADOPTION_SESSION_CLOSED',
+            message: error.message,
+          },
+          adoptedDelta: 0,
+          skippedDelta: 0,
+          failedDelta: 1,
         };
       }
       if (error instanceof AdoptionItemInvalidError) {
         return {
-          localEventId: item.localEventId,
-          status: 'failed',
-          code: 'ADOPTION_ITEM_INVALID',
-          message: error.message,
+          result: {
+            localEventId: item.localEventId,
+            status: 'failed',
+            code: 'ADOPTION_ITEM_INVALID',
+            message: error.message,
+          },
+          adoptedDelta: 0,
+          skippedDelta: 0,
+          failedDelta: 1,
         };
       }
       throw error;
@@ -328,8 +385,10 @@ export function createMedicalAdoptionService(
           return existing;
         }
         if (existing.lifecycleState === 'failed') {
-          const resumed = await sessionRepository.updateLifecycle(
+          const resumed = await sessionRepository.transitionLifecycle(
+            input.scope.subjectId,
             existing.adoptionSessionId,
+            ['failed'],
             'open',
           );
           return resumed ?? existing;
@@ -382,40 +441,35 @@ export function createMedicalAdoptionService(
         input.adoptionSessionId,
       );
 
-      if (!acceptsBatches(session.lifecycleState)) {
-        throw new AdoptionSessionClosedError(
-          'Adoption session is closed to new batches.',
-        );
-      }
-
       const results: AdoptionItemResult[] = [];
       let adoptedDelta = 0;
       let failedDelta = 0;
       let skippedDelta = 0;
 
       for (const item of input.items) {
-        const result = await adoptSingleItem(
+        const outcome = await adoptSingleItem(
           input.scope,
           input.apiVersion,
           session,
           item,
         );
-        results.push(result);
-
-        if (result.status === 'adopted') {
-          adoptedDelta += 1;
-        } else if (result.status === 'already_adopted') {
-          skippedDelta += 1;
-        } else {
-          failedDelta += 1;
-        }
+        results.push(outcome.result);
+        adoptedDelta += outcome.adoptedDelta;
+        skippedDelta += outcome.skippedDelta;
+        failedDelta += outcome.failedDelta;
       }
 
-      await sessionRepository.incrementCounters(session.adoptionSessionId, {
-        adoptedCount: adoptedDelta,
-        skippedCount: skippedDelta,
-        failedCount: failedDelta,
-      });
+      if (adoptedDelta > 0 || skippedDelta > 0 || failedDelta > 0) {
+        await sessionRepository.incrementCounters(
+          input.scope.subjectId,
+          session.adoptionSessionId,
+          {
+            adoptedCount: adoptedDelta,
+            skippedCount: skippedDelta,
+            failedCount: failedDelta,
+          },
+        );
+      }
 
       return { items: results };
     },
@@ -430,15 +484,35 @@ export function createMedicalAdoptionService(
         );
       }
 
-      const updated = await sessionRepository.updateLifecycle(
+      if (session.failedCount > 0) {
+        throw new AdoptionSessionIncompleteError(
+          'Adoption session has unresolved failed items.',
+        );
+      }
+
+      const updated = await sessionRepository.transitionLifecycle(
+        scope.subjectId,
         adoptionSessionId,
+        ['open', 'failed'],
         'completed',
         { completedAt: new Date() },
       );
 
       if (!updated) {
-        throw new AdoptionSessionNotFoundError(
-          'Adoption session was not found.',
+        const current = await sessionRepository.findByIdForSubject(
+          scope.subjectId,
+          adoptionSessionId,
+        );
+        if (!current) {
+          throw new AdoptionSessionNotFoundError(
+            'Adoption session was not found.',
+          );
+        }
+        if (current.lifecycleState === 'completed') {
+          return current;
+        }
+        throw new AdoptionSessionClosedError(
+          'Adoption session is closed to completion.',
         );
       }
 
@@ -449,15 +523,29 @@ export function createMedicalAdoptionService(
       assertAdoptionEnabled();
       await getSessionForScope(scope, adoptionSessionId);
 
-      const updated = await sessionRepository.updateLifecycle(
+      const updated = await sessionRepository.transitionLifecycle(
+        scope.subjectId,
         adoptionSessionId,
+        ['open', 'failed'],
         'cancelled',
         { completedAt: new Date() },
       );
 
       if (!updated) {
-        throw new AdoptionSessionNotFoundError(
-          'Adoption session was not found.',
+        const current = await sessionRepository.findByIdForSubject(
+          scope.subjectId,
+          adoptionSessionId,
+        );
+        if (!current) {
+          throw new AdoptionSessionNotFoundError(
+            'Adoption session was not found.',
+          );
+        }
+        if (current.lifecycleState === 'cancelled') {
+          return current;
+        }
+        throw new AdoptionSessionClosedError(
+          'Adoption session is closed to cancellation.',
         );
       }
 

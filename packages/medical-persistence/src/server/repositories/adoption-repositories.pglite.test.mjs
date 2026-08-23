@@ -6,6 +6,7 @@ import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
 
 import {
   MEDICAL_ADOPTION_MIGRATION_SQL,
+  MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL,
   MEDICAL_FOUNDATION_MIGRATION_SQL,
 } from '../database/medical-foundation-migration.ts';
 import { medicalSchema } from '../database/medical-schema.ts';
@@ -34,6 +35,7 @@ async function bootstrapDatabase() {
   const client = new PGlite();
   await client.exec(MEDICAL_FOUNDATION_MIGRATION_SQL);
   await client.exec(MEDICAL_ADOPTION_MIGRATION_SQL);
+  await client.exec(MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL);
   const database = drizzlePglite(client, { schema: medicalSchema });
   const subjectRepository = createMedicalSubjectRepository(database);
   const relationship =
@@ -64,20 +66,26 @@ test('adoption session lifecycle and cross-subject isolation', async () => {
   );
   assert.equal(crossSubject, null);
 
-  const failed = await sessionRepository.updateLifecycle(
+  const failed = await sessionRepository.transitionLifecycle(
+    subjectId,
     session.adoptionSessionId,
+    ['open'],
     'failed',
   );
   assert.equal(failed?.lifecycleState, 'failed');
 
-  const resumed = await sessionRepository.updateLifecycle(
+  const resumed = await sessionRepository.transitionLifecycle(
+    subjectId,
     session.adoptionSessionId,
+    ['failed'],
     'open',
   );
   assert.equal(resumed?.lifecycleState, 'open');
 
-  const completed = await sessionRepository.updateLifecycle(
+  const completed = await sessionRepository.transitionLifecycle(
+    subjectId,
     session.adoptionSessionId,
+    ['open', 'failed'],
     'completed',
     { completedAt: new Date() },
   );
@@ -135,4 +143,67 @@ test('adoption mapping unique constraint and fingerprint conflict', async () => 
     baseInput.localEventId,
   );
   assert.equal(otherSubjectLookup, null);
+});
+
+test('cross-subject canonical resource mapping fails at database level', async () => {
+  const client = new PGlite();
+  await client.exec(MEDICAL_FOUNDATION_MIGRATION_SQL);
+  await client.exec(MEDICAL_ADOPTION_MIGRATION_SQL);
+  await client.exec(MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL);
+  const database = drizzlePglite(client, { schema: medicalSchema });
+  const subjectRepository = createMedicalSubjectRepository(database);
+  const subjectA = await subjectRepository.provisionSelfSubject('acct-a');
+  const subjectB = await subjectRepository.provisionSelfSubject('acct-b');
+  const sessionRepository = createAdoptionSessionRepository(database);
+  const mappingRepository = createAdoptionMappingRepository(database);
+  const eventRepository = createMedicalEventRepository(database);
+
+  const sessionA = await sessionRepository.create({
+    actorAccountId: 'acct-a',
+    subjectId: subjectA.subjectId,
+    clientAdoptionRunId: 'run-cross-a',
+    sourcePlatform: 'web',
+    sourceAppVersion: '1.0.0',
+    sourceSchemaMin: 1,
+    sourceSchemaMax: 1,
+  });
+
+  const resourceA = await eventRepository.insert(subjectA.subjectId, {
+    semanticEvent: glucoseEvent('local-cross-a'),
+    createdByAccountId: 'acct-a',
+  });
+
+  await mappingRepository.insertMapping({
+    subjectId: subjectA.subjectId,
+    sourceNamespace: 'ns_cross',
+    localEventId: 'local-cross-a',
+    canonicalResourceId: resourceA.resourceId,
+    canonicalRevision: BigInt(resourceA.revision),
+    sourceSchemaVersion: 1,
+    payloadFingerprint: 'fp_cross',
+    adoptionSessionId: sessionA.adoptionSessionId,
+  });
+
+  const sessionB = await sessionRepository.create({
+    actorAccountId: 'acct-b',
+    subjectId: subjectB.subjectId,
+    clientAdoptionRunId: 'run-cross-b',
+    sourcePlatform: 'web',
+    sourceAppVersion: '1.0.0',
+    sourceSchemaMin: 1,
+    sourceSchemaMax: 1,
+  });
+
+  await assert.rejects(() =>
+    mappingRepository.insertMapping({
+      subjectId: subjectB.subjectId,
+      sourceNamespace: 'ns_cross',
+      localEventId: 'local-cross-b',
+      canonicalResourceId: resourceA.resourceId,
+      canonicalRevision: BigInt(resourceA.revision),
+      sourceSchemaVersion: 1,
+      payloadFingerprint: 'fp_cross_b',
+      adoptionSessionId: sessionB.adoptionSessionId,
+    }),
+  );
 });

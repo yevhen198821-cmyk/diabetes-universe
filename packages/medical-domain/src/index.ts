@@ -34,6 +34,7 @@ export {
   AdoptionNotEnabledError,
   AdoptionSchemaUnsupportedError,
   AdoptionSessionClosedError,
+  AdoptionSessionIncompleteError,
   AdoptionSessionNotFoundError,
   AdoptionSourceConflictError,
 } from './errors/adoption-errors';

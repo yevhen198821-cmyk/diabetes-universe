@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 
 import type {
   AdoptionSessionLifecycleState,
@@ -45,19 +45,18 @@ export interface AdoptionSessionRepository {
     actorAccountId: string,
     clientAdoptionRunId: string,
   ): Promise<MedicalAdoptionSession | null>;
-  updateLifecycle(
+  transitionLifecycle(
+    subjectId: string,
     adoptionSessionId: string,
-    lifecycleState: AdoptionSessionLifecycleState,
+    fromStates: readonly AdoptionSessionLifecycleState[],
+    toState: AdoptionSessionLifecycleState,
     updates?: {
-      adoptedCount?: number;
-      skippedCount?: number;
-      failedCount?: number;
-      eligibleCount?: number;
       completedAt?: Date | null;
       startedAt?: Date | null;
     },
   ): Promise<MedicalAdoptionSession | null>;
   incrementCounters(
+    subjectId: string,
     adoptionSessionId: string,
     deltas: {
       adoptedCount?: number;
@@ -65,6 +64,10 @@ export interface AdoptionSessionRepository {
       failedCount?: number;
     },
   ): Promise<MedicalAdoptionSession | null>;
+  lockSessionLifecycleForUpdate(
+    subjectId: string,
+    adoptionSessionId: string,
+  ): Promise<AdoptionSessionLifecycleState | null>;
 }
 
 export function createAdoptionSessionRepository(
@@ -134,25 +137,19 @@ export function createAdoptionSessionRepository(
       return rows[0] ? mapSessionRow(rows[0]) : null;
     },
 
-    async updateLifecycle(adoptionSessionId, lifecycleState, updates = {}) {
+    async transitionLifecycle(
+      subjectId,
+      adoptionSessionId,
+      fromStates,
+      toState,
+      updates = {},
+    ) {
       const now = new Date();
       const [row] = await database
         .update(medicalAdoptionSessions)
         .set({
-          lifecycleState,
+          lifecycleState: toState,
           updatedAt: now,
-          ...(updates.adoptedCount !== undefined
-            ? { adoptedCount: updates.adoptedCount }
-            : {}),
-          ...(updates.skippedCount !== undefined
-            ? { skippedCount: updates.skippedCount }
-            : {}),
-          ...(updates.failedCount !== undefined
-            ? { failedCount: updates.failedCount }
-            : {}),
-          ...(updates.eligibleCount !== undefined
-            ? { eligibleCount: updates.eligibleCount }
-            : {}),
           ...(updates.completedAt !== undefined
             ? { completedAt: updates.completedAt }
             : {}),
@@ -160,37 +157,71 @@ export function createAdoptionSessionRepository(
             ? { startedAt: updates.startedAt }
             : {}),
         })
-        .where(eq(medicalAdoptionSessions.adoptionSessionId, adoptionSessionId))
+        .where(
+          and(
+            eq(medicalAdoptionSessions.adoptionSessionId, adoptionSessionId),
+            eq(medicalAdoptionSessions.subjectId, subjectId),
+            inArray(medicalAdoptionSessions.lifecycleState, [...fromStates]),
+          ),
+        )
         .returning();
 
       return row ? mapSessionRow(row) : null;
     },
 
-    async incrementCounters(adoptionSessionId, deltas) {
-      const session = await database
-        .select()
-        .from(medicalAdoptionSessions)
-        .where(eq(medicalAdoptionSessions.adoptionSessionId, adoptionSessionId))
-        .limit(1);
+    async incrementCounters(subjectId, adoptionSessionId, deltas) {
+      const adoptedDelta = deltas.adoptedCount ?? 0;
+      const skippedDelta = deltas.skippedCount ?? 0;
+      const failedDelta = deltas.failedCount ?? 0;
 
-      const current = session[0];
-      if (!current) {
-        return null;
+      if (adoptedDelta === 0 && skippedDelta === 0 && failedDelta === 0) {
+        const rows = await database
+          .select()
+          .from(medicalAdoptionSessions)
+          .where(
+            and(
+              eq(medicalAdoptionSessions.adoptionSessionId, adoptionSessionId),
+              eq(medicalAdoptionSessions.subjectId, subjectId),
+            ),
+          )
+          .limit(1);
+        return rows[0] ? mapSessionRow(rows[0]) : null;
       }
 
-      const now = new Date();
       const [row] = await database
         .update(medicalAdoptionSessions)
         .set({
-          adoptedCount: current.adoptedCount + (deltas.adoptedCount ?? 0),
-          skippedCount: current.skippedCount + (deltas.skippedCount ?? 0),
-          failedCount: current.failedCount + (deltas.failedCount ?? 0),
-          updatedAt: now,
+          adoptedCount: sql`${medicalAdoptionSessions.adoptedCount} + ${adoptedDelta}`,
+          skippedCount: sql`${medicalAdoptionSessions.skippedCount} + ${skippedDelta}`,
+          failedCount: sql`${medicalAdoptionSessions.failedCount} + ${failedDelta}`,
+          updatedAt: new Date(),
         })
-        .where(eq(medicalAdoptionSessions.adoptionSessionId, adoptionSessionId))
+        .where(
+          and(
+            eq(medicalAdoptionSessions.adoptionSessionId, adoptionSessionId),
+            eq(medicalAdoptionSessions.subjectId, subjectId),
+          ),
+        )
         .returning();
 
       return row ? mapSessionRow(row) : null;
+    },
+
+    async lockSessionLifecycleForUpdate(subjectId, adoptionSessionId) {
+      const rows = await database
+        .select({ lifecycleState: medicalAdoptionSessions.lifecycleState })
+        .from(medicalAdoptionSessions)
+        .where(
+          and(
+            eq(medicalAdoptionSessions.adoptionSessionId, adoptionSessionId),
+            eq(medicalAdoptionSessions.subjectId, subjectId),
+          ),
+        )
+        .for('update');
+
+      return rows[0]
+        ? (rows[0].lifecycleState as AdoptionSessionLifecycleState)
+        : null;
     },
   };
 }

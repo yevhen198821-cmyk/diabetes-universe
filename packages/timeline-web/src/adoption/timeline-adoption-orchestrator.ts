@@ -11,6 +11,7 @@ import {
   type TimelineAdoptionScanItem,
 } from './timeline-adoption-scanner';
 import type { TimelineAdoptionLocalStore } from './timeline-adoption-local-store';
+import type { IndexedDbTimelineAdoptionSession } from '../persistence/indexeddb/timeline-indexeddb-schema';
 
 export interface AdoptionSessionResponse {
   readonly session: {
@@ -46,10 +47,14 @@ export interface TimelineAdoptionOrchestratorOptions {
   readonly sourcePlatform?: string;
   readonly sourceAppVersion?: string;
   readonly batchSize?: number;
+  /** When set, forces this run id instead of restoring a durable checkpoint. */
   readonly clientAdoptionRunId?: string;
+  /** When true, ignores any resumable checkpoint and starts a fresh run id. */
+  readonly forceNewRun?: boolean;
 }
 
 export interface TimelineAdoptionOrchestratorResult {
+  readonly status: 'completed' | 'incomplete';
   readonly adoptionSessionId: string;
   readonly adoptedCount: number;
   readonly skippedCount: number;
@@ -58,6 +63,10 @@ export interface TimelineAdoptionOrchestratorResult {
 
 const DEFAULT_BATCH_SIZE = 25;
 
+function generateClientAdoptionRunId(): string {
+  return `run_${crypto.randomUUID().replace(/-/g, '')}`;
+}
+
 export class TimelineAdoptionOrchestrator {
   private readonly repository: TimelineRepository;
   private readonly localStore: TimelineAdoptionLocalStore;
@@ -65,7 +74,8 @@ export class TimelineAdoptionOrchestrator {
   private readonly sourcePlatform: string;
   private readonly sourceAppVersion: string;
   private readonly batchSize: number;
-  private readonly clientAdoptionRunId: string;
+  private readonly explicitClientAdoptionRunId?: string;
+  private readonly forceNewRun: boolean;
 
   constructor(options: TimelineAdoptionOrchestratorOptions) {
     this.repository = options.repository;
@@ -74,9 +84,8 @@ export class TimelineAdoptionOrchestrator {
     this.sourcePlatform = options.sourcePlatform ?? 'web';
     this.sourceAppVersion = options.sourceAppVersion ?? '0.0.0';
     this.batchSize = options.batchSize ?? DEFAULT_BATCH_SIZE;
-    this.clientAdoptionRunId =
-      options.clientAdoptionRunId ??
-      `run_${crypto.randomUUID().replace(/-/g, '')}`;
+    this.explicitClientAdoptionRunId = options.clientAdoptionRunId;
+    this.forceNewRun = options.forceNewRun ?? false;
   }
 
   async run(): Promise<TimelineAdoptionOrchestratorResult> {
@@ -92,8 +101,26 @@ export class TimelineAdoptionOrchestrator {
 
     const eligible = scan.filter((item) => item.classification === 'eligible');
 
+    let clientAdoptionRunId = this.explicitClientAdoptionRunId;
+    let restoredCheckpoint: IndexedDbTimelineAdoptionSession | null = null;
+
+    if (!clientAdoptionRunId && !this.forceNewRun) {
+      restoredCheckpoint =
+        await this.localStore.getResumableSessionCheckpoint();
+      if (restoredCheckpoint) {
+        clientAdoptionRunId = restoredCheckpoint.clientAdoptionRunId;
+      }
+    }
+
+    if (!clientAdoptionRunId) {
+      clientAdoptionRunId = generateClientAdoptionRunId();
+    }
+
+    const checkpointCreatedAt =
+      restoredCheckpoint?.createdAt ?? new Date().toISOString();
+
     const sessionResponse = await this.transport.createOrResumeSession({
-      clientAdoptionRunId: this.clientAdoptionRunId,
+      clientAdoptionRunId,
       sourcePlatform: this.sourcePlatform,
       sourceAppVersion: this.sourceAppVersion,
       sourceSchemaMin: 1,
@@ -104,15 +131,15 @@ export class TimelineAdoptionOrchestrator {
     const adoptionSessionId = sessionResponse.session.adoptionSessionId;
 
     await this.localStore.saveSessionCheckpoint({
-      clientAdoptionRunId: this.clientAdoptionRunId,
+      clientAdoptionRunId,
       adoptionSessionId,
       lifecycle: 'open',
       checkpoint: {
         eligibleCount: eligible.length,
-        adoptedCount: 0,
-        failedCount: 0,
+        adoptedCount: restoredCheckpoint?.checkpoint.adoptedCount ?? 0,
+        failedCount: restoredCheckpoint?.checkpoint.failedCount ?? 0,
       },
-      createdAt: new Date().toISOString(),
+      createdAt: checkpointCreatedAt,
       updatedAt: new Date().toISOString(),
       storageSchemaVersion: 1,
     });
@@ -177,42 +204,71 @@ export class TimelineAdoptionOrchestrator {
       }
 
       await this.localStore.saveSessionCheckpoint({
-        clientAdoptionRunId: this.clientAdoptionRunId,
+        clientAdoptionRunId,
         adoptionSessionId,
-        lifecycle: 'open',
+        lifecycle: failedCount > 0 ? 'failed' : 'open',
         checkpoint: {
           lastSubmittedLocalEventId: pending[pending.length - 1]?.localEventId,
           eligibleCount: eligible.length,
           adoptedCount,
           failedCount,
         },
-        createdAt: new Date().toISOString(),
+        createdAt: checkpointCreatedAt,
         updatedAt: new Date().toISOString(),
         storageSchemaVersion: 1,
       });
     }
 
+    const unresolvedWithoutAck =
+      await this.countEligibleWithoutAcknowledgement(eligible);
+    const hasUnresolvedFailures = failedCount > 0 || unresolvedWithoutAck > 0;
+
+    if (hasUnresolvedFailures) {
+      await this.localStore.saveSessionCheckpoint({
+        clientAdoptionRunId,
+        adoptionSessionId,
+        lifecycle: 'failed',
+        checkpoint: {
+          eligibleCount: eligible.length,
+          adoptedCount,
+          failedCount,
+        },
+        createdAt: checkpointCreatedAt,
+        updatedAt: new Date().toISOString(),
+        storageSchemaVersion: 1,
+      });
+
+      return {
+        status: 'incomplete',
+        adoptionSessionId,
+        adoptedCount,
+        skippedCount,
+        failedCount,
+      };
+    }
+
     await this.transport.completeSession(adoptionSessionId);
 
     await this.localStore.saveSessionCheckpoint({
-      clientAdoptionRunId: this.clientAdoptionRunId,
+      clientAdoptionRunId,
       adoptionSessionId,
       lifecycle: 'completed',
       checkpoint: {
         eligibleCount: eligible.length,
         adoptedCount,
-        failedCount,
+        failedCount: 0,
       },
-      createdAt: new Date().toISOString(),
+      createdAt: checkpointCreatedAt,
       updatedAt: new Date().toISOString(),
       storageSchemaVersion: 1,
     });
 
     return {
+      status: 'completed',
       adoptionSessionId,
       adoptedCount,
       skippedCount,
-      failedCount,
+      failedCount: 0,
     };
   }
 
@@ -222,5 +278,17 @@ export class TimelineAdoptionOrchestrator {
       isAcknowledged: (localEventId) =>
         this.localStore.hasAcknowledgement(localEventId),
     });
+  }
+
+  private async countEligibleWithoutAcknowledgement(
+    eligible: readonly TimelineAdoptionScanItem[],
+  ): Promise<number> {
+    let unresolved = 0;
+    for (const item of eligible) {
+      if (!(await this.localStore.hasAcknowledgement(item.localEventId))) {
+        unresolved += 1;
+      }
+    }
+    return unresolved;
   }
 }

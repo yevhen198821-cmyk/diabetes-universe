@@ -29,12 +29,28 @@ async function seedEvent(repository, event) {
 function createMockTransport() {
   const adopted = new Map();
   let adoptionSessionId = 'session-mock-1';
+  let completeCalls = 0;
   let batchCalls = 0;
+  const sessionsByRun = new Map();
 
   return {
-    batchCalls,
+    getCompleteCalls: () => completeCalls,
+    getBatchCalls: () => batchCalls,
+    getAdoptedCount: () => adopted.size,
     transport: {
       async createOrResumeSession(input) {
+        const existing = sessionsByRun.get(input.clientAdoptionRunId);
+        if (existing) {
+          adoptionSessionId = existing;
+          return {
+            session: {
+              adoptionSessionId: existing,
+              lifecycleState: 'open',
+              clientAdoptionRunId: input.clientAdoptionRunId,
+            },
+          };
+        }
+        sessionsByRun.set(input.clientAdoptionRunId, adoptionSessionId);
         return {
           session: {
             adoptionSessionId,
@@ -70,6 +86,7 @@ function createMockTransport() {
         return { items: results };
       },
       async completeSession(sessionId) {
+        completeCalls += 1;
         return {
           session: {
             adoptionSessionId: sessionId,
@@ -78,8 +95,6 @@ function createMockTransport() {
         };
       },
     },
-    getBatchCalls: () => batchCalls,
-    getAdoptedCount: () => adopted.size,
   };
 }
 
@@ -108,13 +123,49 @@ test('orchestrator adopts eligible events in bounded batches', async () => {
 
   const result = await orchestrator.run();
 
+  assert.equal(result.status, 'completed');
   assert.equal(result.adoptedCount, 60);
   assert.equal(mock.getAdoptedCount(), 60);
-  assert.ok(mock.getBatchCalls() >= 3);
-  assert.ok(mock.getBatchCalls() <= 3);
+  assert.equal(mock.getBatchCalls(), 3);
+  assert.equal(mock.getCompleteCalls(), 1);
 });
 
-test('orchestrator retries without duplicate canonical resources after crash before ack', async () => {
+test('orchestrator restores durable run id after restart', async () => {
+  const repository = new InMemoryTimelineRepository();
+  await seedEvent(
+    repository,
+    glucoseEvent('evt-resume-run', '2026-08-14T10:00:00.000Z'),
+  );
+
+  const mock = createMockTransport();
+  const localStore = createInMemoryLocalStore();
+
+  const first = new TimelineAdoptionOrchestrator({
+    repository,
+    localStore,
+    transport: mock.transport,
+    clientAdoptionRunId: 'run-durable-1',
+  });
+
+  await first.run();
+
+  const second = new TimelineAdoptionOrchestrator({
+    repository,
+    localStore,
+    transport: mock.transport,
+  });
+
+  const classification = await second.classifyLocalEvents();
+  const resumed = classification.find(
+    (item) => item.localEventId === 'evt-resume-run',
+  );
+  assert.equal(resumed?.classification, 'already_adopted');
+
+  const checkpoint = await localStore.getResumableSessionCheckpoint();
+  assert.equal(checkpoint, null);
+});
+
+test('orchestrator retries crash-before-ack without duplicate canonical resources', async () => {
   const repository = new InMemoryTimelineRepository();
   await seedEvent(
     repository,
@@ -136,51 +187,94 @@ test('orchestrator retries without duplicate canonical resources after crash bef
     clientAdoptionRunId: 'run-crash-1',
   });
 
-  await orchestrator.run();
+  const firstResult = await orchestrator.run();
+  assert.equal(firstResult.status, 'incomplete');
+  assert.equal(mock.getCompleteCalls(), 0);
   assert.equal(mock.getAdoptedCount(), 1);
 
   const retryOrchestrator = new TimelineAdoptionOrchestrator({
     repository,
     localStore,
     transport: mock.transport,
-    clientAdoptionRunId: 'run-crash-retry',
   });
 
   const retryResult = await retryOrchestrator.run();
+  assert.equal(retryResult.status, 'completed');
   assert.equal(retryResult.adoptedCount, 0);
   assert.equal(retryResult.skippedCount, 1);
   assert.equal(mock.getAdoptedCount(), 1);
+  assert.equal(mock.getCompleteCalls(), 1);
 });
 
-test('orchestrator skips acknowledged events on resume', async () => {
+test('orchestrator does not complete when batch item fails', async () => {
   const repository = new InMemoryTimelineRepository();
   await seedEvent(
     repository,
-    glucoseEvent('evt-resume-1', '2026-08-14T10:00:00.000Z'),
+    glucoseEvent('evt-fail-1', '2026-08-14T10:00:00.000Z'),
   );
 
   const mock = createMockTransport();
   const localStore = createInMemoryLocalStore();
 
-  const first = new TimelineAdoptionOrchestrator({
+  const orchestrator = new TimelineAdoptionOrchestrator({
     repository,
     localStore,
-    transport: mock.transport,
-    clientAdoptionRunId: 'run-resume-1',
+    transport: {
+      ...mock.transport,
+      async adoptBatch(sessionId, items) {
+        return {
+          items: items.map((item) => ({
+            localEventId: item.localEventId,
+            status: 'failed',
+            code: 'ADOPTION_ITEM_INVALID',
+            message: 'simulated failure',
+          })),
+        };
+      },
+    },
+    clientAdoptionRunId: 'run-fail-1',
   });
-  await first.run();
 
-  const second = new TimelineAdoptionOrchestrator({
+  const result = await orchestrator.run();
+  assert.equal(result.status, 'incomplete');
+  assert.equal(result.failedCount, 1);
+  assert.equal(mock.getCompleteCalls(), 0);
+
+  const checkpoint = await localStore.getResumableSessionCheckpoint();
+  assert.equal(checkpoint?.lifecycle, 'failed');
+});
+
+test('terminal checkpoint does not resume until forceNewRun', async () => {
+  const repository = new InMemoryTimelineRepository();
+  await seedEvent(
+    repository,
+    glucoseEvent('evt-terminal', '2026-08-14T11:00:00.000Z'),
+  );
+
+  const mock = createMockTransport();
+  const localStore = createInMemoryLocalStore();
+
+  await localStore.saveSessionCheckpoint({
+    clientAdoptionRunId: 'run-terminal-old',
+    adoptionSessionId: 'session-terminal-old',
+    lifecycle: 'completed',
+    checkpoint: { eligibleCount: 1, adoptedCount: 1, failedCount: 0 },
+    createdAt: '2026-08-14T09:00:00.000Z',
+    updatedAt: '2026-08-14T09:00:00.000Z',
+    storageSchemaVersion: 1,
+  });
+
+  const orchestrator = new TimelineAdoptionOrchestrator({
     repository,
     localStore,
     transport: mock.transport,
-    clientAdoptionRunId: 'run-resume-2',
+    forceNewRun: true,
+    clientAdoptionRunId: 'run-terminal-new',
   });
-  const classification = await second.classifyLocalEvents();
-  const resumed = classification.find(
-    (item) => item.localEventId === 'evt-resume-1',
-  );
-  assert.equal(resumed?.classification, 'already_adopted');
+
+  const result = await orchestrator.run();
+  assert.equal(result.status, 'completed');
+  assert.equal(result.adoptedCount, 1);
 });
 
 test('indexeddb local store persists source namespace and acknowledgements', async () => {
@@ -195,10 +289,28 @@ test('indexeddb local store persists source namespace and acknowledgements', asy
   );
   assert.match(namespace, /^ns_/);
 
-  const namespaceAgain = await localStore.ensureSourceNamespace(
-    () => 'ns_other',
-  );
-  assert.equal(namespaceAgain, namespace);
+  await localStore.saveSessionCheckpoint({
+    clientAdoptionRunId: 'run-ack-test',
+    adoptionSessionId: 'session-ack-test',
+    lifecycle: 'open',
+    checkpoint: { eligibleCount: 1 },
+    createdAt: '2026-08-14T08:00:00.000Z',
+    updatedAt: '2026-08-14T08:00:00.000Z',
+    storageSchemaVersion: 1,
+  });
+
+  await localStore.saveSessionCheckpoint({
+    clientAdoptionRunId: 'run-ack-test',
+    adoptionSessionId: 'session-ack-test',
+    lifecycle: 'open',
+    checkpoint: { eligibleCount: 1, adoptedCount: 1 },
+    createdAt: '2026-08-14T08:00:00.000Z',
+    updatedAt: '2026-08-14T09:00:00.000Z',
+    storageSchemaVersion: 1,
+  });
+
+  const checkpoint = await localStore.getSessionByRunId('run-ack-test');
+  assert.equal(checkpoint?.createdAt, '2026-08-14T08:00:00.000Z');
 
   await localStore.saveAcknowledgement({
     localEventId: 'evt-ack-1',
@@ -209,13 +321,13 @@ test('indexeddb local store persists source namespace and acknowledgements', asy
     storageSchemaVersion: 1,
   });
 
-  assert.equal(await localStore.hasAcknowledgement('evt-ack-1'), true);
-
   const reopened = await openTimelineIndexedDB({ databaseName });
   const reopenedStore = createTimelineAdoptionLocalStore(
     reopened.connection.database,
   );
   assert.equal(await reopenedStore.hasAcknowledgement('evt-ack-1'), true);
+  const resumable = await reopenedStore.getResumableSessionCheckpoint();
+  assert.equal(resumable?.clientAdoptionRunId, 'run-ack-test');
 });
 
 function createInMemoryLocalStore() {
@@ -237,10 +349,23 @@ function createInMemoryLocalStore() {
       acknowledgements.set(acknowledgement.localEventId, acknowledgement);
     },
     async saveSessionCheckpoint(session) {
-      sessions.set(session.clientAdoptionRunId, session);
+      const existing = sessions.get(session.clientAdoptionRunId);
+      sessions.set(session.clientAdoptionRunId, {
+        ...session,
+        createdAt: existing?.createdAt ?? session.createdAt,
+      });
     },
     async getSessionByRunId(clientAdoptionRunId) {
       return sessions.get(clientAdoptionRunId) ?? null;
+    },
+    async getResumableSessionCheckpoint() {
+      const resumable = [...sessions.values()]
+        .filter(
+          (session) =>
+            session.lifecycle === 'open' || session.lifecycle === 'failed',
+        )
+        .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+      return resumable[0] ?? null;
     },
   };
 }

@@ -3,6 +3,7 @@ import {
   AdoptionItemInvalidError,
   AdoptionNotEnabledError,
   AdoptionSessionClosedError,
+  AdoptionSessionIncompleteError,
   AdoptionSessionNotFoundError,
   AdoptionSourceConflictError,
   InvalidMedicalListCursorError,
@@ -176,6 +177,16 @@ function mapAdoptionApiError(error: unknown, correlationId: string): Response {
       error.message,
       correlationId,
       { code: 'ADOPTION_SESSION_CLOSED' },
+    );
+  }
+
+  if (error instanceof AdoptionSessionIncompleteError) {
+    return medicalApiErrorResponse(
+      409,
+      'VALIDATION_FAILED',
+      'Adoption session has unresolved failed items.',
+      correlationId,
+      { code: 'ADOPTION_SESSION_INCOMPLETE' },
     );
   }
 
