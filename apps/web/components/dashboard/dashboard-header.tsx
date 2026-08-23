@@ -50,7 +50,7 @@ function DashboardAvatar({
     avatarUrl,
     failedAvatarUrl,
   );
-  const avatarClassName = `${avatarTargetClassName} border border-border-default bg-slate-100 text-sm font-bold text-text-primary`;
+  const avatarClassName = `${avatarTargetClassName} border border-white/80 bg-white/85 text-sm font-bold text-text-primary shadow-[0_8px_24px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:border-white/10 dark:bg-slate-900/85 dark:ring-white/10`;
 
   if (isLoading) {
     return (
@@ -86,7 +86,7 @@ function DashboardAvatar({
     return (
       <button
         aria-label={avatarLabel}
-        className={`${avatarClassName} hover:border-border-strong focus-visible:outline-interactive-primary transition hover:bg-slate-200 focus-visible:outline-2 focus-visible:outline-offset-2`}
+        className={`${avatarClassName} transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(15,23,42,0.14)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-interactive-primary`}
         onClick={onAvatarClick}
         type="button"
       >
@@ -141,32 +141,39 @@ export function DashboardHeader({
   return (
     <header
       aria-busy={viewModel.isLoading}
-      className="border-border-default bg-surface/95 text-text-primary sticky top-0 z-30 border-b pt-[env(safe-area-inset-top)] backdrop-blur"
+      className="relative z-30 pt-[env(safe-area-inset-top)]"
     >
-      <div className="mx-auto grid min-h-16 max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-[4.5rem]">
+      <div className="mx-auto grid min-h-20 max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-4 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-24 lg:py-5">
         <div className="flex min-w-0 items-center gap-3">
-          <BrandSymbol />
-          <h1 className="truncate text-base font-bold sm:text-lg">
-            {viewModel.productName}
-          </h1>
+          <span className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-teal-400 via-cyan-400 to-blue-500 shadow-[0_12px_28px_rgba(14,165,233,0.24)] [&_svg]:drop-shadow-sm">
+            <BrandSymbol />
+          </span>
+          <div className="min-w-0">
+            <h1 className="truncate text-lg font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-xl lg:text-2xl">
+              {viewModel.productName}
+            </h1>
+            <p className="mt-0.5 hidden text-xs font-medium text-slate-500 dark:text-slate-400 sm:block">
+              {dateContent}
+            </p>
+          </div>
         </div>
 
         {viewModel.isLoading ? (
           <span
             aria-hidden="true"
-            className="col-span-2 row-start-2 h-5 w-48 max-w-full animate-pulse rounded bg-slate-200 motion-reduce:animate-none sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center"
+            className="col-span-2 row-start-2 h-5 w-48 max-w-full animate-pulse rounded bg-white/70 motion-reduce:animate-none sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center dark:bg-slate-800"
           />
         ) : viewModel.dateLabel && viewModel.dateTime ? (
           <time
             aria-label={viewModel.currentDateAriaLabel ?? undefined}
-            className="text-text-secondary col-span-2 row-start-2 min-w-0 text-sm font-medium sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center"
+            className="col-span-2 row-start-2 min-w-0 rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm backdrop-blur sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-300 lg:text-sm"
             dateTime={viewModel.dateTime}
           >
             {viewModel.dateLabel}
           </time>
         ) : (
           <span
-            className="text-text-secondary col-span-2 row-start-2 min-w-0 text-sm sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center"
+            className="col-span-2 row-start-2 min-w-0 text-sm text-text-secondary sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center"
             role="status"
           >
             {dateContent}
@@ -176,7 +183,7 @@ export function DashboardHeader({
         <div className="col-start-2 row-start-1 flex items-center gap-2 sm:col-start-3">
           <Button
             aria-label={viewModel.addEventLabel}
-            className={`${desktopActionClassName}`}
+            className={`${desktopActionClassName} border-0 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 text-white shadow-[0_10px_24px_rgba(6,182,212,0.22)] hover:brightness-105`}
             disabled={viewModel.addEventDisabled}
             onClick={viewModel.onAddEvent}
             ref={addEventButtonRef}
@@ -203,7 +210,7 @@ export function DashboardHeader({
 
         {viewModel.isError ? (
           <p
-            className="col-span-full m-0 text-xs font-medium text-rose-700"
+            className="col-span-full m-0 text-xs font-medium text-status-danger"
             role="status"
           >
             {viewModel.errorMessage}
