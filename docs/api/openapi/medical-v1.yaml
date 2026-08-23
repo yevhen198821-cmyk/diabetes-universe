@@ -11,6 +11,8 @@ servers:
 tags:
   - name: MedicalEvents
     description: Self-subject medical event resources
+  - name: MedicalAdoption
+    description: One-time local data adoption sessions
 security:
   - sessionAuth: []
 paths:
@@ -185,6 +187,151 @@ paths:
           $ref: '#/components/responses/InternalError'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
+  /me/adoption-sessions:
+    post:
+      tags: [MedicalAdoption]
+      summary: Create or resume adoption session
+      operationId: createAdoptionSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdoptionSessionCreateRequest'
+      responses:
+        '200':
+          description: Adoption session state
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdoptionSessionResponse'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '403':
+          $ref: '#/components/responses/ValidationFailed'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /me/adoption-sessions/{adoptionSessionId}:
+    get:
+      tags: [MedicalAdoption]
+      summary: Get adoption session status
+      operationId: getAdoptionSession
+      parameters:
+        - $ref: '#/components/parameters/AdoptionSessionId'
+      responses:
+        '200':
+          description: Adoption session state
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdoptionSessionResponse'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /me/adoption-sessions/{adoptionSessionId}/items:
+    post:
+      tags: [MedicalAdoption]
+      summary: Submit bounded adoption batch
+      operationId: adoptBatch
+      parameters:
+        - $ref: '#/components/parameters/AdoptionSessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdoptionBatchRequest'
+      responses:
+        '200':
+          description: Per-item adoption outcomes
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdoptionBatchResponse'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ValidationFailed'
+        '413':
+          $ref: '#/components/responses/RequestTooLarge'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /me/adoption-sessions/{adoptionSessionId}/complete:
+    post:
+      tags: [MedicalAdoption]
+      summary: Complete adoption session
+      operationId: completeAdoptionSession
+      parameters:
+        - $ref: '#/components/parameters/AdoptionSessionId'
+      responses:
+        '200':
+          description: Completed adoption session
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdoptionSessionResponse'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '409':
+          $ref: '#/components/responses/ValidationFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /me/adoption-sessions/{adoptionSessionId}/cancel:
+    post:
+      tags: [MedicalAdoption]
+      summary: Cancel adoption session
+      operationId: cancelAdoptionSession
+      parameters:
+        - $ref: '#/components/parameters/AdoptionSessionId'
+      responses:
+        '200':
+          description: Cancelled adoption session
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdoptionSessionResponse'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
 components:
   securitySchemes:
     sessionAuth:
@@ -230,6 +377,13 @@ components:
       schema:
         type: string
         description: Opaque revision token previously returned as revision or ETag
+    AdoptionSessionId:
+      name: adoptionSessionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
   headers:
     PrivateNoStore:
       description: Private response that must not be cached publicly
@@ -305,6 +459,186 @@ components:
               nullable: true
             hasMore:
               type: boolean
+    AdoptionSessionCreateRequest:
+      type: object
+      required:
+        - clientAdoptionRunId
+        - sourcePlatform
+        - sourceAppVersion
+        - sourceSchemaMin
+        - sourceSchemaMax
+      additionalProperties: false
+      properties:
+        clientAdoptionRunId:
+          type: string
+          maxLength: 128
+          pattern: '^[A-Za-z0-9._-]+$'
+        sourcePlatform:
+          type: string
+          maxLength: 16
+        sourceAppVersion:
+          type: string
+          maxLength: 64
+        sourceSchemaMin:
+          type: integer
+          minimum: 1
+        sourceSchemaMax:
+          type: integer
+          minimum: 1
+        eligibleCount:
+          type: integer
+          minimum: 0
+    AdoptionSession:
+      type: object
+      required:
+        - adoptionSessionId
+        - clientAdoptionRunId
+        - sourcePlatform
+        - sourceAppVersion
+        - sourceSchemaMin
+        - sourceSchemaMax
+        - lifecycleState
+        - eligibleCount
+        - adoptedCount
+        - skippedCount
+        - failedCount
+        - createdAt
+        - startedAt
+        - completedAt
+        - updatedAt
+      properties:
+        adoptionSessionId:
+          type: string
+          format: uuid
+        clientAdoptionRunId:
+          type: string
+        sourcePlatform:
+          type: string
+        sourceAppVersion:
+          type: string
+        sourceSchemaMin:
+          type: integer
+        sourceSchemaMax:
+          type: integer
+        lifecycleState:
+          type: string
+          enum: [open, failed, completed, cancelled]
+        eligibleCount:
+          type: integer
+        adoptedCount:
+          type: integer
+        skippedCount:
+          type: integer
+        failedCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        startedAt:
+          type: string
+          format: date-time
+          nullable: true
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+    AdoptionSessionResponse:
+      type: object
+      required: [session]
+      properties:
+        session:
+          $ref: '#/components/schemas/AdoptionSession'
+    AdoptionBatchRequest:
+      type: object
+      required: [items]
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/AdoptionItemInput'
+    AdoptionItemInput:
+      type: object
+      required:
+        - sourceNamespace
+        - localEventId
+        - sourceSchemaVersion
+        - event
+      additionalProperties: false
+      properties:
+        sourceNamespace:
+          type: string
+          maxLength: 128
+          pattern: '^[A-Za-z0-9._-]+$'
+        localEventId:
+          type: string
+          maxLength: 128
+          pattern: '^[A-Za-z0-9._-]+$'
+        sourceSchemaVersion:
+          type: integer
+          minimum: 1
+        event:
+          $ref: '#/components/schemas/SemanticTimelineEvent'
+    AdoptionBatchResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/AdoptionItemSuccess'
+              - $ref: '#/components/schemas/AdoptionItemReplay'
+              - $ref: '#/components/schemas/AdoptionItemFailure'
+    AdoptionItemSuccess:
+      type: object
+      required: [localEventId, status, resourceId, revision, createdAt]
+      properties:
+        localEventId:
+          type: string
+        status:
+          type: string
+          enum: [adopted]
+        resourceId:
+          type: string
+          format: uuid
+        revision:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    AdoptionItemReplay:
+      type: object
+      required: [localEventId, status, resourceId, revision]
+      properties:
+        localEventId:
+          type: string
+        status:
+          type: string
+          enum: [already_adopted]
+        resourceId:
+          type: string
+          format: uuid
+        revision:
+          type: string
+    AdoptionItemFailure:
+      type: object
+      required: [localEventId, status, code, message]
+      properties:
+        localEventId:
+          type: string
+        status:
+          type: string
+          enum: [failed]
+        code:
+          type: string
+        message:
+          type: string
     SemanticTimelineEvent:
       type: object
       required: [occurredAt, schemaVersion, source, kind]

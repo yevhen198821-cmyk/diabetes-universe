@@ -50,3 +50,20 @@ export {
   IndexedDbTimelineRepository,
   createIndexedDbTimelineRepository,
 } from './persistence/indexeddb/timeline-indexeddb-repository';
+export {
+  TimelineAdoptionOrchestrator,
+  type TimelineAdoptionTransport,
+  type TimelineAdoptionOrchestratorOptions,
+  type TimelineAdoptionOrchestratorResult,
+} from './adoption/timeline-adoption-orchestrator';
+export {
+  scanTimelineForAdoption,
+  createSourceNamespace,
+  toAdoptionAcknowledgement,
+  type TimelineAdoptionScanClassification,
+  type TimelineAdoptionScanItem,
+} from './adoption/timeline-adoption-scanner';
+export {
+  createTimelineAdoptionLocalStore,
+  type TimelineAdoptionLocalStore,
+} from './adoption/timeline-adoption-local-store';

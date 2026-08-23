@@ -28,6 +28,32 @@ export {
   MedicalRevisionConflictError,
   MedicalServiceUnavailableError,
 } from './errors/medical-service-errors';
+export {
+  AdoptionBatchTooLargeError,
+  AdoptionItemInvalidError,
+  AdoptionNotEnabledError,
+  AdoptionSchemaUnsupportedError,
+  AdoptionSessionClosedError,
+  AdoptionSessionIncompleteError,
+  AdoptionSessionNotFoundError,
+  AdoptionSourceConflictError,
+} from './errors/adoption-errors';
+export type {
+  AdoptionBatchResult,
+  AdoptionItemFailure,
+  AdoptionItemInput,
+  AdoptionItemOutcomeStatus,
+  AdoptionItemReplay,
+  AdoptionItemResult,
+  AdoptionItemStateKind,
+  AdoptionItemSuccess,
+  AdoptionSessionLifecycleState,
+  AdoptionSourceIdentity,
+  CreateAdoptionSessionInput,
+  MedicalAdoptionMapping,
+  MedicalAdoptionItemState,
+  MedicalAdoptionSession,
+} from './types/adoption';
 export type { MedicalRevision } from './types/medical-revision';
 export {
   assertMedicalRevision,

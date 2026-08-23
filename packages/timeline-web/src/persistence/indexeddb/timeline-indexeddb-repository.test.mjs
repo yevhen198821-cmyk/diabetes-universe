@@ -5,8 +5,10 @@ import { TimelineRepositoryError } from '@diabetes-universe/timeline';
 
 import {
   TIMELINE_INDEXEDDB_STORES,
+  TIMELINE_INDEXEDDB_VERSION,
   createIndexedDbTimelineRepository,
 } from '../../index.ts';
+import { applyTimelineIndexedDbSchemaUpgrade } from './timeline-indexeddb-upgrade.ts';
 
 const FIXED_NOW = '2026-08-09T19:00:00.000Z';
 
@@ -219,35 +221,24 @@ test('fails initialize when bootstrap metadata is inconsistent with event eviden
   const databaseName = createTestDatabaseName('bootstrap-inconsistent');
   await deleteTestDatabase(databaseName);
 
-  const request = indexedDB.open(databaseName, 1);
+  const request = indexedDB.open(databaseName, TIMELINE_INDEXEDDB_VERSION);
   await new Promise((resolve, reject) => {
     request.onupgradeneeded = () => {
-      const database = request.result;
-      const eventStore = database.createObjectStore(
-        TIMELINE_INDEXEDDB_STORES.events,
-        { keyPath: 'id' },
+      applyTimelineIndexedDbSchemaUpgrade(
+        request.result,
+        0,
+        TIMELINE_INDEXEDDB_VERSION,
       );
-      eventStore.createIndex('by_occurredAt_id', ['occurredAt', 'id'], {
-        unique: false,
-      });
-      eventStore.createIndex(
-        'by_kind_occurredAt_id',
-        ['kind', 'occurredAt', 'id'],
-        { unique: false },
-      );
-      database.createObjectStore(TIMELINE_INDEXEDDB_STORES.metadata, {
-        keyPath: 'key',
-      });
-      database.createObjectStore(TIMELINE_INDEXEDDB_STORES.quarantine, {
-        keyPath: 'quarantineId',
-      });
     };
     request.onsuccess = () => resolve(undefined);
     request.onerror = () => reject(request.error);
   });
 
   const database = await new Promise((resolve, reject) => {
-    const openRequest = indexedDB.open(databaseName, 1);
+    const openRequest = indexedDB.open(
+      databaseName,
+      TIMELINE_INDEXEDDB_VERSION,
+    );
     openRequest.onsuccess = () => resolve(openRequest.result);
     openRequest.onerror = () => reject(openRequest.error);
   });

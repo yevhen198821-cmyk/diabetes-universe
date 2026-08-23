@@ -37,7 +37,7 @@ function createRecord(overrides = {}) {
 
 test('declares the approved P4 IndexedDB database identity', () => {
   assert.equal(TIMELINE_INDEXEDDB_DATABASE_NAME, 'diabetes-universe-timeline');
-  assert.equal(TIMELINE_INDEXEDDB_VERSION, 1);
+  assert.equal(TIMELINE_INDEXEDDB_VERSION, 2);
   assert.equal(TIMELINE_STORAGE_SCHEMA_VERSION, 1);
   assert.equal(
     timelineIndexedDbSchemaV1.databaseName,
@@ -45,11 +45,14 @@ test('declares the approved P4 IndexedDB database identity', () => {
   );
 });
 
-test('declares all three v1 stores and required event indexes', () => {
+test('declares v2 stores including adoption persistence', () => {
   assert.deepEqual(TIMELINE_INDEXEDDB_STORES, {
     events: 'timeline_events',
     metadata: 'timeline_metadata',
     quarantine: 'timeline_quarantine',
+    adoptionAcknowledgements: 'timeline_adoption_acknowledgements',
+    adoptionSessions: 'timeline_adoption_sessions',
+    adoptionQuarantine: 'timeline_adoption_quarantine',
   });
   assert.deepEqual(TIMELINE_INDEXEDDB_EVENT_INDEXES, {
     byKindOccurredAtId: 'by_kind_occurredAt_id',

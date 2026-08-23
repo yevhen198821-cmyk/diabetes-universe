@@ -18,6 +18,7 @@ function environmentCacheKey(): string {
     env.MEDICAL_DATABASE_URL,
     env.MEDICAL_REVISION_TOKEN_SECRET,
     env.MEDICAL_LIST_CURSOR_SECRET,
+    env.MEDICAL_ADOPTION_ENABLED,
   ].join('|');
 }
 
