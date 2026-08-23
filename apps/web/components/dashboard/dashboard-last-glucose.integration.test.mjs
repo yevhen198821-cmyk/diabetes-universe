@@ -70,8 +70,8 @@ test('dashboard last glucose renders localized English copy inside platform prov
 
   try {
     assert.match(document.body.textContent ?? '', /Last glucose/);
-    assert.match(document.body.textContent ?? '', /Last measurement/);
-    assert.match(document.body.textContent ?? '', /6\.4 mmol\/L/);
+    assert.match(document.body.textContent ?? '', /6\.4/);
+    assert.match(document.body.textContent ?? '', /mmol\/L/);
     assert.equal(
       document.body.textContent?.includes('Последняя глюкоза'),
       false,

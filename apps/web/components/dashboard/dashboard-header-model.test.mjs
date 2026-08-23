@@ -11,7 +11,8 @@ import {
 const englishLabels = {
   addEvent: 'Add event',
   avatar: 'User profile',
-  avatarAction: 'Open profile',
+  avatarAction: 'Open account',
+  brandName: 'Diabetes Universe',
   currentDate: 'Current date',
   dateUnavailable: 'Date unavailable',
   defaultError: 'Could not load header data.',
@@ -226,7 +227,7 @@ test('preserves required and optional callbacks and disabled action state', () =
   assert.equal(staticAvatarModel.avatarLabel, 'User profile: Alex Example');
   assert.equal(
     interactiveAvatarModel.avatarLabel,
-    'Open profile: Alex Example',
+    'Open account: Alex Example',
   );
 });
 
@@ -239,7 +240,7 @@ test('provides accessible labels for actions, date, loading, and fallback', () =
   );
 
   assert.equal(interactiveModel.addEventLabel, 'Add event');
-  assert.equal(interactiveModel.avatarLabel, 'Open profile: Alex Example');
+  assert.equal(interactiveModel.avatarLabel, 'Open account: Alex Example');
   assert.equal(noUserModel.avatarLabel, 'User profile');
   assert.equal(interactiveModel.currentDateLabel, 'Current date');
   assert.equal(

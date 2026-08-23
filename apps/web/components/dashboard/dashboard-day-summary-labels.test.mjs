@@ -11,16 +11,18 @@ test('resolveDashboardDaySummaryLabels returns canonical English strings', async
 
   const labels = resolveDashboardDaySummaryLabels(runtime.localization);
 
-  assert.equal(labels.title, 'Day summary');
+  assert.equal(labels.title, 'Today');
   assert.equal(labels.eyebrow, 'Current day');
   assert.equal(labels.loading, 'Loading day summary');
   assert.equal(labels.unavailable, 'Day summary unavailable.');
   assert.equal(labels.defaultEmpty, "Today's summary is not available yet.");
   assert.equal(labels.defaultError, 'Could not load the day summary.');
-  assert.equal(labels.glucoseMeasurements, 'Glucose measurements');
-  assert.equal(labels.totalInsulin, 'Total insulin');
-  assert.equal(labels.totalCarbohydrates, 'Total carbohydrates');
-  assert.equal(labels.medicationDoses, 'Medication doses');
+  assert.equal(labels.glucose, 'Glucose');
+  assert.equal(labels.totalInsulin, 'Insulin');
+  assert.equal(labels.totalCarbohydrates, 'Carbohydrates');
+  assert.equal(labels.activity, 'Activity');
+  assert.equal(labels.totalForDay, 'Total for the day');
+  assert.equal(labels.viewDetails, 'Details');
   assert.equal(labels.units.compactMassG, 'g');
   assert.equal(labels.units.compactInsulinDose, 'U');
 });

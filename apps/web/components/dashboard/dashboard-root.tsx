@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useMemo, useRef, useState } from 'react';
 
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model';
@@ -29,14 +30,17 @@ import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { QuickAddHost } from '../quick-add/quick-add-host';
 import { DashboardDaySummary } from './dashboard-day-summary';
+import { DashboardGreeting } from './dashboard-greeting';
 import { DashboardHeader } from './dashboard-header';
 import { DashboardLastGlucose } from './dashboard-last-glucose';
+import { DashboardMobileNav } from './dashboard-mobile-nav';
 import { DashboardNextAction } from './dashboard-next-action';
 import { DashboardQuickActions } from './dashboard-quick-actions';
 import { DashboardRecentEvents } from './dashboard-recent-events';
 import { DashboardShell } from './dashboard-shell';
 
 export function DashboardRoot() {
+  const router = useRouter();
   const localization = useLocalization();
   const formatter = useFormatter();
   const presentationDependencies = useTimelinePresentationDependencies();
@@ -160,11 +164,18 @@ export function DashboardRoot() {
             <DashboardDaySummary state="empty" />
           )
         }
+        greeting={
+          <DashboardGreeting
+            referenceTime={referenceTime}
+            state={isTimelineHydrating ? 'loading' : 'ready'}
+          />
+        }
         header={
           <DashboardHeader
             addEventButtonRef={headerActionRef}
             addEventDisabled={quickAddState.isOpen}
             onAddEvent={() => requestOpen('header')}
+            onAvatarClick={() => router.push('/account')}
             referenceTime={referenceTime}
             state={isTimelineHydrating ? 'loading' : 'ready'}
             user={null}
@@ -187,6 +198,13 @@ export function DashboardRoot() {
           ) : (
             <DashboardLastGlucose state="empty" />
           )
+        }
+        mobileNav={
+          <DashboardMobileNav
+            onQuickAdd={() => requestOpen('fab')}
+            quickAddButtonRef={fabRef}
+            quickAddDisabled={quickAddState.isOpen || isTimelineHydrating}
+          />
         }
         nextAction={
           isTimelineHydrating ? (
@@ -234,8 +252,6 @@ export function DashboardRoot() {
         }
       />
       <QuickAddHost
-        floatingActionButtonClassName="bottom-[calc(1rem+env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] size-14 bg-gradient-to-br from-rose-500 via-orange-400 to-amber-300 text-white shadow-[0_14px_35px_rgba(244,63,94,0.28)] lg:hidden"
-        floatingActionButtonRef={fabRef}
         onActivitySubmit={(entry) => {
           addEvent(createSemanticActivityTimelineEvent(entry));
         }}
@@ -259,7 +275,7 @@ export function DashboardRoot() {
         open={quickAddState.isOpen}
         openCategory={quickAddState.openCategory}
         returnFocusRef={returnFocusRef}
-        showFloatingActionButton
+        showFloatingActionButton={false}
       />
     </>
   );

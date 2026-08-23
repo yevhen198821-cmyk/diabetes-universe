@@ -31,7 +31,7 @@ export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
     <section
       aria-busy={viewModel.isLoading}
       aria-labelledby={titleId}
-      className={`relative col-span-full overflow-hidden rounded-[1.75rem] border bg-white/85 p-4 shadow-[0_18px_55px_rgba(15,23,42,0.07)] backdrop-blur-xl dark:bg-slate-900/85 sm:p-5 lg:col-span-12 ${
+      className={`relative col-span-full overflow-hidden rounded-[1.75rem] border bg-white/85 p-4 shadow-[0_18px_55px_rgba(15,23,42,0.07)] backdrop-blur-xl sm:p-5 lg:col-span-12 dark:bg-slate-900/85 ${
         isError
           ? 'border-status-danger/40'
           : 'border-white/70 dark:border-white/10'
@@ -39,7 +39,7 @@ export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-16 -right-16 size-52 rounded-full bg-gradient-to-br from-cyan-200/25 via-violet-200/20 to-rose-200/25 blur-3xl dark:opacity-20"
+        className="pointer-events-none absolute -right-16 -bottom-16 size-52 rounded-full bg-gradient-to-br from-cyan-200/25 via-violet-200/20 to-rose-200/25 blur-3xl dark:opacity-20"
       />
 
       {viewModel.state === 'loading' ? (
@@ -82,7 +82,7 @@ export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
               </h2>
             </div>
             <Link
-              className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-full px-3 text-sm font-bold text-violet-600 transition hover:bg-violet-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-interactive-primary dark:text-violet-300"
+              className="focus-visible:outline-interactive-primary inline-flex min-h-11 shrink-0 items-center gap-1 rounded-full px-3 text-sm font-bold text-violet-600 transition hover:bg-violet-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 dark:text-violet-300"
               href={viewModel.viewAllHref ?? '/timeline'}
             >
               <span>{viewModel.viewAllLabel}</span>

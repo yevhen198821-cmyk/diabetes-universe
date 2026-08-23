@@ -9,7 +9,7 @@ test('dashboard header renders localized English copy after platform readiness',
   await waitForApplicationReady(page);
 
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Home' }),
+    page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
   ).toBeVisible();
   await expect(page.getByRole('button', { name: 'Add event' })).toBeVisible();
   await expect(page.locator('header time[datetime]')).toBeVisible();

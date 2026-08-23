@@ -4,20 +4,22 @@ import type {
 } from '@diabetes-universe/i18n';
 
 export interface DashboardDaySummaryLabels {
+  readonly activity: string;
   readonly defaultEmpty: string;
   readonly defaultError: string;
   readonly eyebrow: string;
-  readonly glucoseMeasurements: string;
+  readonly glucose: string;
   readonly loading: string;
-  readonly medicationDoses: string;
   readonly title: string;
   readonly totalCarbohydrates: string;
+  readonly totalForDay: string;
   readonly totalInsulin: string;
   readonly unavailable: string;
   readonly units: Readonly<{
     readonly compactInsulinDose: string;
     readonly compactMassG: string;
   }>;
+  readonly viewDetails: string;
 }
 
 function asTranslationKey(value: string): TranslationKey {
@@ -25,22 +27,20 @@ function asTranslationKey(value: string): TranslationKey {
 }
 
 const DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS = {
+  activity: asTranslationKey('dashboard.daySummary.metrics.activity'),
   defaultEmpty: asTranslationKey('dashboard.daySummary.empty.default'),
   defaultError: asTranslationKey('dashboard.daySummary.error.default'),
   eyebrow: asTranslationKey('dashboard.daySummary.eyebrow'),
-  glucoseMeasurements: asTranslationKey(
-    'dashboard.daySummary.metrics.glucoseMeasurements',
-  ),
+  glucose: asTranslationKey('dashboard.daySummary.metrics.glucose'),
   loading: asTranslationKey('dashboard.daySummary.loading'),
-  medicationDoses: asTranslationKey(
-    'dashboard.daySummary.metrics.medicationDoses',
-  ),
   title: asTranslationKey('dashboard.daySummary.title'),
   totalCarbohydrates: asTranslationKey(
     'dashboard.daySummary.metrics.totalCarbohydrates',
   ),
+  totalForDay: asTranslationKey('dashboard.daySummary.metrics.totalForDay'),
   totalInsulin: asTranslationKey('dashboard.daySummary.metrics.totalInsulin'),
   unavailable: asTranslationKey('dashboard.daySummary.unavailable'),
+  viewDetails: asTranslationKey('dashboard.daySummary.viewDetails'),
 } as const;
 
 const DASHBOARD_DAY_SUMMARY_COMPACT_UNIT_TRANSLATION_KEYS = {
@@ -55,13 +55,14 @@ function translateDashboardDaySummaryKey(
   return localization.translate({ key }).value;
 }
 
-/**
- * Resolves localized Dashboard Day Summary block labels from the platform runtime.
- */
 export function resolveDashboardDaySummaryLabels(
   localization: LocalizationPlatform,
 ): DashboardDaySummaryLabels {
   return {
+    activity: translateDashboardDaySummaryKey(
+      localization,
+      DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.activity,
+    ),
     defaultEmpty: translateDashboardDaySummaryKey(
       localization,
       DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.defaultEmpty,
@@ -74,17 +75,13 @@ export function resolveDashboardDaySummaryLabels(
       localization,
       DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.eyebrow,
     ),
-    glucoseMeasurements: translateDashboardDaySummaryKey(
+    glucose: translateDashboardDaySummaryKey(
       localization,
-      DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.glucoseMeasurements,
+      DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.glucose,
     ),
     loading: translateDashboardDaySummaryKey(
       localization,
       DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.loading,
-    ),
-    medicationDoses: translateDashboardDaySummaryKey(
-      localization,
-      DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.medicationDoses,
     ),
     title: translateDashboardDaySummaryKey(
       localization,
@@ -94,6 +91,10 @@ export function resolveDashboardDaySummaryLabels(
       localization,
       DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.totalCarbohydrates,
     ),
+    totalForDay: translateDashboardDaySummaryKey(
+      localization,
+      DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.totalForDay,
+    ),
     totalInsulin: translateDashboardDaySummaryKey(
       localization,
       DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.totalInsulin,
@@ -101,6 +102,10 @@ export function resolveDashboardDaySummaryLabels(
     unavailable: translateDashboardDaySummaryKey(
       localization,
       DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.unavailable,
+    ),
+    viewDetails: translateDashboardDaySummaryKey(
+      localization,
+      DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.viewDetails,
     ),
     units: {
       compactInsulinDose: translateDashboardDaySummaryKey(

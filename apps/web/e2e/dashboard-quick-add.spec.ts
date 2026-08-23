@@ -8,12 +8,12 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
 
   await expect(page).toHaveTitle(/Dashboard \| Diabetes Universe/);
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Home' }),
+    page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
   ).toBeVisible();
   await expect(
     page.getByRole('heading', { name: 'Last glucose' }),
   ).toBeVisible();
-  const daySummary = page.getByRole('region', { name: 'Day summary' });
+  const daySummary = page.getByRole('region', { name: 'Today' });
 
   await expect(daySummary.getByText('4 U')).toBeVisible();
 
@@ -86,7 +86,7 @@ test('next action opens insulin quick add directly and updates dashboard', async
 
   await waitForApplicationReady(page);
 
-  const daySummary = page.getByRole('region', { name: 'Day summary' });
+  const daySummary = page.getByRole('region', { name: 'Today' });
 
   await expect(page.getByText('Next action')).toBeVisible();
   await expect(
@@ -222,10 +222,17 @@ test('timeline quick add updates shared dashboard state', async ({ page }) => {
 
   await expect(page).toHaveURL('/');
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Home' }),
+    page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
   ).toBeVisible();
   await expect(
-    page.getByRole('region', { name: 'Last glucose' }).getByText('8.8 mmol/L'),
+    page.getByRole('region', { name: 'Last glucose' }).getByText('8.8', {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('region', { name: 'Last glucose' }).getByText('mmol/L', {
+      exact: true,
+    }),
   ).toBeVisible();
 });
 
@@ -235,6 +242,6 @@ test('/dashboard redirects to home dashboard', async ({ page }) => {
 
   await expect(page).toHaveURL('/');
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Home' }),
+    page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
   ).toBeVisible();
 });

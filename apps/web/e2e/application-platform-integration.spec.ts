@@ -39,7 +39,7 @@ test('dashboard to timeline client navigation preserves timeline store state', a
   await page.goto('/');
   await waitForApplicationReady(page);
 
-  const daySummary = page.getByRole('region', { name: 'Day summary' });
+  const daySummary = page.getByRole('region', { name: 'Today' });
 
   await expect(daySummary.getByText('4 U')).toBeVisible();
 

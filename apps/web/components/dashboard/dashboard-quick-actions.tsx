@@ -6,7 +6,7 @@ import { useLocalization } from '../../lib/platform/react/use-localization';
 import { quickAddActions } from '../../lib/quick-add/actions';
 import type { QuickAddOpenCategory } from '../../lib/quick-add/quick-add-controller-model';
 import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
-import { resolveDashboardHeaderLabels } from './dashboard-header-labels';
+import { resolveDashboardQuickActionsLabels } from './dashboard-quick-actions-labels';
 
 const visibleCategories: readonly QuickAddOpenCategory[] = [
   'glucose',
@@ -52,7 +52,7 @@ export function DashboardQuickActions({
   const localization = useLocalization();
   const presentationDependencies = useTimelinePresentationDependencies();
   const sectionLabel = useMemo(
-    () => resolveDashboardHeaderLabels(localization).addEvent,
+    () => resolveDashboardQuickActionsLabels(localization).title,
     [localization],
   );
   const actions = quickAddActions.filter((action) =>
@@ -62,11 +62,11 @@ export function DashboardQuickActions({
   return (
     <section
       aria-label={sectionLabel}
-      className="relative col-span-full overflow-hidden rounded-[1.75rem] border border-white/60 bg-white/80 p-4 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/80 sm:p-5"
+      className="relative col-span-full overflow-hidden rounded-[1.75rem] border border-white/60 bg-white/80 p-4 shadow-[0_18px_55px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-5 dark:border-white/10 dark:bg-slate-900/80"
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-10 -top-12 size-40 rounded-full bg-gradient-to-br from-emerald-200/45 via-cyan-200/30 to-violet-200/40 blur-2xl dark:opacity-20"
+        className="pointer-events-none absolute -top-12 -right-10 size-40 rounded-full bg-gradient-to-br from-emerald-200/45 via-cyan-200/30 to-violet-200/40 blur-2xl dark:opacity-20"
       />
       <div className="relative">
         <h2 className="text-text-primary mb-4 text-lg font-extrabold tracking-tight sm:text-xl">
@@ -77,9 +77,7 @@ export function DashboardQuickActions({
           {actions.map((action) => {
             const category = toQuickAddOpenCategory(action.category);
             const eventKind =
-              eventKindByCategory[
-                category as keyof typeof eventKindByCategory
-              ];
+              eventKindByCategory[category as keyof typeof eventKindByCategory];
             const label = eventKind
               ? presentationDependencies.labels.eventKinds[eventKind]
               : action.label;
@@ -87,7 +85,7 @@ export function DashboardQuickActions({
             return (
               <button
                 aria-label={`${sectionLabel}: ${label}`}
-                className="group min-w-0 rounded-2xl p-1 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-interactive-primary disabled:cursor-not-allowed disabled:opacity-50"
+                className="group focus-visible:outline-interactive-primary min-w-0 rounded-2xl p-1 text-center focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={disabled}
                 key={action.id}
                 onClick={() => onOpenCategory(category)}

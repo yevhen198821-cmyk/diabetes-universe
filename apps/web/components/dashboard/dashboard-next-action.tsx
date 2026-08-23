@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@diabetes-universe/ui';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { useMemo, type RefObject } from 'react';
 
@@ -27,71 +26,58 @@ export function DashboardNextAction({
   const viewModel = createDashboardNextActionViewModel(props, labels);
   const isError = viewModel.state === 'error';
 
+  if (viewModel.state === 'empty' && !viewModel.description) {
+    return null;
+  }
+
   return (
     <section
       aria-busy={viewModel.isLoading}
       aria-labelledby={titleId}
-      className={`relative col-span-full overflow-hidden rounded-[1.75rem] border p-5 shadow-[0_18px_55px_rgba(76,29,149,0.08)] sm:p-6 ${
+      className={`relative col-span-full overflow-hidden rounded-2xl border px-4 py-3 shadow-[0_10px_30px_rgba(76,29,149,0.06)] sm:px-5 ${
         isError
           ? 'border-status-danger/40 bg-surface'
-          : 'border-violet-200/60 bg-gradient-to-r from-violet-500/[0.10] via-fuchsia-400/[0.08] to-orange-300/[0.12] dark:border-violet-400/15'
+          : 'border-violet-200/50 bg-gradient-to-r from-violet-500/[0.08] via-fuchsia-400/[0.06] to-cyan-300/[0.08] dark:border-violet-400/15'
       }`}
     >
-      {!isError ? (
-        <>
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-14 -top-20 size-52 rounded-full bg-gradient-to-br from-fuchsia-300/25 via-violet-300/20 to-orange-200/25 blur-2xl dark:opacity-20"
-          />
-          <Sparkles
-            aria-hidden="true"
-            className="absolute right-5 top-5 text-violet-400/60"
-            size={20}
-          />
-        </>
-      ) : null}
-
       {viewModel.state === 'loading' ? (
         <>
           <span className="sr-only" id={titleId} role="status">
             {viewModel.statusLabel}
           </span>
-          <div aria-hidden="true" className="relative space-y-4">
-            <div className="bg-surface-subtle h-5 w-36 animate-pulse rounded motion-reduce:animate-none" />
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-              <div className="bg-surface-subtle h-7 w-full max-w-md animate-pulse rounded motion-reduce:animate-none" />
-              <div className="rounded-control bg-surface-subtle h-11 w-full animate-pulse motion-reduce:animate-none sm:w-32" />
-            </div>
-          </div>
+          <div
+            aria-hidden="true"
+            className="relative h-10 animate-pulse rounded-xl bg-white/50 motion-reduce:animate-none dark:bg-slate-800"
+          />
         </>
       ) : null}
 
       {viewModel.state === 'ready' ? (
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center">
-          <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-rose-400 text-white shadow-[0_10px_24px_rgba(139,92,246,0.24)]">
-            <Sparkles aria-hidden="true" size={21} />
-          </div>
+        <div className="relative flex items-center gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-[0_8px_18px_rgba(139,92,246,0.22)]">
+            <Sparkles aria-hidden="true" size={17} />
+          </span>
           <div className="min-w-0 flex-1">
-            <p className="text-text-secondary text-sm font-semibold">
+            <p className="text-text-secondary text-xs font-semibold tracking-wide uppercase">
               {viewModel.title}
             </p>
             <h2
-              className="text-text-primary mt-1 text-xl font-extrabold tracking-tight sm:text-2xl"
+              className="text-text-primary truncate text-sm font-bold sm:text-base"
               id={titleId}
             >
               {viewModel.description}
             </h2>
           </div>
-          <Button
-            className="min-h-12 w-full shrink-0 border-0 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-rose-500 text-white shadow-[0_10px_24px_rgba(139,92,246,0.22)] hover:brightness-105 sm:w-auto"
+          <button
+            className="focus-visible:outline-interactive-primary inline-flex min-h-10 shrink-0 items-center gap-1 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 text-sm font-bold text-white shadow-[0_8px_18px_rgba(139,92,246,0.22)] transition hover:brightness-105 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={viewModel.actionDisabled}
             onClick={viewModel.onAction}
             ref={actionButtonRef}
             type="button"
           >
             <span>{viewModel.actionLabel}</span>
-            <ArrowRight aria-hidden="true" size={18} />
-          </Button>
+            <ArrowRight aria-hidden="true" size={16} />
+          </button>
         </div>
       ) : null}
 
@@ -101,12 +87,12 @@ export function DashboardNextAction({
           className="relative"
           role={isError ? 'alert' : 'status'}
         >
-          <h2 className="text-text-primary text-lg font-bold" id={titleId}>
+          <h2 className="text-text-primary text-sm font-bold" id={titleId}>
             {viewModel.title}
           </h2>
           {viewModel.description ? (
             <p
-              className={`mt-2 text-sm ${
+              className={`mt-1 text-sm ${
                 isError ? 'text-status-danger' : 'text-text-secondary'
               }`}
             >

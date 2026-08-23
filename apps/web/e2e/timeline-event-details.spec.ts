@@ -51,7 +51,9 @@ test('timeline event edit updates Timeline and Dashboard selectors', async ({
   await page.getByRole('link', { name: 'Go to home' }).click();
 
   await expect(
-    page.getByRole('region', { name: 'Last glucose' }).getByText('9.1 mmol/L'),
+    page.getByRole('region', { name: 'Last glucose' }).getByText('9.1', {
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(page.getByText('9.1 mmol/L').first()).toBeVisible();
 });
@@ -101,7 +103,7 @@ test('timeline event delete requires confirmation and updates Dashboard', async 
 
   await page.getByRole('link', { name: 'Go to home' }).click();
   await expect(
-    page.getByRole('region', { name: 'Day summary' }).getByText('0 U'),
+    page.getByRole('region', { name: 'Today' }).getByText('0 U'),
   ).toBeVisible();
 });
 

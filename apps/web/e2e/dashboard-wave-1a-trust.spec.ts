@@ -17,15 +17,21 @@ test('dashboard does not render mock AI insight block', async ({ page }) => {
   ).toHaveCount(0);
 });
 
-test('dashboard uses Home navigation label without hardcoded user name', async ({
+test('dashboard uses brand and Home navigation without hardcoded user name', async ({
   page,
 }) => {
+  await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/');
   await waitForApplicationReady(page);
 
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Home', exact: true }),
+    page.getByRole('heading', {
+      level: 1,
+      name: 'Diabetes Universe',
+      exact: true,
+    }),
   ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Home' })).toBeVisible();
   await expect(page.getByText('Анна Иванова')).toHaveCount(0);
 });
 

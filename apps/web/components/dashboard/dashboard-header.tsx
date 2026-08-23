@@ -86,7 +86,7 @@ function DashboardAvatar({
     return (
       <button
         aria-label={avatarLabel}
-        className={`${avatarClassName} transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(15,23,42,0.14)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-interactive-primary`}
+        className={`${avatarClassName} focus-visible:outline-interactive-primary transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(15,23,42,0.14)] focus-visible:outline-2 focus-visible:outline-offset-2`}
         onClick={onAvatarClick}
         type="button"
       >
@@ -149,10 +149,11 @@ export function DashboardHeader({
             <BrandSymbol />
           </span>
           <div className="min-w-0">
-            <h1 className="truncate text-lg font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-xl lg:text-2xl">
-              {viewModel.productName}
+            <h1 className="truncate text-lg font-extrabold tracking-tight text-slate-950 sm:text-xl lg:text-2xl dark:text-white">
+              {viewModel.brandName}
             </h1>
-            <p className="mt-0.5 hidden text-xs font-medium text-slate-500 dark:text-slate-400 sm:block">
+            <p className="sr-only">{viewModel.productName}</p>
+            <p className="mt-0.5 hidden text-xs font-medium text-slate-500 sm:block dark:text-slate-400">
               {dateContent}
             </p>
           </div>
@@ -166,14 +167,14 @@ export function DashboardHeader({
         ) : viewModel.dateLabel && viewModel.dateTime ? (
           <time
             aria-label={viewModel.currentDateAriaLabel ?? undefined}
-            className="col-span-2 row-start-2 min-w-0 rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm backdrop-blur sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-300 lg:text-sm"
+            className="col-span-2 row-start-2 min-w-0 rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm backdrop-blur sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center lg:text-sm dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-300"
             dateTime={viewModel.dateTime}
           >
             {viewModel.dateLabel}
           </time>
         ) : (
           <span
-            className="col-span-2 row-start-2 min-w-0 text-sm text-text-secondary sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center"
+            className="text-text-secondary col-span-2 row-start-2 min-w-0 text-sm sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center"
             role="status"
           >
             {dateContent}
@@ -210,7 +211,7 @@ export function DashboardHeader({
 
         {viewModel.isError ? (
           <p
-            className="col-span-full m-0 text-xs font-medium text-status-danger"
+            className="text-status-danger col-span-full m-0 text-xs font-medium"
             role="status"
           >
             {viewModel.errorMessage}

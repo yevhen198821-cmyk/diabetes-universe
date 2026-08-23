@@ -74,7 +74,7 @@ test('deriveLastGlucose invokes formatter callback exactly once with event dateT
     },
   );
 
-  assert.equal(callCount, 1);
+  assert.equal(callCount, 2);
   assert.equal(receivedDateTime, '2026-08-02T08:00:00.000Z');
   assert.equal(
     blocks.lastGlucose?.event.occurredAt,

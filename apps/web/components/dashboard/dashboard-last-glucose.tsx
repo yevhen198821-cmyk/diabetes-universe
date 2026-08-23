@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, ClockAlert, Droplets, Sparkles } from 'lucide-react';
+import { Clock, ClockAlert, Droplets } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { resolveDashboardMedicalEventSourceLabel } from '../../lib/dashboard/dashboard-event-source-labels';
@@ -17,6 +17,37 @@ import {
 } from './dashboard-last-glucose-model';
 
 const titleId = 'dashboard-last-glucose-title';
+
+function HeroScenery() {
+  return (
+    <>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+      >
+        <div className="absolute bottom-0 -left-10 h-32 w-[120%] rounded-[50%] bg-gradient-to-r from-teal-300/35 via-cyan-200/25 to-blue-400/30 blur-[1px]" />
+        <div className="absolute bottom-8 left-[8%] h-16 w-24 rotate-[-8deg] rounded-full bg-emerald-300/25 blur-sm" />
+        <div className="absolute bottom-10 left-[28%] h-24 w-32 rotate-[6deg] rounded-full bg-teal-400/20 blur-sm" />
+        <div className="absolute right-[18%] bottom-6 h-20 w-28 rotate-[-4deg] rounded-full bg-cyan-300/25 blur-sm" />
+      </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-8 -right-6 grid size-[clamp(7.5rem,28vw,11rem)] place-items-center"
+      >
+        <span className="absolute size-full rounded-full bg-white/15 blur-md" />
+        <span className="absolute size-[88%] rounded-full border border-white/25 bg-white/10" />
+        <span className="relative grid size-[72%] place-items-center rounded-full bg-gradient-to-br from-white/90 via-cyan-50 to-teal-100 shadow-[0_18px_50px_rgba(8,145,178,0.28)]">
+          <Droplets
+            aria-hidden="true"
+            className="text-cyan-500 drop-shadow-sm"
+            size={56}
+            strokeWidth={2.1}
+          />
+        </span>
+      </div>
+    </>
+  );
+}
 
 export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
   const localization = useLocalization();
@@ -72,39 +103,15 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
     <section
       aria-busy={viewModel.isLoading}
       aria-labelledby={titleId}
-      className={`relative min-h-[15.5rem] overflow-hidden rounded-[2rem] border p-5 shadow-[0_24px_70px_rgba(14,116,144,0.16)] sm:col-span-2 sm:min-h-[17rem] sm:p-7 lg:col-span-12 lg:min-h-[18rem] ${
+      className={`relative min-h-[17.5rem] overflow-hidden rounded-[2rem] border p-5 shadow-[0_24px_70px_rgba(14,116,144,0.18)] sm:min-h-[19rem] sm:p-7 lg:min-h-[20.5rem] ${
         isError
           ? 'border-status-danger/40 bg-surface'
           : hasColorHero
-            ? 'border-white/60 bg-gradient-to-br from-[#ff6654] via-[#ff9a54] to-[#16bfb4] text-white dark:border-white/10'
+            ? 'border-white/50 bg-gradient-to-br from-cyan-400 via-teal-400 to-blue-600 text-white dark:border-white/10'
             : 'border-border-default bg-surface'
       }`}
     >
-      {hasColorHero ? (
-        <>
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-16 -top-16 size-72 rounded-full border border-white/25 bg-white/10 shadow-[inset_0_0_60px_rgba(255,255,255,0.15)] sm:size-80"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute right-7 top-10 grid size-32 place-items-center rounded-full border border-white/30 bg-white/20 shadow-[0_18px_50px_rgba(90,45,18,0.16)] backdrop-blur-sm sm:right-16 sm:size-40"
-          >
-            <span className="grid size-20 place-items-center rounded-full bg-white/90 text-[#ff5b4f] shadow-[0_12px_30px_rgba(83,48,28,0.18)] sm:size-24">
-              <Droplets aria-hidden="true" size={42} strokeWidth={2.2} />
-            </span>
-          </div>
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-20 left-[35%] h-44 w-[75%] -rotate-3 rounded-[50%] bg-gradient-to-r from-rose-500/30 via-violet-500/20 to-teal-500/40 blur-sm"
-          />
-          <Sparkles
-            aria-hidden="true"
-            className="absolute right-5 top-5 hidden text-white/75 sm:block"
-            size={22}
-          />
-        </>
-      ) : null}
+      {hasColorHero ? <HeroScenery /> : null}
 
       {viewModel.state === 'loading' ? (
         <>
@@ -115,7 +122,7 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
             {viewModel.message}
           </span>
           <div aria-hidden="true" className="relative z-10 space-y-5">
-            <div className="h-5 w-36 animate-pulse rounded bg-white/35 motion-reduce:animate-none" />
+            <div className="h-5 w-40 animate-pulse rounded bg-white/35 motion-reduce:animate-none" />
             <div className="h-16 w-52 animate-pulse rounded-2xl bg-white/35 motion-reduce:animate-none" />
             <div className="h-10 w-64 max-w-full animate-pulse rounded-full bg-white/25 motion-reduce:animate-none" />
           </div>
@@ -123,14 +130,16 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
       ) : null}
 
       {viewModel.state === 'ready' && measurement ? (
-        <div className="relative z-10 flex h-full max-w-[68%] flex-col justify-between sm:max-w-[62%] lg:max-w-[56%]">
+        <div className="relative z-10 flex h-full max-w-[62%] flex-col justify-between sm:max-w-[58%] lg:max-w-[52%]">
           <div>
-            <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.08em] text-white/90 sm:text-base">
-              <Droplets aria-hidden="true" size={18} />
+            <div className="flex items-center gap-2 text-sm font-bold tracking-[0.08em] text-white/90 uppercase sm:text-base">
+              <span className="grid size-8 place-items-center rounded-full bg-white/20">
+                <Droplets aria-hidden="true" size={16} />
+              </span>
               <h2 id={titleId}>{labels.title}</h2>
             </div>
             <p className="mt-5 flex flex-wrap items-end gap-x-3 gap-y-1 text-white drop-shadow-sm">
-              <span className="text-[clamp(3.2rem,12vw,6.3rem)] font-black leading-[0.86] tracking-[-0.06em] tabular-nums">
+              <span className="text-[clamp(3.2rem,12vw,6.3rem)] leading-[0.86] font-black tracking-[-0.06em] tabular-nums">
                 {measurement.value}
               </span>
               <span className="pb-1 text-lg font-bold sm:pb-2 sm:text-2xl">
@@ -176,13 +185,16 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
             className={`grid size-12 shrink-0 place-items-center rounded-2xl ${
               isError
                 ? 'bg-status-danger/10 text-status-danger'
-                : 'bg-gradient-to-br from-rose-400/25 via-orange-300/20 to-teal-300/25 text-teal-700 dark:text-teal-200'
+                : 'bg-gradient-to-br from-cyan-400/25 via-teal-300/20 to-blue-300/25 text-teal-700 dark:text-teal-200'
             }`}
           >
             <Droplets size={22} />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-text-primary text-xl font-extrabold" id={titleId}>
+            <h2
+              className="text-text-primary text-xl font-extrabold"
+              id={titleId}
+            >
               {labels.title}
             </h2>
             <p

@@ -123,13 +123,13 @@ test('dashboard quick add insulin persists across page reload', async ({
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
   await expect(
-    page.getByRole('region', { name: 'Day summary' }).getByText('11 U'),
+    page.getByRole('region', { name: 'Today' }).getByText('11 U'),
   ).toBeVisible();
 
   await page.reload();
   await waitForApplicationReady(page);
 
   await expect(
-    page.getByRole('region', { name: 'Day summary' }).getByText('11 U'),
+    page.getByRole('region', { name: 'Today' }).getByText('11 U'),
   ).toBeVisible();
 });

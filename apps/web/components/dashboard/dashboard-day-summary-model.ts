@@ -4,14 +4,17 @@ export interface DashboardDaySummaryData {
   readonly dayDate: string;
   readonly displayDayLabel: string;
   readonly glucoseMeasurements: number;
+  readonly latestGlucoseDisplay: string | null;
+  readonly latestGlucoseDisplayTime: string | null;
   readonly medicationDoses: number;
+  readonly totalActivitySeconds: number;
   readonly totalCarbohydrateGrams: number;
   readonly totalInsulinUnits: number;
 }
 
 export interface DashboardDaySummaryFormattedMetrics {
-  readonly glucoseMeasurements: string;
-  readonly medicationDoses: string;
+  readonly glucose: string;
+  readonly totalActivity: string;
   readonly totalCarbohydrates: string;
   readonly totalInsulin: string;
 }
@@ -44,6 +47,7 @@ export type DashboardDaySummaryProps =
 
 export interface DashboardDaySummaryMetric {
   readonly label: string;
+  readonly secondaryText: string | null;
   readonly value: string;
 }
 
@@ -52,8 +56,7 @@ export interface DashboardDaySummaryViewModel {
   readonly displayDayLabel: string | null;
   readonly isLoading: boolean;
   readonly message: string | null;
-  readonly primaryMetrics: readonly DashboardDaySummaryMetric[];
-  readonly secondaryMetrics: readonly DashboardDaySummaryMetric[];
+  readonly metrics: readonly DashboardDaySummaryMetric[];
   readonly state: 'empty' | 'error' | 'loading' | 'ready';
 }
 
@@ -87,6 +90,9 @@ function normalizeReadySummary(
 ): DashboardDaySummaryData | null {
   const dayDate = summary.dayDate.trim();
   const displayDayLabel = summary.displayDayLabel.trim();
+  const latestGlucoseDisplay = summary.latestGlucoseDisplay?.trim() || null;
+  const latestGlucoseDisplayTime =
+    summary.latestGlucoseDisplayTime?.trim() || null;
 
   if (
     !isValidDayDate(dayDate) ||
@@ -94,7 +100,8 @@ function normalizeReadySummary(
     !isNonNegativeInteger(summary.glucoseMeasurements) ||
     !isNonNegativeInteger(summary.medicationDoses) ||
     !isNonNegativeNumber(summary.totalCarbohydrateGrams) ||
-    !isNonNegativeNumber(summary.totalInsulinUnits)
+    !isNonNegativeNumber(summary.totalInsulinUnits) ||
+    !isNonNegativeInteger(summary.totalActivitySeconds)
   ) {
     return null;
   }
@@ -103,7 +110,10 @@ function normalizeReadySummary(
     dayDate,
     displayDayLabel,
     glucoseMeasurements: summary.glucoseMeasurements,
+    latestGlucoseDisplay,
+    latestGlucoseDisplayTime,
     medicationDoses: summary.medicationDoses,
+    totalActivitySeconds: summary.totalActivitySeconds,
     totalCarbohydrateGrams: summary.totalCarbohydrateGrams,
     totalInsulinUnits: summary.totalInsulinUnits,
   };
@@ -111,30 +121,31 @@ function normalizeReadySummary(
 
 function createReadyMetrics(
   labels: DashboardDaySummaryLabels,
+  summary: DashboardDaySummaryData,
   formattedMetrics: DashboardDaySummaryFormattedMetrics,
-): Pick<DashboardDaySummaryViewModel, 'primaryMetrics' | 'secondaryMetrics'> {
-  return {
-    primaryMetrics: [
-      {
-        label: labels.glucoseMeasurements,
-        value: formattedMetrics.glucoseMeasurements,
-      },
-      {
-        label: labels.totalInsulin,
-        value: formattedMetrics.totalInsulin,
-      },
-      {
-        label: labels.totalCarbohydrates,
-        value: formattedMetrics.totalCarbohydrates,
-      },
-    ],
-    secondaryMetrics: [
-      {
-        label: labels.medicationDoses,
-        value: formattedMetrics.medicationDoses,
-      },
-    ],
-  };
+): DashboardDaySummaryMetric[] {
+  return [
+    {
+      label: labels.glucose,
+      secondaryText: summary.latestGlucoseDisplayTime,
+      value: formattedMetrics.glucose,
+    },
+    {
+      label: labels.totalInsulin,
+      secondaryText: labels.totalForDay,
+      value: formattedMetrics.totalInsulin,
+    },
+    {
+      label: labels.totalCarbohydrates,
+      secondaryText: labels.totalForDay,
+      value: formattedMetrics.totalCarbohydrates,
+    },
+    {
+      label: labels.activity,
+      secondaryText: labels.totalForDay,
+      value: formattedMetrics.totalActivity,
+    },
+  ];
 }
 
 function createEmptyViewModel(
@@ -146,8 +157,7 @@ function createEmptyViewModel(
     displayDayLabel: null,
     isLoading: false,
     message,
-    primaryMetrics: [],
-    secondaryMetrics: [],
+    metrics: [],
     state: 'empty',
   };
 }
@@ -164,8 +174,7 @@ export function createDashboardDaySummaryViewModel(
         displayDayLabel: null,
         isLoading: true,
         message: props.loadingLabel?.trim() || labels.loading,
-        primaryMetrics: [],
-        secondaryMetrics: [],
+        metrics: [],
         state: props.state,
       };
     case 'ready': {
@@ -175,14 +184,12 @@ export function createDashboardDaySummaryViewModel(
         return createEmptyViewModel(labels, labels.unavailable);
       }
 
-      const metrics = createReadyMetrics(labels, formattedMetrics);
-
       return {
         dayDate: summary.dayDate,
         displayDayLabel: summary.displayDayLabel,
         isLoading: false,
         message: null,
-        ...metrics,
+        metrics: createReadyMetrics(labels, summary, formattedMetrics),
         state: props.state,
       };
     }
@@ -192,8 +199,7 @@ export function createDashboardDaySummaryViewModel(
         displayDayLabel: null,
         isLoading: false,
         message: props.message?.trim() || labels.defaultEmpty,
-        primaryMetrics: [],
-        secondaryMetrics: [],
+        metrics: [],
         state: props.state,
       };
     case 'error':
@@ -202,8 +208,7 @@ export function createDashboardDaySummaryViewModel(
         displayDayLabel: null,
         isLoading: false,
         message: props.message?.trim() || labels.defaultError,
-        primaryMetrics: [],
-        secondaryMetrics: [],
+        metrics: [],
         state: props.state,
       };
   }

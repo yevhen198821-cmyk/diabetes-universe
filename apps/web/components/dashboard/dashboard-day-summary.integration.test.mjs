@@ -33,7 +33,10 @@ const readySummary = {
   dayDate: '2026-08-02',
   displayDayLabel: 'Sunday, 2 August 2026',
   glucoseMeasurements: 4,
+  latestGlucoseDisplay: '6.4 mmol/L',
+  latestGlucoseDisplayTime: '06:00',
   medicationDoses: 2,
+  totalActivitySeconds: 1800,
   totalCarbohydrateGrams: 120,
   totalInsulinUnits: 12,
 };
@@ -66,16 +69,14 @@ test('dashboard day summary renders localized English copy inside platform provi
   });
 
   try {
-    assert.match(document.body.textContent ?? '', /Day summary/);
-    assert.match(document.body.textContent ?? '', /Current day/);
-    assert.match(document.body.textContent ?? '', /Glucose measurements/);
-    assert.match(document.body.textContent ?? '', /Total insulin/);
-    assert.match(document.body.textContent ?? '', /Total carbohydrates/);
-    assert.match(document.body.textContent ?? '', /Medication doses/);
+    assert.match(document.body.textContent ?? '', /Today/);
+    assert.match(document.body.textContent ?? '', /Glucose/);
+    assert.match(document.body.textContent ?? '', /Insulin/);
+    assert.match(document.body.textContent ?? '', /Carbohydrates/);
+    assert.match(document.body.textContent ?? '', /Activity/);
     assert.equal(document.body.textContent?.includes('Reminders'), false);
-    assert.match(document.body.textContent ?? '', /Sunday, 2 August 2026/);
     assert.equal(document.body.textContent?.includes('Сводка дня'), false);
-    assert.equal(document.querySelector('time[dateTime]') !== null, true);
+    assert.match(document.body.textContent ?? '', /6\.4 mmol\/L/);
   } finally {
     await act(async () => {
       root.unmount();
@@ -250,7 +251,7 @@ test('dashboard day summary formats counters with platform formatter', async () 
   });
 
   try {
-    assert.equal(formatNumberCalls >= 4, true);
+    assert.equal(formatNumberCalls >= 2, true);
     assert.equal(document.body.textContent?.includes('1 / 3'), false);
     assert.match(document.body.textContent ?? '', /12 U/);
     assert.match(document.body.textContent ?? '', /120 g/);

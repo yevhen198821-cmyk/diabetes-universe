@@ -150,6 +150,33 @@ test('day summary counts medication doses and glucose measurements from semantic
   assert.equal(blocks.daySummary?.medicationDoses, 1);
 });
 
+test('day summary derives activity totals and latest glucose display from semantic events', () => {
+  const blocks = deriveBlocks(
+    liftLegacyTestFixtures([
+      {
+        context: 'Today',
+        dateTime: '2026-08-02T08:00:00.000Z',
+        id: 'glucose-1',
+        kind: 'glucose',
+        title: 'Glucose',
+        value: '6.4 mmol/L',
+      },
+      {
+        context: 'Walk',
+        dateTime: '2026-08-02T09:00:00.000Z',
+        id: 'activity-1',
+        kind: 'activity',
+        title: 'Walk',
+        value: '30 min',
+      },
+    ]),
+  );
+
+  assert.equal(blocks.daySummary?.totalActivitySeconds, 1800);
+  assert.match(blocks.daySummary?.latestGlucoseDisplay ?? '', /6\.4 mmol\/L/);
+  assert.equal(blocks.daySummary?.latestGlucoseDisplayTime, '08:00');
+});
+
 test('recent events order by occurredAt after semantic selection', () => {
   const blocks = deriveBlocks(
     liftLegacyTestFixtures([
