@@ -30,8 +30,10 @@ export function DashboardAiInsight(props: DashboardAiInsightProps) {
     <section
       aria-busy={viewModel.isLoading}
       aria-labelledby={titleId}
-      className={`bg-surface col-span-full rounded-2xl border p-5 shadow-sm lg:col-span-4 ${
-        isError ? 'border-status-danger/40' : 'border-border-default'
+      className={`col-span-full rounded-2xl border bg-white p-5 shadow-sm lg:col-span-4 dark:bg-slate-900 ${
+        isError
+          ? 'border-rose-200 dark:border-rose-900/70'
+          : 'border-slate-200 dark:border-slate-800'
       }`}
     >
       {viewModel.state === 'loading' ? (
@@ -44,10 +46,10 @@ export function DashboardAiInsight(props: DashboardAiInsightProps) {
           </span>
           <div aria-hidden="true" className="space-y-4">
             <div className="space-y-2">
-              <div className="bg-surface-subtle h-4 w-36 animate-pulse rounded motion-reduce:animate-none" />
-              <div className="bg-surface-subtle h-6 w-44 animate-pulse rounded motion-reduce:animate-none" />
+              <div className="h-4 w-36 animate-pulse rounded bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
+              <div className="h-6 w-44 animate-pulse rounded bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
             </div>
-            <div className="rounded-control bg-surface-subtle h-28 animate-pulse motion-reduce:animate-none" />
+            <div className="h-28 animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
           </div>
         </>
       ) : null}
@@ -57,19 +59,21 @@ export function DashboardAiInsight(props: DashboardAiInsightProps) {
           <div className="flex items-start gap-4">
             <div
               aria-hidden="true"
-              className="grid size-11 shrink-0 place-items-center rounded-xl bg-teal-50 text-teal-700"
+              className="grid size-11 shrink-0 place-items-center rounded-xl bg-teal-50 text-teal-700 dark:bg-teal-950/70 dark:text-teal-300"
             >
               <Sparkles size={20} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-text-secondary text-sm">{labels.eyebrow}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {labels.eyebrow}
+              </p>
               <h2
-                className="text-text-primary mt-0.5 text-lg font-bold"
+                className="mt-0.5 text-lg font-bold text-slate-950 dark:text-slate-50"
                 id={titleId}
               >
                 {labels.title}
               </h2>
-              <p className="text-text-secondary mt-1 text-xs">
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 {viewModel.insight.disclaimer}
               </p>
             </div>
@@ -93,19 +97,24 @@ export function DashboardAiInsight(props: DashboardAiInsightProps) {
             aria-hidden="true"
             className={`grid size-11 shrink-0 place-items-center rounded-xl ${
               isError
-                ? 'bg-status-danger/10 text-status-danger'
-                : 'bg-teal-500/10 text-teal-700'
+                ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/70 dark:text-rose-300'
+                : 'bg-teal-50 text-teal-700 dark:bg-teal-950/70 dark:text-teal-300'
             }`}
           >
             <Sparkles size={20} />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-text-primary text-lg font-bold" id={titleId}>
+            <h2
+              className="text-lg font-bold text-slate-950 dark:text-slate-50"
+              id={titleId}
+            >
               {labels.title}
             </h2>
             <p
               className={`mt-2 text-sm ${
-                isError ? 'text-status-danger' : 'text-text-secondary'
+                isError
+                  ? 'text-rose-700 dark:text-rose-300'
+                  : 'text-slate-600 dark:text-slate-300'
               }`}
             >
               {viewModel.message}
