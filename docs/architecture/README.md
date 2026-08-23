@@ -84,20 +84,21 @@ future approved server paths; public medical API routes are not yet implemented.
 
 ## Medical platform architecture status
 
-| Phase             | Document                                                                                          | Lifecycle status                                                                        | Runtime in repo                               |
-| ----------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------- |
-| P7                | [Backend medical data](backend/p7-backend-medical-data-architecture.md)                           | Approved                                                                                | N/A (architecture)                            |
-| P8                | [Medical API contracts](api/p8-medical-api-contracts.md)                                          | Approved                                                                                | Public API transport implementation candidate |
-| P9 design         | [Cloud medical persistence design](backend/p9-cloud-medical-persistence-implementation-design.md) | Approved                                                                                | N/A (architecture)                            |
-| P9 implementation | [Medical persistence foundation](../implementation/p9-medical-persistence-foundation.md)          | Implementation complete; PostgreSQL rehearsal validated; production deployment deferred | Packages merged; no public routes             |
-| P10               | [Local data adoption](sync/p10-local-data-adoption-architecture.md)                               | Draft (PR #95 merged spec; approval closure pending)                                    | Not implemented                               |
-| P11               | [Offline sync](sync/p11-offline-sync-architecture.md)                                             | Approved ([closure record](sync/p11-approval-closure.md))                               | Not implemented                               |
-| P12               | [Conflict / revision / tombstone](sync/p12-conflict-revision-tombstone-architecture.md)           | Approved with clarifications ([audit closure](sync/p12-architecture-security-audit.md)) | Not implemented                               |
-| P13               | [Security & privacy hardening](security/p13-security-privacy-hardening.md)                        | Approved (closing architecture gate)                                                    | Operational controls not fully implemented    |
+| Phase             | Document                                                                                          | Lifecycle status                                                                                          | Runtime in repo                               |
+| ----------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| P7                | [Backend medical data](backend/p7-backend-medical-data-architecture.md)                           | Approved                                                                                                  | N/A (architecture)                            |
+| P8                | [Medical API contracts](api/p8-medical-api-contracts.md)                                          | Approved                                                                                                  | Public API transport implementation candidate |
+| P9 design         | [Cloud medical persistence design](backend/p9-cloud-medical-persistence-implementation-design.md) | Approved                                                                                                  | N/A (architecture)                            |
+| P9 implementation | [Medical persistence foundation](../implementation/p9-medical-persistence-foundation.md)          | Implementation complete; PostgreSQL rehearsal validated; production deployment deferred                   | Packages merged; no public routes             |
+| P10               | [Local data adoption](sync/p10-local-data-adoption-architecture.md)                               | Approved ([closure](sync/p10-approval-closure.md), [charter](sync/p10-runtime-implementation-charter.md)) | Not implemented                               |
+| P11               | [Offline sync](sync/p11-offline-sync-architecture.md)                                             | Approved ([closure record](sync/p11-approval-closure.md))                                                 | Not implemented                               |
+| P12               | [Conflict / revision / tombstone](sync/p12-conflict-revision-tombstone-architecture.md)           | Approved with clarifications ([audit closure](sync/p12-architecture-security-audit.md))                   | Not implemented                               |
+| P13               | [Security & privacy hardening](security/p13-security-privacy-hardening.md)                        | Approved (closing architecture gate)                                                                      | Operational controls not fully implemented    |
 
 The table records design and lifecycle state only. A merged or approved architecture
 document is not permission to ship runtime behavior without a separate implementation
-and security gate; P10 additionally still requires formal architecture approval.
+and security gate; P10 architecture approval is recorded in
+[p10-approval-closure.md](sync/p10-approval-closure.md).
 
 ## Deliberate exclusions (not yet in repository runtime)
 
@@ -155,7 +156,7 @@ implementation gates, and product requirements.
 - [P9 — Cloud Medical Persistence Implementation Design](backend/p9-cloud-medical-persistence-implementation-design.md)
 - [P9 — Medical Persistence Foundation Implementation](../implementation/p9-medical-persistence-foundation.md)
 - [P9 — Medical Persistence Readiness Runbook](../implementation/p9-production-readiness-runbook.md)
-- [P10 — Local Medical Data Adoption Architecture](sync/p10-local-data-adoption-architecture.md)
+- [P10 — Local Medical Data Adoption Architecture](sync/p10-local-data-adoption-architecture.md) · [P10 approval closure](sync/p10-approval-closure.md) · [P10 implementation charter](sync/p10-runtime-implementation-charter.md)
 - [P11 — Offline Sync Architecture](sync/p11-offline-sync-architecture.md) · [P11 approval closure](sync/p11-approval-closure.md)
 - [P12 — Conflict / Revision / Tombstone Architecture](sync/p12-conflict-revision-tombstone-architecture.md) · [P12 audit closure](sync/p12-architecture-security-audit.md)
 - [P13 — Security, Privacy, and Production Hardening](security/p13-security-privacy-hardening.md)

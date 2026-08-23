@@ -110,7 +110,7 @@
 - [P9 — Cloud Medical Persistence Implementation Design](architecture/backend/p9-cloud-medical-persistence-implementation-design.md) — Approved
 - [P9 — Medical Persistence Foundation Implementation](implementation/p9-medical-persistence-foundation.md) — implementation complete; PostgreSQL rehearsal validated; production deployment deferred
 - [P9 — Medical Persistence Readiness Runbook](implementation/p9-production-readiness-runbook.md) — rehearsal gate closed; production launch gate deferred
-- [P10 — Local Medical Data Adoption Architecture](architecture/sync/p10-local-data-adoption-architecture.md) — Draft
+- [P10 — Local Medical Data Adoption Architecture](architecture/sync/p10-local-data-adoption-architecture.md) — Approved · [closure](architecture/sync/p10-approval-closure.md) · [implementation charter](architecture/sync/p10-runtime-implementation-charter.md)
 - [P11 — Offline Sync Architecture](architecture/sync/p11-offline-sync-architecture.md) — Approved · [closure](architecture/sync/p11-approval-closure.md)
 - [P12 — Conflict / Revision / Tombstone Architecture](architecture/sync/p12-conflict-revision-tombstone-architecture.md) — Approved · [audit closure](architecture/sync/p12-architecture-security-audit.md)
 - [P13 — Security, Privacy, and Production Hardening](architecture/security/p13-security-privacy-hardening.md) — Approved
