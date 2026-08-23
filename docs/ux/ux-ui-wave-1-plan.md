@@ -49,6 +49,8 @@ Deliverables: IA decision record, updated specs, feature flags or content gates.
 
 **Goal:** Close gap between `docs/design-system/*` and runtime.
 
+**Status:** **IMPLEMENTATION CANDIDATE** — see [UX Wave 1B Implementation](../implementation/ux-wave-1b-ui-foundation.md)
+
 Scope:
 
 - Implement token layer (`@theme` / CSS variables) per spec 11

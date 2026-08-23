@@ -37,7 +37,7 @@ export function TimelineToolbar({
   return (
     <section
       aria-labelledby="timeline-toolbar-title"
-      className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+      className="border-border-default bg-surface space-y-3 rounded-2xl border p-4 shadow-sm"
     >
       <h2 className="sr-only" id="timeline-toolbar-title">
         {labels.toolbar.title}
@@ -54,12 +54,12 @@ export function TimelineToolbar({
         onChange={onFilterChange}
       />
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p aria-live="polite" className="text-sm text-slate-500">
+        <p aria-live="polite" className="text-text-secondary text-sm">
           {resultLabel}
         </p>
         {model.hasActiveCriteria ? (
           <button
-            className="min-h-11 self-start rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 sm:self-auto"
+            className="border-border-default bg-surface text-text-primary hover:border-border-strong hover:bg-surface-subtle focus-visible:outline-interactive-primary min-h-11 self-start rounded-xl border px-4 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 sm:self-auto"
             onClick={onReset}
             type="button"
           >

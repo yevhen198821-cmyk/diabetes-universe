@@ -51,7 +51,7 @@ export function TimelineLoadMore({
       <button
         aria-busy={isLoading}
         aria-controls={ariaControls}
-        className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+        className="border-border-default bg-surface text-text-primary hover:border-border-strong hover:bg-surface-subtle focus-visible:outline-interactive-primary min-h-11 w-full rounded-xl border px-5 py-3 text-sm font-semibold shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
         disabled={isLoading}
         onClick={handleClick}
         type="button"
@@ -59,7 +59,7 @@ export function TimelineLoadMore({
         {isLoading ? labels.loading : labels.button}
       </button>
       {showRemainingCount && remainingCount !== undefined ? (
-        <p className="text-center text-xs text-slate-500 dark:text-slate-400">
+        <p className="text-text-secondary text-center text-xs">
           {labels.remaining.replace('{count}', formatCount(remainingCount))}
         </p>
       ) : null}

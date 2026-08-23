@@ -50,7 +50,7 @@ function DashboardAvatar({
     avatarUrl,
     failedAvatarUrl,
   );
-  const avatarClassName = `${avatarTargetClassName} border border-slate-200 bg-slate-100 text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100`;
+  const avatarClassName = `${avatarTargetClassName} border border-border-default bg-slate-100 text-sm font-bold text-text-primary`;
 
   if (isLoading) {
     return (
@@ -86,7 +86,7 @@ function DashboardAvatar({
     return (
       <button
         aria-label={avatarLabel}
-        className={`${avatarClassName} transition hover:border-slate-300 hover:bg-slate-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:focus-visible:outline-teal-400`}
+        className={`${avatarClassName} hover:border-border-strong focus-visible:outline-interactive-primary transition hover:bg-slate-200 focus-visible:outline-2 focus-visible:outline-offset-2`}
         onClick={onAvatarClick}
         type="button"
       >
@@ -141,7 +141,7 @@ export function DashboardHeader({
   return (
     <header
       aria-busy={viewModel.isLoading}
-      className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 pt-[env(safe-area-inset-top)] text-slate-950 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:text-slate-50"
+      className="border-border-default bg-surface/95 text-text-primary sticky top-0 z-30 border-b pt-[env(safe-area-inset-top)] backdrop-blur"
     >
       <div className="mx-auto grid min-h-16 max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-[4.5rem]">
         <div className="flex min-w-0 items-center gap-3">
@@ -154,19 +154,19 @@ export function DashboardHeader({
         {viewModel.isLoading ? (
           <span
             aria-hidden="true"
-            className="col-span-2 row-start-2 h-5 w-48 max-w-full animate-pulse rounded bg-slate-200 motion-reduce:animate-none sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center dark:bg-slate-700"
+            className="col-span-2 row-start-2 h-5 w-48 max-w-full animate-pulse rounded bg-slate-200 motion-reduce:animate-none sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center"
           />
         ) : viewModel.dateLabel && viewModel.dateTime ? (
           <time
             aria-label={viewModel.currentDateAriaLabel ?? undefined}
-            className="col-span-2 row-start-2 min-w-0 text-sm font-medium text-slate-600 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center dark:text-slate-300"
+            className="text-text-secondary col-span-2 row-start-2 min-w-0 text-sm font-medium sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center"
             dateTime={viewModel.dateTime}
           >
             {viewModel.dateLabel}
           </time>
         ) : (
           <span
-            className="col-span-2 row-start-2 min-w-0 text-sm text-slate-500 sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center dark:text-slate-400"
+            className="text-text-secondary col-span-2 row-start-2 min-w-0 text-sm sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center"
             role="status"
           >
             {dateContent}
@@ -176,7 +176,7 @@ export function DashboardHeader({
         <div className="col-start-2 row-start-1 flex items-center gap-2 sm:col-start-3">
           <Button
             aria-label={viewModel.addEventLabel}
-            className={`${desktopActionClassName} dark:bg-teal-500 dark:text-slate-950 dark:hover:bg-teal-400 dark:focus-visible:outline-teal-400`}
+            className={`${desktopActionClassName}`}
             disabled={viewModel.addEventDisabled}
             onClick={viewModel.onAddEvent}
             ref={addEventButtonRef}
@@ -203,7 +203,7 @@ export function DashboardHeader({
 
         {viewModel.isError ? (
           <p
-            className="col-span-full m-0 text-xs font-medium text-rose-700 dark:text-rose-300"
+            className="col-span-full m-0 text-xs font-medium text-rose-700"
             role="status"
           >
             {viewModel.errorMessage}

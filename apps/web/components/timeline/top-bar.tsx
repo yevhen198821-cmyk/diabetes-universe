@@ -17,7 +17,7 @@ export function TopBar() {
   );
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6">
+    <header className="border-border-default bg-surface/95 sticky top-0 z-30 border-b px-4 py-3 backdrop-blur sm:px-6">
       <div className="mx-auto flex max-w-3xl items-center gap-3">
         <Link
           aria-label={labels.topBar.home}
@@ -29,9 +29,7 @@ export function TopBar() {
 
         <BrandSymbol size="sm" />
 
-        <p className="text-lg font-bold text-slate-950 sm:text-xl">
-          {labels.header.title}
-        </p>
+        <p className="text-section-title sm:text-xl">{labels.header.title}</p>
       </div>
     </header>
   );

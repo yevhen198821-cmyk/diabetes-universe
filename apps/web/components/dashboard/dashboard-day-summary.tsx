@@ -37,21 +37,19 @@ function MetricList({
       {metrics.map((metric) => (
         <div
           className={`rounded-xl p-3.5 ${
-            isPrimary
-              ? 'bg-slate-50 dark:bg-slate-800/70'
-              : 'bg-slate-50/70 dark:bg-slate-800/40'
+            isPrimary ? 'bg-surface-subtle' : 'bg-surface-subtle/80'
           }`}
           key={metric.label}
         >
           <dt
             className={`${
               isPrimary ? 'text-xs' : 'text-[11px]'
-            } text-slate-500 dark:text-slate-400`}
+            } text-text-secondary`}
           >
             {metric.label}
           </dt>
           <dd
-            className={`mt-0.5 font-bold text-slate-950 dark:text-slate-50 ${
+            className={`text-text-primary mt-0.5 font-bold ${
               isPrimary ? 'text-lg' : 'text-base'
             }`}
           >
@@ -111,10 +109,8 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
     <section
       aria-busy={viewModel.isLoading}
       aria-labelledby={titleId}
-      className={`h-full rounded-2xl border bg-white p-5 shadow-sm sm:col-span-1 lg:col-span-5 dark:bg-slate-900 ${
-        isError
-          ? 'border-rose-200 dark:border-rose-900/70'
-          : 'border-slate-200 dark:border-slate-800'
+      className={`bg-surface h-full rounded-2xl border p-5 shadow-sm sm:col-span-1 lg:col-span-5 ${
+        isError ? 'border-status-danger/40' : 'border-border-default'
       }`}
     >
       {viewModel.state === 'loading' ? (
@@ -127,17 +123,17 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
           </span>
           <div aria-hidden="true" className="space-y-4">
             <div className="space-y-2">
-              <div className="h-4 w-24 animate-pulse rounded bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
-              <div className="h-6 w-40 animate-pulse rounded bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
+              <div className="bg-surface-subtle h-4 w-24 animate-pulse rounded motion-reduce:animate-none" />
+              <div className="bg-surface-subtle h-6 w-40 animate-pulse rounded motion-reduce:animate-none" />
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="h-16 animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
-              <div className="h-16 animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
-              <div className="h-16 animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
+              <div className="rounded-control bg-surface-subtle h-16 animate-pulse motion-reduce:animate-none" />
+              <div className="rounded-control bg-surface-subtle h-16 animate-pulse motion-reduce:animate-none" />
+              <div className="rounded-control bg-surface-subtle h-16 animate-pulse motion-reduce:animate-none" />
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="h-14 animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
-              <div className="h-14 animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
+              <div className="rounded-control bg-surface-subtle h-14 animate-pulse motion-reduce:animate-none" />
+              <div className="rounded-control bg-surface-subtle h-14 animate-pulse motion-reduce:animate-none" />
             </div>
           </div>
         </>
@@ -148,21 +144,19 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
           <div className="flex items-start gap-4">
             <div
               aria-hidden="true"
-              className="grid size-11 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600 dark:bg-violet-950/70 dark:text-violet-300"
+              className="grid size-11 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600"
             >
               <CalendarDays size={20} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                {labels.eyebrow}
-              </p>
+              <p className="text-text-secondary text-sm">{labels.eyebrow}</p>
               <h2
-                className="mt-0.5 text-lg font-bold text-slate-950 dark:text-slate-50"
+                className="text-text-primary mt-0.5 text-lg font-bold"
                 id={titleId}
               >
                 {labels.title}
               </h2>
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+              <p className="text-text-secondary mt-1 text-sm">
                 <time dateTime={viewModel.dayDate ?? undefined}>
                   {viewModel.displayDayLabel}
                 </time>
@@ -187,24 +181,19 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
             aria-hidden="true"
             className={`grid size-11 shrink-0 place-items-center rounded-xl ${
               isError
-                ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/70 dark:text-rose-300'
-                : 'bg-violet-50 text-violet-600 dark:bg-violet-950/70 dark:text-violet-300'
+                ? 'bg-status-danger/10 text-status-danger'
+                : 'bg-violet-500/10 text-violet-600'
             }`}
           >
             <CalendarDays size={20} />
           </div>
           <div className="min-w-0 flex-1">
-            <h2
-              className="text-lg font-bold text-slate-950 dark:text-slate-50"
-              id={titleId}
-            >
+            <h2 className="text-text-primary text-lg font-bold" id={titleId}>
               {labels.title}
             </h2>
             <p
               className={`mt-2 text-sm ${
-                isError
-                  ? 'text-rose-700 dark:text-rose-300'
-                  : 'text-slate-600 dark:text-slate-300'
+                isError ? 'text-status-danger' : 'text-text-secondary'
               }`}
             >
               {viewModel.message}

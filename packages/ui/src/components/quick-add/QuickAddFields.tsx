@@ -10,10 +10,10 @@ import {
   type KeyboardEvent,
 } from 'react';
 
-const quickAddFieldClass =
-  'h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-900 transition placeholder:text-slate-400 hover:border-slate-300 focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:outline-none';
-
-const quickAddLabelClass = 'block text-sm font-medium text-slate-700';
+import {
+  formFieldClass as quickAddFieldClass,
+  formLabelClass as quickAddLabelClass,
+} from '../../styles/form';
 
 function ChevronDownIcon({
   className,

@@ -1,7 +1,15 @@
 'use client';
 
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
-import { Button, haptics } from '@diabetes-universe/ui';
+import {
+  Button,
+  dialogPanelClass,
+  formErrorClass,
+  formFieldClass,
+  formLabelClass,
+  haptics,
+  overlayScrimClass,
+} from '@diabetes-universe/ui';
 import type { TranslationKey } from '@diabetes-universe/i18n';
 import { X } from 'lucide-react';
 import {
@@ -42,10 +50,8 @@ interface TimelineEventDetailProps {
   readonly presentationDependencies: TimelinePresentationDependencies;
 }
 
-const fieldClass =
-  'mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100';
-const labelClass =
-  'block text-sm font-medium text-slate-700 dark:text-slate-200';
+const fieldClass = `${formFieldClass} mt-2`;
+const labelClass = formLabelClass;
 
 function focusableElements(container: HTMLElement): HTMLElement[] {
   return Array.from(
@@ -111,7 +117,7 @@ function ErrorText({
   readonly message?: string;
 }) {
   return message ? (
-    <p className="mt-1 text-sm text-rose-600" id={id}>
+    <p className={formErrorClass} id={id}>
       {message}
     </p>
   ) : null;
@@ -264,7 +270,7 @@ function TimelineEventEditForm({
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <Button
-          className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+          className="border-border-default bg-surface text-text-primary hover:bg-surface-subtle border"
           onClick={onCancel}
           type="button"
         >
@@ -352,7 +358,7 @@ export function TimelineEventDetail({
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
       <button
         aria-label={uiLabels.detail.closeOverlay}
-        className="absolute inset-0 bg-slate-950/40 backdrop-blur-[1px]"
+        className={overlayScrimClass}
         onClick={onClose}
         type="button"
       />
@@ -360,20 +366,17 @@ export function TimelineEventDetail({
         aria-describedby={descriptionId}
         aria-labelledby={titleId}
         aria-modal="true"
-        className="relative z-10 flex max-h-[min(92dvh,calc(100dvh-env(safe-area-inset-bottom)))] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/15 outline-none sm:rounded-3xl dark:border-slate-800 dark:bg-slate-950"
+        className={`${dialogPanelClass} shadow-2xl shadow-black/15`}
         ref={dialogRef}
         role="dialog"
         tabIndex={-1}
       >
-        <header className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 sm:px-6 dark:border-slate-800">
+        <header className="border-border-subtle flex items-center gap-3 border-b px-5 py-4 sm:px-6">
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            <p className="text-body-small text-text-secondary">
               {readPresentation.kindLabel}
             </p>
-            <h2
-              className="truncate text-lg font-bold text-slate-950 dark:text-slate-50"
-              id={titleId}
-            >
+            <h2 className="text-section-title truncate" id={titleId}>
               {mode === 'edit'
                 ? uiLabels.detail.editTitle
                 : readPresentation.title}
@@ -381,7 +384,7 @@ export function TimelineEventDetail({
           </div>
           <button
             aria-label={uiLabels.detail.closeButton}
-            className="grid size-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+            className="border-border-default bg-surface text-text-secondary hover:border-border-strong hover:bg-surface-subtle focus-visible:outline-interactive-primary grid size-10 shrink-0 place-items-center rounded-xl border transition focus-visible:outline-2 focus-visible:outline-offset-2"
             onClick={onClose}
             type="button"
           >
@@ -412,31 +415,31 @@ export function TimelineEventDetail({
           ) : (
             <div className="space-y-5">
               <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                <p className="text-text-secondary text-sm">
                   {displayDate} · {displayTime}
                 </p>
-                <p className="mt-2 text-2xl font-bold text-slate-950 dark:text-slate-50">
+                <p className="text-text-primary mt-2 text-2xl font-bold">
                   {readPresentation.primaryText}
                 </p>
               </div>
 
               <dl className="grid gap-3">
                 {readPresentation.context ? (
-                  <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
-                    <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  <div className="bg-surface-subtle rounded-xl p-3">
+                    <dt className="text-text-secondary text-xs font-medium">
                       {uiLabels.detail.context}
                     </dt>
-                    <dd className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    <dd className="mt-1 text-sm font-semibold text-slate-900">
                       {readPresentation.context}
                     </dd>
                   </div>
                 ) : null}
                 {readPresentation.note ? (
-                  <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
-                    <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  <div className="bg-surface-subtle rounded-xl p-3">
+                    <dt className="text-text-secondary text-xs font-medium">
                       {uiLabels.detail.note}
                     </dt>
-                    <dd className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    <dd className="mt-1 text-sm font-semibold text-slate-900">
                       {readPresentation.note}
                     </dd>
                   </div>
@@ -445,18 +448,18 @@ export function TimelineEventDetail({
                   <div
                     className={`rounded-xl p-3 ${
                       sourcePresentation.isDemo
-                        ? 'border border-dashed border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/30'
-                        : 'bg-slate-50 dark:bg-slate-900'
+                        ? 'border-status-warning/50 bg-status-warning/10 border border-dashed'
+                        : 'bg-surface-subtle'
                     }`}
                   >
-                    <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    <dt className="text-text-secondary text-xs font-medium">
                       {uiLabels.detail.source}
                     </dt>
                     <dd
                       className={`mt-1 text-sm font-semibold ${
                         sourcePresentation.isDemo
-                          ? 'text-amber-800 dark:text-amber-200'
-                          : 'text-slate-900 dark:text-slate-100'
+                          ? 'text-status-warning'
+                          : 'text-text-primary'
                       }`}
                     >
                       {sourcePresentation.label}
@@ -469,9 +472,9 @@ export function TimelineEventDetail({
         </div>
 
         {mode === 'view' ? (
-          <footer className="flex flex-col-reverse gap-3 border-t border-slate-100 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:flex-row sm:justify-between sm:px-6 dark:border-slate-800">
+          <footer className="flex flex-col-reverse gap-3 border-t border-slate-100 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:flex-row sm:justify-between sm:px-6">
             <Button
-              className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              className="border-border-default bg-surface text-text-primary hover:bg-surface-subtle border"
               onClick={onClose}
               type="button"
             >
@@ -479,7 +482,7 @@ export function TimelineEventDetail({
             </Button>
             <div className="flex flex-col-reverse gap-3 sm:flex-row">
               <Button
-                className="border border-rose-200 bg-white text-rose-700 hover:bg-rose-50"
+                className="bg-surface border border-rose-200 text-rose-700 hover:bg-rose-50"
                 onClick={() => setDeleteOpen(true)}
                 type="button"
               >
@@ -512,33 +515,33 @@ export function TimelineEventDetail({
             aria-describedby={deleteDescriptionId}
             aria-labelledby={deleteTitleId}
             aria-modal="true"
-            className="relative z-10 w-full max-w-md rounded-t-3xl border border-slate-200 bg-white p-5 shadow-2xl sm:rounded-3xl dark:border-slate-800 dark:bg-slate-950"
+            className="border-border-default bg-surface relative z-10 w-full max-w-md rounded-t-3xl border p-5 shadow-2xl sm:rounded-3xl"
             ref={deleteDialogRef}
             role="dialog"
             tabIndex={-1}
           >
             <h3
-              className="text-lg font-bold text-slate-950 dark:text-slate-50"
+              className="text-text-primary text-lg font-bold"
               id={deleteTitleId}
             >
               {uiLabels.detail.deleteConfirm.title}
             </h3>
             <p
-              className="mt-2 text-sm text-slate-600 dark:text-slate-300"
+              className="text-text-secondary mt-2 text-sm"
               id={deleteDescriptionId}
             >
               {uiLabels.detail.deleteConfirm.description}
             </p>
             <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <Button
-                className="border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                className="border-border-default bg-surface text-text-primary hover:bg-surface-subtle border"
                 onClick={() => setDeleteOpen(false)}
                 type="button"
               >
                 {cancelLabel}
               </Button>
               <button
-                className="min-h-11 rounded-xl bg-rose-600 px-5 text-sm font-semibold text-white transition hover:bg-rose-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700"
+                className="text-text-inverse min-h-11 rounded-xl bg-rose-600 px-5 text-sm font-semibold transition hover:bg-rose-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700"
                 onClick={handleDelete}
                 type="button"
               >

@@ -16,6 +16,8 @@ import {
   type ApplicationPlatformBootstrap,
 } from '../lib/platform/integration/server';
 
+import { themeInitScript } from '../lib/theme/theme-config';
+
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -82,6 +84,9 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 
   return (
     <html lang={resolveDocumentLanguage(bootstrap)} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body>
         <ApplicationRuntimeGate bootstrap={bootstrap}>
           {children}

@@ -35,6 +35,11 @@ test('dashboard status-first hierarchy places last glucose before next action', 
   await page.goto('/');
   await waitForApplicationReady(page);
 
+  await expect(
+    page.getByRole('region', { name: 'Last glucose' }),
+  ).toBeVisible();
+  await expect(page.getByText('Next action').first()).toBeVisible();
+
   const sectionSummaries = await page
     .locator('#main-content > section')
     .evaluateAll((sections) =>
