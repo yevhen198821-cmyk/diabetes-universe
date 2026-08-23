@@ -16,7 +16,7 @@ const englishLabels = {
   dateUnavailable: 'Date unavailable',
   defaultError: 'Could not load header data.',
   loading: 'Loading header',
-  productName: 'Diabetes Universe',
+  productName: 'Home',
 };
 
 const currentDate = new Date('2026-08-01T18:30:00.000Z');

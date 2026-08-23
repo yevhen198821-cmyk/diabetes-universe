@@ -2,11 +2,15 @@ import type {
   TimelineEventFilter,
   TimelineSearchFilterModel,
 } from './timeline-search-filter-model';
+import type { TimelineUiLabels } from './timeline-ui-labels';
+import { formatTimelineToolbarResultLabel } from './timeline-ui-labels';
 import { TimelineFilters } from './timeline-filters';
 import { TimelineSearch } from './timeline-search';
 
 interface TimelineToolbarProps {
   readonly filterLabels: Readonly<Record<TimelineEventFilter, string>>;
+  readonly formatCount: (count: number) => string;
+  readonly labels: TimelineUiLabels;
   readonly model: TimelineSearchFilterModel;
   readonly onFilterChange: (filter: TimelineEventFilter) => void;
   readonly onQueryChange: (query: string) => void;
@@ -14,43 +18,44 @@ interface TimelineToolbarProps {
   readonly query: string;
 }
 
-function createResultLabel(model: TimelineSearchFilterModel): string {
-  if (model.hasActiveCriteria && model.resultCount === 0) {
-    return 'Ничего не найдено';
-  }
-
-  if (model.hasActiveCriteria) {
-    return `Найдено: ${model.resultCount}`;
-  }
-
-  return `${model.resultCount} событий`;
-}
-
 export function TimelineToolbar({
   filterLabels,
+  formatCount,
+  labels,
   model,
   onFilterChange,
   onQueryChange,
   onReset,
   query,
 }: TimelineToolbarProps) {
+  const resultLabel = formatTimelineToolbarResultLabel(
+    labels.toolbar,
+    model,
+    formatCount,
+  );
+
   return (
     <section
       aria-labelledby="timeline-toolbar-title"
       className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
     >
       <h2 className="sr-only" id="timeline-toolbar-title">
-        Поиск и фильтры Timeline
+        {labels.toolbar.title}
       </h2>
-      <TimelineSearch onChange={onQueryChange} query={query} />
+      <TimelineSearch
+        labels={labels.search}
+        onChange={onQueryChange}
+        query={query}
+      />
       <TimelineFilters
         activeFilter={model.activeFilter}
+        ariaLabel={labels.filters.ariaLabel}
         filterLabels={filterLabels}
         onChange={onFilterChange}
       />
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p aria-live="polite" className="text-sm text-slate-500">
-          {createResultLabel(model)}
+          {resultLabel}
         </p>
         {model.hasActiveCriteria ? (
           <button
@@ -58,7 +63,7 @@ export function TimelineToolbar({
             onClick={onReset}
             type="button"
           >
-            Сбросить фильтры
+            {labels.toolbar.reset}
           </button>
         ) : null}
       </div>

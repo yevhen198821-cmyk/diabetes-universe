@@ -60,6 +60,7 @@ test('createWebPlatformConfig declares application preload scope for bootstrap a
       'account',
       WEB_PLATFORM_DASHBOARD_PRELOAD_NAMESPACE,
       WEB_PLATFORM_TIMELINE_PRELOAD_NAMESPACE,
+      'quick-add',
     ],
     locales: ['en-GB'],
   });

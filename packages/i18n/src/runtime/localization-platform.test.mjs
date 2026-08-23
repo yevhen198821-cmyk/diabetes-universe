@@ -111,7 +111,7 @@ test('getBundle delegates to TranslationBundleLoader', async () => {
 
   assert.equal(bundle.locale, 'en-GB');
   assert.equal(bundle.namespace, 'dashboard');
-  assert.equal(bundle.entries['dashboard.header.title'], 'Diabetes Universe');
+  assert.equal(bundle.entries['dashboard.header.title'], 'Home');
 });
 
 test('getSupportedLocales uses LocaleRegistryLoader metadata', async () => {

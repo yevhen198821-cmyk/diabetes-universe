@@ -1,10 +1,12 @@
 import { EventCard } from '@diabetes-universe/ui';
 
 import type { TimelineListModel } from './timeline-list-model';
+import type { TimelineUiLabels } from './timeline-ui-labels';
 import { mapTimelineEventToCard } from './timeline-event-card.mapper';
 import type { TimelinePresentationDependencies } from '../../lib/timeline/presentation';
 
 interface TimelineListProps {
+  readonly labels: TimelineUiLabels;
   readonly model: TimelineListModel;
   readonly onAddEvent: () => void;
   readonly onOpenEvent: (eventId: string, trigger: HTMLElement) => void;
@@ -12,7 +14,7 @@ interface TimelineListProps {
   readonly presentationDependencies: TimelinePresentationDependencies;
 }
 
-function TimelineLoadingState() {
+function TimelineLoadingState({ labels }: Pick<TimelineListProps, 'labels'>) {
   return (
     <section
       aria-busy="true"
@@ -20,10 +22,10 @@ function TimelineLoadingState() {
       className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
     >
       <h2 className="sr-only" id="timeline-loading-title">
-        Загрузка событий
+        {labels.loading.title}
       </h2>
       <span className="sr-only" role="status">
-        Загрузка событий
+        {labels.loading.status}
       </span>
       <div aria-hidden="true" className="space-y-4">
         <div className="h-5 w-28 animate-pulse rounded bg-slate-200 motion-reduce:animate-none" />
@@ -38,8 +40,9 @@ function TimelineLoadingState() {
 }
 
 function TimelineEmptyState({
+  labels,
   onAddEvent,
-}: Pick<TimelineListProps, 'onAddEvent'>) {
+}: Pick<TimelineListProps, 'labels' | 'onAddEvent'>) {
   return (
     <section
       aria-labelledby="timeline-empty-title"
@@ -49,25 +52,26 @@ function TimelineEmptyState({
         className="text-lg font-bold text-slate-950"
         id="timeline-empty-title"
       >
-        Событий пока нет
+        {labels.empty.title}
       </h2>
       <p className="mx-auto mt-2 max-w-sm text-sm text-slate-600">
-        Добавьте первое событие, чтобы начать вести историю.
+        {labels.empty.description}
       </p>
       <button
         className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-teal-700 px-5 text-sm font-semibold text-white transition hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
         onClick={onAddEvent}
         type="button"
       >
-        Добавить событие
+        {labels.empty.action}
       </button>
     </section>
   );
 }
 
 function TimelineFilteredEmptyState({
+  labels,
   onResetCriteria,
-}: Pick<TimelineListProps, 'onResetCriteria'>) {
+}: Pick<TimelineListProps, 'labels' | 'onResetCriteria'>) {
   return (
     <section
       aria-labelledby="timeline-filtered-empty-title"
@@ -77,17 +81,17 @@ function TimelineFilteredEmptyState({
         className="text-lg font-bold text-slate-950"
         id="timeline-filtered-empty-title"
       >
-        Ничего не найдено
+        {labels.filteredEmpty.title}
       </h2>
       <p className="mx-auto mt-2 max-w-sm text-sm text-slate-600">
-        Измените запрос или сбросьте фильтры.
+        {labels.filteredEmpty.description}
       </p>
       <button
         className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
         onClick={onResetCriteria}
         type="button"
       >
-        Сбросить фильтры
+        {labels.filteredEmpty.reset}
       </button>
     </section>
   );
@@ -95,8 +99,10 @@ function TimelineFilteredEmptyState({
 
 function TimelineErrorState({
   errorMessage,
+  labels,
 }: {
   readonly errorMessage: string | undefined;
+  readonly labels: TimelineUiLabels;
 }) {
   return (
     <section
@@ -108,16 +114,17 @@ function TimelineErrorState({
         className="text-lg font-bold text-slate-950"
         id="timeline-error-title"
       >
-        Не удалось загрузить события
+        {labels.error.title}
       </h2>
       <p className="mt-2 text-sm text-rose-700">
-        {errorMessage ?? 'Попробуйте обновить страницу или вернуться позже.'}
+        {errorMessage ?? labels.error.default}
       </p>
     </section>
   );
 }
 
 export function TimelineList({
+  labels,
   model,
   onAddEvent,
   onOpenEvent,
@@ -125,24 +132,31 @@ export function TimelineList({
   presentationDependencies,
 }: TimelineListProps) {
   if (model.status === 'loading') {
-    return <TimelineLoadingState />;
+    return <TimelineLoadingState labels={labels} />;
   }
 
   if (model.status === 'empty') {
-    return <TimelineEmptyState onAddEvent={onAddEvent} />;
+    return <TimelineEmptyState labels={labels} onAddEvent={onAddEvent} />;
   }
 
   if (model.status === 'filtered-empty') {
-    return <TimelineFilteredEmptyState onResetCriteria={onResetCriteria} />;
+    return (
+      <TimelineFilteredEmptyState
+        labels={labels}
+        onResetCriteria={onResetCriteria}
+      />
+    );
   }
 
   if (model.status === 'error') {
-    return <TimelineErrorState errorMessage={model.errorMessage} />;
+    return (
+      <TimelineErrorState errorMessage={model.errorMessage} labels={labels} />
+    );
   }
 
   return (
     <div
-      aria-label="Список событий"
+      aria-label={labels.list.ariaLabel}
       className="min-w-0 space-y-8"
       id="timeline-events-list"
     >

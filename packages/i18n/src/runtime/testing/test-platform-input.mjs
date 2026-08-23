@@ -27,7 +27,7 @@ const catalog = {
       'common.actions.close': 'Close',
     },
     dashboard: {
-      'dashboard.header.title': 'Diabetes Universe',
+      'dashboard.header.title': 'Home',
     },
     timeline: {
       'timeline.header.title': 'Timeline',

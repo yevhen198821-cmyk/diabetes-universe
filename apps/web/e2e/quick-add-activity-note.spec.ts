@@ -3,7 +3,7 @@ import { expect, test } from './support/test';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
 const openQuickAdd = async (page: import('@playwright/test').Page) => {
-  await page.getByRole('button', { name: 'Добавить событие' }).click();
+  await page.getByRole('button', { name: 'Add event' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Добавить событие' }),
   ).toBeVisible();
@@ -36,16 +36,14 @@ test('activity quick add creates timeline event with details flow', async ({
     .first()
     .click();
   await expect(page.getByRole('dialog', { name: 'Ходьба' })).toBeVisible();
-  await page.getByRole('button', { name: 'Изменить' }).click();
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await expect(page.getByRole('dialog', { name: 'Edit event' })).toBeVisible();
+  await page.getByRole('button', { name: 'Cancel' }).click();
+  await page.getByRole('button', { name: 'Delete' }).click();
   await expect(
-    page.getByRole('dialog', { name: 'Изменить событие' }),
+    page.getByRole('dialog', { name: 'Delete event?' }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Отмена' }).click();
-  await page.getByRole('button', { name: 'Удалить' }).click();
-  await expect(
-    page.getByRole('dialog', { name: 'Удалить событие?' }),
-  ).toBeVisible();
-  await page.getByRole('button', { name: 'Отмена' }).click();
+  await page.getByRole('button', { name: 'Cancel' }).click();
   await page.keyboard.press('Escape');
 });
 
@@ -68,10 +66,10 @@ test('note quick add is searchable and appears in notes filter', async ({
 
   await expect(page.getByText(noteText).first()).toBeVisible();
 
-  await page.getByLabel('Поиск событий').fill('E2E заметка');
+  await page.getByLabel('Search events').fill('E2E заметка');
   await expect(page.getByText(noteText).first()).toBeVisible();
 
-  await page.getByRole('button', { name: 'Очистить поиск' }).click();
+  await page.getByRole('button', { name: 'Clear search' }).click();
   await page.getByRole('button', { name: 'Notes' }).click();
   await expect(page.getByText(noteText).first()).toBeVisible();
 
@@ -114,11 +112,7 @@ test('quick add shows six categories on mobile without horizontal scroll', async
   );
   expect(hasHorizontalScroll).toBe(false);
 
-  await expect(
-    page.getByRole('button', { name: 'Добавить событие' }),
-  ).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Add event' })).toBeHidden();
   await page.keyboard.press('Escape');
-  await expect(
-    page.getByRole('button', { name: 'Добавить событие' }),
-  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add event' })).toBeVisible();
 });

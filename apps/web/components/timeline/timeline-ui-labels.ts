@@ -1,0 +1,460 @@
+import type {
+  LocalizationPlatform,
+  TranslationKey,
+} from '@diabetes-universe/i18n';
+import type { TimelineEventSource } from '@diabetes-universe/types';
+
+function asTranslationKey(value: string): TranslationKey {
+  return value as TranslationKey;
+}
+
+function translate(
+  localization: LocalizationPlatform,
+  key: TranslationKey,
+): string {
+  return localization.translate({ key }).value;
+}
+
+export interface TimelineUiLabels {
+  readonly detail: Readonly<{
+    readonly close: string;
+    readonly closeButton: string;
+    readonly closeOverlay: string;
+    readonly context: string;
+    readonly delete: string;
+    readonly deleteConfirm: Readonly<{
+      readonly closeOverlay: string;
+      readonly confirm: string;
+      readonly description: string;
+      readonly title: string;
+    }>;
+    readonly edit: string;
+    readonly editTitle: string;
+    readonly form: Readonly<{
+      readonly context: string;
+      readonly date: string;
+      readonly note: string;
+      readonly save: string;
+      readonly time: string;
+      readonly title: string;
+      readonly unit: string;
+      readonly value: string;
+    }>;
+    readonly note: string;
+    readonly source: string;
+  }>;
+  readonly empty: Readonly<{
+    readonly action: string;
+    readonly description: string;
+    readonly title: string;
+  }>;
+  readonly error: Readonly<{
+    readonly default: string;
+    readonly title: string;
+  }>;
+  readonly filteredEmpty: Readonly<{
+    readonly description: string;
+    readonly reset: string;
+    readonly title: string;
+  }>;
+  readonly filters: Readonly<{
+    readonly ariaLabel: string;
+  }>;
+  readonly group: Readonly<{
+    readonly unknownDate: string;
+  }>;
+  readonly header: Readonly<{
+    readonly title: string;
+  }>;
+  readonly historyLoad: Readonly<{
+    readonly error: string;
+  }>;
+  readonly list: Readonly<{
+    readonly ariaLabel: string;
+  }>;
+  readonly loadMore: Readonly<{
+    readonly announced: string;
+    readonly button: string;
+    readonly loading: string;
+    readonly remaining: string;
+  }>;
+  readonly loading: Readonly<{
+    readonly status: string;
+    readonly title: string;
+  }>;
+  readonly search: Readonly<{
+    readonly clear: string;
+    readonly label: string;
+    readonly placeholder: string;
+  }>;
+  readonly shell: Readonly<{
+    readonly eyebrow: string;
+  }>;
+  readonly sources: Readonly<{
+    readonly demo: string;
+    readonly device: string;
+    readonly import: string;
+    readonly manual: string;
+  }>;
+  readonly toolbar: Readonly<{
+    readonly eventCount: string;
+    readonly foundCount: string;
+    readonly noMatches: string;
+    readonly reset: string;
+    readonly title: string;
+  }>;
+  readonly topBar: Readonly<{
+    readonly home: string;
+  }>;
+}
+
+const TIMELINE_UI_TRANSLATION_KEYS = {
+  detailClose: asTranslationKey('timeline.detail.closeButton'),
+  detailCloseDetails: asTranslationKey('timeline.detail.close'),
+  detailCloseOverlay: asTranslationKey('timeline.detail.closeOverlay'),
+  detailContext: asTranslationKey('timeline.detail.context'),
+  detailDelete: asTranslationKey('timeline.detail.delete'),
+  detailDeleteConfirmCloseOverlay: asTranslationKey(
+    'timeline.detail.deleteConfirm.closeOverlay',
+  ),
+  detailDeleteConfirmConfirm: asTranslationKey(
+    'timeline.detail.deleteConfirm.confirm',
+  ),
+  detailDeleteConfirmDescription: asTranslationKey(
+    'timeline.detail.deleteConfirm.description',
+  ),
+  detailDeleteConfirmTitle: asTranslationKey(
+    'timeline.detail.deleteConfirm.title',
+  ),
+  detailEdit: asTranslationKey('timeline.detail.edit'),
+  detailEditTitle: asTranslationKey('timeline.detail.editTitle'),
+  detailFormContext: asTranslationKey('timeline.detail.form.context'),
+  detailFormDate: asTranslationKey('timeline.detail.form.date'),
+  detailFormNote: asTranslationKey('timeline.detail.form.note'),
+  detailFormSave: asTranslationKey('timeline.detail.form.save'),
+  detailFormTime: asTranslationKey('timeline.detail.form.time'),
+  detailFormTitle: asTranslationKey('timeline.detail.form.title'),
+  detailFormUnit: asTranslationKey('timeline.detail.form.unit'),
+  detailFormValue: asTranslationKey('timeline.detail.form.value'),
+  detailNote: asTranslationKey('timeline.detail.note'),
+  detailSource: asTranslationKey('timeline.detail.source'),
+  emptyAction: asTranslationKey('timeline.empty.action'),
+  emptyDescription: asTranslationKey('timeline.empty.description'),
+  emptyTitle: asTranslationKey('timeline.empty.title'),
+  errorDefault: asTranslationKey('timeline.error.default'),
+  errorTitle: asTranslationKey('timeline.error.title'),
+  filteredEmptyDescription: asTranslationKey(
+    'timeline.filteredEmpty.description',
+  ),
+  filteredEmptyReset: asTranslationKey('timeline.filteredEmpty.reset'),
+  filteredEmptyTitle: asTranslationKey('timeline.filteredEmpty.title'),
+  filtersAriaLabel: asTranslationKey('timeline.filters.ariaLabel'),
+  groupUnknownDate: asTranslationKey('timeline.group.unknownDate'),
+  headerTitle: asTranslationKey('timeline.header.title'),
+  historyLoadError: asTranslationKey('timeline.historyLoad.error'),
+  listAriaLabel: asTranslationKey('timeline.list.ariaLabel'),
+  loadMoreAnnounced: asTranslationKey('timeline.loadMore.announced'),
+  loadMoreButton: asTranslationKey('timeline.loadMore.button'),
+  loadMoreLoading: asTranslationKey('timeline.loadMore.loading'),
+  loadMoreRemaining: asTranslationKey('timeline.loadMore.remaining'),
+  loadingStatus: asTranslationKey('timeline.loading.status'),
+  loadingTitle: asTranslationKey('timeline.loading.title'),
+  searchClear: asTranslationKey('timeline.search.clear'),
+  searchLabel: asTranslationKey('timeline.search.label'),
+  searchPlaceholder: asTranslationKey('timeline.search.placeholder'),
+  shellEyebrow: asTranslationKey('timeline.shell.eyebrow'),
+  sourceDemo: asTranslationKey('timeline.detail.source.demo'),
+  sourceDevice: asTranslationKey('timeline.detail.source.device'),
+  sourceImport: asTranslationKey('timeline.detail.source.import'),
+  sourceManual: asTranslationKey('timeline.detail.source.manual'),
+  toolbarEventCount: asTranslationKey('timeline.toolbar.eventCount'),
+  toolbarFoundCount: asTranslationKey('timeline.toolbar.foundCount'),
+  toolbarNoMatches: asTranslationKey('timeline.toolbar.noMatches'),
+  toolbarReset: asTranslationKey('timeline.toolbar.reset'),
+  toolbarTitle: asTranslationKey('timeline.toolbar.title'),
+  topBarHome: asTranslationKey('timeline.topBar.home'),
+} as const;
+
+export function resolveTimelineUiLabels(
+  localization: LocalizationPlatform,
+): TimelineUiLabels {
+  return {
+    detail: {
+      close: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.detailCloseDetails,
+      ),
+      closeButton: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.detailClose,
+      ),
+      closeOverlay: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.detailCloseOverlay,
+      ),
+      context: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.detailContext,
+      ),
+      delete: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.detailDelete,
+      ),
+      deleteConfirm: {
+        closeOverlay: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailDeleteConfirmCloseOverlay,
+        ),
+        confirm: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailDeleteConfirmConfirm,
+        ),
+        description: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailDeleteConfirmDescription,
+        ),
+        title: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailDeleteConfirmTitle,
+        ),
+      },
+      edit: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.detailEdit),
+      editTitle: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.detailEditTitle,
+      ),
+      form: {
+        context: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailFormContext,
+        ),
+        date: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailFormDate,
+        ),
+        note: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailFormNote,
+        ),
+        save: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailFormSave,
+        ),
+        time: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailFormTime,
+        ),
+        title: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailFormTitle,
+        ),
+        unit: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailFormUnit,
+        ),
+        value: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailFormValue,
+        ),
+      },
+      note: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.detailNote),
+      source: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.detailSource,
+      ),
+    },
+    empty: {
+      action: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.emptyAction),
+      description: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.emptyDescription,
+      ),
+      title: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.emptyTitle),
+    },
+    error: {
+      default: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.errorDefault,
+      ),
+      title: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.errorTitle),
+    },
+    filteredEmpty: {
+      description: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.filteredEmptyDescription,
+      ),
+      reset: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.filteredEmptyReset,
+      ),
+      title: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.filteredEmptyTitle,
+      ),
+    },
+    filters: {
+      ariaLabel: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.filtersAriaLabel,
+      ),
+    },
+    group: {
+      unknownDate: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.groupUnknownDate,
+      ),
+    },
+    header: {
+      title: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.headerTitle),
+    },
+    historyLoad: {
+      error: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.historyLoadError,
+      ),
+    },
+    list: {
+      ariaLabel: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.listAriaLabel,
+      ),
+    },
+    loadMore: {
+      announced: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.loadMoreAnnounced,
+      ),
+      button: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.loadMoreButton,
+      ),
+      loading: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.loadMoreLoading,
+      ),
+      remaining: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.loadMoreRemaining,
+      ),
+    },
+    loading: {
+      status: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.loadingStatus,
+      ),
+      title: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.loadingTitle),
+    },
+    search: {
+      clear: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.searchClear),
+      label: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.searchLabel),
+      placeholder: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.searchPlaceholder,
+      ),
+    },
+    shell: {
+      eyebrow: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.shellEyebrow,
+      ),
+    },
+    sources: {
+      demo: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.sourceDemo),
+      device: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.sourceDevice,
+      ),
+      import: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.sourceImport,
+      ),
+      manual: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.sourceManual,
+      ),
+    },
+    toolbar: {
+      eventCount: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.toolbarEventCount,
+      ),
+      foundCount: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.toolbarFoundCount,
+      ),
+      noMatches: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.toolbarNoMatches,
+      ),
+      reset: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.toolbarReset),
+      title: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.toolbarTitle),
+    },
+    topBar: {
+      home: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.topBarHome),
+    },
+  };
+}
+
+export interface TimelineEventSourcePresentation {
+  readonly isDemo: boolean;
+  readonly label: string;
+}
+
+export function resolveTimelineEventSourcePresentation(
+  source: TimelineEventSource | undefined,
+  labels: TimelineUiLabels['sources'],
+): TimelineEventSourcePresentation | null {
+  if (!source) {
+    return null;
+  }
+
+  switch (source) {
+    case 'manual':
+      return { isDemo: false, label: labels.manual };
+    case 'device':
+      return { isDemo: false, label: labels.device };
+    case 'import':
+      return { isDemo: false, label: labels.import };
+    case 'demo':
+      return { isDemo: true, label: labels.demo };
+    default:
+      return null;
+  }
+}
+
+export function formatTimelineToolbarResultLabel(
+  labels: TimelineUiLabels['toolbar'],
+  model: Readonly<{
+    readonly hasActiveCriteria: boolean;
+    readonly resultCount: number;
+  }>,
+  formatCount: (count: number) => string,
+): string {
+  if (model.hasActiveCriteria && model.resultCount === 0) {
+    return labels.noMatches;
+  }
+
+  const formattedCount = formatCount(model.resultCount);
+
+  if (model.hasActiveCriteria) {
+    return labels.foundCount.replace('{count}', formattedCount);
+  }
+
+  return labels.eventCount.replace('{count}', formattedCount);
+}
+
+export function formatTimelineLoadMoreAnnouncement(
+  template: string,
+  count: number,
+  formatCount: (count: number) => string,
+): string {
+  return template.replace('{count}', formatCount(count));
+}
+
+export function formatTimelineLoadMoreRemaining(
+  template: string,
+  count: number,
+  formatCount: (count: number) => string,
+): string {
+  return template.replace('{count}', formatCount(count));
+}

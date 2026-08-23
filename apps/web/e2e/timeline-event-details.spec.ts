@@ -22,7 +22,7 @@ test('timeline event details open, close with Escape, and return focus', async (
   const detailDialog = page.getByRole('dialog', { name: 'Метформин' });
   await expect(detailDialog.getByText('Medication')).toBeVisible();
   await expect(detailDialog.getByText('400 mg').first()).toBeVisible();
-  await expect(detailDialog.getByText('Демо-данные')).toBeVisible();
+  await expect(detailDialog.getByText('Demo data')).toBeVisible();
 
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog', { name: 'Метформин' })).toBeHidden();
@@ -36,19 +36,19 @@ test('timeline event edit updates Timeline and Dashboard selectors', async ({
   await waitForApplicationReady(page);
 
   await openEvent(page, /Open event: Glucose, 7\.3 mmol\/L/);
-  await page.getByRole('button', { name: 'Изменить' }).click();
+  await page.getByRole('button', { name: 'Edit' }).click();
 
-  await expect(
-    page.getByRole('dialog', { name: 'Изменить событие' }),
-  ).toBeVisible();
-  await page.getByLabel('Значение').fill('9.1');
-  await page.getByLabel('Время').fill('23:58');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
+  await expect(page.getByRole('dialog', { name: 'Edit event' })).toBeVisible();
+  await page.getByLabel('Value').fill('9.1');
+  await page.getByLabel('Event time').fill('23:58');
+  await page.getByRole('button', { name: 'Save' }).click();
 
   await expect(page.getByText('9.1 mmol/L').first()).toBeVisible();
 
-  await page.getByRole('button', { exact: true, name: 'Закрыть' }).click();
-  await page.getByRole('link', { name: 'На главную' }).click();
+  await page
+    .getByRole('button', { exact: true, name: 'Close details' })
+    .click();
+  await page.getByRole('link', { name: 'Go to home' }).click();
 
   await expect(
     page.getByRole('region', { name: 'Last glucose' }).getByText('9.1 mmol/L'),
@@ -63,10 +63,12 @@ test('timeline edit moves an event between Today and Yesterday groups', async ({
   await waitForApplicationReady(page);
 
   await openEvent(page, /Open event: Breakfast/);
-  await page.getByRole('button', { name: 'Изменить' }).click();
-  await page.getByLabel('Дата').fill('2026-08-01');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
-  await page.getByRole('button', { exact: true, name: 'Закрыть' }).click();
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await page.getByLabel('Date').fill('2026-08-01');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await page
+    .getByRole('button', { exact: true, name: 'Close details' })
+    .click();
 
   await expect(page.getByRole('heading', { name: 'Yesterday' })).toBeVisible();
   await expect(page.getByText('Breakfast').first()).toBeVisible();
@@ -79,25 +81,25 @@ test('timeline event delete requires confirmation and updates Dashboard', async 
   await waitForApplicationReady(page);
 
   await openEvent(page, /Open event: NovoRapid/);
-  await page.getByRole('button', { name: 'Удалить' }).click();
+  await page.getByRole('button', { name: 'Delete' }).click();
   await expect(
-    page.getByRole('dialog', { name: 'Удалить событие?' }),
+    page.getByRole('dialog', { name: 'Delete event?' }),
   ).toBeVisible();
 
-  await page.getByRole('button', { name: 'Отмена' }).click();
+  await page.getByRole('button', { name: 'Cancel' }).click();
   await expect(
-    page.getByRole('dialog', { name: 'Удалить событие?' }),
+    page.getByRole('dialog', { name: 'Delete event?' }),
   ).toBeHidden();
   await expect(page.getByRole('dialog', { name: 'NovoRapid' })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Удалить' }).click();
+  await page.getByRole('button', { name: 'Delete' }).click();
   await page
-    .getByRole('dialog', { name: 'Удалить событие?' })
-    .getByRole('button', { name: 'Удалить' })
+    .getByRole('dialog', { name: 'Delete event?' })
+    .getByRole('button', { name: 'Delete' })
     .click();
   await expect(page.getByText('NovoRapid').first()).toBeHidden();
 
-  await page.getByRole('link', { name: 'На главную' }).click();
+  await page.getByRole('link', { name: 'Go to home' }).click();
   await expect(
     page.getByRole('region', { name: 'Day summary' }).getByText('0 U'),
   ).toBeVisible();
@@ -109,16 +111,16 @@ test('timeline closes details when edited event leaves search results', async ({
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  const search = page.getByLabel('Поиск событий');
+  const search = page.getByLabel('Search events');
 
   await search.fill('Метформин');
   await openEvent(page, /Open event: Метформин/);
-  await page.getByRole('button', { name: 'Изменить' }).click();
-  await page.getByLabel('Название').fill('Сиофор');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await page.getByLabel('Title').fill('Сиофор');
+  await page.getByRole('button', { name: 'Save' }).click();
 
   await expect(
-    page.getByRole('heading', { name: 'Ничего не найдено' }),
+    page.getByRole('heading', { name: 'No matching events' }),
   ).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
@@ -136,14 +138,12 @@ test('timeline event details work on mobile without horizontal scroll', async ({
   const box = await dialog.boundingBox();
 
   expect(box?.width).toBeLessThanOrEqual(390);
-  await page.getByRole('button', { name: 'Изменить' }).click();
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await expect(page.getByRole('dialog', { name: 'Edit event' })).toBeVisible();
+  await page.getByRole('button', { name: 'Cancel' }).click();
+  await page.getByRole('button', { name: 'Delete' }).click();
   await expect(
-    page.getByRole('dialog', { name: 'Изменить событие' }),
-  ).toBeVisible();
-  await page.getByRole('button', { name: 'Отмена' }).click();
-  await page.getByRole('button', { name: 'Удалить' }).click();
-  await expect(
-    page.getByRole('dialog', { name: 'Удалить событие?' }),
+    page.getByRole('dialog', { name: 'Delete event?' }),
   ).toBeVisible();
   await page.keyboard.press('Escape');
 

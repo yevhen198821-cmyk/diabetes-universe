@@ -34,12 +34,14 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   await page
     .getByRole('button', { name: /Open event: Glucose, 7\.7 mmol\/L/ })
     .click();
-  await page.getByRole('button', { name: 'Изменить' }).click();
-  await page.getByLabel('Значение').fill('8.2');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
-  await page.getByRole('button', { exact: true, name: 'Закрыть' }).click();
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await page.getByLabel('Value').fill('8.2');
+  await page.getByRole('button', { name: 'Save' }).click();
+  await page
+    .getByRole('button', { exact: true, name: 'Close details' })
+    .click();
 
-  await page.getByRole('link', { name: 'На главную' }).click();
+  await page.getByRole('link', { name: 'Go to home' }).click();
   await waitForApplicationReady(page);
 
   await expect(
@@ -50,13 +52,13 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   await page
     .getByRole('button', { name: /Open event: Glucose, 8\.2 mmol\/L/ })
     .click();
-  await page.getByRole('button', { name: 'Удалить' }).click();
+  await page.getByRole('button', { name: 'Delete' }).click();
   await page
-    .getByRole('dialog', { name: 'Удалить событие?' })
-    .getByRole('button', { name: 'Удалить' })
+    .getByRole('dialog', { name: 'Delete event?' })
+    .getByRole('button', { name: 'Delete' })
     .click();
 
-  await page.getByRole('link', { name: 'На главную' }).click();
+  await page.getByRole('link', { name: 'Go to home' }).click();
   await waitForApplicationReady(page);
 
   await expect(

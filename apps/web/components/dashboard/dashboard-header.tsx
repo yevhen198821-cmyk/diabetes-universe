@@ -66,7 +66,7 @@ function DashboardAvatar({
   if (visibleAvatarUrl) {
     content = (
       <Image
-        alt=""
+        alt={avatarLabel}
         className="size-full object-cover"
         height={44}
         onError={() => setFailedAvatarUrl(visibleAvatarUrl)}

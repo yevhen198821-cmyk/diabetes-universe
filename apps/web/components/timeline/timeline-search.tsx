@@ -1,12 +1,19 @@
 import { Search, X } from 'lucide-react';
 import type { KeyboardEvent } from 'react';
 
+import type { TimelineUiLabels } from './timeline-ui-labels';
+
 interface TimelineSearchProps {
+  readonly labels: TimelineUiLabels['search'];
   readonly onChange: (query: string) => void;
   readonly query: string;
 }
 
-export function TimelineSearch({ onChange, query }: TimelineSearchProps) {
+export function TimelineSearch({
+  labels,
+  onChange,
+  query,
+}: TimelineSearchProps) {
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Escape' && query.length > 0) {
       event.preventDefault();
@@ -17,7 +24,7 @@ export function TimelineSearch({ onChange, query }: TimelineSearchProps) {
   return (
     <div className="relative">
       <label className="sr-only" htmlFor="timeline-search">
-        Поиск событий
+        {labels.label}
       </label>
       <Search
         aria-hidden="true"
@@ -29,13 +36,13 @@ export function TimelineSearch({ onChange, query }: TimelineSearchProps) {
         id="timeline-search"
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Поиск событий"
+        placeholder={labels.placeholder}
         type="search"
         value={query}
       />
       {query.length > 0 ? (
         <button
-          aria-label="Очистить поиск"
+          aria-label={labels.clear}
           className="absolute top-1/2 right-2 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
           onClick={() => onChange('')}
           type="button"

@@ -7,7 +7,6 @@ import {
   createDashboardNextActionEngineInput,
   resolveDashboardNextActionPresentation,
 } from '../../lib/dashboard/dashboard-next-action-integration';
-import { prepareDashboardAiInsightPresentation } from '../../lib/dashboard/dashboard-ai-insight-presentation';
 import {
   createSemanticActivityTimelineEvent,
   createSemanticGlucoseTimelineEvent,
@@ -29,29 +28,18 @@ import { useTimelinePresentationDependencies } from '../../lib/timeline/react/us
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { QuickAddHost } from '../quick-add/quick-add-host';
-import { DashboardAiInsight } from './dashboard-ai-insight';
 import { DashboardDaySummary } from './dashboard-day-summary';
 import { DashboardHeader } from './dashboard-header';
 import { DashboardLastGlucose } from './dashboard-last-glucose';
 import { DashboardNextAction } from './dashboard-next-action';
 import { DashboardRecentEvents } from './dashboard-recent-events';
-import { resolveDashboardAiInsightLabels } from './dashboard-ai-insight-labels';
 import { DashboardShell } from './dashboard-shell';
-
-const mockAiInsight = {
-  generatedAt: '2026-08-02T07:20:00.000Z',
-  id: 'insight-demo',
-  relatedEventIds: ['glucose-0800', 'nutrition-0820'],
-  summary:
-    'После завтрака значение глюкозы было выше обычного уровня по вашим записям.',
-  title: 'После завтрака',
-} as const;
 
 export function DashboardRoot() {
   const localization = useLocalization();
   const formatter = useFormatter();
   const presentationDependencies = useTimelinePresentationDependencies();
-  const { addEvent, events } = useTimelineStore();
+  const { addEvent, events, status: timelineStatus } = useTimelineStore();
   const [quickAddState, setQuickAddState] = useState(
     createInitialQuickAddControllerState,
   );
@@ -59,13 +47,17 @@ export function DashboardRoot() {
   const fabRef = useRef<HTMLButtonElement>(null);
   const nextActionRef = useRef<HTMLButtonElement>(null);
   const referenceTime = useMemo(() => new Date(), []);
+  const isTimelineHydrating = timelineStatus === 'loading';
+  const isTimelineError = timelineStatus === 'error';
   const nextActionPresentation = useMemo(
     () =>
-      resolveDashboardNextActionPresentation(
-        localization,
-        createDashboardNextActionEngineInput(events, referenceTime),
-      ),
-    [events, localization, referenceTime],
+      isTimelineHydrating
+        ? null
+        : resolveDashboardNextActionPresentation(
+            localization,
+            createDashboardNextActionEngineInput(events, referenceTime),
+          ),
+    [events, isTimelineHydrating, localization, referenceTime],
   );
   const dashboardTimeZone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -85,67 +77,35 @@ export function DashboardRoot() {
       formatter.formatTime(dateTime, { timeStyle: 'short' }),
     [formatter],
   );
-  const aiInsightPresentationLabels = useMemo(
-    () => resolveDashboardAiInsightLabels(localization),
-    [localization],
-  );
-  const formatAiInsightDisplayTime = useMemo(
-    () => (generatedAt: string) =>
-      formatter.formatTime(generatedAt, { timeStyle: 'short' }),
-    [formatter],
-  );
-  const formatAiInsightRelatedEventsCount = useMemo(
-    () => (count: number) => formatter.formatNumber(count),
-    [formatter],
-  );
 
   const derivedBlocks = useMemo(
     () =>
-      deriveDashboardQuickAddBlocks(
-        { events },
-        {
-          aiInsight: mockAiInsight,
-          formatDaySummaryDisplayDate,
-          formatLastGlucoseDisplayTime,
-          formatRecentEventDisplayTime,
-          locale: localization.localeContext.locale,
-          presentationDependencies,
-          referenceTime,
-          remindersCompleted: 1,
-          remindersTotal: 3,
-          timeZone: dashboardTimeZone,
-        },
-      ),
+      isTimelineHydrating
+        ? null
+        : deriveDashboardQuickAddBlocks(
+            { events },
+            {
+              formatDaySummaryDisplayDate,
+              formatLastGlucoseDisplayTime,
+              formatRecentEventDisplayTime,
+              locale: localization.localeContext.locale,
+              presentationDependencies,
+              referenceTime,
+              timeZone: dashboardTimeZone,
+            },
+          ),
     [
       dashboardTimeZone,
       events,
       formatDaySummaryDisplayDate,
       formatLastGlucoseDisplayTime,
       formatRecentEventDisplayTime,
+      isTimelineHydrating,
       localization.localeContext.locale,
       presentationDependencies,
       referenceTime,
     ],
   );
-
-  const presentedAiInsight = useMemo(() => {
-    if (!derivedBlocks.aiInsight) {
-      return null;
-    }
-
-    return prepareDashboardAiInsightPresentation(derivedBlocks.aiInsight, {
-      formatDisplayTime: formatAiInsightDisplayTime,
-      formatRelatedEventsCount: formatAiInsightRelatedEventsCount,
-      relatedEventsLabel: aiInsightPresentationLabels.relatedEventsLabel,
-      relatedEventsNone: aiInsightPresentationLabels.relatedEventsNone,
-    });
-  }, [
-    aiInsightPresentationLabels.relatedEventsLabel,
-    aiInsightPresentationLabels.relatedEventsNone,
-    derivedBlocks.aiInsight,
-    formatAiInsightDisplayTime,
-    formatAiInsightRelatedEventsCount,
-  ]);
 
   const returnFocusRef =
     quickAddState.lastOpenTrigger === 'header'
@@ -185,15 +145,12 @@ export function DashboardRoot() {
   return (
     <>
       <DashboardShell
-        aiInsight={
-          presentedAiInsight ? (
-            <DashboardAiInsight insight={presentedAiInsight} state="ready" />
-          ) : (
-            <DashboardAiInsight state="empty" />
-          )
-        }
         daySummary={
-          derivedBlocks.daySummary ? (
+          isTimelineHydrating ? (
+            <DashboardDaySummary state="loading" />
+          ) : isTimelineError ? (
+            <DashboardDaySummary state="error" />
+          ) : derivedBlocks?.daySummary ? (
             <DashboardDaySummary
               state="ready"
               summary={derivedBlocks.daySummary}
@@ -208,12 +165,16 @@ export function DashboardRoot() {
             addEventDisabled={quickAddState.isOpen}
             onAddEvent={() => requestOpen('header')}
             referenceTime={referenceTime}
-            state="ready"
-            user={{ displayName: 'Анна Иванова' }}
+            state={isTimelineHydrating ? 'loading' : 'ready'}
+            user={null}
           />
         }
         lastGlucose={
-          derivedBlocks.lastGlucose ? (
+          isTimelineHydrating ? (
+            <DashboardLastGlucose state="loading" />
+          ) : isTimelineError ? (
+            <DashboardLastGlucose state="error" />
+          ) : derivedBlocks?.lastGlucose ? (
             <DashboardLastGlucose
               glucose={{
                 displayTime: derivedBlocks.lastGlucose.displayTime,
@@ -227,7 +188,9 @@ export function DashboardRoot() {
           )
         }
         nextAction={
-          nextActionPresentation.state === 'ready' ? (
+          isTimelineHydrating ? (
+            <DashboardNextAction state="loading" />
+          ) : nextActionPresentation?.state === 'ready' ? (
             <DashboardNextAction
               action={nextActionPresentation.action}
               actionButtonRef={nextActionRef}
@@ -240,19 +203,27 @@ export function DashboardRoot() {
               }
               state="ready"
             />
-          ) : (
+          ) : nextActionPresentation ? (
             <DashboardNextAction
               content={nextActionPresentation.content}
               state="empty"
             />
+          ) : (
+            <DashboardNextAction state="loading" />
           )
         }
         recentEvents={
-          <DashboardRecentEvents
-            events={derivedBlocks.recentEvents}
-            state="ready"
-            viewAllHref="/timeline"
-          />
+          isTimelineHydrating ? (
+            <DashboardRecentEvents state="loading" />
+          ) : isTimelineError ? (
+            <DashboardRecentEvents state="error" />
+          ) : (
+            <DashboardRecentEvents
+              events={derivedBlocks?.recentEvents ?? []}
+              state="ready"
+              viewAllHref="/timeline"
+            />
+          )
         }
       />
       <QuickAddHost

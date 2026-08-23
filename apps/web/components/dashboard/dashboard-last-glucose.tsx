@@ -1,8 +1,9 @@
 'use client';
 
-import { Droplets } from 'lucide-react';
+import { ClockAlert, Droplets } from 'lucide-react';
 import { useMemo } from 'react';
 
+import { resolveDashboardMedicalEventSourceLabel } from '../../lib/dashboard/dashboard-event-source-labels';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { formatTimelineGlucoseDisplayValue } from '../../lib/timeline/presentation';
 import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
@@ -31,12 +32,23 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
       presentationDependencies,
     );
   }, [presentationDependencies, props]);
+  const sourceLabel = useMemo(() => {
+    if (props.state !== 'ready') {
+      return null;
+    }
+
+    return resolveDashboardMedicalEventSourceLabel(
+      localization,
+      props.glucose.event.source,
+    );
+  }, [localization, props]);
   const viewModel = useMemo(
     () =>
       createDashboardLastGlucoseViewModel(props, labels, {
         formattedValue,
+        sourceLabel,
       }),
-    [formattedValue, labels, props],
+    [formattedValue, labels, props, sourceLabel],
   );
   const isError = viewModel.state === 'error';
 
@@ -90,6 +102,11 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
             >
               {labels.title}
             </h2>
+            {viewModel.sourceLabel ? (
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                {viewModel.sourceLabel}
+              </p>
+            ) : null}
           </div>
           <div className="shrink-0 text-right">
             <p className="text-xl font-bold text-slate-950 dark:text-slate-50">
@@ -102,8 +119,16 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
               {viewModel.displayTime}
             </time>
             {viewModel.isStale && viewModel.staleMessage ? (
-              <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
-                {viewModel.staleMessage}
+              <p
+                className="mt-1 inline-flex items-center gap-1 text-xs text-amber-800 dark:text-amber-200"
+                role="status"
+              >
+                <ClockAlert
+                  aria-hidden="true"
+                  className="size-3.5 shrink-0"
+                  size={14}
+                />
+                <span>{viewModel.staleMessage}</span>
               </p>
             ) : null}
           </div>

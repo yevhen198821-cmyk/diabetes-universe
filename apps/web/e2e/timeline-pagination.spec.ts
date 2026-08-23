@@ -12,27 +12,27 @@ test('timeline load more reveals the next page and then disappears', async ({
   await waitForApplicationReady(page);
 
   await expect(eventCards(page)).toHaveCount(20);
-  await expect(page.getByText('Осталось: 11')).toBeVisible();
+  await expect(page.getByText('Remaining: 11')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Показать ещё' }).click();
+  await page.getByRole('button', { name: 'Load more' }).click();
 
   await expect(eventCards(page)).toHaveCount(31);
-  await expect(page.getByRole('button', { name: 'Показать ещё' })).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Load more' })).toBeHidden();
 });
 
 test('timeline search paginates all matching results', async ({ page }) => {
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await page.getByLabel('Поиск событий').fill('История');
+  await page.getByLabel('Search events').fill('История');
 
-  await expect(page.getByText('Найдено: 24')).toBeVisible();
+  await expect(page.getByText('Found: 24')).toBeVisible();
   await expect(eventCards(page)).toHaveCount(20);
 
-  await page.getByRole('button', { name: 'Показать ещё' }).click();
+  await page.getByRole('button', { name: 'Load more' }).click();
 
   await expect(eventCards(page)).toHaveCount(24);
-  await expect(page.getByRole('button', { name: 'Показать ещё' })).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Load more' })).toBeHidden();
 });
 
 test('timeline filter pagination resets visible count with criteria reset', async ({
@@ -43,19 +43,17 @@ test('timeline filter pagination resets visible count with criteria reset', asyn
 
   await page.getByRole('button', { name: 'Notes' }).click();
 
-  await expect(page.getByText('Найдено: 25')).toBeVisible();
+  await expect(page.getByText('Found: 25')).toBeVisible();
   await expect(eventCards(page)).toHaveCount(20);
 
-  await page.getByRole('button', { name: 'Показать ещё' }).click();
+  await page.getByRole('button', { name: 'Load more' }).click();
   await expect(eventCards(page)).toHaveCount(25);
 
-  await page.getByRole('button', { name: 'Сбросить фильтры' }).click();
+  await page.getByRole('button', { name: 'Reset filters' }).click();
 
-  await expect(page.getByText('31 событий')).toBeVisible();
+  await expect(page.getByText('31 events')).toBeVisible();
   await expect(eventCards(page)).toHaveCount(20);
-  await expect(
-    page.getByRole('button', { name: 'Показать ещё' }),
-  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Load more' })).toBeVisible();
 });
 
 test('timeline pagination recalculates after delete and keeps new add on top', async ({
@@ -65,16 +63,16 @@ test('timeline pagination recalculates after delete and keeps new add on top', a
   await waitForApplicationReady(page);
 
   await page.getByRole('button', { name: /Open event: NovoRapid/ }).click();
-  await page.getByRole('button', { name: 'Удалить' }).click();
+  await page.getByRole('button', { name: 'Delete' }).click();
   await page
-    .getByRole('dialog', { name: 'Удалить событие?' })
-    .getByRole('button', { name: 'Удалить' })
+    .getByRole('dialog', { name: 'Delete event?' })
+    .getByRole('button', { name: 'Delete' })
     .click();
 
-  await expect(page.getByText('Осталось: 10')).toBeVisible();
+  await expect(page.getByText('Remaining: 10')).toBeVisible();
   await expect(eventCards(page)).toHaveCount(20);
 
-  await page.getByRole('button', { name: 'Добавить событие' }).click();
+  await page.getByRole('button', { name: 'Add event' }).click();
   await page
     .getByRole('button', { name: 'Глюкоза. Записать уровень сахара' })
     .click();
@@ -88,7 +86,7 @@ test('timeline pagination recalculates after delete and keeps new add on top', a
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
   await expect(eventCards(page).first()).toContainText('8.8 mmol/L');
-  await expect(page.getByText('Осталось: 11')).toBeVisible();
+  await expect(page.getByText('Remaining: 11')).toBeVisible();
 });
 
 test('timeline load more is usable on mobile without FAB overlap or horizontal scroll', async ({
@@ -98,14 +96,14 @@ test('timeline load more is usable on mobile without FAB overlap or horizontal s
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  const loadMore = page.getByRole('button', { name: 'Показать ещё' });
+  const loadMore = page.getByRole('button', { name: 'Load more' });
 
   await expect(loadMore).toBeVisible();
   await loadMore.scrollIntoViewIfNeeded();
 
   const loadMoreBox = await loadMore.boundingBox();
   const fabBox = await page
-    .getByRole('button', { name: 'Добавить событие' })
+    .getByRole('button', { name: 'Add event' })
     .boundingBox();
 
   expect(loadMoreBox).not.toBeNull();
