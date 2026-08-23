@@ -287,7 +287,7 @@ export function TimelineShell() {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-950">
+    <div className="bg-background text-text-primary min-h-screen overflow-x-hidden">
       <TopBar />
 
       <main
@@ -295,11 +295,11 @@ export function TimelineShell() {
         id="main-content"
       >
         <div>
-          <p className="text-sm font-medium text-slate-500">
+          <p className="text-text-secondary text-sm font-medium">
             {uiLabels.shell.eyebrow}
           </p>
           <h1
-            className="mt-1 text-2xl font-bold text-slate-950 focus:outline-none"
+            className="text-text-primary mt-1 text-2xl font-bold focus:outline-none"
             ref={headingRef}
             tabIndex={-1}
           >
@@ -352,10 +352,7 @@ export function TimelineShell() {
         ) : null}
 
         {historyLoadErrorCode ? (
-          <p
-            className="text-center text-sm text-red-600 dark:text-red-400"
-            role="status"
-          >
+          <p className="text-center text-sm text-red-600" role="status">
             {uiLabels.historyLoad.error}
           </p>
         ) : null}

@@ -1,6 +1,8 @@
 import { Search, X } from 'lucide-react';
 import type { KeyboardEvent } from 'react';
 
+import { formFieldClass } from '@diabetes-universe/ui';
+
 import type { TimelineUiLabels } from './timeline-ui-labels';
 
 interface TimelineSearchProps {
@@ -28,11 +30,11 @@ export function TimelineSearch({
       </label>
       <Search
         aria-hidden="true"
-        className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400"
+        className="text-text-tertiary absolute top-1/2 left-3 -translate-y-1/2"
         size={18}
       />
       <input
-        className="h-11 w-full rounded-xl border border-slate-200 bg-white pr-11 pl-10 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 hover:border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 focus:outline-none"
+        className={`${formFieldClass} shadow-elevation-sm pr-11 pl-10`}
         id="timeline-search"
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={handleKeyDown}
@@ -43,7 +45,7 @@ export function TimelineSearch({
       {query.length > 0 ? (
         <button
           aria-label={labels.clear}
-          className="absolute top-1/2 right-2 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+          className="text-text-secondary hover:bg-surface-subtle hover:text-text-primary focus-visible:outline-interactive-primary absolute top-1/2 right-2 grid size-8 -translate-y-1/2 place-items-center rounded-lg transition focus-visible:outline-2 focus-visible:outline-offset-2"
           onClick={() => onChange('')}
           type="button"
         >

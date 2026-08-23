@@ -17,13 +17,14 @@ export function QuickAddFormActions({
 }: QuickAddFormActionsProps) {
   const actions = (
     <>
-      <button
-        className="h-12 min-w-0 flex-1 basis-0 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+      <Button
+        className="h-12 min-w-0 flex-1 basis-0"
         onClick={onCancel}
         type="button"
+        variant="secondary"
       >
         {cancelLabel}
-      </button>
+      </Button>
       <Button
         className="h-12 min-w-0 flex-1 basis-0"
         disabled={submitDisabled}
@@ -39,7 +40,7 @@ export function QuickAddFormActions({
   }
 
   return (
-    <div className="flex shrink-0 gap-3 border-t border-slate-100 bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
+    <div className="border-border-subtle bg-surface flex shrink-0 gap-3 border-t px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
       {actions}
     </div>
   );

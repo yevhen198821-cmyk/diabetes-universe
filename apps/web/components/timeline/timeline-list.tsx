@@ -1,4 +1,4 @@
-import { EventCard } from '@diabetes-universe/ui';
+import { Button, EventCard, Skeleton } from '@diabetes-universe/ui';
 
 import type { TimelineListModel } from './timeline-list-model';
 import type { TimelineUiLabels } from './timeline-ui-labels';
@@ -19,7 +19,7 @@ function TimelineLoadingState({ labels }: Pick<TimelineListProps, 'labels'>) {
     <section
       aria-busy="true"
       aria-labelledby="timeline-loading-title"
-      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+      className="rounded-card border-border-default bg-surface shadow-elevation-sm border p-5"
     >
       <h2 className="sr-only" id="timeline-loading-title">
         {labels.loading.title}
@@ -28,11 +28,11 @@ function TimelineLoadingState({ labels }: Pick<TimelineListProps, 'labels'>) {
         {labels.loading.status}
       </span>
       <div aria-hidden="true" className="space-y-4">
-        <div className="h-5 w-28 animate-pulse rounded bg-slate-200 motion-reduce:animate-none" />
+        <Skeleton className="h-5 w-28" />
         <div className="space-y-3">
-          <div className="h-16 animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none" />
-          <div className="h-16 animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none" />
-          <div className="h-16 animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none" />
+          <Skeleton className="h-16" rounded="control" />
+          <Skeleton className="h-16" rounded="control" />
+          <Skeleton className="h-16" rounded="control" />
         </div>
       </div>
     </section>
@@ -46,24 +46,20 @@ function TimelineEmptyState({
   return (
     <section
       aria-labelledby="timeline-empty-title"
-      className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm"
+      className="rounded-card border-border-default bg-surface border p-6 text-center shadow-sm"
     >
       <h2
-        className="text-lg font-bold text-slate-950"
+        className="text-text-primary text-lg font-bold"
         id="timeline-empty-title"
       >
         {labels.empty.title}
       </h2>
-      <p className="mx-auto mt-2 max-w-sm text-sm text-slate-600">
+      <p className="text-text-secondary mx-auto mt-2 max-w-sm text-sm">
         {labels.empty.description}
       </p>
-      <button
-        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-teal-700 px-5 text-sm font-semibold text-white transition hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-        onClick={onAddEvent}
-        type="button"
-      >
+      <Button className="mt-5" onClick={onAddEvent} type="button">
         {labels.empty.action}
-      </button>
+      </Button>
     </section>
   );
 }
@@ -75,24 +71,25 @@ function TimelineFilteredEmptyState({
   return (
     <section
       aria-labelledby="timeline-filtered-empty-title"
-      className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm"
+      className="rounded-card border-border-default bg-surface border p-6 text-center shadow-sm"
     >
       <h2
-        className="text-lg font-bold text-slate-950"
+        className="text-text-primary text-lg font-bold"
         id="timeline-filtered-empty-title"
       >
         {labels.filteredEmpty.title}
       </h2>
-      <p className="mx-auto mt-2 max-w-sm text-sm text-slate-600">
+      <p className="text-text-secondary mx-auto mt-2 max-w-sm text-sm">
         {labels.filteredEmpty.description}
       </p>
-      <button
-        className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+      <Button
+        className="mt-5"
         onClick={onResetCriteria}
         type="button"
+        variant="secondary"
       >
         {labels.filteredEmpty.reset}
-      </button>
+      </Button>
     </section>
   );
 }
@@ -107,16 +104,16 @@ function TimelineErrorState({
   return (
     <section
       aria-labelledby="timeline-error-title"
-      className="rounded-2xl border border-rose-200 bg-white p-6 shadow-sm"
+      className="rounded-card border-status-danger/40 bg-surface shadow-elevation-sm border p-6"
       role="alert"
     >
       <h2
-        className="text-lg font-bold text-slate-950"
+        className="text-text-primary text-lg font-bold"
         id="timeline-error-title"
       >
         {labels.error.title}
       </h2>
-      <p className="mt-2 text-sm text-rose-700">
+      <p className="text-status-danger mt-2 text-sm">
         {errorMessage ?? labels.error.default}
       </p>
     </section>
@@ -171,12 +168,15 @@ export function TimelineList({
           >
             <div className="mb-4 flex items-center gap-3">
               <h2
-                className="shrink-0 text-sm font-semibold text-slate-600"
+                className="text-text-secondary shrink-0 text-sm font-semibold"
                 id={groupTitleId}
               >
                 {group.label}
               </h2>
-              <div aria-hidden="true" className="h-px flex-1 bg-slate-200" />
+              <div
+                aria-hidden="true"
+                className="bg-border-default h-px flex-1"
+              />
             </div>
 
             <ul className="space-y-2.5">
@@ -190,7 +190,7 @@ export function TimelineList({
                   <li className="relative pl-10 sm:pl-12" key={event.id}>
                     <div
                       aria-hidden="true"
-                      className={`absolute top-0 left-[15px] w-0.5 bg-slate-300 sm:left-[17px] ${
+                      className={`bg-border-strong absolute top-0 left-[15px] w-0.5 sm:left-[17px] ${
                         index === group.events.length - 1 ? 'h-7' : 'bottom-0'
                       }`}
                     />

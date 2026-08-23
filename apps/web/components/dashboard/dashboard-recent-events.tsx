@@ -31,10 +31,8 @@ export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
     <section
       aria-busy={viewModel.isLoading}
       aria-labelledby={titleId}
-      className={`col-span-full rounded-2xl border bg-white p-5 shadow-sm lg:col-span-8 dark:bg-slate-900 ${
-        isError
-          ? 'border-rose-200 dark:border-rose-900/70'
-          : 'border-slate-200 dark:border-slate-800'
+      className={`bg-surface col-span-full rounded-2xl border p-5 shadow-sm lg:col-span-8 ${
+        isError ? 'border-status-danger/40' : 'border-border-default'
       }`}
     >
       {viewModel.state === 'loading' ? (
@@ -47,13 +45,13 @@ export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
           </span>
           <div aria-hidden="true" className="space-y-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="h-6 w-44 animate-pulse rounded bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
-              <div className="h-10 w-32 animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
+              <div className="bg-surface-subtle h-6 w-44 animate-pulse rounded motion-reduce:animate-none" />
+              <div className="rounded-control bg-surface-subtle h-10 w-32 animate-pulse motion-reduce:animate-none" />
             </div>
             <div className="space-y-3">
-              <div className="h-16 animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
-              <div className="h-16 animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
-              <div className="h-16 animate-pulse rounded-xl bg-slate-200 motion-reduce:animate-none dark:bg-slate-700" />
+              <div className="rounded-control bg-surface-subtle h-16 animate-pulse motion-reduce:animate-none" />
+              <div className="rounded-control bg-surface-subtle h-16 animate-pulse motion-reduce:animate-none" />
+              <div className="rounded-control bg-surface-subtle h-16 animate-pulse motion-reduce:animate-none" />
             </div>
           </div>
         </>
@@ -65,19 +63,16 @@ export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
             <div className="flex items-start gap-4">
               <div
                 aria-hidden="true"
-                className="grid size-11 shrink-0 place-items-center rounded-xl bg-teal-50 text-teal-600 dark:bg-teal-950/70 dark:text-teal-300"
+                className="grid size-11 shrink-0 place-items-center rounded-xl bg-teal-50 text-teal-600"
               >
                 <History size={20} />
               </div>
-              <h2
-                className="text-lg font-bold text-slate-950 dark:text-slate-50"
-                id={titleId}
-              >
+              <h2 className="text-text-primary text-lg font-bold" id={titleId}>
                 {labels.title}
               </h2>
             </div>
             <Link
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="border-border-default text-text-primary hover:border-border-strong hover:bg-surface-subtle focus-visible:outline-interactive-primary inline-flex min-h-11 items-center justify-center rounded-xl border px-4 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2"
               href={viewModel.viewAllHref ?? '/timeline'}
             >
               {viewModel.viewAllLabel}
@@ -106,24 +101,19 @@ export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
             aria-hidden="true"
             className={`grid size-11 shrink-0 place-items-center rounded-xl ${
               isError
-                ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/70 dark:text-rose-300'
-                : 'bg-teal-50 text-teal-600 dark:bg-teal-950/70 dark:text-teal-300'
+                ? 'bg-status-danger/10 text-status-danger'
+                : 'bg-teal-500/10 text-teal-600'
             }`}
           >
             <History size={20} />
           </div>
           <div className="min-w-0 flex-1">
-            <h2
-              className="text-lg font-bold text-slate-950 dark:text-slate-50"
-              id={titleId}
-            >
+            <h2 className="text-text-primary text-lg font-bold" id={titleId}>
               {labels.title}
             </h2>
             <p
               className={`mt-2 text-sm ${
-                isError
-                  ? 'text-rose-700 dark:text-rose-300'
-                  : 'text-slate-600 dark:text-slate-300'
+                isError ? 'text-status-danger' : 'text-text-secondary'
               }`}
             >
               {viewModel.message}

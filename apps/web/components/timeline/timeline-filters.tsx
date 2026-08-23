@@ -1,3 +1,7 @@
+import {
+  filterChipDefaultClass,
+  filterChipSelectedClass,
+} from '@diabetes-universe/ui';
 import type { TimelineEventFilter } from './timeline-search-filter-model';
 import { timelineEventFilterOptions } from './timeline-search-filter-model';
 
@@ -27,10 +31,8 @@ export function TimelineFilters({
           return (
             <button
               aria-pressed={selected}
-              className={`min-h-11 rounded-full border px-4 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 ${
-                selected
-                  ? 'border-teal-700 bg-teal-700 text-white'
-                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+              className={`focus-visible:outline-interactive-primary min-h-11 rounded-full border px-4 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                selected ? filterChipSelectedClass : filterChipDefaultClass
               }`}
               key={filter}
               onClick={() => onChange(filter)}

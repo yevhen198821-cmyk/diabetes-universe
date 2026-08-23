@@ -3,8 +3,131 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Foundation palette — not consumed directly by components */
 :root {
+  --du-neutral-50: #f8fafc;
+  --du-neutral-100: #f1f5f9;
+  --du-neutral-200: #e2e8f0;
+  --du-neutral-300: #cbd5e1;
+  --du-neutral-400: #94a3b8;
+  --du-neutral-500: #64748b;
+  --du-neutral-700: #334155;
+  --du-neutral-800: #1e293b;
+  --du-neutral-900: #0f172a;
+  --du-neutral-950: #020617;
+  --du-brand-600: #0d9488;
+  --du-brand-700: #0f766e;
+  --du-brand-800: #115e59;
+  --du-success: #15803d;
+  --du-warning: #b45309;
+  --du-danger: #be123c;
+  --du-info: #0369a1;
+
+  /* Semantic tokens — light theme */
+  --du-background: var(--du-neutral-50);
+  --du-surface: #ffffff;
+  --du-surface-raised: #ffffff;
+  --du-surface-subtle: var(--du-neutral-100);
+  --du-overlay: rgb(15 23 42 / 0.4);
+
+  --du-text-primary: var(--du-neutral-900);
+  --du-text-secondary: var(--du-neutral-500);
+  --du-text-tertiary: var(--du-neutral-400);
+  --du-text-inverse: #ffffff;
+
+  --du-border-default: var(--du-neutral-200);
+  --du-border-subtle: var(--du-neutral-100);
+  --du-border-strong: var(--du-neutral-300);
+
+  --du-interactive-primary: var(--du-brand-700);
+  --du-interactive-primary-hover: var(--du-brand-800);
+  --du-interactive-secondary: #ffffff;
+  --du-interactive-muted: var(--du-neutral-50);
+  --du-focus-ring: var(--du-brand-600);
+
+  --du-status-success: var(--du-success);
+  --du-status-warning: var(--du-warning);
+  --du-status-danger: var(--du-danger);
+  --du-status-info: var(--du-info);
+
+  --du-radius-control: 0.75rem;
+  --du-radius-card: 1rem;
+  --du-radius-modal: 1.5rem;
+
+  --du-shadow-sm: 0 1px 2px rgb(15 23 42 / 0.05);
+  --du-shadow-md: 0 8px 24px rgb(15 23 42 / 0.08);
+
+  --du-space-page-x: max(1rem, env(safe-area-inset-left));
+  --du-space-section: 1rem;
+
   color-scheme: light;
+}
+
+.dark {
+  --du-background: var(--du-neutral-950);
+  --du-surface: var(--du-neutral-900);
+  --du-surface-raised: var(--du-neutral-800);
+  --du-surface-subtle: var(--du-neutral-800);
+  --du-overlay: rgb(2 6 23 / 0.55);
+
+  --du-text-primary: #f8fafc;
+  --du-text-secondary: #94a3b8;
+  --du-text-tertiary: #64748b;
+  --du-text-inverse: var(--du-neutral-900);
+
+  --du-border-default: var(--du-neutral-800);
+  --du-border-subtle: var(--du-neutral-900);
+  --du-border-strong: var(--du-neutral-700);
+
+  --du-interactive-primary: var(--du-brand-600);
+  --du-interactive-primary-hover: #14b8a6;
+  --du-interactive-secondary: var(--du-neutral-900);
+  --du-interactive-muted: var(--du-neutral-900);
+
+  --du-status-success: #4ade80;
+  --du-status-warning: #fbbf24;
+  --du-status-danger: #fb7185;
+  --du-status-info: #38bdf8;
+
+  --du-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.35);
+  --du-shadow-md: 0 12px 32px rgb(0 0 0 / 0.45);
+
+  color-scheme: dark;
+}
+
+@theme {
+  --color-background: var(--du-background);
+  --color-surface: var(--du-surface);
+  --color-surface-raised: var(--du-surface-raised);
+  --color-surface-subtle: var(--du-surface-subtle);
+  --color-overlay: var(--du-overlay);
+
+  --color-text-primary: var(--du-text-primary);
+  --color-text-secondary: var(--du-text-secondary);
+  --color-text-tertiary: var(--du-text-tertiary);
+  --color-text-inverse: var(--du-text-inverse);
+
+  --color-border-default: var(--du-border-default);
+  --color-border-subtle: var(--du-border-subtle);
+  --color-border-strong: var(--du-border-strong);
+
+  --color-interactive-primary: var(--du-interactive-primary);
+  --color-interactive-primary-hover: var(--du-interactive-primary-hover);
+  --color-interactive-secondary: var(--du-interactive-secondary);
+  --color-interactive-muted: var(--du-interactive-muted);
+  --color-focus-ring: var(--du-focus-ring);
+
+  --color-status-success: var(--du-status-success);
+  --color-status-warning: var(--du-status-warning);
+  --color-status-danger: var(--du-status-danger);
+  --color-status-info: var(--du-status-info);
+
+  --radius-control: var(--du-radius-control);
+  --radius-card: var(--du-radius-card);
+  --radius-modal: var(--du-radius-modal);
+
+  --shadow-elevation-sm: var(--du-shadow-sm);
+  --shadow-elevation-md: var(--du-shadow-md);
 }
 
 html {
@@ -18,8 +141,8 @@ html {
 
 body {
   margin: 0;
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--du-background);
+  color: var(--du-text-primary);
   font-family:
     Inter,
     ui-sans-serif,
@@ -33,8 +156,65 @@ body {
 }
 
 button,
-input {
+input,
+textarea,
+select {
   font: inherit;
+}
+
+/* Typography roles */
+.text-display {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--du-text-primary);
+}
+
+.text-section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--du-text-primary);
+}
+
+.text-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--du-text-primary);
+}
+
+.text-body {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--du-text-primary);
+}
+
+.text-body-small {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--du-text-secondary);
+}
+
+.text-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--du-text-secondary);
+}
+
+.text-caption {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--du-text-secondary);
+}
+
+.text-metric {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  color: var(--du-text-primary);
 }
 
 .timeline-content {
@@ -59,4 +239,14 @@ input {
 
 ::selection {
   background: rgb(45 212 191 / 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
