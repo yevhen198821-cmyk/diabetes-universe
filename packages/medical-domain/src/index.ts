@@ -45,11 +45,13 @@ export type {
   AdoptionItemOutcomeStatus,
   AdoptionItemReplay,
   AdoptionItemResult,
+  AdoptionItemStateKind,
   AdoptionItemSuccess,
   AdoptionSessionLifecycleState,
   AdoptionSourceIdentity,
   CreateAdoptionSessionInput,
   MedicalAdoptionMapping,
+  MedicalAdoptionItemState,
   MedicalAdoptionSession,
 } from './types/adoption';
 export type { MedicalRevision } from './types/medical-revision';

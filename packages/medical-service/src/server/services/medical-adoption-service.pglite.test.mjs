@@ -2,7 +2,12 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { AdoptionNotEnabledError } from '@diabetes-universe/medical-domain';
-import { resolveMedicalEnvironment } from '@diabetes-universe/medical-persistence/server';
+import {
+  createAdoptionItemStateRepository,
+  createAdoptionSessionRepository,
+  createRequestFingerprint,
+  resolveMedicalEnvironment,
+} from '@diabetes-universe/medical-persistence/server';
 import {
   closeMedicalServiceBundle,
   createMedicalServiceBundle,
@@ -240,10 +245,10 @@ test('completeSession rejects unresolved failed items', async () => {
     correlationId: 'corr-incomplete',
   };
 
-  const session = await bundle.adoptionService.createOrResumeSession({
+  const setupSession = await bundle.adoptionService.createOrResumeSession({
     scope,
     apiVersion: 'v1',
-    clientAdoptionRunId: 'run-incomplete',
+    clientAdoptionRunId: 'run-incomplete-setup',
     sourcePlatform: 'web',
     sourceAppVersion: '1.0.0',
     sourceSchemaMin: 1,
@@ -260,8 +265,18 @@ test('completeSession rejects unresolved failed items', async () => {
   await bundle.adoptionService.adoptBatch({
     scope,
     apiVersion: 'v1',
-    adoptionSessionId: session.adoptionSessionId,
+    adoptionSessionId: setupSession.adoptionSessionId,
     items: [conflictItem],
+  });
+
+  const session = await bundle.adoptionService.createOrResumeSession({
+    scope,
+    apiVersion: 'v1',
+    clientAdoptionRunId: 'run-incomplete',
+    sourcePlatform: 'web',
+    sourceAppVersion: '1.0.0',
+    sourceSchemaMin: 1,
+    sourceSchemaMax: 1,
   });
 
   await bundle.adoptionService.adoptBatch({
@@ -284,6 +299,275 @@ test('completeSession rejects unresolved failed items', async () => {
       bundle.adoptionService.completeSession(scope, session.adoptionSessionId),
     (error) => error?.code === 'ADOPTION_SESSION_INCOMPLETE',
   );
+
+  await closeMedicalServiceBundle(bundle);
+});
+
+test('repeat logical failure does not inflate failedCount', async () => {
+  const bundle = await createMedicalServiceBundle(
+    resolveMedicalEnvironment(TEST_ENV),
+  );
+  const relationship =
+    await bundle.subjectService.provisionSelfSubject('acct-repeat-fail');
+  const scope = {
+    accountId: 'acct-repeat-fail',
+    subjectId: relationship.subjectId,
+    correlationId: 'corr-repeat-fail',
+  };
+
+  const session = await bundle.adoptionService.createOrResumeSession({
+    scope,
+    apiVersion: 'v1',
+    clientAdoptionRunId: 'run-repeat-fail',
+    sourcePlatform: 'web',
+    sourceAppVersion: '1.0.0',
+    sourceSchemaMin: 1,
+    sourceSchemaMax: 1,
+  });
+
+  const baseItem = {
+    sourceNamespace: 'ns_repeat_fail',
+    localEventId: 'local-repeat-fail',
+    sourceSchemaVersion: 1,
+    event: sampleEvent('local-repeat-fail'),
+  };
+
+  await bundle.adoptionService.adoptBatch({
+    scope,
+    apiVersion: 'v1',
+    adoptionSessionId: session.adoptionSessionId,
+    items: [baseItem],
+  });
+
+  const conflicting = {
+    ...baseItem,
+    event: {
+      ...sampleEvent('local-repeat-fail'),
+      concentrationMmolPerL: 9.9,
+    },
+  };
+
+  await bundle.adoptionService.adoptBatch({
+    scope,
+    apiVersion: 'v1',
+    adoptionSessionId: session.adoptionSessionId,
+    items: [conflicting],
+  });
+
+  let current = await bundle.adoptionService.getSession(
+    scope,
+    session.adoptionSessionId,
+  );
+  assert.equal(current.failedCount, 0);
+
+  await bundle.adoptionService.adoptBatch({
+    scope,
+    apiVersion: 'v1',
+    adoptionSessionId: session.adoptionSessionId,
+    items: [conflicting],
+  });
+
+  current = await bundle.adoptionService.getSession(
+    scope,
+    session.adoptionSessionId,
+  );
+  assert.equal(current.adoptedCount, 1);
+  assert.equal(current.failedCount, 0);
+
+  await closeMedicalServiceBundle(bundle);
+});
+
+test('conflict against existing mapping records unresolved once then clears on replay', async () => {
+  const bundle = await createMedicalServiceBundle(
+    resolveMedicalEnvironment(TEST_ENV),
+  );
+  const relationship =
+    await bundle.subjectService.provisionSelfSubject('acct-recover-fail');
+  const scope = {
+    accountId: 'acct-recover-fail',
+    subjectId: relationship.subjectId,
+    correlationId: 'corr-recover-fail',
+  };
+
+  const setupSession = await bundle.adoptionService.createOrResumeSession({
+    scope,
+    apiVersion: 'v1',
+    clientAdoptionRunId: 'run-recover-setup',
+    sourcePlatform: 'web',
+    sourceAppVersion: '1.0.0',
+    sourceSchemaMin: 1,
+    sourceSchemaMax: 1,
+  });
+
+  const goodItem = {
+    sourceNamespace: 'ns_recover',
+    localEventId: 'local-recover',
+    sourceSchemaVersion: 1,
+    event: sampleEvent('local-recover'),
+  };
+
+  await bundle.adoptionService.adoptBatch({
+    scope,
+    apiVersion: 'v1',
+    adoptionSessionId: setupSession.adoptionSessionId,
+    items: [goodItem],
+  });
+
+  const session = await bundle.adoptionService.createOrResumeSession({
+    scope,
+    apiVersion: 'v1',
+    clientAdoptionRunId: 'run-recover-fail',
+    sourcePlatform: 'web',
+    sourceAppVersion: '1.0.0',
+    sourceSchemaMin: 1,
+    sourceSchemaMax: 1,
+  });
+
+  const conflicting = {
+    ...goodItem,
+    event: {
+      ...sampleEvent('local-recover'),
+      concentrationMmolPerL: 7.7,
+    },
+  };
+
+  await bundle.adoptionService.adoptBatch({
+    scope,
+    apiVersion: 'v1',
+    adoptionSessionId: session.adoptionSessionId,
+    items: [conflicting],
+  });
+
+  let current = await bundle.adoptionService.getSession(
+    scope,
+    session.adoptionSessionId,
+  );
+  assert.equal(current.failedCount, 1);
+
+  await bundle.adoptionService.adoptBatch({
+    scope,
+    apiVersion: 'v1',
+    adoptionSessionId: session.adoptionSessionId,
+    items: [conflicting],
+  });
+
+  current = await bundle.adoptionService.getSession(
+    scope,
+    session.adoptionSessionId,
+  );
+  assert.equal(current.failedCount, 1);
+
+  await assert.rejects(
+    () =>
+      bundle.adoptionService.completeSession(scope, session.adoptionSessionId),
+    (error) => error?.code === 'ADOPTION_SESSION_INCOMPLETE',
+  );
+
+  await bundle.adoptionService.adoptBatch({
+    scope,
+    apiVersion: 'v1',
+    adoptionSessionId: session.adoptionSessionId,
+    items: [goodItem],
+  });
+
+  current = await bundle.adoptionService.getSession(
+    scope,
+    session.adoptionSessionId,
+  );
+  assert.equal(current.failedCount, 0);
+  assert.equal(current.skippedCount, 1);
+
+  const completed = await bundle.adoptionService.completeSession(
+    scope,
+    session.adoptionSessionId,
+  );
+  assert.equal(completed.lifecycleState, 'completed');
+
+  await closeMedicalServiceBundle(bundle);
+});
+
+test('failed item succeeds on later retry and session can complete', async () => {
+  const bundle = await createMedicalServiceBundle(
+    resolveMedicalEnvironment(TEST_ENV),
+  );
+  const relationship = await bundle.subjectService.provisionSelfSubject(
+    'acct-fail-then-adopt',
+  );
+  const scope = {
+    accountId: 'acct-fail-then-adopt',
+    subjectId: relationship.subjectId,
+    correlationId: 'corr-fail-then-adopt',
+  };
+
+  const session = await bundle.adoptionService.createOrResumeSession({
+    scope,
+    apiVersion: 'v1',
+    clientAdoptionRunId: 'run-fail-then-adopt',
+    sourcePlatform: 'web',
+    sourceAppVersion: '1.0.0',
+    sourceSchemaMin: 1,
+    sourceSchemaMax: 1,
+  });
+
+  const pendingItem = {
+    sourceNamespace: 'ns_fail_then_adopt',
+    localEventId: 'local-fail-then-adopt',
+    sourceSchemaVersion: 1,
+    event: sampleEvent('local-fail-then-adopt'),
+  };
+  const fingerprint = createRequestFingerprint(pendingItem.event);
+  const itemStateRepository = createAdoptionItemStateRepository(
+    bundle.database,
+  );
+  const sessionRepository = createAdoptionSessionRepository(bundle.database);
+
+  await itemStateRepository.recordOutcome({
+    subjectId: scope.subjectId,
+    adoptionSessionId: session.adoptionSessionId,
+    sourceNamespace: pendingItem.sourceNamespace,
+    localEventId: pendingItem.localEventId,
+    payloadFingerprint: fingerprint,
+    outcome: 'failed',
+    failureCode: 'ADOPTION_ITEM_INVALID',
+  });
+  await sessionRepository.incrementCounters(
+    scope.subjectId,
+    session.adoptionSessionId,
+    { failedCount: 1 },
+  );
+
+  let current = await bundle.adoptionService.getSession(
+    scope,
+    session.adoptionSessionId,
+  );
+  assert.equal(current.failedCount, 1);
+
+  await assert.rejects(
+    () =>
+      bundle.adoptionService.completeSession(scope, session.adoptionSessionId),
+    (error) => error?.code === 'ADOPTION_SESSION_INCOMPLETE',
+  );
+
+  const adopted = await bundle.adoptionService.adoptBatch({
+    scope,
+    apiVersion: 'v1',
+    adoptionSessionId: session.adoptionSessionId,
+    items: [pendingItem],
+  });
+  assert.equal(adopted.items[0].status, 'adopted');
+
+  current = await bundle.adoptionService.getSession(
+    scope,
+    session.adoptionSessionId,
+  );
+  assert.equal(current.failedCount, 0);
+  assert.equal(current.adoptedCount, 1);
+
+  const completed = await bundle.adoptionService.completeSession(
+    scope,
+    session.adoptionSessionId,
+  );
+  assert.equal(completed.lifecycleState, 'completed');
 
   await closeMedicalServiceBundle(bundle);
 });

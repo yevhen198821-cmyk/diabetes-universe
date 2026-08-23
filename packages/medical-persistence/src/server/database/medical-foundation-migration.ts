@@ -36,3 +36,9 @@ export const MEDICAL_ADOPTION_PRIVILEGES_MIGRATION_SQL =
 
 export const MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL =
   readMedicalMigrationSql('0003_medical_adoption_subject_resource_fk.sql');
+
+export const MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL =
+  readMedicalMigrationSql('0004_medical_adoption_item_states.sql');
+
+export const MEDICAL_ADOPTION_ITEM_STATES_PRIVILEGES_MIGRATION_SQL =
+  readMedicalMigrationSql('0004_medical_adoption_item_states_privileges.sql');

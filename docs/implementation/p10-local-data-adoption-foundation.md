@@ -133,3 +133,39 @@ This foundation remains **implementation candidate** until independent audit pas
 
 - Replaying the same batch with `already_adopted` outcomes does not double-count session aggregates.
 - Local orchestrator skipped count tracks client-side ack state; server counters stable on replay.
+
+## Remediation — recoverable failure accounting (2026-08-23)
+
+### Aggregate counter semantics (current logical state)
+
+- `failedCount` = count of unique source identities with **current** unresolved item state (`state = failed`), not lifetime HTTP retry failures.
+- `adoptedCount` = unique source identities that created a new canonical resource in this session.
+- `skippedCount` = unique source identities reconciled via `already_adopted` in this session.
+- `eligibleCount` = expected eligible items when known at session creation; may diverge if client rescan finds a different eligible set on resume.
+
+### Durable per-item state source of truth
+
+- Table: `medical.medical_adoption_item_states`
+- Key: `(subject_id, adoption_session_id, source_namespace, local_event_id)`
+- States: `failed` | `adopted` | `reconciled`
+- Stores fingerprint + optional failure code and canonical resource id only — no semantic payload / PHI.
+- `completeSession` checks unresolved item-state rows, not historical failure attempts.
+
+### Failure resolution transitions
+
+- First logical failure for a source identity: `failedCount +1`, item state `failed`.
+- Repeat failure same identity: no counter delta.
+- `failed → adopted`: `failedCount -1`, `adoptedCount +1`.
+- `failed → reconciled` (`already_adopted`): `failedCount -1`, `skippedCount +1`.
+- Terminal success states (`adopted`/`reconciled`) are not downgraded on conflict replays.
+
+### Completion rule
+
+- Session may complete only when zero unresolved item-state rows remain for the session.
+- Historical resolved failures do not block completion.
+- Orchestrator completion relies on local ack coverage; server independently validates unresolved item state.
+
+### Transient vs logical failures
+
+- Logical per-item failures (`ADOPTION_SOURCE_CONFLICT`, validation/quarantine outcomes) persist in item state.
+- Lifecycle gate failures (`ADOPTION_SESSION_CLOSED`) and infrastructure errors propagate without durable unresolved item records.

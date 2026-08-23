@@ -8,6 +8,7 @@ import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
 import type { MedicalEnvironment } from '../config/medical-environment';
 import {
+  MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL,
   MEDICAL_ADOPTION_MIGRATION_SQL,
   MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL,
   MEDICAL_FOUNDATION_MIGRATION_SQL,
@@ -38,6 +39,7 @@ async function ensurePgliteMedicalSchema(pgliteClient: PGlite): Promise<void> {
       .then(() =>
         pgliteClient.exec(MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL),
       )
+      .then(() => pgliteClient.exec(MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL))
       .then(() => undefined);
   }
 

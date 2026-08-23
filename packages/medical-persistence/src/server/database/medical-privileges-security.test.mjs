@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import {
+  MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL,
+  MEDICAL_ADOPTION_ITEM_STATES_PRIVILEGES_MIGRATION_SQL,
   MEDICAL_ADOPTION_MIGRATION_SQL,
   MEDICAL_ADOPTION_PRIVILEGES_MIGRATION_SQL,
   MEDICAL_FOUNDATION_MIGRATION_SQL,
@@ -28,6 +30,14 @@ const adoptionPrivilegesSql = readFileSync(
   join(drizzleDirectory, '0002_medical_adoption_privileges.sql'),
   'utf8',
 );
+const adoptionItemStatesSql = readFileSync(
+  join(drizzleDirectory, '0004_medical_adoption_item_states.sql'),
+  'utf8',
+);
+const adoptionItemStatesPrivilegesSql = readFileSync(
+  join(drizzleDirectory, '0004_medical_adoption_item_states_privileges.sql'),
+  'utf8',
+);
 const privilegesSql = readFileSync(
   join(drizzleDirectory, '0001_medical_privileges.sql'),
   'utf8',
@@ -45,6 +55,23 @@ test('PGlite bootstrap loads canonical 0000 migration SQL artifact', () => {
 
 test('PGlite bootstrap loads canonical adoption migration SQL artifact', () => {
   assert.equal(MEDICAL_ADOPTION_MIGRATION_SQL, adoptionSql);
+});
+
+test('PGlite bootstrap loads canonical adoption item state migration SQL artifact', () => {
+  assert.equal(
+    MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL,
+    adoptionItemStatesSql,
+  );
+});
+
+test('adoption item state privilege migration grants table-specific medical_app access', () => {
+  assert.equal(
+    MEDICAL_ADOPTION_ITEM_STATES_PRIVILEGES_MIGRATION_SQL,
+    adoptionItemStatesPrivilegesSql,
+  );
+  assert.match(adoptionItemStatesPrivilegesSql, /medical_adoption_item_states/);
+  assert.match(adoptionItemStatesPrivilegesSql, /GRANT SELECT, INSERT, UPDATE/);
+  assert.doesNotMatch(adoptionItemStatesPrivilegesSql, /GRANT DELETE/);
 });
 
 test('adoption privilege migration grants table-specific medical_app access', () => {

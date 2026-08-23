@@ -11,6 +11,8 @@ export {
 export { MEDICAL_FOUNDATION_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { MEDICAL_ADOPTION_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL } from './database/medical-foundation-migration';
+export { MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL } from './database/medical-foundation-migration';
+export { MEDICAL_ADOPTION_ITEM_STATES_PRIVILEGES_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { MEDICAL_ADOPTION_PRIVILEGES_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { medicalSchema } from './database/medical-schema';
 export {
@@ -46,6 +48,13 @@ export {
   createAdoptionSessionRepository,
   type AdoptionSessionRepository,
 } from './repositories/adoption-session-repository';
+export {
+  createAdoptionItemStateRepository,
+  computeAdoptionItemCounterDelta,
+  type AdoptionItemCounterDelta,
+  type AdoptionItemStateRepository,
+  type RecordAdoptionItemOutcomeInput,
+} from './repositories/adoption-item-state-repository';
 export {
   createRevisionTokenService,
   verifyRevisionTokenForResource,

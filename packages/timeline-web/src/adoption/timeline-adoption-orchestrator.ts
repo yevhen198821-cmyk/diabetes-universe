@@ -221,7 +221,7 @@ export class TimelineAdoptionOrchestrator {
 
     const unresolvedWithoutAck =
       await this.countEligibleWithoutAcknowledgement(eligible);
-    const hasUnresolvedFailures = failedCount > 0 || unresolvedWithoutAck > 0;
+    const hasUnresolvedFailures = unresolvedWithoutAck > 0;
 
     if (hasUnresolvedFailures) {
       await this.localStore.saveSessionCheckpoint({

@@ -80,6 +80,22 @@ export interface MedicalAdoptionMapping {
   readonly adoptionSessionId: string;
 }
 
+export type AdoptionItemStateKind = 'failed' | 'adopted' | 'reconciled';
+
+export interface MedicalAdoptionItemState {
+  readonly adoptionItemStateId: string;
+  readonly subjectId: string;
+  readonly adoptionSessionId: string;
+  readonly sourceNamespace: string;
+  readonly localEventId: string;
+  readonly payloadFingerprint: string;
+  readonly state: AdoptionItemStateKind;
+  readonly failureCode: string | null;
+  readonly canonicalResourceId: string | null;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
 export interface CreateAdoptionSessionInput {
   readonly actorAccountId: string;
   readonly subjectId: string;

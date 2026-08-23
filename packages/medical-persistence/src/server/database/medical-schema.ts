@@ -172,6 +172,29 @@ export const medicalAdoptionMappings = medical.table(
   ],
 );
 
+export const medicalAdoptionItemStates = medical.table(
+  'medical_adoption_item_states',
+  {
+    adoptionItemStateId: uuid('adoption_item_state_id').primaryKey(),
+    subjectId: uuid('subject_id')
+      .notNull()
+      .references(() => medicalSubjects.subjectId, { onDelete: 'restrict' }),
+    adoptionSessionId: uuid('adoption_session_id')
+      .notNull()
+      .references(() => medicalAdoptionSessions.adoptionSessionId, {
+        onDelete: 'restrict',
+      }),
+    sourceNamespace: text('source_namespace').notNull(),
+    localEventId: text('local_event_id').notNull(),
+    payloadFingerprint: text('payload_fingerprint').notNull(),
+    state: text('state').notNull(),
+    failureCode: text('failure_code'),
+    canonicalResourceId: uuid('canonical_resource_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+  },
+);
+
 export const medicalSchema = {
   medicalSubjects,
   accountSubjectRelationships,
@@ -181,4 +204,5 @@ export const medicalSchema = {
   medicalOutboxEvents,
   medicalAdoptionSessions,
   medicalAdoptionMappings,
+  medicalAdoptionItemStates,
 };

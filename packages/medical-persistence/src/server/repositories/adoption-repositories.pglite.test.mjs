@@ -5,6 +5,7 @@ import { PGlite } from '@electric-sql/pglite';
 import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
 
 import {
+  MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL,
   MEDICAL_ADOPTION_MIGRATION_SQL,
   MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL,
   MEDICAL_FOUNDATION_MIGRATION_SQL,
@@ -36,6 +37,7 @@ async function bootstrapDatabase() {
   await client.exec(MEDICAL_FOUNDATION_MIGRATION_SQL);
   await client.exec(MEDICAL_ADOPTION_MIGRATION_SQL);
   await client.exec(MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL);
+  await client.exec(MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL);
   const database = drizzlePglite(client, { schema: medicalSchema });
   const subjectRepository = createMedicalSubjectRepository(database);
   const relationship =
@@ -150,6 +152,7 @@ test('cross-subject canonical resource mapping fails at database level', async (
   await client.exec(MEDICAL_FOUNDATION_MIGRATION_SQL);
   await client.exec(MEDICAL_ADOPTION_MIGRATION_SQL);
   await client.exec(MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL);
+  await client.exec(MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL);
   const database = drizzlePglite(client, { schema: medicalSchema });
   const subjectRepository = createMedicalSubjectRepository(database);
   const subjectA = await subjectRepository.provisionSelfSubject('acct-a');
