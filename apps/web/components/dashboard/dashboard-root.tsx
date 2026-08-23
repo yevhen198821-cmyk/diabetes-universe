@@ -32,6 +32,7 @@ import { DashboardDaySummary } from './dashboard-day-summary';
 import { DashboardHeader } from './dashboard-header';
 import { DashboardLastGlucose } from './dashboard-last-glucose';
 import { DashboardNextAction } from './dashboard-next-action';
+import { DashboardQuickActions } from './dashboard-quick-actions';
 import { DashboardRecentEvents } from './dashboard-recent-events';
 import { DashboardShell } from './dashboard-shell';
 
@@ -212,6 +213,12 @@ export function DashboardRoot() {
             <DashboardNextAction state="loading" />
           )
         }
+        quickActions={
+          <DashboardQuickActions
+            disabled={quickAddState.isOpen || isTimelineHydrating}
+            onOpenCategory={(category) => requestOpen('fab', category)}
+          />
+        }
         recentEvents={
           isTimelineHydrating ? (
             <DashboardRecentEvents state="loading" />
@@ -227,7 +234,7 @@ export function DashboardRoot() {
         }
       />
       <QuickAddHost
-        floatingActionButtonClassName="dashboard-fab lg:hidden"
+        floatingActionButtonClassName="bottom-[calc(1rem+env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] size-14 bg-gradient-to-br from-rose-500 via-orange-400 to-amber-300 text-white shadow-[0_14px_35px_rgba(244,63,94,0.28)] lg:hidden"
         floatingActionButtonRef={fabRef}
         onActivitySubmit={(entry) => {
           addEvent(createSemanticActivityTimelineEvent(entry));
