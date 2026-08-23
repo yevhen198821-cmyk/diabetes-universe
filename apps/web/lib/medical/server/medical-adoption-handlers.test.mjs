@@ -6,9 +6,7 @@ import {
   handleCreateAdoptionSession,
   setMedicalApiRateLimiterForTests,
 } from './medical-adoption-handlers.ts';
-import {
-  resetMedicalServiceBundleForTests,
-} from './get-medical-service-bundle.ts';
+import { resetMedicalServiceBundleForTests } from './get-medical-service-bundle.ts';
 import { TEST_ACCOUNT_HEADER } from './resolve-medical-api-scope.ts';
 import { MEDICAL_ADOPTION_BASE_PATH } from './constants.ts';
 
