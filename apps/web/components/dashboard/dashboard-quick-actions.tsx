@@ -1,11 +1,12 @@
 'use client';
 
-import type { TranslationKey } from '@diabetes-universe/i18n';
 import { useMemo } from 'react';
 
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { quickAddActions } from '../../lib/quick-add/actions';
 import type { QuickAddOpenCategory } from '../../lib/quick-add/quick-add-controller-model';
+import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
+import { resolveDashboardHeaderLabels } from './dashboard-header-labels';
 
 const visibleCategories: readonly QuickAddOpenCategory[] = [
   'glucose',
@@ -28,6 +29,13 @@ const toneByCategory: Record<QuickAddOpenCategory, string> = {
   note: 'from-slate-300/25 via-slate-200/20 to-slate-300/25 text-slate-700 dark:text-slate-200',
 };
 
+const eventKindByCategory = {
+  activity: 'activity',
+  glucose: 'glucose',
+  insulin: 'insulin',
+  nutrition: 'nutrition',
+} as const;
+
 export interface DashboardQuickActionsProps {
   readonly disabled?: boolean;
   readonly onOpenCategory: (category: QuickAddOpenCategory) => void;
@@ -38,11 +46,9 @@ export function DashboardQuickActions({
   onOpenCategory,
 }: DashboardQuickActionsProps) {
   const localization = useLocalization();
+  const presentationDependencies = useTimelinePresentationDependencies();
   const sectionLabel = useMemo(
-    () =>
-      localization.translate({
-        key: 'quick-add.button.label' as TranslationKey,
-      }).value,
+    () => resolveDashboardHeaderLabels(localization).addEvent,
     [localization],
   );
   const actions = quickAddActions.filter((action) =>
@@ -64,26 +70,36 @@ export function DashboardQuickActions({
         </h2>
 
         <div className="grid grid-cols-4 gap-2 sm:gap-3">
-          {actions.map((action) => (
-            <button
-              aria-label={action.addTitle}
-              className="group min-w-0 rounded-2xl p-1 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-interactive-primary disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={disabled}
-              key={action.id}
-              onClick={() => onOpenCategory(action.category)}
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                className={`mx-auto grid size-14 place-items-center rounded-full bg-gradient-to-br shadow-[0_10px_28px_rgba(15,23,42,0.10)] ring-1 ring-white/70 transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95 sm:size-16 ${toneByCategory[action.category]}`}
+          {actions.map((action) => {
+            const eventKind =
+              eventKindByCategory[
+                action.category as keyof typeof eventKindByCategory
+              ];
+            const label = eventKind
+              ? presentationDependencies.labels.eventKinds[eventKind]
+              : action.label;
+
+            return (
+              <button
+                aria-label={`${sectionLabel}: ${label}`}
+                className="group min-w-0 rounded-2xl p-1 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-interactive-primary disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={disabled}
+                key={action.id}
+                onClick={() => onOpenCategory(action.category)}
+                type="button"
               >
-                {action.icon}
-              </span>
-              <span className="text-text-primary mt-2 block truncate text-xs font-semibold sm:text-sm">
-                {action.label}
-              </span>
-            </button>
-          ))}
+                <span
+                  aria-hidden="true"
+                  className={`mx-auto grid size-14 place-items-center rounded-full bg-gradient-to-br shadow-[0_10px_28px_rgba(15,23,42,0.10)] ring-1 ring-white/70 transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95 sm:size-16 ${toneByCategory[action.category]}`}
+                >
+                  {action.icon}
+                </span>
+                <span className="text-text-primary mt-2 block truncate text-xs font-semibold sm:text-sm">
+                  {label}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </section>
