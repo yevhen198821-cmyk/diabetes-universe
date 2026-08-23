@@ -169,3 +169,11 @@ This foundation remains **implementation candidate** until independent audit pas
 
 - Logical per-item failures (`ADOPTION_SOURCE_CONFLICT`, validation/quarantine outcomes) persist in item state.
 - Lifecycle gate failures (`ADOPTION_SESSION_CLOSED`) and infrastructure errors propagate without durable unresolved item records.
+
+### Item-state concurrency
+
+- Item-state transitions are serialized per source identity via `pg_advisory_xact_lock` on `(subjectId, sourceNamespace, localEventId)` before read/compute/write.
+- `recordOutcome()` always runs inside a transaction with the advisory lock, so callers do not need to pre-lock.
+- First-write races are prevented by lock ordering; the unique `(subject_id, adoption_session_id, source_namespace, local_event_id)` constraint remains defense-in-depth.
+- Aggregate session counters reflect serialized logical transitions returned as deltas from `recordOutcome()`.
+- Lock order in `adoptSingleItem`: session lifecycle row lock → source advisory lock → mapping/item-state/idempotency/resource operations.

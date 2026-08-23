@@ -51,6 +51,7 @@ export {
 export {
   createAdoptionItemStateRepository,
   computeAdoptionItemCounterDelta,
+  createAdoptionSourceIdentityLockKey,
   type AdoptionItemCounterDelta,
   type AdoptionItemStateRepository,
   type RecordAdoptionItemOutcomeInput,

@@ -16,6 +16,7 @@ import {
 import type { MedicalEnvironment } from '@diabetes-universe/medical-persistence/server';
 import {
   createAdoptionItemStateRepository,
+  createAdoptionSourceIdentityLockKey,
   createAdoptionMappingRepository,
   createAdoptionSessionRepository,
   createMedicalAuditRepository,
@@ -179,11 +180,11 @@ export function createMedicalAdoptionService(
         };
       }
 
-      const lockKey = [
+      const lockKey = createAdoptionSourceIdentityLockKey(
         scope.subjectId,
         item.sourceNamespace,
         item.localEventId,
-      ].join('|');
+      );
 
       await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`);
 

@@ -22,6 +22,14 @@ const ZERO_DELTA: AdoptionItemCounterDelta = {
   failedCount: 0,
 };
 
+export function createAdoptionSourceIdentityLockKey(
+  subjectId: string,
+  sourceNamespace: string,
+  localEventId: string,
+): string {
+  return [subjectId, sourceNamespace, localEventId].join('|');
+}
+
 function mapItemStateRow(
   row: typeof medicalAdoptionItemStates.$inferSelect,
 ): MedicalAdoptionItemState {
@@ -92,6 +100,111 @@ export interface AdoptionItemStateRepository {
   ): Promise<AdoptionItemCounterDelta>;
 }
 
+async function recordOutcomeWithinTransaction(
+  database: MedicalDatabase,
+  input: RecordAdoptionItemOutcomeInput,
+): Promise<AdoptionItemCounterDelta> {
+  const lockKey = createAdoptionSourceIdentityLockKey(
+    input.subjectId,
+    input.sourceNamespace,
+    input.localEventId,
+  );
+
+  await database.execute(
+    sql`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`,
+  );
+
+  const rows = await database
+    .select()
+    .from(medicalAdoptionItemStates)
+    .where(
+      and(
+        eq(medicalAdoptionItemStates.subjectId, input.subjectId),
+        eq(
+          medicalAdoptionItemStates.adoptionSessionId,
+          input.adoptionSessionId,
+        ),
+        eq(medicalAdoptionItemStates.sourceNamespace, input.sourceNamespace),
+        eq(medicalAdoptionItemStates.localEventId, input.localEventId),
+      ),
+    )
+    .for('update');
+
+  const existing = rows[0] ? mapItemStateRow(rows[0]) : null;
+  const previous = existing?.state ?? null;
+
+  if (
+    existing &&
+    (previous === 'adopted' || previous === 'reconciled') &&
+    input.outcome === 'failed'
+  ) {
+    return ZERO_DELTA;
+  }
+
+  const delta = computeAdoptionItemCounterDelta(previous, input.outcome);
+  const now = new Date();
+
+  if (existing) {
+    if (previous === input.outcome) {
+      await database
+        .update(medicalAdoptionItemStates)
+        .set({
+          payloadFingerprint: input.payloadFingerprint,
+          failureCode:
+            input.outcome === 'failed'
+              ? (input.failureCode ?? existing.failureCode)
+              : null,
+          canonicalResourceId:
+            input.canonicalResourceId ?? existing.canonicalResourceId,
+          updatedAt: now,
+        })
+        .where(
+          eq(
+            medicalAdoptionItemStates.adoptionItemStateId,
+            existing.adoptionItemStateId,
+          ),
+        );
+      return ZERO_DELTA;
+    }
+
+    await database
+      .update(medicalAdoptionItemStates)
+      .set({
+        payloadFingerprint: input.payloadFingerprint,
+        state: input.outcome,
+        failureCode:
+          input.outcome === 'failed' ? (input.failureCode ?? null) : null,
+        canonicalResourceId: input.canonicalResourceId ?? null,
+        updatedAt: now,
+      })
+      .where(
+        eq(
+          medicalAdoptionItemStates.adoptionItemStateId,
+          existing.adoptionItemStateId,
+        ),
+      );
+
+    return delta;
+  }
+
+  await database.insert(medicalAdoptionItemStates).values({
+    adoptionItemStateId: randomUUID(),
+    subjectId: input.subjectId,
+    adoptionSessionId: input.adoptionSessionId,
+    sourceNamespace: input.sourceNamespace,
+    localEventId: input.localEventId,
+    payloadFingerprint: input.payloadFingerprint,
+    state: input.outcome,
+    failureCode:
+      input.outcome === 'failed' ? (input.failureCode ?? null) : null,
+    canonicalResourceId: input.canonicalResourceId ?? null,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return delta;
+}
+
 export function createAdoptionItemStateRepository(
   database: MedicalDatabase,
 ): AdoptionItemStateRepository {
@@ -112,98 +225,9 @@ export function createAdoptionItemStateRepository(
     },
 
     async recordOutcome(input) {
-      const rows = await database
-        .select()
-        .from(medicalAdoptionItemStates)
-        .where(
-          and(
-            eq(medicalAdoptionItemStates.subjectId, input.subjectId),
-            eq(
-              medicalAdoptionItemStates.adoptionSessionId,
-              input.adoptionSessionId,
-            ),
-            eq(
-              medicalAdoptionItemStates.sourceNamespace,
-              input.sourceNamespace,
-            ),
-            eq(medicalAdoptionItemStates.localEventId, input.localEventId),
-          ),
-        )
-        .for('update');
-
-      const existing = rows[0] ? mapItemStateRow(rows[0]) : null;
-      const previous = existing?.state ?? null;
-
-      if (
-        existing &&
-        (previous === 'adopted' || previous === 'reconciled') &&
-        input.outcome === 'failed'
-      ) {
-        return ZERO_DELTA;
-      }
-
-      const delta = computeAdoptionItemCounterDelta(previous, input.outcome);
-      const now = new Date();
-
-      if (existing) {
-        if (previous === input.outcome) {
-          await database
-            .update(medicalAdoptionItemStates)
-            .set({
-              payloadFingerprint: input.payloadFingerprint,
-              failureCode:
-                input.outcome === 'failed'
-                  ? (input.failureCode ?? existing.failureCode)
-                  : null,
-              canonicalResourceId:
-                input.canonicalResourceId ?? existing.canonicalResourceId,
-              updatedAt: now,
-            })
-            .where(
-              eq(
-                medicalAdoptionItemStates.adoptionItemStateId,
-                existing.adoptionItemStateId,
-              ),
-            );
-          return ZERO_DELTA;
-        }
-
-        await database
-          .update(medicalAdoptionItemStates)
-          .set({
-            payloadFingerprint: input.payloadFingerprint,
-            state: input.outcome,
-            failureCode:
-              input.outcome === 'failed' ? (input.failureCode ?? null) : null,
-            canonicalResourceId: input.canonicalResourceId ?? null,
-            updatedAt: now,
-          })
-          .where(
-            eq(
-              medicalAdoptionItemStates.adoptionItemStateId,
-              existing.adoptionItemStateId,
-            ),
-          );
-
-        return delta;
-      }
-
-      await database.insert(medicalAdoptionItemStates).values({
-        adoptionItemStateId: randomUUID(),
-        subjectId: input.subjectId,
-        adoptionSessionId: input.adoptionSessionId,
-        sourceNamespace: input.sourceNamespace,
-        localEventId: input.localEventId,
-        payloadFingerprint: input.payloadFingerprint,
-        state: input.outcome,
-        failureCode:
-          input.outcome === 'failed' ? (input.failureCode ?? null) : null,
-        canonicalResourceId: input.canonicalResourceId ?? null,
-        createdAt: now,
-        updatedAt: now,
-      });
-
-      return delta;
+      return database.transaction(async (tx) =>
+        recordOutcomeWithinTransaction(tx, input),
+      );
     },
   };
 }
