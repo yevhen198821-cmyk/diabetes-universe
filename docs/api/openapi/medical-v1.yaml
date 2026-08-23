@@ -1,0 +1,465 @@
+openapi: 3.0.3
+info:
+  title: Diabetes Universe Medical API
+  version: v1
+  description: |
+    Self-subject medical event transport API for Diabetes Universe.
+    Public contracts expose opaque resource identifiers and revision tokens only.
+servers:
+  - url: /api/v1/medical
+    description: Versioned medical API base path
+tags:
+  - name: MedicalEvents
+    description: Self-subject medical event resources
+security:
+  - sessionAuth: []
+paths:
+  /me/medical-events:
+    get:
+      tags: [MedicalEvents]
+      summary: List medical events
+      operationId: listMedicalEvents
+      parameters:
+        - $ref: '#/components/parameters/LimitQuery'
+        - $ref: '#/components/parameters/CursorQuery'
+      responses:
+        '200':
+          description: Paginated medical event collection
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalEventListResponse'
+        '400':
+          $ref: '#/components/responses/InvalidCursor'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    post:
+      tags: [MedicalEvents]
+      summary: Create medical event
+      operationId: createMedicalEvent
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicalEventCreateRequest'
+      responses:
+        '201':
+          description: Created medical event
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalEventResource'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '409':
+          $ref: '#/components/responses/IdempotencyConflict'
+        '413':
+          $ref: '#/components/responses/RequestTooLarge'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /me/medical-events/{resourceId}:
+    parameters:
+      - $ref: '#/components/parameters/ResourceIdPath'
+    get:
+      tags: [MedicalEvents]
+      summary: Read one medical event
+      operationId: getMedicalEvent
+      responses:
+        '200':
+          description: Medical event resource
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalEventResource'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    patch:
+      tags: [MedicalEvents]
+      summary: Update medical event
+      operationId: updateMedicalEvent
+      parameters:
+        - $ref: '#/components/parameters/IfMatchHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicalEventUpdateRequest'
+      responses:
+        '200':
+          description: Updated medical event
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalEventResource'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '412':
+          $ref: '#/components/responses/RevisionConflict'
+        '413':
+          $ref: '#/components/responses/RequestTooLarge'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    delete:
+      tags: [MedicalEvents]
+      summary: Delete medical event
+      operationId: deleteMedicalEvent
+      parameters:
+        - $ref: '#/components/parameters/IfMatchHeader'
+      responses:
+        '204':
+          description: Resource deleted
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+        '400':
+          $ref: '#/components/responses/ValidationFailed'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '404':
+          $ref: '#/components/responses/ResourceNotFound'
+        '412':
+          $ref: '#/components/responses/RevisionConflict'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Validated Better Auth session cookie resolved server-side
+  parameters:
+    ResourceIdPath:
+      name: resourceId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    LimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+    CursorQuery:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        type: string
+        maxLength: 4096
+    IdempotencyKeyHeader:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        maxLength: 128
+        pattern: '^[A-Za-z0-9._-]+$'
+    IfMatchHeader:
+      name: If-Match
+      in: header
+      required: true
+      schema:
+        type: string
+        description: Opaque revision token previously returned as revision or ETag
+  headers:
+    PrivateNoStore:
+      description: Private response that must not be cached publicly
+      schema:
+        type: string
+        example: private, no-store
+    ETag:
+      description: Opaque revision token for optimistic concurrency
+      schema:
+        type: string
+    RetryAfter:
+      description: Seconds until a rate-limited client may retry
+      schema:
+        type: integer
+        minimum: 1
+  schemas:
+    MedicalEventCreateRequest:
+      type: object
+      required: [event]
+      additionalProperties: false
+      properties:
+        event:
+          $ref: '#/components/schemas/SemanticTimelineEvent'
+    MedicalEventUpdateRequest:
+      type: object
+      required: [event]
+      additionalProperties: false
+      properties:
+        event:
+          $ref: '#/components/schemas/SemanticTimelineEvent'
+    MedicalEventResource:
+      type: object
+      required:
+        - resourceId
+        - revision
+        - createdAt
+        - updatedAt
+        - deletedAt
+        - event
+      properties:
+        resourceId:
+          type: string
+          format: uuid
+        revision:
+          type: string
+          description: Opaque revision token
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+        event:
+          $ref: '#/components/schemas/SemanticTimelineEvent'
+    MedicalEventListResponse:
+      type: object
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalEventResource'
+        page:
+          type: object
+          required: [nextCursor, hasMore]
+          properties:
+            nextCursor:
+              type: string
+              nullable: true
+            hasMore:
+              type: boolean
+    SemanticTimelineEvent:
+      type: object
+      required: [occurredAt, schemaVersion, source, kind]
+      description: Transport-safe semantic event payload without server-owned lifecycle fields
+      properties:
+        occurredAt:
+          type: string
+          format: date-time
+        schemaVersion:
+          type: integer
+          enum: [1]
+        source:
+          type: string
+          enum: [manual, device, import]
+        kind:
+          type: string
+          enum: [glucose, insulin, nutrition, medication, activity, note]
+    ApiErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, correlationId, details]
+          properties:
+            code:
+              type: string
+              enum:
+                - AUTH_REQUIRED
+                - AUTH_INSUFFICIENT
+                - SUBJECT_ACCESS_DENIED
+                - RESOURCE_NOT_FOUND
+                - VALIDATION_FAILED
+                - INVALID_CURSOR
+                - PRECONDITION_REQUIRED
+                - REVISION_CONFLICT
+                - IDEMPOTENCY_CONFLICT
+                - RATE_LIMITED
+                - REQUEST_TOO_LARGE
+                - SERVICE_UNAVAILABLE
+                - INTERNAL_ERROR
+            message:
+              type: string
+            correlationId:
+              type: string
+              format: uuid
+            details:
+              type: object
+              nullable: true
+              additionalProperties: true
+  responses:
+    AuthRequired:
+      description: Authentication is required
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorEnvelope'
+          example:
+            error:
+              code: AUTH_REQUIRED
+              message: Authentication is required.
+              correlationId: 00000000-0000-4000-8000-000000000001
+              details: null
+    ResourceNotFound:
+      description: Resource unavailable or out of scope
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorEnvelope'
+    ValidationFailed:
+      description: Request validation failed
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorEnvelope'
+    InvalidCursor:
+      description: Pagination cursor is invalid
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorEnvelope'
+    PreconditionRequired:
+      description: If-Match header is required
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorEnvelope'
+    RevisionConflict:
+      description: Stale revision token
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorEnvelope'
+    IdempotencyConflict:
+      description: Idempotency key reused with different payload
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorEnvelope'
+    RequestTooLarge:
+      description: Request body exceeds transport limit
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorEnvelope'
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorEnvelope'
+    ServiceUnavailable:
+      description: Temporary service unavailability
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorEnvelope'
+    InternalError:
+      description: Unexpected server error
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/PrivateNoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorEnvelope'

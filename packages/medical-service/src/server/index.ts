@@ -4,3 +4,4 @@ export {
   closeMedicalServiceBundle,
   type MedicalServiceBundle,
 } from './create-medical-service-bundle';
+export { resolveMedicalServiceEnvironment } from './config/medical-service-environment';

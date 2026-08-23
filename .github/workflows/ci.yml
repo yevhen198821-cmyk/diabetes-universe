@@ -37,6 +37,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -87,3 +89,14 @@ jobs:
       - name: Validate Markdown links
         if: always()
         run: python3 scripts/validate-markdown-links.py
+
+      - name: Validate OpenAPI
+        run: pnpm validate:openapi
+
+      - name: Validate OpenAPI breaking changes
+        env:
+          OPENAPI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: pnpm validate:openapi:breaking
+
+      - name: Test OpenAPI contract diff
+        run: pnpm test:openapi-diff

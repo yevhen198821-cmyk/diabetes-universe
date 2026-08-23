@@ -1,0 +1,99 @@
+openapi: 3.0.3
+info:
+  title: Medical API Baseline
+  version: v1
+paths:
+  /me/medical-events:
+    get:
+      operationId: listMedicalEvents
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalEventListResponse'
+    post:
+      operationId: createMedicalEvent
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicalEventCreateRequest'
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalEventResource'
+components:
+  schemas:
+    MedicalEventCreateRequest:
+      type: object
+      required: [event]
+      properties:
+        event:
+          $ref: '#/components/schemas/SemanticTimelineEvent'
+    MedicalEventResource:
+      type: object
+      required: [resourceId, revision, createdAt, updatedAt, deletedAt, event]
+      properties:
+        resourceId:
+          type: string
+        revision:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        deletedAt:
+          type: string
+          nullable: true
+        event:
+          $ref: '#/components/schemas/SemanticTimelineEvent'
+    MedicalEventListResponse:
+      type: object
+      required: [items, page]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MedicalEventResource'
+        page:
+          type: object
+          required: [nextCursor, hasMore]
+          properties:
+            nextCursor:
+              type: string
+              nullable: true
+            hasMore:
+              type: boolean
+    SemanticTimelineEvent:
+      type: object
+      required: [occurredAt, schemaVersion, source, kind]
+      properties:
+        occurredAt:
+          type: string
+        schemaVersion:
+          type: integer
+          enum: [1]
+        source:
+          type: string
+          enum: [manual, device, import]
+        kind:
+          type: string
+          enum: [glucose, insulin, nutrition, medication, activity, note]
