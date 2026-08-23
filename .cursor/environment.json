@@ -1,0 +1,17 @@
+{
+  "name": "Diabetes Universe",
+  "install": "corepack enable && COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm install --frozen-lockfile && COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm exec playwright install --with-deps chromium",
+  "terminals": [
+    {
+      "name": "web-dev",
+      "command": "COREPACK_ENABLE_DOWNLOAD_PROMPT=0 pnpm --dir apps/web dev",
+      "description": "Next.js dev server for apps/web on http://localhost:3000 (Dashboard at /, Timeline at /timeline). Local Timeline/Dashboard works without secrets; auth routes require secrets from .env.example."
+    }
+  ],
+  "ports": [
+    {
+      "name": "web",
+      "port": 3000
+    }
+  ]
+}
