@@ -4,8 +4,9 @@ import type {
 } from '@diabetes-universe/types';
 
 export const TIMELINE_INDEXEDDB_DATABASE_NAME = 'diabetes-universe-timeline';
-export const TIMELINE_INDEXEDDB_VERSION = 1;
+export const TIMELINE_INDEXEDDB_VERSION = 2;
 export const TIMELINE_STORAGE_SCHEMA_VERSION = 1;
+export const TIMELINE_ADOPTION_STORAGE_SCHEMA_VERSION = 1;
 export const TIMELINE_BOOTSTRAP_VERSION = 1;
 export const TIMELINE_SEED_VERSION = 1;
 
@@ -13,12 +14,21 @@ export const TIMELINE_INDEXEDDB_STORES = {
   events: 'timeline_events',
   metadata: 'timeline_metadata',
   quarantine: 'timeline_quarantine',
+  adoptionAcknowledgements: 'timeline_adoption_acknowledgements',
+  adoptionSessions: 'timeline_adoption_sessions',
+  adoptionQuarantine: 'timeline_adoption_quarantine',
 } as const;
 
 export const TIMELINE_INDEXEDDB_EVENT_INDEXES = {
   byKindOccurredAtId: 'by_kind_occurredAt_id',
   byOccurredAtId: 'by_occurredAt_id',
 } as const;
+
+export const TIMELINE_INDEXEDDB_ADOPTION_INDEXES = {
+  byAdoptedAt: 'by_adoptedAt',
+} as const;
+
+export const TIMELINE_SOURCE_NAMESPACE_METADATA_KEY = 'source-namespace';
 
 export type TimelineStorageSchemaVersion = 1;
 export type TimelineBootstrapVersion = 1;
@@ -65,6 +75,53 @@ export interface IndexedDbTimelineQuarantineRecord {
   readonly reason: TimelineStorageQuarantineReason;
   readonly quarantinedAt: string;
   readonly raw: unknown;
+  readonly storageSchemaVersion?: number;
+}
+
+export interface TimelineSourceNamespaceMetadata {
+  readonly key: typeof TIMELINE_SOURCE_NAMESPACE_METADATA_KEY;
+  readonly sourceNamespace: string;
+  readonly createdAt: string;
+}
+
+export type TimelineAdoptionSessionLifecycle =
+  'open' | 'failed' | 'completed' | 'cancelled';
+
+export interface IndexedDbTimelineAdoptionAcknowledgement {
+  readonly localEventId: string;
+  readonly canonicalResourceId: string;
+  readonly canonicalRevision: string;
+  readonly adoptedAt: string;
+  readonly adoptionSessionId: string;
+  readonly storageSchemaVersion: typeof TIMELINE_ADOPTION_STORAGE_SCHEMA_VERSION;
+}
+
+export interface IndexedDbTimelineAdoptionSession {
+  readonly clientAdoptionRunId: string;
+  readonly adoptionSessionId?: string;
+  readonly lifecycle: TimelineAdoptionSessionLifecycle;
+  readonly checkpoint: {
+    readonly lastSubmittedLocalEventId?: string;
+    readonly eligibleCount?: number;
+    readonly adoptedCount?: number;
+    readonly failedCount?: number;
+  };
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly storageSchemaVersion: typeof TIMELINE_ADOPTION_STORAGE_SCHEMA_VERSION;
+}
+
+export type TimelineAdoptionQuarantineReason =
+  | 'adoption_schema_unsupported'
+  | 'adoption_legacy_ambiguous'
+  | 'adoption_source_conflict';
+
+export interface IndexedDbTimelineAdoptionQuarantineRecord {
+  readonly quarantineId: string;
+  readonly localEventId?: string;
+  readonly reason: TimelineAdoptionQuarantineReason;
+  readonly quarantinedAt: string;
+  readonly detail?: string;
   readonly storageSchemaVersion?: number;
 }
 

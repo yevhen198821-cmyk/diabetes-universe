@@ -41,6 +41,7 @@ const TIMELINE_EVENT_SOURCES = new Set<TimelineEventSource>([
   'demo',
   'device',
   'manual',
+  'import',
 ]);
 
 const CANONICAL_UNIT_IDS = new Set<CanonicalUnitId>([

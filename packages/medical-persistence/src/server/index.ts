@@ -9,7 +9,8 @@ export {
   type MedicalDatabase,
 } from './database/create-medical-database';
 export { MEDICAL_FOUNDATION_MIGRATION_SQL } from './database/medical-foundation-migration';
-export { MEDICAL_PRIVILEGES_MIGRATION_SQL } from './database/medical-foundation-migration';
+export { MEDICAL_ADOPTION_MIGRATION_SQL } from './database/medical-foundation-migration';
+export { MEDICAL_ADOPTION_PRIVILEGES_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { medicalSchema } from './database/medical-schema';
 export {
   createMedicalSubjectRepository,
@@ -35,7 +36,15 @@ export {
   type MedicalOutboxRepository,
   type OutboxInsert,
 } from './repositories/medical-outbox-repository';
-export { createRequestFingerprint } from './idempotency/request-fingerprint';
+export {
+  createAdoptionMappingRepository,
+  type AdoptionMappingRepository,
+  type AdoptionMappingInsert,
+} from './repositories/adoption-mapping-repository';
+export {
+  createAdoptionSessionRepository,
+  type AdoptionSessionRepository,
+} from './repositories/adoption-session-repository';
 export {
   createRevisionTokenService,
   verifyRevisionTokenForResource,
@@ -60,3 +69,4 @@ export {
   WeakListCursorSecretError,
 } from './security/list-cursor-token-secret';
 export { purgeExpiredIdempotencyRecords } from './maintenance/purge-expired-idempotency';
+export { createRequestFingerprint } from './idempotency/request-fingerprint';

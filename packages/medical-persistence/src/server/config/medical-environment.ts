@@ -6,6 +6,7 @@ export interface MedicalEnvironment {
   readonly revisionTokenSecret: string;
   readonly listCursorSecret: string;
   readonly idempotencyRetentionHours: number;
+  readonly adoptionEnabled: boolean;
 }
 
 function readTrimmed(value: string | undefined): string | undefined {
@@ -36,6 +37,7 @@ export function resolveMedicalEnvironment(
       revisionTokenSecret,
       listCursorSecret,
       idempotencyRetentionHours: readRetentionHours(env),
+      adoptionEnabled: readAdoptionEnabled(env),
     };
   }
 
@@ -65,7 +67,13 @@ export function resolveMedicalEnvironment(
     revisionTokenSecret,
     listCursorSecret,
     idempotencyRetentionHours: readRetentionHours(env),
+    adoptionEnabled: readAdoptionEnabled(env),
   };
+}
+
+function readAdoptionEnabled(env: Record<string, string | undefined>): boolean {
+  const raw = readTrimmed(env.MEDICAL_ADOPTION_ENABLED);
+  return raw === '1' || raw?.toLowerCase() === 'true';
 }
 
 function readRetentionHours(env: Record<string, string | undefined>): number {

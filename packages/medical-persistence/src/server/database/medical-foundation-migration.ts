@@ -26,3 +26,10 @@ export const MEDICAL_FOUNDATION_MIGRATION_SQL = readMedicalMigrationSql(
 export const MEDICAL_PRIVILEGES_MIGRATION_SQL = readMedicalMigrationSql(
   '0001_medical_privileges.sql',
 );
+
+export const MEDICAL_ADOPTION_MIGRATION_SQL = readMedicalMigrationSql(
+  '0002_medical_adoption.sql',
+);
+
+export const MEDICAL_ADOPTION_PRIVILEGES_MIGRATION_SQL =
+  readMedicalMigrationSql('0002_medical_adoption_privileges.sql');

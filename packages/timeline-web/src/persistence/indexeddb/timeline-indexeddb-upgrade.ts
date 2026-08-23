@@ -1,4 +1,5 @@
 import {
+  TIMELINE_INDEXEDDB_ADOPTION_INDEXES,
   TIMELINE_INDEXEDDB_EVENT_INDEXES,
   TIMELINE_INDEXEDDB_STORES,
   TIMELINE_INDEXEDDB_VERSION,
@@ -19,21 +20,7 @@ function assertFreshDatabase(database: IDBDatabase): void {
   }
 }
 
-export function applyTimelineIndexedDbSchemaUpgrade(
-  database: IDBDatabase,
-  oldVersion: number,
-  newVersion: number | null,
-): void {
-  if (oldVersion >= TIMELINE_INDEXEDDB_VERSION) {
-    return;
-  }
-
-  if (oldVersion !== 0 || newVersion !== TIMELINE_INDEXEDDB_VERSION) {
-    throw new TimelineIndexedDbSchemaUpgradeError();
-  }
-
-  assertFreshDatabase(database);
-
+function createV1Stores(database: IDBDatabase): void {
   const eventStore = database.createObjectStore(
     TIMELINE_INDEXEDDB_STORES.events,
     {
@@ -57,4 +44,70 @@ export function applyTimelineIndexedDbSchemaUpgrade(
   database.createObjectStore(TIMELINE_INDEXEDDB_STORES.quarantine, {
     keyPath: 'quarantineId',
   });
+}
+
+function upgradeToV2(database: IDBDatabase): void {
+  if (
+    !database.objectStoreNames.contains(
+      TIMELINE_INDEXEDDB_STORES.adoptionAcknowledgements,
+    )
+  ) {
+    const ackStore = database.createObjectStore(
+      TIMELINE_INDEXEDDB_STORES.adoptionAcknowledgements,
+      { keyPath: 'localEventId' },
+    );
+    ackStore.createIndex(
+      TIMELINE_INDEXEDDB_ADOPTION_INDEXES.byAdoptedAt,
+      'adoptedAt',
+      { unique: false },
+    );
+  }
+
+  if (
+    !database.objectStoreNames.contains(
+      TIMELINE_INDEXEDDB_STORES.adoptionSessions,
+    )
+  ) {
+    database.createObjectStore(TIMELINE_INDEXEDDB_STORES.adoptionSessions, {
+      keyPath: 'clientAdoptionRunId',
+    });
+  }
+
+  if (
+    !database.objectStoreNames.contains(
+      TIMELINE_INDEXEDDB_STORES.adoptionQuarantine,
+    )
+  ) {
+    database.createObjectStore(TIMELINE_INDEXEDDB_STORES.adoptionQuarantine, {
+      keyPath: 'quarantineId',
+    });
+  }
+}
+
+export function applyTimelineIndexedDbSchemaUpgrade(
+  database: IDBDatabase,
+  oldVersion: number,
+  newVersion: number | null,
+): void {
+  const targetVersion = newVersion ?? TIMELINE_INDEXEDDB_VERSION;
+
+  if (oldVersion >= TIMELINE_INDEXEDDB_VERSION) {
+    return;
+  }
+
+  if (oldVersion === 0) {
+    assertFreshDatabase(database);
+    createV1Stores(database);
+    if (targetVersion >= 2) {
+      upgradeToV2(database);
+    }
+    return;
+  }
+
+  if (oldVersion === 1 && targetVersion >= 2) {
+    upgradeToV2(database);
+    return;
+  }
+
+  throw new TimelineIndexedDbSchemaUpgradeError();
 }

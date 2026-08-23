@@ -1,5 +1,6 @@
 import {
   bigint,
+  integer,
   jsonb,
   pgSchema,
   smallint,
@@ -101,6 +102,59 @@ export const medicalOutboxEvents = medical.table('medical_outbox_events', {
   publishedAt: timestamp('published_at', { withTimezone: true }),
 });
 
+export const medicalAdoptionSessions = medical.table(
+  'medical_adoption_sessions',
+  {
+    adoptionSessionId: uuid('adoption_session_id').primaryKey(),
+    subjectId: uuid('subject_id')
+      .notNull()
+      .references(() => medicalSubjects.subjectId, { onDelete: 'restrict' }),
+    actorAccountId: text('actor_account_id').notNull(),
+    clientAdoptionRunId: text('client_adoption_run_id').notNull(),
+    sourcePlatform: text('source_platform').notNull(),
+    sourceAppVersion: text('source_app_version').notNull(),
+    sourceSchemaMin: smallint('source_schema_min').notNull(),
+    sourceSchemaMax: smallint('source_schema_max').notNull(),
+    lifecycleState: text('lifecycle_state').notNull(),
+    eligibleCount: integer('eligible_count').notNull().default(0),
+    adoptedCount: integer('adopted_count').notNull().default(0),
+    skippedCount: integer('skipped_count').notNull().default(0),
+    failedCount: integer('failed_count').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+  },
+);
+
+export const medicalAdoptionMappings = medical.table(
+  'medical_adoption_mappings',
+  {
+    adoptionMappingId: uuid('adoption_mapping_id').primaryKey(),
+    subjectId: uuid('subject_id')
+      .notNull()
+      .references(() => medicalSubjects.subjectId, { onDelete: 'restrict' }),
+    sourceNamespace: text('source_namespace').notNull(),
+    localEventId: text('local_event_id').notNull(),
+    canonicalResourceId: uuid('canonical_resource_id')
+      .notNull()
+      .references(() => medicalEventResources.resourceId, {
+        onDelete: 'restrict',
+      }),
+    canonicalRevision: bigint('canonical_revision', {
+      mode: 'bigint',
+    }).notNull(),
+    sourceSchemaVersion: smallint('source_schema_version').notNull(),
+    payloadFingerprint: text('payload_fingerprint').notNull(),
+    adoptedAt: timestamp('adopted_at', { withTimezone: true }).notNull(),
+    adoptionSessionId: uuid('adoption_session_id')
+      .notNull()
+      .references(() => medicalAdoptionSessions.adoptionSessionId, {
+        onDelete: 'restrict',
+      }),
+  },
+);
+
 export const medicalSchema = {
   medicalSubjects,
   accountSubjectRelationships,
@@ -108,4 +162,6 @@ export const medicalSchema = {
   medicalIdempotencyRecords,
   medicalAuditEvents,
   medicalOutboxEvents,
+  medicalAdoptionSessions,
+  medicalAdoptionMappings,
 };

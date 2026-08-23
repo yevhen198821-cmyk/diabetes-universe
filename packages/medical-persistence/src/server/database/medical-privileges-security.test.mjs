@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import {
+  MEDICAL_ADOPTION_MIGRATION_SQL,
+  MEDICAL_ADOPTION_PRIVILEGES_MIGRATION_SQL,
   MEDICAL_FOUNDATION_MIGRATION_SQL,
   MEDICAL_PRIVILEGES_MIGRATION_SQL,
 } from '../database/medical-foundation-migration.ts';
@@ -16,6 +18,14 @@ const drizzleDirectory = join(
 
 const foundationSql = readFileSync(
   join(drizzleDirectory, '0000_medical_foundation.sql'),
+  'utf8',
+);
+const adoptionSql = readFileSync(
+  join(drizzleDirectory, '0002_medical_adoption.sql'),
+  'utf8',
+);
+const adoptionPrivilegesSql = readFileSync(
+  join(drizzleDirectory, '0002_medical_adoption_privileges.sql'),
   'utf8',
 );
 const privilegesSql = readFileSync(
@@ -31,6 +41,20 @@ function positionOf(pattern) {
 
 test('PGlite bootstrap loads canonical 0000 migration SQL artifact', () => {
   assert.equal(MEDICAL_FOUNDATION_MIGRATION_SQL, foundationSql);
+});
+
+test('PGlite bootstrap loads canonical adoption migration SQL artifact', () => {
+  assert.equal(MEDICAL_ADOPTION_MIGRATION_SQL, adoptionSql);
+});
+
+test('adoption privilege migration grants table-specific medical_app access', () => {
+  assert.equal(
+    MEDICAL_ADOPTION_PRIVILEGES_MIGRATION_SQL,
+    adoptionPrivilegesSql,
+  );
+  assert.match(adoptionPrivilegesSql, /medical_adoption_sessions/);
+  assert.match(adoptionPrivilegesSql, /medical_adoption_mappings/);
+  assert.doesNotMatch(adoptionPrivilegesSql, /GRANT ALL/);
 });
 
 test('privilege migration SQL is executable and fails closed without Neon roles', () => {
@@ -178,6 +202,7 @@ test('postgres medical database factory does not embed duplicate migration SQL',
   );
 
   assert.equal(source.includes('MEDICAL_FOUNDATION_MIGRATION_SQL'), true);
+  assert.equal(source.includes('MEDICAL_ADOPTION_MIGRATION_SQL'), true);
   assert.equal(source.includes('@electric-sql/pglite'), true);
   assert.equal(
     source.includes('CREATE TABLE IF NOT EXISTS medical.medical_subjects'),
