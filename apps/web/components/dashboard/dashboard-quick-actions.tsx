@@ -41,6 +41,10 @@ export interface DashboardQuickActionsProps {
   readonly onOpenCategory: (category: QuickAddOpenCategory) => void;
 }
 
+function toQuickAddOpenCategory(category: string): QuickAddOpenCategory {
+  return category as QuickAddOpenCategory;
+}
+
 export function DashboardQuickActions({
   disabled = false,
   onOpenCategory,
@@ -52,7 +56,7 @@ export function DashboardQuickActions({
     [localization],
   );
   const actions = quickAddActions.filter((action) =>
-    visibleCategories.includes(action.category),
+    visibleCategories.includes(toQuickAddOpenCategory(action.category)),
   );
 
   return (
@@ -71,9 +75,10 @@ export function DashboardQuickActions({
 
         <div className="grid grid-cols-4 gap-2 sm:gap-3">
           {actions.map((action) => {
+            const category = toQuickAddOpenCategory(action.category);
             const eventKind =
               eventKindByCategory[
-                action.category as keyof typeof eventKindByCategory
+                category as keyof typeof eventKindByCategory
               ];
             const label = eventKind
               ? presentationDependencies.labels.eventKinds[eventKind]
@@ -85,12 +90,12 @@ export function DashboardQuickActions({
                 className="group min-w-0 rounded-2xl p-1 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-interactive-primary disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={disabled}
                 key={action.id}
-                onClick={() => onOpenCategory(action.category)}
+                onClick={() => onOpenCategory(category)}
                 type="button"
               >
                 <span
                   aria-hidden="true"
-                  className={`mx-auto grid size-14 place-items-center rounded-full bg-gradient-to-br shadow-[0_10px_28px_rgba(15,23,42,0.10)] ring-1 ring-white/70 transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95 sm:size-16 ${toneByCategory[action.category]}`}
+                  className={`mx-auto grid size-14 place-items-center rounded-full bg-gradient-to-br shadow-[0_10px_28px_rgba(15,23,42,0.10)] ring-1 ring-white/70 transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95 sm:size-16 ${toneByCategory[category]}`}
                 >
                   {action.icon}
                 </span>
