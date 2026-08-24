@@ -27,7 +27,7 @@ export const FloatingActionButton = forwardRef<
   return (
     <button
       aria-label={label}
-      className={`bg-interactive-primary text-text-inverse hover:bg-interactive-primary-hover focus-visible:outline-interactive-primary fixed z-40 grid size-12 place-items-center rounded-full shadow-md shadow-black/15 transition focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-95 ${className}`}
+      className={`focus-visible:outline-interactive-primary fixed z-40 grid size-12 place-items-center rounded-full bg-gradient-to-br from-teal-400 via-cyan-400 to-blue-500 text-white shadow-[0_16px_40px_rgba(6,182,212,0.38)] transition hover:brightness-105 focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-95 ${className}`}
       onClick={onClick}
       ref={ref}
       type="button"

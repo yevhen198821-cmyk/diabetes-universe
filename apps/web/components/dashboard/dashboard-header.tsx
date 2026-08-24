@@ -1,11 +1,8 @@
 'use client';
 
-import { Button } from '@diabetes-universe/ui';
-import { Plus, UserRound } from 'lucide-react';
+import { UserRound } from 'lucide-react';
 import Image from 'next/image';
-import { useMemo, useState, type ReactNode, type RefObject } from 'react';
-
-import { BrandSymbol } from '../brand/brand-symbol';
+import { useMemo, useState, type ReactNode } from 'react';
 
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
@@ -18,17 +15,21 @@ import {
   type DashboardHeaderModelInput,
 } from './dashboard-header-model';
 import { resolveDashboardHeaderLabels } from './dashboard-header-labels';
+import { DashboardBrandWordmark } from './dashboard-brand-wordmark';
 
 const avatarTargetClassName =
   'grid size-11 shrink-0 place-items-center overflow-hidden rounded-full';
-const desktopActionClassName =
-  'hidden min-h-11 items-center justify-center gap-2 lg:inline-flex';
+
+const brandLogoPath = '/brand/diabetes-universe-logo.png';
+const brandLogoWidth = 1254;
+const brandLogoHeight = 1254;
+const brandLogoIconClassName =
+  'h-[4.5rem] w-[4.5rem] shrink-0 object-contain sm:h-[5.25rem] sm:w-[5.25rem] lg:h-24 lg:w-24';
 
 export interface DashboardHeaderProps extends Omit<
   DashboardHeaderModelInput,
-  'date' | 'labels'
+  'addEventDisabled' | 'date' | 'labels' | 'onAddEvent'
 > {
-  readonly addEventButtonRef?: RefObject<HTMLButtonElement | null>;
   readonly referenceTime?: Date;
 }
 
@@ -50,7 +51,7 @@ function DashboardAvatar({
     avatarUrl,
     failedAvatarUrl,
   );
-  const avatarClassName = `${avatarTargetClassName} border border-border-default bg-slate-100 text-sm font-bold text-text-primary`;
+  const avatarClassName = `${avatarTargetClassName} border border-white/80 bg-white/85 text-sm font-bold text-text-primary shadow-[0_8px_24px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 dark:border-white/10 dark:bg-slate-900/85 dark:ring-white/10`;
 
   if (isLoading) {
     return (
@@ -86,7 +87,7 @@ function DashboardAvatar({
     return (
       <button
         aria-label={avatarLabel}
-        className={`${avatarClassName} hover:border-border-strong focus-visible:outline-interactive-primary transition hover:bg-slate-200 focus-visible:outline-2 focus-visible:outline-offset-2`}
+        className={`${avatarClassName} focus-visible:outline-interactive-primary transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(15,23,42,0.14)] focus-visible:outline-2 focus-visible:outline-offset-2`}
         onClick={onAvatarClick}
         type="button"
       >
@@ -103,7 +104,6 @@ function DashboardAvatar({
 }
 
 export function DashboardHeader({
-  addEventButtonRef,
   referenceTime,
   ...props
 }: DashboardHeaderProps) {
@@ -133,58 +133,54 @@ export function DashboardHeader({
   );
   const viewModel = createDashboardHeaderViewModel({
     ...props,
+    addEventDisabled: false,
     date: headerDate,
     labels,
+    onAddEvent: () => {},
   });
-  const dateContent = viewModel.dateLabel ?? viewModel.dateUnavailableLabel;
 
   return (
     <header
       aria-busy={viewModel.isLoading}
-      className="border-border-default bg-surface/95 text-text-primary sticky top-0 z-30 border-b pt-[env(safe-area-inset-top)] backdrop-blur"
+      className="relative z-30 pt-[env(safe-area-inset-top)]"
     >
-      <div className="mx-auto grid min-h-16 max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-[4.5rem]">
-        <div className="flex min-w-0 items-center gap-3">
-          <BrandSymbol />
-          <h1 className="truncate text-base font-bold sm:text-lg">
-            {viewModel.productName}
+      <div className="mx-auto flex min-h-[4.25rem] max-w-6xl items-center justify-between gap-3 py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:min-h-20 sm:py-4 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-24 lg:py-5">
+        <div className="flex min-w-0 flex-1 items-center">
+          <h1 className="flex min-w-0 items-center gap-3 sm:gap-[0.9rem]">
+            <Image
+              alt=""
+              aria-hidden
+              className={brandLogoIconClassName}
+              height={brandLogoHeight}
+              priority
+              src={brandLogoPath}
+              unoptimized
+              width={brandLogoWidth}
+            />
+            <span className="min-w-0 shrink">
+              <DashboardBrandWordmark
+                accentLine={viewModel.brandLineAccent}
+                primaryLine={viewModel.brandLinePrimary}
+              />
+            </span>
           </h1>
         </div>
 
-        {viewModel.isLoading ? (
-          <span
-            aria-hidden="true"
-            className="col-span-2 row-start-2 h-5 w-48 max-w-full animate-pulse rounded bg-slate-200 motion-reduce:animate-none sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center"
-          />
-        ) : viewModel.dateLabel && viewModel.dateTime ? (
-          <time
-            aria-label={viewModel.currentDateAriaLabel ?? undefined}
-            className="text-text-secondary col-span-2 row-start-2 min-w-0 text-sm font-medium sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center"
-            dateTime={viewModel.dateTime}
-          >
-            {viewModel.dateLabel}
-          </time>
-        ) : (
-          <span
-            className="text-text-secondary col-span-2 row-start-2 min-w-0 text-sm sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:justify-self-center sm:text-center"
-            role="status"
-          >
-            {dateContent}
-          </span>
-        )}
-
-        <div className="col-start-2 row-start-1 flex items-center gap-2 sm:col-start-3">
-          <Button
-            aria-label={viewModel.addEventLabel}
-            className={`${desktopActionClassName}`}
-            disabled={viewModel.addEventDisabled}
-            onClick={viewModel.onAddEvent}
-            ref={addEventButtonRef}
-            type="button"
-          >
-            <Plus aria-hidden="true" size={18} />
-            <span>{viewModel.addEventLabel}</span>
-          </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          {viewModel.isLoading ? (
+            <span
+              aria-hidden="true"
+              className="hidden h-5 w-40 animate-pulse rounded bg-white/70 motion-reduce:animate-none lg:block dark:bg-slate-800"
+            />
+          ) : viewModel.dateLabel && viewModel.dateTime ? (
+            <time
+              aria-label={viewModel.currentDateAriaLabel ?? undefined}
+              className="hidden min-w-0 rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm backdrop-blur lg:inline-flex dark:border-white/10 dark:bg-slate-900/60 dark:text-slate-300"
+              dateTime={viewModel.dateTime}
+            >
+              {viewModel.dateLabel}
+            </time>
+          ) : null}
 
           <DashboardAvatar
             avatarInitials={viewModel.avatarInitials}
@@ -203,7 +199,7 @@ export function DashboardHeader({
 
         {viewModel.isError ? (
           <p
-            className="col-span-full m-0 text-xs font-medium text-rose-700"
+            className="text-status-danger absolute inset-x-4 bottom-1 m-0 text-xs font-medium"
             role="status"
           >
             {viewModel.errorMessage}

@@ -41,6 +41,11 @@ import {
 } from './timeline-search-filter-model';
 import { TimelineToolbar } from './timeline-toolbar';
 import { TopBar } from './top-bar';
+import { DashboardMobileNav } from '../dashboard/dashboard-mobile-nav';
+import {
+  AppPageBackground,
+  appPageShellClassName,
+} from '../shared/app-page-background';
 
 const TIMELINE_PAGE_SIZE = 20;
 
@@ -287,19 +292,20 @@ export function TimelineShell() {
   };
 
   return (
-    <div className="bg-background text-text-primary min-h-screen overflow-x-hidden">
+    <div className={appPageShellClassName}>
+      <AppPageBackground />
       <TopBar />
 
       <main
-        className="timeline-content mx-auto max-w-3xl space-y-6 px-4 pt-6 pb-24 sm:px-6 lg:pt-8"
+        className="relative mx-auto max-w-6xl space-y-5 px-[max(1rem,env(safe-area-inset-right))] pt-2 pb-[calc(4.75rem+env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] sm:space-y-6 sm:px-[max(1.5rem,env(safe-area-inset-right))] sm:pt-4 sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:pb-10"
         id="main-content"
       >
         <div>
-          <p className="text-text-secondary text-sm font-medium">
+          <p className="text-sm font-semibold text-teal-600/85 dark:text-teal-300/85">
             {uiLabels.shell.eyebrow}
           </p>
           <h1
-            className="text-text-primary mt-1 text-2xl font-bold focus:outline-none"
+            className="mt-1 text-[1.75rem] font-extrabold tracking-tight text-[#1e3a5f] focus:outline-none sm:text-[2rem] dark:text-white"
             ref={headingRef}
             tabIndex={-1}
           >
@@ -367,6 +373,12 @@ export function TimelineShell() {
         onNoteSubmit={handleNoteSubmit}
         onNutritionSubmit={handleNutritionSubmit}
         open={quickAddOpen}
+      />
+
+      <DashboardMobileNav
+        activeTab="timeline"
+        onQuickAdd={() => setQuickAddOpen(true)}
+        showQuickAddFab={!quickAddOpen}
       />
 
       {selectedEvent ? (

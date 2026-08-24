@@ -9,11 +9,16 @@ test('dashboard header renders localized English copy after platform readiness',
   await waitForApplicationReady(page);
 
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Home' }),
+    page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
   ).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Add event' })).toBeVisible();
   await expect(page.locator('header time[datetime]')).toBeVisible();
+  await expect(
+    page.locator('header').getByRole('button', { name: 'Add event' }),
+  ).toHaveCount(0);
   await expect(page.getByText('Добавить событие')).toHaveCount(0);
+  await expect(
+    page.getByRole('button', { name: 'Quick add: Glucose' }),
+  ).toBeVisible();
 
   await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
@@ -21,4 +26,5 @@ test('dashboard header renders localized English copy after platform readiness',
   await expect(
     page.getByRole('heading', { level: 1, name: 'Timeline' }),
   ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add event' })).toBeVisible();
 });

@@ -4,6 +4,9 @@ import type { TimelineListModel } from './timeline-list-model';
 import type { TimelineUiLabels } from './timeline-ui-labels';
 import { mapTimelineEventToCard } from './timeline-event-card.mapper';
 import type { TimelinePresentationDependencies } from '../../lib/timeline/presentation';
+import { frostedPanelClassName } from '../shared/app-page-background';
+
+const frostedStatePanelClassName = `${frostedPanelClassName} p-6 text-center`;
 
 interface TimelineListProps {
   readonly labels: TimelineUiLabels;
@@ -19,7 +22,7 @@ function TimelineLoadingState({ labels }: Pick<TimelineListProps, 'labels'>) {
     <section
       aria-busy="true"
       aria-labelledby="timeline-loading-title"
-      className="rounded-card border-border-default bg-surface shadow-elevation-sm border p-5"
+      className={`${frostedPanelClassName} p-5`}
     >
       <h2 className="sr-only" id="timeline-loading-title">
         {labels.loading.title}
@@ -46,10 +49,10 @@ function TimelineEmptyState({
   return (
     <section
       aria-labelledby="timeline-empty-title"
-      className="rounded-card border-border-default bg-surface border p-6 text-center shadow-sm"
+      className={frostedStatePanelClassName}
     >
       <h2
-        className="text-text-primary text-lg font-bold"
+        className="text-lg font-extrabold text-[#1e3a5f] dark:text-white"
         id="timeline-empty-title"
       >
         {labels.empty.title}
@@ -71,10 +74,10 @@ function TimelineFilteredEmptyState({
   return (
     <section
       aria-labelledby="timeline-filtered-empty-title"
-      className="rounded-card border-border-default bg-surface border p-6 text-center shadow-sm"
+      className={frostedStatePanelClassName}
     >
       <h2
-        className="text-text-primary text-lg font-bold"
+        className="text-lg font-extrabold text-[#1e3a5f] dark:text-white"
         id="timeline-filtered-empty-title"
       >
         {labels.filteredEmpty.title}
@@ -104,11 +107,11 @@ function TimelineErrorState({
   return (
     <section
       aria-labelledby="timeline-error-title"
-      className="rounded-card border-status-danger/40 bg-surface shadow-elevation-sm border p-6"
+      className={`${frostedPanelClassName} border-status-danger/30 p-6`}
       role="alert"
     >
       <h2
-        className="text-text-primary text-lg font-bold"
+        className="text-lg font-extrabold text-[#1e3a5f] dark:text-white"
         id="timeline-error-title"
       >
         {labels.error.title}
@@ -168,14 +171,14 @@ export function TimelineList({
           >
             <div className="mb-4 flex items-center gap-3">
               <h2
-                className="text-text-secondary shrink-0 text-sm font-semibold"
+                className="shrink-0 text-sm font-extrabold tracking-wide text-[#1e3a5f]/75 uppercase dark:text-slate-300"
                 id={groupTitleId}
               >
                 {group.label}
               </h2>
               <div
                 aria-hidden="true"
-                className="bg-border-default h-px flex-1"
+                className="h-px flex-1 bg-gradient-to-r from-teal-300/60 via-violet-300/40 to-transparent"
               />
             </div>
 
@@ -190,12 +193,13 @@ export function TimelineList({
                   <li className="relative pl-10 sm:pl-12" key={event.id}>
                     <div
                       aria-hidden="true"
-                      className={`bg-border-strong absolute top-0 left-[15px] w-0.5 sm:left-[17px] ${
+                      className={`absolute top-0 left-[15px] w-0.5 bg-gradient-to-b from-teal-300/70 via-violet-300/45 to-orange-300/35 sm:left-[17px] ${
                         index === group.events.length - 1 ? 'h-7' : 'bottom-0'
                       }`}
                     />
                     <EventCard
                       {...eventCardProps}
+                      appearance="vibrant"
                       ariaLabel={`${presentationDependencies.labels.openEventAriaPrefix}: ${[
                         eventCardProps.title,
                         [eventCardProps.value, eventCardProps.unit]

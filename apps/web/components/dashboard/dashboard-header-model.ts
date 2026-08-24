@@ -31,6 +31,9 @@ export interface DashboardHeaderViewModel {
   readonly avatarInitials: string | null;
   readonly avatarLabel: string;
   readonly avatarUrl: string | null;
+  readonly brandLineAccent: string;
+  readonly brandLinePrimary: string;
+  readonly brandName: string;
   readonly currentDateAriaLabel: string | null;
   readonly currentDateLabel: string;
   readonly dateLabel: string | null;
@@ -161,6 +164,9 @@ export function createDashboardHeaderViewModel({
       state === 'ready' && user?.avatarUrl?.trim()
         ? user.avatarUrl.trim()
         : null,
+    brandLineAccent: labels.brandLineAccent,
+    brandLinePrimary: labels.brandLinePrimary,
+    brandName: labels.brandName,
     currentDateAriaLabel:
       dateLabel === null ? null : `${labels.currentDate}: ${dateLabel}`,
     currentDateLabel: labels.currentDate,

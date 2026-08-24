@@ -40,6 +40,12 @@ test('loads the English bundle for en-GB', async () => {
 test('loads draft bundles for supported draft locales', async () => {
   const loader = new InMemoryTranslationBundleLoader(platformFallbackPolicy);
 
+  const expectedTitles = {
+    'de-DE': 'Home',
+    'ru-RU': 'Главная',
+    'uk-UA': 'Home',
+  };
+
   for (const locale of ['uk-UA', 'de-DE', 'ru-RU']) {
     const bundle = await loader.load({
       locale: asLocaleCode(locale),
@@ -47,7 +53,10 @@ test('loads draft bundles for supported draft locales', async () => {
     });
 
     assert.equal(bundle.locale, locale);
-    assert.equal(bundle.entries['dashboard.header.title'], 'Home');
+    assert.equal(
+      bundle.entries['dashboard.header.title'],
+      expectedTitles[locale],
+    );
   }
 });
 

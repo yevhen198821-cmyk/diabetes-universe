@@ -38,6 +38,7 @@ export type DashboardLastGlucoseProps =
 export interface DashboardLastGlucoseViewModel {
   readonly dateTime: string | null;
   readonly displayTime: string | null;
+  readonly freshMessage: string | null;
   readonly isLoading: boolean;
   readonly isStale: boolean;
   readonly message: string | null;
@@ -83,6 +84,7 @@ function createEmptyViewModel(message: string): DashboardLastGlucoseViewModel {
   return {
     dateTime: null,
     displayTime: null,
+    freshMessage: null,
     isLoading: false,
     isStale: false,
     message,
@@ -119,6 +121,7 @@ export function createDashboardLastGlucoseViewModel(
       return {
         dateTime: null,
         displayTime: null,
+        freshMessage: null,
         isLoading: true,
         isStale: false,
         message: props.loadingLabel?.trim() || labels.loading,
@@ -148,6 +151,7 @@ export function createDashboardLastGlucoseViewModel(
       return {
         dateTime: measurement.event.occurredAt,
         displayTime: measurement.displayTime,
+        freshMessage: isStale ? null : labels.fresh,
         isLoading: false,
         isStale,
         message: null,
@@ -161,6 +165,7 @@ export function createDashboardLastGlucoseViewModel(
       return {
         dateTime: null,
         displayTime: null,
+        freshMessage: null,
         isLoading: false,
         isStale: false,
         message: props.message?.trim() || labels.defaultEmpty,
@@ -173,6 +178,7 @@ export function createDashboardLastGlucoseViewModel(
       return {
         dateTime: null,
         displayTime: null,
+        freshMessage: null,
         isLoading: false,
         isStale: false,
         message: props.message?.trim() || labels.defaultError,

@@ -12,9 +12,12 @@ test('resolveDashboardHeaderLabels returns canonical English dashboard header st
   const labels = resolveDashboardHeaderLabels(runtime.localization);
 
   assert.equal(labels.productName, 'Home');
+  assert.equal(labels.brandName, 'Diabetes Universe');
+  assert.equal(labels.brandLinePrimary, 'Diabetes');
+  assert.equal(labels.brandLineAccent, 'Universe');
   assert.equal(labels.addEvent, 'Add event');
   assert.equal(labels.avatar, 'User profile');
-  assert.equal(labels.avatarAction, 'Open profile');
+  assert.equal(labels.avatarAction, 'Open account');
   assert.equal(labels.currentDate, 'Current date');
   assert.equal(labels.dateUnavailable, 'Date unavailable');
   assert.equal(labels.loading, 'Loading header');

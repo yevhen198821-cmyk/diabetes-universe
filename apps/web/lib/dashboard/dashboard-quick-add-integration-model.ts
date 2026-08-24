@@ -1,10 +1,18 @@
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
-import type { TimelinePresentationDependencies } from '../timeline/presentation';
+import {
+  formatTimelineGlucoseDisplayValue,
+  type TimelinePresentationDependencies,
+} from '../timeline/presentation';
 import { deriveDashboardRecentEventSources } from './dashboard-recent-events-derivation';
+import {
+  deriveDashboardDaySummaryVisualizations,
+  type DashboardDaySummaryVisualizations,
+} from './dashboard-day-summary-series';
 import { getTimelineCalendarDateKey } from '../timeline/timeline-date-time';
 import {
   getLatestGlucoseEvent,
+  getTodayActivityTotalSeconds,
   getTodayInsulinTotal,
   getTodayMedicationCount,
   getTodayNutritionTotal,
@@ -16,9 +24,13 @@ export interface DashboardDerivedDaySummary {
   readonly dayDate: string;
   readonly displayDayLabel: string;
   readonly glucoseMeasurements: number;
+  readonly latestTodayGlucoseDisplay: string | null;
+  readonly latestTodayGlucoseDisplayTime: string | null;
   readonly medicationDoses: number;
+  readonly totalActivitySeconds: number;
   readonly totalCarbohydrateGrams: number;
   readonly totalInsulinUnits: number;
+  readonly visualizations: DashboardDaySummaryVisualizations;
 }
 
 export interface DashboardDerivedLastGlucose {
@@ -107,6 +119,8 @@ function deriveDaySummary(
   referenceTime: Date,
   timeZone: string | undefined,
   formatDaySummaryDisplayDate?: (referenceTime: Date) => string,
+  presentationDependencies?: TimelinePresentationDependencies,
+  formatLastGlucoseDisplayTime?: (dateTime: string) => string,
 ): DashboardDerivedDaySummary | null {
   if (!formatDaySummaryDisplayDate) {
     return null;
@@ -141,14 +155,48 @@ function deriveDaySummary(
     referenceTime,
     timeZone,
   );
+  const totalActivitySeconds = getTodayActivityTotalSeconds(
+    events,
+    referenceTime,
+    timeZone,
+  );
+  const latestTodayGlucose = getLatestGlucoseEvent(todayEvents);
+  let latestTodayGlucoseDisplay: string | null = null;
+  let latestTodayGlucoseDisplayTime: string | null = null;
+
+  if (latestTodayGlucose && presentationDependencies) {
+    const display = formatTimelineGlucoseDisplayValue(
+      latestTodayGlucose,
+      presentationDependencies,
+    ).trim();
+
+    latestTodayGlucoseDisplay = display.length > 0 ? display : null;
+
+    if (formatLastGlucoseDisplayTime) {
+      const displayTime = formatLastGlucoseDisplayTime(
+        latestTodayGlucose.occurredAt,
+      ).trim();
+
+      latestTodayGlucoseDisplayTime =
+        displayTime.length > 0 && displayTime !== '--:--' ? displayTime : null;
+    }
+  }
 
   return {
     dayDate: dayLabel.dayDate,
     displayDayLabel: dayLabel.displayDayLabel,
     glucoseMeasurements,
+    latestTodayGlucoseDisplay,
+    latestTodayGlucoseDisplayTime,
     medicationDoses,
+    totalActivitySeconds,
     totalCarbohydrateGrams,
     totalInsulinUnits,
+    visualizations: deriveDashboardDaySummaryVisualizations(
+      events,
+      referenceTime,
+      timeZone,
+    ),
   };
 }
 
@@ -175,6 +223,8 @@ export function deriveDashboardQuickAddBlocks(
       referenceTime,
       timeZone,
       options.formatDaySummaryDisplayDate,
+      presentationDependencies,
+      options.formatLastGlucoseDisplayTime,
     ),
     lastGlucose: deriveLastGlucose(
       state.events,

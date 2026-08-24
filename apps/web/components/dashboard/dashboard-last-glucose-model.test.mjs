@@ -9,6 +9,7 @@ const englishLabels = {
   defaultEmpty: 'No measurements yet.',
   defaultError: 'Could not load the last measurement.',
   eyebrow: 'Last measurement',
+  fresh: 'Fresh data',
   loading: 'Loading last glucose measurement',
   stale: 'Measurement is outdated.',
   title: 'Last glucose',
@@ -53,6 +54,7 @@ test('creates ready state from a validated measurement contract', () => {
   assert.equal(model.message, null);
   assert.equal(model.isLoading, false);
   assert.equal(model.isStale, false);
+  assert.equal(model.freshMessage, englishLabels.fresh);
   assert.equal(model.staleMessage, null);
 });
 
@@ -231,6 +233,7 @@ test('marks a measurement older than the stale threshold as stale', () => {
 
   assert.equal(model.state, 'ready');
   assert.equal(model.isStale, true);
+  assert.equal(model.freshMessage, null);
   assert.equal(model.staleMessage, englishLabels.stale);
   assert.equal(model.value, '6.4 mmol/L');
 });

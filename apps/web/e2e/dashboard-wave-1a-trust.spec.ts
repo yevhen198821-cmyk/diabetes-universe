@@ -17,19 +17,25 @@ test('dashboard does not render mock AI insight block', async ({ page }) => {
   ).toHaveCount(0);
 });
 
-test('dashboard uses Home navigation label without hardcoded user name', async ({
+test('dashboard uses brand and Home navigation without hardcoded user name', async ({
   page,
 }) => {
+  await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/');
   await waitForApplicationReady(page);
 
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Home', exact: true }),
+    page.getByRole('heading', {
+      level: 1,
+      name: 'Diabetes Universe',
+      exact: true,
+    }),
   ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Home' })).toBeVisible();
   await expect(page.getByText('Анна Иванова')).toHaveCount(0);
 });
 
-test('dashboard status-first hierarchy places last glucose before next action', async ({
+test('dashboard status-first hierarchy places last glucose before today summary', async ({
   page,
 }) => {
   await page.goto('/');
@@ -38,7 +44,8 @@ test('dashboard status-first hierarchy places last glucose before next action', 
   await expect(
     page.getByRole('region', { name: 'Last glucose' }),
   ).toBeVisible();
-  await expect(page.getByText('Next action').first()).toBeVisible();
+  await expect(page.getByText('Next action')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
 
   const sectionSummaries = await page
     .locator('#main-content > section')
@@ -52,10 +59,10 @@ test('dashboard status-first hierarchy places last glucose before next action', 
   const lastGlucoseIndex = sectionSummaries.findIndex((section) =>
     section.text.includes('Last glucose'),
   );
-  const nextActionIndex = sectionSummaries.findIndex((section) =>
-    section.text.includes('Next action'),
+  const todayIndex = sectionSummaries.findIndex((section) =>
+    section.text.includes('Today'),
   );
 
   expect(lastGlucoseIndex).toBeGreaterThanOrEqual(0);
-  expect(nextActionIndex).toBeGreaterThan(lastGlucoseIndex);
+  expect(todayIndex).toBeGreaterThan(lastGlucoseIndex);
 });

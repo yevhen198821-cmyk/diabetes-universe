@@ -160,6 +160,16 @@ export function getTodayMedicationCount(
   ).length;
 }
 
+export function getTodayActivityTotalSeconds(
+  events: readonly SemanticTimelineEvent[],
+  referenceDate: Date = new Date(),
+  timeZone?: string,
+): number {
+  return getTodayTimelineEvents(events, referenceDate, timeZone)
+    .filter((event) => event.kind === 'activity')
+    .reduce((total, event) => total + event.durationSeconds, 0);
+}
+
 export function formatLatestGlucoseValue(
   event: Extract<SemanticTimelineEvent, { kind: 'glucose' }>,
   dependencies: TimelinePresentationDependencies,

@@ -6,11 +6,9 @@ import {
   englishCanonicalMessages,
 } from '../../../../packages/locales/src/index.ts';
 
-import { dashboardDaySummaryTranslationKeys } from './dashboard-day-summary-labels.ts';
+import { dashboardDaySummaryTranslationKeyList } from './dashboard-day-summary-labels.ts';
 
-const DASHBOARD_DAY_SUMMARY_KEYS = Object.values(
-  dashboardDaySummaryTranslationKeys,
-);
+const DASHBOARD_DAY_SUMMARY_KEYS = dashboardDaySummaryTranslationKeyList;
 
 test('dashboard day summary translation keys are canonical and non-empty in English resources', () => {
   for (const key of DASHBOARD_DAY_SUMMARY_KEYS) {
@@ -39,8 +37,8 @@ test('dashboard day summary keys do not duplicate other dashboard block keys', (
   assert.equal(duplicates.length, 0);
 });
 
-test('dashboard day summary exposes exactly ten translation keys', () => {
-  assert.equal(DASHBOARD_DAY_SUMMARY_KEYS.length, 10);
+test('dashboard day summary exposes all day summary translation keys', () => {
+  assert.equal(DASHBOARD_DAY_SUMMARY_KEYS.length, 25);
 });
 
 test('dashboard preload namespaces remain unchanged for day summary keys', async () => {

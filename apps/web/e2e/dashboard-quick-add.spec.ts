@@ -8,43 +8,28 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
 
   await expect(page).toHaveTitle(/Dashboard \| Diabetes Universe/);
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Home' }),
+    page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
   ).toBeVisible();
   await expect(
     page.getByRole('heading', { name: 'Last glucose' }),
   ).toBeVisible();
-  const daySummary = page.getByRole('region', { name: 'Day summary' });
+  const daySummary = page.getByRole('region', { name: 'Today' });
 
   await expect(daySummary.getByText('4 U')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Add event' }).click();
-  await expect(
-    page.getByRole('dialog', { name: 'Добавить событие' }),
-  ).toBeVisible();
+  for (const category of [
+    'Glucose',
+    'Insulin',
+    'Nutrition',
+    'Activity',
+    'Notes',
+  ]) {
+    await expect(
+      page.getByRole('button', { name: `Quick add: ${category}` }),
+    ).toBeVisible();
+  }
 
-  const quickAddDialog = page.getByRole('dialog', { name: 'Добавить событие' });
-  await expect(
-    quickAddDialog.getByRole('button', { name: /Глюкоза/ }),
-  ).toBeVisible();
-  await expect(
-    quickAddDialog.getByRole('button', { name: /Инсулин/ }),
-  ).toBeVisible();
-  await expect(
-    quickAddDialog.getByRole('button', { name: /Питание/ }),
-  ).toBeVisible();
-  await expect(
-    quickAddDialog.getByRole('button', { name: /Лекарство/ }),
-  ).toBeVisible();
-  await expect(
-    quickAddDialog.getByRole('button', { name: /Активность/ }),
-  ).toBeVisible();
-  await expect(
-    quickAddDialog.getByRole('button', { name: /Заметка/ }),
-  ).toBeVisible();
-
-  await page
-    .getByRole('button', { name: 'Инсулин. Записать дозу инсулина' })
-    .click();
+  await page.getByRole('button', { name: 'Quick add: Insulin' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Добавить инсулин' }),
   ).toBeVisible();
@@ -79,20 +64,16 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
   ).toBeVisible();
 });
 
-test('next action opens insulin quick add directly and updates dashboard', async ({
+test('quick add insulin opens directly and updates dashboard', async ({
   page,
 }) => {
   await page.goto('/');
 
   await waitForApplicationReady(page);
 
-  const daySummary = page.getByRole('region', { name: 'Day summary' });
+  const daySummary = page.getByRole('region', { name: 'Today' });
 
-  await expect(page.getByText('Next action')).toBeVisible();
-  await expect(
-    page.getByRole('heading', { name: 'Add insulin' }),
-  ).toBeVisible();
-  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await page.getByRole('button', { name: 'Quick add: Insulin' }).click();
 
   await expect(
     page.getByRole('dialog', { name: 'Добавить инсулин' }),
@@ -110,9 +91,6 @@ test('next action opens insulin quick add directly and updates dashboard', async
     page.getByRole('dialog', { name: 'Добавить инсулин' }),
   ).toBeHidden();
   await expect(daySummary.getByText('6 U')).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'Add', exact: true }),
-  ).toBeFocused();
 
   await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
@@ -222,10 +200,17 @@ test('timeline quick add updates shared dashboard state', async ({ page }) => {
 
   await expect(page).toHaveURL('/');
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Home' }),
+    page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
   ).toBeVisible();
   await expect(
-    page.getByRole('region', { name: 'Last glucose' }).getByText('8.8 mmol/L'),
+    page.getByRole('region', { name: 'Last glucose' }).getByText('8.8', {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('region', { name: 'Last glucose' }).getByText('mmol/L', {
+      exact: true,
+    }),
   ).toBeVisible();
 });
 
@@ -235,6 +220,6 @@ test('/dashboard redirects to home dashboard', async ({ page }) => {
 
   await expect(page).toHaveURL('/');
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Home' }),
+    page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
   ).toBeVisible();
 });

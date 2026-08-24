@@ -35,6 +35,6 @@ test('dashboard last glucose keys do not duplicate dashboard header or next acti
   assert.equal(duplicates.length, 0);
 });
 
-test('dashboard last glucose exposes exactly seven translation keys', () => {
-  assert.equal(DASHBOARD_LAST_GLUCOSE_KEYS.length, 7);
+test('dashboard last glucose exposes exactly eight translation keys', () => {
+  assert.equal(DASHBOARD_LAST_GLUCOSE_KEYS.length, 8);
 });

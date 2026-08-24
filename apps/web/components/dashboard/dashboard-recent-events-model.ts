@@ -151,30 +151,9 @@ export function selectDashboardRecentEvents(
   events: readonly DashboardRecentEventSource[],
   categoryLabels: DashboardRecentEventsLabels['categories'],
 ): DashboardRecentEventCard[] {
-  const latestByCategory = new Map<
-    DashboardRecentEventCategory,
-    DashboardRecentEventSource
-  >();
-
-  for (const source of events) {
-    const event = normalizeRecentEventSource(source);
-
-    if (!event) {
-      continue;
-    }
-
-    const existing = latestByCategory.get(event.category);
-    const eventTimestamp = Date.parse(event.dateTime);
-    const existingTimestamp = existing
-      ? Date.parse(existing.dateTime)
-      : Number.NaN;
-
-    if (!existing || eventTimestamp > existingTimestamp) {
-      latestByCategory.set(event.category, event);
-    }
-  }
-
-  return [...latestByCategory.values()]
+  return events
+    .map((source) => normalizeRecentEventSource(source))
+    .filter((event): event is DashboardRecentEventSource => event !== null)
     .sort(
       (left, right) => Date.parse(right.dateTime) - Date.parse(left.dateTime),
     )

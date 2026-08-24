@@ -9,12 +9,17 @@ test('dashboard renders with semantic foundation in light theme', async ({
   await waitForApplicationReady(page);
 
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Home', exact: true }),
+    page.getByRole('heading', {
+      level: 1,
+      name: 'Diabetes Universe',
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(
     page.getByRole('region', { name: 'Last glucose' }),
   ).toBeVisible();
-  await expect(page.getByText('Next action').first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Quick add' })).toBeVisible();
+  await expect(page.getByText('Next action')).toHaveCount(0);
 });
 
 test('timeline renders with semantic foundation and filter chips', async ({
@@ -46,7 +51,11 @@ test('dark theme foundation applies html class without flash regression', async 
 
   expect(themeClass).toBe(true);
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Home', exact: true }),
+    page.getByRole('heading', {
+      level: 1,
+      name: 'Diabetes Universe',
+      exact: true,
+    }),
   ).toBeVisible();
 });
 

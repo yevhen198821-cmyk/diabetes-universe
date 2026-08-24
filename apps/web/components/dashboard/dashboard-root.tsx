@@ -1,12 +1,12 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useMemo, useRef, useState } from 'react';
 
+import type { TranslationKey } from '@diabetes-universe/i18n';
+
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model';
-import {
-  createDashboardNextActionEngineInput,
-  resolveDashboardNextActionPresentation,
-} from '../../lib/dashboard/dashboard-next-action-integration';
+import { formatDashboardRecentEventDisplayTime } from '../../lib/dashboard/dashboard-recent-events-display-time';
 import {
   createSemanticActivityTimelineEvent,
   createSemanticGlucoseTimelineEvent,
@@ -29,13 +29,16 @@ import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { QuickAddHost } from '../quick-add/quick-add-host';
 import { DashboardDaySummary } from './dashboard-day-summary';
+import { DashboardGreeting } from './dashboard-greeting';
 import { DashboardHeader } from './dashboard-header';
 import { DashboardLastGlucose } from './dashboard-last-glucose';
-import { DashboardNextAction } from './dashboard-next-action';
+import { DashboardMobileNav } from './dashboard-mobile-nav';
+import { DashboardQuickActions } from './dashboard-quick-actions';
 import { DashboardRecentEvents } from './dashboard-recent-events';
 import { DashboardShell } from './dashboard-shell';
 
 export function DashboardRoot() {
+  const router = useRouter();
   const localization = useLocalization();
   const formatter = useFormatter();
   const presentationDependencies = useTimelinePresentationDependencies();
@@ -43,25 +46,20 @@ export function DashboardRoot() {
   const [quickAddState, setQuickAddState] = useState(
     createInitialQuickAddControllerState,
   );
-  const headerActionRef = useRef<HTMLButtonElement>(null);
-  const fabRef = useRef<HTMLButtonElement>(null);
-  const nextActionRef = useRef<HTMLButtonElement>(null);
+  const quickActionsRef = useRef<HTMLButtonElement>(null);
   const referenceTime = useMemo(() => new Date(), []);
   const isTimelineHydrating = timelineStatus === 'loading';
   const isTimelineError = timelineStatus === 'error';
-  const nextActionPresentation = useMemo(
-    () =>
-      isTimelineHydrating
-        ? null
-        : resolveDashboardNextActionPresentation(
-            localization,
-            createDashboardNextActionEngineInput(events, referenceTime),
-          ),
-    [events, isTimelineHydrating, localization, referenceTime],
-  );
   const dashboardTimeZone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
     [],
+  );
+  const yesterdayLabel = useMemo(
+    () =>
+      localization.translate({
+        key: 'timeline.group.yesterday' as TranslationKey,
+      }).value,
+    [localization],
   );
   const formatLastGlucoseDisplayTime = useMemo(
     () => (dateTime: string) =>
@@ -74,8 +72,19 @@ export function DashboardRoot() {
   );
   const formatRecentEventDisplayTime = useMemo(
     () => (dateTime: string) =>
-      formatter.formatTime(dateTime, { timeStyle: 'short' }),
-    [formatter],
+      formatDashboardRecentEventDisplayTime(
+        dateTime,
+        referenceTime,
+        localization.localeContext.locale,
+        yesterdayLabel,
+        dashboardTimeZone,
+      ),
+    [
+      dashboardTimeZone,
+      localization.localeContext.locale,
+      referenceTime,
+      yesterdayLabel,
+    ],
   );
 
   const derivedBlocks = useMemo(
@@ -106,13 +115,6 @@ export function DashboardRoot() {
       referenceTime,
     ],
   );
-
-  const returnFocusRef =
-    quickAddState.lastOpenTrigger === 'header'
-      ? headerActionRef
-      : quickAddState.lastOpenTrigger === 'next-action'
-        ? nextActionRef
-        : fabRef;
 
   const requestOpen = (
     trigger: QuickAddOpenTrigger,
@@ -159,11 +161,15 @@ export function DashboardRoot() {
             <DashboardDaySummary state="empty" />
           )
         }
+        greeting={
+          <DashboardGreeting
+            referenceTime={referenceTime}
+            state={isTimelineHydrating ? 'loading' : 'ready'}
+          />
+        }
         header={
           <DashboardHeader
-            addEventButtonRef={headerActionRef}
-            addEventDisabled={quickAddState.isOpen}
-            onAddEvent={() => requestOpen('header')}
+            onAvatarClick={() => router.push('/account')}
             referenceTime={referenceTime}
             state={isTimelineHydrating ? 'loading' : 'ready'}
             user={null}
@@ -187,30 +193,13 @@ export function DashboardRoot() {
             <DashboardLastGlucose state="empty" />
           )
         }
-        nextAction={
-          isTimelineHydrating ? (
-            <DashboardNextAction state="loading" />
-          ) : nextActionPresentation?.state === 'ready' ? (
-            <DashboardNextAction
-              action={nextActionPresentation.action}
-              actionButtonRef={nextActionRef}
-              actionDisabled={quickAddState.isOpen}
-              onAction={() =>
-                requestOpen(
-                  'next-action',
-                  nextActionPresentation.quickAddCategory,
-                )
-              }
-              state="ready"
-            />
-          ) : nextActionPresentation ? (
-            <DashboardNextAction
-              content={nextActionPresentation.content}
-              state="empty"
-            />
-          ) : (
-            <DashboardNextAction state="loading" />
-          )
+        mobileNav={<DashboardMobileNav showQuickAddFab={false} />}
+        quickActions={
+          <DashboardQuickActions
+            disabled={quickAddState.isOpen || isTimelineHydrating}
+            onOpenCategory={(category) => requestOpen('fab', category)}
+            returnFocusRef={quickActionsRef}
+          />
         }
         recentEvents={
           isTimelineHydrating ? (
@@ -227,8 +216,6 @@ export function DashboardRoot() {
         }
       />
       <QuickAddHost
-        floatingActionButtonClassName="dashboard-fab lg:hidden"
-        floatingActionButtonRef={fabRef}
         onActivitySubmit={(entry) => {
           addEvent(createSemanticActivityTimelineEvent(entry));
         }}
@@ -251,8 +238,8 @@ export function DashboardRoot() {
         onRequestOpen={() => requestOpen('fab')}
         open={quickAddState.isOpen}
         openCategory={quickAddState.openCategory}
-        returnFocusRef={returnFocusRef}
-        showFloatingActionButton
+        returnFocusRef={quickActionsRef}
+        showFloatingActionButton={false}
       />
     </>
   );

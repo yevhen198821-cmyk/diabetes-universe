@@ -1,10 +1,22 @@
 'use client';
 
-import { CalendarDays } from 'lucide-react';
+import {
+  ArrowRight,
+  Droplets,
+  PersonStanding,
+  Syringe,
+  Wheat,
+} from 'lucide-react';
 import { useMemo } from 'react';
 
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
+import {
+  ActivityMiniChart,
+  GlucoseMiniChart,
+  InsulinMiniChart,
+  NutritionMiniChart,
+} from './dashboard-day-summary-mini-charts';
 import {
   resolveDashboardDaySummaryLabels,
   type DashboardDaySummaryLabels,
@@ -12,53 +24,92 @@ import {
 import {
   createDashboardDaySummaryViewModel,
   type DashboardDaySummaryFormattedMetrics,
+  type DashboardDaySummaryMetric,
   type DashboardDaySummaryProps,
 } from './dashboard-day-summary-model';
 
 const titleId = 'dashboard-day-summary-title';
 
-function MetricList({
-  metrics,
-  variant,
-}: {
-  readonly metrics: ReadonlyArray<{ label: string; value: string }>;
-  readonly variant: 'primary' | 'secondary';
-}) {
-  const isPrimary = variant === 'primary';
+const metricVisuals = [
+  {
+    icon: Droplets,
+    iconClass:
+      'bg-teal-500 text-white shadow-[0_8px_18px_rgba(20,184,166,0.24)]',
+    labelClass: 'text-teal-800/75 dark:text-teal-200/80',
+    surfaceClass:
+      'border-teal-100/70 bg-gradient-to-br from-teal-50/95 via-cyan-50/85 to-white/80 dark:border-teal-500/15 dark:from-teal-950/45 dark:via-cyan-950/25 dark:to-slate-900/55',
+    valueClass: 'text-teal-800 dark:text-teal-100',
+  },
+  {
+    icon: Syringe,
+    iconClass:
+      'bg-violet-500 text-white shadow-[0_8px_18px_rgba(139,92,246,0.24)]',
+    labelClass: 'text-violet-800/75 dark:text-violet-200/80',
+    surfaceClass:
+      'border-violet-100/70 bg-gradient-to-br from-violet-50/95 via-fuchsia-50/70 to-white/80 dark:border-violet-500/15 dark:from-violet-950/45 dark:via-fuchsia-950/20 dark:to-slate-900/55',
+    valueClass: 'text-violet-800 dark:text-violet-100',
+  },
+  {
+    icon: Wheat,
+    iconClass:
+      'bg-orange-500 text-white shadow-[0_8px_18px_rgba(249,115,22,0.24)]',
+    labelClass: 'text-orange-800/75 dark:text-orange-200/80',
+    surfaceClass:
+      'border-orange-100/70 bg-gradient-to-br from-orange-50/95 via-amber-50/75 to-white/80 dark:border-orange-500/15 dark:from-orange-950/45 dark:via-amber-950/20 dark:to-slate-900/55',
+    valueClass: 'text-orange-800 dark:text-orange-100',
+  },
+  {
+    icon: PersonStanding,
+    iconClass:
+      'bg-blue-500 text-white shadow-[0_8px_18px_rgba(59,130,246,0.24)]',
+    labelClass: 'text-blue-800/75 dark:text-blue-200/80',
+    surfaceClass:
+      'border-blue-100/70 bg-gradient-to-br from-sky-50/95 via-blue-50/75 to-white/80 dark:border-blue-500/15 dark:from-sky-950/45 dark:via-blue-950/20 dark:to-slate-900/55',
+    valueClass: 'text-blue-800 dark:text-blue-100',
+  },
+] as const;
 
-  return (
-    <dl
-      className={
-        isPrimary
-          ? 'mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3'
-          : 'mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2'
-      }
-    >
-      {metrics.map((metric) => (
-        <div
-          className={`rounded-xl p-3.5 ${
-            isPrimary ? 'bg-surface-subtle' : 'bg-surface-subtle/80'
-          }`}
-          key={metric.label}
-        >
-          <dt
-            className={`${
-              isPrimary ? 'text-xs' : 'text-[11px]'
-            } text-text-secondary`}
-          >
-            {metric.label}
-          </dt>
-          <dd
-            className={`text-text-primary mt-0.5 font-bold ${
-              isPrimary ? 'text-lg' : 'text-base'
-            }`}
-          >
-            {metric.value}
-          </dd>
-        </div>
-      ))}
-    </dl>
-  );
+function MetricMiniChart({
+  emptyHint,
+  metric,
+}: {
+  readonly emptyHint: string;
+  readonly metric: DashboardDaySummaryMetric;
+}) {
+  switch (metric.kind) {
+    case 'glucose':
+      return (
+        <GlucoseMiniChart
+          ariaLabel={metric.chartAriaLabel}
+          emptyHint={emptyHint}
+          values={metric.chartValues}
+        />
+      );
+    case 'insulin':
+      return (
+        <InsulinMiniChart
+          ariaLabel={metric.chartAriaLabel}
+          emptyHint={emptyHint}
+          values={metric.chartValues}
+        />
+      );
+    case 'nutrition':
+      return (
+        <NutritionMiniChart
+          ariaLabel={metric.chartAriaLabel}
+          emptyHint={emptyHint}
+          values={metric.chartValues}
+        />
+      );
+    case 'activity':
+      return (
+        <ActivityMiniChart
+          ariaLabel={metric.chartAriaLabel}
+          emptyHint={emptyHint}
+          values={metric.chartValues}
+        />
+      );
+  }
 }
 
 function createFormattedMetrics(
@@ -74,12 +125,11 @@ function createFormattedMetrics(
     summary.summary.totalCarbohydrateGrams,
     { maximumFractionDigits: 0, minimumFractionDigits: 0 },
   );
+  const activityMinutes = Math.floor(summary.summary.totalActivitySeconds / 60);
 
   return {
-    glucoseMeasurements: formatter.formatNumber(
-      summary.summary.glucoseMeasurements,
-    ),
-    medicationDoses: formatter.formatNumber(summary.summary.medicationDoses),
+    glucose: summary.summary.latestTodayGlucoseDisplay ?? '—',
+    totalActivity: formatter.formatDuration({ minutes: activityMinutes }),
     totalCarbohydrates: `${formattedCarbs} ${labels.units.compactMassG}`,
     totalInsulin: `${formattedInsulin} ${labels.units.compactInsulinDose}`,
   };
@@ -109,9 +159,7 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
     <section
       aria-busy={viewModel.isLoading}
       aria-labelledby={titleId}
-      className={`bg-surface h-full rounded-2xl border p-5 shadow-sm sm:col-span-1 lg:col-span-5 ${
-        isError ? 'border-status-danger/40' : 'border-border-default'
-      }`}
+      className="relative col-span-full"
     >
       {viewModel.state === 'loading' ? (
         <>
@@ -121,84 +169,98 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
           <span className="sr-only" role="status">
             {viewModel.message}
           </span>
-          <div aria-hidden="true" className="space-y-4">
-            <div className="space-y-2">
-              <div className="bg-surface-subtle h-4 w-24 animate-pulse rounded motion-reduce:animate-none" />
-              <div className="bg-surface-subtle h-6 w-40 animate-pulse rounded motion-reduce:animate-none" />
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-control bg-surface-subtle h-16 animate-pulse motion-reduce:animate-none" />
-              <div className="rounded-control bg-surface-subtle h-16 animate-pulse motion-reduce:animate-none" />
-              <div className="rounded-control bg-surface-subtle h-16 animate-pulse motion-reduce:animate-none" />
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="rounded-control bg-surface-subtle h-14 animate-pulse motion-reduce:animate-none" />
-              <div className="rounded-control bg-surface-subtle h-14 animate-pulse motion-reduce:animate-none" />
+          <div aria-hidden="true" className="space-y-3">
+            <div className="h-7 w-32 animate-pulse rounded bg-white/80 motion-reduce:animate-none dark:bg-slate-800" />
+            <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  className="h-36 animate-pulse rounded-[1.35rem] bg-white/80 motion-reduce:animate-none dark:bg-slate-800"
+                  key={index}
+                />
+              ))}
             </div>
           </div>
         </>
       ) : null}
 
       {viewModel.state === 'ready' ? (
-        <>
-          <div className="flex items-start gap-4">
-            <div
-              aria-hidden="true"
-              className="grid size-11 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600"
+        <div>
+          <div className="mb-2.5 flex items-center justify-between gap-3">
+            <h2
+              className="text-[1.25rem] font-extrabold tracking-tight text-[#1e3a5f] sm:text-[1.35rem] dark:text-white"
+              id={titleId}
             >
-              <CalendarDays size={20} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-text-secondary text-sm">{labels.eyebrow}</p>
-              <h2
-                className="text-text-primary mt-0.5 text-lg font-bold"
-                id={titleId}
-              >
-                {labels.title}
-              </h2>
-              <p className="text-text-secondary mt-1 text-sm">
-                <time dateTime={viewModel.dayDate ?? undefined}>
-                  {viewModel.displayDayLabel}
-                </time>
-              </p>
-            </div>
+              {labels.title}
+            </h2>
+            <a
+              className="focus-visible:outline-interactive-primary inline-flex min-h-9 items-center gap-1 text-sm font-bold text-blue-600 transition hover:text-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 dark:text-blue-300"
+              href="/timeline"
+            >
+              <span>{labels.viewDetails}</span>
+              <ArrowRight aria-hidden="true" size={16} />
+            </a>
           </div>
-          <MetricList metrics={viewModel.primaryMetrics} variant="primary" />
-          <MetricList
-            metrics={viewModel.secondaryMetrics}
-            variant="secondary"
-          />
-        </>
+
+          <dl className="grid grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-4 lg:gap-3">
+            {viewModel.metrics.map((metric, index) => {
+              const visual = metricVisuals[index] ?? metricVisuals[3];
+              const Icon = visual.icon;
+
+              return (
+                <div
+                  className={`relative min-h-[9.25rem] overflow-hidden rounded-[1.25rem] border p-3 shadow-[0_10px_28px_rgba(15,23,42,0.05)] sm:min-h-[9.75rem] sm:rounded-[1.35rem] sm:p-3.5 ${visual.surfaceClass}`}
+                  key={metric.label}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`relative z-10 grid size-11 place-items-center rounded-full sm:size-12 ${visual.iconClass}`}
+                  >
+                    <Icon size={20} strokeWidth={2.2} />
+                  </span>
+                  <dt
+                    className={`relative z-10 mt-2 text-[0.8125rem] font-semibold sm:text-sm ${visual.labelClass}`}
+                  >
+                    {metric.label}
+                  </dt>
+                  <dd
+                    className={`relative z-10 mt-0.5 text-[1.25rem] font-black tracking-tight tabular-nums sm:mt-1 sm:text-[1.35rem] ${visual.valueClass}`}
+                  >
+                    {metric.value}
+                  </dd>
+                  <MetricMiniChart
+                    emptyHint={labels.chartEmptyHint}
+                    metric={metric}
+                  />
+                  {metric.secondaryText ? (
+                    <dd
+                      className={`relative z-10 mt-1 text-xs font-medium ${visual.labelClass}`}
+                    >
+                      {metric.secondaryText}
+                    </dd>
+                  ) : null}
+                </div>
+              );
+            })}
+          </dl>
+        </div>
       ) : null}
 
       {viewModel.state === 'empty' || viewModel.state === 'error' ? (
         <div
           aria-live={isError ? 'assertive' : 'polite'}
-          className="flex items-start gap-4"
+          className="rounded-[1.35rem] border border-white/80 bg-white/90 p-4 shadow-[0_14px_36px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-slate-900/90"
           role={isError ? 'alert' : 'status'}
         >
-          <div
-            aria-hidden="true"
-            className={`grid size-11 shrink-0 place-items-center rounded-xl ${
-              isError
-                ? 'bg-status-danger/10 text-status-danger'
-                : 'bg-violet-500/10 text-violet-600'
+          <h2 className="text-text-primary text-lg font-bold" id={titleId}>
+            {labels.title}
+          </h2>
+          <p
+            className={`mt-2 text-sm ${
+              isError ? 'text-status-danger' : 'text-text-secondary'
             }`}
           >
-            <CalendarDays size={20} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h2 className="text-text-primary text-lg font-bold" id={titleId}>
-              {labels.title}
-            </h2>
-            <p
-              className={`mt-2 text-sm ${
-                isError ? 'text-status-danger' : 'text-text-secondary'
-              }`}
-            >
-              {viewModel.message}
-            </p>
-          </div>
+            {viewModel.message}
+          </p>
         </div>
       ) : null}
     </section>

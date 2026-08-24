@@ -14,6 +14,7 @@ import { useRef, useState } from 'react';
 import { QuickAddHost } from '../quick-add/quick-add-host';
 
 interface QuickAddRootProps {
+  readonly floatingActionButtonClassName?: string;
   readonly onOpenChange?: (open: boolean) => void;
   readonly onActivitySubmit?: (entry: ActivityQuickAddEntry) => void;
   readonly onGlucoseSubmit?: (entry: GlucoseQuickAddEntry) => void;
@@ -26,6 +27,7 @@ interface QuickAddRootProps {
 }
 
 export function QuickAddRoot({
+  floatingActionButtonClassName = 'timeline-fab right-[max(1rem,env(safe-area-inset-right))] hidden lg:grid sm:right-[max(1.5rem,env(safe-area-inset-right))]',
   onOpenChange,
   onActivitySubmit,
   onGlucoseSubmit,
@@ -43,7 +45,7 @@ export function QuickAddRoot({
 
   return (
     <QuickAddHost
-      floatingActionButtonClassName="timeline-fab right-4 sm:right-6"
+      floatingActionButtonClassName={floatingActionButtonClassName}
       floatingActionButtonRef={fabRef}
       onActivitySubmit={onActivitySubmit}
       onGlucoseSubmit={onGlucoseSubmit}

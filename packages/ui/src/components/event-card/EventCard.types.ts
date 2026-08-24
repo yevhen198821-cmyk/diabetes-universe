@@ -12,6 +12,8 @@ export type EventCardType =
 
 export type EventCardVariant = 'compact' | 'standard';
 
+export type EventCardAppearance = 'default' | 'vibrant';
+
 export type EventCardStatus =
   'default' | 'completed' | 'scheduled' | 'missed' | 'error';
 
@@ -28,4 +30,5 @@ export interface EventCardProps {
   readonly icon?: ReactNode;
   readonly onClick?: MouseEventHandler<HTMLButtonElement>;
   readonly variant?: EventCardVariant;
+  readonly appearance?: EventCardAppearance;
 }

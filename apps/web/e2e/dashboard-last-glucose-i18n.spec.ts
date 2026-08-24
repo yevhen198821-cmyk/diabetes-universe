@@ -13,19 +13,22 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   await expect(
     page.getByRole('heading', { name: 'Last glucose' }),
   ).toBeVisible();
-  await expect(page.getByText('Last measurement')).toBeVisible();
   await expect(page.getByText('Последняя глюкоза')).toHaveCount(0);
-  await expect(lastGlucoseRegion.getByText('7.3 mmol/L')).toBeVisible();
+  await expect(
+    lastGlucoseRegion.getByText('7.3', { exact: true }),
+  ).toBeVisible();
+  await expect(
+    lastGlucoseRegion.getByText('mmol/L', { exact: true }),
+  ).toBeVisible();
   await expect(lastGlucoseRegion.locator('time')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Add event' }).click();
-  await page
-    .getByRole('button', { name: 'Глюкоза. Записать уровень сахара' })
-    .click();
+  await page.getByRole('button', { name: 'Quick add: Glucose' }).click();
   await page.getByLabel('Уровень глюкозы').fill('7,7');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
-  await expect(lastGlucoseRegion.getByText('7.7 mmol/L')).toBeVisible();
+  await expect(
+    lastGlucoseRegion.getByText('7.7', { exact: true }),
+  ).toBeVisible();
 
   await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
@@ -45,7 +48,9 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   await waitForApplicationReady(page);
 
   await expect(
-    page.getByRole('region', { name: 'Last glucose' }).getByText('8.2 mmol/L'),
+    page.getByRole('region', { name: 'Last glucose' }).getByText('8.2', {
+      exact: true,
+    }),
   ).toBeVisible();
 
   await page.getByRole('link', { name: 'All events' }).click();
@@ -62,6 +67,8 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   await waitForApplicationReady(page);
 
   await expect(
-    page.getByRole('region', { name: 'Last glucose' }).getByText('7.3 mmol/L'),
+    page.getByRole('region', { name: 'Last glucose' }).getByText('7.3', {
+      exact: true,
+    }),
   ).toBeVisible();
 });

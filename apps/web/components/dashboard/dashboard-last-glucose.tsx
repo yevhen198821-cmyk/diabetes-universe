@@ -1,12 +1,16 @@
 'use client';
 
-import { ClockAlert, Droplets } from 'lucide-react';
+import { Clock, ClockAlert, Droplets } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { resolveDashboardMedicalEventSourceLabel } from '../../lib/dashboard/dashboard-event-source-labels';
 import { useLocalization } from '../../lib/platform/react/use-localization';
-import { formatTimelineGlucoseDisplayValue } from '../../lib/timeline/presentation';
+import {
+  formatTimelineGlucoseDisplayValue,
+  mapTimelineEventCardPresentation,
+} from '../../lib/timeline/presentation';
 import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
+import { DashboardHeroScenery } from './dashboard-hero-scenery';
 import { resolveDashboardLastGlucoseLabels } from './dashboard-last-glucose-labels';
 import {
   createDashboardLastGlucoseViewModel,
@@ -32,6 +36,17 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
       presentationDependencies,
     );
   }, [presentationDependencies, props]);
+  const measurement = useMemo(() => {
+    if (props.state !== 'ready') {
+      return null;
+    }
+
+    return mapTimelineEventCardPresentation(
+      props.glucose.event,
+      presentationDependencies,
+      props.glucose.displayTime,
+    );
+  }, [presentationDependencies, props]);
   const sourceLabel = useMemo(() => {
     if (props.state !== 'ready') {
       return null;
@@ -51,15 +66,25 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
     [formattedValue, labels, props, sourceLabel],
   );
   const isError = viewModel.state === 'error';
+  const hasColorHero =
+    viewModel.state === 'ready' || viewModel.state === 'loading';
+  const statusMessage =
+    viewModel.staleMessage ?? viewModel.freshMessage ?? null;
 
   return (
     <section
       aria-busy={viewModel.isLoading}
       aria-labelledby={titleId}
-      className={`bg-surface h-full rounded-2xl border p-5 shadow-sm sm:col-span-1 lg:col-span-7 ${
-        isError ? 'border-status-danger/40' : 'border-border-default'
+      className={`relative min-h-[17rem] overflow-hidden rounded-[1.75rem] border p-4 shadow-[0_24px_70px_rgba(14,116,144,0.2)] sm:min-h-[18.5rem] sm:p-6 lg:min-h-[19rem] ${
+        isError
+          ? 'border-status-danger/40 bg-surface'
+          : hasColorHero
+            ? 'border-white/35 bg-gradient-to-br from-sky-300/90 via-cyan-400/85 to-teal-500/90 text-white dark:border-white/10'
+            : 'border-border-default bg-surface'
       }`}
     >
+      {hasColorHero ? <DashboardHeroScenery /> : null}
+
       {viewModel.state === 'loading' ? (
         <>
           <h2 className="sr-only" id={titleId}>
@@ -68,64 +93,65 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
           <span className="sr-only" role="status">
             {viewModel.message}
           </span>
-          <div aria-hidden="true" className="flex items-center gap-4">
-            <div className="rounded-control bg-surface-subtle size-11 shrink-0 animate-pulse motion-reduce:animate-none" />
-            <div className="min-w-0 flex-1 space-y-2">
-              <div className="bg-surface-subtle h-4 w-28 animate-pulse rounded motion-reduce:animate-none" />
-              <div className="bg-surface-subtle h-5 w-36 max-w-full animate-pulse rounded motion-reduce:animate-none" />
-            </div>
-            <div className="w-24 shrink-0 space-y-2">
-              <div className="bg-surface-subtle ml-auto h-6 w-24 animate-pulse rounded motion-reduce:animate-none" />
-              <div className="bg-surface-subtle ml-auto h-4 w-12 animate-pulse rounded motion-reduce:animate-none" />
-            </div>
+          <div aria-hidden="true" className="relative z-10 space-y-4">
+            <div className="h-5 w-40 animate-pulse rounded bg-white/35 motion-reduce:animate-none" />
+            <div className="h-14 w-48 animate-pulse rounded-2xl bg-white/35 motion-reduce:animate-none" />
+            <div className="h-9 w-56 max-w-full animate-pulse rounded-full bg-white/25 motion-reduce:animate-none" />
           </div>
         </>
       ) : null}
 
-      {viewModel.state === 'ready' ? (
-        <div className="flex items-center gap-4">
-          <div
-            aria-hidden="true"
-            className="grid size-11 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-600"
-          >
-            <Droplets size={20} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-text-secondary text-sm">{labels.eyebrow}</p>
-            <h2
-              className="text-text-primary mt-0.5 text-lg font-bold"
-              id={titleId}
-            >
-              {labels.title}
-            </h2>
-            {viewModel.sourceLabel ? (
-              <p className="text-text-secondary mt-1 text-xs">
-                {viewModel.sourceLabel}
-              </p>
-            ) : null}
-          </div>
-          <div className="shrink-0 text-right">
-            <p className="text-text-primary text-xl font-bold">
-              {viewModel.value}
+      {viewModel.state === 'ready' && measurement ? (
+        <div className="relative z-10 flex h-full max-w-[62%] flex-col justify-between sm:max-w-[56%] lg:max-w-[50%]">
+          <div>
+            <div className="flex items-center gap-2.5 text-sm font-semibold text-white/95 sm:text-base">
+              <span className="grid size-9 place-items-center rounded-full bg-white text-teal-500 shadow-[0_8px_20px_rgba(15,23,42,0.14)]">
+                <Droplets aria-hidden="true" size={18} strokeWidth={2.3} />
+              </span>
+              <h2 id={titleId}>{labels.title}</h2>
+            </div>
+            <p className="mt-4 flex flex-wrap items-end gap-x-2.5 gap-y-1 text-white drop-shadow-sm">
+              <span className="text-[clamp(3rem,12vw,5.75rem)] leading-[0.86] font-black tracking-[-0.06em] tabular-nums">
+                {measurement.value}
+              </span>
+              <span className="pb-1 text-lg font-bold sm:pb-1.5 sm:text-xl">
+                {measurement.unit}
+              </span>
             </p>
-            <time
-              className="text-text-secondary mt-0.5 block text-sm tabular-nums"
-              dateTime={viewModel.dateTime ?? undefined}
-            >
-              {viewModel.displayTime}
-            </time>
-            {viewModel.isStale && viewModel.staleMessage ? (
-              <p
-                className="mt-1 inline-flex items-center gap-1 text-xs text-amber-800"
-                role="status"
+          </div>
+
+          <div className="mt-4 space-y-1.5 text-sm font-medium text-white/95 sm:text-[0.925rem]">
+            <p className="flex flex-wrap items-center gap-2">
+              <time
+                className="inline-flex items-center gap-1.5"
+                dateTime={viewModel.dateTime ?? undefined}
               >
-                <ClockAlert
-                  aria-hidden="true"
-                  className="size-3.5 shrink-0"
-                  size={14}
-                />
-                <span>{viewModel.staleMessage}</span>
-              </p>
+                <Clock aria-hidden="true" size={15} />
+                {viewModel.displayTime}
+              </time>
+              {statusMessage ? (
+                <>
+                  <span aria-hidden="true" className="text-white/65">
+                    •
+                  </span>
+                  <span
+                    className={
+                      viewModel.isStale
+                        ? 'inline-flex items-center gap-1.5'
+                        : undefined
+                    }
+                    role={viewModel.isStale ? 'status' : undefined}
+                  >
+                    {viewModel.isStale ? (
+                      <ClockAlert aria-hidden="true" size={15} />
+                    ) : null}
+                    {statusMessage}
+                  </span>
+                </>
+              ) : null}
+            </p>
+            {viewModel.sourceLabel ? (
+              <p className="text-xs text-white/75">{viewModel.sourceLabel}</p>
             ) : null}
           </div>
         </div>
@@ -134,21 +160,24 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
       {viewModel.state === 'empty' || viewModel.state === 'error' ? (
         <div
           aria-live={isError ? 'assertive' : 'polite'}
-          className="flex items-start gap-4"
+          className="relative z-10 flex items-start gap-4"
           role={isError ? 'alert' : 'status'}
         >
           <div
             aria-hidden="true"
-            className={`grid size-11 shrink-0 place-items-center rounded-xl ${
+            className={`grid size-12 shrink-0 place-items-center rounded-2xl ${
               isError
                 ? 'bg-status-danger/10 text-status-danger'
-                : 'bg-sky-500/10 text-sky-600'
+                : 'bg-gradient-to-br from-cyan-400/25 via-teal-300/20 to-blue-300/25 text-teal-700 dark:text-teal-200'
             }`}
           >
-            <Droplets size={20} />
+            <Droplets size={22} />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-text-primary text-lg font-bold" id={titleId}>
+            <h2
+              className="text-text-primary text-xl font-extrabold"
+              id={titleId}
+            >
               {labels.title}
             </h2>
             <p

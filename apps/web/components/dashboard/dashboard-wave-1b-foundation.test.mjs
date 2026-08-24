@@ -15,22 +15,39 @@ const nextActionSource = readFileSync(
   fileURLToPath(new URL('./dashboard-next-action.tsx', import.meta.url)),
   'utf8',
 );
+const quickActionsSource = readFileSync(
+  fileURLToPath(new URL('./dashboard-quick-actions.tsx', import.meta.url)),
+  'utf8',
+);
+const rootSource = readFileSync(
+  fileURLToPath(new URL('./dashboard-root.tsx', import.meta.url)),
+  'utf8',
+);
 
-test('dashboard shell uses semantic background tokens', () => {
-  assert.match(shellSource, /bg-background text-text-primary/);
-  assert.doesNotMatch(shellSource, /dark:/);
+test('dashboard shell keeps semantic page foundation under decorative layers', () => {
+  assert.match(shellSource, /appPageShellClassName/);
+  assert.match(shellSource, /AppPageBackground/);
+  assert.match(shellSource, /id="main-content"/);
 });
 
-test('dashboard blocks preserve Wave 1A status-first order in shell', () => {
+test('dashboard blocks preserve Wave 1C home order without next action', () => {
   const lastGlucoseIndex = shellSource.indexOf('{lastGlucose}');
-  const nextActionIndex = shellSource.indexOf('{nextAction}');
+  const daySummaryIndex = shellSource.indexOf('{daySummary}');
+  const quickActionsIndex = shellSource.indexOf('{quickActions}');
+  const recentEventsIndex = shellSource.indexOf('{recentEvents}');
 
   assert.ok(lastGlucoseIndex >= 0);
-  assert.ok(nextActionIndex > lastGlucoseIndex);
+  assert.ok(daySummaryIndex > lastGlucoseIndex);
+  assert.ok(quickActionsIndex > daySummaryIndex);
+  assert.ok(recentEventsIndex > quickActionsIndex);
+  assert.equal(shellSource.includes('{nextAction}'), false);
+  assert.doesNotMatch(rootSource, /DashboardNextAction/);
 });
 
-test('dashboard migrated blocks avoid raw slate page surfaces', () => {
-  assert.match(lastGlucoseSource, /bg-surface|border-border-default/);
-  assert.doesNotMatch(lastGlucoseSource, /dark:/);
-  assert.doesNotMatch(nextActionSource, /dark:/);
+test('Wave 1C decorative color does not remove semantic accessibility states', () => {
+  assert.match(lastGlucoseSource, /role="status"/);
+  assert.match(lastGlucoseSource, /text-text-primary/);
+  assert.match(nextActionSource, /aria-labelledby=\{titleId\}/);
+  assert.match(nextActionSource, /text-status-danger/);
+  assert.match(quickActionsSource, /focus-visible:outline-interactive-primary/);
 });

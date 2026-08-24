@@ -51,7 +51,7 @@ export function TimelineLoadMore({
       <button
         aria-busy={isLoading}
         aria-controls={ariaControls}
-        className="border-border-default bg-surface text-text-primary hover:border-border-strong hover:bg-surface-subtle focus-visible:outline-interactive-primary min-h-11 w-full rounded-xl border px-5 py-3 text-sm font-semibold shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+        className="focus-visible:outline-interactive-primary min-h-11 w-full rounded-xl border border-white/80 bg-white/75 px-5 py-3 text-sm font-semibold text-[#1e3a5f] shadow-[0_10px_28px_rgba(15,23,42,0.05)] backdrop-blur transition hover:border-teal-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto dark:border-white/10 dark:bg-slate-900/75 dark:text-white dark:hover:border-teal-800"
         disabled={isLoading}
         onClick={handleClick}
         type="button"
