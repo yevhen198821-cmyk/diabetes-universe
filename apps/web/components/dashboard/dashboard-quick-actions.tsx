@@ -82,7 +82,9 @@ export function DashboardQuickActions({
     [localization],
   );
   const actions = quickAddActions.filter(
-    (action): action is (typeof quickAddActions)[number] & {
+    (
+      action,
+    ): action is (typeof quickAddActions)[number] & {
       category: VisibleQuickAddCategory;
     } => isVisibleQuickAddCategory(action.category),
   );
