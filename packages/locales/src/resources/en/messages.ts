@@ -130,7 +130,7 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'timeline.eventKind.glucose': 'Glucose',
   'timeline.eventKind.insulin': 'Insulin',
   'timeline.eventKind.medication': 'Medication',
-  'timeline.eventKind.note': 'Note',
+  'timeline.eventKind.note': 'Notes',
   'timeline.eventKind.nutrition': 'Nutrition',
   'timeline.eventCard.openAriaPrefix': 'Open event',
   'timeline.filter.activity': 'Activity',

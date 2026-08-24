@@ -33,7 +33,6 @@ test('dashboard header renders localized English copy inside platform provider',
         TestPlatformProvider,
         { runtime },
         createElement(DashboardHeader, {
-          onAddEvent: () => {},
           referenceTime: new Date('2026-08-01T12:00:00.000Z'),
           state: 'ready',
           user: { displayName: 'Anna Example' },
@@ -44,14 +43,13 @@ test('dashboard header renders localized English copy inside platform provider',
 
   try {
     assert.match(document.body.textContent ?? '', /Home/);
-    assert.match(document.body.textContent ?? '', /Add event/);
     assert.equal(
       document.body.textContent?.includes('Добавить событие'),
       false,
     );
     assert.equal(
-      document.querySelector('button[aria-label="Add event"]') !== null,
-      true,
+      document.querySelector('button[aria-label="Add event"]'),
+      null,
     );
     assert.equal(document.querySelector('time[dateTime]') !== null, true);
   } finally {

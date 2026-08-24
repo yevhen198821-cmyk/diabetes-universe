@@ -48,7 +48,6 @@ export function DashboardRoot() {
   const [quickAddState, setQuickAddState] = useState(
     createInitialQuickAddControllerState,
   );
-  const headerActionRef = useRef<HTMLButtonElement>(null);
   const fabRef = useRef<HTMLButtonElement>(null);
   const nextActionRef = useRef<HTMLButtonElement>(null);
   const referenceTime = useMemo(() => new Date(), []);
@@ -113,11 +112,7 @@ export function DashboardRoot() {
   );
 
   const returnFocusRef =
-    quickAddState.lastOpenTrigger === 'header'
-      ? headerActionRef
-      : quickAddState.lastOpenTrigger === 'next-action'
-        ? nextActionRef
-        : fabRef;
+    quickAddState.lastOpenTrigger === 'next-action' ? nextActionRef : fabRef;
 
   const requestOpen = (
     trigger: QuickAddOpenTrigger,
@@ -172,9 +167,6 @@ export function DashboardRoot() {
         }
         header={
           <DashboardHeader
-            addEventButtonRef={headerActionRef}
-            addEventDisabled={quickAddState.isOpen}
-            onAddEvent={() => requestOpen('header')}
             onAvatarClick={() => router.push('/account')}
             referenceTime={referenceTime}
             state={isTimelineHydrating ? 'loading' : 'ready'}

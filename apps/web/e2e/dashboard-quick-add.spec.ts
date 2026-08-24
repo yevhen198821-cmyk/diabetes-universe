@@ -17,34 +17,19 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
 
   await expect(daySummary.getByText('4 U')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Add event' }).click();
-  await expect(
-    page.getByRole('dialog', { name: 'Добавить событие' }),
-  ).toBeVisible();
+  for (const category of [
+    'Glucose',
+    'Insulin',
+    'Nutrition',
+    'Activity',
+    'Notes',
+  ]) {
+    await expect(
+      page.getByRole('button', { name: `Quick add: ${category}` }),
+    ).toBeVisible();
+  }
 
-  const quickAddDialog = page.getByRole('dialog', { name: 'Добавить событие' });
-  await expect(
-    quickAddDialog.getByRole('button', { name: /Глюкоза/ }),
-  ).toBeVisible();
-  await expect(
-    quickAddDialog.getByRole('button', { name: /Инсулин/ }),
-  ).toBeVisible();
-  await expect(
-    quickAddDialog.getByRole('button', { name: /Питание/ }),
-  ).toBeVisible();
-  await expect(
-    quickAddDialog.getByRole('button', { name: /Лекарство/ }),
-  ).toBeVisible();
-  await expect(
-    quickAddDialog.getByRole('button', { name: /Активность/ }),
-  ).toBeVisible();
-  await expect(
-    quickAddDialog.getByRole('button', { name: /Заметка/ }),
-  ).toBeVisible();
-
-  await page
-    .getByRole('button', { name: 'Инсулин. Записать дозу инсулина' })
-    .click();
+  await page.getByRole('button', { name: 'Quick add: Insulin' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Добавить инсулин' }),
   ).toBeVisible();

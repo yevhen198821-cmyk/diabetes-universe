@@ -1,9 +1,8 @@
 'use client';
 
-import { Button } from '@diabetes-universe/ui';
-import { Plus, UserRound } from 'lucide-react';
+import { UserRound } from 'lucide-react';
 import Image from 'next/image';
-import { useMemo, useState, type ReactNode, type RefObject } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 
 import { DashboardBrandMark } from './dashboard-brand-mark';
 
@@ -21,14 +20,11 @@ import { resolveDashboardHeaderLabels } from './dashboard-header-labels';
 
 const avatarTargetClassName =
   'grid size-11 shrink-0 place-items-center overflow-hidden rounded-full';
-const desktopActionClassName =
-  'hidden min-h-11 items-center justify-center gap-2 lg:inline-flex';
 
 export interface DashboardHeaderProps extends Omit<
   DashboardHeaderModelInput,
-  'date' | 'labels'
+  'addEventDisabled' | 'date' | 'labels' | 'onAddEvent'
 > {
-  readonly addEventButtonRef?: RefObject<HTMLButtonElement | null>;
   readonly referenceTime?: Date;
 }
 
@@ -103,7 +99,6 @@ function DashboardAvatar({
 }
 
 export function DashboardHeader({
-  addEventButtonRef,
   referenceTime,
   ...props
 }: DashboardHeaderProps) {
@@ -133,8 +128,10 @@ export function DashboardHeader({
   );
   const viewModel = createDashboardHeaderViewModel({
     ...props,
+    addEventDisabled: false,
     date: headerDate,
     labels,
+    onAddEvent: () => {},
   });
 
   return (
@@ -168,18 +165,6 @@ export function DashboardHeader({
               {viewModel.dateLabel}
             </time>
           ) : null}
-
-          <Button
-            aria-label={viewModel.addEventLabel}
-            className={`${desktopActionClassName} border-0 bg-gradient-to-r from-teal-500 via-cyan-500 to-blue-500 text-white shadow-[0_10px_24px_rgba(6,182,212,0.22)] hover:brightness-105`}
-            disabled={viewModel.addEventDisabled}
-            onClick={viewModel.onAddEvent}
-            ref={addEventButtonRef}
-            type="button"
-          >
-            <Plus aria-hidden="true" size={18} />
-            <span>{viewModel.addEventLabel}</span>
-          </Button>
 
           <DashboardAvatar
             avatarInitials={viewModel.avatarInitials}

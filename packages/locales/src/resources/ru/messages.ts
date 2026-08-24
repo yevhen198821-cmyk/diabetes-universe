@@ -80,7 +80,7 @@ export const russianDraftMessages = defineDraftMessages({
   'timeline.eventKind.glucose': 'Глюкоза',
   'timeline.eventKind.insulin': 'Инсулин',
   'timeline.eventKind.medication': 'Лекарство',
-  'timeline.eventKind.note': 'Заметка',
+  'timeline.eventKind.note': 'Заметки',
   'timeline.eventKind.nutrition': 'Питание',
   'timeline.mealType.breakfast': 'Завтрак',
   'timeline.mealType.dinner': 'Ужин',

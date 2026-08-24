@@ -22,6 +22,7 @@ const HOME_TIMELINE_KEYS = [
   'timeline.eventKind.glucose',
   'timeline.eventKind.insulin',
   'timeline.eventKind.nutrition',
+  'timeline.eventKind.note',
   'timeline.mealType.breakfast',
   'timeline.units.insulinDose',
   'timeline.units.massG',

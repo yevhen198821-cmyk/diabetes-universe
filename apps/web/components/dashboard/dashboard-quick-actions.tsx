@@ -8,12 +8,15 @@ import type { QuickAddOpenCategory } from '../../lib/quick-add/quick-add-control
 import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
 import { resolveDashboardQuickActionsLabels } from './dashboard-quick-actions-labels';
 
-const visibleCategories: readonly QuickAddOpenCategory[] = [
+const visibleCategories = [
   'glucose',
   'insulin',
   'nutrition',
   'activity',
-];
+  'note',
+] as const satisfies readonly QuickAddOpenCategory[];
+
+type VisibleQuickAddCategory = (typeof visibleCategories)[number];
 
 const iconToneByCategory: Record<QuickAddOpenCategory, string> = {
   glucose: 'bg-teal-500 text-white',
@@ -21,15 +24,19 @@ const iconToneByCategory: Record<QuickAddOpenCategory, string> = {
   nutrition: 'bg-orange-500 text-white',
   activity: 'bg-blue-500 text-white',
   medication: 'bg-rose-500 text-white',
-  note: 'bg-slate-500 text-white',
+  note: 'bg-emerald-500 text-white',
 };
 
-const eventKindByCategory = {
+const eventKindByCategory: Record<
+  VisibleQuickAddCategory,
+  'activity' | 'glucose' | 'insulin' | 'note' | 'nutrition'
+> = {
   activity: 'activity',
   glucose: 'glucose',
   insulin: 'insulin',
+  note: 'note',
   nutrition: 'nutrition',
-} as const;
+};
 
 function OrganicAccent({ side }: { readonly side: 'left' | 'right' }) {
   return (
@@ -58,8 +65,10 @@ export interface DashboardQuickActionsProps {
   readonly onOpenCategory: (category: QuickAddOpenCategory) => void;
 }
 
-function toQuickAddOpenCategory(category: string): QuickAddOpenCategory {
-  return category as QuickAddOpenCategory;
+function isVisibleQuickAddCategory(
+  category: string,
+): category is VisibleQuickAddCategory {
+  return (visibleCategories as readonly string[]).includes(category);
 }
 
 export function DashboardQuickActions({
@@ -72,8 +81,10 @@ export function DashboardQuickActions({
     () => resolveDashboardQuickActionsLabels(localization).title,
     [localization],
   );
-  const actions = quickAddActions.filter((action) =>
-    visibleCategories.includes(toQuickAddOpenCategory(action.category)),
+  const actions = quickAddActions.filter(
+    (action): action is (typeof quickAddActions)[number] & {
+      category: VisibleQuickAddCategory;
+    } => isVisibleQuickAddCategory(action.category),
   );
 
   return (
@@ -93,14 +104,11 @@ export function DashboardQuickActions({
           {sectionLabel}
         </h2>
 
-        <div className="grid grid-cols-4 gap-1.5 sm:gap-3">
+        <div className="grid grid-cols-5 gap-1 sm:gap-2.5">
           {actions.map((action) => {
-            const category = toQuickAddOpenCategory(action.category);
-            const eventKind =
-              eventKindByCategory[category as keyof typeof eventKindByCategory];
-            const label = eventKind
-              ? presentationDependencies.labels.eventKinds[eventKind]
-              : action.label;
+            const category = action.category;
+            const eventKind = eventKindByCategory[category];
+            const label = presentationDependencies.labels.eventKinds[eventKind];
 
             return (
               <button
@@ -113,15 +121,15 @@ export function DashboardQuickActions({
               >
                 <span
                   aria-hidden="true"
-                  className="mx-auto grid size-[4.25rem] place-items-center rounded-full bg-white/95 shadow-[0_14px_34px_rgba(15,23,42,0.10)] ring-1 ring-white/80 transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95 sm:size-[4.75rem]"
+                  className="mx-auto grid size-[3.65rem] place-items-center rounded-full bg-white/95 shadow-[0_14px_34px_rgba(15,23,42,0.10)] ring-1 ring-white/80 transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95 sm:size-[4.5rem] md:size-[4.75rem]"
                 >
                   <span
-                    className={`grid size-11 place-items-center rounded-full sm:size-12 ${iconToneByCategory[category]}`}
+                    className={`grid size-10 place-items-center rounded-full sm:size-11 md:size-12 ${iconToneByCategory[category]}`}
                   >
                     {action.icon}
                   </span>
                 </span>
-                <span className="mt-1.5 block truncate text-[11px] font-semibold text-slate-700 sm:mt-2 sm:text-xs dark:text-slate-200">
+                <span className="mt-1 block truncate px-0.5 text-[10px] font-semibold text-slate-700 sm:mt-1.5 sm:text-[11px] md:text-xs dark:text-slate-200">
                   {label}
                 </span>
               </button>

@@ -70,6 +70,12 @@ test('quick add category buttons open existing quick add forms', async ({
 
   await page.getByRole('button', { name: 'Quick add: Glucose' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('button', { name: 'Quick add: Notes' }).click();
+  await expect(
+    page.getByRole('dialog', { name: 'Добавить заметку' }),
+  ).toBeVisible();
 });
 
 test('ru-RU Home chrome stays fully localized without English dashboard strings', async ({

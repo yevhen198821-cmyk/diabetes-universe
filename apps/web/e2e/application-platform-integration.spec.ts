@@ -43,10 +43,7 @@ test('dashboard to timeline client navigation preserves timeline store state', a
 
   await expect(daySummary.getByText('4 U')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Add event' }).click();
-  await page
-    .getByRole('button', { name: 'Инсулин. Записать дозу инсулина' })
-    .click();
+  await page.getByRole('button', { name: 'Quick add: Insulin' }).click();
   await page.getByRole('button', { name: /Препарат/ }).click();
   await page.getByRole('button', { name: 'NovoRapid' }).click();
   await page.getByLabel('Доза').fill('3');

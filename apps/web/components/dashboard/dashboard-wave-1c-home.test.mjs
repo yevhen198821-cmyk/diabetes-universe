@@ -24,6 +24,10 @@ const summarySource = readFileSync(
   fileURLToPath(new URL('./dashboard-day-summary.tsx', import.meta.url)),
   'utf8',
 );
+const headerSource = readFileSync(
+  fileURLToPath(new URL('./dashboard-header.tsx', import.meta.url)),
+  'utf8',
+);
 const quickActionsSource = readFileSync(
   fileURLToPath(new URL('./dashboard-quick-actions.tsx', import.meta.url)),
   'utf8',
@@ -61,10 +65,23 @@ test('today summary presents four distinct metric visual slots', () => {
   assert.match(summarySource, /PersonStanding/);
 });
 
-test('quick actions expose only approved high-frequency categories', () => {
-  for (const category of ['glucose', 'insulin', 'nutrition', 'activity']) {
+test('quick actions expose approved high-frequency categories including notes', () => {
+  for (const category of [
+    'glucose',
+    'insulin',
+    'nutrition',
+    'activity',
+    'note',
+  ]) {
     assert.match(quickActionsSource, new RegExp(`'${category}'`));
   }
+});
+
+test('header keeps brand and account affordance without duplicate add-event CTA', () => {
+  assert.match(headerSource, /DashboardBrandMark/);
+  assert.match(headerSource, /DashboardAvatar/);
+  assert.doesNotMatch(headerSource, /viewModel\.addEventLabel/);
+  assert.doesNotMatch(headerSource, /aria-label=\{viewModel\.addEventLabel\}/);
 });
 
 test('mobile navigation links only to real routes', () => {

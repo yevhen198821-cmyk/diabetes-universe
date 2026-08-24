@@ -47,10 +47,7 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
     await expect(timeElement).toHaveText(/\d{1,2}:\d{2}/);
   }
 
-  await page.getByRole('button', { name: 'Add event' }).click();
-  await page
-    .getByRole('button', { name: 'Инсулин. Записать дозу инсулина' })
-    .click();
+  await page.getByRole('button', { name: 'Quick add: Insulin' }).click();
   await page.getByRole('button', { name: /Препарат/ }).click();
   await page.getByRole('button', { name: 'NovoRapid' }).click();
   await page.getByLabel('Доза').fill('5');
@@ -59,10 +56,7 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await expect(recentEvents.getByText('5 U', { exact: true })).toBeVisible();
   await expect(recentEvents.locator('li')).toHaveCount(3);
 
-  await page.getByRole('button', { name: 'Add event' }).click();
-  await page
-    .getByRole('button', { name: 'Питание. Записать приём пищи' })
-    .click();
+  await page.getByRole('button', { name: 'Quick add: Nutrition' }).click();
   await page.getByRole('button', { name: /Тип приёма пищи/ }).click();
   await page.getByRole('button', { name: 'Завтрак' }).click();
   await page.getByLabel('Углеводы').fill('10');
@@ -71,6 +65,9 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await expect(
     recentEvents.getByText('10 g carbs', { exact: true }),
   ).toBeVisible();
+
+  await page.getByRole('link', { name: 'All events', exact: true }).click();
+  await waitForApplicationReady(page);
 
   await page.getByRole('button', { name: 'Add event' }).click();
   await page
@@ -81,14 +78,14 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await page.getByRole('textbox', { name: 'Доза' }).fill('10');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
+  await page.getByRole('link', { name: 'Go to home' }).click();
+  await waitForApplicationReady(page);
+
   await expect(
     recentEvents.getByText('Jardiance', { exact: true }),
   ).toBeVisible();
 
-  await page.getByRole('button', { name: 'Add event' }).click();
-  await page
-    .getByRole('button', { name: 'Активность. Записать тренировку' })
-    .click();
+  await page.getByRole('button', { name: 'Quick add: Activity' }).click();
   await page.getByRole('button', { name: /Вид активности/ }).click();
   await page.getByRole('button', { name: 'Ходьба' }).click();
   await page.getByLabel('Продолжительность, мин').fill('45');

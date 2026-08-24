@@ -22,10 +22,7 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   ).toBeVisible();
   await expect(lastGlucoseRegion.locator('time')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Add event' }).click();
-  await page
-    .getByRole('button', { name: 'Глюкоза. Записать уровень сахара' })
-    .click();
+  await page.getByRole('button', { name: 'Quick add: Glucose' }).click();
   await page.getByLabel('Уровень глюкозы').fill('7,7');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
