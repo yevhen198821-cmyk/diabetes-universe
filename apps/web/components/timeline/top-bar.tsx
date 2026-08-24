@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 
 import { useLocalization } from '../../lib/platform/react/use-localization';
-import { BrandSymbol } from '../brand/brand-symbol';
 import { resolveTimelineUiLabels } from './timeline-ui-labels';
 import { iconButton } from './ui-styles';
 
@@ -26,8 +25,6 @@ export function TopBar() {
         >
           <ArrowLeft aria-hidden="true" size={18} />
         </Link>
-
-        <BrandSymbol size="sm" />
 
         <p className="text-section-title sm:text-xl">{labels.header.title}</p>
       </div>
