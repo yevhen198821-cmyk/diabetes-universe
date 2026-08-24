@@ -146,7 +146,7 @@ export function DashboardHeader({
           <h1 className="min-w-0 shrink">
             <Image
               alt={viewModel.brandName}
-              className="h-10 w-auto max-w-[11rem] object-contain sm:h-11 sm:max-w-[12rem] lg:h-12 lg:max-w-[13rem]"
+              className="h-12 w-auto max-w-[12rem] object-contain sm:h-14 sm:max-w-[14rem] lg:h-16 lg:max-w-[16rem]"
               height={brandLogoHeight}
               priority
               src={brandLogoPath}
