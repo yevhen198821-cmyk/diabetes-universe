@@ -134,7 +134,7 @@ export function DashboardQuickActions({
                     {action.icon}
                   </span>
                 </span>
-                <span className="mt-1 block truncate px-0.5 text-[9px] font-semibold text-slate-700 sm:mt-1.5 sm:text-[10px] md:text-[11px] dark:text-slate-200">
+                <span className="mt-1 block px-0.5 text-[8px] leading-[1.05] font-semibold break-words hyphens-auto text-slate-700 sm:mt-1.5 sm:text-[10px] sm:leading-tight md:text-[11px] dark:text-slate-200">
                   {label}
                 </span>
               </button>

@@ -105,6 +105,8 @@ test('quick actions expose exactly five approved high-frequency categories inclu
   ]) {
     assert.match(quickActionsSource, new RegExp(`'${category}'`));
   }
+
+  assert.doesNotMatch(quickActionsSource, /\btruncate\b/);
 });
 
 function visibleCategoriesCount(source) {
