@@ -1,7 +1,11 @@
 import type { ReactNode } from 'react';
 
 import { eventTypeAppearances } from '../../theme/event-type-appearance';
-import type { EventCardProps, EventCardStatus, EventCardType } from './EventCard.types';
+import type {
+  EventCardProps,
+  EventCardStatus,
+  EventCardType,
+} from './EventCard.types';
 
 const statusLabels: Record<EventCardStatus, string> = {
   default: '',
@@ -14,12 +18,15 @@ const statusLabels: Record<EventCardStatus, string> = {
 const vibrantAccents: Record<EventCardType, string> = {
   glucose: 'bg-teal-500 text-white shadow-[0_6px_16px_rgba(20,184,166,0.32)]',
   insulin: 'bg-violet-500 text-white shadow-[0_6px_16px_rgba(139,92,246,0.32)]',
-  nutrition: 'bg-orange-500 text-white shadow-[0_6px_16px_rgba(249,115,22,0.32)]',
+  nutrition:
+    'bg-orange-500 text-white shadow-[0_6px_16px_rgba(249,115,22,0.32)]',
   activity: 'bg-blue-500 text-white shadow-[0_6px_16px_rgba(59,130,246,0.32)]',
   medication: 'bg-rose-500 text-white shadow-[0_6px_16px_rgba(244,63,94,0.32)]',
-  reminder: 'bg-orange-500 text-white shadow-[0_6px_16px_rgba(249,115,22,0.32)]',
+  reminder:
+    'bg-orange-500 text-white shadow-[0_6px_16px_rgba(249,115,22,0.32)]',
   note: 'bg-emerald-500 text-white shadow-[0_6px_16px_rgba(16,185,129,0.32)]',
-  ai_insight: 'bg-teal-500 text-white shadow-[0_6px_16px_rgba(20,184,166,0.32)]',
+  ai_insight:
+    'bg-teal-500 text-white shadow-[0_6px_16px_rgba(20,184,166,0.32)]',
 };
 
 function EventIcon({
@@ -67,7 +74,8 @@ export function EventCard({
   variant = 'standard',
 }: EventCardProps) {
   const { accent, fallbackIcon } = eventTypeAppearances[type];
-  const resolvedAccent = appearance === 'vibrant' ? vibrantAccents[type] : accent;
+  const resolvedAccent =
+    appearance === 'vibrant' ? vibrantAccents[type] : accent;
   const isVibrant = appearance === 'vibrant';
   const statusLabel = statusLabels[status];
   const ariaLabel =

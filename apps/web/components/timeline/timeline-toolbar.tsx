@@ -48,31 +48,31 @@ export function TimelineToolbar({
         {labels.toolbar.title}
       </h2>
       <div className="relative space-y-3">
-      <TimelineSearch
-        labels={labels.search}
-        onChange={onQueryChange}
-        query={query}
-      />
-      <TimelineFilters
-        activeFilter={model.activeFilter}
-        ariaLabel={labels.filters.ariaLabel}
-        filterLabels={filterLabels}
-        onChange={onFilterChange}
-      />
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p aria-live="polite" className="text-text-secondary text-sm">
-          {resultLabel}
-        </p>
-        {model.hasActiveCriteria ? (
-          <button
-            className="focus-visible:outline-interactive-primary min-h-11 self-start rounded-xl border border-white/80 bg-white/70 px-4 text-sm font-semibold text-[#1e3a5f] shadow-sm backdrop-blur transition hover:border-teal-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 sm:self-auto dark:border-white/10 dark:bg-slate-900/70 dark:text-white dark:hover:border-teal-800"
-            onClick={onReset}
-            type="button"
-          >
-            {labels.toolbar.reset}
-          </button>
-        ) : null}
-      </div>
+        <TimelineSearch
+          labels={labels.search}
+          onChange={onQueryChange}
+          query={query}
+        />
+        <TimelineFilters
+          activeFilter={model.activeFilter}
+          ariaLabel={labels.filters.ariaLabel}
+          filterLabels={filterLabels}
+          onChange={onFilterChange}
+        />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p aria-live="polite" className="text-text-secondary text-sm">
+            {resultLabel}
+          </p>
+          {model.hasActiveCriteria ? (
+            <button
+              className="focus-visible:outline-interactive-primary min-h-11 self-start rounded-xl border border-white/80 bg-white/70 px-4 text-sm font-semibold text-[#1e3a5f] shadow-sm backdrop-blur transition hover:border-teal-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 sm:self-auto dark:border-white/10 dark:bg-slate-900/70 dark:text-white dark:hover:border-teal-800"
+              onClick={onReset}
+              type="button"
+            >
+              {labels.toolbar.reset}
+            </button>
+          ) : null}
+        </div>
       </div>
     </section>
   );

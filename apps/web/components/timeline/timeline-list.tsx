@@ -52,7 +52,7 @@ function TimelineEmptyState({
       className={frostedStatePanelClassName}
     >
       <h2
-        className="text-[#1e3a5f] text-lg font-extrabold dark:text-white"
+        className="text-lg font-extrabold text-[#1e3a5f] dark:text-white"
         id="timeline-empty-title"
       >
         {labels.empty.title}
@@ -77,7 +77,7 @@ function TimelineFilteredEmptyState({
       className={frostedStatePanelClassName}
     >
       <h2
-        className="text-[#1e3a5f] text-lg font-extrabold dark:text-white"
+        className="text-lg font-extrabold text-[#1e3a5f] dark:text-white"
         id="timeline-filtered-empty-title"
       >
         {labels.filteredEmpty.title}
@@ -111,7 +111,7 @@ function TimelineErrorState({
       role="alert"
     >
       <h2
-        className="text-[#1e3a5f] text-lg font-extrabold dark:text-white"
+        className="text-lg font-extrabold text-[#1e3a5f] dark:text-white"
         id="timeline-error-title"
       >
         {labels.error.title}

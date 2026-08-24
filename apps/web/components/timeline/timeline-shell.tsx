@@ -373,7 +373,6 @@ export function TimelineShell() {
         onNoteSubmit={handleNoteSubmit}
         onNutritionSubmit={handleNutritionSubmit}
         open={quickAddOpen}
-        floatingActionButtonClassName="timeline-fab right-[max(1rem,env(safe-area-inset-right))] hidden lg:grid sm:right-[max(1.5rem,env(safe-area-inset-right))]"
       />
 
       <DashboardMobileNav
