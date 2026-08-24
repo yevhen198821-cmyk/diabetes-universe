@@ -122,10 +122,12 @@ function visibleCategoriesCount(source) {
     .filter(Boolean).length;
 }
 
-test('header keeps brand and account affordance without duplicate add-event CTA', () => {
-  assert.match(headerSource, /DashboardBrandMark/);
-  assert.match(headerSource, /DashboardBrandWordmark/);
+test('header keeps approved brand logo and account affordance without duplicate add-event CTA', () => {
+  assert.match(headerSource, /\/brand\/diabetes-universe-logo\.png/);
+  assert.match(headerSource, /object-contain/);
   assert.match(headerSource, /DashboardAvatar/);
+  assert.doesNotMatch(headerSource, /DashboardBrandMark/);
+  assert.doesNotMatch(headerSource, /DashboardBrandWordmark/);
   assert.doesNotMatch(headerSource, /viewModel\.addEventLabel/);
   assert.doesNotMatch(headerSource, /aria-label=\{viewModel\.addEventLabel\}/);
 });

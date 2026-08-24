@@ -4,9 +4,6 @@ import { UserRound } from 'lucide-react';
 import Image from 'next/image';
 import { useMemo, useState, type ReactNode } from 'react';
 
-import { DashboardBrandMark } from './dashboard-brand-mark';
-import { DashboardBrandWordmark } from './dashboard-brand-wordmark';
-
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { usePresentationContext } from '../../lib/platform/react/use-presentation-context';
@@ -21,6 +18,10 @@ import { resolveDashboardHeaderLabels } from './dashboard-header-labels';
 
 const avatarTargetClassName =
   'grid size-11 shrink-0 place-items-center overflow-hidden rounded-full';
+
+const brandLogoPath = '/brand/diabetes-universe-logo.png';
+const brandLogoWidth = 1254;
+const brandLogoHeight = 1254;
 
 export interface DashboardHeaderProps extends Omit<
   DashboardHeaderModelInput,
@@ -141,15 +142,17 @@ export function DashboardHeader({
       className="relative z-30 pt-[env(safe-area-inset-top)]"
     >
       <div className="mx-auto flex min-h-[4.25rem] max-w-6xl items-center justify-between gap-3 py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:min-h-20 sm:py-4 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-24 lg:py-5">
-        <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-          <DashboardBrandMark />
-          <h1 aria-label={viewModel.brandName} className="min-w-0">
-            <span aria-hidden="true">
-              <DashboardBrandWordmark
-                accentLine={viewModel.brandLineAccent}
-                primaryLine={viewModel.brandLinePrimary}
-              />
-            </span>
+        <div className="flex min-w-0 items-center">
+          <h1 className="min-w-0 shrink">
+            <Image
+              alt={viewModel.brandName}
+              className="h-9 w-auto max-w-[10.5rem] object-contain sm:h-10 sm:max-w-[11.5rem] lg:h-11 lg:max-w-[12.5rem]"
+              height={brandLogoHeight}
+              priority
+              src={brandLogoPath}
+              unoptimized
+              width={brandLogoWidth}
+            />
           </h1>
         </div>
 
