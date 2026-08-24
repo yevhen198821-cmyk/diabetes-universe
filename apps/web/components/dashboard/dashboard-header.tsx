@@ -23,7 +23,7 @@ const brandLogoPath = '/brand/diabetes-universe-logo.png';
 const brandLogoWidth = 1254;
 const brandLogoHeight = 1254;
 const brandLogoClassName =
-  'h-auto w-auto max-h-[min(9rem,calc(100vw-5.5rem-env(safe-area-inset-left,0px)-env(safe-area-inset-right,0px)))] max-w-[min(9rem,calc(100vw-5.5rem-env(safe-area-inset-left,0px)-env(safe-area-inset-right,0px)))] object-contain sm:max-h-[10rem] sm:max-w-[10rem] lg:max-h-[12rem] lg:max-w-[12rem]';
+  'h-auto w-auto max-h-[min(6.75rem,calc(100vw-5.5rem-env(safe-area-inset-left,0px)-env(safe-area-inset-right,0px)))] max-w-[min(6.75rem,calc(100vw-5.5rem-env(safe-area-inset-left,0px)-env(safe-area-inset-right,0px)))] object-contain sm:max-h-[7.5rem] sm:max-w-[7.5rem] lg:max-h-[9rem] lg:max-w-[9rem]';
 
 export interface DashboardHeaderProps extends Omit<
   DashboardHeaderModelInput,
