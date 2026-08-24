@@ -1,7 +1,7 @@
 # UX/UI Wave 1C — Home Redesign
 
 Date: 2026-08-23  
-Status: **IMPLEMENTATION CANDIDATE — visual approval required before merge**
+Status: **READY FOR MERGE** (pending final CI on `279a5e2`)
 
 ## Purpose
 
@@ -15,10 +15,10 @@ Home remains status-first:
 
 1. Last glucose
 2. Today summary
-3. One operational next action
+3. Quick Add (five high-frequency categories)
 4. Recent events
 
-A dedicated Quick Add surface is added as a high-frequency utility. It does not replace the status-first hierarchy or introduce treatment guidance.
+`DashboardNextAction` is intentionally removed from Home composition in Wave 1C. The underlying model remains in the repo for future use but is not rendered on Home.
 
 ## Last glucose hero
 
@@ -46,18 +46,25 @@ No activity value, target percentage, streak or other metric is fabricated simpl
 
 ## Quick Add
 
-The Home quick action strip exposes the four highest-frequency entry categories already supported by the existing Quick Add runtime:
+The Home quick action strip exposes five high-frequency entry categories already supported by the existing Quick Add runtime:
 
 - glucose
 - insulin
 - nutrition
 - activity
+- note
 
 The buttons reuse existing submission flows and localized Timeline event-kind labels. No duplicate persistence path is introduced.
 
-## Next action
+## Branding
 
-The existing operational/logging-oriented engine remains authoritative. Styling changes do not change its semantics and do not introduce dosing, correction, food or diagnostic advice.
+Home header uses the approved master PNG at `apps/web/public/brand/diabetes-universe-logo.png`.
+
+- Current asset is **icon-only** (globe + droplet). The separate `DashboardBrandWordmark` renders localized “Diabetes / Universe” text beside the icon.
+- If a future PNG includes a baked-in wordmark, remove the separate wordmark to avoid duplicate visible branding.
+- Timeline top bar no longer shows the legacy `BrandSymbol` SVG; it uses the same colorful page shell as Home.
+
+## Timeline visual alignment
 
 ## Recent events
 
@@ -65,7 +72,7 @@ Recent events keep the existing Timeline-derived presentation and handoff to `/t
 
 ## Navigation decision
 
-The approved visual references include a five-item mobile bottom navigation. Wave 1C intentionally does **not** add placeholder/dead destinations for Analytics or Profile. Home retains the functional mobile Quick Add control and the existing Timeline handoff. A global navigation dock should be implemented only after the route/information architecture for its destinations is real and consistent across Home and Timeline.
+Wave 1C uses a three-destination mobile bottom navigation on Home and Timeline: Home, Timeline, Account. Quick Add on Home lives in the page content strip; Timeline uses the nav FAB on mobile and a desktop FAB on large screens. Placeholder Analytics/Profile routes are intentionally omitted.
 
 ## Identity and motivational content
 
@@ -105,8 +112,13 @@ The composition is mobile-first and scales through the existing responsive grid 
 - reminders
 - goals/streak gamification
 - P11/P12 sync/conflict UI
-- final Timeline redesign
+- deeper Timeline IA / layout redesign beyond the Wave 1C visual shell
 
-## Merge gate
+## Merge checklist
 
-This PR must remain unmerged until the product owner reviews the Vercel preview and explicitly approves the visual result.
+- [x] Approved master logo integrated at `apps/web/public/brand/diabetes-universe-logo.png`
+- [x] Home Wave 1C visual foundation with trust/safety rules preserved
+- [x] Timeline colorful shell aligned with Home (no legacy top-bar brand symbol)
+- [x] Unit, integration, and E2E coverage updated
+- [x] CI green on latest branch head
+- [ ] Product owner final visual sign-off on Vercel preview (recommended before merge)
