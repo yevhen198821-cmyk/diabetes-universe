@@ -46,9 +46,9 @@ test('dashboard header renders localized English copy inside platform provider',
       'img[src="/brand/diabetes-universe-logo.png"]',
     );
     assert.ok(brandLogo);
-    assert.equal(brandLogo.getAttribute('alt'), 'Diabetes Universe');
-    assert.equal(document.body.textContent?.includes('Diabetes'), false);
-    assert.equal(document.body.textContent?.includes('Universe'), false);
+    assert.equal(brandLogo.getAttribute('alt'), '');
+    assert.match(document.body.textContent ?? '', /Diabetes/);
+    assert.match(document.body.textContent ?? '', /Universe/);
     assert.equal(
       document.body.textContent?.includes('Добавить событие'),
       false,

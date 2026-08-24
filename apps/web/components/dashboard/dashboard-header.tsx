@@ -15,6 +15,7 @@ import {
   type DashboardHeaderModelInput,
 } from './dashboard-header-model';
 import { resolveDashboardHeaderLabels } from './dashboard-header-labels';
+import { DashboardBrandWordmark } from './dashboard-brand-wordmark';
 
 const avatarTargetClassName =
   'grid size-11 shrink-0 place-items-center overflow-hidden rounded-full';
@@ -22,8 +23,8 @@ const avatarTargetClassName =
 const brandLogoPath = '/brand/diabetes-universe-logo.png';
 const brandLogoWidth = 1254;
 const brandLogoHeight = 1254;
-const brandLogoClassName =
-  'h-auto w-auto max-h-[min(6.75rem,calc(100vw-5.5rem-env(safe-area-inset-left,0px)-env(safe-area-inset-right,0px)))] max-w-[min(6.75rem,calc(100vw-5.5rem-env(safe-area-inset-left,0px)-env(safe-area-inset-right,0px)))] object-contain sm:max-h-[7.5rem] sm:max-w-[7.5rem] lg:max-h-[9rem] lg:max-w-[9rem]';
+const brandLogoIconClassName =
+  'h-12 w-12 shrink-0 object-contain sm:h-14 sm:w-14 lg:h-16 lg:w-16';
 
 export interface DashboardHeaderProps extends Omit<
   DashboardHeaderModelInput,
@@ -145,16 +146,23 @@ export function DashboardHeader({
     >
       <div className="mx-auto flex min-h-[4.25rem] max-w-6xl items-center justify-between gap-3 py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:min-h-20 sm:py-4 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-24 lg:py-5">
         <div className="flex min-w-0 items-center">
-          <h1 className="min-w-0 shrink">
+          <h1 className="flex min-w-0 items-center gap-2 sm:gap-2.5">
             <Image
-              alt={viewModel.brandName}
-              className={brandLogoClassName}
+              alt=""
+              aria-hidden
+              className={brandLogoIconClassName}
               height={brandLogoHeight}
               priority
               src={brandLogoPath}
               unoptimized
               width={brandLogoWidth}
             />
+            <span className="min-w-0">
+              <DashboardBrandWordmark
+                accentLine={viewModel.brandLineAccent}
+                primaryLine={viewModel.brandLinePrimary}
+              />
+            </span>
           </h1>
         </div>
 

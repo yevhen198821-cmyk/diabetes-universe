@@ -25,10 +25,10 @@ test('home renders Wave 1C visual foundation without fabricated identity data', 
     page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
   ).toBeVisible();
   await expect(
-    page.getByRole('img', { name: 'Diabetes Universe' }),
-  ).toHaveAttribute('src', '/brand/diabetes-universe-logo.png');
-  await expect(page.getByText('Diabetes', { exact: true })).toHaveCount(0);
-  await expect(page.getByText('Universe', { exact: true })).toHaveCount(0);
+    page.locator('img[src="/brand/diabetes-universe-logo.png"]'),
+  ).toBeVisible();
+  await expect(page.getByText('Diabetes', { exact: true })).toBeVisible();
+  await expect(page.getByText('Universe', { exact: true })).toBeVisible();
   await expect(page.getByText('Anna')).toHaveCount(0);
   await expect(page.getByText('AI insight', { exact: false })).toHaveCount(0);
   await expect(
@@ -150,11 +150,10 @@ test('mobile home layout stays compact at primary reference widths', async ({
     await waitForApplicationReady(page);
 
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
+      page.locator('img[src="/brand/diabetes-universe-logo.png"]'),
     ).toBeVisible();
-    await expect(
-      page.getByRole('img', { name: 'Diabetes Universe' }),
-    ).toBeVisible();
+    await expect(page.getByText('Diabetes', { exact: true })).toBeVisible();
+    await expect(page.getByText('Universe', { exact: true })).toBeVisible();
 
     const overflowWidth = await page.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth,
