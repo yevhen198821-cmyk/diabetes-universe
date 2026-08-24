@@ -52,6 +52,8 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'dashboard.header.addEvent': 'Add event',
   'dashboard.header.avatar.action': 'Open account',
   'dashboard.header.avatar.label': 'User profile',
+  'dashboard.header.brandLineAccent': 'Universe',
+  'dashboard.header.brandLinePrimary': 'Diabetes',
   'dashboard.header.brandName': 'Diabetes Universe',
   'dashboard.header.context.today': 'Your data for today',
   'dashboard.header.date.label': 'Current date',

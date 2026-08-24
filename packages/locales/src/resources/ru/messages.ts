@@ -9,6 +9,9 @@ import { englishCanonicalMessages } from '../en/messages';
  */
 export const russianDraftMessages = defineDraftMessages({
   ...englishCanonicalMessages,
+  'dashboard.header.brandLineAccent': 'Universe',
+  'dashboard.header.brandLinePrimary': 'Diabetes',
+  'dashboard.header.brandName': 'Diabetes Universe',
   'dashboard.header.addEvent': 'Добавить событие',
   'dashboard.header.avatar.action': 'Открыть аккаунт',
   'dashboard.header.avatar.label': 'Профиль пользователя',

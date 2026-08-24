@@ -13,6 +13,8 @@ test('resolveDashboardHeaderLabels returns canonical English dashboard header st
 
   assert.equal(labels.productName, 'Home');
   assert.equal(labels.brandName, 'Diabetes Universe');
+  assert.equal(labels.brandLinePrimary, 'Diabetes');
+  assert.equal(labels.brandLineAccent, 'Universe');
   assert.equal(labels.addEvent, 'Add event');
   assert.equal(labels.avatar, 'User profile');
   assert.equal(labels.avatarAction, 'Open account');

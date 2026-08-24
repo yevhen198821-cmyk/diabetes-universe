@@ -7,6 +7,8 @@ export interface DashboardHeaderLabels {
   readonly addEvent: string;
   readonly avatar: string;
   readonly avatarAction: string;
+  readonly brandLineAccent: string;
+  readonly brandLinePrimary: string;
   readonly brandName: string;
   readonly currentDate: string;
   readonly dateUnavailable: string;
@@ -23,6 +25,8 @@ const DASHBOARD_HEADER_TRANSLATION_KEYS = {
   addEvent: asTranslationKey('dashboard.header.addEvent'),
   avatar: asTranslationKey('dashboard.header.avatar.label'),
   avatarAction: asTranslationKey('dashboard.header.avatar.action'),
+  brandLineAccent: asTranslationKey('dashboard.header.brandLineAccent'),
+  brandLinePrimary: asTranslationKey('dashboard.header.brandLinePrimary'),
   brandName: asTranslationKey('dashboard.header.brandName'),
   currentDate: asTranslationKey('dashboard.header.date.label'),
   dateUnavailable: asTranslationKey('dashboard.header.date.unavailable'),
@@ -56,6 +60,14 @@ export function resolveDashboardHeaderLabels(
     avatarAction: translateDashboardHeaderKey(
       localization,
       DASHBOARD_HEADER_TRANSLATION_KEYS.avatarAction,
+    ),
+    brandLineAccent: translateDashboardHeaderKey(
+      localization,
+      DASHBOARD_HEADER_TRANSLATION_KEYS.brandLineAccent,
+    ),
+    brandLinePrimary: translateDashboardHeaderKey(
+      localization,
+      DASHBOARD_HEADER_TRANSLATION_KEYS.brandLinePrimary,
     ),
     brandName: translateDashboardHeaderKey(
       localization,

@@ -15,7 +15,11 @@ const HOME_DASHBOARD_KEY_PREFIXES = [
   'dashboard.nextAction.',
 ];
 
-const HOME_DASHBOARD_KEY_EXCLUSIONS = new Set(['dashboard.header.brandName']);
+const HOME_DASHBOARD_KEY_EXCLUSIONS = new Set([
+  'dashboard.header.brandLineAccent',
+  'dashboard.header.brandLinePrimary',
+  'dashboard.header.brandName',
+]);
 
 const HOME_TIMELINE_KEYS = [
   'timeline.eventKind.activity',

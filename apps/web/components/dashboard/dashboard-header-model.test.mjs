@@ -12,6 +12,8 @@ const englishLabels = {
   addEvent: 'Add event',
   avatar: 'User profile',
   avatarAction: 'Open account',
+  brandLineAccent: 'Universe',
+  brandLinePrimary: 'Diabetes',
   brandName: 'Diabetes Universe',
   currentDate: 'Current date',
   dateUnavailable: 'Date unavailable',

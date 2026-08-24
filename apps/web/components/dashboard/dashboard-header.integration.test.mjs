@@ -42,7 +42,8 @@ test('dashboard header renders localized English copy inside platform provider',
   });
 
   try {
-    assert.match(document.body.textContent ?? '', /Home/);
+    assert.match(document.body.textContent ?? '', /Diabetes/);
+    assert.match(document.body.textContent ?? '', /Universe/);
     assert.equal(
       document.body.textContent?.includes('Добавить событие'),
       false,

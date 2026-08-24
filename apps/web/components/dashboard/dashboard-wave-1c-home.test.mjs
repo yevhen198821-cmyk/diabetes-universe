@@ -122,6 +122,7 @@ function visibleCategoriesCount(source) {
 
 test('header keeps brand and account affordance without duplicate add-event CTA', () => {
   assert.match(headerSource, /DashboardBrandMark/);
+  assert.match(headerSource, /DashboardBrandWordmark/);
   assert.match(headerSource, /DashboardAvatar/);
   assert.doesNotMatch(headerSource, /viewModel\.addEventLabel/);
   assert.doesNotMatch(headerSource, /aria-label=\{viewModel\.addEventLabel\}/);

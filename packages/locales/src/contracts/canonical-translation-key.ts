@@ -38,6 +38,8 @@ export const CANONICAL_TRANSLATION_KEYS = [
   'dashboard.header.addEvent',
   'dashboard.header.avatar.action',
   'dashboard.header.avatar.label',
+  'dashboard.header.brandLineAccent',
+  'dashboard.header.brandLinePrimary',
   'dashboard.header.brandName',
   'dashboard.header.context.today',
   'dashboard.header.date.label',
