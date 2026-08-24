@@ -211,7 +211,7 @@ export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
             viewAllHref={viewModel.viewAllHref}
             viewAllLabel={viewModel.viewAllLabel}
           />
-          <div className="overflow-hidden rounded-[1.35rem] border border-white/80 bg-white/75 shadow-[0_12px_32px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-slate-900/75">
+          <div className="overflow-hidden rounded-[1.25rem] border border-white/85 bg-white/78 shadow-[0_10px_28px_rgba(15,23,42,0.05)] sm:rounded-[1.35rem] dark:border-white/10 dark:bg-slate-900/78">
             <ul className="divide-y divide-slate-100/90 px-3 py-1 sm:px-4 dark:divide-slate-800">
               {viewModel.events.map((event) => (
                 <RecentEventRow event={event} key={event.id} />

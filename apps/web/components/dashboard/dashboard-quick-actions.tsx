@@ -94,7 +94,7 @@ export function DashboardQuickActions({
   return (
     <section
       aria-label={sectionLabel}
-      className="relative col-span-full overflow-hidden rounded-[1.75rem] border border-white/75 bg-white/55 p-4 shadow-[0_18px_48px_rgba(15,23,42,0.07)] backdrop-blur-md sm:p-5 dark:border-white/10 dark:bg-slate-900/55"
+      className="relative col-span-full overflow-hidden rounded-[1.75rem] border border-white/80 bg-white/62 p-3.5 shadow-[0_14px_40px_rgba(15,23,42,0.06)] backdrop-blur-md sm:p-5 dark:border-white/10 dark:bg-slate-900/58"
     >
       <div
         aria-hidden="true"
@@ -108,7 +108,7 @@ export function DashboardQuickActions({
           {sectionLabel}
         </h2>
 
-        <div className="grid grid-cols-5 gap-1 sm:gap-2.5">
+        <div className="grid grid-cols-5 gap-0.5 sm:gap-2">
           {actions.map((action, index) => {
             const category = action.category;
             const eventKind = eventKindByCategory[category];
@@ -126,15 +126,15 @@ export function DashboardQuickActions({
               >
                 <span
                   aria-hidden="true"
-                  className="mx-auto grid size-[3.65rem] place-items-center rounded-full bg-white/95 shadow-[0_14px_34px_rgba(15,23,42,0.10)] ring-1 ring-white/80 transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95 sm:size-[4.5rem] md:size-[4.75rem]"
+                  className="mx-auto grid size-[3.5rem] place-items-center rounded-full bg-white/95 shadow-[0_10px_28px_rgba(15,23,42,0.08)] ring-1 ring-white/85 transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95 sm:size-[4.25rem] md:size-[4.5rem]"
                 >
                   <span
-                    className={`grid size-10 place-items-center rounded-full sm:size-11 md:size-12 ${iconToneByCategory[category]}`}
+                    className={`grid size-9 place-items-center rounded-full sm:size-10 md:size-11 ${iconToneByCategory[category]}`}
                   >
                     {action.icon}
                   </span>
                 </span>
-                <span className="mt-1 block truncate px-0.5 text-[10px] font-semibold text-slate-700 sm:mt-1.5 sm:text-[11px] md:text-xs dark:text-slate-200">
+                <span className="mt-1 block truncate px-0.5 text-[9px] font-semibold text-slate-700 sm:mt-1.5 sm:text-[10px] md:text-[11px] dark:text-slate-200">
                   {label}
                 </span>
               </button>

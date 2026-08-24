@@ -23,6 +23,7 @@ test('resolveDashboardDaySummaryLabels returns canonical English strings', async
   assert.equal(labels.activity, 'Activity');
   assert.equal(labels.totalForDay, 'Total for the day');
   assert.equal(labels.viewDetails, 'Details');
+  assert.equal(labels.chartEmptyHint, 'No entries today');
   assert.equal(labels.units.compactMassG, 'g');
   assert.equal(labels.units.compactInsulinDose, 'U');
 });

@@ -36,6 +36,16 @@ const mobileNavSource = readFileSync(
   fileURLToPath(new URL('./dashboard-mobile-nav.tsx', import.meta.url)),
   'utf8',
 );
+const miniChartsSource = readFileSync(
+  fileURLToPath(
+    new URL('./dashboard-day-summary-mini-charts.tsx', import.meta.url),
+  ),
+  'utf8',
+);
+const shellSource = readFileSync(
+  fileURLToPath(new URL('./dashboard-shell.tsx', import.meta.url)),
+  'utf8',
+);
 
 test('Home composition keeps trust-first blocks and excludes deferred AI insight', () => {
   assert.match(rootSource, /DashboardLastGlucose/);
@@ -67,10 +77,25 @@ test('today summary presents four distinct metric visual slots with real mini ch
   assert.match(summarySource, /InsulinMiniChart/);
   assert.match(summarySource, /NutritionMiniChart/);
   assert.match(summarySource, /ActivityMiniChart/);
+  assert.match(summarySource, /chartEmptyHint/);
+  assert.match(summarySource, /dark:from-teal-950/);
   assert.doesNotMatch(summarySource, /MetricDecoration/);
 });
 
-test('quick actions expose approved high-frequency categories including notes', () => {
+test('empty mini charts avoid fabricated data visuals and misleading chart semantics', () => {
+  assert.doesNotMatch(miniChartsSource, /strokeDasharray/);
+  assert.match(miniChartsSource, /sr-only/);
+  assert.match(miniChartsSource, /emptyHint/);
+  assert.doesNotMatch(
+    miniChartsSource,
+    /function EmptyMiniChart[\s\S]*role="img"/,
+  );
+  assert.match(miniChartsSource, /buildSparklinePath/);
+});
+
+test('quick actions expose exactly five approved high-frequency categories including notes', () => {
+  assert.equal(visibleCategoriesCount(quickActionsSource), 5);
+
   for (const category of [
     'glucose',
     'insulin',
@@ -81,6 +106,19 @@ test('quick actions expose approved high-frequency categories including notes', 
     assert.match(quickActionsSource, new RegExp(`'${category}'`));
   }
 });
+
+function visibleCategoriesCount(source) {
+  const match = source.match(
+    /const visibleCategories = \[([\s\S]*?)\] as const/,
+  );
+
+  assert.ok(match, 'visibleCategories declaration is present');
+
+  return match[1]
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean).length;
+}
 
 test('header keeps brand and account affordance without duplicate add-event CTA', () => {
   assert.match(headerSource, /DashboardBrandMark/);
@@ -95,9 +133,18 @@ test('mobile navigation links only to real routes without duplicate quick-add FA
   assert.match(mobileNavSource, /href="\/account"/);
   assert.match(mobileNavSource, /showQuickAddFab/);
   assert.match(mobileNavSource, /grid-cols-3/);
+  assert.match(mobileNavSource, /min-h-11/);
   assert.match(rootSource, /showQuickAddFab=\{false\}/);
   assert.doesNotMatch(mobileNavSource, /href="\/analytics"/);
   assert.doesNotMatch(mobileNavSource, /Anna/);
+});
+
+test('home shell keeps airy light canvas and dark-compatible ambient backdrop', () => {
+  assert.match(shellSource, /bg-\[#f7fafd\]/);
+  assert.match(shellSource, /dark:bg-background/);
+  assert.match(shellSource, /dark:opacity-/);
+  assert.doesNotMatch(rootSource, /DashboardNextAction/);
+  assert.doesNotMatch(rootSource, /DashboardAiInsight/);
 });
 
 test('greeting resolves by time of day without health judgment copy', () => {

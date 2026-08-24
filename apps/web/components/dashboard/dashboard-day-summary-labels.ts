@@ -13,6 +13,7 @@ export interface DashboardDaySummaryChartAriaLabels {
 export interface DashboardDaySummaryLabels {
   readonly activity: string;
   readonly chartAria: DashboardDaySummaryChartAriaLabels;
+  readonly chartEmptyHint: string;
   readonly defaultEmpty: string;
   readonly defaultError: string;
   readonly eyebrow: string;
@@ -36,6 +37,7 @@ function asTranslationKey(value: string): TranslationKey {
 
 const DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS = {
   activity: asTranslationKey('dashboard.daySummary.metrics.activity'),
+  chartEmptyHint: asTranslationKey('dashboard.daySummary.chartEmpty.hint'),
   chartAria: {
     activity: {
       multiple: asTranslationKey(
@@ -129,6 +131,10 @@ export function resolveDashboardDaySummaryLabels(
       localization,
       DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.activity,
     ),
+    chartEmptyHint: translateDashboardDaySummaryKey(
+      localization,
+      DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.chartEmptyHint,
+    ),
     chartAria: {
       activity: createChartAriaResolver(
         localization,
@@ -210,6 +216,7 @@ export const dashboardDaySummaryTranslationKeys =
 export const dashboardDaySummaryTranslationKeyList: readonly TranslationKey[] =
   [
     DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.activity,
+    DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.chartEmptyHint,
     DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.defaultEmpty,
     DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.defaultError,
     DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.eyebrow,

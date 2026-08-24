@@ -29,29 +29,31 @@ export function DashboardMobileNav({
   return (
     <nav
       aria-label={labels.home}
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] lg:hidden"
     >
-      <div className="pointer-events-auto mx-auto max-w-md rounded-[2rem] border border-white/80 bg-white/95 shadow-[0_18px_50px_rgba(15,23,42,0.14)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95">
+      <div className="pointer-events-auto mx-auto max-w-md rounded-[1.65rem] border border-slate-200/55 bg-white/84 shadow-[0_6px_24px_rgba(15,23,42,0.07)] backdrop-blur-lg dark:border-white/8 dark:bg-slate-950/84 dark:shadow-[0_6px_24px_rgba(0,0,0,0.32)]">
         <ul
-          className={`grid items-center px-2 py-2 ${showQuickAddFab ? 'grid-cols-4 items-end pt-1.5 pb-2' : 'grid-cols-3 gap-1'}`}
+          className={`grid items-center px-1 py-1 ${showQuickAddFab ? 'grid-cols-4 items-end pt-1 pb-1.5' : 'grid-cols-3'}`}
         >
           <li>
             <Link
               aria-current="page"
-              className="focus-visible:outline-interactive-primary flex min-h-[3.75rem] flex-col items-center justify-center gap-0.5 rounded-2xl px-2 text-teal-600 focus-visible:outline-2 focus-visible:outline-offset-2 dark:text-teal-300"
+              className="focus-visible:outline-interactive-primary flex min-h-11 min-w-11 flex-col items-center justify-center gap-0 rounded-2xl px-2.5 py-1 text-teal-600 focus-visible:outline-2 focus-visible:outline-offset-2 dark:text-teal-300"
               href="/"
             >
-              <Home aria-hidden="true" size={22} strokeWidth={2.2} />
-              <span className="text-[11px] font-bold">{labels.home}</span>
+              <Home aria-hidden="true" size={20} strokeWidth={2.2} />
+              <span className="text-[10px] leading-tight font-bold">
+                {labels.home}
+              </span>
             </Link>
           </li>
           <li>
             <Link
-              className="text-text-secondary focus-visible:outline-interactive-primary flex min-h-[3.75rem] flex-col items-center justify-center gap-0.5 rounded-2xl px-2 transition hover:text-teal-600 focus-visible:outline-2 focus-visible:outline-offset-2 dark:hover:text-teal-300"
+              className="text-text-secondary focus-visible:outline-interactive-primary flex min-h-11 min-w-11 flex-col items-center justify-center gap-0 rounded-2xl px-2.5 py-1 transition hover:text-teal-600 focus-visible:outline-2 focus-visible:outline-offset-2 dark:hover:text-teal-300"
               href="/timeline"
             >
-              <Clock aria-hidden="true" size={22} strokeWidth={2.2} />
-              <span className="text-[11px] font-semibold">
+              <Clock aria-hidden="true" size={20} strokeWidth={2.2} />
+              <span className="text-[10px] leading-tight font-semibold">
                 {labels.timeline}
               </span>
             </Link>
@@ -72,11 +74,11 @@ export function DashboardMobileNav({
           ) : null}
           <li>
             <Link
-              className="text-text-secondary focus-visible:outline-interactive-primary flex min-h-[3.75rem] flex-col items-center justify-center gap-0.5 rounded-2xl px-2 transition hover:text-teal-600 focus-visible:outline-2 focus-visible:outline-offset-2 dark:hover:text-teal-300"
+              className="text-text-secondary focus-visible:outline-interactive-primary flex min-h-11 min-w-11 flex-col items-center justify-center gap-0 rounded-2xl px-2.5 py-1 transition hover:text-teal-600 focus-visible:outline-2 focus-visible:outline-offset-2 dark:hover:text-teal-300"
               href="/account"
             >
-              <UserRound aria-hidden="true" size={22} strokeWidth={2.2} />
-              <span className="text-[11px] font-semibold">
+              <UserRound aria-hidden="true" size={20} strokeWidth={2.2} />
+              <span className="text-[10px] leading-tight font-semibold">
                 {labels.account}
               </span>
             </Link>

@@ -52,6 +52,7 @@ export const russianDraftMessages = defineDraftMessages({
     '1 запись активности сегодня',
   'dashboard.daySummary.chartAria.activity.multiple':
     '{count} записей активности сегодня',
+  'dashboard.daySummary.chartEmpty.hint': 'Сегодня нет записей',
   'dashboard.daySummary.chartAria.glucose.none':
     'Сегодня нет измерений глюкозы',
   'dashboard.daySummary.chartAria.glucose.single':

@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 
 export interface DashboardDaySummaryMiniChartProps {
   readonly ariaLabel: string;
+  readonly emptyHint?: string;
 }
 
 const CHART_WIDTH = 96;
@@ -19,7 +20,7 @@ function MiniChartFrame({
   return (
     <div
       aria-label={ariaLabel}
-      className="relative z-10 mt-2 h-9 w-full max-w-[6.5rem]"
+      className="relative z-10 mt-1.5 h-9 w-full max-w-[6.5rem]"
       role="img"
     >
       {children}
@@ -27,25 +28,47 @@ function MiniChartFrame({
   );
 }
 
-function EmptyMiniChart({ ariaLabel }: DashboardDaySummaryMiniChartProps) {
+function EmptyMiniChart({
+  ariaLabel,
+  emptyHint,
+  toneClassName,
+}: DashboardDaySummaryMiniChartProps & {
+  readonly toneClassName: string;
+}) {
   return (
-    <MiniChartFrame ariaLabel={ariaLabel}>
-      <svg
-        aria-hidden="true"
-        className="h-full w-full text-slate-300/70 dark:text-slate-600/70"
-        viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-      >
-        <line
-          stroke="currentColor"
-          strokeDasharray="3 4"
-          strokeWidth="1.5"
-          x1="4"
-          x2={CHART_WIDTH - 4}
-          y1={CHART_HEIGHT / 2}
-          y2={CHART_HEIGHT / 2}
-        />
-      </svg>
-    </MiniChartFrame>
+    <div className="relative z-10 mt-1.5 flex h-9 w-full max-w-[6.5rem] flex-col justify-end">
+      <span className="sr-only">{ariaLabel}</span>
+      <div aria-hidden="true" className="flex flex-col justify-end gap-1">
+        <svg
+          className={`h-[1.125rem] w-full ${toneClassName}`}
+          viewBox={`0 0 ${CHART_WIDTH} 16`}
+        >
+          <rect
+            fill="currentColor"
+            height="5"
+            opacity="0.08"
+            rx="2.5"
+            width={CHART_WIDTH - 16}
+            x="8"
+            y="3"
+          />
+          <line
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeWidth="1"
+            x1="8"
+            x2={CHART_WIDTH - 8}
+            y1="13"
+            y2="13"
+          />
+        </svg>
+        {emptyHint ? (
+          <span className="truncate text-[9px] leading-none font-medium opacity-80">
+            {emptyHint}
+          </span>
+        ) : null}
+      </div>
+    </div>
   );
 }
 
@@ -68,12 +91,19 @@ function buildSparklinePath(values: readonly number[]): string {
 
 export function GlucoseMiniChart({
   ariaLabel,
+  emptyHint,
   values,
 }: DashboardDaySummaryMiniChartProps & {
   readonly values: readonly number[];
 }) {
   if (values.length === 0) {
-    return <EmptyMiniChart ariaLabel={ariaLabel} />;
+    return (
+      <EmptyMiniChart
+        ariaLabel={ariaLabel}
+        emptyHint={emptyHint}
+        toneClassName="text-teal-500/45 dark:text-teal-400/35"
+      />
+    );
   }
 
   if (values.length === 1) {
@@ -118,13 +148,22 @@ export function GlucoseMiniChart({
 function BarMiniChart({
   ariaLabel,
   barClassName,
+  emptyHint,
+  emptyToneClassName,
   values,
 }: DashboardDaySummaryMiniChartProps & {
   readonly barClassName: string;
+  readonly emptyToneClassName: string;
   readonly values: readonly number[];
 }) {
   if (values.length === 0) {
-    return <EmptyMiniChart ariaLabel={ariaLabel} />;
+    return (
+      <EmptyMiniChart
+        ariaLabel={ariaLabel}
+        emptyHint={emptyHint}
+        toneClassName={emptyToneClassName}
+      />
+    );
   }
 
   const maxValue = Math.max(...values, 1);
@@ -174,6 +213,7 @@ export function InsulinMiniChart(
     <BarMiniChart
       {...props}
       barClassName="fill-violet-500/75"
+      emptyToneClassName="text-violet-500/45 dark:text-violet-400/35"
       values={props.values}
     />
   );
@@ -188,6 +228,7 @@ export function NutritionMiniChart(
     <BarMiniChart
       {...props}
       barClassName="fill-orange-500/75"
+      emptyToneClassName="text-orange-500/45 dark:text-orange-400/35"
       values={props.values}
     />
   );
@@ -202,6 +243,7 @@ export function ActivityMiniChart(
     <BarMiniChart
       {...props}
       barClassName="fill-blue-500/75"
+      emptyToneClassName="text-blue-500/45 dark:text-blue-400/35"
       values={props.values}
     />
   );

@@ -38,7 +38,7 @@ test('dashboard day summary keys do not duplicate other dashboard block keys', (
 });
 
 test('dashboard day summary exposes all day summary translation keys', () => {
-  assert.equal(DASHBOARD_DAY_SUMMARY_KEYS.length, 24);
+  assert.equal(DASHBOARD_DAY_SUMMARY_KEYS.length, 25);
 });
 
 test('dashboard preload namespaces remain unchanged for day summary keys', async () => {

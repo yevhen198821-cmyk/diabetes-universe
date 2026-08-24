@@ -75,6 +75,7 @@ export const CANONICAL_TRANSLATION_KEYS = [
   'dashboard.daySummary.chartAria.activity.multiple',
   'dashboard.daySummary.chartAria.activity.none',
   'dashboard.daySummary.chartAria.activity.single',
+  'dashboard.daySummary.chartEmpty.hint',
   'dashboard.daySummary.chartAria.glucose.multiple',
   'dashboard.daySummary.chartAria.glucose.none',
   'dashboard.daySummary.chartAria.glucose.single',

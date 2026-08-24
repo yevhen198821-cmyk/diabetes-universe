@@ -34,44 +34,46 @@ const metricVisuals = [
   {
     icon: Droplets,
     iconClass:
-      'bg-teal-500 text-white shadow-[0_10px_22px_rgba(20,184,166,0.28)]',
-    labelClass: 'text-teal-800/75',
+      'bg-teal-500 text-white shadow-[0_8px_18px_rgba(20,184,166,0.24)]',
+    labelClass: 'text-teal-800/75 dark:text-teal-200/80',
     surfaceClass:
-      'border-teal-100/80 bg-gradient-to-br from-teal-50 via-cyan-50/90 to-white/70',
-    valueClass: 'text-teal-800',
+      'border-teal-100/70 bg-gradient-to-br from-teal-50/95 via-cyan-50/85 to-white/80 dark:border-teal-500/15 dark:from-teal-950/45 dark:via-cyan-950/25 dark:to-slate-900/55',
+    valueClass: 'text-teal-800 dark:text-teal-100',
   },
   {
     icon: Syringe,
     iconClass:
-      'bg-violet-500 text-white shadow-[0_10px_22px_rgba(139,92,246,0.28)]',
-    labelClass: 'text-violet-800/75',
+      'bg-violet-500 text-white shadow-[0_8px_18px_rgba(139,92,246,0.24)]',
+    labelClass: 'text-violet-800/75 dark:text-violet-200/80',
     surfaceClass:
-      'border-violet-100/80 bg-gradient-to-br from-violet-50 via-fuchsia-50/70 to-white/70',
-    valueClass: 'text-violet-800',
+      'border-violet-100/70 bg-gradient-to-br from-violet-50/95 via-fuchsia-50/70 to-white/80 dark:border-violet-500/15 dark:from-violet-950/45 dark:via-fuchsia-950/20 dark:to-slate-900/55',
+    valueClass: 'text-violet-800 dark:text-violet-100',
   },
   {
     icon: Wheat,
     iconClass:
-      'bg-orange-500 text-white shadow-[0_10px_22px_rgba(249,115,22,0.28)]',
-    labelClass: 'text-orange-800/75',
+      'bg-orange-500 text-white shadow-[0_8px_18px_rgba(249,115,22,0.24)]',
+    labelClass: 'text-orange-800/75 dark:text-orange-200/80',
     surfaceClass:
-      'border-orange-100/80 bg-gradient-to-br from-orange-50 via-amber-50/75 to-white/70',
-    valueClass: 'text-orange-800',
+      'border-orange-100/70 bg-gradient-to-br from-orange-50/95 via-amber-50/75 to-white/80 dark:border-orange-500/15 dark:from-orange-950/45 dark:via-amber-950/20 dark:to-slate-900/55',
+    valueClass: 'text-orange-800 dark:text-orange-100',
   },
   {
     icon: PersonStanding,
     iconClass:
-      'bg-blue-500 text-white shadow-[0_10px_22px_rgba(59,130,246,0.28)]',
-    labelClass: 'text-blue-800/75',
+      'bg-blue-500 text-white shadow-[0_8px_18px_rgba(59,130,246,0.24)]',
+    labelClass: 'text-blue-800/75 dark:text-blue-200/80',
     surfaceClass:
-      'border-blue-100/80 bg-gradient-to-br from-sky-50 via-blue-50/75 to-white/70',
-    valueClass: 'text-blue-800',
+      'border-blue-100/70 bg-gradient-to-br from-sky-50/95 via-blue-50/75 to-white/80 dark:border-blue-500/15 dark:from-sky-950/45 dark:via-blue-950/20 dark:to-slate-900/55',
+    valueClass: 'text-blue-800 dark:text-blue-100',
   },
 ] as const;
 
 function MetricMiniChart({
+  emptyHint,
   metric,
 }: {
+  readonly emptyHint: string;
   readonly metric: DashboardDaySummaryMetric;
 }) {
   switch (metric.kind) {
@@ -79,6 +81,7 @@ function MetricMiniChart({
       return (
         <GlucoseMiniChart
           ariaLabel={metric.chartAriaLabel}
+          emptyHint={emptyHint}
           values={metric.chartValues}
         />
       );
@@ -86,6 +89,7 @@ function MetricMiniChart({
       return (
         <InsulinMiniChart
           ariaLabel={metric.chartAriaLabel}
+          emptyHint={emptyHint}
           values={metric.chartValues}
         />
       );
@@ -93,6 +97,7 @@ function MetricMiniChart({
       return (
         <NutritionMiniChart
           ariaLabel={metric.chartAriaLabel}
+          emptyHint={emptyHint}
           values={metric.chartValues}
         />
       );
@@ -100,6 +105,7 @@ function MetricMiniChart({
       return (
         <ActivityMiniChart
           ariaLabel={metric.chartAriaLabel}
+          emptyHint={emptyHint}
           values={metric.chartValues}
         />
       );
@@ -195,33 +201,36 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
             </a>
           </div>
 
-          <dl className="grid grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-3">
+          <dl className="grid grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-4 lg:gap-3">
             {viewModel.metrics.map((metric, index) => {
               const visual = metricVisuals[index] ?? metricVisuals[3];
               const Icon = visual.icon;
 
               return (
                 <div
-                  className={`relative min-h-[9.75rem] overflow-hidden rounded-[1.35rem] border p-3.5 shadow-[0_16px_40px_rgba(15,23,42,0.07)] sm:min-h-[10.25rem] sm:p-4 ${visual.surfaceClass}`}
+                  className={`relative min-h-[9.25rem] overflow-hidden rounded-[1.25rem] border p-3 shadow-[0_10px_28px_rgba(15,23,42,0.05)] sm:min-h-[9.75rem] sm:rounded-[1.35rem] sm:p-3.5 ${visual.surfaceClass}`}
                   key={metric.label}
                 >
                   <span
                     aria-hidden="true"
-                    className={`relative z-10 grid size-12 place-items-center rounded-full ${visual.iconClass}`}
+                    className={`relative z-10 grid size-11 place-items-center rounded-full sm:size-12 ${visual.iconClass}`}
                   >
-                    <Icon size={22} strokeWidth={2.2} />
+                    <Icon size={20} strokeWidth={2.2} />
                   </span>
                   <dt
-                    className={`relative z-10 mt-2.5 text-sm font-semibold ${visual.labelClass}`}
+                    className={`relative z-10 mt-2 text-[0.8125rem] font-semibold sm:text-sm ${visual.labelClass}`}
                   >
                     {metric.label}
                   </dt>
                   <dd
-                    className={`relative z-10 mt-1 text-[1.35rem] font-black tracking-tight tabular-nums sm:text-2xl ${visual.valueClass}`}
+                    className={`relative z-10 mt-0.5 text-[1.25rem] font-black tracking-tight tabular-nums sm:mt-1 sm:text-[1.35rem] ${visual.valueClass}`}
                   >
                     {metric.value}
                   </dd>
-                  <MetricMiniChart metric={metric} />
+                  <MetricMiniChart
+                    emptyHint={labels.chartEmptyHint}
+                    metric={metric}
+                  />
                   {metric.secondaryText ? (
                     <dd
                       className={`relative z-10 mt-1 text-xs font-medium ${visual.labelClass}`}

@@ -90,6 +90,7 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'dashboard.daySummary.chartAria.activity.single': '1 activity entry today',
   'dashboard.daySummary.chartAria.activity.multiple':
     '{count} activity entries today',
+  'dashboard.daySummary.chartEmpty.hint': 'No entries today',
   'dashboard.daySummary.chartAria.glucose.none': 'No glucose readings today',
   'dashboard.daySummary.chartAria.glucose.single': '1 glucose reading today',
   'dashboard.daySummary.chartAria.glucose.multiple':
