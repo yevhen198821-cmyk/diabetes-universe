@@ -34,11 +34,7 @@ export function DashboardNextAction({
     <section
       aria-busy={viewModel.isLoading}
       aria-labelledby={titleId}
-      className={`relative col-span-full overflow-hidden rounded-2xl border px-4 py-3 shadow-[0_10px_30px_rgba(76,29,149,0.06)] sm:px-5 ${
-        isError
-          ? 'border-status-danger/40 bg-surface'
-          : 'border-violet-200/50 bg-gradient-to-r from-violet-500/[0.08] via-fuchsia-400/[0.06] to-cyan-300/[0.08] dark:border-violet-400/15'
-      }`}
+      className="relative col-span-full"
     >
       {viewModel.state === 'loading' ? (
         <>
@@ -47,36 +43,42 @@ export function DashboardNextAction({
           </span>
           <div
             aria-hidden="true"
-            className="relative h-10 animate-pulse rounded-xl bg-white/50 motion-reduce:animate-none dark:bg-slate-800"
+            className="h-11 animate-pulse rounded-2xl bg-white/60 motion-reduce:animate-none dark:bg-slate-800"
           />
         </>
       ) : null}
 
       {viewModel.state === 'ready' ? (
-        <div className="relative flex items-center gap-3">
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-[0_8px_18px_rgba(139,92,246,0.22)]">
-            <Sparkles aria-hidden="true" size={17} />
+        <div
+          className={`flex items-center gap-2.5 rounded-2xl border px-3 py-2.5 shadow-[0_8px_24px_rgba(15,23,42,0.05)] backdrop-blur-sm sm:gap-3 sm:px-4 ${
+            isError
+              ? 'border-status-danger/30 bg-white/70'
+              : 'border-violet-100/70 bg-white/55 dark:border-violet-400/10 dark:bg-slate-900/50'
+          }`}
+        >
+          <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-violet-500/12 text-violet-600 dark:text-violet-300">
+            <Sparkles aria-hidden="true" size={15} />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-text-secondary text-xs font-semibold tracking-wide uppercase">
+            <p className="text-[10px] font-semibold tracking-[0.14em] text-slate-500 uppercase dark:text-slate-400">
               {viewModel.title}
             </p>
             <h2
-              className="text-text-primary truncate text-sm font-bold sm:text-base"
+              className="truncate text-sm font-semibold text-[#1e3a5f] dark:text-white"
               id={titleId}
             >
               {viewModel.description}
             </h2>
           </div>
           <button
-            className="focus-visible:outline-interactive-primary inline-flex min-h-10 shrink-0 items-center gap-1 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 text-sm font-bold text-white shadow-[0_8px_18px_rgba(139,92,246,0.22)] transition hover:brightness-105 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="focus-visible:outline-interactive-primary inline-flex min-h-9 shrink-0 items-center gap-1 rounded-full border border-violet-200/80 bg-white/80 px-3 text-xs font-bold text-violet-700 transition hover:bg-violet-50 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-violet-400/20 dark:bg-slate-900/60 dark:text-violet-200"
             disabled={viewModel.actionDisabled}
             onClick={viewModel.onAction}
             ref={actionButtonRef}
             type="button"
           >
             <span>{viewModel.actionLabel}</span>
-            <ArrowRight aria-hidden="true" size={16} />
+            <ArrowRight aria-hidden="true" size={14} />
           </button>
         </div>
       ) : null}
@@ -84,10 +86,10 @@ export function DashboardNextAction({
       {viewModel.state === 'empty' || viewModel.state === 'error' ? (
         <div
           aria-live={isError ? 'assertive' : 'polite'}
-          className="relative"
+          className="rounded-2xl border border-white/70 bg-white/55 px-3 py-2.5 dark:border-white/10 dark:bg-slate-900/50"
           role={isError ? 'alert' : 'status'}
         >
-          <h2 className="text-text-primary text-sm font-bold" id={titleId}>
+          <h2 className="text-sm font-semibold text-[#1e3a5f]" id={titleId}>
             {viewModel.title}
           </h2>
           {viewModel.description ? (

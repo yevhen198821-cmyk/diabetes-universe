@@ -27,12 +27,12 @@ export function DashboardShell({
     <div className="text-text-primary dark:bg-background relative min-h-screen overflow-hidden bg-[#f5f8fc]">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[34rem] bg-[radial-gradient(circle_at_12%_12%,rgba(45,212,191,0.14),transparent_30%),radial-gradient(circle_at_88%_8%,rgba(251,146,60,0.12),transparent_32%),radial-gradient(circle_at_58%_18%,rgba(167,139,250,0.10),transparent_30%)] dark:opacity-40"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[28rem] bg-[radial-gradient(circle_at_10%_8%,rgba(45,212,191,0.13),transparent_28%),radial-gradient(circle_at_92%_6%,rgba(251,146,60,0.14),transparent_30%),radial-gradient(circle_at_72%_18%,rgba(167,139,250,0.11),transparent_28%),radial-gradient(circle_at_28%_22%,rgba(244,114,182,0.08),transparent_24%)] dark:opacity-40"
       />
       {header}
       {greeting}
       <main
-        className="relative mx-auto grid max-w-6xl grid-cols-1 gap-4 py-4 pr-[max(1rem,env(safe-area-inset-right))] pb-[calc(6.5rem+env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] sm:gap-5 sm:py-6 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:gap-6 lg:py-8 lg:pb-12"
+        className="relative mx-auto grid max-w-6xl grid-cols-1 gap-3 py-3 pr-[max(1rem,env(safe-area-inset-right))] pb-[calc(6.25rem+env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] sm:gap-3.5 sm:py-4 sm:pr-[max(1.25rem,env(safe-area-inset-right))] sm:pl-[max(1.25rem,env(safe-area-inset-left))] lg:gap-4 lg:py-5 lg:pb-10"
         id="main-content"
       >
         {lastGlucose}

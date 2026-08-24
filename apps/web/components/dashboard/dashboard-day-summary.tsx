@@ -27,52 +27,65 @@ const metricVisuals = [
   {
     decoration: 'wave',
     icon: Droplets,
-    iconClass: 'bg-teal-500 text-white',
-    pillClass: 'bg-teal-100 text-teal-700',
-    valueClass: 'text-teal-700 dark:text-teal-200',
+    iconClass:
+      'bg-teal-500 text-white shadow-[0_10px_22px_rgba(20,184,166,0.28)]',
+    labelClass: 'text-teal-800/75',
+    surfaceClass:
+      'border-teal-100/80 bg-gradient-to-br from-teal-50 via-cyan-50/90 to-white/70',
+    valueClass: 'text-teal-800',
   },
   {
     decoration: 'bars',
     icon: Syringe,
-    iconClass: 'bg-violet-500 text-white',
-    pillClass: 'bg-violet-100 text-violet-700',
-    valueClass: 'text-violet-700 dark:text-violet-200',
+    iconClass:
+      'bg-violet-500 text-white shadow-[0_10px_22px_rgba(139,92,246,0.28)]',
+    labelClass: 'text-violet-800/75',
+    surfaceClass:
+      'border-violet-100/80 bg-gradient-to-br from-violet-50 via-fuchsia-50/70 to-white/70',
+    valueClass: 'text-violet-800',
   },
   {
     decoration: 'gradient',
     icon: Wheat,
-    iconClass: 'bg-orange-500 text-white',
-    pillClass: 'bg-orange-100 text-orange-700',
-    valueClass: 'text-orange-700 dark:text-orange-200',
+    iconClass:
+      'bg-orange-500 text-white shadow-[0_10px_22px_rgba(249,115,22,0.28)]',
+    labelClass: 'text-orange-800/75',
+    surfaceClass:
+      'border-orange-100/80 bg-gradient-to-br from-orange-50 via-amber-50/75 to-white/70',
+    valueClass: 'text-orange-800',
   },
   {
     decoration: 'arc',
     icon: PersonStanding,
-    iconClass: 'bg-blue-500 text-white',
-    pillClass: 'bg-blue-100 text-blue-700',
-    valueClass: 'text-blue-700 dark:text-blue-200',
+    iconClass:
+      'bg-blue-500 text-white shadow-[0_10px_22px_rgba(59,130,246,0.28)]',
+    labelClass: 'text-blue-800/75',
+    surfaceClass:
+      'border-blue-100/80 bg-gradient-to-br from-sky-50 via-blue-50/75 to-white/70',
+    valueClass: 'text-blue-800',
   },
 ] as const;
 
-function MetricDecoration({ kind }: { readonly kind: string }) {
+function MetricDecoration({
+  kind,
+  tone,
+}: {
+  readonly kind: string;
+  readonly tone: string;
+}) {
   if (kind === 'wave') {
     return (
       <svg
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-12 w-full opacity-70"
+        className="absolute inset-x-0 bottom-0 h-14 w-full opacity-80"
         preserveAspectRatio="none"
-        viewBox="0 0 120 28"
+        viewBox="0 0 120 32"
       >
         <path
-          d="M0 18 C18 10 36 24 54 16 C72 8 90 22 120 14 L120 28 L0 28 Z"
-          fill="url(#todayWave)"
+          d="M0 20 C20 12 40 26 60 18 C80 10 100 24 120 16 L120 32 L0 32 Z"
+          fill="currentColor"
+          className={tone}
         />
-        <defs>
-          <linearGradient id="todayWave" x1="0" x2="1" y1="0" y2="0">
-            <stop offset="0%" stopColor="rgba(45,212,191,0.45)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-          </linearGradient>
-        </defs>
       </svg>
     );
   }
@@ -81,11 +94,11 @@ function MetricDecoration({ kind }: { readonly kind: string }) {
     return (
       <div
         aria-hidden="true"
-        className="absolute inset-x-3 bottom-3 flex items-end justify-center gap-1 opacity-55"
+        className="absolute inset-x-3 bottom-3 flex items-end justify-center gap-1 opacity-50"
       >
-        {[10, 16, 12, 18].map((height, index) => (
+        {[12, 18, 14, 20].map((height, index) => (
           <span
-            className="w-2 rounded-full bg-violet-400/55"
+            className="w-2 rounded-full bg-violet-400/50"
             key={index}
             style={{ height }}
           />
@@ -98,7 +111,7 @@ function MetricDecoration({ kind }: { readonly kind: string }) {
     return (
       <svg
         aria-hidden="true"
-        className="absolute right-3 bottom-2 size-14 opacity-55"
+        className="absolute right-2 bottom-2 size-16 opacity-50"
         viewBox="0 0 48 48"
       >
         <circle
@@ -110,7 +123,7 @@ function MetricDecoration({ kind }: { readonly kind: string }) {
           strokeDasharray="72 120"
           strokeLinecap="round"
           strokeWidth="4"
-          className="text-blue-400/50"
+          className="text-blue-400/45"
         />
       </svg>
     );
@@ -119,7 +132,7 @@ function MetricDecoration({ kind }: { readonly kind: string }) {
   return (
     <div
       aria-hidden="true"
-      className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-orange-300/30 to-transparent"
+      className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-orange-300/25 to-transparent"
     />
   );
 }
@@ -181,12 +194,12 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
           <span className="sr-only" role="status">
             {viewModel.message}
           </span>
-          <div aria-hidden="true" className="space-y-4">
+          <div aria-hidden="true" className="space-y-3">
             <div className="h-7 w-32 animate-pulse rounded bg-white/80 motion-reduce:animate-none dark:bg-slate-800" />
-            <div className="flex gap-3 overflow-hidden">
+            <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, index) => (
                 <div
-                  className="h-40 min-w-[8.5rem] flex-1 animate-pulse rounded-[1.35rem] bg-white/80 motion-reduce:animate-none dark:bg-slate-800"
+                  className="h-36 animate-pulse rounded-[1.35rem] bg-white/80 motion-reduce:animate-none dark:bg-slate-800"
                   key={index}
                 />
               ))}
@@ -197,15 +210,15 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
 
       {viewModel.state === 'ready' ? (
         <div>
-          <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="mb-2.5 flex items-center justify-between gap-3">
             <h2
-              className="text-[1.35rem] font-extrabold tracking-tight text-[#1e3a5f] dark:text-white"
+              className="text-[1.25rem] font-extrabold tracking-tight text-[#1e3a5f] sm:text-[1.35rem] dark:text-white"
               id={titleId}
             >
               {labels.title}
             </h2>
             <a
-              className="focus-visible:outline-interactive-primary inline-flex min-h-10 items-center gap-1 text-sm font-bold text-blue-600 transition hover:text-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 dark:text-blue-300"
+              className="focus-visible:outline-interactive-primary inline-flex min-h-9 items-center gap-1 text-sm font-bold text-blue-600 transition hover:text-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 dark:text-blue-300"
               href="/timeline"
             >
               <span>{labels.viewDetails}</span>
@@ -213,44 +226,47 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
             </a>
           </div>
 
-          <div className="-mx-[max(1rem,env(safe-area-inset-left))] overflow-x-auto px-[max(1rem,env(safe-area-inset-left))] pb-1 sm:mx-0 sm:overflow-visible sm:px-0">
-            <dl className="grid min-w-[42rem] grid-cols-4 gap-3 sm:min-w-0 sm:grid-cols-2 lg:grid-cols-4">
-              {viewModel.metrics.map((metric, index) => {
-                const visual = metricVisuals[index] ?? metricVisuals[3];
-                const Icon = visual.icon;
+          <dl className="grid grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-3">
+            {viewModel.metrics.map((metric, index) => {
+              const visual = metricVisuals[index] ?? metricVisuals[3];
+              const Icon = visual.icon;
 
-                return (
-                  <div
-                    className="relative min-h-[10.5rem] overflow-hidden rounded-[1.35rem] border border-white/90 bg-white p-4 shadow-[0_14px_36px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-900"
-                    key={metric.label}
+              return (
+                <div
+                  className={`relative min-h-[9.75rem] overflow-hidden rounded-[1.35rem] border p-3.5 shadow-[0_16px_40px_rgba(15,23,42,0.07)] sm:min-h-[10.25rem] sm:p-4 ${visual.surfaceClass}`}
+                  key={metric.label}
+                >
+                  <MetricDecoration
+                    kind={visual.decoration}
+                    tone="text-teal-300/35"
+                  />
+                  <span
+                    aria-hidden="true"
+                    className={`relative z-10 grid size-12 place-items-center rounded-full ${visual.iconClass}`}
                   >
-                    <MetricDecoration kind={visual.decoration} />
-                    <span
-                      aria-hidden="true"
-                      className={`relative z-10 grid size-11 place-items-center rounded-full shadow-[0_8px_18px_rgba(15,23,42,0.12)] ${visual.iconClass}`}
-                    >
-                      <Icon size={20} strokeWidth={2.2} />
-                    </span>
-                    <dt className="relative z-10 mt-3 text-sm font-semibold text-slate-600 dark:text-slate-300">
-                      {metric.label}
-                    </dt>
+                    <Icon size={22} strokeWidth={2.2} />
+                  </span>
+                  <dt
+                    className={`relative z-10 mt-2.5 text-sm font-semibold ${visual.labelClass}`}
+                  >
+                    {metric.label}
+                  </dt>
+                  <dd
+                    className={`relative z-10 mt-1 text-[1.35rem] font-black tracking-tight tabular-nums sm:text-2xl ${visual.valueClass}`}
+                  >
+                    {metric.value}
+                  </dd>
+                  {metric.secondaryText ? (
                     <dd
-                      className={`relative z-10 mt-1 text-xl font-black tracking-tight tabular-nums sm:text-2xl ${visual.valueClass}`}
+                      className={`relative z-10 mt-1 text-xs font-medium ${visual.labelClass}`}
                     >
-                      {metric.value}
+                      {metric.secondaryText}
                     </dd>
-                    {metric.secondaryText ? (
-                      <dd
-                        className={`relative z-10 mt-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold sm:text-xs ${visual.pillClass}`}
-                      >
-                        {metric.secondaryText}
-                      </dd>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </dl>
-          </div>
+                  ) : null}
+                </div>
+              );
+            })}
+          </dl>
         </div>
       ) : null}
 

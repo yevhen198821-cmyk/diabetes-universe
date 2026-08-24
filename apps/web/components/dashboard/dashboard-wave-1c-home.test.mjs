@@ -16,6 +16,10 @@ const heroSource = readFileSync(
   fileURLToPath(new URL('./dashboard-last-glucose.tsx', import.meta.url)),
   'utf8',
 );
+const heroScenerySource = readFileSync(
+  fileURLToPath(new URL('./dashboard-hero-scenery.tsx', import.meta.url)),
+  'utf8',
+);
 const summarySource = readFileSync(
   fileURLToPath(new URL('./dashboard-day-summary.tsx', import.meta.url)),
   'utf8',
@@ -46,7 +50,8 @@ test('glucose hero preserves explicit stale and source presentation', () => {
   assert.match(heroSource, /viewModel\.freshMessage/);
   assert.match(heroSource, /ClockAlert/);
   assert.match(heroSource, /dateTime=/);
-  assert.match(heroSource, /from-sky-400 via-cyan-400 to-teal-500/);
+  assert.match(heroSource, /DashboardHeroScenery/);
+  assert.match(heroScenerySource, /heroHillFront/);
 });
 
 test('today summary presents four distinct metric visual slots', () => {

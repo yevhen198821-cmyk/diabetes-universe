@@ -47,11 +47,11 @@ export function DashboardGreeting({
 
   return (
     <div className="mx-auto max-w-6xl px-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:px-[max(1.5rem,env(safe-area-inset-left))] sm:pr-[max(1.5rem,env(safe-area-inset-right))]">
-      <div className="py-1">
-        <h2 className="text-[clamp(1.75rem,5.4vw,2.4rem)] font-extrabold tracking-tight text-[#1e3a5f] dark:text-white">
+      <div className="py-0.5">
+        <h2 className="text-[clamp(1.55rem,5vw,2.15rem)] font-extrabold tracking-tight text-[#1e3a5f] dark:text-white">
           {greeting}
         </h2>
-        <p className="mt-1 text-sm font-medium text-slate-500 sm:text-base dark:text-slate-400">
+        <p className="mt-0.5 text-sm font-medium text-slate-500 sm:text-[0.925rem] dark:text-slate-400">
           {labels.contextToday}
         </p>
       </div>

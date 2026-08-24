@@ -2,6 +2,20 @@ import { expect, test } from './support/test';
 
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
+const ENGLISH_HOME_CHROME = [
+  'Good morning',
+  'Good afternoon',
+  'Good evening',
+  'Good night',
+  'Your data for today',
+  'Last glucose',
+  'Quick add',
+  'Recent events',
+  'All events',
+  'Next action',
+  'Details',
+] as const;
+
 test('home renders Wave 1C visual foundation without fabricated identity data', async ({
   page,
 }) => {
@@ -56,4 +70,68 @@ test('quick add category buttons open existing quick add forms', async ({
 
   await page.getByRole('button', { name: 'Quick add: Glucose' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
+});
+
+test('ru-RU Home chrome stays fully localized without English dashboard strings', async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    locale: 'ru-RU',
+    extraHTTPHeaders: {
+      'Accept-Language': 'ru-RU',
+    },
+  });
+  const page = await context.newPage();
+
+  await page.goto('/');
+  await waitForApplicationReady(page);
+
+  await expect(
+    page.getByRole('heading', { name: 'Последняя глюкоза' }),
+  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Сегодня' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Быстрое добавление' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Последние записи' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: 'Все записи', exact: true }),
+  ).toBeVisible();
+
+  for (const englishLabel of ENGLISH_HOME_CHROME) {
+    await expect(page.getByText(englishLabel, { exact: true })).toHaveCount(0);
+  }
+
+  await expect(page.getByText('Breakfast', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Завтрак', { exact: true })).toBeVisible();
+
+  await context.close();
+});
+
+test('mobile home layout stays compact at primary reference widths', async ({
+  browser,
+}) => {
+  for (const viewport of [
+    { height: 844, width: 390 },
+    { height: 915, width: 412 },
+  ]) {
+    const context = await browser.newContext({ viewport });
+    const page = await context.newPage();
+
+    await page.goto('/');
+    await waitForApplicationReady(page);
+
+    await expect(
+      page.getByRole('heading', { name: 'Last glucose' }),
+    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Quick add' }),
+    ).toBeVisible();
+    await expect(page.getByRole('navigation')).toBeVisible();
+
+    await context.close();
+  }
 });

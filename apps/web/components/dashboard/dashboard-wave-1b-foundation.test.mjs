@@ -41,6 +41,7 @@ test('dashboard blocks preserve Wave 1A status-first order in shell', () => {
 test('Wave 1C decorative color does not remove semantic accessibility states', () => {
   assert.match(lastGlucoseSource, /role="status"/);
   assert.match(lastGlucoseSource, /text-text-primary/);
-  assert.match(nextActionSource, /text-text-primary/);
+  assert.match(nextActionSource, /aria-labelledby=\{titleId\}/);
+  assert.match(nextActionSource, /text-status-danger/);
   assert.match(quickActionsSource, /focus-visible:outline-interactive-primary/);
 });

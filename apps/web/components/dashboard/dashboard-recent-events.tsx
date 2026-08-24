@@ -25,32 +25,30 @@ const categoryVisuals: Record<
   {
     readonly icon: typeof Activity;
     readonly iconClass: string;
-    readonly pillClass: string;
+    readonly tagClass: string;
   }
 > = {
   activity: {
     icon: Activity,
     iconClass: 'bg-blue-500 text-white',
-    pillClass:
-      'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-200',
+    tagClass: 'bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-200',
   },
   insulin: {
     icon: Syringe,
     iconClass: 'bg-violet-500 text-white',
-    pillClass:
-      'bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-200',
+    tagClass:
+      'bg-violet-50 text-violet-700 dark:bg-violet-500/15 dark:text-violet-200',
   },
   medication: {
     icon: Pill,
     iconClass: 'bg-rose-500 text-white',
-    pillClass:
-      'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-200',
+    tagClass: 'bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-200',
   },
   nutrition: {
     icon: CookingPot,
     iconClass: 'bg-orange-500 text-white',
-    pillClass:
-      'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-200',
+    tagClass:
+      'bg-orange-50 text-orange-700 dark:bg-orange-500/15 dark:text-orange-200',
   },
 };
 
@@ -65,40 +63,41 @@ function RecentEventRow({
 
   return (
     <li>
-      <div className="flex min-h-[3.75rem] items-center gap-3 px-1 py-2.5 sm:gap-4 sm:px-2">
+      <div className="flex min-h-[4.25rem] items-center gap-3 px-1.5 py-3 sm:gap-4 sm:px-2">
         <span
           aria-hidden="true"
-          className={`grid size-10 shrink-0 place-items-center rounded-full shadow-[0_6px_16px_rgba(15,23,42,0.10)] ${visual.iconClass}`}
+          className={`grid size-11 shrink-0 place-items-center rounded-full shadow-[0_8px_20px_rgba(15,23,42,0.10)] ${visual.iconClass}`}
         >
-          <Icon size={18} strokeWidth={2.2} />
+          <Icon size={19} strokeWidth={2.2} />
         </span>
 
         <time
-          className="w-11 shrink-0 text-sm font-semibold text-slate-500 tabular-nums dark:text-slate-400"
+          className="w-11 shrink-0 text-sm font-semibold text-slate-500/90 tabular-nums dark:text-slate-400"
           dateTime={event.dateTime}
         >
           {event.displayTime}
         </time>
 
-        <p className="min-w-0 flex-1 truncate text-sm font-semibold text-[#1e3a5f] sm:text-base dark:text-white">
-          <span>{event.title}</span>
-          {valueWithUnit.length > 0 ? (
-            <>
-              <span aria-hidden="true"> — </span>
-              <span>{valueWithUnit}</span>
-            </>
-          ) : null}
-        </p>
-
-        <span
-          className={`hidden shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold sm:inline-flex ${visual.pillClass}`}
-        >
-          {event.categoryLabel}
-        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-[#1e3a5f] sm:text-[0.95rem] dark:text-white">
+            <span>{event.title}</span>
+            {valueWithUnit.length > 0 ? (
+              <>
+                <span aria-hidden="true"> — </span>
+                <span className="font-bold">{valueWithUnit}</span>
+              </>
+            ) : null}
+          </p>
+          <span
+            className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${visual.tagClass}`}
+          >
+            {event.categoryLabel}
+          </span>
+        </div>
 
         <ChevronRight
           aria-hidden="true"
-          className="size-4 shrink-0 text-slate-300 dark:text-slate-600"
+          className="size-4 shrink-0 text-slate-300/90 dark:text-slate-600"
         />
       </div>
     </li>
@@ -115,15 +114,15 @@ function SectionHeader({
   readonly viewAllLabel: string;
 }) {
   return (
-    <div className="mb-3 flex items-center justify-between gap-3">
+    <div className="mb-2.5 flex items-center justify-between gap-3">
       <h2
-        className="text-[1.35rem] font-extrabold tracking-tight text-[#1e3a5f] dark:text-white"
+        className="text-[1.25rem] font-extrabold tracking-tight text-[#1e3a5f] sm:text-[1.35rem] dark:text-white"
         id={titleId}
       >
         {title}
       </h2>
       <Link
-        className="focus-visible:outline-interactive-primary inline-flex min-h-10 items-center gap-1 text-sm font-bold text-blue-600 transition hover:text-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 dark:text-blue-300"
+        className="focus-visible:outline-interactive-primary inline-flex min-h-9 items-center gap-1 text-sm font-bold text-blue-600 transition hover:text-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 dark:text-blue-300"
         href={viewAllHref}
       >
         <span>{viewAllLabel}</span>
@@ -146,11 +145,11 @@ function StatePanel({
     <section aria-labelledby={titleId} className="relative col-span-full">
       <div
         aria-live={isError ? 'assertive' : 'polite'}
-        className="rounded-[1.35rem] border border-white/90 bg-white p-4 shadow-[0_14px_36px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-900"
+        className="rounded-[1.35rem] border border-white/80 bg-white/75 p-4 shadow-[0_12px_32px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-slate-900/75"
         role={isError ? 'alert' : 'status'}
       >
         <h2
-          className="text-[1.35rem] font-extrabold tracking-tight text-[#1e3a5f] dark:text-white"
+          className="text-[1.25rem] font-extrabold tracking-tight text-[#1e3a5f] dark:text-white"
           id={titleId}
         >
           {title}
@@ -187,15 +186,15 @@ export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
           <span className="sr-only" role="status">
             {viewModel.message}
           </span>
-          <div aria-hidden="true" className="space-y-4">
+          <div aria-hidden="true" className="space-y-3">
             <div className="flex items-center justify-between gap-4">
               <div className="h-7 w-40 animate-pulse rounded bg-white/80 motion-reduce:animate-none dark:bg-slate-800" />
-              <div className="h-10 w-28 animate-pulse rounded-full bg-white/80 motion-reduce:animate-none dark:bg-slate-800" />
+              <div className="h-9 w-28 animate-pulse rounded-full bg-white/80 motion-reduce:animate-none dark:bg-slate-800" />
             </div>
-            <div className="space-y-0 rounded-[1.35rem] border border-white/90 bg-white p-3 shadow-[0_14px_36px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-900">
+            <div className="space-y-0 rounded-[1.35rem] border border-white/80 bg-white/75 p-3 shadow-[0_12px_32px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-slate-900/75">
               {Array.from({ length: 4 }).map((_, index) => (
-                <div className="flex items-center gap-3 py-3" key={index}>
-                  <div className="bg-surface-subtle size-10 animate-pulse rounded-full motion-reduce:animate-none" />
+                <div className="flex items-center gap-3 py-3.5" key={index}>
+                  <div className="bg-surface-subtle size-11 animate-pulse rounded-full motion-reduce:animate-none" />
                   <div className="bg-surface-subtle h-4 w-10 animate-pulse rounded motion-reduce:animate-none" />
                   <div className="bg-surface-subtle h-4 flex-1 animate-pulse rounded motion-reduce:animate-none" />
                 </div>
@@ -212,8 +211,8 @@ export function DashboardRecentEvents(props: DashboardRecentEventsProps) {
             viewAllHref={viewModel.viewAllHref}
             viewAllLabel={viewModel.viewAllLabel}
           />
-          <div className="overflow-hidden rounded-[1.35rem] border border-white/90 bg-white shadow-[0_14px_36px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-900">
-            <ul className="divide-y divide-slate-100 px-3 py-1 sm:px-4 dark:divide-slate-800">
+          <div className="overflow-hidden rounded-[1.35rem] border border-white/80 bg-white/75 shadow-[0_12px_32px_rgba(15,23,42,0.06)] dark:border-white/10 dark:bg-slate-900/75">
+            <ul className="divide-y divide-slate-100/90 px-3 py-1 sm:px-4 dark:divide-slate-800">
               {viewModel.events.map((event) => (
                 <RecentEventRow event={event} key={event.id} />
               ))}
