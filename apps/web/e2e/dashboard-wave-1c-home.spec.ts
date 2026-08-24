@@ -21,7 +21,11 @@ test('home renders Wave 1C visual foundation without fabricated identity data', 
   await page.goto('/');
   await waitForApplicationReady(page);
 
-  await expect(page.getByText('Diabetes Universe')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
+  ).toBeVisible();
+  await expect(page.getByText('Diabetes', { exact: true })).toBeVisible();
+  await expect(page.getByText('Universe', { exact: true })).toBeVisible();
   await expect(page.getByText('Anna')).toHaveCount(0);
   await expect(page.getByText('AI insight', { exact: false })).toHaveCount(0);
   await expect(
