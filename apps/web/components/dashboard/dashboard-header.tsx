@@ -145,7 +145,7 @@ export function DashboardHeader({
       className="relative z-30 pt-[env(safe-area-inset-top)]"
     >
       <div className="mx-auto flex min-h-[4.25rem] max-w-6xl items-center justify-between gap-3 py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:min-h-20 sm:py-4 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-24 lg:py-5">
-        <div className="flex min-w-0 items-center">
+        <div className="flex min-w-0 flex-1 items-center">
           <h1 className="flex min-w-0 items-center gap-2 sm:gap-2.5">
             <Image
               alt=""
@@ -157,7 +157,7 @@ export function DashboardHeader({
               unoptimized
               width={brandLogoWidth}
             />
-            <span className="min-w-0">
+            <span className="min-w-0 shrink">
               <DashboardBrandWordmark
                 accentLine={viewModel.brandLineAccent}
                 primaryLine={viewModel.brandLinePrimary}
@@ -166,7 +166,7 @@ export function DashboardHeader({
           </h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {viewModel.isLoading ? (
             <span
               aria-hidden="true"
