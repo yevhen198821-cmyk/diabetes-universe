@@ -378,7 +378,7 @@ export function TimelineShell() {
       <DashboardMobileNav
         activeTab="timeline"
         onQuickAdd={() => setQuickAddOpen(true)}
-        showQuickAddFab
+        showQuickAddFab={!quickAddOpen}
       />
 
       {selectedEvent ? (
