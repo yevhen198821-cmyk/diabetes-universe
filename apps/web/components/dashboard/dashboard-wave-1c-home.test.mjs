@@ -46,6 +46,10 @@ const shellSource = readFileSync(
   fileURLToPath(new URL('./dashboard-shell.tsx', import.meta.url)),
   'utf8',
 );
+const pageBackgroundSource = readFileSync(
+  fileURLToPath(new URL('../shared/app-page-background.tsx', import.meta.url)),
+  'utf8',
+);
 
 test('Home composition keeps trust-first blocks and excludes deferred AI insight', () => {
   assert.match(rootSource, /DashboardLastGlucose/);
@@ -144,9 +148,10 @@ test('mobile navigation links only to real routes without duplicate quick-add FA
 });
 
 test('home shell keeps airy light canvas and dark-compatible ambient backdrop', () => {
-  assert.match(shellSource, /bg-\[#f7fafd\]/);
-  assert.match(shellSource, /dark:bg-background/);
-  assert.match(shellSource, /dark:opacity-/);
+  assert.match(pageBackgroundSource, /bg-\[#f7fafd\]/);
+  assert.match(pageBackgroundSource, /dark:bg-background/);
+  assert.match(pageBackgroundSource, /dark:opacity-/);
+  assert.match(shellSource, /AppPageBackground/);
   assert.doesNotMatch(rootSource, /DashboardNextAction/);
   assert.doesNotMatch(rootSource, /DashboardAiInsight/);
 });

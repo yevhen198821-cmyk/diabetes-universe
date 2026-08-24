@@ -25,8 +25,8 @@ const rootSource = readFileSync(
 );
 
 test('dashboard shell keeps semantic page foundation under decorative layers', () => {
-  assert.match(shellSource, /text-text-primary/);
-  assert.match(shellSource, /min-h-screen/);
+  assert.match(shellSource, /appPageShellClassName/);
+  assert.match(shellSource, /AppPageBackground/);
   assert.match(shellSource, /id="main-content"/);
 });
 

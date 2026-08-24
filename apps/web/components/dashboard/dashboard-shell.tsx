@@ -1,5 +1,10 @@
 import type { ReactNode } from 'react';
 
+import {
+  AppPageBackground,
+  appPageShellClassName,
+} from '../shared/app-page-background';
+
 export interface DashboardShellProps {
   readonly children?: ReactNode;
   readonly daySummary: ReactNode;
@@ -22,11 +27,8 @@ export function DashboardShell({
   recentEvents,
 }: DashboardShellProps) {
   return (
-    <div className="text-text-primary dark:bg-background relative min-h-screen overflow-hidden bg-[#f7fafd]">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] bg-[radial-gradient(circle_at_8%_6%,rgba(45,212,191,0.15),transparent_30%),radial-gradient(circle_at_94%_4%,rgba(251,146,60,0.15),transparent_32%),radial-gradient(circle_at_74%_16%,rgba(167,139,250,0.12),transparent_30%),radial-gradient(circle_at_24%_20%,rgba(244,114,182,0.09),transparent_26%)] dark:opacity-45"
-      />
+    <div className={appPageShellClassName}>
+      <AppPageBackground />
       {header}
       {greeting}
       <main

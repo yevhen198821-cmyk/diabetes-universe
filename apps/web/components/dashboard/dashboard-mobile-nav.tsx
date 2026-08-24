@@ -8,6 +8,7 @@ import { useLocalization } from '../../lib/platform/react/use-localization';
 import { resolveDashboardMobileNavLabels } from './dashboard-mobile-nav-labels';
 
 export interface DashboardMobileNavProps {
+  readonly activeTab?: 'home' | 'timeline';
   readonly onQuickAdd?: () => void;
   readonly quickAddButtonRef?: RefObject<HTMLButtonElement | null>;
   readonly quickAddDisabled?: boolean;
@@ -15,6 +16,7 @@ export interface DashboardMobileNavProps {
 }
 
 export function DashboardMobileNav({
+  activeTab = 'home',
   onQuickAdd,
   quickAddButtonRef,
   quickAddDisabled = false,
@@ -37,23 +39,36 @@ export function DashboardMobileNav({
         >
           <li>
             <Link
-              aria-current="page"
-              className="focus-visible:outline-interactive-primary flex min-h-11 min-w-11 flex-col items-center justify-center gap-0 rounded-2xl px-2.5 py-1 text-teal-600 focus-visible:outline-2 focus-visible:outline-offset-2 dark:text-teal-300"
+              aria-current={activeTab === 'home' ? 'page' : undefined}
+              className={`focus-visible:outline-interactive-primary flex min-h-11 min-w-11 flex-col items-center justify-center gap-0 rounded-2xl px-2.5 py-1 focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                activeTab === 'home'
+                  ? 'text-teal-600 dark:text-teal-300'
+                  : 'text-text-secondary transition hover:text-teal-600 dark:hover:text-teal-300'
+              }`}
               href="/"
             >
               <Home aria-hidden="true" size={20} strokeWidth={2.2} />
-              <span className="text-[10px] leading-tight font-bold">
+              <span
+                className={`text-[10px] leading-tight ${activeTab === 'home' ? 'font-bold' : 'font-semibold'}`}
+              >
                 {labels.home}
               </span>
             </Link>
           </li>
           <li>
             <Link
-              className="text-text-secondary focus-visible:outline-interactive-primary flex min-h-11 min-w-11 flex-col items-center justify-center gap-0 rounded-2xl px-2.5 py-1 transition hover:text-teal-600 focus-visible:outline-2 focus-visible:outline-offset-2 dark:hover:text-teal-300"
+              aria-current={activeTab === 'timeline' ? 'page' : undefined}
+              className={`focus-visible:outline-interactive-primary flex min-h-11 min-w-11 flex-col items-center justify-center gap-0 rounded-2xl px-2.5 py-1 focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                activeTab === 'timeline'
+                  ? 'text-teal-600 dark:text-teal-300'
+                  : 'text-text-secondary transition hover:text-teal-600 dark:hover:text-teal-300'
+              }`}
               href="/timeline"
             >
               <Clock aria-hidden="true" size={20} strokeWidth={2.2} />
-              <span className="text-[10px] leading-tight font-semibold">
+              <span
+                className={`text-[10px] leading-tight ${activeTab === 'timeline' ? 'font-bold' : 'font-semibold'}`}
+              >
                 {labels.timeline}
               </span>
             </Link>

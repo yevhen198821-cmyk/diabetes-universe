@@ -6,7 +6,6 @@ import { useMemo } from 'react';
 
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { resolveTimelineUiLabels } from './timeline-ui-labels';
-import { iconButton } from './ui-styles';
 
 export function TopBar() {
   const localization = useLocalization();
@@ -16,17 +15,15 @@ export function TopBar() {
   );
 
   return (
-    <header className="border-border-default bg-surface/95 sticky top-0 z-30 border-b px-4 py-3 backdrop-blur sm:px-6">
-      <div className="mx-auto flex max-w-3xl items-center gap-3">
+    <header className="relative z-30 pt-[env(safe-area-inset-top)]">
+      <div className="mx-auto flex max-w-6xl items-center py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:py-4 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))]">
         <Link
           aria-label={labels.topBar.home}
-          className={`${iconButton} shrink-0`}
+          className="focus-visible:outline-interactive-primary grid size-11 shrink-0 place-items-center rounded-full border border-white/80 bg-white/85 text-[#1e3a5f] shadow-[0_8px_24px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/70 transition hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(15,23,42,0.14)] focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/10 dark:bg-slate-900/85 dark:text-[#E8EEF9] dark:ring-white/10"
           href="/"
         >
           <ArrowLeft aria-hidden="true" size={18} />
         </Link>
-
-        <p className="text-section-title sm:text-xl">{labels.header.title}</p>
       </div>
     </header>
   );
