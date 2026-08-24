@@ -18,12 +18,34 @@ export function DashboardBrandMark() {
           </linearGradient>
         </defs>
         <rect width="64" height="64" rx="17" fill="#fff" />
-        <path d="M32 9C26 18 20 25 20 34a12 12 0 0 0 24 0c0-9-6-16-12-25Z" fill="url(#dashboard-drop)" />
-        <path d="M25 31c2-5 5-9 8-13" fill="none" stroke="#BFFBFF" strokeWidth="2.4" strokeLinecap="round" opacity=".9" />
-        <ellipse cx="32" cy="34" rx="25" ry="8.5" fill="none" stroke="url(#dashboard-orbit)" strokeWidth="2.2" transform="rotate(12 32 34)" />
+        <path
+          d="M32 9C26 18 20 25 20 34a12 12 0 0 0 24 0c0-9-6-16-12-25Z"
+          fill="url(#dashboard-drop)"
+        />
+        <path
+          d="M25 31c2-5 5-9 8-13"
+          fill="none"
+          stroke="#BFFBFF"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          opacity=".9"
+        />
+        <ellipse
+          cx="32"
+          cy="34"
+          rx="25"
+          ry="8.5"
+          fill="none"
+          stroke="url(#dashboard-orbit)"
+          strokeWidth="2.2"
+          transform="rotate(12 32 34)"
+        />
         <circle cx="9" cy="31" r="2.5" fill="#168CFF" />
         <circle cx="54" cy="39" r="2.5" fill="#FF3D86" />
-        <path d="m48 12 1.2 3.2L52 16.5l-2.8 1.2L48 21l-1.2-3.3-2.8-1.2 2.8-1.3L48 12Z" fill="#18BDEB" />
+        <path
+          d="m48 12 1.2 3.2L52 16.5l-2.8 1.2L48 21l-1.2-3.3-2.8-1.2 2.8-1.3L48 12Z"
+          fill="#18BDEB"
+        />
       </svg>
     </span>
   );
