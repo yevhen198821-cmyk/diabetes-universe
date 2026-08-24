@@ -52,7 +52,8 @@ test('mobile navigation exposes real destinations without analytics placeholder'
   await expect(page.getByRole('link', { name: 'Analytics' })).toHaveCount(0);
   await expect(
     navigation.getByRole('button', { name: 'Add event' }),
-  ).toBeVisible();
+  ).toHaveCount(0);
+  await expect(navigation.getByRole('link')).toHaveCount(3);
 
   await navigation.getByRole('link', { name: 'Timeline' }).click();
   await expect(page).toHaveURL('/timeline');

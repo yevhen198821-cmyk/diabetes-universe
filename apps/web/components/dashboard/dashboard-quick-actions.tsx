@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, type RefObject } from 'react';
 
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { quickAddActions } from '../../lib/quick-add/actions';
@@ -60,20 +60,22 @@ function OrganicAccent({ side }: { readonly side: 'left' | 'right' }) {
   );
 }
 
-export interface DashboardQuickActionsProps {
-  readonly disabled?: boolean;
-  readonly onOpenCategory: (category: QuickAddOpenCategory) => void;
-}
-
 function isVisibleQuickAddCategory(
   category: string,
 ): category is VisibleQuickAddCategory {
   return (visibleCategories as readonly string[]).includes(category);
 }
 
+export interface DashboardQuickActionsProps {
+  readonly disabled?: boolean;
+  readonly onOpenCategory: (category: QuickAddOpenCategory) => void;
+  readonly returnFocusRef?: RefObject<HTMLButtonElement | null>;
+}
+
 export function DashboardQuickActions({
   disabled = false,
   onOpenCategory,
+  returnFocusRef,
 }: DashboardQuickActionsProps) {
   const localization = useLocalization();
   const presentationDependencies = useTimelinePresentationDependencies();
@@ -107,7 +109,7 @@ export function DashboardQuickActions({
         </h2>
 
         <div className="grid grid-cols-5 gap-1 sm:gap-2.5">
-          {actions.map((action) => {
+          {actions.map((action, index) => {
             const category = action.category;
             const eventKind = eventKindByCategory[category];
             const label = presentationDependencies.labels.eventKinds[eventKind];
@@ -119,6 +121,7 @@ export function DashboardQuickActions({
                 disabled={disabled}
                 key={action.id}
                 onClick={() => onOpenCategory(category)}
+                ref={index === 0 ? returnFocusRef : undefined}
                 type="button"
               >
                 <span

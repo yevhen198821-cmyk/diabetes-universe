@@ -46,7 +46,7 @@ export function DashboardRoot() {
   const [quickAddState, setQuickAddState] = useState(
     createInitialQuickAddControllerState,
   );
-  const fabRef = useRef<HTMLButtonElement>(null);
+  const quickActionsRef = useRef<HTMLButtonElement>(null);
   const referenceTime = useMemo(() => new Date(), []);
   const isTimelineHydrating = timelineStatus === 'loading';
   const isTimelineError = timelineStatus === 'error';
@@ -193,17 +193,12 @@ export function DashboardRoot() {
             <DashboardLastGlucose state="empty" />
           )
         }
-        mobileNav={
-          <DashboardMobileNav
-            onQuickAdd={() => requestOpen('fab')}
-            quickAddButtonRef={fabRef}
-            quickAddDisabled={quickAddState.isOpen || isTimelineHydrating}
-          />
-        }
+        mobileNav={<DashboardMobileNav showQuickAddFab={false} />}
         quickActions={
           <DashboardQuickActions
             disabled={quickAddState.isOpen || isTimelineHydrating}
             onOpenCategory={(category) => requestOpen('fab', category)}
+            returnFocusRef={quickActionsRef}
           />
         }
         recentEvents={
@@ -243,7 +238,7 @@ export function DashboardRoot() {
         onRequestOpen={() => requestOpen('fab')}
         open={quickAddState.isOpen}
         openCategory={quickAddState.openCategory}
-        returnFocusRef={fabRef}
+        returnFocusRef={quickActionsRef}
         showFloatingActionButton={false}
       />
     </>

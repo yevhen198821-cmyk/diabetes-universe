@@ -89,11 +89,13 @@ test('header keeps brand and account affordance without duplicate add-event CTA'
   assert.doesNotMatch(headerSource, /aria-label=\{viewModel\.addEventLabel\}/);
 });
 
-test('mobile navigation links only to real routes', () => {
+test('mobile navigation links only to real routes without duplicate quick-add FAB', () => {
   assert.match(mobileNavSource, /href="\/"/);
   assert.match(mobileNavSource, /href="\/timeline"/);
   assert.match(mobileNavSource, /href="\/account"/);
-  assert.match(mobileNavSource, /Clock/);
+  assert.match(mobileNavSource, /showQuickAddFab/);
+  assert.match(mobileNavSource, /grid-cols-3/);
+  assert.match(rootSource, /showQuickAddFab=\{false\}/);
   assert.doesNotMatch(mobileNavSource, /href="\/analytics"/);
   assert.doesNotMatch(mobileNavSource, /Anna/);
 });
