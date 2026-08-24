@@ -1,4 +1,5 @@
 import type { DashboardDaySummaryLabels } from './dashboard-day-summary-labels';
+import type { DashboardDaySummaryVisualizations } from '../../lib/dashboard/dashboard-day-summary-series';
 
 export interface DashboardDaySummaryData {
   readonly dayDate: string;
@@ -10,6 +11,7 @@ export interface DashboardDaySummaryData {
   readonly totalActivitySeconds: number;
   readonly totalCarbohydrateGrams: number;
   readonly totalInsulinUnits: number;
+  readonly visualizations: DashboardDaySummaryVisualizations;
 }
 
 export interface DashboardDaySummaryFormattedMetrics {
@@ -45,7 +47,13 @@ export type DashboardDaySummaryProps =
   | DashboardDaySummaryEmptyProps
   | DashboardDaySummaryErrorProps;
 
+export type DashboardDaySummaryMetricKind =
+  'activity' | 'glucose' | 'insulin' | 'nutrition';
+
 export interface DashboardDaySummaryMetric {
+  readonly chartAriaLabel: string;
+  readonly chartValues: readonly number[];
+  readonly kind: DashboardDaySummaryMetricKind;
   readonly label: string;
   readonly secondaryText: string | null;
   readonly value: string;
@@ -117,6 +125,7 @@ function normalizeReadySummary(
     totalActivitySeconds: summary.totalActivitySeconds,
     totalCarbohydrateGrams: summary.totalCarbohydrateGrams,
     totalInsulinUnits: summary.totalInsulinUnits,
+    visualizations: summary.visualizations,
   };
 }
 
@@ -125,23 +134,47 @@ function createReadyMetrics(
   summary: DashboardDaySummaryData,
   formattedMetrics: DashboardDaySummaryFormattedMetrics,
 ): DashboardDaySummaryMetric[] {
+  const { visualizations } = summary;
+  const glucoseValues = visualizations.glucose.map(
+    (point) => point.concentrationMmolPerL,
+  );
+  const insulinValues = visualizations.insulin.map((mark) => mark.doseUnits);
+  const nutritionValues = visualizations.nutrition.map(
+    (mark) => mark.carbohydratesGrams,
+  );
+  const activityValues = visualizations.activity.map(
+    (mark) => mark.durationSeconds / 60,
+  );
+
   return [
     {
+      chartAriaLabel: labels.chartAria.glucose(glucoseValues.length),
+      chartValues: glucoseValues,
+      kind: 'glucose',
       label: labels.glucose,
       secondaryText: summary.latestTodayGlucoseDisplayTime,
       value: formattedMetrics.glucose,
     },
     {
+      chartAriaLabel: labels.chartAria.insulin(insulinValues.length),
+      chartValues: insulinValues,
+      kind: 'insulin',
       label: labels.totalInsulin,
       secondaryText: labels.totalForDay,
       value: formattedMetrics.totalInsulin,
     },
     {
+      chartAriaLabel: labels.chartAria.nutrition(nutritionValues.length),
+      chartValues: nutritionValues,
+      kind: 'nutrition',
       label: labels.totalCarbohydrates,
       secondaryText: labels.totalForDay,
       value: formattedMetrics.totalCarbohydrates,
     },
     {
+      chartAriaLabel: labels.chartAria.activity(activityValues.length),
+      chartValues: activityValues,
+      kind: 'activity',
       label: labels.activity,
       secondaryText: labels.totalForDay,
       value: formattedMetrics.totalActivity,

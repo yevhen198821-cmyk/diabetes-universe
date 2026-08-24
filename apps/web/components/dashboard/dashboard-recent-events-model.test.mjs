@@ -77,20 +77,16 @@ const activityWalk = {
   value: '30',
 };
 
-test('keeps only the latest event per category', () => {
+test('sorts events newest-first by occurredAt instead of category buckets', () => {
   const events = selectDashboardRecentEvents(
     [insulinMorning, insulinEvening, nutritionBreakfast, medicationMorning],
     labels.categories,
   );
 
-  assert.equal(events.length, 3);
-  assert.equal(
-    events.find((event) => event.category === 'insulin')?.id,
-    'insulin-1800',
-  );
-  assert.equal(
-    events.find((event) => event.category === 'insulin')?.categoryLabel,
-    'Insulin',
+  assert.equal(events.length, 4);
+  assert.deepEqual(
+    events.map((event) => event.id),
+    ['insulin-1800', 'nutrition-0820', 'insulin-0805', 'medication-0730'],
   );
 });
 
@@ -106,7 +102,7 @@ test('sorts events by latest dateTime instead of category order', () => {
   );
 });
 
-test('limits the preview to four cards', () => {
+test('limits the preview to four cards even when more events are supplied', () => {
   const events = selectDashboardRecentEvents(
     [
       insulinMorning,
@@ -127,19 +123,23 @@ test('limits the preview to four cards', () => {
   );
 
   assert.equal(events.length, DASHBOARD_RECENT_EVENTS_MAX_CARDS);
+  assert.deepEqual(
+    events.map((event) => event.id),
+    ['nutrition-1900', 'insulin-1800', 'activity-1400', 'nutrition-0820'],
+  );
 });
 
-test('omits activity when no activity event is supplied', () => {
+test('includes activity when it is among the newest events', () => {
   const events = selectDashboardRecentEvents(
-    [insulinEvening, nutritionBreakfast, medicationMorning],
+    [insulinEvening, nutritionBreakfast, medicationMorning, activityWalk],
     labels.categories,
   );
 
   assert.equal(
     events.some((event) => event.category === 'activity'),
-    false,
+    true,
   );
-  assert.equal(events.length, 3);
+  assert.equal(events.length, 4);
 });
 
 test('rejects invalid events without affecting valid categories', () => {

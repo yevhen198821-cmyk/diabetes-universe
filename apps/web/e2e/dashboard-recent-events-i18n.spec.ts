@@ -43,8 +43,13 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   ).toBeVisible();
 
   await expect(recentEvents.locator('time')).toHaveCount(4);
+  await expect(
+    recentEvents.getByText('Yesterday,', { exact: false }),
+  ).toBeVisible();
   for (const timeElement of await recentEvents.locator('time').all()) {
-    await expect(timeElement).toHaveText(/\d{1,2}:\d{2}/);
+    await expect(timeElement).toHaveText(
+      /(\d{1,2}:\d{2}|Yesterday, \d{1,2}:\d{2})/,
+    );
   }
 
   await page.getByRole('button', { name: 'Quick add: Insulin' }).click();
@@ -54,7 +59,7 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
   await expect(recentEvents.getByText('5 U', { exact: true })).toBeVisible();
-  await expect(recentEvents.locator('li')).toHaveCount(3);
+  await expect(recentEvents.locator('li')).toHaveCount(4);
 
   await page.getByRole('button', { name: 'Quick add: Nutrition' }).click();
   await page.getByRole('button', { name: /Тип приёма пищи/ }).click();
@@ -136,5 +141,5 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await expect(
     recentEvents.getByText('10 g carbs', { exact: true }),
   ).toBeVisible();
-  await expect(recentEvents.locator('li')).toHaveCount(3);
+  await expect(recentEvents.locator('li')).toHaveCount(4);
 });

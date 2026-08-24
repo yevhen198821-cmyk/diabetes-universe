@@ -3,11 +3,10 @@
 import { useRouter } from 'next/navigation';
 import { useMemo, useRef, useState } from 'react';
 
+import type { TranslationKey } from '@diabetes-universe/i18n';
+
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model';
-import {
-  createDashboardNextActionEngineInput,
-  resolveDashboardNextActionPresentation,
-} from '../../lib/dashboard/dashboard-next-action-integration';
+import { formatDashboardRecentEventDisplayTime } from '../../lib/dashboard/dashboard-recent-events-display-time';
 import {
   createSemanticActivityTimelineEvent,
   createSemanticGlucoseTimelineEvent,
@@ -34,7 +33,6 @@ import { DashboardGreeting } from './dashboard-greeting';
 import { DashboardHeader } from './dashboard-header';
 import { DashboardLastGlucose } from './dashboard-last-glucose';
 import { DashboardMobileNav } from './dashboard-mobile-nav';
-import { DashboardNextAction } from './dashboard-next-action';
 import { DashboardQuickActions } from './dashboard-quick-actions';
 import { DashboardRecentEvents } from './dashboard-recent-events';
 import { DashboardShell } from './dashboard-shell';
@@ -49,23 +47,19 @@ export function DashboardRoot() {
     createInitialQuickAddControllerState,
   );
   const fabRef = useRef<HTMLButtonElement>(null);
-  const nextActionRef = useRef<HTMLButtonElement>(null);
   const referenceTime = useMemo(() => new Date(), []);
   const isTimelineHydrating = timelineStatus === 'loading';
   const isTimelineError = timelineStatus === 'error';
-  const nextActionPresentation = useMemo(
-    () =>
-      isTimelineHydrating
-        ? null
-        : resolveDashboardNextActionPresentation(
-            localization,
-            createDashboardNextActionEngineInput(events, referenceTime),
-          ),
-    [events, isTimelineHydrating, localization, referenceTime],
-  );
   const dashboardTimeZone = useMemo(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
     [],
+  );
+  const yesterdayLabel = useMemo(
+    () =>
+      localization.translate({
+        key: 'timeline.group.yesterday' as TranslationKey,
+      }).value,
+    [localization],
   );
   const formatLastGlucoseDisplayTime = useMemo(
     () => (dateTime: string) =>
@@ -78,8 +72,19 @@ export function DashboardRoot() {
   );
   const formatRecentEventDisplayTime = useMemo(
     () => (dateTime: string) =>
-      formatter.formatTime(dateTime, { timeStyle: 'short' }),
-    [formatter],
+      formatDashboardRecentEventDisplayTime(
+        dateTime,
+        referenceTime,
+        localization.localeContext.locale,
+        yesterdayLabel,
+        dashboardTimeZone,
+      ),
+    [
+      dashboardTimeZone,
+      localization.localeContext.locale,
+      referenceTime,
+      yesterdayLabel,
+    ],
   );
 
   const derivedBlocks = useMemo(
@@ -110,9 +115,6 @@ export function DashboardRoot() {
       referenceTime,
     ],
   );
-
-  const returnFocusRef =
-    quickAddState.lastOpenTrigger === 'next-action' ? nextActionRef : fabRef;
 
   const requestOpen = (
     trigger: QuickAddOpenTrigger,
@@ -198,31 +200,6 @@ export function DashboardRoot() {
             quickAddDisabled={quickAddState.isOpen || isTimelineHydrating}
           />
         }
-        nextAction={
-          isTimelineHydrating ? (
-            <DashboardNextAction state="loading" />
-          ) : nextActionPresentation?.state === 'ready' ? (
-            <DashboardNextAction
-              action={nextActionPresentation.action}
-              actionButtonRef={nextActionRef}
-              actionDisabled={quickAddState.isOpen}
-              onAction={() =>
-                requestOpen(
-                  'next-action',
-                  nextActionPresentation.quickAddCategory,
-                )
-              }
-              state="ready"
-            />
-          ) : nextActionPresentation ? (
-            <DashboardNextAction
-              content={nextActionPresentation.content}
-              state="empty"
-            />
-          ) : (
-            <DashboardNextAction state="loading" />
-          )
-        }
         quickActions={
           <DashboardQuickActions
             disabled={quickAddState.isOpen || isTimelineHydrating}
@@ -266,7 +243,7 @@ export function DashboardRoot() {
         onRequestOpen={() => requestOpen('fab')}
         open={quickAddState.isOpen}
         openCategory={quickAddState.openCategory}
-        returnFocusRef={returnFocusRef}
+        returnFocusRef={fabRef}
         showFloatingActionButton={false}
       />
     </>

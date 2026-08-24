@@ -45,6 +45,7 @@ test('Home composition keeps trust-first blocks and excludes deferred AI insight
   assert.match(rootSource, /DashboardMobileNav/);
   assert.match(rootSource, /DashboardRecentEvents/);
   assert.doesNotMatch(rootSource, /DashboardAiInsight/);
+  assert.doesNotMatch(rootSource, /DashboardNextAction/);
   assert.doesNotMatch(rootSource, /showFloatingActionButton=\{true\}/);
 });
 
@@ -58,11 +59,15 @@ test('glucose hero preserves explicit stale and source presentation', () => {
   assert.match(heroScenerySource, /heroHillFront/);
 });
 
-test('today summary presents four distinct metric visual slots', () => {
+test('today summary presents four distinct metric visual slots with real mini charts', () => {
   assert.equal((summarySource.match(/icon:/g) ?? []).length, 4);
   assert.match(summarySource, /grid-cols-2/);
   assert.match(summarySource, /lg:grid-cols-4/);
-  assert.match(summarySource, /PersonStanding/);
+  assert.match(summarySource, /GlucoseMiniChart/);
+  assert.match(summarySource, /InsulinMiniChart/);
+  assert.match(summarySource, /NutritionMiniChart/);
+  assert.match(summarySource, /ActivityMiniChart/);
+  assert.doesNotMatch(summarySource, /MetricDecoration/);
 });
 
 test('quick actions expose approved high-frequency categories including notes', () => {

@@ -46,6 +46,27 @@ export const russianDraftMessages = defineDraftMessages({
   'dashboard.daySummary.metrics.totalCarbohydrates': 'Углеводы',
   'dashboard.daySummary.metrics.totalForDay': 'Всего за день',
   'dashboard.daySummary.metrics.totalInsulin': 'Инсулин',
+  'dashboard.daySummary.chartAria.activity.none':
+    'Сегодня активность не записана',
+  'dashboard.daySummary.chartAria.activity.single':
+    '1 запись активности сегодня',
+  'dashboard.daySummary.chartAria.activity.multiple':
+    '{count} записей активности сегодня',
+  'dashboard.daySummary.chartAria.glucose.none':
+    'Сегодня нет измерений глюкозы',
+  'dashboard.daySummary.chartAria.glucose.single':
+    '1 измерение глюкозы сегодня',
+  'dashboard.daySummary.chartAria.glucose.multiple':
+    '{count} измерений глюкозы сегодня',
+  'dashboard.daySummary.chartAria.insulin.none': 'Сегодня нет доз инсулина',
+  'dashboard.daySummary.chartAria.insulin.single': '1 доза инсулина сегодня',
+  'dashboard.daySummary.chartAria.insulin.multiple':
+    '{count} доз инсулина сегодня',
+  'dashboard.daySummary.chartAria.nutrition.none':
+    'Сегодня нет записей питания',
+  'dashboard.daySummary.chartAria.nutrition.single': '1 запись питания сегодня',
+  'dashboard.daySummary.chartAria.nutrition.multiple':
+    '{count} записей питания сегодня',
   'dashboard.daySummary.title': 'Сегодня',
   'dashboard.daySummary.unavailable': 'Сводка за день недоступна.',
   'dashboard.daySummary.viewDetails': 'Подробнее',

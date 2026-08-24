@@ -5,6 +5,10 @@ import {
   type TimelinePresentationDependencies,
 } from '../timeline/presentation';
 import { deriveDashboardRecentEventSources } from './dashboard-recent-events-derivation';
+import {
+  deriveDashboardDaySummaryVisualizations,
+  type DashboardDaySummaryVisualizations,
+} from './dashboard-day-summary-series';
 import { getTimelineCalendarDateKey } from '../timeline/timeline-date-time';
 import {
   getLatestGlucoseEvent,
@@ -26,6 +30,7 @@ export interface DashboardDerivedDaySummary {
   readonly totalActivitySeconds: number;
   readonly totalCarbohydrateGrams: number;
   readonly totalInsulinUnits: number;
+  readonly visualizations: DashboardDaySummaryVisualizations;
 }
 
 export interface DashboardDerivedLastGlucose {
@@ -187,6 +192,11 @@ function deriveDaySummary(
     totalActivitySeconds,
     totalCarbohydrateGrams,
     totalInsulinUnits,
+    visualizations: deriveDashboardDaySummaryVisualizations(
+      events,
+      referenceTime,
+      timeZone,
+    ),
   };
 }
 

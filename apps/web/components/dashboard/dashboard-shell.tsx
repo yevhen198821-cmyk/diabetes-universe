@@ -7,7 +7,6 @@ export interface DashboardShellProps {
   readonly header: ReactNode;
   readonly lastGlucose: ReactNode;
   readonly mobileNav?: ReactNode;
-  readonly nextAction: ReactNode;
   readonly quickActions?: ReactNode;
   readonly recentEvents: ReactNode;
 }
@@ -19,7 +18,6 @@ export function DashboardShell({
   header,
   lastGlucose,
   mobileNav,
-  nextAction,
   quickActions,
   recentEvents,
 }: DashboardShellProps) {
@@ -38,7 +36,6 @@ export function DashboardShell({
         {lastGlucose}
         {daySummary}
         {quickActions}
-        {nextAction}
         {recentEvents}
         {children}
       </main>

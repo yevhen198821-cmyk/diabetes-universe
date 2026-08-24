@@ -5,6 +5,12 @@ import { createDashboardDaySummaryViewModel } from './dashboard-day-summary-mode
 
 const labels = {
   activity: 'Activity',
+  chartAria: {
+    activity: (count) => `${count} activity entries today`,
+    glucose: (count) => `${count} glucose readings today`,
+    insulin: (count) => `${count} insulin doses today`,
+    nutrition: (count) => `${count} nutrition entries today`,
+  },
   defaultEmpty: "Today's summary is not available yet.",
   defaultError: 'Could not load the day summary.',
   eyebrow: 'Current day',
@@ -32,6 +38,12 @@ const validSummary = {
   totalActivitySeconds: 1800,
   totalCarbohydrateGrams: 120,
   totalInsulinUnits: 12,
+  visualizations: {
+    activity: [{ durationSeconds: 1800 }],
+    glucose: [{ concentrationMmolPerL: 6.1 }, { concentrationMmolPerL: 6.4 }],
+    insulin: [{ doseUnits: 12 }],
+    nutrition: [{ carbohydratesGrams: 120 }],
+  },
 };
 
 const formattedMetrics = {
@@ -78,6 +90,7 @@ test('normalizes ready summary values without changing their meaning', () => {
         totalActivitySeconds: 1800,
         totalCarbohydrateGrams: 120,
         totalInsulinUnits: 12,
+        visualizations: validSummary.visualizations,
       },
     },
     labels,

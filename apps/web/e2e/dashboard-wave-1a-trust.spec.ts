@@ -35,7 +35,7 @@ test('dashboard uses brand and Home navigation without hardcoded user name', asy
   await expect(page.getByText('Анна Иванова')).toHaveCount(0);
 });
 
-test('dashboard status-first hierarchy places last glucose before next action', async ({
+test('dashboard status-first hierarchy places last glucose before today summary', async ({
   page,
 }) => {
   await page.goto('/');
@@ -44,7 +44,8 @@ test('dashboard status-first hierarchy places last glucose before next action', 
   await expect(
     page.getByRole('region', { name: 'Last glucose' }),
   ).toBeVisible();
-  await expect(page.getByText('Next action').first()).toBeVisible();
+  await expect(page.getByText('Next action')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
 
   const sectionSummaries = await page
     .locator('#main-content > section')
@@ -58,10 +59,10 @@ test('dashboard status-first hierarchy places last glucose before next action', 
   const lastGlucoseIndex = sectionSummaries.findIndex((section) =>
     section.text.includes('Last glucose'),
   );
-  const nextActionIndex = sectionSummaries.findIndex((section) =>
-    section.text.includes('Next action'),
+  const todayIndex = sectionSummaries.findIndex((section) =>
+    section.text.includes('Today'),
   );
 
   expect(lastGlucoseIndex).toBeGreaterThanOrEqual(0);
-  expect(nextActionIndex).toBeGreaterThan(lastGlucoseIndex);
+  expect(todayIndex).toBeGreaterThan(lastGlucoseIndex);
 });

@@ -50,5 +50,7 @@ test('resolveDashboardDaySummaryLabels returns a fresh immutable snapshot', asyn
   const second = resolveDashboardDaySummaryLabels(runtime.localization);
 
   assert.notEqual(first, second);
-  assert.deepEqual(first, second);
+  assert.equal(first.title, second.title);
+  assert.equal(first.chartAria.glucose(2), second.chartAria.glucose(2));
+  assert.equal(first.chartAria.insulin(0), second.chartAria.insulin(0));
 });

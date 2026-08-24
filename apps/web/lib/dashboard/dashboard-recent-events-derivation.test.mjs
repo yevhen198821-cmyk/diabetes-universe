@@ -300,29 +300,16 @@ test('getRecentTimelineEvents consumer behavior remains unchanged without dashbo
   );
 });
 
-test('dashboard pipeline keeps latest-per-category and final limit unchanged', () => {
-  const baselineSources = getRecentTimelineEvents(
-    pipelineEvents,
-    presentationDependencies,
-    {
-      limit: 4,
-      timeZone: 'UTC',
-    },
-  );
+test('dashboard pipeline keeps newest-first ordering with a four-card limit', () => {
   const dashboardSources = deriveDashboardRecentEventSources(
     pipelineEvents,
     presentationDependencies,
     {
       formatDisplayTime: (dateTime) =>
         formatTimelineDisplayTime(dateTime, 'ru-RU', 'UTC'),
-      limit: 4,
     },
   );
 
-  const baselineSelected = selectDashboardRecentEvents(
-    baselineSources,
-    categoryLabels,
-  );
   const dashboardSelected = selectDashboardRecentEvents(
     dashboardSources,
     categoryLabels,
@@ -330,6 +317,11 @@ test('dashboard pipeline keeps latest-per-category and final limit unchanged', (
 
   assert.deepEqual(
     dashboardSelected.map((event) => event.id),
-    baselineSelected.map((event) => event.id),
+    [
+      'nutrition-today',
+      'insulin-today',
+      'medication-today',
+      'nutrition-yesterday',
+    ],
   );
 });

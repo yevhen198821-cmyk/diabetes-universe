@@ -86,6 +86,22 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'dashboard.daySummary.metrics.totalCarbohydrates': 'Carbohydrates',
   'dashboard.daySummary.metrics.totalForDay': 'Total for the day',
   'dashboard.daySummary.metrics.totalInsulin': 'Insulin',
+  'dashboard.daySummary.chartAria.activity.none': 'No activity recorded today',
+  'dashboard.daySummary.chartAria.activity.single': '1 activity entry today',
+  'dashboard.daySummary.chartAria.activity.multiple':
+    '{count} activity entries today',
+  'dashboard.daySummary.chartAria.glucose.none': 'No glucose readings today',
+  'dashboard.daySummary.chartAria.glucose.single': '1 glucose reading today',
+  'dashboard.daySummary.chartAria.glucose.multiple':
+    '{count} glucose readings today',
+  'dashboard.daySummary.chartAria.insulin.none': 'No insulin doses today',
+  'dashboard.daySummary.chartAria.insulin.single': '1 insulin dose today',
+  'dashboard.daySummary.chartAria.insulin.multiple':
+    '{count} insulin doses today',
+  'dashboard.daySummary.chartAria.nutrition.none': 'No nutrition entries today',
+  'dashboard.daySummary.chartAria.nutrition.single': '1 nutrition entry today',
+  'dashboard.daySummary.chartAria.nutrition.multiple':
+    '{count} nutrition entries today',
   'dashboard.daySummary.title': 'Today',
   'dashboard.daySummary.unavailable': 'Day summary unavailable.',
   'dashboard.daySummary.viewDetails': 'Details',

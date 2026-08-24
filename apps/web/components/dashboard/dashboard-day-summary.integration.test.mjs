@@ -39,6 +39,12 @@ const readySummary = {
   totalActivitySeconds: 1800,
   totalCarbohydrateGrams: 120,
   totalInsulinUnits: 12,
+  visualizations: {
+    activity: [],
+    glucose: [{ concentrationMmolPerL: 6.4 }],
+    insulin: [{ doseUnits: 12 }],
+    nutrition: [{ carbohydratesGrams: 120 }],
+  },
 };
 
 after(() => {

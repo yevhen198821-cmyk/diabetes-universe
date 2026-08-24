@@ -12,7 +12,6 @@ const ENGLISH_HOME_CHROME = [
   'Quick add',
   'Recent events',
   'All events',
-  'Next action',
   'Details',
 ] as const;
 
@@ -30,6 +29,7 @@ test('home renders Wave 1C visual foundation without fabricated identity data', 
   ).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Quick add' })).toBeVisible();
+  await expect(page.getByText('Next action')).toHaveCount(0);
   await expect(
     page.getByRole('heading', { name: 'Recent events' }),
   ).toBeVisible();
@@ -75,6 +75,18 @@ test('quick add category buttons open existing quick add forms', async ({
   await page.getByRole('button', { name: 'Quick add: Notes' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Добавить заметку' }),
+  ).toBeVisible();
+});
+
+test('today cards expose real-data mini chart summaries', async ({ page }) => {
+  await page.goto('/');
+  await waitForApplicationReady(page);
+
+  await expect(
+    page.getByRole('img', { name: /glucose readings today/i }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('img', { name: /insulin dose today/i }),
   ).toBeVisible();
 });
 

@@ -12,12 +12,19 @@ import { useMemo } from 'react';
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import {
+  ActivityMiniChart,
+  GlucoseMiniChart,
+  InsulinMiniChart,
+  NutritionMiniChart,
+} from './dashboard-day-summary-mini-charts';
+import {
   resolveDashboardDaySummaryLabels,
   type DashboardDaySummaryLabels,
 } from './dashboard-day-summary-labels';
 import {
   createDashboardDaySummaryViewModel,
   type DashboardDaySummaryFormattedMetrics,
+  type DashboardDaySummaryMetric,
   type DashboardDaySummaryProps,
 } from './dashboard-day-summary-model';
 
@@ -25,7 +32,6 @@ const titleId = 'dashboard-day-summary-title';
 
 const metricVisuals = [
   {
-    decoration: 'wave',
     icon: Droplets,
     iconClass:
       'bg-teal-500 text-white shadow-[0_10px_22px_rgba(20,184,166,0.28)]',
@@ -35,7 +41,6 @@ const metricVisuals = [
     valueClass: 'text-teal-800',
   },
   {
-    decoration: 'bars',
     icon: Syringe,
     iconClass:
       'bg-violet-500 text-white shadow-[0_10px_22px_rgba(139,92,246,0.28)]',
@@ -45,7 +50,6 @@ const metricVisuals = [
     valueClass: 'text-violet-800',
   },
   {
-    decoration: 'gradient',
     icon: Wheat,
     iconClass:
       'bg-orange-500 text-white shadow-[0_10px_22px_rgba(249,115,22,0.28)]',
@@ -55,7 +59,6 @@ const metricVisuals = [
     valueClass: 'text-orange-800',
   },
   {
-    decoration: 'arc',
     icon: PersonStanding,
     iconClass:
       'bg-blue-500 text-white shadow-[0_10px_22px_rgba(59,130,246,0.28)]',
@@ -66,75 +69,41 @@ const metricVisuals = [
   },
 ] as const;
 
-function MetricDecoration({
-  kind,
-  tone,
+function MetricMiniChart({
+  metric,
 }: {
-  readonly kind: string;
-  readonly tone: string;
+  readonly metric: DashboardDaySummaryMetric;
 }) {
-  if (kind === 'wave') {
-    return (
-      <svg
-        aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-14 w-full opacity-80"
-        preserveAspectRatio="none"
-        viewBox="0 0 120 32"
-      >
-        <path
-          d="M0 20 C20 12 40 26 60 18 C80 10 100 24 120 16 L120 32 L0 32 Z"
-          fill="currentColor"
-          className={tone}
+  switch (metric.kind) {
+    case 'glucose':
+      return (
+        <GlucoseMiniChart
+          ariaLabel={metric.chartAriaLabel}
+          values={metric.chartValues}
         />
-      </svg>
-    );
-  }
-
-  if (kind === 'bars') {
-    return (
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-3 bottom-3 flex items-end justify-center gap-1 opacity-50"
-      >
-        {[12, 18, 14, 20].map((height, index) => (
-          <span
-            className="w-2 rounded-full bg-violet-400/50"
-            key={index}
-            style={{ height }}
-          />
-        ))}
-      </div>
-    );
-  }
-
-  if (kind === 'arc') {
-    return (
-      <svg
-        aria-hidden="true"
-        className="absolute right-2 bottom-2 size-16 opacity-50"
-        viewBox="0 0 48 48"
-      >
-        <circle
-          cx="24"
-          cy="24"
-          fill="none"
-          r="18"
-          stroke="currentColor"
-          strokeDasharray="72 120"
-          strokeLinecap="round"
-          strokeWidth="4"
-          className="text-blue-400/45"
+      );
+    case 'insulin':
+      return (
+        <InsulinMiniChart
+          ariaLabel={metric.chartAriaLabel}
+          values={metric.chartValues}
         />
-      </svg>
-    );
+      );
+    case 'nutrition':
+      return (
+        <NutritionMiniChart
+          ariaLabel={metric.chartAriaLabel}
+          values={metric.chartValues}
+        />
+      );
+    case 'activity':
+      return (
+        <ActivityMiniChart
+          ariaLabel={metric.chartAriaLabel}
+          values={metric.chartValues}
+        />
+      );
   }
-
-  return (
-    <div
-      aria-hidden="true"
-      className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-orange-300/25 to-transparent"
-    />
-  );
 }
 
 function createFormattedMetrics(
@@ -236,10 +205,6 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
                   className={`relative min-h-[9.75rem] overflow-hidden rounded-[1.35rem] border p-3.5 shadow-[0_16px_40px_rgba(15,23,42,0.07)] sm:min-h-[10.25rem] sm:p-4 ${visual.surfaceClass}`}
                   key={metric.label}
                 >
-                  <MetricDecoration
-                    kind={visual.decoration}
-                    tone="text-teal-300/35"
-                  />
                   <span
                     aria-hidden="true"
                     className={`relative z-10 grid size-12 place-items-center rounded-full ${visual.iconClass}`}
@@ -256,6 +221,7 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
                   >
                     {metric.value}
                   </dd>
+                  <MetricMiniChart metric={metric} />
                   {metric.secondaryText ? (
                     <dd
                       className={`relative z-10 mt-1 text-xs font-medium ${visual.labelClass}`}

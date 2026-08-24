@@ -3,8 +3,16 @@ import type {
   TranslationKey,
 } from '@diabetes-universe/i18n';
 
+export interface DashboardDaySummaryChartAriaLabels {
+  readonly activity: (count: number) => string;
+  readonly glucose: (count: number) => string;
+  readonly insulin: (count: number) => string;
+  readonly nutrition: (count: number) => string;
+}
+
 export interface DashboardDaySummaryLabels {
   readonly activity: string;
+  readonly chartAria: DashboardDaySummaryChartAriaLabels;
   readonly defaultEmpty: string;
   readonly defaultError: string;
   readonly eyebrow: string;
@@ -28,6 +36,40 @@ function asTranslationKey(value: string): TranslationKey {
 
 const DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS = {
   activity: asTranslationKey('dashboard.daySummary.metrics.activity'),
+  chartAria: {
+    activity: {
+      multiple: asTranslationKey(
+        'dashboard.daySummary.chartAria.activity.multiple',
+      ),
+      none: asTranslationKey('dashboard.daySummary.chartAria.activity.none'),
+      single: asTranslationKey(
+        'dashboard.daySummary.chartAria.activity.single',
+      ),
+    },
+    glucose: {
+      multiple: asTranslationKey(
+        'dashboard.daySummary.chartAria.glucose.multiple',
+      ),
+      none: asTranslationKey('dashboard.daySummary.chartAria.glucose.none'),
+      single: asTranslationKey('dashboard.daySummary.chartAria.glucose.single'),
+    },
+    insulin: {
+      multiple: asTranslationKey(
+        'dashboard.daySummary.chartAria.insulin.multiple',
+      ),
+      none: asTranslationKey('dashboard.daySummary.chartAria.insulin.none'),
+      single: asTranslationKey('dashboard.daySummary.chartAria.insulin.single'),
+    },
+    nutrition: {
+      multiple: asTranslationKey(
+        'dashboard.daySummary.chartAria.nutrition.multiple',
+      ),
+      none: asTranslationKey('dashboard.daySummary.chartAria.nutrition.none'),
+      single: asTranslationKey(
+        'dashboard.daySummary.chartAria.nutrition.single',
+      ),
+    },
+  },
   defaultEmpty: asTranslationKey('dashboard.daySummary.empty.default'),
   defaultError: asTranslationKey('dashboard.daySummary.error.default'),
   eyebrow: asTranslationKey('dashboard.daySummary.eyebrow'),
@@ -55,6 +97,30 @@ function translateDashboardDaySummaryKey(
   return localization.translate({ key }).value;
 }
 
+function createChartAriaResolver(
+  localization: LocalizationPlatform,
+  keys: {
+    readonly multiple: TranslationKey;
+    readonly none: TranslationKey;
+    readonly single: TranslationKey;
+  },
+): (count: number) => string {
+  return (count: number) => {
+    if (count === 0) {
+      return translateDashboardDaySummaryKey(localization, keys.none);
+    }
+
+    if (count === 1) {
+      return translateDashboardDaySummaryKey(localization, keys.single);
+    }
+
+    return translateDashboardDaySummaryKey(localization, keys.multiple).replace(
+      '{count}',
+      String(count),
+    );
+  };
+}
+
 export function resolveDashboardDaySummaryLabels(
   localization: LocalizationPlatform,
 ): DashboardDaySummaryLabels {
@@ -63,6 +129,24 @@ export function resolveDashboardDaySummaryLabels(
       localization,
       DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.activity,
     ),
+    chartAria: {
+      activity: createChartAriaResolver(
+        localization,
+        DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.chartAria.activity,
+      ),
+      glucose: createChartAriaResolver(
+        localization,
+        DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.chartAria.glucose,
+      ),
+      insulin: createChartAriaResolver(
+        localization,
+        DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.chartAria.insulin,
+      ),
+      nutrition: createChartAriaResolver(
+        localization,
+        DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.chartAria.nutrition,
+      ),
+    },
     defaultEmpty: translateDashboardDaySummaryKey(
       localization,
       DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.defaultEmpty,
@@ -122,3 +206,25 @@ export function resolveDashboardDaySummaryLabels(
 
 export const dashboardDaySummaryTranslationKeys =
   DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS;
+
+export const dashboardDaySummaryTranslationKeyList: readonly TranslationKey[] =
+  [
+    DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.activity,
+    DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.defaultEmpty,
+    DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.defaultError,
+    DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.eyebrow,
+    DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.glucose,
+    DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.loading,
+    DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.title,
+    DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.totalCarbohydrates,
+    DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.totalForDay,
+    DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.totalInsulin,
+    DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.unavailable,
+    DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.viewDetails,
+    ...Object.values(DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.chartAria.activity),
+    ...Object.values(DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.chartAria.glucose),
+    ...Object.values(DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.chartAria.insulin),
+    ...Object.values(
+      DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.chartAria.nutrition,
+    ),
+  ];

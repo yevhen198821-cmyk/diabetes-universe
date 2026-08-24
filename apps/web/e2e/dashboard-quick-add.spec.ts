@@ -64,7 +64,7 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
   ).toBeVisible();
 });
 
-test('next action opens insulin quick add directly and updates dashboard', async ({
+test('quick add insulin opens directly and updates dashboard', async ({
   page,
 }) => {
   await page.goto('/');
@@ -73,11 +73,7 @@ test('next action opens insulin quick add directly and updates dashboard', async
 
   const daySummary = page.getByRole('region', { name: 'Today' });
 
-  await expect(page.getByText('Next action')).toBeVisible();
-  await expect(
-    page.getByRole('heading', { name: 'Add insulin' }),
-  ).toBeVisible();
-  await page.getByRole('button', { name: 'Add', exact: true }).click();
+  await page.getByRole('button', { name: 'Quick add: Insulin' }).click();
 
   await expect(
     page.getByRole('dialog', { name: 'Добавить инсулин' }),
@@ -95,9 +91,6 @@ test('next action opens insulin quick add directly and updates dashboard', async
     page.getByRole('dialog', { name: 'Добавить инсулин' }),
   ).toBeHidden();
   await expect(daySummary.getByText('6 U')).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'Add', exact: true }),
-  ).toBeFocused();
 
   await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');

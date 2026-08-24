@@ -19,6 +19,10 @@ const quickActionsSource = readFileSync(
   fileURLToPath(new URL('./dashboard-quick-actions.tsx', import.meta.url)),
   'utf8',
 );
+const rootSource = readFileSync(
+  fileURLToPath(new URL('./dashboard-root.tsx', import.meta.url)),
+  'utf8',
+);
 
 test('dashboard shell keeps semantic page foundation under decorative layers', () => {
   assert.match(shellSource, /text-text-primary/);
@@ -26,16 +30,18 @@ test('dashboard shell keeps semantic page foundation under decorative layers', (
   assert.match(shellSource, /id="main-content"/);
 });
 
-test('dashboard blocks preserve Wave 1A status-first order in shell', () => {
+test('dashboard blocks preserve Wave 1C home order without next action', () => {
   const lastGlucoseIndex = shellSource.indexOf('{lastGlucose}');
   const daySummaryIndex = shellSource.indexOf('{daySummary}');
-  const nextActionIndex = shellSource.indexOf('{nextAction}');
+  const quickActionsIndex = shellSource.indexOf('{quickActions}');
   const recentEventsIndex = shellSource.indexOf('{recentEvents}');
 
   assert.ok(lastGlucoseIndex >= 0);
   assert.ok(daySummaryIndex > lastGlucoseIndex);
-  assert.ok(nextActionIndex > daySummaryIndex);
-  assert.ok(recentEventsIndex > nextActionIndex);
+  assert.ok(quickActionsIndex > daySummaryIndex);
+  assert.ok(recentEventsIndex > quickActionsIndex);
+  assert.equal(shellSource.includes('{nextAction}'), false);
+  assert.doesNotMatch(rootSource, /DashboardNextAction/);
 });
 
 test('Wave 1C decorative color does not remove semantic accessibility states', () => {

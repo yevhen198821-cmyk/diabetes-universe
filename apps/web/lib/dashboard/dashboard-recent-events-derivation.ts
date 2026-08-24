@@ -5,10 +5,7 @@ import {
   type TimelinePresentationDependencies,
 } from '../timeline/presentation';
 import { compareSemanticTimelineEventsDescending } from '../timeline/semantic-timeline-ordering';
-import {
-  DEFAULT_RECENT_TIMELINE_EVENTS_LIMIT,
-  type TimelineRecentEvent,
-} from '../timeline/timeline-selectors';
+import { type TimelineRecentEvent } from '../timeline/timeline-selectors';
 
 function mapDashboardRecentEventSource(
   event: SemanticTimelineEvent,
@@ -62,9 +59,7 @@ export function deriveDashboardRecentEventSources(
     readonly limit?: number;
   },
 ): TimelineRecentEvent[] {
-  const limit = options.limit ?? DEFAULT_RECENT_TIMELINE_EVENTS_LIMIT;
-
-  return [...events]
+  const mapped = [...events]
     .sort(compareSemanticTimelineEventsDescending)
     .map((event) =>
       mapDashboardRecentEventSource(
@@ -73,6 +68,11 @@ export function deriveDashboardRecentEventSources(
         options.formatDisplayTime,
       ),
     )
-    .filter((event): event is TimelineRecentEvent => event !== null)
-    .slice(0, limit);
+    .filter((event): event is TimelineRecentEvent => event !== null);
+
+  if (options.limit === undefined) {
+    return mapped;
+  }
+
+  return mapped.slice(0, options.limit);
 }
