@@ -24,10 +24,10 @@
     "js-yaml": "^4.1.0",
     "@playwright/test": "^1.62.1",
     "eslint": "^9.39.5",
-    "eslint-config-next": "^16.2.12",
+    "eslint-config-next": "^16.3.1",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
-    "turbo": "^2.10.8",
+    "turbo": "^2.10.11",
     "typescript": "^6.0.3"
   }
 }
