@@ -6,12 +6,24 @@ export function DashboardBrandMark() {
     >
       <svg viewBox="0 0 64 64" className="size-full" focusable="false">
         <defs>
-          <linearGradient id="dashboard-drop" x1="18" y1="10" x2="46" y2="52">
+          <linearGradient
+            id="dashboard-drop"
+            x1="18"
+            y1="10"
+            x2="46"
+            y2="52"
+          >
             <stop offset="0" stopColor="#12DDF0" />
             <stop offset="0.48" stopColor="#087CFF" />
             <stop offset="1" stopColor="#E600D7" />
           </linearGradient>
-          <linearGradient id="dashboard-orbit" x1="8" y1="20" x2="56" y2="45">
+          <linearGradient
+            id="dashboard-orbit"
+            x1="8"
+            y1="20"
+            x2="56"
+            y2="45"
+          >
             <stop offset="0" stopColor="#F02BD5" />
             <stop offset="0.5" stopColor="#20D9F2" />
             <stop offset="1" stopColor="#376CFF" />
