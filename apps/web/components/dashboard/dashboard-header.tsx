@@ -23,7 +23,7 @@ const brandLogoPath = '/brand/diabetes-universe-logo.png';
 const brandLogoWidth = 1254;
 const brandLogoHeight = 1254;
 const brandLogoClassName =
-  'h-auto w-auto max-h-[min(18rem,calc(100vw-5.5rem-env(safe-area-inset-left,0px)-env(safe-area-inset-right,0px)))] max-w-[min(18rem,calc(100vw-5.5rem-env(safe-area-inset-left,0px)-env(safe-area-inset-right,0px))] object-contain sm:max-h-[20rem] sm:max-w-[20rem] lg:max-h-[24rem] lg:max-w-[24rem]';
+  'h-auto w-auto max-h-[min(9rem,calc(100vw-5.5rem-env(safe-area-inset-left,0px)-env(safe-area-inset-right,0px)))] max-w-[min(9rem,calc(100vw-5.5rem-env(safe-area-inset-left,0px)-env(safe-area-inset-right,0px)))] object-contain sm:max-h-[10rem] sm:max-w-[10rem] lg:max-h-[12rem] lg:max-w-[12rem]';
 
 export interface DashboardHeaderProps extends Omit<
   DashboardHeaderModelInput,
@@ -143,7 +143,7 @@ export function DashboardHeader({
       aria-busy={viewModel.isLoading}
       className="relative z-30 pt-[env(safe-area-inset-top)]"
     >
-      <div className="mx-auto flex min-h-[5rem] max-w-6xl items-center justify-between gap-2 py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:min-h-[5.5rem] sm:gap-3 sm:py-4 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-[6.5rem] lg:py-5">
+      <div className="mx-auto flex min-h-[4.25rem] max-w-6xl items-center justify-between gap-3 py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:min-h-20 sm:py-4 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-24 lg:py-5">
         <div className="flex min-w-0 items-center">
           <h1 className="min-w-0 shrink">
             <Image
