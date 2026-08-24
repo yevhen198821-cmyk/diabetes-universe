@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^12.1.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^5.3.0",
     "@playwright/test": "^1.62.1",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.1",
