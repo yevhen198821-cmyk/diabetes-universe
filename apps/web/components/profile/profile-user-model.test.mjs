@@ -11,6 +11,7 @@ test('createProfileUserCardModel uses display name and email from principal', ()
   const model = createProfileUserCardModel(
     {
       accountId: 'acc-1',
+      avatarUrl: '/api/v1/identity/me/avatar?v=1',
       displayName: 'Alex Example',
       email: 'alex@example.com',
       emailVerified: true,
@@ -23,12 +24,14 @@ test('createProfileUserCardModel uses display name and email from principal', ()
   assert.equal(model.email, 'alex@example.com');
   assert.equal(model.showEmail, true);
   assert.equal(model.avatarInitials, 'AE');
+  assert.equal(model.avatarUrl, '/api/v1/identity/me/avatar?v=1');
 });
 
 test('createProfileUserCardModel falls back when display name is missing', () => {
   const model = createProfileUserCardModel(
     {
       accountId: 'acc-2',
+      avatarUrl: null,
       displayName: null,
       email: 'user@example.com',
       emailVerified: false,
@@ -46,6 +49,7 @@ test('createProfileUserCardModel hides email when absent', () => {
   const model = createProfileUserCardModel(
     {
       accountId: 'acc-3',
+      avatarUrl: null,
       displayName: 'Alex',
       email: '   ',
       emailVerified: false,
@@ -61,6 +65,7 @@ test('createProfileUserCardModel does not fabricate medical profile fields', () 
   const model = createProfileUserCardModel(
     {
       accountId: 'acc-4',
+      avatarUrl: null,
       displayName: 'Alex Example',
       email: 'alex@example.com',
       emailVerified: true,
@@ -71,6 +76,7 @@ test('createProfileUserCardModel does not fabricate medical profile fields', () 
 
   assert.deepEqual(Object.keys(model).sort(), [
     'avatarInitials',
+    'avatarUrl',
     'displayName',
     'email',
     'showEmail',

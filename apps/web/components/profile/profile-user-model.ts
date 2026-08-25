@@ -4,6 +4,7 @@ import { getDashboardAvatarInitials } from '../dashboard/dashboard-header-model'
 
 export interface ProfileUserCardModel {
   readonly avatarInitials: string | null;
+  readonly avatarUrl: string | null;
   readonly displayName: string;
   readonly email: string;
   readonly showEmail: boolean;
@@ -22,6 +23,7 @@ export function createProfileUserCardModel(
 
   return {
     avatarInitials: getDashboardAvatarInitials(principal.displayName, locale),
+    avatarUrl: principal.avatarUrl,
     displayName,
     email: principal.email,
     showEmail: principal.email.trim().length > 0,

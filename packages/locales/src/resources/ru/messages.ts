@@ -328,6 +328,21 @@ export const russianDraftMessages = defineDraftMessages({
   'account.profile.subtitle': 'Управляйте аккаунтом и настройками',
   'account.profile.title': 'Профиль',
   'account.profile.userCard.avatarLabel': 'Аватар профиля',
+  'account.profile.userCard.avatarEditAction': 'Изменить фото профиля',
+  'account.profile.userCard.avatarDialog.title': 'Фото профиля',
+  'account.profile.userCard.avatarDialog.description':
+    'Выберите фото из галереи или файлов. Оно будет отображаться в карточке аккаунта.',
+  'account.profile.userCard.avatarDialog.choosePhoto': 'Выбрать фото',
+  'account.profile.userCard.avatarDialog.removePhoto': 'Удалить фото',
+  'account.profile.userCard.avatarDialog.save': 'Сохранить фото',
+  'account.profile.userCard.avatarDialog.uploading': 'Загрузка…',
+  'account.profile.userCard.avatarDialog.success': 'Фото профиля обновлено.',
+  'account.profile.userCard.avatarDialog.error.invalidType':
+    'Используйте изображение JPG, PNG или WebP.',
+  'account.profile.userCard.avatarDialog.error.tooLarge':
+    'Файл слишком большой. Максимальный размер — 5 МБ.',
+  'account.profile.userCard.avatarDialog.error.generic':
+    'Не удалось обновить фото профиля. Попробуйте ещё раз.',
   'account.profile.userCard.emailLabel': 'Email',
   'account.profile.userCard.fallbackName': 'Аккаунт',
   'account.profile.security.passkeysUnavailable.description':

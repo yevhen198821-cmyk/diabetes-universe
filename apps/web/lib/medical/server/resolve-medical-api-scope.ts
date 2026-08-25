@@ -30,6 +30,7 @@ function resolvePrincipalForRequest(
 
   return {
     accountId: testAccountId,
+    avatarUrl: null,
     email: `${testAccountId}@example.com`,
     emailVerified: true,
     displayName: testAccountId,

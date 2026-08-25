@@ -37,3 +37,14 @@ export {
   probeAuthDatabaseHealth,
   type AuthDatabaseProbeResult,
 } from './probe-auth-database';
+export {
+  USER_AVATAR_ALLOWED_INPUT_MIME_TYPES,
+  USER_AVATAR_API_PATH,
+  USER_AVATAR_MAX_UPLOAD_BYTES,
+  USER_AVATAR_OUTPUT_CONTENT_TYPE,
+} from './avatar/avatar-constants';
+export type {
+  AvatarMutationCode,
+  AvatarMutationResult,
+  UserAvatarContent,
+} from '../contracts/avatar-contracts';

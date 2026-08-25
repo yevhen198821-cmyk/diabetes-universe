@@ -3,36 +3,35 @@ import {
   profileUserCardAccentClassName,
   profileUserCardClassName,
 } from './profile-surface-styles';
+import {
+  ProfileAvatarEditor,
+  type ProfileAvatarEditorLabels,
+} from './profile-avatar-editor';
 
 export interface ProfileUserCardLabels {
-  readonly avatarLabel: string;
+  readonly avatar: ProfileAvatarEditorLabels;
   readonly emailLabel: string;
 }
 
 export function ProfileUserCard({
   labels,
   model,
+  onAvatarChange,
 }: {
   readonly labels: ProfileUserCardLabels;
   readonly model: ProfileUserCardModel;
+  readonly onAvatarChange?: (avatarUrl: string | null) => void;
 }) {
   return (
     <section className={profileUserCardClassName}>
       <div aria-hidden="true" className={profileUserCardAccentClassName} />
       <div className="relative flex items-center gap-4">
-        <div
-          aria-label={labels.avatarLabel}
-          className="grid size-16 shrink-0 place-items-center rounded-full bg-gradient-to-br from-teal-400/90 via-cyan-400/85 to-violet-500/80 text-lg font-bold text-white shadow-[0_10px_24px_rgba(6,182,212,0.25)]"
-          role="img"
-        >
-          {model.avatarInitials ? (
-            <span aria-hidden="true">{model.avatarInitials}</span>
-          ) : (
-            <span aria-hidden="true" className="text-2xl">
-              ◦
-            </span>
-          )}
-        </div>
+        <ProfileAvatarEditor
+          avatarInitials={model.avatarInitials}
+          avatarUrl={model.avatarUrl}
+          labels={labels.avatar}
+          onAvatarChange={onAvatarChange ?? (() => undefined)}
+        />
         <div className="min-w-0">
           <h2 className="text-text-primary truncate text-xl font-bold tracking-tight">
             {model.displayName}
