@@ -149,7 +149,31 @@ export const germanDraftMessages = defineDraftMessages({
   'quick-add.button.label': 'Ereignis hinzufügen',
   'account.profile.about.description':
     'Diabetes Universe hilft Ihnen, Ihre Diabetes-Daten zu verfolgen und zu verstehen.',
-  'account.profile.about.subtitle': 'Version, Lizenzen und Support',
+  'account.profile.about.page.buildInfoLabel': 'Build',
+  'account.profile.about.page.ecosystem.description':
+    'Diabetes Universe ist ein Ökosystem zum Sammeln, Verfolgen und Verstehen diabetesbezogener Daten – einschließlich Glukose, Insulin, Mahlzeiten, Aktivität, Ereignissen und verbundenen Datenquellen, sobald diese Funktionen verfügbar werden.',
+  'account.profile.about.page.ecosystem.title': 'Über Diabetes Universe',
+  'account.profile.about.page.medical.description':
+    'Diabetes Universe unterstützt beim Verfolgen und Verstehen von Informationen. Es ersetzt keine professionelle medizinische Beratung, stellt keine Diagnosen, verschreibt keine Behandlungen und trifft keine medizinischen Entscheidungen selbstständig.',
+  'account.profile.about.page.medical.title': 'Medizinische Informationen',
+  'account.profile.about.page.rows.accountDeletion': 'Konto und Daten löschen',
+  'account.profile.about.page.rows.contactSupport': 'Support kontaktieren',
+  'account.profile.about.page.rows.dataExport': 'Daten exportieren',
+  'account.profile.about.page.rows.dataManagement': 'Datenverwaltung',
+  'account.profile.about.page.rows.licenses': 'Lizenzen',
+  'account.profile.about.page.rows.openSourceLicenses': 'Open-Source-Lizenzen',
+  'account.profile.about.page.rows.privacyPolicy': 'Datenschutzerklärung',
+  'account.profile.about.page.rows.reportIssue': 'Problem melden',
+  'account.profile.about.page.rows.supportCenter': 'Support-Center',
+  'account.profile.about.page.rows.termsOfUse': 'Nutzungsbedingungen',
+  'account.profile.about.page.sections.help': 'Hilfe',
+  'account.profile.about.page.sections.legal': 'Rechtliche Informationen',
+  'account.profile.about.page.sections.privacyAndData': 'Datenschutz und Daten',
+  'account.profile.about.page.sections.technical':
+    'Technische App-Informationen',
+  'account.profile.about.page.title': 'Über die App',
+  'account.profile.about.subtitle':
+    'Version, Support und rechtliche Informationen',
   'account.profile.about.title': 'Über die App',
   'account.profile.about.versionLabel': 'Version',
   'account.profile.comingSoon.badge': 'Demnächst',

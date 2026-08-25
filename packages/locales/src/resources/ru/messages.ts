@@ -270,7 +270,34 @@ export const russianDraftMessages = defineDraftMessages({
   'quick-add.button.label': 'Добавить событие',
   'account.profile.about.description':
     'Diabetes Universe помогает отслеживать и понимать ваши данные о диабете.',
-  'account.profile.about.subtitle': 'Версия, лицензии и поддержка',
+  'account.profile.about.page.buildInfoLabel': 'Сборка',
+  'account.profile.about.page.ecosystem.description':
+    'Diabetes Universe — экосистема для сбора, отслеживания и понимания данных, связанных с диабетом, включая глюкозу, инсулин, приёмы пищи, активность, события и подключённые источники данных по мере появления этих возможностей.',
+  'account.profile.about.page.ecosystem.title': 'О Diabetes Universe',
+  'account.profile.about.page.medical.description':
+    'Diabetes Universe помогает отслеживать и понимать информацию. Приложение не заменяет профессиональную медицинскую консультацию, не ставит диагноз, не назначает лечение и не принимает медицинские решения самостоятельно.',
+  'account.profile.about.page.medical.title': 'Медицинская информация',
+  'account.profile.about.page.rows.accountDeletion':
+    'Удаление аккаунта и данных',
+  'account.profile.about.page.rows.contactSupport': 'Связаться с поддержкой',
+  'account.profile.about.page.rows.dataExport': 'Экспорт данных',
+  'account.profile.about.page.rows.dataManagement': 'Управление данными',
+  'account.profile.about.page.rows.licenses': 'Лицензии',
+  'account.profile.about.page.rows.openSourceLicenses': 'Лицензии Open Source',
+  'account.profile.about.page.rows.privacyPolicy':
+    'Политика конфиденциальности',
+  'account.profile.about.page.rows.reportIssue': 'Сообщить о проблеме',
+  'account.profile.about.page.rows.supportCenter': 'Центр поддержки',
+  'account.profile.about.page.rows.termsOfUse': 'Условия использования',
+  'account.profile.about.page.sections.help': 'Помощь',
+  'account.profile.about.page.sections.legal': 'Юридическая информация',
+  'account.profile.about.page.sections.privacyAndData':
+    'Конфиденциальность и данные',
+  'account.profile.about.page.sections.technical':
+    'Техническая информация приложения',
+  'account.profile.about.page.title': 'О приложении',
+  'account.profile.about.subtitle':
+    'Версия, поддержка и юридическая информация',
   'account.profile.about.title': 'О приложении',
   'account.profile.about.versionLabel': 'Версия',
   'account.profile.comingSoon.badge': 'Скоро',
