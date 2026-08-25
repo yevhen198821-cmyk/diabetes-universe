@@ -1,12 +1,11 @@
 'use client';
 
-import type { ThemePreference } from '../../lib/theme/theme-config';
+import type { UserThemePreference } from '../../lib/theme/theme-config';
 import { useThemePreference } from '../../lib/theme/theme-provider';
 
 export interface ProfileThemeControlLabels {
   readonly dark: string;
   readonly light: string;
-  readonly system: string;
   readonly title: string;
 }
 
@@ -18,18 +17,17 @@ export function ProfileThemeControl({
   const { preference, setPreference } = useThemePreference();
 
   const options: ReadonlyArray<{
-    readonly id: ThemePreference;
+    readonly id: UserThemePreference;
     readonly label: string;
   }> = [
     { id: 'light', label: labels.light },
     { id: 'dark', label: labels.dark },
-    { id: 'system', label: labels.system },
   ];
 
   return (
     <div
       aria-label={labels.title}
-      className="mt-3 grid grid-cols-3 gap-2"
+      className="mt-3 grid grid-cols-2 gap-2"
       role="group"
     >
       {options.map((option) => {

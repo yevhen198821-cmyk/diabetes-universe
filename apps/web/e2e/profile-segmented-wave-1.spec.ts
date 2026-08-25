@@ -5,6 +5,8 @@ import { expect, test } from './support/test';
 import { signInWithMagicLink } from './support/auth-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
+const THEME_STORAGE_KEY = 'du-ui-theme';
+
 async function openProfile(
   page: import('./support/test').Page,
   headingName: string | RegExp = 'Profile',
@@ -184,3 +186,114 @@ function assertBoxesClear(
 
   expect(contentBox.y + contentBox.height).toBeLessThanOrEqual(navBox.y + 1);
 }
+
+test('app theme lives on settings and exposes only light and dark', async ({
+  page,
+  request,
+}) => {
+  await signInWithMagicLink(page, request, 'profile-wave1-theme@example.com');
+  await openProfile(page);
+
+  await expect(page.getByRole('group', { name: 'App theme' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'System' })).toHaveCount(0);
+
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await expect(page).toHaveURL(/\/account\/settings$/);
+  await expect(page.getByRole('group', { name: 'App theme' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Light' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Dark' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'System' })).toHaveCount(0);
+});
+
+test('legacy system theme preference resolves to dark on settings', async ({
+  page,
+  request,
+}) => {
+  await page.addInitScript((storageKey) => {
+    window.localStorage.setItem(storageKey, 'system');
+  }, THEME_STORAGE_KEY);
+
+  await signInWithMagicLink(
+    page,
+    request,
+    'profile-wave1-theme-legacy@example.com',
+  );
+  await page.goto('/account/settings');
+  await waitForApplicationReady(page);
+
+  await expect(
+    page.getByRole('button', { name: 'Dark', pressed: true }),
+  ).toBeVisible();
+  await expect(
+    page.evaluate(
+      (storageKey) => window.localStorage.getItem(storageKey),
+      THEME_STORAGE_KEY,
+    ),
+  ).resolves.toBe('dark');
+});
+
+test('selecting light and dark themes persists preference', async ({
+  page,
+  request,
+}) => {
+  await signInWithMagicLink(
+    page,
+    request,
+    'profile-wave1-theme-persist@example.com',
+  );
+  await page.goto('/account/settings');
+  await waitForApplicationReady(page);
+
+  await page.getByRole('button', { name: 'Light' }).click();
+  await expect(
+    page.getByRole('button', { name: 'Light', pressed: true }),
+  ).toBeVisible();
+  await expect(
+    page.evaluate(
+      (storageKey) => window.localStorage.getItem(storageKey),
+      THEME_STORAGE_KEY,
+    ),
+  ).resolves.toBe('light');
+  await expect(page.locator('html')).toHaveClass(/light/);
+
+  await page.getByRole('button', { name: 'Dark' }).click();
+  await expect(
+    page.getByRole('button', { name: 'Dark', pressed: true }),
+  ).toBeVisible();
+  await expect(
+    page.evaluate(
+      (storageKey) => window.localStorage.getItem(storageKey),
+      THEME_STORAGE_KEY,
+    ),
+  ).resolves.toBe('dark');
+  await expect(page.locator('html')).toHaveClass(/dark/);
+});
+
+test('sign out everywhere waits for confirmation and cancel keeps sessions', async ({
+  page,
+  request,
+}) => {
+  await signInWithMagicLink(
+    page,
+    request,
+    'profile-wave1-revoke-all-cancel@example.com',
+  );
+  await page.goto('/account/security/sessions');
+  await waitForApplicationReady(page);
+
+  await page.getByRole('button', { name: 'Sign out everywhere' }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(
+    page.getByText(
+      'All active sessions will be ended, including this one. You will need to confirm sign-in by email to sign in again.',
+    ),
+  ).toBeVisible();
+
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page).toHaveURL(/\/account\/security\/sessions$/);
+
+  const sessionResponse = await page.request.get('/api/auth/get-session');
+  expect(sessionResponse.ok()).toBeTruthy();
+  expect(await sessionResponse.json()).not.toBeNull();
+});

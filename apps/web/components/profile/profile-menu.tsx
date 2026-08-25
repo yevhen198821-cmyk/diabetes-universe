@@ -5,14 +5,12 @@ import {
   Download,
   Globe2,
   Info,
-  Palette,
   Smartphone,
   type LucideIcon,
 } from 'lucide-react';
 import { useState } from 'react';
 
 import type { ProfileLabels } from './profile-labels';
-import { ProfileThemeControl } from './profile-theme-control';
 
 const APP_VERSION = '0.0.0';
 
@@ -99,25 +97,6 @@ function ProfileMenuDisabledRow({
   );
 }
 
-function ProfileMenuThemeRow({ labels }: { readonly labels: ProfileLabels }) {
-  return (
-    <div className="rounded-[1.15rem] border border-white/8 bg-slate-950/30 px-4 py-3">
-      <div className="flex items-start gap-3">
-        <ProfileMenuIcon icon={Palette} tone="amber" />
-        <div className="min-w-0 flex-1">
-          <p className="text-text-primary text-sm font-semibold">
-            {labels.menu.theme.title}
-          </p>
-          <p className="text-text-secondary mt-0.5 text-xs">
-            {labels.menu.theme.subtitle}
-          </p>
-          <ProfileThemeControl labels={labels.menu.theme} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function ProfileMenuAboutRow({ labels }: { readonly labels: ProfileLabels }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -182,7 +161,6 @@ export function ProfileMenu({ labels }: { readonly labels: ProfileLabels }) {
           title={labels.menu.language.title}
           tone="teal"
         />
-        <ProfileMenuThemeRow labels={labels} />
       </ProfileMenuSection>
 
       <ProfileMenuSection title={labels.menu.section.data}>

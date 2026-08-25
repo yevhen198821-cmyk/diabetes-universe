@@ -31,6 +31,10 @@ const menuSource = readFileSync(
   fileURLToPath(new URL('./profile-menu.tsx', import.meta.url)),
   'utf8',
 );
+const settingsPanelSource = readFileSync(
+  fileURLToPath(new URL('./profile-settings-panel.tsx', import.meta.url)),
+  'utf8',
+);
 
 test('profile shell uses segmented navigation, skip link, and account mobile nav', () => {
   assert.match(shellSource, /SegmentedControl/);
@@ -60,8 +64,13 @@ test('account profile route renders user card, menu, and logout', () => {
 test('profile menu keeps disabled rows for unavailable actions', () => {
   assert.match(menuSource, /ProfileMenuDisabledRow/);
   assert.match(menuSource, /aria-disabled="true"/);
-  assert.match(menuSource, /ProfileThemeControl/);
+  assert.doesNotMatch(menuSource, /ProfileThemeControl/);
   assert.match(menuSource, /ProfileMenuAboutRow/);
+});
+
+test('settings panel contains app theme controls', () => {
+  assert.match(settingsPanelSource, /ProfileThemeControl/);
+  assert.match(settingsPanelSource, /labels\.settings\.theme/);
 });
 
 test('mobile nav supports active account tab state', () => {

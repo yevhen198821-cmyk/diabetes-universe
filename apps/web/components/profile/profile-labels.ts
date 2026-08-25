@@ -46,13 +46,6 @@ export interface ProfileLabels {
       readonly diabetesManagement: string;
       readonly personalization: string;
     }>;
-    readonly theme: Readonly<{
-      readonly dark: string;
-      readonly light: string;
-      readonly subtitle: string;
-      readonly system: string;
-      readonly title: string;
-    }>;
   }>;
   readonly segments: Readonly<{
     readonly profile: string;
@@ -61,6 +54,12 @@ export interface ProfileLabels {
   }>;
   readonly settings: Readonly<{
     readonly description: string;
+    readonly theme: Readonly<{
+      readonly dark: string;
+      readonly light: string;
+      readonly subtitle: string;
+      readonly title: string;
+    }>;
     readonly title: string;
   }>;
   readonly subtitle: string;
@@ -103,15 +102,16 @@ const PROFILE_TRANSLATION_KEYS = {
   menuSectionPersonalization: asTranslationKey(
     'account.profile.menu.section.personalization',
   ),
-  menuThemeDark: asTranslationKey('account.profile.menu.theme.dark'),
-  menuThemeLight: asTranslationKey('account.profile.menu.theme.light'),
-  menuThemeSubtitle: asTranslationKey('account.profile.menu.theme.subtitle'),
-  menuThemeSystem: asTranslationKey('account.profile.menu.theme.system'),
-  menuThemeTitle: asTranslationKey('account.profile.menu.theme.title'),
   segmentProfile: asTranslationKey('account.profile.segments.profile'),
   segmentSecurity: asTranslationKey('account.profile.segments.security'),
   segmentSettings: asTranslationKey('account.profile.segments.settings'),
   settingsDescription: asTranslationKey('account.profile.settings.description'),
+  settingsThemeDark: asTranslationKey('account.profile.settings.theme.dark'),
+  settingsThemeLight: asTranslationKey('account.profile.settings.theme.light'),
+  settingsThemeSubtitle: asTranslationKey(
+    'account.profile.settings.theme.subtitle',
+  ),
+  settingsThemeTitle: asTranslationKey('account.profile.settings.theme.title'),
   settingsTitle: asTranslationKey('account.profile.settings.title'),
   subtitle: asTranslationKey('account.profile.subtitle'),
   title: asTranslationKey('account.profile.title'),
@@ -199,19 +199,6 @@ export function resolveProfileLabels(
           PROFILE_TRANSLATION_KEYS.menuSectionPersonalization,
         ),
       },
-      theme: {
-        dark: translate(localization, PROFILE_TRANSLATION_KEYS.menuThemeDark),
-        light: translate(localization, PROFILE_TRANSLATION_KEYS.menuThemeLight),
-        subtitle: translate(
-          localization,
-          PROFILE_TRANSLATION_KEYS.menuThemeSubtitle,
-        ),
-        system: translate(
-          localization,
-          PROFILE_TRANSLATION_KEYS.menuThemeSystem,
-        ),
-        title: translate(localization, PROFILE_TRANSLATION_KEYS.menuThemeTitle),
-      },
     },
     segments: {
       profile: translate(localization, PROFILE_TRANSLATION_KEYS.segmentProfile),
@@ -229,6 +216,24 @@ export function resolveProfileLabels(
         localization,
         PROFILE_TRANSLATION_KEYS.settingsDescription,
       ),
+      theme: {
+        dark: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.settingsThemeDark,
+        ),
+        light: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.settingsThemeLight,
+        ),
+        subtitle: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.settingsThemeSubtitle,
+        ),
+        title: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.settingsThemeTitle,
+        ),
+      },
       title: translate(localization, PROFILE_TRANSLATION_KEYS.settingsTitle),
     },
     subtitle: translate(localization, PROFILE_TRANSLATION_KEYS.subtitle),

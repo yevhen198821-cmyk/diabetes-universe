@@ -4,54 +4,52 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react';
 
 import {
-  resolveThemeClass,
+  normalizeStoredThemePreference,
   THEME_STORAGE_KEY,
-  type ThemePreference,
+  type UserThemePreference,
 } from './theme-config';
 
 interface ThemeContextValue {
-  readonly preference: ThemePreference;
-  readonly resolvedTheme: 'dark' | 'light';
-  readonly setPreference: (preference: ThemePreference) => void;
+  readonly preference: UserThemePreference;
+  readonly resolvedTheme: UserThemePreference;
+  readonly setPreference: (preference: UserThemePreference) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function readStoredPreference(): ThemePreference {
+function readStoredPreference(): UserThemePreference {
   if (typeof window === 'undefined') {
-    return 'system';
+    return 'dark';
   }
 
   const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+  const normalized = normalizeStoredThemePreference(stored);
 
-  if (stored === 'light' || stored === 'dark' || stored === 'system') {
-    return stored;
+  if (stored === 'system') {
+    window.localStorage.setItem(THEME_STORAGE_KEY, normalized);
   }
 
-  return 'system';
+  return normalized;
 }
 
-function applyDocumentTheme(preference: ThemePreference): 'dark' | 'light' {
-  const systemPrefersDark = window.matchMedia(
-    '(prefers-color-scheme: dark)',
-  ).matches;
-  const resolved = resolveThemeClass(preference, systemPrefersDark);
+function applyDocumentTheme(
+  preference: UserThemePreference,
+): UserThemePreference {
   const root = document.documentElement;
 
   root.classList.remove('light', 'dark');
-  root.classList.add(resolved);
+  root.classList.add(preference);
 
-  return resolved;
+  return preference;
 }
 
-function readResolvedThemeFromDocument(): 'dark' | 'light' {
+function readResolvedThemeFromDocument(): UserThemePreference {
   if (typeof document === 'undefined') {
     return 'light';
   }
@@ -61,31 +59,15 @@ function readResolvedThemeFromDocument(): 'dark' | 'light' {
 
 export function ThemeProvider({ children }: { readonly children: ReactNode }) {
   const [preference, setPreferenceState] =
-    useState<ThemePreference>(readStoredPreference);
-  const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'light'>(() =>
+    useState<UserThemePreference>(readStoredPreference);
+  const [resolvedTheme, setResolvedTheme] = useState<UserThemePreference>(() =>
     readResolvedThemeFromDocument(),
   );
 
-  const setPreference = useCallback((nextPreference: ThemePreference) => {
+  const setPreference = useCallback((nextPreference: UserThemePreference) => {
     window.localStorage.setItem(THEME_STORAGE_KEY, nextPreference);
     setPreferenceState(nextPreference);
     setResolvedTheme(applyDocumentTheme(nextPreference));
-  }, []);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-    const handleChange = () => {
-      if (readStoredPreference() === 'system') {
-        setResolvedTheme(applyDocumentTheme('system'));
-      }
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-
-    return () => {
-      mediaQuery.removeEventListener('change', handleChange);
-    };
   }, []);
 
   const value = useMemo(
