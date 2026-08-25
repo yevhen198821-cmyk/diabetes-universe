@@ -7,6 +7,7 @@ import { useMemo, type RefObject } from 'react';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { resolveDashboardMobileNavLabels } from './dashboard-mobile-nav-labels';
 import {
+  dashboardMobileNavFabSlotClassName,
   dashboardMobileNavInnerClassName,
   dashboardMobileNavOuterClassName,
   DASHBOARD_MOBILE_QUICK_ADD_FAB_CLASSES,
@@ -42,7 +43,7 @@ export function DashboardMobileNav({
     >
       <div className={dashboardMobileNavInnerClassName}>
         <ul
-          className={`grid items-center px-1 py-1 ${showQuickAddFab ? 'grid-cols-4 items-end pt-1 pb-1.5' : 'grid-cols-3'}`}
+          className={`relative grid grid-cols-3 items-center px-1 py-1 ${showQuickAddFab ? 'items-end pt-1 pb-1.5' : ''}`}
         >
           <li>
             <Link
@@ -81,10 +82,10 @@ export function DashboardMobileNav({
             </Link>
           </li>
           {showQuickAddFab ? (
-            <li className="flex justify-center">
+            <li className={dashboardMobileNavFabSlotClassName}>
               <button
                 aria-label={labels.quickAdd}
-                className={DASHBOARD_MOBILE_QUICK_ADD_FAB_CLASSES}
+                className={`${DASHBOARD_MOBILE_QUICK_ADD_FAB_CLASSES} pointer-events-auto`}
                 disabled={quickAddDisabled}
                 onClick={onQuickAdd}
                 ref={quickAddButtonRef}

@@ -42,17 +42,19 @@ test('timeline mobile quick add FAB uses compact sizing tokens', () => {
     'utf8',
   );
 
-  assert.match(navLayoutSource, /DASHBOARD_MOBILE_QUICK_ADD_FAB_SIZE = '4rem'/);
-  assert.match(navLayoutSource, /size-16/);
+  assert.match(navLayoutSource, /DASHBOARD_MOBILE_QUICK_ADD_FAB_SIZE = '3rem'/);
+  assert.match(navLayoutSource, /size-12/);
   assert.match(
     navLayoutSource,
-    /shadow-\[0_12px_30px_rgba\(6,182,212,0\.28\)\]/,
+    /shadow-\[0_10px_24px_rgba\(6,182,212,0\.24\)\]/,
   );
   assert.match(
     navLayoutSource,
-    /DASHBOARD_MOBILE_QUICK_ADD_FAB_ICON_SIZE = 22/,
+    /DASHBOARD_MOBILE_QUICK_ADD_FAB_ICON_SIZE = 20/,
   );
-  assert.doesNotMatch(navLayoutSource, /size-\[3\.75rem\]/);
+  assert.match(navLayoutSource, /dashboardMobileNavFabSlotClassName/);
+  assert.match(mobileNavSource, /grid-cols-3/);
+  assert.doesNotMatch(mobileNavSource, /grid-cols-4/);
   assert.match(mobileNavSource, /DASHBOARD_MOBILE_QUICK_ADD_FAB_CLASSES/);
 });
 
