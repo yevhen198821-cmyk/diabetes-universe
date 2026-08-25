@@ -2,17 +2,30 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  formatTimelineDayPeriodEventCount,
+  formatTimelineEventsOfDayClusterAriaLabel,
   formatTimelineLoadMoreAnnouncement,
   formatTimelineToolbarResultLabel,
   resolveTimelineEventSourcePresentation,
 } from './timeline-ui-labels.ts';
 
+const eventCountLabels = {
+  few: '{count} events',
+  many: '{count} events',
+  one: '{count} event',
+  other: '{count} events',
+};
+
+const ruEventCountLabels = {
+  few: '{count} события',
+  many: '{count} событий',
+  one: '{count} событие',
+  other: '{count} событий',
+};
+
 const toolbarLabels = {
-  eventCount: '{count} events',
-  foundCount: 'Found: {count}',
+  eventCount: eventCountLabels,
   noMatches: 'No matches found',
-  reset: 'Reset filters',
-  title: 'Timeline search and filters',
 };
 
 const sourceLabels = {
@@ -26,20 +39,80 @@ test('formatTimelineToolbarResultLabel reports no matches for filtered empty', (
   const label = formatTimelineToolbarResultLabel(
     toolbarLabels,
     { hasActiveSearchOrCategoryCriteria: true, resultCount: 0 },
+    'en-GB',
     String,
   );
 
   assert.equal(label, 'No matches found');
 });
 
-test('formatTimelineToolbarResultLabel reports zero events for date-only empty', () => {
-  const label = formatTimelineToolbarResultLabel(
-    toolbarLabels,
-    { hasActiveSearchOrCategoryCriteria: false, resultCount: 0 },
-    String,
+test('formatTimelineToolbarResultLabel pluralizes English event counts', () => {
+  assert.equal(
+    formatTimelineToolbarResultLabel(
+      toolbarLabels,
+      { hasActiveSearchOrCategoryCriteria: false, resultCount: 0 },
+      'en-GB',
+      String,
+    ),
+    '0 events',
   );
+  assert.equal(
+    formatTimelineToolbarResultLabel(
+      toolbarLabels,
+      { hasActiveSearchOrCategoryCriteria: false, resultCount: 1 },
+      'en-GB',
+      String,
+    ),
+    '1 event',
+  );
+  assert.equal(
+    formatTimelineToolbarResultLabel(
+      toolbarLabels,
+      { hasActiveSearchOrCategoryCriteria: false, resultCount: 2 },
+      'en-GB',
+      String,
+    ),
+    '2 events',
+  );
+});
 
-  assert.equal(label, '0 events');
+test('formatTimelineDayPeriodEventCount uses the shared pluralization mechanism', () => {
+  assert.equal(
+    formatTimelineDayPeriodEventCount(21, ruEventCountLabels, 'ru-RU', String),
+    '21 событие',
+  );
+  assert.equal(
+    formatTimelineDayPeriodEventCount(5, ruEventCountLabels, 'ru-RU', String),
+    '5 событий',
+  );
+});
+
+test('formatTimelineEventsOfDayClusterAriaLabel pluralizes cluster labels', () => {
+  const clusterLabels = {
+    few: '{count} events close together',
+    many: '{count} events close together',
+    one: '{count} event close together',
+    other: '{count} events close together',
+  };
+
+  assert.equal(
+    formatTimelineEventsOfDayClusterAriaLabel(
+      1,
+      clusterLabels,
+      'en-GB',
+      String,
+    ),
+    '1 event close together',
+  );
+  assert.equal(
+    formatTimelineEventsOfDayClusterAriaLabel(
+      3,
+      clusterLabels,
+      'en-GB',
+      String,
+    ),
+    '3 events close together',
+  );
 });
 
 test('resolveTimelineEventSourcePresentation marks demo separately from medical sources', () => {

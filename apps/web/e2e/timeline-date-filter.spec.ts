@@ -79,7 +79,11 @@ test('timeline combines last 45 days with category filter', async ({
   await dateFilterSheet(page).getByRole('button', { name: 'Apply' }).click();
   await page.getByRole('button', { name: 'Insulin' }).click();
 
-  await expect(page.getByText('1 events')).toBeVisible();
+  await expect(
+    page
+      .getByLabel('Timeline search and filters')
+      .getByText('1 event', { exact: true }),
+  ).toBeVisible();
   await expect(page.getByText('NovoRapid').first()).toBeVisible();
 });
 
@@ -148,7 +152,7 @@ test('timeline date filter keeps mobile layout without horizontal overflow', asy
   expect(hasHorizontalScroll).toBe(false);
 
   const fabBox = await page
-    .getByRole('button', { name: 'Add event' })
+    .locator('#timeline-mobile-quick-add-fab')
     .boundingBox();
 
   expect(fabBox).not.toBeNull();

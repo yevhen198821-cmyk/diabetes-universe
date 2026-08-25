@@ -17,3 +17,9 @@ export type {
   CreateLocalizationPlatform,
   LocalizationPlatformFactory,
 } from './localization-platform-factory';
+export {
+  formatPluralMessage,
+  resolvePluralCategory,
+  type PluralCategory,
+  type PluralMessageTemplates,
+} from './format-plural-message';

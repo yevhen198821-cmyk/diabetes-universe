@@ -28,6 +28,13 @@ export type {
 
 export { createLocalizationPlatform } from './runtime/create-localization-platform';
 
+export {
+  formatPluralMessage,
+  resolvePluralCategory,
+  type PluralCategory,
+  type PluralMessageTemplates,
+} from './runtime/format-plural-message';
+
 export type {
   CreateLocalizationPlatform,
   LocalizationPlatform,

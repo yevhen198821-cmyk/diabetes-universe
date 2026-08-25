@@ -1,22 +1,32 @@
 'use client';
 
-import { Clock, Home, UserRound } from 'lucide-react';
+import { Clock, Home, Plus, UserRound } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useMemo, type RefObject } from 'react';
 
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { resolveDashboardMobileNavLabels } from './dashboard-mobile-nav-labels';
 import {
   dashboardMobileNavInnerClassName,
   dashboardMobileNavOuterClassName,
+  TIMELINE_MOBILE_QUICK_ADD_FAB_BUTTON_CLASSNAME,
+  TIMELINE_MOBILE_QUICK_ADD_FAB_ICON_SIZE,
 } from './dashboard-mobile-nav-layout';
 
 export interface DashboardMobileNavProps {
   readonly activeTab?: 'home' | 'timeline';
+  readonly onQuickAddClick?: () => void;
+  readonly quickAddDisabled?: boolean;
+  readonly quickAddFabRef?: RefObject<HTMLButtonElement | null>;
+  readonly showQuickAddFab?: boolean;
 }
 
 export function DashboardMobileNav({
   activeTab = 'home',
+  onQuickAddClick,
+  quickAddDisabled = false,
+  quickAddFabRef,
+  showQuickAddFab = false,
 }: DashboardMobileNavProps) {
   const localization = useLocalization();
   const labels = useMemo(
@@ -31,7 +41,9 @@ export function DashboardMobileNav({
       id="dashboard-mobile-nav"
     >
       <div className={dashboardMobileNavInnerClassName}>
-        <ul className="grid grid-cols-3 items-center px-1 py-1">
+        <ul
+          className={`grid items-center px-1 py-1 ${showQuickAddFab ? 'grid-cols-4' : 'grid-cols-3'}`}
+        >
           <li>
             <Link
               aria-current={activeTab === 'home' ? 'page' : undefined}
@@ -68,6 +80,25 @@ export function DashboardMobileNav({
               </span>
             </Link>
           </li>
+          {showQuickAddFab ? (
+            <li className="flex justify-center">
+              <button
+                aria-label={labels.quickAdd}
+                className={TIMELINE_MOBILE_QUICK_ADD_FAB_BUTTON_CLASSNAME}
+                disabled={quickAddDisabled}
+                id="timeline-mobile-quick-add-fab"
+                onClick={onQuickAddClick}
+                ref={quickAddFabRef}
+                type="button"
+              >
+                <Plus
+                  aria-hidden="true"
+                  size={TIMELINE_MOBILE_QUICK_ADD_FAB_ICON_SIZE}
+                  strokeWidth={2.4}
+                />
+              </button>
+            </li>
+          ) : null}
           <li>
             <Link
               className="text-text-secondary focus-visible:outline-interactive-primary flex min-h-11 min-w-11 flex-col items-center justify-center gap-0 rounded-2xl px-2.5 py-1 transition hover:text-teal-600 focus-visible:outline-2 focus-visible:outline-offset-2 dark:hover:text-teal-300"

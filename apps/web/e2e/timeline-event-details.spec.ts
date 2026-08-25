@@ -58,7 +58,7 @@ test('timeline event edit updates Timeline and Dashboard selectors', async ({
   await expect(page.getByText('9.1 mmol/L').first()).toBeVisible();
 });
 
-test('timeline edit moves an event between Today and Yesterday groups', async ({
+test('timeline edit moves an event to another day via day navigation', async ({
   page,
 }) => {
   await page.goto('/timeline');
@@ -75,7 +75,7 @@ test('timeline edit moves an event between Today and Yesterday groups', async ({
     .getByRole('button', { exact: true, name: 'Close details' })
     .click();
 
-  await expect(page.getByRole('heading', { name: 'Yesterday' })).toBeVisible();
+  await page.getByRole('button', { name: 'Previous day' }).click();
   await expect(page.getByText('Breakfast').first()).toBeVisible();
 });
 

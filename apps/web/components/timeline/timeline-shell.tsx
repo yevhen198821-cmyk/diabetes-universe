@@ -21,12 +21,19 @@ import {
 } from '../../lib/timeline/semantic-creators';
 import { compareSemanticTimelineEventsDescending } from '../../lib/timeline/semantic-timeline-ordering';
 import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
-import { resolveTimelinePresentationLocale } from '../../lib/timeline/presentation';
+import {
+  mapTimelineEventCardPresentation,
+  resolveTimelinePresentationLocale,
+} from '../../lib/timeline/presentation';
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
-import { createTimelineListModel } from './timeline-list-model';
-import { resolveTimelineUiLabels } from './timeline-ui-labels';
+import { createTimelineDayPeriodListModel } from './timeline-list-model';
+import {
+  formatTimelineDayPeriodEventCount,
+  formatTimelineEventsOfDayClusterAriaLabel,
+  resolveTimelineUiLabels,
+} from './timeline-ui-labels';
 import { QuickAddRoot } from './quick-add-root';
 import { TimelineList } from './timeline-list';
 import {
@@ -43,10 +50,20 @@ import {
   DEFAULT_TIMELINE_DATE_FILTER,
   type TimelineDateFilterSelection,
 } from './timeline-date-filter-model';
+import {
+  clampTimelineSelectedDateKey,
+  resolveDefaultTimelineSelectedDateKey,
+  shiftTimelineSelectedDateKey,
+} from './timeline-day-navigation-model';
+import {
+  createTimelineDayViewModel,
+  filterTimelineEventsForSelectedDay,
+} from './timeline-day-view-model';
+import { TimelineDayNavigation } from './timeline-day-navigation';
+import { TimelineEventsOfDayMap } from './timeline-events-of-day-map';
 import { TimelineToolbar } from './timeline-toolbar';
 import { TopBar } from './top-bar';
 import { DashboardMobileNav } from '../dashboard/dashboard-mobile-nav';
-import { TimelineMobileQuickAddFab } from './timeline-mobile-quick-add-fab';
 import {
   AppPageBackground,
   appPageShellClassName,
@@ -87,12 +104,29 @@ export function TimelineShell() {
   const presentationLocale = resolveTimelinePresentationLocale(
     presentationDependencies,
   );
+  const formatPeriodEventCountResolved = useMemo(
+    () => (count: number) =>
+      formatTimelineDayPeriodEventCount(
+        count,
+        uiLabels.eventCount,
+        presentationLocale,
+        formatCount,
+      ),
+    [formatCount, presentationLocale, uiLabels.eventCount],
+  );
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const mobileQuickAddFabRef = useRef<HTMLButtonElement>(null);
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<TimelineEventFilter>('all');
   const [dateFilter, setDateFilter] = useState<TimelineDateFilterSelection>(
     DEFAULT_TIMELINE_DATE_FILTER,
+  );
+  const [selectedDateKey, setSelectedDateKey] = useState<string | null>(() =>
+    resolveDefaultTimelineSelectedDateKey(
+      DEFAULT_TIMELINE_DATE_FILTER,
+      new Date(),
+      Intl.DateTimeFormat().resolvedOptions().timeZone,
+    ),
   );
   const [visibleCount, setVisibleCount] = useState(TIMELINE_PAGE_SIZE);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
@@ -146,6 +180,26 @@ export function TimelineShell() {
     ],
   );
 
+  const effectiveSelectedDateKey = useMemo(() => {
+    if (!selectedDateKey) {
+      return resolveDefaultTimelineSelectedDateKey(
+        dateFilter,
+        referenceDate,
+        timeZone,
+      );
+    }
+
+    return (
+      clampTimelineSelectedDateKey(
+        selectedDateKey,
+        dateFilter,
+        referenceDate,
+        timeZone,
+      ) ??
+      resolveDefaultTimelineSelectedDateKey(dateFilter, referenceDate, timeZone)
+    );
+  }, [dateFilter, referenceDate, selectedDateKey, timeZone]);
+
   useLayoutEffect(() => {
     if (!pendingSearchFocusRef.current || selectedEventId !== null) {
       return;
@@ -161,6 +215,7 @@ export function TimelineShell() {
 
     headingRef.current?.focus();
   }, [selectedEventId]);
+
   const paginationModel = useMemo(
     () =>
       createTimelinePaginationModel({
@@ -170,38 +225,123 @@ export function TimelineShell() {
       }),
     [searchFilterModel.filteredEvents, visibleCount],
   );
+
+  const dayViewModel = useMemo(() => {
+    if (!effectiveSelectedDateKey) {
+      return null;
+    }
+
+    const selectedDayEvents = filterTimelineEventsForSelectedDay(
+      searchFilterModel.filteredEvents,
+      effectiveSelectedDateKey,
+      timeZone,
+    );
+    const mapMarkerInputs = selectedDayEvents.map((event) => {
+      const time = presentationDependencies.formatter.formatTime(
+        event.occurredAt,
+        { timeStyle: 'short' },
+      );
+      const presentation = mapTimelineEventCardPresentation(
+        event,
+        presentationDependencies,
+        time,
+      );
+      const categoryLabel =
+        presentationDependencies.labels.eventKinds[event.kind] ?? event.kind;
+      const primaryValue = [presentation.value, presentation.unit]
+        .filter(Boolean)
+        .join(' ');
+
+      return {
+        ariaLabel: [time, categoryLabel, presentation.title, primaryValue]
+          .filter(Boolean)
+          .join(', '),
+        category: event.kind,
+        event,
+        primaryValue: primaryValue || undefined,
+        timeLabel: time,
+        title: presentation.title,
+      };
+    });
+
+    return createTimelineDayViewModel({
+      clusterAriaLabel: (count) =>
+        formatTimelineEventsOfDayClusterAriaLabel(
+          count,
+          uiLabels.eventsOfDay.clusterAriaLabel,
+          presentationLocale,
+          formatCount,
+        ),
+      dateFilter,
+      dayNavigationLabels: {
+        todayPrefix: uiLabels.dayNavigation.todayPrefix,
+      },
+      dayPeriodLabels: uiLabels.dayPeriod,
+      dayPeriodTimeRangeLabels: uiLabels.dayPeriod.timeRange,
+      events: searchFilterModel.filteredEvents,
+      locale: presentationLocale,
+      mapMarkerInputs,
+      referenceDate,
+      selectedDateKey: effectiveSelectedDateKey,
+      timeZone,
+    });
+  }, [
+    dateFilter,
+    effectiveSelectedDateKey,
+    formatCount,
+    presentationDependencies,
+    presentationLocale,
+    referenceDate,
+    searchFilterModel.filteredEvents,
+    timeZone,
+    uiLabels.dayNavigation.todayPrefix,
+    uiLabels.dayPeriod,
+    uiLabels.eventsOfDay.clusterAriaLabel,
+  ]);
+
+  const hasEventsOnOtherDaysInRange = useMemo(() => {
+    if (!dayViewModel) {
+      return false;
+    }
+
+    return (
+      searchFilterModel.filteredEvents.length > 0 &&
+      dayViewModel.selectedDayEvents.length === 0
+    );
+  }, [dayViewModel, searchFilterModel.filteredEvents.length]);
+
   const listModel = useMemo(
     () =>
-      createTimelineListModel({
+      createTimelineDayPeriodListModel({
         defaultErrorMessage: uiLabels.error.default,
+        dayPeriodLabels: uiLabels.dayPeriod,
+        dayPeriodTimeRangeLabels: uiLabels.dayPeriod.timeRange,
         error,
-        events: paginationModel.visibleEvents,
+        events: dayViewModel?.selectedDayEvents ?? [],
+        formatPeriodEventCount: formatPeriodEventCountResolved,
         hasActiveSearchOrCategoryCriteria:
           searchFilterModel.hasActiveSearchOrCategoryCriteria,
         hasEventsInDateRange: searchFilterModel.dateRangeEventCount > 0,
-        locale: presentationLocale,
-        groupLabels: presentationDependencies.labels.groups,
-        referenceDate,
+        hasEventsOnOtherDaysInRange,
         status,
         timeZone,
         totalSourceEventCount: events.length,
-        unknownDateLabel: uiLabels.group.unknownDate,
       }),
     [
+      dayViewModel?.selectedDayEvents,
       error,
       events.length,
-      paginationModel.visibleEvents,
-      presentationDependencies.labels.groups,
-      presentationLocale,
-      referenceDate,
+      formatPeriodEventCountResolved,
+      hasEventsOnOtherDaysInRange,
       searchFilterModel.dateRangeEventCount,
       searchFilterModel.hasActiveSearchOrCategoryCriteria,
       status,
       timeZone,
+      uiLabels.dayPeriod,
       uiLabels.error.default,
-      uiLabels.group.unknownDate,
     ],
   );
+
   const showToolbar = status === 'ready';
   const selectedEvent =
     selectedEventId !== null
@@ -228,7 +368,50 @@ export function TimelineShell() {
     nextDateFilter: TimelineDateFilterSelection,
   ) => {
     setDateFilter(nextDateFilter);
+    setSelectedDateKey(
+      resolveDefaultTimelineSelectedDateKey(
+        nextDateFilter,
+        referenceDate,
+        timeZone,
+      ),
+    );
     setVisibleCount(TIMELINE_PAGE_SIZE);
+  };
+
+  const handlePreviousDay = () => {
+    if (!effectiveSelectedDateKey) {
+      return;
+    }
+
+    const previousDateKey = shiftTimelineSelectedDateKey(
+      effectiveSelectedDateKey,
+      'previous',
+      dateFilter,
+      referenceDate,
+      timeZone,
+    );
+
+    if (previousDateKey) {
+      setSelectedDateKey(previousDateKey);
+    }
+  };
+
+  const handleNextDay = () => {
+    if (!effectiveSelectedDateKey) {
+      return;
+    }
+
+    const nextDateKey = shiftTimelineSelectedDateKey(
+      effectiveSelectedDateKey,
+      'next',
+      dateFilter,
+      referenceDate,
+      timeZone,
+    );
+
+    if (nextDateKey) {
+      setSelectedDateKey(nextDateKey);
+    }
   };
 
   const handleLoadMore = () => {
@@ -243,10 +426,7 @@ export function TimelineShell() {
   };
 
   const showLoadMore =
-    status === 'ready' &&
-    (paginationModel.hasMore ||
-      hasMoreHistory ||
-      historyLoadStatus === 'loading');
+    status === 'ready' && (hasMoreHistory || historyLoadStatus === 'loading');
   const isLoadingRepositoryHistory = historyLoadStatus === 'loading';
 
   const focusTimelineHeading = () => {
@@ -366,6 +546,39 @@ export function TimelineShell() {
           </h1>
         </div>
 
+        {showToolbar && dayViewModel?.dayNavigation ? (
+          <TimelineDayNavigation
+            ariaLabel={uiLabels.dayNavigation.ariaLabel}
+            model={dayViewModel.dayNavigation}
+            nextDayLabel={uiLabels.dayNavigation.nextDay}
+            onNext={handleNextDay}
+            onPrevious={handlePreviousDay}
+            previousDayLabel={uiLabels.dayNavigation.previousDay}
+          />
+        ) : null}
+
+        {showToolbar && dayViewModel ? (
+          <TimelineEventsOfDayMap
+            labels={{
+              ariaLabel: uiLabels.eventsOfDay.ariaLabel,
+              clusterAriaLabel: (count) =>
+                formatTimelineEventsOfDayClusterAriaLabel(
+                  count,
+                  uiLabels.eventsOfDay.clusterAriaLabel,
+                  presentationLocale,
+                  formatCount,
+                ),
+              currentTimeLabel: uiLabels.eventsOfDay.currentTime,
+              helper: uiLabels.eventsOfDay.helper,
+              title: uiLabels.eventsOfDay.title,
+            }}
+            model={dayViewModel.dayMap}
+            onSelectEvent={handleOpenEvent}
+            selectedEventId={selectedEventId}
+            timeZone={timeZone}
+          />
+        ) : null}
+
         {showToolbar ? (
           <TimelineToolbar
             dateFilter={dateFilter}
@@ -373,6 +586,7 @@ export function TimelineShell() {
             filterLabels={presentationDependencies.labels.filters}
             formatCount={formatCount}
             labels={uiLabels}
+            locale={presentationLocale}
             model={searchFilterModel}
             onDateFilterChange={handleDateFilterChange}
             onFilterChange={handleFilterChange}
@@ -432,14 +646,13 @@ export function TimelineShell() {
         returnFocusRef={mobileQuickAddFabRef}
       />
 
-      {!quickAddOpen ? (
-        <TimelineMobileQuickAddFab
-          onClick={() => setQuickAddOpen(true)}
-          ref={mobileQuickAddFabRef}
-        />
-      ) : null}
-
-      <DashboardMobileNav activeTab="timeline" />
+      <DashboardMobileNav
+        activeTab="timeline"
+        onQuickAddClick={() => setQuickAddOpen(true)}
+        quickAddDisabled={quickAddOpen}
+        quickAddFabRef={mobileQuickAddFabRef}
+        showQuickAddFab={!quickAddOpen}
+      />
 
       {selectedEvent ? (
         <TimelineEventDetail
