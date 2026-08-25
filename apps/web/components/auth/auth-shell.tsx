@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { BrandSymbol } from '../brand/brand-symbol';
+import { ProductBrandLogo } from '../brand/product-brand-logo';
 
 interface AuthShellProps {
   readonly children: ReactNode;
@@ -13,7 +13,7 @@ export function AuthShell({ children, description, title }: AuthShellProps) {
     <div className="min-h-dvh bg-slate-50 px-4 py-8 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
       <div className="mx-auto flex w-full max-w-md flex-col gap-8">
         <header className="flex flex-col items-center gap-4 text-center">
-          <BrandSymbol className="size-14" size="md" />
+          <ProductBrandLogo priority variant="auth" />
           <div className="space-y-2">
             <p className="text-sm font-semibold tracking-wide text-teal-700 uppercase dark:text-teal-300">
               Diabetes Universe

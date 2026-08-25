@@ -63,7 +63,54 @@ test('preview diagnostics report maps branch alias host mismatch safely', async 
     );
     assert.equal(report.runtimeEnvPresence.DATABASE_URL, 'MISSING');
     assert.equal(report.authEnvironment.configured, true);
+    assert.equal(report.authEnvironment.configurationFailureStage, null);
     assert.equal(report.session.sessionCookiePresent, false);
+  } finally {
+    process.env = originalEnv;
+  }
+});
+
+test('preview diagnostics report classifies auth unavailable configuration', async () => {
+  const originalEnv = { ...process.env };
+  const unavailableEnv = {
+    AUTH_DATABASE_MODE: 'postgres',
+    BETTER_AUTH_SECRET: 'x'.repeat(32),
+    BETTER_AUTH_URL: 'https://production.example',
+    DATABASE_URL: 'postgres://user:pass@localhost:5432/app',
+    VERCEL_BRANCH_URL:
+      'diabetes-universe-web-git-implementation-profile-2b7cc9-resulto.vercel.app',
+    VERCEL_ENV: 'preview',
+    VERCEL_URL: 'diabetes-universe-web-ft5kujfzn-resulto.vercel.app',
+  };
+
+  process.env = { ...originalEnv, ...unavailableEnv };
+
+  try {
+    const request = new Request(
+      'https://diabetes-universe-web-git-implementation-profile-2b7cc9-resulto.vercel.app/api/auth/preview-diagnostics',
+      {
+        headers: {
+          host: 'diabetes-universe-web-git-implementation-profile-2b7cc9-resulto.vercel.app',
+          'x-forwarded-host':
+            'diabetes-universe-web-git-implementation-profile-2b7cc9-resulto.vercel.app',
+          'x-forwarded-proto': 'https',
+        },
+      },
+    );
+
+    const report = await buildPreviewAuthDiagnosticsReport(
+      request,
+      unavailableEnv,
+    );
+
+    assert.equal(report.authEnvironment.configured, false);
+    assert.equal(
+      report.authEnvironment.configurationFailureStage,
+      'email_delivery',
+    );
+    assert.equal(report.flowHints.likelyFailureCategory, 'A_AUTH_UNAVAILABLE');
+    assert.equal(report.runtimeEnvPresence.RESEND_API_KEY, 'MISSING');
+    assert.equal(report.runtimeEnvPresence.AUTH_EMAIL_FROM, 'MISSING');
   } finally {
     process.env = originalEnv;
   }

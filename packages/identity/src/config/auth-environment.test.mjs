@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   AuthConfigurationError,
+  probeAuthConfiguration,
   resolveAuthEnvironment,
   resolveBetterAuthBaseUrlConfig,
   resolveSafeAuthCallbackPath,
@@ -242,4 +243,55 @@ test('resolveSafeAuthCallbackPath rejects external redirects', () => {
   );
   assert.equal(resolveSafeAuthCallbackPath('/timeline'), '/timeline');
   assert.equal(resolveSafeAuthCallbackPath('//evil.example'), '/account');
+});
+
+test('probeAuthConfiguration identifies missing postgres email delivery', () => {
+  const probe = probeAuthConfiguration({
+    AUTH_DATABASE_MODE: 'postgres',
+    BETTER_AUTH_SECRET: 'x'.repeat(32),
+    BETTER_AUTH_URL: 'https://example.com',
+    DATABASE_URL: 'postgres://user:pass@localhost:5432/app',
+    VERCEL_ENV: 'preview',
+    VERCEL_URL: 'preview-host.vercel.app',
+  });
+
+  assert.equal(probe.configured, false);
+  assert.equal(probe.failureStage, 'email_delivery');
+  assert.match(
+    probe.failureMessage ?? '',
+    /RESEND_API_KEY and AUTH_EMAIL_FROM/,
+  );
+  assert.equal(probe.envPresence.RESEND_API_KEY, 'MISSING');
+  assert.equal(probe.envPresence.AUTH_EMAIL_FROM, 'MISSING');
+  assert.equal(probe.envPresence.DATABASE_URL, 'SET');
+});
+
+test('probeAuthConfiguration identifies missing auth database configuration', () => {
+  const probe = probeAuthConfiguration({
+    BETTER_AUTH_SECRET: 'x'.repeat(32),
+    BETTER_AUTH_URL: 'https://example.com',
+    NODE_ENV: 'production',
+    VERCEL_ENV: 'preview',
+  });
+
+  assert.equal(probe.configured, false);
+  assert.equal(probe.failureStage, 'database_mode');
+  assert.equal(probe.envPresence.DATABASE_URL, 'MISSING');
+});
+
+test('probeAuthConfiguration succeeds for preview postgres auth', () => {
+  const probe = probeAuthConfiguration({
+    AUTH_DATABASE_MODE: 'postgres',
+    AUTH_EMAIL_FROM: 'auth@example.com',
+    BETTER_AUTH_SECRET: 'x'.repeat(32),
+    BETTER_AUTH_URL: 'https://production.example',
+    DATABASE_URL: 'postgres://user:pass@localhost:5432/app',
+    RESEND_API_KEY: 're_test_key',
+    VERCEL_BRANCH_URL: 'preview-branch.vercel.app',
+    VERCEL_ENV: 'preview',
+    VERCEL_URL: 'preview-host.vercel.app',
+  });
+
+  assert.equal(probe.configured, true);
+  assert.equal(probe.failureStage, null);
 });

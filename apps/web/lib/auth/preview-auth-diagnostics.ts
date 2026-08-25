@@ -4,6 +4,7 @@ import {
   AUTH_COOKIE_PREFIX,
   AuthConfigurationError,
   isAuthEnvironmentConfigured,
+  probeAuthConfiguration,
   resolveAuthEnvironment,
   resolveBetterAuthBaseUrlConfig,
 } from '@diabetes-universe/identity';
@@ -50,6 +51,7 @@ export interface PreviewAuthDiagnosticsReport {
     readonly configured: boolean;
     readonly configurationErrorType: string | null;
     readonly configurationErrorMessage: string | null;
+    readonly configurationFailureStage: string | null;
     readonly passkeyEnabled: boolean;
     readonly databaseMode: string | null;
     readonly trustedOriginsCount: number | null;
@@ -144,6 +146,9 @@ function classifyLikelyFailure(report: PreviewAuthDiagnosticsReport): {
       category: 'A_AUTH_UNAVAILABLE',
       notes: [
         'Auth environment failed configuration at runtime.',
+        report.authEnvironment.configurationFailureStage
+          ? `Failure stage: ${report.authEnvironment.configurationFailureStage}.`
+          : 'Failure stage unknown.',
         report.authEnvironment.configurationErrorMessage ??
           'Unknown configuration error.',
       ],
@@ -241,9 +246,16 @@ export async function buildPreviewAuthDiagnosticsReport(
   const vercelUrlHost = normalizeHost(env.VERCEL_URL);
   const vercelBranchUrlHost = normalizeHost(env.VERCEL_BRANCH_URL);
 
-  let configured = false;
-  let configurationErrorType: string | null = null;
-  let configurationErrorMessage: string | null = null;
+  const configurationProbe = probeAuthConfiguration(env);
+
+  let configured = configurationProbe.configured;
+  let configurationErrorType: string | null = configured
+    ? null
+    : 'AuthConfigurationError';
+  let configurationErrorMessage: string | null =
+    configurationProbe.failureMessage;
+  let configurationFailureStage: string | null =
+    configurationProbe.failureStage;
   let passkeyEnabled = false;
   let databaseMode: string | null = null;
   let trustedOriginsCount: number | null = null;
@@ -256,6 +268,9 @@ export async function buildPreviewAuthDiagnosticsReport(
   try {
     const environment = resolveAuthEnvironment(env);
     configured = true;
+    configurationErrorType = null;
+    configurationErrorMessage = null;
+    configurationFailureStage = null;
     configuredAuthBaseUrl = environment.baseUrl;
     configuredAuthBaseUrlHost = readHostFromBaseUrl(environment.baseUrl);
     passkeyEnabled = environment.passkeyEnabled;
@@ -286,6 +301,7 @@ export async function buildPreviewAuthDiagnosticsReport(
         : error instanceof Error
           ? error.message
           : 'Auth configuration failed.';
+    configurationFailureStage ??= configurationProbe.failureStage ?? 'unknown';
     passkeyEnabled = isWebPasskeyConfigured();
   }
 
@@ -376,22 +392,16 @@ export async function buildPreviewAuthDiagnosticsReport(
       configured: isAuthEnvironmentConfigured(env),
       configurationErrorType,
       configurationErrorMessage,
+      configurationFailureStage,
       passkeyEnabled,
       databaseMode,
       trustedOriginsCount,
     },
     runtimeEnvPresence: {
-      DATABASE_URL: envPresence('DATABASE_URL', env),
-      BETTER_AUTH_SECRET: envPresence('BETTER_AUTH_SECRET', env),
-      BETTER_AUTH_URL: envPresence('BETTER_AUTH_URL', env),
-      RESEND_API_KEY: envPresence('RESEND_API_KEY', env),
-      AUTH_EMAIL_FROM: envPresence('AUTH_EMAIL_FROM', env),
+      ...configurationProbe.envPresence,
+      AUTH_TRUSTED_ORIGINS: envPresence('AUTH_TRUSTED_ORIGINS', env),
       AUTH_WEBAUTHN_ORIGIN: envPresence('AUTH_WEBAUTHN_ORIGIN', env),
       AUTH_WEBAUTHN_RP_ID: envPresence('AUTH_WEBAUTHN_RP_ID', env),
-      AUTH_TRUSTED_ORIGINS: envPresence('AUTH_TRUSTED_ORIGINS', env),
-      VERCEL_ENV: envPresence('VERCEL_ENV', env),
-      VERCEL_URL: envPresence('VERCEL_URL', env),
-      VERCEL_BRANCH_URL: envPresence('VERCEL_BRANCH_URL', env),
       VERCEL_GIT_COMMIT_SHA: envPresence('VERCEL_GIT_COMMIT_SHA', env),
     },
     session: {

@@ -29,9 +29,13 @@ export {
 export {
   AuthConfigurationError,
   isAuthEnvironmentConfigured,
+  probeAuthConfiguration,
   resolveAuthEnvironment,
   resolveBetterAuthBaseUrlConfig,
   resolveSafeAuthCallbackPath,
+  type AuthConfigurationFailureStage,
+  type AuthConfigurationProbeResult,
+  type AuthEnvPresence,
   type AuthEnvironment,
 } from './config/auth-environment';
 export {

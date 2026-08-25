@@ -19,6 +19,8 @@ export async function GET(request: Request) {
       browserHost: report.request.browserHost,
       likelyFailureCategory: report.flowHints.likelyFailureCategory,
       authConfigured: report.authEnvironment.configured,
+      configurationFailureStage:
+        report.authEnvironment.configurationFailureStage,
       sessionCookiePresent: report.session.sessionCookiePresent,
       getSessionReturnedPrincipal: report.session.getSessionReturnedPrincipal,
       hostMismatch: report.hosts.hostMismatchVercelUrlVsBranchUrl,

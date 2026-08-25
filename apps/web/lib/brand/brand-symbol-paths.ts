@@ -1,6 +1,13 @@
 export const APP_BASELINE_DESCRIPTION =
   'Diabetes Universe — a digital companion for people living with diabetes.';
 
+export const PRODUCT_BRAND_LOGO_PATH = '/brand/diabetes-universe-logo.png';
+
+export const PRODUCT_BRAND_LOGO_INTRINSIC_SIZE = {
+  height: 1254,
+  width: 1254,
+} as const;
+
 export const BRAND_SYMBOL_ICON_SVG = '/brand/app-icon/app-icon-dark.svg';
 
 export const BRAND_SYMBOL_ICON_PNG = '/brand/app-icon/app-icon-dark-1024.png';
