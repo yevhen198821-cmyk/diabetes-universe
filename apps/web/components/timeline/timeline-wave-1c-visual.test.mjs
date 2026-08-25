@@ -28,6 +28,34 @@ test('timeline shell reuses the home page colorful backdrop', () => {
   assert.match(shellSource, /activeTab="timeline"/);
 });
 
+test('timeline mobile quick add FAB uses compact sizing tokens', () => {
+  const navLayoutSource = readFileSync(
+    fileURLToPath(
+      new URL('../dashboard/dashboard-mobile-nav-layout.ts', import.meta.url),
+    ),
+    'utf8',
+  );
+  const mobileNavSource = readFileSync(
+    fileURLToPath(
+      new URL('../dashboard/dashboard-mobile-nav.tsx', import.meta.url),
+    ),
+    'utf8',
+  );
+
+  assert.match(navLayoutSource, /DASHBOARD_MOBILE_QUICK_ADD_FAB_SIZE = '4rem'/);
+  assert.match(navLayoutSource, /size-16/);
+  assert.match(
+    navLayoutSource,
+    /shadow-\[0_12px_30px_rgba\(6,182,212,0\.28\)\]/,
+  );
+  assert.match(
+    navLayoutSource,
+    /DASHBOARD_MOBILE_QUICK_ADD_FAB_ICON_SIZE = 22/,
+  );
+  assert.doesNotMatch(navLayoutSource, /size-\[3\.75rem\]/);
+  assert.match(mobileNavSource, /DASHBOARD_MOBILE_QUICK_ADD_FAB_CLASSES/);
+});
+
 test('timeline list uses vibrant frosted event cards', () => {
   assert.match(listSource, /frostedPanelClassName/);
   assert.match(listSource, /appearance="vibrant"/);

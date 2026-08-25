@@ -9,6 +9,8 @@ import { resolveDashboardMobileNavLabels } from './dashboard-mobile-nav-labels';
 import {
   dashboardMobileNavInnerClassName,
   dashboardMobileNavOuterClassName,
+  DASHBOARD_MOBILE_QUICK_ADD_FAB_CLASSES,
+  DASHBOARD_MOBILE_QUICK_ADD_FAB_ICON_SIZE,
 } from './dashboard-mobile-nav-layout';
 
 export interface DashboardMobileNavProps {
@@ -82,13 +84,17 @@ export function DashboardMobileNav({
             <li className="flex justify-center">
               <button
                 aria-label={labels.quickAdd}
-                className="focus-visible:outline-interactive-primary -mt-6 grid size-[3.75rem] place-items-center rounded-full bg-gradient-to-br from-teal-400 via-cyan-400 to-blue-500 text-white shadow-[0_16px_40px_rgba(6,182,212,0.38)] transition hover:brightness-105 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className={DASHBOARD_MOBILE_QUICK_ADD_FAB_CLASSES}
                 disabled={quickAddDisabled}
                 onClick={onQuickAdd}
                 ref={quickAddButtonRef}
                 type="button"
               >
-                <Plus aria-hidden="true" size={28} strokeWidth={2.4} />
+                <Plus
+                  aria-hidden="true"
+                  size={DASHBOARD_MOBILE_QUICK_ADD_FAB_ICON_SIZE}
+                  strokeWidth={2.4}
+                />
               </button>
             </li>
           ) : null}
