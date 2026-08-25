@@ -9,7 +9,7 @@ import type {
   NutritionQuickAddEntry,
   QuickAddCategory,
 } from '@diabetes-universe/types';
-import { useRef, useState } from 'react';
+import { useRef, useState, type RefObject } from 'react';
 
 import { QuickAddHost } from '../quick-add/quick-add-host';
 
@@ -24,6 +24,7 @@ interface QuickAddRootProps {
   readonly onNutritionSubmit?: (entry: NutritionQuickAddEntry) => void;
   readonly open?: boolean;
   readonly openCategory?: QuickAddCategory | null;
+  readonly returnFocusRef?: RefObject<HTMLButtonElement | null>;
 }
 
 export function QuickAddRoot({
@@ -37,16 +38,18 @@ export function QuickAddRoot({
   onNutritionSubmit,
   open,
   openCategory,
+  returnFocusRef: returnFocusRefProp,
 }: QuickAddRootProps) {
   const [internalOpen, setInternalOpen] = useState(false);
-  const fabRef = useRef<HTMLButtonElement>(null);
+  const desktopFabRef = useRef<HTMLButtonElement>(null);
+  const returnFocusRef = returnFocusRefProp ?? desktopFabRef;
   const isOpen = open ?? internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
 
   return (
     <QuickAddHost
       floatingActionButtonClassName={floatingActionButtonClassName}
-      floatingActionButtonRef={fabRef}
+      floatingActionButtonRef={desktopFabRef}
       onActivitySubmit={onActivitySubmit}
       onGlucoseSubmit={onGlucoseSubmit}
       onInsulinSubmit={onInsulinSubmit}
@@ -56,7 +59,7 @@ export function QuickAddRoot({
       onOpenChange={setOpen}
       open={isOpen}
       openCategory={openCategory}
-      returnFocusRef={fabRef}
+      returnFocusRef={returnFocusRef}
       showFloatingActionButton
     />
   );

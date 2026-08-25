@@ -1,8 +1,8 @@
 'use client';
 
-import { Clock, Home, Plus, UserRound } from 'lucide-react';
+import { Clock, Home, UserRound } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo, type RefObject } from 'react';
+import { useMemo } from 'react';
 
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { resolveDashboardMobileNavLabels } from './dashboard-mobile-nav-labels';
@@ -13,18 +13,10 @@ import {
 
 export interface DashboardMobileNavProps {
   readonly activeTab?: 'home' | 'timeline';
-  readonly onQuickAdd?: () => void;
-  readonly quickAddButtonRef?: RefObject<HTMLButtonElement | null>;
-  readonly quickAddDisabled?: boolean;
-  readonly showQuickAddFab?: boolean;
 }
 
 export function DashboardMobileNav({
   activeTab = 'home',
-  onQuickAdd,
-  quickAddButtonRef,
-  quickAddDisabled = false,
-  showQuickAddFab = true,
 }: DashboardMobileNavProps) {
   const localization = useLocalization();
   const labels = useMemo(
@@ -39,9 +31,7 @@ export function DashboardMobileNav({
       id="dashboard-mobile-nav"
     >
       <div className={dashboardMobileNavInnerClassName}>
-        <ul
-          className={`grid items-center px-1 py-1 ${showQuickAddFab ? 'grid-cols-4 items-end pt-1 pb-1.5' : 'grid-cols-3'}`}
-        >
+        <ul className="grid grid-cols-3 items-center px-1 py-1">
           <li>
             <Link
               aria-current={activeTab === 'home' ? 'page' : undefined}
@@ -78,20 +68,6 @@ export function DashboardMobileNav({
               </span>
             </Link>
           </li>
-          {showQuickAddFab ? (
-            <li className="flex justify-center">
-              <button
-                aria-label={labels.quickAdd}
-                className="focus-visible:outline-interactive-primary -mt-6 grid size-[3.75rem] place-items-center rounded-full bg-gradient-to-br from-teal-400 via-cyan-400 to-blue-500 text-white shadow-[0_16px_40px_rgba(6,182,212,0.38)] transition hover:brightness-105 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={quickAddDisabled}
-                onClick={onQuickAdd}
-                ref={quickAddButtonRef}
-                type="button"
-              >
-                <Plus aria-hidden="true" size={28} strokeWidth={2.4} />
-              </button>
-            </li>
-          ) : null}
           <li>
             <Link
               className="text-text-secondary focus-visible:outline-interactive-primary flex min-h-11 min-w-11 flex-col items-center justify-center gap-0 rounded-2xl px-2.5 py-1 transition hover:text-teal-600 focus-visible:outline-2 focus-visible:outline-offset-2 dark:hover:text-teal-300"

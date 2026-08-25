@@ -158,14 +158,14 @@ test('header keeps approved brand logo with wordmark and account affordance', ()
   assert.doesNotMatch(headerSource, /aria-label=\{viewModel\.addEventLabel\}/);
 });
 
-test('mobile navigation links only to real routes without duplicate quick-add FAB', () => {
+test('mobile navigation links only to real routes without embedded quick-add FAB', () => {
   assert.match(mobileNavSource, /href="\/"/);
   assert.match(mobileNavSource, /href="\/timeline"/);
   assert.match(mobileNavSource, /href="\/account"/);
-  assert.match(mobileNavSource, /showQuickAddFab/);
   assert.match(mobileNavSource, /grid-cols-3/);
   assert.match(mobileNavSource, /min-h-11/);
-  assert.match(rootSource, /showQuickAddFab=\{false\}/);
+  assert.doesNotMatch(mobileNavSource, /<Plus/);
+  assert.doesNotMatch(mobileNavSource, /showQuickAddFab/);
   assert.doesNotMatch(mobileNavSource, /href="\/analytics"/);
   assert.doesNotMatch(mobileNavSource, /Anna/);
 });

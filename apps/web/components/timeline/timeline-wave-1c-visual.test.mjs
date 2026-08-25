@@ -28,6 +28,43 @@ test('timeline shell reuses the home page colorful backdrop', () => {
   assert.match(shellSource, /activeTab="timeline"/);
 });
 
+test('timeline mobile quick add FAB is detached from bottom nav on the right', () => {
+  const navLayoutSource = readFileSync(
+    fileURLToPath(
+      new URL('../dashboard/dashboard-mobile-nav-layout.ts', import.meta.url),
+    ),
+    'utf8',
+  );
+  const mobileNavSource = readFileSync(
+    fileURLToPath(
+      new URL('../dashboard/dashboard-mobile-nav.tsx', import.meta.url),
+    ),
+    'utf8',
+  );
+  const fabSource = readFileSync(
+    fileURLToPath(
+      new URL('./timeline-mobile-quick-add-fab.tsx', import.meta.url),
+    ),
+    'utf8',
+  );
+
+  assert.match(navLayoutSource, /TIMELINE_MOBILE_QUICK_ADD_FAB_SIZE = '3rem'/);
+  assert.match(navLayoutSource, /size-12/);
+  assert.match(navLayoutSource, /0\.9375rem/);
+  assert.match(navLayoutSource, /3\.75rem\+0\.9375rem/);
+  assert.match(navLayoutSource, /timelineMobileQuickAddFabPositionClassName/);
+  assert.match(
+    navLayoutSource,
+    /right-\[max\(1rem,env\(safe-area-inset-right\)\)\]/,
+  );
+  assert.match(navLayoutSource, /TIMELINE_MOBILE_QUICK_ADD_FAB_ICON_SIZE = 20/);
+  assert.doesNotMatch(mobileNavSource, /<Plus/);
+  assert.doesNotMatch(mobileNavSource, /showQuickAddFab/);
+  assert.match(fabSource, /timelineMobileQuickAddFabPositionClassName/);
+  assert.match(shellSource, /TimelineMobileQuickAddFab/);
+  assert.doesNotMatch(shellSource, /showQuickAddFab/);
+});
+
 test('timeline list uses vibrant frosted event cards', () => {
   assert.match(listSource, /frostedPanelClassName/);
   assert.match(listSource, /appearance="vibrant"/);

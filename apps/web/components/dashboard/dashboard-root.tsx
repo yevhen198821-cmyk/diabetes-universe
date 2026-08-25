@@ -193,7 +193,7 @@ export function DashboardRoot() {
             <DashboardLastGlucose state="empty" />
           )
         }
-        mobileNav={<DashboardMobileNav showQuickAddFab={false} />}
+        mobileNav={<DashboardMobileNav />}
         quickActions={
           <DashboardQuickActions
             disabled={quickAddState.isOpen || isTimelineHydrating}

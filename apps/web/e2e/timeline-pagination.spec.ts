@@ -89,7 +89,7 @@ test('timeline pagination recalculates after delete and keeps new add on top', a
   await expect(page.getByText('Remaining: 11')).toBeVisible();
 });
 
-test('timeline load more is usable on mobile without FAB overlap or horizontal scroll', async ({
+test('timeline load more is usable on mobile with detached right FAB', async ({
   page,
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
@@ -97,27 +97,43 @@ test('timeline load more is usable on mobile without FAB overlap or horizontal s
   await waitForApplicationReady(page);
 
   const loadMore = page.getByRole('button', { name: 'Load more' });
+  const fab = page.locator('#timeline-mobile-quick-add-fab');
 
   await expect(loadMore).toBeVisible();
+  await expect(fab).toBeVisible();
   await loadMore.scrollIntoViewIfNeeded();
 
-  const loadMoreBox = await loadMore.boundingBox();
-  const fabBox = await page
-    .getByRole('button', { name: 'Add event' })
-    .boundingBox();
+  const layout = await page.evaluate(() => {
+    const navInner = document
+      .getElementById('dashboard-mobile-nav')
+      ?.querySelector('.pointer-events-auto');
+    const fabElement = document.getElementById('timeline-mobile-quick-add-fab');
+    const navRect = navInner?.getBoundingClientRect();
+    const fabRect = fabElement?.getBoundingClientRect();
 
-  expect(loadMoreBox).not.toBeNull();
-  expect(fabBox).not.toBeNull();
+    return {
+      fabCenterX: fabRect ? fabRect.left + fabRect.width / 2 : null,
+      fabBottomGapAboveNav:
+        navRect && fabRect ? navRect.top - fabRect.bottom : null,
+      fabInNav: fabElement
+        ? document.getElementById('dashboard-mobile-nav')?.contains(fabElement)
+        : null,
+      navInnerHeight: navRect?.height ?? null,
+      viewportCenterX: window.innerWidth / 2,
+    };
+  });
 
-  const overlaps =
-    loadMoreBox !== null &&
-    fabBox !== null &&
-    loadMoreBox.x < fabBox.x + fabBox.width &&
-    loadMoreBox.x + loadMoreBox.width > fabBox.x &&
-    loadMoreBox.y < fabBox.y + fabBox.height &&
-    loadMoreBox.y + loadMoreBox.height > fabBox.y;
+  expect(layout.fabInNav).toBe(false);
+  expect(layout.fabCenterX).not.toBeNull();
+  expect(layout.fabCenterX).toBeGreaterThan(layout.viewportCenterX);
+  expect(layout.navInnerHeight).not.toBeNull();
+  expect(layout.fabBottomGapAboveNav).not.toBeNull();
+  expect(layout.fabBottomGapAboveNav ?? 0).toBeGreaterThan(8);
+  expect(layout.fabBottomGapAboveNav ?? 0).toBeLessThan(24);
 
-  expect(overlaps).toBe(false);
+  await loadMore.click();
+  await expect(eventCards(page)).toHaveCount(31);
+  await expect(page.getByRole('button', { name: 'Load more' })).toBeHidden();
 
   const hasHorizontalScroll = await page.evaluate(
     () =>
