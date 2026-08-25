@@ -57,6 +57,23 @@ export interface TimelineUiLabels {
     readonly reset: string;
     readonly title: string;
   }>;
+  readonly dateFilter: Readonly<{
+    readonly apply: string;
+    readonly ariaLabel: string;
+    readonly closeOverlay: string;
+    readonly custom: string;
+    readonly customFrom: string;
+    readonly customRange: string;
+    readonly customTo: string;
+    readonly last30Days: string;
+    readonly last7Days: string;
+    readonly sheetTitle: string;
+    readonly today: string;
+  }>;
+  readonly periodEmpty: Readonly<{
+    readonly description: string;
+    readonly title: string;
+  }>;
   readonly filters: Readonly<{
     readonly ariaLabel: string;
   }>;
@@ -148,6 +165,19 @@ const TIMELINE_UI_TRANSLATION_KEYS = {
   ),
   filteredEmptyReset: asTranslationKey('timeline.filteredEmpty.reset'),
   filteredEmptyTitle: asTranslationKey('timeline.filteredEmpty.title'),
+  dateFilterApply: asTranslationKey('timeline.dateFilter.apply'),
+  dateFilterAriaLabel: asTranslationKey('timeline.dateFilter.ariaLabel'),
+  dateFilterCloseOverlay: asTranslationKey('timeline.dateFilter.closeOverlay'),
+  dateFilterCustom: asTranslationKey('timeline.dateFilter.custom'),
+  dateFilterCustomFrom: asTranslationKey('timeline.dateFilter.customFrom'),
+  dateFilterCustomRange: asTranslationKey('timeline.dateFilter.customRange'),
+  dateFilterCustomTo: asTranslationKey('timeline.dateFilter.customTo'),
+  dateFilterLast30Days: asTranslationKey('timeline.dateFilter.last30Days'),
+  dateFilterLast7Days: asTranslationKey('timeline.dateFilter.last7Days'),
+  dateFilterSheetTitle: asTranslationKey('timeline.dateFilter.sheetTitle'),
+  dateFilterToday: asTranslationKey('timeline.dateFilter.today'),
+  periodEmptyDescription: asTranslationKey('timeline.periodEmpty.description'),
+  periodEmptyTitle: asTranslationKey('timeline.periodEmpty.title'),
   filtersAriaLabel: asTranslationKey('timeline.filters.ariaLabel'),
   groupUnknownDate: asTranslationKey('timeline.group.unknownDate'),
   headerTitle: asTranslationKey('timeline.header.title'),
@@ -292,6 +322,62 @@ export function resolveTimelineUiLabels(
         TIMELINE_UI_TRANSLATION_KEYS.filteredEmptyTitle,
       ),
     },
+    dateFilter: {
+      apply: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dateFilterApply,
+      ),
+      ariaLabel: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dateFilterAriaLabel,
+      ),
+      closeOverlay: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dateFilterCloseOverlay,
+      ),
+      custom: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dateFilterCustom,
+      ),
+      customFrom: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dateFilterCustomFrom,
+      ),
+      customRange: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dateFilterCustomRange,
+      ),
+      customTo: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dateFilterCustomTo,
+      ),
+      last30Days: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dateFilterLast30Days,
+      ),
+      last7Days: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dateFilterLast7Days,
+      ),
+      sheetTitle: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dateFilterSheetTitle,
+      ),
+      today: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dateFilterToday,
+      ),
+    },
+    periodEmpty: {
+      description: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.periodEmptyDescription,
+      ),
+      title: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.periodEmptyTitle,
+      ),
+    },
     filters: {
       ariaLabel: translate(
         localization,
@@ -425,22 +511,16 @@ export function resolveTimelineEventSourcePresentation(
 export function formatTimelineToolbarResultLabel(
   labels: TimelineUiLabels['toolbar'],
   model: Readonly<{
-    readonly hasActiveCriteria: boolean;
+    readonly hasActiveSearchOrCategoryCriteria: boolean;
     readonly resultCount: number;
   }>,
   formatCount: (count: number) => string,
 ): string {
-  if (model.hasActiveCriteria && model.resultCount === 0) {
+  if (model.hasActiveSearchOrCategoryCriteria && model.resultCount === 0) {
     return labels.noMatches;
   }
 
-  const formattedCount = formatCount(model.resultCount);
-
-  if (model.hasActiveCriteria) {
-    return labels.foundCount.replace('{count}', formattedCount);
-  }
-
-  return labels.eventCount.replace('{count}', formattedCount);
+  return labels.eventCount.replace('{count}', formatCount(model.resultCount));
 }
 
 export function formatTimelineLoadMoreAnnouncement(

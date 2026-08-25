@@ -26,7 +26,7 @@ test('timeline search paginates all matching results', async ({ page }) => {
 
   await page.getByLabel('Search events').fill('История');
 
-  await expect(page.getByText('Found: 24')).toBeVisible();
+  await expect(page.getByText('24 events')).toBeVisible();
   await expect(eventCards(page)).toHaveCount(20);
 
   await page.getByRole('button', { name: 'Load more' }).click();
@@ -43,13 +43,13 @@ test('timeline filter pagination resets visible count with criteria reset', asyn
 
   await page.getByRole('button', { name: 'Notes' }).click();
 
-  await expect(page.getByText('Found: 25')).toBeVisible();
+  await expect(page.getByText('25 events')).toBeVisible();
   await expect(eventCards(page)).toHaveCount(20);
 
   await page.getByRole('button', { name: 'Load more' }).click();
   await expect(eventCards(page)).toHaveCount(25);
 
-  await page.getByRole('button', { name: 'Reset filters' }).click();
+  await page.getByRole('button', { name: 'Clear filters' }).click();
 
   await expect(page.getByText('31 events')).toBeVisible();
   await expect(eventCards(page)).toHaveCount(20);

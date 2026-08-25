@@ -49,7 +49,7 @@ function createModel(input) {
 test('creates loading model without groups', () => {
   const model = createModel({
     events: [createEvent('glucose-1', '2026-08-02T08:00:00.000Z')],
-    hasActiveCriteria: true,
+    hasActiveSearchOrCategoryCriteria: true,
     referenceDate,
     status: 'loading',
     timeZone: 'UTC',
@@ -77,7 +77,8 @@ test('creates empty model for ready state without events', () => {
 test('creates filtered-empty model when criteria hide existing events', () => {
   const model = createModel({
     events: [],
-    hasActiveCriteria: true,
+    hasActiveSearchOrCategoryCriteria: true,
+    hasEventsInDateRange: true,
     referenceDate,
     status: 'ready',
     timeZone: 'UTC',
@@ -88,11 +89,26 @@ test('creates filtered-empty model when criteria hide existing events', () => {
   assert.equal(model.totalEventCount, 0);
 });
 
+test('creates period-empty model when date range excludes all events', () => {
+  const model = createModel({
+    events: [],
+    hasActiveSearchOrCategoryCriteria: false,
+    hasEventsInDateRange: false,
+    referenceDate,
+    status: 'ready',
+    timeZone: 'UTC',
+    totalSourceEventCount: 3,
+  });
+
+  assert.equal(model.status, 'period-empty');
+  assert.equal(model.totalEventCount, 0);
+});
+
 test('creates error model with safe fallback message', () => {
   const model = createModel({
     error: '',
     events: [],
-    hasActiveCriteria: true,
+    hasActiveSearchOrCategoryCriteria: true,
     referenceDate,
     status: 'error',
     timeZone: 'UTC',

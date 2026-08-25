@@ -57,6 +57,61 @@ function parseDateKey(
   return { day, month, year };
 }
 
+export function shiftTimelineCalendarDateKey(
+  dateKey: string,
+  dayOffset: number,
+): string | null {
+  const parsed = parseDateKey(dateKey);
+
+  if (!parsed) {
+    return null;
+  }
+
+  const shifted = new Date(
+    Date.UTC(parsed.year, parsed.month - 1, parsed.day + dayOffset),
+  );
+
+  return `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, '0')}-${String(shifted.getUTCDate()).padStart(2, '0')}`;
+}
+
+export function compareTimelineCalendarDateKeys(
+  left: string,
+  right: string,
+): number {
+  return left.localeCompare(right);
+}
+
+export function isTimelineCalendarDateKeyInInclusiveRange(
+  dateKey: string,
+  fromDateKey: string,
+  toDateKey: string,
+): boolean {
+  return (
+    compareTimelineCalendarDateKeys(dateKey, fromDateKey) >= 0 &&
+    compareTimelineCalendarDateKeys(dateKey, toDateKey) <= 0
+  );
+}
+
+export function formatTimelineCompactDateLabel(
+  dateKey: string,
+  locale: string = DEFAULT_TIMELINE_LOCALE,
+  timeZone?: string,
+): string {
+  const parsed = parseDateKey(dateKey);
+
+  if (!parsed) {
+    return dateKey;
+  }
+
+  const timestamp = Date.UTC(parsed.year, parsed.month - 1, parsed.day, 12);
+
+  return new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    timeZone,
+  }).format(new Date(timestamp));
+}
+
 export function parseTimelineDateTime(dateTime: string): number {
   return Date.parse(dateTime);
 }

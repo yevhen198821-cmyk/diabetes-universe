@@ -12,6 +12,7 @@ import {
   updateSemanticTimelineEventFromDraft,
 } from '../../../components/timeline/timeline-event-detail-model.ts';
 import { createTimelineSearchFilterModel } from '../../../components/timeline/timeline-search-filter-model.ts';
+import { createTestTimelineFilterOptions } from '../testing/create-test-timeline-filter-options.ts';
 import { deriveDashboardQuickAddBlocks } from '../../dashboard/dashboard-quick-add-integration-model.ts';
 import {
   setupIntegrationDom,
@@ -233,10 +234,15 @@ test('dashboard and timeline consumers receive semantic events after edit flow',
     const timelineFilter = createTimelineSearchFilterModel(
       semanticEvents,
       {
+        dateFilter: { preset: '30days' },
         filter: 'glucose',
         query: '',
       },
       presentationDependencies,
+      createTestTimelineFilterOptions({
+        referenceDate: new Date('2026-08-02T10:00:00.000Z'),
+        timeZone: 'UTC',
+      }),
     );
 
     assert.equal(dashboardBlocks.lastGlucose?.event.concentrationMmolPerL, 8.2);

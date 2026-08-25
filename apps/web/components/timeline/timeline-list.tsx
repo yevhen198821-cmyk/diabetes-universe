@@ -97,6 +97,27 @@ function TimelineFilteredEmptyState({
   );
 }
 
+function TimelinePeriodEmptyState({
+  labels,
+}: Pick<TimelineListProps, 'labels'>) {
+  return (
+    <section
+      aria-labelledby="timeline-period-empty-title"
+      className={frostedStatePanelClassName}
+    >
+      <h2
+        className="text-lg font-extrabold text-[#1e3a5f] dark:text-white"
+        id="timeline-period-empty-title"
+      >
+        {labels.periodEmpty.title}
+      </h2>
+      <p className="text-text-secondary mx-auto mt-2 max-w-sm text-sm">
+        {labels.periodEmpty.description}
+      </p>
+    </section>
+  );
+}
+
 function TimelineErrorState({
   errorMessage,
   labels,
@@ -137,6 +158,10 @@ export function TimelineList({
 
   if (model.status === 'empty') {
     return <TimelineEmptyState labels={labels} onAddEvent={onAddEvent} />;
+  }
+
+  if (model.status === 'period-empty') {
+    return <TimelinePeriodEmptyState labels={labels} />;
   }
 
   if (model.status === 'filtered-empty') {

@@ -2,17 +2,22 @@ import type {
   TimelineEventFilter,
   TimelineSearchFilterModel,
 } from './timeline-search-filter-model';
+import type { TimelineDateFilterSelection } from './timeline-date-filter-model';
 import type { TimelineUiLabels } from './timeline-ui-labels';
 import { formatTimelineToolbarResultLabel } from './timeline-ui-labels';
+import { TimelineDateFilterControl } from './timeline-date-filter-control';
 import { TimelineFilters } from './timeline-filters';
 import { TimelineSearch } from './timeline-search';
 import { frostedPanelClassName } from '../shared/app-page-background';
 
 interface TimelineToolbarProps {
+  readonly dateFilter: TimelineDateFilterSelection;
+  readonly dateFilterLabel: string;
   readonly filterLabels: Readonly<Record<TimelineEventFilter, string>>;
   readonly formatCount: (count: number) => string;
   readonly labels: TimelineUiLabels;
   readonly model: TimelineSearchFilterModel;
+  readonly onDateFilterChange: (selection: TimelineDateFilterSelection) => void;
   readonly onFilterChange: (filter: TimelineEventFilter) => void;
   readonly onQueryChange: (query: string) => void;
   readonly onReset: () => void;
@@ -20,10 +25,13 @@ interface TimelineToolbarProps {
 }
 
 export function TimelineToolbar({
+  dateFilter,
+  dateFilterLabel,
   filterLabels,
   formatCount,
   labels,
   model,
+  onDateFilterChange,
   onFilterChange,
   onQueryChange,
   onReset,
@@ -53,26 +61,38 @@ export function TimelineToolbar({
           onChange={onQueryChange}
           query={query}
         />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <TimelineDateFilterControl
+            activeLabel={dateFilterLabel}
+            ariaLabel={labels.dateFilter.ariaLabel}
+            labels={labels.dateFilter}
+            onChange={onDateFilterChange}
+            selection={dateFilter}
+          />
+          <p
+            aria-live="polite"
+            className="text-text-secondary text-sm sm:text-right"
+          >
+            {resultLabel}
+          </p>
+        </div>
         <TimelineFilters
           activeFilter={model.activeFilter}
           ariaLabel={labels.filters.ariaLabel}
           filterLabels={filterLabels}
           onChange={onFilterChange}
         />
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p aria-live="polite" className="text-text-secondary text-sm">
-            {resultLabel}
-          </p>
-          {model.hasActiveCriteria ? (
+        {model.hasActiveSearchOrCategoryCriteria ? (
+          <div className="flex justify-start">
             <button
-              className="focus-visible:outline-interactive-primary min-h-11 self-start rounded-xl border border-white/80 bg-white/70 px-4 text-sm font-semibold text-[#1e3a5f] shadow-sm backdrop-blur transition hover:border-teal-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 sm:self-auto dark:border-white/10 dark:bg-slate-900/70 dark:text-white dark:hover:border-teal-800"
+              className="focus-visible:outline-interactive-primary min-h-11 rounded-xl border border-white/80 bg-white/70 px-4 text-sm font-semibold text-[#1e3a5f] shadow-sm backdrop-blur transition hover:border-teal-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/10 dark:bg-slate-900/70 dark:text-white dark:hover:border-teal-800"
               onClick={onReset}
               type="button"
             >
               {labels.toolbar.reset}
             </button>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );
