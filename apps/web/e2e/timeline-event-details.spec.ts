@@ -66,7 +66,10 @@ test('timeline edit moves an event between Today and Yesterday groups', async ({
 
   await openEvent(page, /Open event: Breakfast/);
   await page.getByRole('button', { name: 'Edit' }).click();
-  await page.getByLabel('Date').fill('2026-08-01');
+  await page
+    .getByRole('dialog', { name: 'Edit event' })
+    .getByLabel('Date')
+    .fill('2026-08-01');
   await page.getByRole('button', { name: 'Save' }).click();
   await page
     .getByRole('button', { exact: true, name: 'Close details' })

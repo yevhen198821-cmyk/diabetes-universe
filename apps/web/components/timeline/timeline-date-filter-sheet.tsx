@@ -1,6 +1,7 @@
 'use client';
 
 import { useId, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import type {
   TimelineDateFilterPreset,
@@ -68,7 +69,11 @@ export function TimelineDateFilterSheet({
     onClose();
   };
 
-  return (
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
     <div className="fixed inset-0 z-[70] flex items-end justify-center sm:p-6">
       <button
         aria-label={labels.closeOverlay}
@@ -141,6 +146,7 @@ export function TimelineDateFilterSheet({
           {labels.apply}
         </button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
