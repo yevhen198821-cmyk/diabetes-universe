@@ -20,7 +20,10 @@ const previewEnv = {
 };
 
 test('preview diagnostics disabled outside preview runtime', () => {
-  assert.equal(isPreviewAuthDiagnosticsEnabled({ VERCEL_ENV: 'production' }), false);
+  assert.equal(
+    isPreviewAuthDiagnosticsEnabled({ VERCEL_ENV: 'production' }),
+    false,
+  );
   assert.equal(isPreviewAuthDiagnosticsEnabled(previewEnv), true);
 });
 
@@ -43,11 +46,17 @@ test('preview diagnostics report maps branch alias host mismatch safely', async 
 
     const report = await buildPreviewAuthDiagnosticsReport(request, previewEnv);
 
-    assert.equal(report.deployment.gitCommitSha, previewEnv.VERCEL_GIT_COMMIT_SHA);
+    assert.equal(
+      report.deployment.gitCommitSha,
+      previewEnv.VERCEL_GIT_COMMIT_SHA,
+    );
     assert.equal(report.hosts.hostMismatchVercelUrlVsBranchUrl, true);
     assert.equal(report.hosts.browserHostMatchesBranchUrl, true);
     assert.equal(report.hosts.browserHostMatchesVercelUrl, false);
-    assert.equal(report.hosts.configuredAuthBaseUrlHost, previewEnv.VERCEL_BRANCH_URL);
+    assert.equal(
+      report.hosts.configuredAuthBaseUrlHost,
+      previewEnv.VERCEL_BRANCH_URL,
+    );
     assert.equal(
       report.flowHints.likelyFailureCategory,
       'C_OR_UNAUTHENTICATED_NO_COOKIE',

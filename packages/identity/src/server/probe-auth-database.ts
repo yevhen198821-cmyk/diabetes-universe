@@ -30,7 +30,9 @@ export async function probeAuthDatabaseHealth(
 
     return {
       connectionOk: true,
-      authSchemaAccessible: Boolean(row?.session_table && row?.verification_table),
+      authSchemaAccessible: Boolean(
+        row?.session_table && row?.verification_table,
+      ),
       errorType: null,
       errorMessage: null,
     };

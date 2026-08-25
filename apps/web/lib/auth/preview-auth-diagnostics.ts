@@ -224,7 +224,9 @@ export async function buildPreviewAuthDiagnosticsReport(
   request: Request,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<PreviewAuthDiagnosticsReport> {
-  const requestHeaders = normalizeAuthRequestHeaders(new Headers(request.headers));
+  const requestHeaders = normalizeAuthRequestHeaders(
+    new Headers(request.headers),
+  );
   const browserHost =
     normalizeHost(requestHeaders.get('x-forwarded-host')) ??
     normalizeHost(requestHeaders.get('host'));
@@ -325,7 +327,9 @@ export async function buildPreviewAuthDiagnosticsReport(
   }
 
   const hostMismatchVercelUrlVsBranchUrl = Boolean(
-    vercelUrlHost && vercelBranchUrlHost && vercelUrlHost !== vercelBranchUrlHost,
+    vercelUrlHost &&
+    vercelBranchUrlHost &&
+    vercelUrlHost !== vercelBranchUrlHost,
   );
 
   const predictedMagicLinkOrigin = predictMagicLinkOrigin({
@@ -362,7 +366,9 @@ export async function buildPreviewAuthDiagnosticsReport(
         browserHost && vercelUrlHost && browserHost === vercelUrlHost,
       ),
       browserHostMatchesBranchUrl: Boolean(
-        browserHost && vercelBranchUrlHost && browserHost === vercelBranchUrlHost,
+        browserHost &&
+        vercelBranchUrlHost &&
+        browserHost === vercelBranchUrlHost,
       ),
       predictedMagicLinkOrigin,
     },
