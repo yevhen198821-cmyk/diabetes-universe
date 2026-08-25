@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   AuthConfigurationError,
   resolveAuthEnvironment,
+  resolveBetterAuthBaseUrlConfig,
   resolveSafeAuthCallbackPath,
 } from './auth-environment.ts';
 
@@ -78,6 +79,59 @@ test('preview deployments keep magic-link auth when production WebAuthn vars are
   assert.equal(environment.databaseMode, 'postgres');
 });
 
+test('preview deployments fall back to VERCEL_BRANCH_URL when VERCEL_URL is absent', () => {
+  const environment = resolveAuthEnvironment({
+    AUTH_DATABASE_MODE: 'postgres',
+    AUTH_EMAIL_FROM: 'auth@example.com',
+    BETTER_AUTH_SECRET: 'x'.repeat(32),
+    BETTER_AUTH_URL: 'https://production.example',
+    DATABASE_URL: 'postgres://user:pass@localhost:5432/app',
+    RESEND_API_KEY: 're_test_key',
+    VERCEL_BRANCH_URL: 'diabetes-universe-web-git-feature-resulto.vercel.app',
+    VERCEL_ENV: 'preview',
+  });
+
+  assert.equal(
+    environment.baseUrl,
+    'https://diabetes-universe-web-git-feature-resulto.vercel.app',
+  );
+});
+
+test('preview deployments expose dynamic Better Auth base URL config', () => {
+  const environment = resolveAuthEnvironment({
+    AUTH_DATABASE_MODE: 'postgres',
+    AUTH_EMAIL_FROM: 'auth@example.com',
+    BETTER_AUTH_SECRET: 'x'.repeat(32),
+    BETTER_AUTH_URL: 'https://production.example',
+    DATABASE_URL: 'postgres://user:pass@localhost:5432/app',
+    RESEND_API_KEY: 're_test_key',
+    VERCEL_ENV: 'preview',
+    VERCEL_URL: 'preview-host.vercel.app',
+  });
+
+  assert.deepEqual(
+    resolveBetterAuthBaseUrlConfig(environment, {
+      VERCEL_ENV: 'preview',
+      VERCEL_URL: 'preview-host.vercel.app',
+      BETTER_AUTH_URL: 'https://production.example',
+    }),
+    {
+      allowedHosts: ['preview-host.vercel.app', 'production.example'],
+      fallback: 'https://preview-host.vercel.app',
+      protocol: 'https',
+    },
+  );
+});
+
+test('non-preview deployments keep static Better Auth base URL config', () => {
+  const environment = resolveAuthEnvironment(baseEnv);
+
+  assert.equal(
+    resolveBetterAuthBaseUrlConfig(environment, baseEnv),
+    baseEnv.BETTER_AUTH_URL,
+  );
+});
+
 test('passkeys require both explicit origin and RP ID', () => {
   assert.throws(
     () =>
@@ -144,6 +198,14 @@ test('resolveSafeAuthCallbackPath rejects external redirects', () => {
     '/account',
   );
   assert.equal(resolveSafeAuthCallbackPath('/account'), '/account');
+  assert.equal(
+    resolveSafeAuthCallbackPath('/account/settings'),
+    '/account/settings',
+  );
+  assert.equal(
+    resolveSafeAuthCallbackPath('/account/security'),
+    '/account/security',
+  );
   assert.equal(
     resolveSafeAuthCallbackPath('/account/security/sessions'),
     '/account/security/sessions',

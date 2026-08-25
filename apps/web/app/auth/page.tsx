@@ -24,14 +24,14 @@ interface AuthPageProps {
 }
 
 export default async function AuthPage({ searchParams }: AuthPageProps) {
+  const params = await searchParams;
+  const callbackPath = resolveSafeAuthCallbackPath(params.callback);
   const principal = await getAuthenticatedPrincipal();
 
   if (principal) {
-    redirect('/account');
+    redirect(callbackPath);
   }
 
-  const params = await searchParams;
-  const callbackPath = resolveSafeAuthCallbackPath(params.callback);
   const isAuthAvailable = isWebAuthConfigured();
 
   return (

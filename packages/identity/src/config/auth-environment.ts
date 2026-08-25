@@ -2,7 +2,10 @@ import {
   AUTH_ALLOWED_CALLBACK_PATHS,
   type AuthAllowedCallbackPath,
 } from './auth-constants';
-import { assertProductionCapableEmailDelivery } from './auth-runtime-guards';
+import {
+  assertProductionCapableEmailDelivery,
+  isPreviewAuthDeployment,
+} from './auth-runtime-guards';
 
 export class AuthConfigurationError extends Error {
   constructor(message: string) {
@@ -12,6 +15,14 @@ export class AuthConfigurationError extends Error {
 }
 
 export type AuthDatabaseMode = 'postgres' | 'pglite';
+
+export interface BetterAuthDynamicBaseUrlConfig {
+  allowedHosts: string[];
+  readonly fallback: string;
+  readonly protocol: 'auto' | 'http' | 'https';
+}
+
+export type BetterAuthBaseUrlConfig = string | BetterAuthDynamicBaseUrlConfig;
 
 export interface AuthEnvironment {
   readonly appName: string;
@@ -70,15 +81,87 @@ function resolveDatabaseMode(env: NodeJS.ProcessEnv): AuthDatabaseMode {
   );
 }
 
+function normalizeDeploymentHost(
+  value: string | undefined,
+): string | undefined {
+  const trimmed = value?.trim();
+
+  if (!trimmed) {
+    return undefined;
+  }
+
+  if (trimmed.includes('://')) {
+    try {
+      return new URL(trimmed).host;
+    } catch {
+      return undefined;
+    }
+  }
+
+  return trimmed.split('/')[0]?.split(':')[0] || undefined;
+}
+
+function resolvePreviewDeploymentHost(
+  env: NodeJS.ProcessEnv,
+): string | undefined {
+  return (
+    normalizeDeploymentHost(env.VERCEL_URL) ??
+    normalizeDeploymentHost(env.VERCEL_BRANCH_URL)
+  );
+}
+
 function resolveAuthBaseUrl(env: NodeJS.ProcessEnv): string {
   const vercelEnv = env.VERCEL_ENV?.trim();
-  const vercelUrl = env.VERCEL_URL?.trim();
+  const deploymentHost = resolvePreviewDeploymentHost(env);
 
-  if (vercelEnv === 'preview' && vercelUrl) {
-    return `https://${vercelUrl}`;
+  if (vercelEnv === 'preview' && deploymentHost) {
+    return `https://${deploymentHost}`;
   }
 
   return readRequiredString('BETTER_AUTH_URL', env.BETTER_AUTH_URL);
+}
+
+function collectPreviewAllowedHosts(
+  baseUrl: string,
+  env: NodeJS.ProcessEnv,
+): string[] {
+  const hosts = new Set<string>();
+
+  for (const candidate of [
+    env.VERCEL_URL,
+    env.VERCEL_BRANCH_URL,
+    baseUrl,
+    env.BETTER_AUTH_URL,
+  ]) {
+    const host = normalizeDeploymentHost(candidate);
+
+    if (host) {
+      hosts.add(host);
+    }
+  }
+
+  return [...hosts];
+}
+
+export function resolveBetterAuthBaseUrlConfig(
+  environment: AuthEnvironment,
+  env: NodeJS.ProcessEnv = process.env,
+): BetterAuthBaseUrlConfig {
+  if (!isPreviewAuthDeployment(env)) {
+    return environment.baseUrl;
+  }
+
+  const allowedHosts = collectPreviewAllowedHosts(environment.baseUrl, env);
+
+  if (allowedHosts.length === 0) {
+    return environment.baseUrl;
+  }
+
+  return {
+    allowedHosts: [...allowedHosts],
+    fallback: environment.baseUrl,
+    protocol: environment.baseUrl.startsWith('http://') ? 'http' : 'https',
+  };
 }
 
 function resolveTrustedOrigins(
@@ -90,6 +173,12 @@ function resolveTrustedOrigins(
     .filter(Boolean);
 
   const origins = new Set<string>([baseUrl]);
+
+  if (isPreviewAuthDeployment(env)) {
+    for (const host of collectPreviewAllowedHosts(baseUrl, env)) {
+      origins.add(`https://${host}`);
+    }
+  }
 
   if (configured) {
     for (const origin of configured) {

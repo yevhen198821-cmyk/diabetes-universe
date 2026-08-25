@@ -17,3 +17,5 @@ export default async function AccountLayout({ children }: AccountLayoutProps) {
 
   return <ProfileShell>{children}</ProfileShell>;
 }
+
+export const dynamic = 'force-dynamic';
