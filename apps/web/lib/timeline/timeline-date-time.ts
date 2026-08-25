@@ -217,6 +217,46 @@ export function formatTimelineDisplayTime(
   }).format(new Date(timestamp));
 }
 
+export function getTimelineMinutesFromMidnight(
+  dateTime: string,
+  timeZone?: string,
+): number | null {
+  const timestamp = parseTimelineDateTime(dateTime);
+
+  if (Number.isNaN(timestamp)) {
+    return null;
+  }
+
+  const parts = new Intl.DateTimeFormat('en-US-u-ca-gregory-nu-latn', {
+    hour: '2-digit',
+    hour12: false,
+    minute: '2-digit',
+    timeZone,
+  }).formatToParts(new Date(timestamp));
+  const hourPart = parts.find((part) => part.type === 'hour')?.value;
+  const minutePart = parts.find((part) => part.type === 'minute')?.value;
+
+  if (!hourPart || !minutePart) {
+    return null;
+  }
+
+  const hours = Number(hourPart);
+  const minutes = Number(minutePart);
+
+  if (
+    !Number.isInteger(hours) ||
+    !Number.isInteger(minutes) ||
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
+    return null;
+  }
+
+  return hours * 60 + minutes;
+}
+
 export function getTimelineCalendarDateKey(
   dateTime: string,
   timeZone?: string,

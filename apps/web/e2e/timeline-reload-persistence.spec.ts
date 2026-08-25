@@ -35,7 +35,8 @@ test('timeline note persists across page reload', async ({ page }) => {
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await page.getByRole('button', { name: 'Add event' }).click();
+  await page.setViewportSize({ height: 844, width: 390 });
+  await page.locator('#timeline-mobile-quick-add-fab').click();
   await page.getByRole('button', { name: 'Заметка. Добавить запись' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Добавить заметку' }),
@@ -60,7 +61,8 @@ test('deleted timeline note remains deleted across page reload', async ({
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await page.getByRole('button', { name: 'Add event' }).click();
+  await page.setViewportSize({ height: 844, width: 390 });
+  await page.locator('#timeline-mobile-quick-add-fab').click();
   await page.getByRole('button', { name: 'Заметка. Добавить запись' }).click();
   await page.getByLabel('Текст заметки').fill(noteText);
   await page.getByRole('button', { name: 'Сохранить' }).click();

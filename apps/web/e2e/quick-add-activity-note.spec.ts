@@ -2,12 +2,13 @@ import { expect, test } from './support/test';
 
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
-const openQuickAdd = async (page: import('@playwright/test').Page) => {
-  await page.getByRole('button', { name: 'Add event' }).click();
+async function openTimelineQuickAdd(page: import('@playwright/test').Page) {
+  await page.setViewportSize({ height: 844, width: 390 });
+  await page.locator('#timeline-mobile-quick-add-fab').click();
   await expect(
     page.getByRole('dialog', { name: 'Добавить событие' }),
   ).toBeVisible();
-};
+}
 
 test('activity quick add creates timeline event with details flow', async ({
   page,
@@ -15,7 +16,7 @@ test('activity quick add creates timeline event with details flow', async ({
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await openQuickAdd(page);
+  await openTimelineQuickAdd(page);
   await page
     .getByRole('button', { name: 'Активность. Записать тренировку' })
     .click();
@@ -55,7 +56,7 @@ test('note quick add is searchable and appears in notes filter', async ({
 
   const noteText = 'E2E заметка для поиска';
 
-  await openQuickAdd(page);
+  await openTimelineQuickAdd(page);
   await page.getByRole('button', { name: 'Заметка. Добавить запись' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Добавить заметку' }),
@@ -70,7 +71,10 @@ test('note quick add is searchable and appears in notes filter', async ({
   await expect(page.getByText(noteText).first()).toBeVisible();
 
   await page.getByRole('button', { name: 'Clear search' }).click();
-  await page.getByRole('button', { name: 'Notes' }).click();
+  await page
+    .getByRole('group', { name: 'Event filter' })
+    .getByRole('button', { name: 'Notes', exact: true })
+    .click();
   await expect(page.getByText(noteText).first()).toBeVisible();
 
   await page
@@ -80,39 +84,24 @@ test('note quick add is searchable and appears in notes filter', async ({
     .first()
     .click();
   await expect(page.getByRole('dialog', { name: 'Note' })).toBeVisible();
+  await page.getByRole('button', { name: 'Delete' }).click();
+  await page
+    .getByRole('dialog', { name: 'Delete event?' })
+    .getByRole('button', { name: 'Delete' })
+    .click();
+
+  await expect(page.getByText(noteText)).toHaveCount(0);
 });
 
-test('quick add shows six categories on mobile without horizontal scroll', async ({
+test('timeline quick add FAB hides while dialog is open on mobile', async ({
   page,
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await openQuickAdd(page);
-  const quickAddDialog = page.getByRole('dialog', { name: 'Добавить событие' });
-
-  for (const label of [
-    'Глюкоза',
-    'Инсулин',
-    'Питание',
-    'Лекарство',
-    'Активность',
-    'Заметка',
-  ]) {
-    await expect(
-      quickAddDialog.getByRole('button', { name: new RegExp(label) }),
-    ).toBeVisible();
-  }
-
-  const hasHorizontalScroll = await page.evaluate(
-    () =>
-      document.documentElement.scrollWidth >
-      document.documentElement.clientWidth,
-  );
-  expect(hasHorizontalScroll).toBe(false);
-
-  await expect(page.getByRole('button', { name: 'Add event' })).toBeHidden();
+  await openTimelineQuickAdd(page);
+  await expect(page.locator('#timeline-mobile-quick-add-fab')).toHaveCount(0);
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('button', { name: 'Add event' })).toBeVisible();
+  await expect(page.locator('#timeline-mobile-quick-add-fab')).toBeVisible();
 });

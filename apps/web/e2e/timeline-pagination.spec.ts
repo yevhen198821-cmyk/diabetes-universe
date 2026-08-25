@@ -5,37 +5,36 @@ import { waitForApplicationReady } from './support/wait-for-application-ready';
 const eventCards = (page: Page) =>
   page.getByRole('button', { name: /Open event/ });
 
-test('timeline load more reveals the next page and then disappears', async ({
+async function openTimelineQuickAdd(page: Page) {
+  await page.setViewportSize({ height: 844, width: 390 });
+  await page.locator('#timeline-mobile-quick-add-fab').click();
+}
+
+test('timeline toolbar keeps filtered totals for the active window', async ({
   page,
 }) => {
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await expect(eventCards(page)).toHaveCount(20);
-  await expect(page.getByText('Remaining: 11')).toBeVisible();
-
-  await page.getByRole('button', { name: 'Load more' }).click();
-
-  await expect(eventCards(page)).toHaveCount(31);
-  await expect(page.getByRole('button', { name: 'Load more' })).toBeHidden();
+  await expect(page.getByText('31 events')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Events of the day', exact: true }),
+  ).toBeVisible();
 });
 
-test('timeline search paginates all matching results', async ({ page }) => {
+test('timeline search keeps composable filtering with day-scoped list', async ({
+  page,
+}) => {
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await page.getByLabel('Search events').fill('История');
+  await page.getByLabel('Search events').fill('NovoRapid');
 
-  await expect(page.getByText('24 events')).toBeVisible();
-  await expect(eventCards(page)).toHaveCount(20);
-
-  await page.getByRole('button', { name: 'Load more' }).click();
-
-  await expect(eventCards(page)).toHaveCount(24);
-  await expect(page.getByRole('button', { name: 'Load more' })).toBeHidden();
+  await expect(page.getByText('1 events')).toBeVisible();
+  await expect(eventCards(page).first()).toBeVisible();
 });
 
-test('timeline filter pagination resets visible count with criteria reset', async ({
+test('timeline filter reset restores default toolbar totals', async ({
   page,
 }) => {
   await page.goto('/timeline');
@@ -44,19 +43,16 @@ test('timeline filter pagination resets visible count with criteria reset', asyn
   await page.getByRole('button', { name: 'Notes' }).click();
 
   await expect(page.getByText('25 events')).toBeVisible();
-  await expect(eventCards(page)).toHaveCount(20);
 
-  await page.getByRole('button', { name: 'Load more' }).click();
-  await expect(eventCards(page)).toHaveCount(25);
-
-  await page.getByRole('button', { name: 'Clear filters' }).click();
+  await page
+    .getByLabel('Timeline search and filters')
+    .getByRole('button', { name: 'Clear filters' })
+    .click();
 
   await expect(page.getByText('31 events')).toBeVisible();
-  await expect(eventCards(page)).toHaveCount(20);
-  await expect(page.getByRole('button', { name: 'Load more' })).toBeVisible();
 });
 
-test('timeline pagination recalculates after delete and keeps new add on top', async ({
+test('timeline delete and add update the selected day list', async ({
   page,
 }) => {
   await page.goto('/timeline');
@@ -69,10 +65,9 @@ test('timeline pagination recalculates after delete and keeps new add on top', a
     .getByRole('button', { name: 'Delete' })
     .click();
 
-  await expect(page.getByText('Remaining: 10')).toBeVisible();
-  await expect(eventCards(page)).toHaveCount(20);
+  await expect(page.getByText('30 events')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Add event' }).click();
+  await openTimelineQuickAdd(page);
   await page
     .getByRole('button', { name: 'Глюкоза. Записать уровень сахара' })
     .click();
@@ -85,55 +80,31 @@ test('timeline pagination recalculates after delete and keeps new add on top', a
   await timePicker.getByRole('button', { name: 'Готово' }).click();
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
-  await expect(eventCards(page).first()).toContainText('8.8 mmol/L');
-  await expect(page.getByText('Remaining: 11')).toBeVisible();
+  await expect(page.getByText('8.8 mmol/L').first()).toBeVisible();
+  await expect(page.getByText('31 events')).toBeVisible();
 });
 
-test('timeline load more is usable on mobile with detached right FAB', async ({
+test('timeline load more control stays hidden for day-scoped list without repository history', async ({
   page,
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  const loadMore = page.getByRole('button', { name: 'Load more' });
   const fab = page.locator('#timeline-mobile-quick-add-fab');
 
-  await expect(loadMore).toBeVisible();
   await expect(fab).toBeVisible();
-  await loadMore.scrollIntoViewIfNeeded();
 
   const layout = await page.evaluate(() => {
-    const navInner = document
-      .getElementById('dashboard-mobile-nav')
-      ?.querySelector('.pointer-events-auto');
+    const nav = document.getElementById('dashboard-mobile-nav');
     const fabElement = document.getElementById('timeline-mobile-quick-add-fab');
-    const navRect = navInner?.getBoundingClientRect();
-    const fabRect = fabElement?.getBoundingClientRect();
 
     return {
-      fabCenterX: fabRect ? fabRect.left + fabRect.width / 2 : null,
-      fabBottomGapAboveNav:
-        navRect && fabRect ? navRect.top - fabRect.bottom : null,
-      fabInNav: fabElement
-        ? document.getElementById('dashboard-mobile-nav')?.contains(fabElement)
-        : null,
-      navInnerHeight: navRect?.height ?? null,
-      viewportCenterX: window.innerWidth / 2,
+      fabInNav: fabElement ? nav?.contains(fabElement) : null,
     };
   });
 
-  expect(layout.fabInNav).toBe(false);
-  expect(layout.fabCenterX).not.toBeNull();
-  expect(layout.fabCenterX).toBeGreaterThan(layout.viewportCenterX);
-  expect(layout.navInnerHeight).not.toBeNull();
-  expect(layout.fabBottomGapAboveNav).not.toBeNull();
-  expect(layout.fabBottomGapAboveNav ?? 0).toBeGreaterThan(8);
-  expect(layout.fabBottomGapAboveNav ?? 0).toBeLessThan(24);
-
-  await loadMore.click();
-  await expect(eventCards(page)).toHaveCount(31);
-  await expect(page.getByRole('button', { name: 'Load more' })).toBeHidden();
+  expect(layout.fabInNav).toBe(true);
 
   const hasHorizontalScroll = await page.evaluate(
     () =>

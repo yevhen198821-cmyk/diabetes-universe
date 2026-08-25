@@ -97,6 +97,25 @@ function TimelineFilteredEmptyState({
   );
 }
 
+function TimelineDayEmptyState({ labels }: Pick<TimelineListProps, 'labels'>) {
+  return (
+    <section
+      aria-labelledby="timeline-day-empty-title"
+      className={frostedStatePanelClassName}
+    >
+      <h2
+        className="text-lg font-extrabold text-[#1e3a5f] dark:text-white"
+        id="timeline-day-empty-title"
+      >
+        {labels.dayEmpty.title}
+      </h2>
+      <p className="text-text-secondary mx-auto mt-2 max-w-sm text-sm">
+        {labels.dayEmpty.description}
+      </p>
+    </section>
+  );
+}
+
 function TimelinePeriodEmptyState({
   labels,
 }: Pick<TimelineListProps, 'labels'>) {
@@ -164,6 +183,10 @@ export function TimelineList({
     return <TimelinePeriodEmptyState labels={labels} />;
   }
 
+  if (model.status === 'day-empty') {
+    return <TimelineDayEmptyState labels={labels} />;
+  }
+
   if (model.status === 'filtered-empty') {
     return (
       <TimelineFilteredEmptyState
@@ -185,67 +208,83 @@ export function TimelineList({
       className="min-w-0 space-y-8"
       id="timeline-events-list"
     >
-      {model.groups.map((group) => {
-        const groupTitleId = `${group.key}-title`;
+      {model.periodGroups.length > 0
+        ? model.periodGroups.map((group) => {
+            const groupTitleId = `timeline-period-${group.key}-title`;
 
-        return (
-          <section
-            aria-labelledby={groupTitleId}
-            className="min-w-0"
-            key={group.key}
-          >
-            <div className="mb-4 flex items-center gap-3">
-              <h2
-                className="shrink-0 text-sm font-extrabold tracking-wide text-[#1e3a5f]/75 uppercase dark:text-slate-300"
-                id={groupTitleId}
+            return (
+              <section
+                aria-labelledby={groupTitleId}
+                className="min-w-0"
+                key={group.key}
               >
-                {group.label}
-              </h2>
-              <div
-                aria-hidden="true"
-                className="h-px flex-1 bg-gradient-to-r from-teal-300/60 via-violet-300/40 to-transparent"
-              />
-            </div>
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="min-w-0 shrink-0">
+                    <h2
+                      className="text-sm font-extrabold tracking-wide text-[#1e3a5f]/75 uppercase dark:text-slate-300"
+                      id={groupTitleId}
+                    >
+                      {group.label}
+                    </h2>
+                    <p className="text-text-secondary mt-0.5 text-xs tabular-nums">
+                      {group.timeRangeLabel}
+                    </p>
+                  </div>
+                  <div
+                    aria-hidden="true"
+                    className="h-px flex-1 bg-gradient-to-r from-teal-300/60 via-violet-300/40 to-transparent"
+                  />
+                  <p className="text-text-secondary shrink-0 text-xs font-semibold">
+                    {group.eventCountLabel}
+                  </p>
+                </div>
 
-            <ul className="space-y-2.5">
-              {group.events.map((event, index) => {
-                const eventCardProps = mapTimelineEventToCard(
-                  event,
-                  presentationDependencies,
-                );
+                <ul className="space-y-2.5">
+                  {group.events.map((event, index) => {
+                    const eventCardProps = mapTimelineEventToCard(
+                      event,
+                      presentationDependencies,
+                    );
 
-                return (
-                  <li className="relative pl-10 sm:pl-12" key={event.id}>
-                    <div
-                      aria-hidden="true"
-                      className={`absolute top-0 left-[15px] w-0.5 bg-gradient-to-b from-teal-300/70 via-violet-300/45 to-orange-300/35 sm:left-[17px] ${
-                        index === group.events.length - 1 ? 'h-7' : 'bottom-0'
-                      }`}
-                    />
-                    <EventCard
-                      {...eventCardProps}
-                      appearance="vibrant"
-                      ariaLabel={`${presentationDependencies.labels.openEventAriaPrefix}: ${[
-                        eventCardProps.title,
-                        [eventCardProps.value, eventCardProps.unit]
-                          .filter(Boolean)
-                          .join(' '),
-                        eventCardProps.time,
-                      ]
-                        .filter(Boolean)
-                        .join(', ')}`}
-                      onClick={(clickEvent) => {
-                        onOpenEvent(event.id, clickEvent.currentTarget);
-                      }}
-                      variant="compact"
-                    />
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        );
-      })}
+                    return (
+                      <li
+                        className="relative pl-10 sm:pl-12"
+                        data-timeline-event-id={event.id}
+                        key={event.id}
+                      >
+                        <div
+                          aria-hidden="true"
+                          className={`absolute top-0 left-[15px] w-0.5 bg-gradient-to-b from-teal-300/70 via-violet-300/45 to-orange-300/35 sm:left-[17px] ${
+                            index === group.events.length - 1
+                              ? 'h-7'
+                              : 'bottom-0'
+                          }`}
+                        />
+                        <EventCard
+                          {...eventCardProps}
+                          appearance="vibrant"
+                          ariaLabel={`${presentationDependencies.labels.openEventAriaPrefix}: ${[
+                            eventCardProps.title,
+                            [eventCardProps.value, eventCardProps.unit]
+                              .filter(Boolean)
+                              .join(' '),
+                            eventCardProps.time,
+                          ]
+                            .filter(Boolean)
+                            .join(', ')}`}
+                          onClick={(clickEvent) => {
+                            onOpenEvent(event.id, clickEvent.currentTarget);
+                          }}
+                          variant="compact"
+                        />
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            );
+          })
+        : null}
     </div>
   );
 }

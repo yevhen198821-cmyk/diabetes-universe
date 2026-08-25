@@ -148,7 +148,7 @@ test('timeline date filter keeps mobile layout without horizontal overflow', asy
   expect(hasHorizontalScroll).toBe(false);
 
   const fabBox = await page
-    .getByRole('button', { name: 'Add event' })
+    .locator('#timeline-mobile-quick-add-fab')
     .boundingBox();
 
   expect(fabBox).not.toBeNull();

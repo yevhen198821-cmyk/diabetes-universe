@@ -74,7 +74,8 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await page.getByRole('link', { name: 'All events', exact: true }).click();
   await waitForApplicationReady(page);
 
-  await page.getByRole('button', { name: 'Add event' }).click();
+  await page.setViewportSize({ height: 844, width: 390 });
+  await page.locator('#timeline-mobile-quick-add-fab').click();
   await page
     .getByRole('button', { name: 'Лекарство. Записать приём препарата' })
     .click();

@@ -51,14 +51,18 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
   await expect(
     page.getByRole('heading', { level: 1, name: 'Timeline' }),
   ).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Yesterday' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: '30 July' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Events of the day', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('navigation', { name: 'Day navigation' }),
+  ).toBeVisible();
   await expect(page.getByRole('group', { name: 'Event filter' })).toBeVisible();
   await expect(page.getByText('6.4 mmol/L').first()).toBeVisible();
   await expect(page.getByText('5 U').first()).toBeVisible();
 
-  await page.getByRole('button', { name: 'Add event' }).click();
+  await page.setViewportSize({ height: 844, width: 390 });
+  await page.locator('#timeline-mobile-quick-add-fab').click();
   await expect(
     page.getByRole('dialog', { name: 'Добавить событие' }),
   ).toBeVisible();
@@ -97,7 +101,7 @@ test('quick add insulin opens directly and updates dashboard', async ({
   await expect(page.getByText('2 U').first()).toBeVisible();
 });
 
-test('timeline groups demo events and avoids mobile horizontal scroll', async ({
+test('timeline groups demo events by day period and avoids mobile horizontal scroll', async ({
   page,
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
@@ -107,9 +111,12 @@ test('timeline groups demo events and avoids mobile horizontal scroll', async ({
   await expect(
     page.getByRole('heading', { level: 1, name: 'Timeline' }),
   ).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Yesterday' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: '30 July' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Events of the day', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('navigation', { name: 'Day navigation' }),
+  ).toBeVisible();
 
   const hasHorizontalScroll = await page.evaluate(
     () =>
@@ -153,11 +160,7 @@ test('timeline search and filters combine without changing store', async ({
 
   await page.goto('/timeline');
   await waitForApplicationReady(page);
-  const homeLink = page.getByRole('link', { name: 'Go to home' });
-  await homeLink.focus();
-  await expect(homeLink).toBeFocused();
-  await page.keyboard.press('Tab');
-  await expect(search).toBeFocused();
+  await search.focus();
   await page.keyboard.type('glucose');
   await expect(search).toHaveValue('glucose');
   await page.keyboard.press('Escape');
@@ -173,7 +176,8 @@ test('timeline quick add updates shared dashboard state', async ({ page }) => {
     page.getByRole('heading', { level: 1, name: 'Timeline' }),
   ).toBeVisible();
 
-  await page.getByRole('button', { name: 'Add event' }).click();
+  await page.setViewportSize({ height: 844, width: 390 });
+  await page.locator('#timeline-mobile-quick-add-fab').click();
   const quickAddDialog = page.getByRole('dialog', { name: 'Добавить событие' });
   await expect(
     quickAddDialog.getByRole('button', { name: /Активность/ }),

@@ -158,16 +158,27 @@ test('header keeps approved brand logo with wordmark and account affordance', ()
   assert.doesNotMatch(headerSource, /aria-label=\{viewModel\.addEventLabel\}/);
 });
 
-test('mobile navigation links only to real routes without embedded quick-add FAB', () => {
+test('mobile navigation links only to real routes and keeps home layout without FAB', () => {
   assert.match(mobileNavSource, /href="\/"/);
   assert.match(mobileNavSource, /href="\/timeline"/);
   assert.match(mobileNavSource, /href="\/account"/);
   assert.match(mobileNavSource, /grid-cols-3/);
+  assert.match(mobileNavSource, /grid-cols-4/);
+  assert.match(
+    mobileNavSource,
+    /showQuickAddFab \? 'grid-cols-4' : 'grid-cols-3'/,
+  );
   assert.match(mobileNavSource, /min-h-11/);
-  assert.doesNotMatch(mobileNavSource, /<Plus/);
-  assert.doesNotMatch(mobileNavSource, /showQuickAddFab/);
   assert.doesNotMatch(mobileNavSource, /href="\/analytics"/);
   assert.doesNotMatch(mobileNavSource, /Anna/);
+
+  const homeRootSource = readFileSync(
+    fileURLToPath(new URL('./dashboard-root.tsx', import.meta.url)),
+    'utf8',
+  );
+
+  assert.match(homeRootSource, /<DashboardMobileNav \/>/);
+  assert.doesNotMatch(homeRootSource, /showQuickAddFab/);
 });
 
 test('home shell keeps airy light canvas and dark-compatible ambient backdrop', () => {

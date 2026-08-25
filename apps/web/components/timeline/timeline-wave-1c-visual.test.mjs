@@ -28,7 +28,7 @@ test('timeline shell reuses the home page colorful backdrop', () => {
   assert.match(shellSource, /activeTab="timeline"/);
 });
 
-test('timeline mobile quick add FAB is detached from bottom nav on the right', () => {
+test('timeline mobile quick add FAB is embedded in bottom navigation', () => {
   const navLayoutSource = readFileSync(
     fileURLToPath(
       new URL('../dashboard/dashboard-mobile-nav-layout.ts', import.meta.url),
@@ -41,32 +41,30 @@ test('timeline mobile quick add FAB is detached from bottom nav on the right', (
     ),
     'utf8',
   );
-  const fabSource = readFileSync(
-    fileURLToPath(
-      new URL('./timeline-mobile-quick-add-fab.tsx', import.meta.url),
-    ),
-    'utf8',
-  );
 
   assert.match(navLayoutSource, /TIMELINE_MOBILE_QUICK_ADD_FAB_SIZE = '3rem'/);
   assert.match(navLayoutSource, /size-12/);
-  assert.match(navLayoutSource, /0\.9375rem/);
-  assert.match(navLayoutSource, /3\.75rem\+0\.9375rem/);
-  assert.match(navLayoutSource, /timelineMobileQuickAddFabPositionClassName/);
-  assert.match(
-    navLayoutSource,
-    /right-\[max\(1rem,env\(safe-area-inset-right\)\)\]/,
-  );
   assert.match(navLayoutSource, /TIMELINE_MOBILE_QUICK_ADD_FAB_ICON_SIZE = 20/);
-  assert.doesNotMatch(mobileNavSource, /<Plus/);
-  assert.doesNotMatch(mobileNavSource, /showQuickAddFab/);
-  assert.match(fabSource, /timelineMobileQuickAddFabPositionClassName/);
-  assert.match(shellSource, /TimelineMobileQuickAddFab/);
-  assert.doesNotMatch(shellSource, /showQuickAddFab/);
+  assert.doesNotMatch(
+    navLayoutSource,
+    /timelineMobileQuickAddFabPositionClassName/,
+  );
+  assert.match(mobileNavSource, /<Plus/);
+  assert.match(mobileNavSource, /showQuickAddFab/);
+  assert.match(mobileNavSource, /grid-cols-4/);
+  assert.match(shellSource, /showQuickAddFab/);
+  assert.doesNotMatch(shellSource, /TimelineMobileQuickAddFab/);
 });
 
-test('timeline list uses vibrant frosted event cards', () => {
+test('timeline shell renders events of the day and day navigation', () => {
+  assert.match(shellSource, /TimelineDayNavigation/);
+  assert.match(shellSource, /TimelineEventsOfDayMap/);
+  assert.match(shellSource, /createTimelineDayPeriodListModel/);
+});
+
+test('timeline list uses vibrant frosted event cards and day period groups', () => {
   assert.match(listSource, /frostedPanelClassName/);
   assert.match(listSource, /appearance="vibrant"/);
+  assert.match(listSource, /periodGroups/);
   assert.match(toolbarSource, /frostedPanelClassName/);
 });

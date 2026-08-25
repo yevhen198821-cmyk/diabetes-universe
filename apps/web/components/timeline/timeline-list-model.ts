@@ -7,6 +7,15 @@ import {
   getTimelineCalendarDateKey,
 } from '../../lib/timeline/timeline-date-time';
 import type { TimelineStoreStatus } from '../../lib/timeline/timeline-store';
+import {
+  groupTimelineEventsByDayPeriod,
+  resolveTimelineDayPeriodLabel,
+  resolveTimelineDayPeriodTimeRangeLabel,
+  type TimelineDayPeriodGroup,
+  type TimelineDayPeriodKey,
+  type TimelineDayPeriodLabels,
+  type TimelineDayPeriodTimeRangeLabels,
+} from './timeline-day-period-model';
 
 export interface TimelineListGroup {
   readonly dateKey: string;
@@ -15,11 +24,28 @@ export interface TimelineListGroup {
   readonly label: string;
 }
 
+export interface TimelineDayPeriodListGroup {
+  readonly eventCount: number;
+  readonly eventCountLabel: string;
+  readonly events: readonly SemanticTimelineEvent[];
+  readonly key: TimelineDayPeriodKey;
+  readonly label: string;
+  readonly periodKey: TimelineDayPeriodKey;
+  readonly timeRangeLabel: string;
+}
+
 export interface TimelineListModel {
   readonly errorMessage?: string;
   readonly groups: readonly TimelineListGroup[];
+  readonly periodGroups: readonly TimelineDayPeriodListGroup[];
   readonly status:
-    'empty' | 'error' | 'filtered-empty' | 'loading' | 'period-empty' | 'ready';
+    | 'day-empty'
+    | 'empty'
+    | 'error'
+    | 'filtered-empty'
+    | 'loading'
+    | 'period-empty'
+    | 'ready';
   readonly totalEventCount: number;
 }
 
@@ -157,6 +183,7 @@ export function createTimelineListModel({
   if (status === 'loading') {
     return {
       groups: [],
+      periodGroups: [],
       status: 'loading',
       totalEventCount: 0,
     };
@@ -166,6 +193,7 @@ export function createTimelineListModel({
     return {
       errorMessage: error?.trim() || defaultErrorMessage,
       groups: [],
+      periodGroups: [],
       status: 'error',
       totalEventCount: 0,
     };
@@ -178,6 +206,7 @@ export function createTimelineListModel({
   ) {
     return {
       groups: [],
+      periodGroups: [],
       status: 'period-empty',
       totalEventCount: 0,
     };
@@ -190,6 +219,7 @@ export function createTimelineListModel({
   ) {
     return {
       groups: [],
+      periodGroups: [],
       status: 'filtered-empty',
       totalEventCount: 0,
     };
@@ -198,6 +228,7 @@ export function createTimelineListModel({
   if (events.length === 0) {
     return {
       groups: [],
+      periodGroups: [],
       status: 'empty',
       totalEventCount: 0,
     };
@@ -212,7 +243,138 @@ export function createTimelineListModel({
       timeZone,
       groupLabels,
     ),
+    periodGroups: [],
     status: 'ready',
     totalEventCount: events.length,
+  };
+}
+
+export interface TimelineDayPeriodListModelInput {
+  readonly defaultErrorMessage: string;
+  readonly dayPeriodLabels: TimelineDayPeriodLabels;
+  readonly dayPeriodTimeRangeLabels: TimelineDayPeriodTimeRangeLabels;
+  readonly error?: string;
+  readonly events: readonly SemanticTimelineEvent[];
+  readonly formatPeriodEventCount: (count: number) => string;
+  readonly hasActiveSearchOrCategoryCriteria?: boolean;
+  readonly hasEventsInDateRange?: boolean;
+  readonly hasEventsOnOtherDaysInRange?: boolean;
+  readonly status: TimelineStoreStatus;
+  readonly timeZone?: string;
+  readonly totalSourceEventCount?: number;
+}
+
+export function createTimelineDayPeriodListModel({
+  defaultErrorMessage,
+  dayPeriodLabels,
+  dayPeriodTimeRangeLabels,
+  error,
+  events,
+  formatPeriodEventCount,
+  hasActiveSearchOrCategoryCriteria = false,
+  hasEventsInDateRange = true,
+  hasEventsOnOtherDaysInRange = false,
+  status,
+  timeZone,
+  totalSourceEventCount = events.length,
+}: TimelineDayPeriodListModelInput): TimelineListModel {
+  if (status === 'loading') {
+    return {
+      groups: [],
+      periodGroups: [],
+      status: 'loading',
+      totalEventCount: 0,
+    };
+  }
+
+  if (status === 'error') {
+    return {
+      errorMessage: error?.trim() || defaultErrorMessage,
+      groups: [],
+      periodGroups: [],
+      status: 'error',
+      totalEventCount: 0,
+    };
+  }
+
+  if (
+    events.length === 0 &&
+    !hasEventsInDateRange &&
+    totalSourceEventCount > 0
+  ) {
+    return {
+      groups: [],
+      periodGroups: [],
+      status: 'period-empty',
+      totalEventCount: 0,
+    };
+  }
+
+  if (
+    events.length === 0 &&
+    hasActiveSearchOrCategoryCriteria &&
+    hasEventsInDateRange
+  ) {
+    return {
+      groups: [],
+      periodGroups: [],
+      status: 'filtered-empty',
+      totalEventCount: 0,
+    };
+  }
+
+  if (events.length === 0 && hasEventsOnOtherDaysInRange) {
+    return {
+      groups: [],
+      periodGroups: [],
+      status: 'day-empty',
+      totalEventCount: 0,
+    };
+  }
+
+  if (events.length === 0) {
+    return {
+      groups: [],
+      periodGroups: [],
+      status: 'empty',
+      totalEventCount: 0,
+    };
+  }
+
+  const periodGroups = groupTimelineEventsByDayPeriod(events, timeZone).map(
+    (group) =>
+      createDayPeriodListGroup(
+        group,
+        dayPeriodLabels,
+        dayPeriodTimeRangeLabels,
+        formatPeriodEventCount,
+      ),
+  );
+
+  return {
+    groups: [],
+    periodGroups,
+    status: 'ready',
+    totalEventCount: events.length,
+  };
+}
+
+function createDayPeriodListGroup(
+  group: TimelineDayPeriodGroup,
+  dayPeriodLabels: TimelineDayPeriodLabels,
+  dayPeriodTimeRangeLabels: TimelineDayPeriodTimeRangeLabels,
+  formatPeriodEventCount: (count: number) => string,
+): TimelineDayPeriodListGroup {
+  return {
+    eventCount: group.eventCount,
+    eventCountLabel: formatPeriodEventCount(group.eventCount),
+    events: group.events,
+    key: group.key,
+    label: resolveTimelineDayPeriodLabel(group.key, dayPeriodLabels),
+    periodKey: group.key,
+    timeRangeLabel: resolveTimelineDayPeriodTimeRangeLabel(
+      group.key,
+      dayPeriodTimeRangeLabels,
+    ),
   };
 }

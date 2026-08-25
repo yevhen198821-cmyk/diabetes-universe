@@ -67,6 +67,41 @@ export interface TimelineUiLabels {
     readonly sheetTitle: string;
     readonly today: string;
   }>;
+  readonly dayEmpty: Readonly<{
+    readonly description: string;
+    readonly title: string;
+  }>;
+  readonly dayNavigation: Readonly<{
+    readonly ariaLabel: string;
+    readonly nextDay: string;
+    readonly previousDay: string;
+    readonly todayPrefix: string;
+  }>;
+  readonly dayPeriod: Readonly<{
+    readonly day: string;
+    readonly evening: string;
+    readonly eventCount: Readonly<{
+      readonly few: string;
+      readonly many: string;
+      readonly one: string;
+      readonly other: string;
+    }>;
+    readonly morning: string;
+    readonly night: string;
+    readonly timeRange: Readonly<{
+      readonly day: string;
+      readonly evening: string;
+      readonly morning: string;
+      readonly night: string;
+    }>;
+  }>;
+  readonly eventsOfDay: Readonly<{
+    readonly ariaLabel: string;
+    readonly clusterAriaLabel: string;
+    readonly currentTime: string;
+    readonly helper: string;
+    readonly title: string;
+  }>;
   readonly periodEmpty: Readonly<{
     readonly description: string;
     readonly title: string;
@@ -170,6 +205,45 @@ const TIMELINE_UI_TRANSLATION_KEYS = {
   dateFilterLast7Days: asTranslationKey('timeline.dateFilter.last7Days'),
   dateFilterSheetTitle: asTranslationKey('timeline.dateFilter.sheetTitle'),
   dateFilterToday: asTranslationKey('timeline.dateFilter.today'),
+  dayEmptyDescription: asTranslationKey('timeline.dayEmpty.description'),
+  dayEmptyTitle: asTranslationKey('timeline.dayEmpty.title'),
+  dayNavigationAriaLabel: asTranslationKey('timeline.dayNavigation.ariaLabel'),
+  dayNavigationNextDay: asTranslationKey('timeline.dayNavigation.nextDay'),
+  dayNavigationPreviousDay: asTranslationKey(
+    'timeline.dayNavigation.previousDay',
+  ),
+  dayNavigationTodayPrefix: asTranslationKey(
+    'timeline.dayNavigation.todayPrefix',
+  ),
+  dayPeriodDay: asTranslationKey('timeline.dayPeriod.day'),
+  dayPeriodEvening: asTranslationKey('timeline.dayPeriod.evening'),
+  dayPeriodEventCountFew: asTranslationKey('timeline.dayPeriod.eventCount.few'),
+  dayPeriodEventCountMany: asTranslationKey(
+    'timeline.dayPeriod.eventCount.many',
+  ),
+  dayPeriodEventCountOne: asTranslationKey('timeline.dayPeriod.eventCount.one'),
+  dayPeriodEventCountOther: asTranslationKey(
+    'timeline.dayPeriod.eventCount.other',
+  ),
+  dayPeriodMorning: asTranslationKey('timeline.dayPeriod.morning'),
+  dayPeriodNight: asTranslationKey('timeline.dayPeriod.night'),
+  dayPeriodTimeRangeDay: asTranslationKey('timeline.dayPeriod.timeRange.day'),
+  dayPeriodTimeRangeEvening: asTranslationKey(
+    'timeline.dayPeriod.timeRange.evening',
+  ),
+  dayPeriodTimeRangeMorning: asTranslationKey(
+    'timeline.dayPeriod.timeRange.morning',
+  ),
+  dayPeriodTimeRangeNight: asTranslationKey(
+    'timeline.dayPeriod.timeRange.night',
+  ),
+  eventsOfDayAriaLabel: asTranslationKey('timeline.eventsOfDay.ariaLabel'),
+  eventsOfDayClusterAriaLabel: asTranslationKey(
+    'timeline.eventsOfDay.clusterAriaLabel',
+  ),
+  eventsOfDayCurrentTime: asTranslationKey('timeline.eventsOfDay.currentTime'),
+  eventsOfDayHelper: asTranslationKey('timeline.eventsOfDay.helper'),
+  eventsOfDayTitle: asTranslationKey('timeline.eventsOfDay.title'),
   periodEmptyDescription: asTranslationKey('timeline.periodEmpty.description'),
   periodEmptyTitle: asTranslationKey('timeline.periodEmpty.title'),
   filtersAriaLabel: asTranslationKey('timeline.filters.ariaLabel'),
@@ -350,6 +424,107 @@ export function resolveTimelineUiLabels(
         TIMELINE_UI_TRANSLATION_KEYS.dateFilterToday,
       ),
     },
+    dayEmpty: {
+      description: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dayEmptyDescription,
+      ),
+      title: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dayEmptyTitle,
+      ),
+    },
+    dayNavigation: {
+      ariaLabel: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dayNavigationAriaLabel,
+      ),
+      nextDay: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dayNavigationNextDay,
+      ),
+      previousDay: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dayNavigationPreviousDay,
+      ),
+      todayPrefix: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dayNavigationTodayPrefix,
+      ),
+    },
+    dayPeriod: {
+      day: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.dayPeriodDay),
+      evening: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dayPeriodEvening,
+      ),
+      eventCount: {
+        few: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.dayPeriodEventCountFew,
+        ),
+        many: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.dayPeriodEventCountMany,
+        ),
+        one: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.dayPeriodEventCountOne,
+        ),
+        other: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.dayPeriodEventCountOther,
+        ),
+      },
+      morning: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dayPeriodMorning,
+      ),
+      night: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.dayPeriodNight,
+      ),
+      timeRange: {
+        day: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.dayPeriodTimeRangeDay,
+        ),
+        evening: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.dayPeriodTimeRangeEvening,
+        ),
+        morning: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.dayPeriodTimeRangeMorning,
+        ),
+        night: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.dayPeriodTimeRangeNight,
+        ),
+      },
+    },
+    eventsOfDay: {
+      ariaLabel: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.eventsOfDayAriaLabel,
+      ),
+      clusterAriaLabel: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.eventsOfDayClusterAriaLabel,
+      ),
+      currentTime: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.eventsOfDayCurrentTime,
+      ),
+      helper: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.eventsOfDayHelper,
+      ),
+      title: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.eventsOfDayTitle,
+      ),
+    },
     periodEmpty: {
       description: translate(
         localization,
@@ -514,6 +689,52 @@ export function formatTimelineLoadMoreAnnouncement(
 }
 
 export function formatTimelineLoadMoreRemaining(
+  template: string,
+  count: number,
+  formatCount: (count: number) => string,
+): string {
+  return template.replace('{count}', formatCount(count));
+}
+
+function resolveSlavicPluralForm(count: number): 'few' | 'many' | 'one' {
+  const absoluteCount = Math.abs(count);
+  const mod10 = absoluteCount % 10;
+  const mod100 = absoluteCount % 100;
+
+  if (mod10 === 1 && mod100 !== 11) {
+    return 'one';
+  }
+
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    return 'few';
+  }
+
+  return 'many';
+}
+
+export function formatTimelineDayPeriodEventCount(
+  count: number,
+  labels: TimelineUiLabels['dayPeriod']['eventCount'],
+  locale: string,
+  formatCount: (count: number) => string,
+): string {
+  const normalizedLocale = locale.toLowerCase();
+  const formattedCount = formatCount(count);
+
+  if (normalizedLocale.startsWith('ru') || normalizedLocale.startsWith('uk')) {
+    const form = resolveSlavicPluralForm(count);
+    const template =
+      form === 'one' ? labels.one : form === 'few' ? labels.few : labels.many;
+
+    return template.replace('{count}', formattedCount);
+  }
+
+  const template = count === 1 ? labels.one : labels.other;
+
+  return template.replace('{count}', formattedCount);
+}
+
+export function formatTimelineEventsOfDayClusterAriaLabel(
   template: string,
   count: number,
   formatCount: (count: number) => string,
