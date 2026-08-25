@@ -70,18 +70,19 @@ const metricVisuals = [
 ] as const;
 
 function MetricMiniChart({
-  emptyHint,
   metric,
 }: {
-  readonly emptyHint: string;
   readonly metric: DashboardDaySummaryMetric;
 }) {
+  if (metric.chartValues.length === 0) {
+    return null;
+  }
+
   switch (metric.kind) {
     case 'glucose':
       return (
         <GlucoseMiniChart
           ariaLabel={metric.chartAriaLabel}
-          emptyHint={emptyHint}
           values={metric.chartValues}
         />
       );
@@ -89,7 +90,6 @@ function MetricMiniChart({
       return (
         <InsulinMiniChart
           ariaLabel={metric.chartAriaLabel}
-          emptyHint={emptyHint}
           values={metric.chartValues}
         />
       );
@@ -97,7 +97,6 @@ function MetricMiniChart({
       return (
         <NutritionMiniChart
           ariaLabel={metric.chartAriaLabel}
-          emptyHint={emptyHint}
           values={metric.chartValues}
         />
       );
@@ -105,7 +104,6 @@ function MetricMiniChart({
       return (
         <ActivityMiniChart
           ariaLabel={metric.chartAriaLabel}
-          emptyHint={emptyHint}
           values={metric.chartValues}
         />
       );
@@ -208,32 +206,29 @@ export function DashboardDaySummary(props: DashboardDaySummaryProps) {
 
               return (
                 <div
-                  className={`relative min-h-[9.25rem] overflow-hidden rounded-[1.25rem] border p-3 shadow-[0_10px_28px_rgba(15,23,42,0.05)] sm:min-h-[9.75rem] sm:rounded-[1.35rem] sm:p-3.5 ${visual.surfaceClass}`}
+                  className={`relative min-h-[7.25rem] overflow-hidden rounded-[1.2rem] border p-2.5 shadow-[0_10px_28px_rgba(15,23,42,0.05)] sm:min-h-[8.5rem] sm:rounded-[1.35rem] sm:p-3 lg:min-h-[9.25rem] lg:p-3.5 ${visual.surfaceClass}`}
                   key={metric.label}
                 >
                   <span
                     aria-hidden="true"
-                    className={`relative z-10 grid size-11 place-items-center rounded-full sm:size-12 ${visual.iconClass}`}
+                    className={`relative z-10 grid size-9 place-items-center rounded-full sm:size-10 lg:size-11 ${visual.iconClass}`}
                   >
-                    <Icon size={20} strokeWidth={2.2} />
+                    <Icon size={18} strokeWidth={2.2} />
                   </span>
                   <dt
-                    className={`relative z-10 mt-2 text-[0.8125rem] font-semibold sm:text-sm ${visual.labelClass}`}
+                    className={`relative z-10 mt-1.5 text-[0.75rem] font-semibold sm:mt-2 sm:text-[0.8125rem] ${visual.labelClass}`}
                   >
                     {metric.label}
                   </dt>
                   <dd
-                    className={`relative z-10 mt-0.5 text-[1.25rem] font-black tracking-tight tabular-nums sm:mt-1 sm:text-[1.35rem] ${visual.valueClass}`}
+                    className={`relative z-10 mt-0.5 text-[1.1rem] font-black tracking-tight tabular-nums sm:text-[1.25rem] lg:text-[1.35rem] ${visual.valueClass}`}
                   >
                     {metric.value}
                   </dd>
-                  <MetricMiniChart
-                    emptyHint={labels.chartEmptyHint}
-                    metric={metric}
-                  />
+                  <MetricMiniChart metric={metric} />
                   {metric.secondaryText ? (
                     <dd
-                      className={`relative z-10 mt-1 text-xs font-medium ${visual.labelClass}`}
+                      className={`relative z-10 mt-0.5 text-[10px] leading-tight font-medium sm:text-xs ${visual.labelClass}`}
                     >
                       {metric.secondaryText}
                     </dd>

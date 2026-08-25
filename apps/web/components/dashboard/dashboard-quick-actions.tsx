@@ -108,7 +108,7 @@ export function DashboardQuickActions({
           {sectionLabel}
         </h2>
 
-        <div className="grid grid-cols-5 gap-0.5 sm:gap-2">
+        <div className="grid grid-cols-5 gap-0.5 sm:gap-1.5 md:gap-2">
           {actions.map((action, index) => {
             const category = action.category;
             const eventKind = eventKindByCategory[category];
@@ -117,7 +117,7 @@ export function DashboardQuickActions({
             return (
               <button
                 aria-label={`${sectionLabel}: ${label}`}
-                className="group focus-visible:outline-interactive-primary min-w-0 rounded-2xl p-0.5 text-center focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="group focus-visible:outline-interactive-primary flex min-h-11 min-w-0 flex-col items-center rounded-2xl px-0.5 py-1 text-center focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={disabled}
                 key={action.id}
                 onClick={() => onOpenCategory(category)}
@@ -126,15 +126,15 @@ export function DashboardQuickActions({
               >
                 <span
                   aria-hidden="true"
-                  className="mx-auto grid size-[3.5rem] place-items-center rounded-full bg-white/95 shadow-[0_10px_28px_rgba(15,23,42,0.08)] ring-1 ring-white/85 transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95 sm:size-[4.25rem] md:size-[4.5rem]"
+                  className="mx-auto grid size-11 place-items-center rounded-full bg-white/95 shadow-[0_10px_28px_rgba(15,23,42,0.08)] ring-1 ring-white/85 transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95 sm:size-[3.75rem] md:size-[4.25rem]"
                 >
                   <span
-                    className={`grid size-9 place-items-center rounded-full sm:size-10 md:size-11 ${iconToneByCategory[category]}`}
+                    className={`grid size-8 place-items-center rounded-full sm:size-9 md:size-10 ${iconToneByCategory[category]}`}
                   >
                     {action.icon}
                   </span>
                 </span>
-                <span className="mt-1 block px-0.5 text-[8px] leading-[1.05] font-semibold break-words hyphens-auto text-slate-700 sm:mt-1.5 sm:text-[10px] sm:leading-tight md:text-[11px] dark:text-slate-200">
+                <span className="mt-1 block max-w-full px-0.5 text-[9px] leading-[1.05] font-semibold break-words hyphens-auto text-slate-700 sm:text-[10px] sm:leading-tight md:text-[11px] dark:text-slate-200">
                   {label}
                 </span>
               </button>

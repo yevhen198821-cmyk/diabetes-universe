@@ -11,6 +11,7 @@ const labels = {
     insulin: (count) => `${count} insulin doses today`,
     nutrition: (count) => `${count} nutrition entries today`,
   },
+  chartEmptyHint: 'No entries today',
   defaultEmpty: "Today's summary is not available yet.",
   defaultError: 'Could not load the day summary.',
   eyebrow: 'Current day',
@@ -194,6 +195,12 @@ test('accepts zero counts when the owner supplies valid current-day totals', () 
         totalActivitySeconds: 0,
         totalCarbohydrateGrams: 0,
         totalInsulinUnits: 0,
+        visualizations: {
+          activity: [],
+          glucose: [],
+          insulin: [],
+          nutrition: [],
+        },
       },
     },
     labels,
@@ -207,6 +214,10 @@ test('accepts zero counts when the owner supplies valid current-day totals', () 
 
   assert.equal(model.state, 'ready');
   assert.equal(model.metrics[0]?.value, '—');
+  assert.equal(model.metrics[0]?.secondaryText, 'No entries today');
+  assert.equal(model.metrics[0]?.chartValues.length, 0);
+  assert.equal(model.metrics[1]?.secondaryText, 'No entries today');
+  assert.equal(model.metrics[1]?.value, '0 U');
 });
 
 test('creates loading state with the default accessible label', () => {

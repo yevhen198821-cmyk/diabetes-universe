@@ -140,6 +140,7 @@ test('mobile home layout stays compact at primary reference widths', async ({
   browser,
 }) => {
   for (const viewport of [
+    { height: 800, width: 360 },
     { height: 844, width: 390 },
     { height: 915, width: 412 },
   ]) {
@@ -170,5 +171,57 @@ test('mobile home layout stays compact at primary reference widths', async ({
     await expect(page.getByRole('navigation')).toBeVisible();
 
     await context.close();
+  }
+});
+
+test('mobile home keeps scrollable content above the bottom navigation', async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 844, width: 390 });
+  await page.goto('/');
+  await waitForApplicationReady(page);
+
+  await page.evaluate(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight);
+  });
+
+  const contentClearance = await page.evaluate(() => {
+    const nav = document.getElementById('dashboard-mobile-nav');
+    const lastRecentEvent = document
+      .getElementById('dashboard-recent-events-title')
+      ?.closest('section')
+      ?.querySelector('li:last-child');
+
+    if (!nav || !lastRecentEvent) {
+      return null;
+    }
+
+    return (
+      nav.getBoundingClientRect().top -
+      lastRecentEvent.getBoundingClientRect().bottom
+    );
+  });
+
+  expect(contentClearance).not.toBeNull();
+  expect(contentClearance).toBeGreaterThan(8);
+});
+
+test('quick add exposes all five approved categories on mobile', async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 844, width: 390 });
+  await page.goto('/');
+  await waitForApplicationReady(page);
+
+  for (const label of [
+    'Glucose',
+    'Insulin',
+    'Nutrition',
+    'Activity',
+    'Notes',
+  ]) {
+    await expect(
+      page.getByRole('button', { name: new RegExp(`Quick add: ${label}`) }),
+    ).toBeVisible();
   }
 });
