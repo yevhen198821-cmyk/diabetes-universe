@@ -52,6 +52,7 @@ test('profile avatar upload, replace, persistence, and removal', async ({
     .getByRole('button', { name: 'Change profile photo', exact: true })
     .click();
   await page.getByRole('button', { name: 'Remove photo', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(profileAvatarImage(page)).toHaveCount(0);
 });
 

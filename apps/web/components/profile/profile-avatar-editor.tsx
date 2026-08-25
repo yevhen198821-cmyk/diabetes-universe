@@ -101,7 +101,8 @@ export function ProfileAvatarEditor({
   const [committedAvatarUrl, setCommittedAvatarUrl] = useState<
     string | null | undefined
   >(undefined);
-  const displayedAvatarUrl = committedAvatarUrl ?? avatarUrl;
+  const displayedAvatarUrl =
+    committedAvatarUrl !== undefined ? committedAvatarUrl : avatarUrl;
 
   useEffect(() => {
     return () => {
