@@ -42,6 +42,7 @@ import {
 import { TimelineToolbar } from './timeline-toolbar';
 import { TopBar } from './top-bar';
 import { DashboardMobileNav } from '../dashboard/dashboard-mobile-nav';
+import { TimelineMobileQuickAddFab } from './timeline-mobile-quick-add-fab';
 import {
   AppPageBackground,
   appPageShellClassName,
@@ -83,6 +84,7 @@ export function TimelineShell() {
     presentationDependencies,
   );
   const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const mobileQuickAddFabRef = useRef<HTMLButtonElement>(null);
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<TimelineEventFilter>('all');
   const [visibleCount, setVisibleCount] = useState(TIMELINE_PAGE_SIZE);
@@ -373,13 +375,17 @@ export function TimelineShell() {
         onNoteSubmit={handleNoteSubmit}
         onNutritionSubmit={handleNutritionSubmit}
         open={quickAddOpen}
+        returnFocusRef={mobileQuickAddFabRef}
       />
 
-      <DashboardMobileNav
-        activeTab="timeline"
-        onQuickAdd={() => setQuickAddOpen(true)}
-        showQuickAddFab={!quickAddOpen}
-      />
+      {!quickAddOpen ? (
+        <TimelineMobileQuickAddFab
+          onClick={() => setQuickAddOpen(true)}
+          ref={mobileQuickAddFabRef}
+        />
+      ) : null}
+
+      <DashboardMobileNav activeTab="timeline" />
 
       {selectedEvent ? (
         <TimelineEventDetail
