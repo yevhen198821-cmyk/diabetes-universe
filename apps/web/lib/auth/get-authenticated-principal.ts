@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 
 import type { AuthenticatedPrincipal } from '@diabetes-universe/identity';
 
+import { normalizeAuthRequestHeaders } from './normalize-auth-request-headers';
 import {
   getWebIdentityService,
   isWebAuthConfigured,
@@ -14,7 +15,9 @@ export async function getAuthenticatedPrincipal(): Promise<AuthenticatedPrincipa
 
   try {
     const identityService = await getWebIdentityService();
-    return identityService.getCurrentPrincipal(await headers());
+    return identityService.getCurrentPrincipal(
+      normalizeAuthRequestHeaders(await headers()),
+    );
   } catch {
     return null;
   }

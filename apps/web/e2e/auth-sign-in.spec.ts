@@ -69,7 +69,10 @@ test('user can enroll a passkey, revoke current session, and sign in with the pa
   await removeExistingPasskeys(page);
   await page.goto('/account/security');
   await expect(
-    page.getByRole('heading', { name: 'Безопасность входа' }),
+    page.getByRole('heading', { level: 1, name: 'Profile' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('tab', { name: 'Security', selected: true }),
   ).toBeVisible();
 
   await page.getByRole('button', { name: 'Добавить Passkey' }).click();
@@ -77,7 +80,7 @@ test('user can enroll a passkey, revoke current session, and sign in with the pa
   await expect(page.getByText('Мой Passkey')).toHaveCount(1);
 
   await page.goto('/account');
-  await page.getByRole('button', { name: 'Выйти из аккаунта' }).click();
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page).toHaveURL(/\/auth$/);
 
   const signedOutSession = await page.request.get('/api/auth/get-session');

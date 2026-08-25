@@ -302,7 +302,7 @@ function BulkActions({
       <form action={allAction} ref={allFormRef} />
       <button
         aria-busy={allPending}
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-rose-600 px-4 text-sm font-semibold text-white transition hover:bg-rose-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 disabled:opacity-60"
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-rose-200 bg-transparent px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 disabled:opacity-60 dark:border-rose-900/80 dark:bg-slate-950/20 dark:text-rose-300 dark:hover:bg-rose-950/30"
         disabled={allPending}
         onClick={() => setAllConfirmOpen(true)}
         ref={allTriggerRef}
@@ -312,7 +312,7 @@ function BulkActions({
       </button>
       <SessionConfirmDialog
         cancelLabel={labels.cancel}
-        confirmLabel={labels.revokeAll}
+        confirmLabel={labels.confirmRevokeAllConfirm}
         description={labels.confirmRevokeAllDescription}
         isPending={allPending}
         onCancel={() => setAllConfirmOpen(false)}

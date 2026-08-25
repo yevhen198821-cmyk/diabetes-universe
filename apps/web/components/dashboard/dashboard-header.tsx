@@ -4,6 +4,7 @@ import { UserRound } from 'lucide-react';
 import Image from 'next/image';
 import { useMemo, useState, type ReactNode } from 'react';
 
+import { ProductBrandLogo } from '../brand/product-brand-logo';
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { usePresentationContext } from '../../lib/platform/react/use-presentation-context';
@@ -19,12 +20,6 @@ import { DashboardBrandWordmark } from './dashboard-brand-wordmark';
 
 const avatarTargetClassName =
   'grid size-11 shrink-0 place-items-center overflow-hidden rounded-full';
-
-const brandLogoPath = '/brand/diabetes-universe-logo.png';
-const brandLogoWidth = 1254;
-const brandLogoHeight = 1254;
-const brandLogoIconClassName =
-  'h-[4.5rem] w-[4.5rem] shrink-0 object-contain sm:h-[5.25rem] sm:w-[5.25rem] lg:h-24 lg:w-24';
 
 export interface DashboardHeaderProps extends Omit<
   DashboardHeaderModelInput,
@@ -147,16 +142,7 @@ export function DashboardHeader({
       <div className="mx-auto flex min-h-[4.25rem] max-w-6xl items-center justify-between gap-3 py-3 pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:min-h-20 sm:py-4 sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] lg:min-h-24 lg:py-5">
         <div className="flex min-w-0 flex-1 items-center">
           <h1 className="flex min-w-0 items-center gap-3 sm:gap-[0.9rem]">
-            <Image
-              alt=""
-              aria-hidden
-              className={brandLogoIconClassName}
-              height={brandLogoHeight}
-              priority
-              src={brandLogoPath}
-              unoptimized
-              width={brandLogoWidth}
-            />
+            <ProductBrandLogo priority variant="header" />
             <span className="min-w-0 shrink">
               <DashboardBrandWordmark
                 accentLine={viewModel.brandLineAccent}

@@ -150,7 +150,7 @@ function visibleCategoriesCount(source) {
 }
 
 test('header keeps approved brand logo with wordmark and account affordance', () => {
-  assert.match(headerSource, /\/brand\/diabetes-universe-logo\.png/);
+  assert.match(headerSource, /ProductBrandLogo/);
   assert.match(headerSource, /DashboardBrandWordmark/);
   assert.match(headerSource, /DashboardAvatar/);
   assert.doesNotMatch(headerSource, /DashboardBrandMark/);

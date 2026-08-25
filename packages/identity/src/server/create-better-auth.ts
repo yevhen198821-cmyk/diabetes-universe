@@ -19,7 +19,11 @@ import {
   AUTH_SESSION_UPDATE_AGE_SECONDS,
 } from '../config/auth-constants';
 import type { AuthEnvironment } from '../config/auth-environment';
-import { isAuthE2eRuntime } from '../config/auth-runtime-guards';
+import { resolveBetterAuthBaseUrlConfig } from '../config/auth-environment';
+import {
+  isAuthE2eRuntime,
+  isVercelAuthDeployment,
+} from '../config/auth-runtime-guards';
 import { authSchema } from './database/auth-schema';
 import type { AuthDatabase } from './database/create-auth-database';
 import type { AuthEmailDelivery } from './email/auth-email-delivery';
@@ -39,7 +43,11 @@ export function createBetterAuth({
   emailDelivery,
   environment,
 }: CreateBetterAuthOptions) {
-  const useSecureCookies = environment.baseUrl.startsWith('https://');
+  const betterAuthBaseUrl = resolveBetterAuthBaseUrlConfig(environment);
+  const useSecureCookies =
+    typeof betterAuthBaseUrl === 'string'
+      ? betterAuthBaseUrl.startsWith('https://')
+      : environment.baseUrl.startsWith('https://');
   const passkeyPlugin = environment.passkeyEnabled
     ? passkey({
         authenticatorSelection: {
@@ -57,7 +65,7 @@ export function createBetterAuth({
 
   return betterAuth({
     appName: environment.appName,
-    baseURL: environment.baseUrl,
+    baseURL: betterAuthBaseUrl,
     database: drizzleAdapter(database, {
       provider: 'pg',
       schema: authSchema,
@@ -72,6 +80,7 @@ export function createBetterAuth({
         sameSite: 'lax',
         secure: useSecureCookies,
       },
+      trustedProxyHeaders: isVercelAuthDeployment(),
       useSecureCookies,
     },
     session: {

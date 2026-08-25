@@ -15,6 +15,23 @@ export function isProductionAuthDeployment(
   return false;
 }
 
+export function isPreviewAuthDeployment(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  return env.VERCEL_ENV === 'preview';
+}
+
+export function isVercelAuthDeployment(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  if (env.VERCEL === '1') {
+    return true;
+  }
+
+  const vercelEnv = env.VERCEL_ENV?.trim();
+  return vercelEnv === 'preview' || vercelEnv === 'production';
+}
+
 export function isAuthE2eRuntime(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {

@@ -24,15 +24,15 @@
   --du-info: #0369a1;
 
   /* Semantic tokens — light theme */
-  --du-background: var(--du-neutral-50);
+  --du-background: #f3f7fb;
   --du-surface: #ffffff;
   --du-surface-raised: #ffffff;
-  --du-surface-subtle: var(--du-neutral-100);
+  --du-surface-subtle: #eef3f8;
   --du-overlay: rgb(15 23 42 / 0.4);
 
-  --du-text-primary: var(--du-neutral-900);
-  --du-text-secondary: var(--du-neutral-500);
-  --du-text-tertiary: var(--du-neutral-400);
+  --du-text-primary: #0f172a;
+  --du-text-secondary: #475569;
+  --du-text-tertiary: #64748b;
   --du-text-inverse: #ffffff;
 
   --du-border-default: var(--du-neutral-200);

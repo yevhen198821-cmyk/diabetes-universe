@@ -5,9 +5,9 @@ import { redirect } from 'next/navigation';
 import type { AccountSessionSummary } from '@diabetes-universe/identity';
 import { SessionManagementError } from '@diabetes-universe/identity/server';
 
-import { SessionManagerPageHeader } from '../../../../components/auth/session-manager-page-header';
 import { SessionManager } from '../../../../components/auth/session-manager';
-import { getAuthenticatedPrincipal } from '../../../../lib/auth/get-authenticated-principal';
+import { ProfileSessionsHeader } from '../../../../components/profile/profile-sessions-header';
+import { requireAuthenticatedPrincipal } from '../../../../lib/auth/get-authenticated-principal';
 import {
   getWebIdentityService,
   isWebPasskeyConfigured,
@@ -15,8 +15,8 @@ import {
 import { ACCOUNT_SECURITY_SESSIONS_AUTH_CALLBACK } from '../../../../lib/auth/session-management-mutation';
 
 export const metadata: Metadata = {
-  title: 'Активные сессии',
-  description: 'Управление активными сессиями входа в Diabetes Universe.',
+  title: 'Active sessions',
+  description: 'Manage active sign-in sessions for Diabetes Universe.',
 };
 
 async function readAccountSessions(): Promise<
@@ -39,24 +39,17 @@ async function readAccountSessions(): Promise<
 }
 
 export default async function AccountSecuritySessionsPage() {
-  const principal = await getAuthenticatedPrincipal();
-
-  if (!principal) {
-    redirect(ACCOUNT_SECURITY_SESSIONS_AUTH_CALLBACK);
-  }
+  await requireAuthenticatedPrincipal();
 
   const sessions = await readAccountSessions();
 
   return (
-    <div className="min-h-dvh bg-slate-50 px-4 py-8 dark:bg-slate-950">
-      <main className="mx-auto w-full max-w-2xl space-y-6">
-        <SessionManagerPageHeader />
-
-        <SessionManager
-          passkeyManagementEnabled={isWebPasskeyConfigured()}
-          sessions={sessions}
-        />
-      </main>
+    <div className="space-y-5">
+      <ProfileSessionsHeader />
+      <SessionManager
+        passkeyManagementEnabled={isWebPasskeyConfigured()}
+        sessions={sessions}
+      />
     </div>
   );
 }

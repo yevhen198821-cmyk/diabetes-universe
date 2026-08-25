@@ -33,3 +33,7 @@ export {
   resetCapturedMagicLinkEmail,
 } from './email/capturing-auth-email-delivery';
 export { markCurrentSessionStaleForE2eFixture } from './e2e/mark-current-session-stale-for-fixture';
+export {
+  probeAuthDatabaseHealth,
+  type AuthDatabaseProbeResult,
+} from './probe-auth-database';

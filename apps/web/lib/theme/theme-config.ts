@@ -1,20 +1,24 @@
 export const THEME_STORAGE_KEY = 'du-ui-theme';
 
-export type ThemePreference = 'dark' | 'light' | 'system';
+export type UserThemePreference = 'dark' | 'light';
 
-export function resolveThemeClass(
-  preference: ThemePreference,
-  systemPrefersDark: boolean,
-): 'dark' | 'light' {
-  if (preference === 'dark') {
-    return 'dark';
-  }
+/** @deprecated Legacy stored values only; never offered in UI. */
+export type ThemePreference = UserThemePreference | 'system';
 
-  if (preference === 'light') {
+export function normalizeStoredThemePreference(
+  stored: string | null | undefined,
+): UserThemePreference {
+  if (stored === 'light') {
     return 'light';
   }
 
-  return systemPrefersDark ? 'dark' : 'light';
+  return 'dark';
 }
 
-export const themeInitScript = `(function(){try{var k=${JSON.stringify(THEME_STORAGE_KEY)};var p=localStorage.getItem(k);var d=window.matchMedia('(prefers-color-scheme: dark)').matches;var t='light';if(p==='dark'){t='dark';}else if(p==='system'||!p){t=d?'dark':'light';}var r=document.documentElement;r.classList.remove('light','dark');r.classList.add(t);}catch(e){}})();`;
+export function resolveThemeClass(
+  preference: ThemePreference,
+): 'dark' | 'light' {
+  return normalizeStoredThemePreference(preference);
+}
+
+export const themeInitScript = `(function(){try{var k=${JSON.stringify(THEME_STORAGE_KEY)};var p=localStorage.getItem(k);var t='dark';if(p==='light'){t='light';}else if(p==='system'){localStorage.setItem(k,'dark');}var r=document.documentElement;r.classList.remove('light','dark');r.classList.add(t);}catch(e){}})();`;

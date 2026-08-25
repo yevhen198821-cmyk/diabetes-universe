@@ -14,7 +14,7 @@ import {
 } from './dashboard-mobile-nav-layout';
 
 export interface DashboardMobileNavProps {
-  readonly activeTab?: 'home' | 'timeline';
+  readonly activeTab?: 'account' | 'home' | 'timeline';
   readonly onQuickAddClick?: () => void;
   readonly quickAddDisabled?: boolean;
   readonly quickAddFabRef?: RefObject<HTMLButtonElement | null>;
@@ -101,11 +101,18 @@ export function DashboardMobileNav({
           ) : null}
           <li>
             <Link
-              className="text-text-secondary focus-visible:outline-interactive-primary flex min-h-11 min-w-11 flex-col items-center justify-center gap-0 rounded-2xl px-2.5 py-1 transition hover:text-teal-600 focus-visible:outline-2 focus-visible:outline-offset-2 dark:hover:text-teal-300"
+              aria-current={activeTab === 'account' ? 'page' : undefined}
+              className={`focus-visible:outline-interactive-primary flex min-h-11 min-w-11 flex-col items-center justify-center gap-0 rounded-2xl px-2.5 py-1 focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                activeTab === 'account'
+                  ? 'text-teal-600 dark:text-teal-300'
+                  : 'text-text-secondary transition hover:text-teal-600 dark:hover:text-teal-300'
+              }`}
               href="/account"
             >
               <UserRound aria-hidden="true" size={20} strokeWidth={2.2} />
-              <span className="text-[10px] leading-tight font-semibold">
+              <span
+                className={`text-[10px] leading-tight ${activeTab === 'account' ? 'font-bold' : 'font-semibold'}`}
+              >
                 {labels.account}
               </span>
             </Link>

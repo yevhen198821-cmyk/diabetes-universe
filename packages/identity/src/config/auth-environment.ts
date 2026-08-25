@@ -2,7 +2,10 @@ import {
   AUTH_ALLOWED_CALLBACK_PATHS,
   type AuthAllowedCallbackPath,
 } from './auth-constants';
-import { assertProductionCapableEmailDelivery } from './auth-runtime-guards';
+import {
+  assertProductionCapableEmailDelivery,
+  isPreviewAuthDeployment,
+} from './auth-runtime-guards';
 
 export class AuthConfigurationError extends Error {
   constructor(message: string) {
@@ -12,6 +15,14 @@ export class AuthConfigurationError extends Error {
 }
 
 export type AuthDatabaseMode = 'postgres' | 'pglite';
+
+export interface BetterAuthDynamicBaseUrlConfig {
+  allowedHosts: string[];
+  readonly fallback: string;
+  readonly protocol: 'auto' | 'http' | 'https';
+}
+
+export type BetterAuthBaseUrlConfig = string | BetterAuthDynamicBaseUrlConfig;
 
 export interface AuthEnvironment {
   readonly appName: string;
@@ -70,6 +81,89 @@ function resolveDatabaseMode(env: NodeJS.ProcessEnv): AuthDatabaseMode {
   );
 }
 
+function normalizeDeploymentHost(
+  value: string | undefined,
+): string | undefined {
+  const trimmed = value?.trim();
+
+  if (!trimmed) {
+    return undefined;
+  }
+
+  if (trimmed.includes('://')) {
+    try {
+      return new URL(trimmed).host;
+    } catch {
+      return undefined;
+    }
+  }
+
+  return trimmed.split('/')[0]?.split(':')[0] || undefined;
+}
+
+function resolvePreviewDeploymentHost(
+  env: NodeJS.ProcessEnv,
+): string | undefined {
+  return (
+    normalizeDeploymentHost(env.VERCEL_BRANCH_URL) ??
+    normalizeDeploymentHost(env.VERCEL_URL)
+  );
+}
+
+function resolveAuthBaseUrl(env: NodeJS.ProcessEnv): string {
+  const vercelEnv = env.VERCEL_ENV?.trim();
+  const deploymentHost = resolvePreviewDeploymentHost(env);
+
+  if (vercelEnv === 'preview' && deploymentHost) {
+    return `https://${deploymentHost}`;
+  }
+
+  return readRequiredString('BETTER_AUTH_URL', env.BETTER_AUTH_URL);
+}
+
+function collectPreviewAllowedHosts(
+  baseUrl: string,
+  env: NodeJS.ProcessEnv,
+): string[] {
+  const hosts = new Set<string>();
+
+  for (const candidate of [
+    env.VERCEL_BRANCH_URL,
+    env.VERCEL_URL,
+    baseUrl,
+    env.BETTER_AUTH_URL,
+  ]) {
+    const host = normalizeDeploymentHost(candidate);
+
+    if (host) {
+      hosts.add(host);
+    }
+  }
+
+  return [...hosts];
+}
+
+export function resolveBetterAuthBaseUrlConfig(
+  environment: AuthEnvironment,
+  env: NodeJS.ProcessEnv = process.env,
+): BetterAuthBaseUrlConfig {
+  if (!isPreviewAuthDeployment(env)) {
+    return environment.baseUrl;
+  }
+
+  const allowedHosts = collectPreviewAllowedHosts(environment.baseUrl, env);
+
+  if (allowedHosts.length === 0) {
+    return environment.baseUrl;
+  }
+
+  return {
+    allowedHosts: [...allowedHosts],
+    fallback: environment.baseUrl,
+    protocol: environment.baseUrl.startsWith('http://') ? 'http' : 'https',
+  };
+}
+
 function resolveTrustedOrigins(
   baseUrl: string,
   env: NodeJS.ProcessEnv,
@@ -78,11 +172,21 @@ function resolveTrustedOrigins(
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-  if (configured && configured.length > 0) {
-    return configured;
+  const origins = new Set<string>([baseUrl]);
+
+  if (isPreviewAuthDeployment(env)) {
+    for (const host of collectPreviewAllowedHosts(baseUrl, env)) {
+      origins.add(`https://${host}`);
+    }
   }
 
-  return [baseUrl];
+  if (configured) {
+    for (const origin of configured) {
+      origins.add(origin);
+    }
+  }
+
+  return [...origins];
 }
 
 function isLocalWebAuthnHostname(hostname: string): boolean {
@@ -135,9 +239,10 @@ function resolveWebAuthnConfiguration(
     originUrl.origin !== origin ||
     originUrl.origin !== baseUrlObject.origin
   ) {
-    throw new AuthConfigurationError(
-      'AUTH_WEBAUTHN_ORIGIN must be the exact BETTER_AUTH_URL origin.',
-    );
+    return {
+      passkeyEnabled: false,
+      webauthnRpName: rpName,
+    };
   }
 
   if (
@@ -184,7 +289,7 @@ export function resolveAuthEnvironment(
   env: NodeJS.ProcessEnv = process.env,
 ): AuthEnvironment {
   const databaseMode = resolveDatabaseMode(env);
-  const baseUrl = readRequiredString('BETTER_AUTH_URL', env.BETTER_AUTH_URL);
+  const baseUrl = resolveAuthBaseUrl(env);
   const webauthn = resolveWebAuthnConfiguration(baseUrl, env);
 
   const environment: AuthEnvironment = {
@@ -211,15 +316,194 @@ export function resolveAuthEnvironment(
   return environment;
 }
 
+export type AuthConfigurationFailureStage =
+  | 'database_mode'
+  | 'base_url'
+  | 'better_auth_secret'
+  | 'database_url'
+  | 'email_delivery'
+  | 'webauthn_origin'
+  | 'webauthn_rp_id'
+  | 'webauthn_security'
+  | 'webauthn_rp_id_domain';
+
+export type AuthEnvPresence = 'MISSING' | 'SET';
+
+export interface AuthConfigurationProbeResult {
+  readonly configured: boolean;
+  readonly failureStage: AuthConfigurationFailureStage | null;
+  readonly failureMessage: string | null;
+  readonly envPresence: Readonly<Record<string, AuthEnvPresence>>;
+}
+
+function readAuthEnvPresence(
+  name: string,
+  env: NodeJS.ProcessEnv,
+): AuthEnvPresence {
+  return env[name]?.trim() ? 'SET' : 'MISSING';
+}
+
+function buildAuthEnvPresence(
+  env: NodeJS.ProcessEnv,
+): Readonly<Record<string, AuthEnvPresence>> {
+  return {
+    AUTH_DATABASE_MODE: readAuthEnvPresence('AUTH_DATABASE_MODE', env),
+    AUTH_EMAIL_FROM: readAuthEnvPresence('AUTH_EMAIL_FROM', env),
+    AUTH_USE_PGLITE: readAuthEnvPresence('AUTH_USE_PGLITE', env),
+    BETTER_AUTH_SECRET: readAuthEnvPresence('BETTER_AUTH_SECRET', env),
+    BETTER_AUTH_URL: readAuthEnvPresence('BETTER_AUTH_URL', env),
+    DATABASE_URL: readAuthEnvPresence('DATABASE_URL', env),
+    RESEND_API_KEY: readAuthEnvPresence('RESEND_API_KEY', env),
+    VERCEL_BRANCH_URL: readAuthEnvPresence('VERCEL_BRANCH_URL', env),
+    VERCEL_ENV: readAuthEnvPresence('VERCEL_ENV', env),
+    VERCEL_URL: readAuthEnvPresence('VERCEL_URL', env),
+  };
+}
+
+export function probeAuthConfiguration(
+  env: NodeJS.ProcessEnv = process.env,
+): AuthConfigurationProbeResult {
+  const envPresence = buildAuthEnvPresence(env);
+
+  let databaseMode: AuthDatabaseMode;
+
+  try {
+    databaseMode = resolveDatabaseMode(env);
+  } catch (error) {
+    return {
+      configured: false,
+      envPresence,
+      failureMessage:
+        error instanceof AuthConfigurationError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : 'Auth database mode resolution failed.',
+      failureStage: 'database_mode',
+    };
+  }
+
+  let baseUrl: string;
+
+  try {
+    baseUrl = resolveAuthBaseUrl(env);
+  } catch (error) {
+    return {
+      configured: false,
+      envPresence,
+      failureMessage:
+        error instanceof AuthConfigurationError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : 'Auth base URL resolution failed.',
+      failureStage: 'base_url',
+    };
+  }
+
+  try {
+    readRequiredString('BETTER_AUTH_SECRET', env.BETTER_AUTH_SECRET);
+  } catch (error) {
+    return {
+      configured: false,
+      envPresence,
+      failureMessage:
+        error instanceof AuthConfigurationError
+          ? error.message
+          : 'Missing required auth environment: BETTER_AUTH_SECRET',
+      failureStage: 'better_auth_secret',
+    };
+  }
+
+  if (databaseMode === 'postgres') {
+    try {
+      readRequiredString('DATABASE_URL', env.DATABASE_URL);
+    } catch (error) {
+      return {
+        configured: false,
+        envPresence,
+        failureMessage:
+          error instanceof AuthConfigurationError
+            ? error.message
+            : 'Missing required auth environment: DATABASE_URL',
+        failureStage: 'database_url',
+      };
+    }
+  }
+
+  try {
+    resolveWebAuthnConfiguration(baseUrl, env);
+  } catch (error) {
+    const message =
+      error instanceof AuthConfigurationError
+        ? error.message
+        : error instanceof Error
+          ? error.message
+          : 'Passkey configuration failed.';
+
+    let failureStage: AuthConfigurationFailureStage = 'webauthn_security';
+
+    if (message.includes('both AUTH_WEBAUTHN_ORIGIN and AUTH_WEBAUTHN_RP_ID')) {
+      failureStage = 'webauthn_rp_id';
+    } else if (message.includes('AUTH_WEBAUTHN_ORIGIN')) {
+      failureStage = 'webauthn_origin';
+    } else if (message.includes('AUTH_WEBAUTHN_RP_ID')) {
+      failureStage = 'webauthn_rp_id_domain';
+    }
+
+    return {
+      configured: false,
+      envPresence,
+      failureMessage: message,
+      failureStage,
+    };
+  }
+
+  const environment: AuthEnvironment = {
+    appName: readOptionalString(env.AUTH_APP_NAME) ?? 'Diabetes Universe',
+    baseUrl,
+    betterAuthSecret: readRequiredString(
+      'BETTER_AUTH_SECRET',
+      env.BETTER_AUTH_SECRET,
+    ),
+    cookiePrefix: readOptionalString(env.AUTH_COOKIE_PREFIX) ?? 'du-auth',
+    databaseMode,
+    databaseUrl:
+      databaseMode === 'postgres'
+        ? readRequiredString('DATABASE_URL', env.DATABASE_URL)
+        : undefined,
+    emailFrom: readOptionalString(env.AUTH_EMAIL_FROM),
+    resendApiKey: readOptionalString(env.RESEND_API_KEY),
+    trustedOrigins: resolveTrustedOrigins(baseUrl, env),
+    ...resolveWebAuthnConfiguration(baseUrl, env),
+  };
+
+  try {
+    assertProductionCapableEmailDelivery(environment);
+  } catch (error) {
+    return {
+      configured: false,
+      envPresence,
+      failureMessage:
+        error instanceof AuthConfigurationError
+          ? error.message
+          : 'Production auth requires RESEND_API_KEY and AUTH_EMAIL_FROM',
+      failureStage: 'email_delivery',
+    };
+  }
+
+  return {
+    configured: true,
+    envPresence,
+    failureMessage: null,
+    failureStage: null,
+  };
+}
+
 export function isAuthEnvironmentConfigured(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
-  try {
-    resolveAuthEnvironment(env);
-    return true;
-  } catch {
-    return false;
-  }
+  return probeAuthConfiguration(env).configured;
 }
 
 export function resolveSafeAuthCallbackPath(

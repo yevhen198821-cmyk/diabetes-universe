@@ -3,6 +3,10 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { resolveSafeAuthCallbackPath } from '@diabetes-universe/identity';
+import {
+  isPreviewAuthDeployment,
+  probeAuthConfiguration,
+} from '@diabetes-universe/identity';
 
 import { AuthShell } from '../../components/auth/auth-shell';
 import { SignInForm } from '../../components/auth/sign-in-form';
@@ -24,15 +28,27 @@ interface AuthPageProps {
 }
 
 export default async function AuthPage({ searchParams }: AuthPageProps) {
+  const params = await searchParams;
+  const callbackPath = resolveSafeAuthCallbackPath(params.callback);
   const principal = await getAuthenticatedPrincipal();
 
   if (principal) {
-    redirect('/account');
+    redirect(callbackPath);
   }
 
-  const params = await searchParams;
-  const callbackPath = resolveSafeAuthCallbackPath(params.callback);
   const isAuthAvailable = isWebAuthConfigured();
+
+  if (isPreviewAuthDeployment() && !isAuthAvailable) {
+    const probe = probeAuthConfiguration();
+    console.info(
+      '[preview-auth-config]',
+      JSON.stringify({
+        failureStage: probe.failureStage,
+        failureMessage: probe.failureMessage,
+        envPresence: probe.envPresence,
+      }),
+    );
+  }
 
   return (
     <AuthShell
