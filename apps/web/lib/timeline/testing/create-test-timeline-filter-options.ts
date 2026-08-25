@@ -7,7 +7,7 @@ export const TEST_TIMELINE_FILTER_REFERENCE_DATE = new Date(
 export const TEST_TIMELINE_FILTER_TIME_ZONE = 'UTC';
 
 export const TEST_TIMELINE_DATE_FILTER_LABELS: TimelineDateFilterLabels = {
-  customRange: '{from} – {to}',
+  last45Days: 'Last 45 days',
   last30Days: 'Last 30 days',
   last7Days: 'Last 7 days',
   today: 'Today',

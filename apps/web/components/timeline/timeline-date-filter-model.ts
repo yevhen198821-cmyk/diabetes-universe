@@ -1,15 +1,18 @@
 import {
-  formatTimelineCompactDateLabel,
   getTimelineCalendarDateKey,
   isTimelineCalendarDateKeyInInclusiveRange,
   shiftTimelineCalendarDateKey,
 } from '../../lib/timeline/timeline-date-time';
 
-export type TimelineDateFilterPreset = '30days' | '7days' | 'custom' | 'today';
+/**
+ * Timeline active journal window (presentation/query boundary only).
+ * Events older than this remain stored for a future Full history / Archive UX.
+ */
+export const TIMELINE_ACTIVE_WINDOW_MAX_CALENDAR_DAYS = 45;
+
+export type TimelineDateFilterPreset = '45days' | '30days' | '7days' | 'today';
 
 export interface TimelineDateFilterSelection {
-  readonly customFromDateKey?: string;
-  readonly customToDateKey?: string;
   readonly preset: TimelineDateFilterPreset;
 }
 
@@ -19,7 +22,7 @@ export interface TimelineDateRange {
 }
 
 export interface TimelineDateFilterLabels {
-  readonly customRange: string;
+  readonly last45Days: string;
   readonly last30Days: string;
   readonly last7Days: string;
   readonly today: string;
@@ -29,13 +32,13 @@ export const DEFAULT_TIMELINE_DATE_FILTER: TimelineDateFilterSelection = {
   preset: '30days',
 };
 
-const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-
-export function isValidTimelineDateFilterDateKey(
-  dateKey: string | undefined,
-): dateKey is string {
-  return typeof dateKey === 'string' && DATE_KEY_PATTERN.test(dateKey);
-}
+const PRESET_LOOKBACK_DAYS: Readonly<
+  Record<Exclude<TimelineDateFilterPreset, 'today'>, number>
+> = {
+  '45days': TIMELINE_ACTIVE_WINDOW_MAX_CALENDAR_DAYS - 1,
+  '30days': 29,
+  '7days': 6,
+};
 
 export function resolveTimelineReferenceDateKey(
   referenceDate: Date,
@@ -55,41 +58,17 @@ export function resolveTimelineDateRange(
     return null;
   }
 
-  switch (selection.preset) {
-    case 'today':
-      return {
-        fromDateKey: toDateKey,
-        toDateKey,
-      };
-    case '7days': {
-      const fromDateKey = shiftTimelineCalendarDateKey(toDateKey, -6);
-
-      return fromDateKey ? { fromDateKey, toDateKey } : null;
-    }
-    case '30days': {
-      const fromDateKey = shiftTimelineCalendarDateKey(toDateKey, -29);
-
-      return fromDateKey ? { fromDateKey, toDateKey } : null;
-    }
-    case 'custom': {
-      if (
-        !isValidTimelineDateFilterDateKey(selection.customFromDateKey) ||
-        !isValidTimelineDateFilterDateKey(selection.customToDateKey)
-      ) {
-        return null;
-      }
-
-      const [fromDateKey, toDateKeyResolved] =
-        selection.customFromDateKey <= selection.customToDateKey
-          ? [selection.customFromDateKey, selection.customToDateKey]
-          : [selection.customToDateKey, selection.customFromDateKey];
-
-      return {
-        fromDateKey,
-        toDateKey: toDateKeyResolved,
-      };
-    }
+  if (selection.preset === 'today') {
+    return {
+      fromDateKey: toDateKey,
+      toDateKey,
+    };
   }
+
+  const lookbackDays = PRESET_LOOKBACK_DAYS[selection.preset];
+  const fromDateKey = shiftTimelineCalendarDateKey(toDateKey, -lookbackDays);
+
+  return fromDateKey ? { fromDateKey, toDateKey } : null;
 }
 
 export function matchesTimelineDateRange(
@@ -113,40 +92,15 @@ export function matchesTimelineDateRange(
 export function formatTimelineDateFilterLabel(
   selection: TimelineDateFilterSelection,
   labels: TimelineDateFilterLabels,
-  referenceDate: Date,
-  timeZone: string,
-  locale: string,
 ): string {
-  if (selection.preset === 'today') {
-    return labels.today;
+  switch (selection.preset) {
+    case 'today':
+      return labels.today;
+    case '7days':
+      return labels.last7Days;
+    case '30days':
+      return labels.last30Days;
+    case '45days':
+      return labels.last45Days;
   }
-
-  if (selection.preset === '7days') {
-    return labels.last7Days;
-  }
-
-  if (selection.preset === '30days') {
-    return labels.last30Days;
-  }
-
-  const range = resolveTimelineDateRange(selection, referenceDate, timeZone);
-
-  if (!range) {
-    return labels.customRange;
-  }
-
-  const fromLabel = formatTimelineCompactDateLabel(
-    range.fromDateKey,
-    locale,
-    timeZone,
-  );
-  const toLabel = formatTimelineCompactDateLabel(
-    range.toDateKey,
-    locale,
-    timeZone,
-  );
-
-  return labels.customRange
-    .replace('{from}', fromLabel)
-    .replace('{to}', toLabel);
 }

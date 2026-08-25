@@ -11,9 +11,7 @@ async function openDateFilterSheet(page: Page) {
   await expect(dateFilterSheet(page)).toBeVisible();
 }
 
-test('timeline date filter shows active period and filters events', async ({
-  page,
-}) => {
+test('timeline defaults to last 30 days', async ({ page }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
   await waitForApplicationReady(page);
@@ -22,20 +20,35 @@ test('timeline date filter shows active period and filters events', async ({
     'Last 30 days',
   );
   await expect(page.getByText('31 events')).toBeVisible();
-
-  await openDateFilterSheet(page);
-  await dateFilterSheet(page).getByRole('button', { name: 'Today' }).click();
-  await dateFilterSheet(page).getByRole('button', { name: 'Apply' }).click();
-
-  await expect(page.getByRole('button', { name: 'Date range' })).toContainText(
-    'Today',
-  );
-  await expect(page.getByText('5 events')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Today' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Yesterday' })).toBeHidden();
 });
 
-test('timeline custom date range applies inclusive boundaries', async ({
+test('timeline date selector lists active window presets only', async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 844, width: 390 });
+  await page.goto('/timeline');
+  await waitForApplicationReady(page);
+
+  await openDateFilterSheet(page);
+
+  await expect(
+    dateFilterSheet(page).getByRole('button', { name: 'Today' }),
+  ).toBeVisible();
+  await expect(
+    dateFilterSheet(page).getByRole('button', { name: 'Last 7 days' }),
+  ).toBeVisible();
+  await expect(
+    dateFilterSheet(page).getByRole('button', { name: 'Last 30 days' }),
+  ).toBeVisible();
+  await expect(
+    dateFilterSheet(page).getByRole('button', { name: 'Last 45 days' }),
+  ).toBeVisible();
+  await expect(
+    dateFilterSheet(page).getByRole('button', { name: 'Custom range' }),
+  ).toHaveCount(0);
+});
+
+test('timeline last 45 days selection filters within active window', async ({
   page,
 }) => {
   await page.goto('/timeline');
@@ -43,21 +56,17 @@ test('timeline custom date range applies inclusive boundaries', async ({
 
   await openDateFilterSheet(page);
   await dateFilterSheet(page)
-    .getByRole('button', { name: 'Custom range' })
+    .getByRole('button', { name: 'Last 45 days' })
     .click();
-  await dateFilterSheet(page).getByLabel('From').fill('2026-07-30');
-  await dateFilterSheet(page).getByLabel('To').fill('2026-08-01');
   await dateFilterSheet(page).getByRole('button', { name: 'Apply' }).click();
 
   await expect(page.getByRole('button', { name: 'Date range' })).toContainText(
-    '30 Jul',
+    'Last 45 days',
   );
-  await expect(page.getByText('2 events')).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Yesterday' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: '30 July' })).toBeVisible();
+  await expect(page.getByText('31 events')).toBeVisible();
 });
 
-test('timeline combined filters and clear filters preserve date range', async ({
+test('timeline combines last 45 days with category filter', async ({
   page,
 }) => {
   await page.goto('/timeline');
@@ -65,13 +74,28 @@ test('timeline combined filters and clear filters preserve date range', async ({
 
   await openDateFilterSheet(page);
   await dateFilterSheet(page)
-    .getByRole('button', { name: 'Last 7 days' })
+    .getByRole('button', { name: 'Last 45 days' })
+    .click();
+  await dateFilterSheet(page).getByRole('button', { name: 'Apply' }).click();
+  await page.getByRole('button', { name: 'Insulin' }).click();
+
+  await expect(page.getByText('1 events')).toBeVisible();
+  await expect(page.getByText('NovoRapid').first()).toBeVisible();
+});
+
+test('timeline clear filters preserves selected 45-day range', async ({
+  page,
+}) => {
+  await page.goto('/timeline');
+  await waitForApplicationReady(page);
+
+  await openDateFilterSheet(page);
+  await dateFilterSheet(page)
+    .getByRole('button', { name: 'Last 45 days' })
     .click();
   await dateFilterSheet(page).getByRole('button', { name: 'Apply' }).click();
   await page.getByRole('button', { name: 'Insulin' }).click();
   await page.getByLabel('Search events').fill('NovoRapid');
-
-  await expect(page.getByText('1 events')).toBeVisible();
 
   await page.getByRole('button', { name: 'Clear filters' }).click();
 
@@ -81,36 +105,17 @@ test('timeline combined filters and clear filters preserve date range', async ({
     'true',
   );
   await expect(page.getByRole('button', { name: 'Date range' })).toContainText(
-    'Last 7 days',
+    'Last 45 days',
   );
-  await expect(page.getByText('10 events')).toBeVisible();
+  await expect(page.getByText('31 events')).toBeVisible();
 });
 
-test('timeline period empty and filtered empty states differ', async ({
+test('timeline filtered empty result keeps clear filters action', async ({
   page,
 }) => {
   await page.goto('/timeline');
   await waitForApplicationReady(page);
 
-  await openDateFilterSheet(page);
-  await dateFilterSheet(page)
-    .getByRole('button', { name: 'Custom range' })
-    .click();
-  await dateFilterSheet(page).getByLabel('From').fill('2026-06-01');
-  await dateFilterSheet(page).getByLabel('To').fill('2026-06-02');
-  await dateFilterSheet(page).getByRole('button', { name: 'Apply' }).click();
-
-  await expect(
-    page.getByRole('heading', { name: 'No events for this period' }),
-  ).toBeVisible();
-  await expect(page.getByText('0 events')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Clear filters' })).toBeHidden();
-
-  await openDateFilterSheet(page);
-  await dateFilterSheet(page)
-    .getByRole('button', { name: 'Last 30 days' })
-    .click();
-  await dateFilterSheet(page).getByRole('button', { name: 'Apply' }).click();
   await page.getByLabel('Search events').fill('does-not-exist');
 
   await expect(

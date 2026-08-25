@@ -230,17 +230,50 @@ test('filters by last 7 days preset', () => {
   );
 });
 
-test('filters by custom inclusive range', () => {
-  const model = filter('', 'all', {
-    customFromDateKey: '2026-07-30',
-    customToDateKey: '2026-08-01',
-    preset: 'custom',
-  });
+test('filters by last 45 days preset', () => {
+  const model = filter('', 'all', { preset: '45days' });
 
-  assert.equal(model.resultCount, 2);
+  assert.equal(model.resultCount, 6);
+  assert.equal(model.dateFilterLabel, 'Last 45 days');
+});
+
+test('excludes events outside the 45-day active window without mutating source data', () => {
+  const [outsideWindowEvent] = liftLegacyTestFixtures([
+    {
+      dateTime: '2026-06-18T09:00:00.000Z',
+      id: 'outside-window',
+      kind: 'note',
+      title: 'Outside window',
+      value: 'Stored but hidden',
+    },
+  ]);
+  const sourceEvents = [...events, outsideWindowEvent];
+  const model = createTimelineSearchFilterModel(
+    sourceEvents,
+    { dateFilter: { preset: '45days' }, filter: 'all', query: '' },
+    presentationDependencies,
+    filterOptions,
+  );
+
+  assert.equal(model.resultCount, events.length);
+  assert.equal(sourceEvents.length, events.length + 1);
+  assert.equal(
+    model.filteredEvents.some((event) => event.id === 'outside-window'),
+    false,
+  );
   assert.deepEqual(
-    model.filteredEvents.map((event) => event.id).sort(),
-    ['activity-1', 'note-1'].sort(),
+    sourceEvents.map((event) => event.id),
+    [...events.map((event) => event.id), 'outside-window'],
+  );
+});
+
+test('combines last 45 days with category and search filters', () => {
+  const model = filter('novo', 'insulin', { preset: '45days' });
+
+  assert.equal(model.resultCount, 1);
+  assert.deepEqual(
+    model.filteredEvents.map((event) => event.id),
+    ['insulin-1'],
   );
 });
 

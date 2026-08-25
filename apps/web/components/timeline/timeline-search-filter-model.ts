@@ -150,9 +150,6 @@ export function createTimelineSearchFilterModel(
     dateFilterLabel: formatTimelineDateFilterLabel(
       dateFilter,
       options.dateFilterLabels,
-      referenceDate,
-      options.timeZone,
-      locale,
     ),
     dateRangeEventCount: dateRangeEvents.length,
     filteredEvents,

@@ -120,7 +120,7 @@ export function TimelineShell() {
         presentationDependencies,
         {
           dateFilterLabels: {
-            customRange: uiLabels.dateFilter.customRange,
+            last45Days: uiLabels.dateFilter.last45Days,
             last30Days: uiLabels.dateFilter.last30Days,
             last7Days: uiLabels.dateFilter.last7Days,
             today: uiLabels.dateFilter.today,
@@ -137,7 +137,7 @@ export function TimelineShell() {
       query,
       referenceDate,
       timeZone,
-      uiLabels.dateFilter.customRange,
+      uiLabels.dateFilter.last45Days,
       uiLabels.dateFilter.last30Days,
       uiLabels.dateFilter.last7Days,
       uiLabels.dateFilter.today,
@@ -291,7 +291,7 @@ export function TimelineShell() {
       presentationDependencies,
       {
         dateFilterLabels: {
-          customRange: uiLabels.dateFilter.customRange,
+          last45Days: uiLabels.dateFilter.last45Days,
           last30Days: uiLabels.dateFilter.last30Days,
           last7Days: uiLabels.dateFilter.last7Days,
           today: uiLabels.dateFilter.today,

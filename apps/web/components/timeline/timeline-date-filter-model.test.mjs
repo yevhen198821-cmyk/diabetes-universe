@@ -10,10 +10,10 @@ import {
 import {
   DEFAULT_TIMELINE_DATE_FILTER,
   formatTimelineDateFilterLabel,
-  isValidTimelineDateFilterDateKey,
   matchesTimelineDateRange,
   resolveTimelineDateRange,
   resolveTimelineReferenceDateKey,
+  TIMELINE_ACTIVE_WINDOW_MAX_CALENDAR_DAYS,
 } from './timeline-date-filter-model.ts';
 import {
   TEST_TIMELINE_DATE_FILTER_LABELS,
@@ -25,10 +25,8 @@ const labels = TEST_TIMELINE_DATE_FILTER_LABELS;
 const referenceDate = TEST_TIMELINE_FILTER_REFERENCE_DATE;
 const timeZone = TEST_TIMELINE_FILTER_TIME_ZONE;
 
-test('validates timeline date filter date keys', () => {
-  assert.equal(isValidTimelineDateFilterDateKey('2026-08-02'), true);
-  assert.equal(isValidTimelineDateFilterDateKey('2026-8-02'), false);
-  assert.equal(isValidTimelineDateFilterDateKey(undefined), false);
+test('active window maximum is 45 calendar days', () => {
+  assert.equal(TIMELINE_ACTIVE_WINDOW_MAX_CALENDAR_DAYS, 45);
 });
 
 test('resolves today range with timezone-aware calendar day', () => {
@@ -70,35 +68,34 @@ test('resolves last 30 days as inclusive twenty-nine-day lookback', () => {
   });
 });
 
-test('resolves custom range with inclusive boundaries and reversed input', () => {
+test('resolves last 45 days as inclusive forty-four-day lookback', () => {
   const range = resolveTimelineDateRange(
-    {
-      customFromDateKey: '2026-08-10',
-      customToDateKey: '2026-08-02',
-      preset: 'custom',
-    },
+    { preset: '45days' },
     referenceDate,
     timeZone,
   );
 
   assert.deepEqual(range, {
-    fromDateKey: '2026-08-02',
-    toDateKey: '2026-08-10',
+    fromDateKey: '2026-06-19',
+    toDateKey: '2026-08-02',
   });
 });
 
-test('returns null for invalid custom range', () => {
+test('includes event on 45-day boundary and excludes event outside it', () => {
+  const range = resolveTimelineDateRange(
+    { preset: '45days' },
+    referenceDate,
+    timeZone,
+  );
+
+  assert.equal(range !== null, true);
   assert.equal(
-    resolveTimelineDateRange(
-      {
-        customFromDateKey: 'bad',
-        customToDateKey: '2026-08-02',
-        preset: 'custom',
-      },
-      referenceDate,
-      timeZone,
-    ),
-    null,
+    matchesTimelineDateRange('2026-06-19T09:00:00.000Z', range, timeZone),
+    true,
+  );
+  assert.equal(
+    matchesTimelineDateRange('2026-06-18T23:59:59.000Z', range, timeZone),
+    false,
   );
 });
 
@@ -143,50 +140,32 @@ test('matches events across DST boundaries in America/New_York', () => {
   );
 });
 
-test('formats preset and custom labels', () => {
+test('formats preset labels', () => {
   assert.equal(
-    formatTimelineDateFilterLabel(
-      { preset: 'today' },
-      labels,
-      referenceDate,
-      timeZone,
-      'en-GB',
-    ),
+    formatTimelineDateFilterLabel({ preset: 'today' }, labels),
     'Today',
   );
   assert.equal(
-    formatTimelineDateFilterLabel(
-      { preset: '7days' },
-      labels,
-      referenceDate,
-      timeZone,
-      'en-GB',
-    ),
+    formatTimelineDateFilterLabel({ preset: '7days' }, labels),
     'Last 7 days',
   );
-  assert.match(
-    formatTimelineDateFilterLabel(
-      {
-        customFromDateKey: '2026-08-02',
-        customToDateKey: '2026-08-14',
-        preset: 'custom',
-      },
-      labels,
-      referenceDate,
-      timeZone,
-      'en-GB',
-    ),
-    /2 Aug.*14 Aug/,
+  assert.equal(
+    formatTimelineDateFilterLabel({ preset: '30days' }, labels),
+    'Last 30 days',
+  );
+  assert.equal(
+    formatTimelineDateFilterLabel({ preset: '45days' }, labels),
+    'Last 45 days',
   );
 });
 
 test('calendar date helpers stay deterministic', () => {
-  assert.equal(shiftTimelineCalendarDateKey('2026-08-02', -6), '2026-07-27');
+  assert.equal(shiftTimelineCalendarDateKey('2026-08-02', -44), '2026-06-19');
   assert.equal(
     isTimelineCalendarDateKeyInInclusiveRange(
       '2026-08-02',
+      '2026-06-19',
       '2026-08-02',
-      '2026-08-14',
     ),
     true,
   );

@@ -44,7 +44,7 @@ export function TimelineDateFilterControl({
       </button>
       {open ? (
         <TimelineDateFilterSheet
-          key={`${selection.preset}-${selection.customFromDateKey ?? ''}-${selection.customToDateKey ?? ''}`}
+          key={selection.preset}
           labels={labels}
           onApply={onChange}
           onClose={() => setOpen(false)}

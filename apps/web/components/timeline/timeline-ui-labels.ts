@@ -61,10 +61,7 @@ export interface TimelineUiLabels {
     readonly apply: string;
     readonly ariaLabel: string;
     readonly closeOverlay: string;
-    readonly custom: string;
-    readonly customFrom: string;
-    readonly customRange: string;
-    readonly customTo: string;
+    readonly last45Days: string;
     readonly last30Days: string;
     readonly last7Days: string;
     readonly sheetTitle: string;
@@ -168,10 +165,7 @@ const TIMELINE_UI_TRANSLATION_KEYS = {
   dateFilterApply: asTranslationKey('timeline.dateFilter.apply'),
   dateFilterAriaLabel: asTranslationKey('timeline.dateFilter.ariaLabel'),
   dateFilterCloseOverlay: asTranslationKey('timeline.dateFilter.closeOverlay'),
-  dateFilterCustom: asTranslationKey('timeline.dateFilter.custom'),
-  dateFilterCustomFrom: asTranslationKey('timeline.dateFilter.customFrom'),
-  dateFilterCustomRange: asTranslationKey('timeline.dateFilter.customRange'),
-  dateFilterCustomTo: asTranslationKey('timeline.dateFilter.customTo'),
+  dateFilterLast45Days: asTranslationKey('timeline.dateFilter.last45Days'),
   dateFilterLast30Days: asTranslationKey('timeline.dateFilter.last30Days'),
   dateFilterLast7Days: asTranslationKey('timeline.dateFilter.last7Days'),
   dateFilterSheetTitle: asTranslationKey('timeline.dateFilter.sheetTitle'),
@@ -335,21 +329,9 @@ export function resolveTimelineUiLabels(
         localization,
         TIMELINE_UI_TRANSLATION_KEYS.dateFilterCloseOverlay,
       ),
-      custom: translate(
+      last45Days: translate(
         localization,
-        TIMELINE_UI_TRANSLATION_KEYS.dateFilterCustom,
-      ),
-      customFrom: translate(
-        localization,
-        TIMELINE_UI_TRANSLATION_KEYS.dateFilterCustomFrom,
-      ),
-      customRange: translate(
-        localization,
-        TIMELINE_UI_TRANSLATION_KEYS.dateFilterCustomRange,
-      ),
-      customTo: translate(
-        localization,
-        TIMELINE_UI_TRANSLATION_KEYS.dateFilterCustomTo,
+        TIMELINE_UI_TRANSLATION_KEYS.dateFilterLast45Days,
       ),
       last30Days: translate(
         localization,
