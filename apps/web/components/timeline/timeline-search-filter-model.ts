@@ -8,8 +8,22 @@ import {
   resolveTimelinePresentationLocale,
   type TimelinePresentationDependencies,
 } from '../../lib/timeline/presentation';
+import {
+  DEFAULT_TIMELINE_DATE_FILTER,
+  formatTimelineDateFilterLabel,
+  matchesTimelineDateRange,
+  resolveTimelineDateRange,
+  type TimelineDateFilterLabels,
+  type TimelineDateFilterSelection,
+} from './timeline-date-filter-model';
 
 export type TimelineEventFilter = 'all' | TimelineEventKind;
+
+export interface TimelineFilterInput {
+  readonly dateFilter: TimelineDateFilterSelection;
+  readonly filter: TimelineEventFilter;
+  readonly query: string;
+}
 
 export interface TimelineSearchFilterInput {
   readonly filter: TimelineEventFilter;
@@ -18,10 +32,15 @@ export interface TimelineSearchFilterInput {
 
 export interface TimelineSearchFilterModel {
   readonly activeFilter: TimelineEventFilter;
+  readonly dateFilter: TimelineDateFilterSelection;
+  readonly dateFilterLabel: string;
+  readonly dateRangeEventCount: number;
   readonly filteredEvents: readonly SemanticTimelineEvent[];
   readonly hasActiveCriteria: boolean;
+  readonly hasActiveDateFilter: boolean;
   readonly hasActiveFilter: boolean;
   readonly hasActiveSearch: boolean;
+  readonly hasActiveSearchOrCategoryCriteria: boolean;
   readonly normalizedQuery: string;
   readonly resultCount: number;
 }
@@ -87,30 +106,59 @@ function matchesSearch(
 
 export function createTimelineSearchFilterModel(
   events: readonly SemanticTimelineEvent[],
-  input: TimelineSearchFilterInput,
+  input: TimelineFilterInput,
   dependencies: TimelinePresentationDependencies,
+  options: {
+    readonly dateFilterLabels: TimelineDateFilterLabels;
+    readonly referenceDate?: Date;
+    readonly timeZone: string;
+  },
 ): TimelineSearchFilterModel {
-  const normalizedQuery = normalizeTimelineSearchQuery(
-    input.query,
-    resolveTimelinePresentationLocale(dependencies),
-  );
+  const locale = resolveTimelinePresentationLocale(dependencies);
+  const normalizedQuery = normalizeTimelineSearchQuery(input.query, locale);
   const activeFilter = timelineEventFilterOptions.includes(input.filter)
     ? input.filter
     : 'all';
-  const hasActiveSearch = normalizedQuery.length > 0;
-  const hasActiveFilter = activeFilter !== 'all';
-  const filteredEvents = events.filter(
+  const dateFilter = input.dateFilter ?? DEFAULT_TIMELINE_DATE_FILTER;
+  const referenceDate = options.referenceDate ?? new Date();
+  const dateRange = resolveTimelineDateRange(
+    dateFilter,
+    referenceDate,
+    options.timeZone,
+  );
+  const dateRangeEvents =
+    dateRange === null
+      ? [...events]
+      : events.filter((event) =>
+          matchesTimelineDateRange(
+            event.occurredAt,
+            dateRange,
+            options.timeZone,
+          ),
+        );
+  const filteredEvents = dateRangeEvents.filter(
     (event) =>
       matchesFilter(event, activeFilter) &&
       matchesSearch(event, normalizedQuery, dependencies),
   );
+  const hasActiveSearch = normalizedQuery.length > 0;
+  const hasActiveFilter = activeFilter !== 'all';
 
   return {
     activeFilter,
+    dateFilter,
+    dateFilterLabel: formatTimelineDateFilterLabel(
+      dateFilter,
+      options.dateFilterLabels,
+    ),
+    dateRangeEventCount: dateRangeEvents.length,
     filteredEvents,
-    hasActiveCriteria: hasActiveSearch || hasActiveFilter,
+    hasActiveCriteria:
+      hasActiveSearch || hasActiveFilter || dateFilter.preset !== '30days',
+    hasActiveDateFilter: dateFilter.preset !== '30days',
     hasActiveFilter,
     hasActiveSearch,
+    hasActiveSearchOrCategoryCriteria: hasActiveSearch || hasActiveFilter,
     normalizedQuery,
     resultCount: filteredEvents.length,
   };

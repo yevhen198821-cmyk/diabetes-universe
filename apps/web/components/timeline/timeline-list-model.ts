@@ -18,7 +18,8 @@ export interface TimelineListGroup {
 export interface TimelineListModel {
   readonly errorMessage?: string;
   readonly groups: readonly TimelineListGroup[];
-  readonly status: 'empty' | 'error' | 'filtered-empty' | 'loading' | 'ready';
+  readonly status:
+    'empty' | 'error' | 'filtered-empty' | 'loading' | 'period-empty' | 'ready';
   readonly totalEventCount: number;
 }
 
@@ -31,7 +32,8 @@ export interface TimelineListModelInput {
     readonly today: string;
     readonly yesterday: string;
   }>;
-  readonly hasActiveCriteria?: boolean;
+  readonly hasActiveSearchOrCategoryCriteria?: boolean;
+  readonly hasEventsInDateRange?: boolean;
   readonly locale?: string;
   readonly referenceDate?: Date;
   readonly status: TimelineStoreStatus;
@@ -143,7 +145,8 @@ export function createTimelineListModel({
   error,
   events,
   groupLabels,
-  hasActiveCriteria = false,
+  hasActiveSearchOrCategoryCriteria = false,
+  hasEventsInDateRange = true,
   locale = WEB_PLATFORM_DEFAULT_LOCALE,
   referenceDate = new Date(),
   status,
@@ -168,7 +171,23 @@ export function createTimelineListModel({
     };
   }
 
-  if (events.length === 0 && hasActiveCriteria && totalSourceEventCount > 0) {
+  if (
+    events.length === 0 &&
+    !hasEventsInDateRange &&
+    totalSourceEventCount > 0
+  ) {
+    return {
+      groups: [],
+      status: 'period-empty',
+      totalEventCount: 0,
+    };
+  }
+
+  if (
+    events.length === 0 &&
+    hasActiveSearchOrCategoryCriteria &&
+    hasEventsInDateRange
+  ) {
     return {
       groups: [],
       status: 'filtered-empty',

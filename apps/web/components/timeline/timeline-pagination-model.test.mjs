@@ -4,7 +4,10 @@ import test from 'node:test';
 import { createTimelinePaginationModel } from './timeline-pagination-model.ts';
 import { createTimelineSearchFilterModel } from './timeline-search-filter-model.ts';
 import { createTestTimelinePresentationDependencies } from '../../lib/timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
+import { createTestTimelineFilterOptions } from '../../lib/timeline/testing/create-test-timeline-filter-options.ts';
 import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
+
+const filterOptions = createTestTimelineFilterOptions();
 
 let presentationDependencies;
 
@@ -145,10 +148,12 @@ test('paginates search results after filtering', () => {
       ]),
     ],
     {
+      dateFilter: { preset: '30days' },
       filter: 'all',
       query: 'История',
     },
     presentationDependencies,
+    filterOptions,
   );
   const model = createTimelinePaginationModel({
     events: filtered.filteredEvents,
@@ -174,10 +179,12 @@ test('paginates filter results after filtering', () => {
       ]),
     ],
     {
+      dateFilter: { preset: '30days' },
       filter: 'note',
       query: '',
     },
     presentationDependencies,
+    filterOptions,
   );
   const model = createTimelinePaginationModel({
     events: filtered.filteredEvents,

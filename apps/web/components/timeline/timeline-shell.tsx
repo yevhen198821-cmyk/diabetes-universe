@@ -39,6 +39,10 @@ import {
   createTimelineSearchFilterModel,
   type TimelineEventFilter,
 } from './timeline-search-filter-model';
+import {
+  DEFAULT_TIMELINE_DATE_FILTER,
+  type TimelineDateFilterSelection,
+} from './timeline-date-filter-model';
 import { TimelineToolbar } from './timeline-toolbar';
 import { TopBar } from './top-bar';
 import { DashboardMobileNav } from '../dashboard/dashboard-mobile-nav';
@@ -87,6 +91,9 @@ export function TimelineShell() {
   const mobileQuickAddFabRef = useRef<HTMLButtonElement>(null);
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<TimelineEventFilter>('all');
+  const [dateFilter, setDateFilter] = useState<TimelineDateFilterSelection>(
+    DEFAULT_TIMELINE_DATE_FILTER,
+  );
   const [visibleCount, setVisibleCount] = useState(TIMELINE_PAGE_SIZE);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [detailMode, setDetailMode] = useState<TimelineEventDetailMode>('view');
@@ -108,12 +115,35 @@ export function TimelineShell() {
       createTimelineSearchFilterModel(
         displayOrderedEvents,
         {
+          dateFilter,
           filter: activeFilter,
           query,
         },
         presentationDependencies,
+        {
+          dateFilterLabels: {
+            last45Days: uiLabels.dateFilter.last45Days,
+            last30Days: uiLabels.dateFilter.last30Days,
+            last7Days: uiLabels.dateFilter.last7Days,
+            today: uiLabels.dateFilter.today,
+          },
+          referenceDate,
+          timeZone,
+        },
       ),
-    [activeFilter, displayOrderedEvents, presentationDependencies, query],
+    [
+      activeFilter,
+      dateFilter,
+      displayOrderedEvents,
+      presentationDependencies,
+      query,
+      referenceDate,
+      timeZone,
+      uiLabels.dateFilter.last45Days,
+      uiLabels.dateFilter.last30Days,
+      uiLabels.dateFilter.last7Days,
+      uiLabels.dateFilter.today,
+    ],
   );
 
   useLayoutEffect(() => {
@@ -146,7 +176,9 @@ export function TimelineShell() {
         defaultErrorMessage: uiLabels.error.default,
         error,
         events: paginationModel.visibleEvents,
-        hasActiveCriteria: searchFilterModel.hasActiveCriteria,
+        hasActiveSearchOrCategoryCriteria:
+          searchFilterModel.hasActiveSearchOrCategoryCriteria,
+        hasEventsInDateRange: searchFilterModel.dateRangeEventCount > 0,
         locale: presentationLocale,
         groupLabels: presentationDependencies.labels.groups,
         referenceDate,
@@ -162,7 +194,8 @@ export function TimelineShell() {
       presentationDependencies.labels.groups,
       presentationLocale,
       referenceDate,
-      searchFilterModel.hasActiveCriteria,
+      searchFilterModel.dateRangeEventCount,
+      searchFilterModel.hasActiveSearchOrCategoryCriteria,
       status,
       timeZone,
       uiLabels.error.default,
@@ -188,6 +221,13 @@ export function TimelineShell() {
 
   const handleFilterChange = (nextFilter: TimelineEventFilter) => {
     setActiveFilter(nextFilter);
+    setVisibleCount(TIMELINE_PAGE_SIZE);
+  };
+
+  const handleDateFilterChange = (
+    nextDateFilter: TimelineDateFilterSelection,
+  ) => {
+    setDateFilter(nextDateFilter);
     setVisibleCount(TIMELINE_PAGE_SIZE);
   };
 
@@ -246,10 +286,21 @@ export function TimelineShell() {
     const nextSearchFilterModel = createTimelineSearchFilterModel(
       nextEvents,
       {
+        dateFilter,
         filter: activeFilter,
         query,
       },
       presentationDependencies,
+      {
+        dateFilterLabels: {
+          last45Days: uiLabels.dateFilter.last45Days,
+          last30Days: uiLabels.dateFilter.last30Days,
+          last7Days: uiLabels.dateFilter.last7Days,
+          today: uiLabels.dateFilter.today,
+        },
+        referenceDate,
+        timeZone,
+      },
     );
     const isStillVisible = nextSearchFilterModel.filteredEvents.some(
       (visibleEvent) => visibleEvent.id === updatedEvent.id,
@@ -317,10 +368,13 @@ export function TimelineShell() {
 
         {showToolbar ? (
           <TimelineToolbar
+            dateFilter={dateFilter}
+            dateFilterLabel={searchFilterModel.dateFilterLabel}
             filterLabels={presentationDependencies.labels.filters}
             formatCount={formatCount}
             labels={uiLabels}
             model={searchFilterModel}
+            onDateFilterChange={handleDateFilterChange}
             onFilterChange={handleFilterChange}
             onQueryChange={handleQueryChange}
             onReset={resetCriteria}

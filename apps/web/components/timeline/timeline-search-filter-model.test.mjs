@@ -3,10 +3,13 @@ import test from 'node:test';
 
 import { liftLegacyTestFixtures } from '../../lib/timeline/testing/lift-legacy-test-fixtures.ts';
 import { createTestTimelinePresentationDependencies } from '../../lib/timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
+import { createTestTimelineFilterOptions } from '../../lib/timeline/testing/create-test-timeline-filter-options.ts';
 import {
   createTimelineSearchFilterModel,
   normalizeTimelineSearchQuery,
 } from './timeline-search-filter-model.ts';
+
+const filterOptions = createTestTimelineFilterOptions();
 
 let presentationDependencies;
 
@@ -69,11 +72,12 @@ const legacyEvents = [
 
 const events = liftLegacyTestFixtures(legacyEvents);
 
-function filter(query, filter = 'all') {
+function filter(query, filter = 'all', dateFilter = { preset: '30days' }) {
   return createTimelineSearchFilterModel(
     events,
-    { filter, query },
+    { dateFilter, filter, query },
     presentationDependencies,
+    filterOptions,
   );
 }
 
@@ -195,4 +199,111 @@ test('does not mutate input events', () => {
     events.map((event) => event.id),
     originalOrder,
   );
+});
+
+test('filters by today preset only', () => {
+  const model = filter('', 'all', { preset: 'today' });
+
+  assert.equal(model.resultCount, 4);
+  assert.equal(model.dateRangeEventCount, 4);
+  assert.equal(model.hasActiveDateFilter, true);
+  assert.deepEqual(
+    model.filteredEvents.map((event) => event.id).sort(),
+    ['glucose-1', 'insulin-1', 'medication-1', 'nutrition-1'].sort(),
+  );
+});
+
+test('filters by last 7 days preset', () => {
+  const model = filter('', 'all', { preset: '7days' });
+
+  assert.equal(model.resultCount, 6);
+  assert.deepEqual(
+    model.filteredEvents.map((event) => event.id).sort(),
+    [
+      'activity-1',
+      'glucose-1',
+      'insulin-1',
+      'medication-1',
+      'note-1',
+      'nutrition-1',
+    ].sort(),
+  );
+});
+
+test('filters by last 45 days preset', () => {
+  const model = filter('', 'all', { preset: '45days' });
+
+  assert.equal(model.resultCount, 6);
+  assert.equal(model.dateFilterLabel, 'Last 45 days');
+});
+
+test('excludes events outside the 45-day active window without mutating source data', () => {
+  const [outsideWindowEvent] = liftLegacyTestFixtures([
+    {
+      dateTime: '2026-06-18T09:00:00.000Z',
+      id: 'outside-window',
+      kind: 'note',
+      title: 'Outside window',
+      value: 'Stored but hidden',
+    },
+  ]);
+  const sourceEvents = [...events, outsideWindowEvent];
+  const model = createTimelineSearchFilterModel(
+    sourceEvents,
+    { dateFilter: { preset: '45days' }, filter: 'all', query: '' },
+    presentationDependencies,
+    filterOptions,
+  );
+
+  assert.equal(model.resultCount, events.length);
+  assert.equal(sourceEvents.length, events.length + 1);
+  assert.equal(
+    model.filteredEvents.some((event) => event.id === 'outside-window'),
+    false,
+  );
+  assert.deepEqual(
+    sourceEvents.map((event) => event.id),
+    [...events.map((event) => event.id), 'outside-window'],
+  );
+});
+
+test('combines last 45 days with category and search filters', () => {
+  const model = filter('novo', 'insulin', { preset: '45days' });
+
+  assert.equal(model.resultCount, 1);
+  assert.deepEqual(
+    model.filteredEvents.map((event) => event.id),
+    ['insulin-1'],
+  );
+});
+
+test('combines search, category, and date filters', () => {
+  const model = filter('novo', 'insulin', { preset: 'today' });
+
+  assert.equal(model.resultCount, 1);
+  assert.deepEqual(
+    model.filteredEvents.map((event) => event.id),
+    ['insulin-1'],
+  );
+  assert.equal(model.hasActiveSearchOrCategoryCriteria, true);
+});
+
+test('reports date filter label for active preset', () => {
+  const model = filter('', 'all', { preset: '7days' });
+
+  assert.equal(model.dateFilterLabel, 'Last 7 days');
+});
+
+test('date-only empty period keeps search/category criteria separate', () => {
+  const model = filter('', 'all', { preset: 'today' });
+
+  assert.equal(model.hasActiveSearchOrCategoryCriteria, false);
+  assert.equal(model.hasActiveCriteria, true);
+});
+
+test('event count reflects filtered results with active category', () => {
+  const model = filter('', 'insulin', { preset: '30days' });
+
+  assert.equal(model.resultCount, 1);
+  assert.equal(model.hasActiveFilter, true);
 });

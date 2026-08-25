@@ -181,28 +181,30 @@ test('mobile home keeps scrollable content above the bottom navigation', async (
   await page.goto('/');
   await waitForApplicationReady(page);
 
+  const recentEventsSection = page.locator('section', {
+    has: page.getByRole('heading', { name: 'Recent events', level: 2 }),
+  });
+  const lastRecentEvent = recentEventsSection.locator('li').last();
+  const bottomNav = page.locator('#dashboard-mobile-nav');
+
+  // Platform readiness precedes timeline hydration; recent events render skeleton
+  // markup without list rows until derived dashboard blocks are available.
+  await expect(page.getByRole('link', { name: 'All events' })).toBeVisible();
+  await expect(lastRecentEvent).toBeVisible();
+  await expect(bottomNav).toBeVisible();
+
   await page.evaluate(() => {
     window.scrollTo(0, document.documentElement.scrollHeight);
   });
 
-  const contentClearance = await page.evaluate(() => {
-    const nav = document.getElementById('dashboard-mobile-nav');
-    const lastRecentEvent = document
-      .getElementById('dashboard-recent-events-title')
-      ?.closest('section')
-      ?.querySelector('li:last-child');
+  const navBox = await bottomNav.boundingBox();
+  const eventBox = await lastRecentEvent.boundingBox();
 
-    if (!nav || !lastRecentEvent) {
-      return null;
-    }
+  expect(navBox).not.toBeNull();
+  expect(eventBox).not.toBeNull();
 
-    return (
-      nav.getBoundingClientRect().top -
-      lastRecentEvent.getBoundingClientRect().bottom
-    );
-  });
+  const contentClearance = navBox!.y - (eventBox!.y + eventBox!.height);
 
-  expect(contentClearance).not.toBeNull();
   expect(contentClearance).toBeGreaterThan(8);
 });
 

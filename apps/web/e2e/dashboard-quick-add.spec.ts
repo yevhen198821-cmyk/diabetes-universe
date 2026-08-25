@@ -142,7 +142,7 @@ test('timeline search and filters combine without changing store', async ({
   await expect(
     page.getByRole('heading', { name: 'No matching events' }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Reset filters' }).first().click();
+  await page.getByRole('button', { name: 'Clear filters' }).first().click();
   await expect(search).toHaveValue('');
   await expect(page.getByRole('button', { name: 'All' })).toHaveAttribute(
     'aria-pressed',

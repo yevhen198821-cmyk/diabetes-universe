@@ -25,11 +25,21 @@ const sourceLabels = {
 test('formatTimelineToolbarResultLabel reports no matches for filtered empty', () => {
   const label = formatTimelineToolbarResultLabel(
     toolbarLabels,
-    { hasActiveCriteria: true, resultCount: 0 },
+    { hasActiveSearchOrCategoryCriteria: true, resultCount: 0 },
     String,
   );
 
   assert.equal(label, 'No matches found');
+});
+
+test('formatTimelineToolbarResultLabel reports zero events for date-only empty', () => {
+  const label = formatTimelineToolbarResultLabel(
+    toolbarLabels,
+    { hasActiveSearchOrCategoryCriteria: false, resultCount: 0 },
+    String,
+  );
+
+  assert.equal(label, '0 events');
 });
 
 test('resolveTimelineEventSourcePresentation marks demo separately from medical sources', () => {
