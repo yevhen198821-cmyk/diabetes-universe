@@ -45,7 +45,9 @@ test('profile renders segmented shell with active bottom navigation', async ({
     page.getByRole('tab', { name: 'Profile', selected: true }),
   ).toBeVisible();
   await expect(
-    page.locator('#dashboard-mobile-nav').getByRole('link', { name: 'Account' }),
+    page
+      .locator('#dashboard-mobile-nav')
+      .getByRole('link', { name: 'Account' }),
   ).toHaveAttribute('aria-current', 'page');
   await expect(page.getByLabel('Add event')).toHaveCount(0);
   await expect(page.locator('#timeline-mobile-quick-add-fab')).toHaveCount(0);
