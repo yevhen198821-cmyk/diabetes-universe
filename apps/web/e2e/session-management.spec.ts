@@ -129,7 +129,7 @@ test.describe('P6c session management', () => {
     await page.goto('/account/security/sessions');
 
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Активные сессии' }),
+      page.getByRole('heading', { level: 2, name: 'Активные сессии' }),
     ).toBeVisible();
     await expect(page.getByText('Current session')).toHaveCount(0);
     await expect(page.getByText('Текущая сессия')).toBeVisible();
@@ -234,7 +234,7 @@ test.describe('P6c session management', () => {
 
     await page.reload();
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Active sessions' }),
+      page.getByRole('heading', { level: 2, name: 'Active sessions' }),
     ).toBeVisible();
 
     await page.getByRole('button', { name: 'Sign out everywhere' }).click();

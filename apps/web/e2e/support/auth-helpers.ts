@@ -114,7 +114,7 @@ export async function expectUnauthenticated(page: Page) {
 export async function gotoSessionsPage(page: Page) {
   await page.goto('/account/security/sessions');
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Active sessions' }),
+    page.getByRole('heading', { level: 2, name: 'Active sessions' }),
   ).toBeVisible();
 }
 
