@@ -105,8 +105,8 @@ function resolvePreviewDeploymentHost(
   env: NodeJS.ProcessEnv,
 ): string | undefined {
   return (
-    normalizeDeploymentHost(env.VERCEL_URL) ??
-    normalizeDeploymentHost(env.VERCEL_BRANCH_URL)
+    normalizeDeploymentHost(env.VERCEL_BRANCH_URL) ??
+    normalizeDeploymentHost(env.VERCEL_URL)
   );
 }
 
@@ -128,8 +128,8 @@ function collectPreviewAllowedHosts(
   const hosts = new Set<string>();
 
   for (const candidate of [
-    env.VERCEL_URL,
     env.VERCEL_BRANCH_URL,
+    env.VERCEL_URL,
     baseUrl,
     env.BETTER_AUTH_URL,
   ]) {

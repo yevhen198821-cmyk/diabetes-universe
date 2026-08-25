@@ -57,6 +57,30 @@ test('resolveAuthEnvironment always trusts the resolved base URL origin', () => 
   ]);
 });
 
+test('preview deployments prefer branch alias host over immutable deployment host', () => {
+  const environment = resolveAuthEnvironment({
+    AUTH_DATABASE_MODE: 'postgres',
+    AUTH_EMAIL_FROM: 'auth@example.com',
+    AUTH_WEBAUTHN_ORIGIN: 'https://production.example',
+    AUTH_WEBAUTHN_RP_ID: 'production.example',
+    BETTER_AUTH_SECRET: 'x'.repeat(32),
+    BETTER_AUTH_URL: 'https://production.example',
+    DATABASE_URL: 'postgres://user:pass@localhost:5432/app',
+    RESEND_API_KEY: 're_test_key',
+    VERCEL_BRANCH_URL:
+      'diabetes-universe-web-git-implementation-profile-2b7cc9-resulto.vercel.app',
+    VERCEL_ENV: 'preview',
+    VERCEL_URL: 'diabetes-universe-web-ft5kujfzn-resulto.vercel.app',
+  });
+
+  assert.equal(
+    environment.baseUrl,
+    'https://diabetes-universe-web-git-implementation-profile-2b7cc9-resulto.vercel.app',
+  );
+  assert.equal(environment.passkeyEnabled, false);
+  assert.equal(environment.databaseMode, 'postgres');
+});
+
 test('preview deployments keep magic-link auth when production WebAuthn vars are present', () => {
   const environment = resolveAuthEnvironment({
     AUTH_DATABASE_MODE: 'postgres',
@@ -79,7 +103,7 @@ test('preview deployments keep magic-link auth when production WebAuthn vars are
   assert.equal(environment.databaseMode, 'postgres');
 });
 
-test('preview deployments fall back to VERCEL_BRANCH_URL when VERCEL_URL is absent', () => {
+test('preview deployments fall back to VERCEL_URL when branch alias is absent', () => {
   const environment = resolveAuthEnvironment({
     AUTH_DATABASE_MODE: 'postgres',
     AUTH_EMAIL_FROM: 'auth@example.com',
@@ -87,13 +111,13 @@ test('preview deployments fall back to VERCEL_BRANCH_URL when VERCEL_URL is abse
     BETTER_AUTH_URL: 'https://production.example',
     DATABASE_URL: 'postgres://user:pass@localhost:5432/app',
     RESEND_API_KEY: 're_test_key',
-    VERCEL_BRANCH_URL: 'diabetes-universe-web-git-feature-resulto.vercel.app',
     VERCEL_ENV: 'preview',
+    VERCEL_URL: 'diabetes-universe-web-ft5kujfzn-resulto.vercel.app',
   });
 
   assert.equal(
     environment.baseUrl,
-    'https://diabetes-universe-web-git-feature-resulto.vercel.app',
+    'https://diabetes-universe-web-ft5kujfzn-resulto.vercel.app',
   );
 });
 
@@ -105,6 +129,7 @@ test('preview deployments expose dynamic Better Auth base URL config', () => {
     BETTER_AUTH_URL: 'https://production.example',
     DATABASE_URL: 'postgres://user:pass@localhost:5432/app',
     RESEND_API_KEY: 're_test_key',
+    VERCEL_BRANCH_URL: 'preview-branch.vercel.app',
     VERCEL_ENV: 'preview',
     VERCEL_URL: 'preview-host.vercel.app',
   });
@@ -112,12 +137,17 @@ test('preview deployments expose dynamic Better Auth base URL config', () => {
   assert.deepEqual(
     resolveBetterAuthBaseUrlConfig(environment, {
       VERCEL_ENV: 'preview',
+      VERCEL_BRANCH_URL: 'preview-branch.vercel.app',
       VERCEL_URL: 'preview-host.vercel.app',
       BETTER_AUTH_URL: 'https://production.example',
     }),
     {
-      allowedHosts: ['preview-host.vercel.app', 'production.example'],
-      fallback: 'https://preview-host.vercel.app',
+      allowedHosts: [
+        'preview-branch.vercel.app',
+        'preview-host.vercel.app',
+        'production.example',
+      ],
+      fallback: 'https://preview-branch.vercel.app',
       protocol: 'https',
     },
   );

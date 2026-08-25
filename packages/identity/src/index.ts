@@ -30,6 +30,7 @@ export {
   AuthConfigurationError,
   isAuthEnvironmentConfigured,
   resolveAuthEnvironment,
+  resolveBetterAuthBaseUrlConfig,
   resolveSafeAuthCallbackPath,
   type AuthEnvironment,
 } from './config/auth-environment';
@@ -38,6 +39,8 @@ export {
   isAuthE2eRuntime,
   isCapturingEmailDeliveryAllowed,
   isExplicitAuthTestRuntime,
+  isPreviewAuthDeployment,
   isProductionAuthDeployment,
+  isVercelAuthDeployment,
   shouldAutoMigrateAuthSchema,
 } from './config/auth-runtime-guards';
