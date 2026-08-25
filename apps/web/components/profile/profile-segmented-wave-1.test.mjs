@@ -31,6 +31,10 @@ const menuSource = readFileSync(
   fileURLToPath(new URL('./profile-menu.tsx', import.meta.url)),
   'utf8',
 );
+const menuAboutLinkSource = readFileSync(
+  fileURLToPath(new URL('./profile-menu-about-link-row.tsx', import.meta.url)),
+  'utf8',
+);
 const settingsPanelSource = readFileSync(
   fileURLToPath(new URL('./profile-settings-panel.tsx', import.meta.url)),
   'utf8',
@@ -65,7 +69,11 @@ test('profile menu keeps disabled rows for unavailable actions', () => {
   assert.match(menuSource, /ProfileMenuDisabledRow/);
   assert.match(menuSource, /aria-disabled="true"/);
   assert.doesNotMatch(menuSource, /ProfileThemeControl/);
-  assert.match(menuSource, /ProfileMenuAboutRow/);
+  assert.match(menuSource, /ProfileMenuAboutLinkRow/);
+  assert.match(menuAboutLinkSource, /href="\/account\/about"/);
+  assert.doesNotMatch(menuSource, /ProfileMenuAboutRow/);
+  assert.doesNotMatch(menuSource, /0\.0\.0/);
+  assert.doesNotMatch(menuAboutLinkSource, /0\.0\.0/);
 });
 
 test('settings panel contains app theme controls', () => {

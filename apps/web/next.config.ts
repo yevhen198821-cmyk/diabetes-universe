@@ -1,6 +1,11 @@
 import type { NextConfig } from 'next';
 
+import webPackage from './package.json' with { type: 'json' };
+
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_APP_VERSION: webPackage.version,
+  },
   reactStrictMode: true,
   serverExternalPackages: [
     '@electric-sql/pglite',

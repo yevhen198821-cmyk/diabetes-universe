@@ -4,24 +4,19 @@ import {
   Activity,
   Download,
   Globe2,
-  Info,
   Smartphone,
   type LucideIcon,
 } from 'lucide-react';
-import { useState } from 'react';
 
 import type { ProfileLabels } from './profile-labels';
+import { ProfileMenuAboutLinkRow } from './profile-menu-about-link-row';
 import {
-  profileAboutExpandedDividerClassName,
   profileComingSoonBadgeClassName,
   profileDisabledRowClassName,
-  profileInsetSurfaceClassName,
   PROFILE_ICON_TONE_CLASS,
   profileSectionHeadingClassName,
   type ProfileMenuIconTone,
 } from './profile-surface-styles';
-
-const APP_VERSION = '0.0.0';
 
 function ProfileMenuSection({
   title,
@@ -87,39 +82,6 @@ function ProfileMenuDisabledRow({
   );
 }
 
-function ProfileMenuAboutRow({ labels }: { readonly labels: ProfileLabels }) {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <div className={`${profileInsetSurfaceClassName} px-4 py-3`}>
-      <button
-        aria-expanded={expanded}
-        className="focus-visible:outline-interactive-primary flex min-h-11 w-full items-start gap-3 text-left focus-visible:outline-2 focus-visible:outline-offset-2"
-        onClick={() => setExpanded((current) => !current)}
-        type="button"
-      >
-        <ProfileMenuIcon icon={Info} tone="neutral" />
-        <span className="min-w-0 flex-1">
-          <span className="text-text-primary block text-sm font-semibold">
-            {labels.about.title}
-          </span>
-          <span className="text-text-secondary mt-0.5 block text-xs">
-            {labels.about.subtitle}
-          </span>
-        </span>
-      </button>
-      {expanded ? (
-        <div className={profileAboutExpandedDividerClassName}>
-          <p>{labels.about.description}</p>
-          <p className="text-text-tertiary mt-2 text-xs">
-            {labels.about.versionLabel}: {APP_VERSION}
-          </p>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 export function ProfileMenu({ labels }: { readonly labels: ProfileLabels }) {
   return (
     <div className="space-y-5">
@@ -161,7 +123,7 @@ export function ProfileMenu({ labels }: { readonly labels: ProfileLabels }) {
           title={labels.menu.export.title}
           tone="coral"
         />
-        <ProfileMenuAboutRow labels={labels} />
+        <ProfileMenuAboutLinkRow labels={labels} />
       </ProfileMenuSection>
     </div>
   );

@@ -143,7 +143,32 @@ export const ukrainianDraftMessages = defineDraftMessages({
   'quick-add.button.label': 'Додати подію',
   'account.profile.about.description':
     'Diabetes Universe допомагає відстежувати та розуміти ваші дані про діабет.',
-  'account.profile.about.subtitle': 'Версія, ліцензії та підтримка',
+  'account.profile.about.page.buildInfoLabel': 'Збірка',
+  'account.profile.about.page.ecosystem.description':
+    'Diabetes Universe — екосистема для збору, відстеження та розуміння даних, пов’язаних із діабетом, включно з глюкозою, інсуліном, прийомами їжі, активністю, подіями та підключеними джерелами даних у міру появи цих можливостей.',
+  'account.profile.about.page.ecosystem.title': 'Про Diabetes Universe',
+  'account.profile.about.page.medical.description':
+    'Diabetes Universe допомагає відстежувати та розуміти інформацію. Застосунок не замінює професійну медичну консультацію, не ставить діагноз, не призначає лікування та не приймає медичні рішення самостійно.',
+  'account.profile.about.page.medical.title': 'Медична інформація',
+  'account.profile.about.page.rows.accountDeletion':
+    'Видалення акаунта та даних',
+  'account.profile.about.page.rows.contactSupport': 'Зв’язатися з підтримкою',
+  'account.profile.about.page.rows.dataExport': 'Експорт даних',
+  'account.profile.about.page.rows.dataManagement': 'Керування даними',
+  'account.profile.about.page.rows.licenses': 'Ліцензії',
+  'account.profile.about.page.rows.openSourceLicenses': 'Ліцензії Open Source',
+  'account.profile.about.page.rows.privacyPolicy': 'Політика конфіденційності',
+  'account.profile.about.page.rows.reportIssue': 'Повідомити про проблему',
+  'account.profile.about.page.rows.supportCenter': 'Центр підтримки',
+  'account.profile.about.page.rows.termsOfUse': 'Умови використання',
+  'account.profile.about.page.sections.help': 'Допомога',
+  'account.profile.about.page.sections.legal': 'Юридична інформація',
+  'account.profile.about.page.sections.privacyAndData':
+    'Конфіденційність і дані',
+  'account.profile.about.page.sections.technical':
+    'Технічна інформація застосунку',
+  'account.profile.about.page.title': 'Про застосунок',
+  'account.profile.about.subtitle': 'Версія, підтримка та юридична інформація',
   'account.profile.about.title': 'Про застосунок',
   'account.profile.about.versionLabel': 'Версія',
   'account.profile.comingSoon.badge': 'Незабаром',
