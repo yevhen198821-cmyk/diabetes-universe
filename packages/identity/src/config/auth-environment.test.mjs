@@ -38,9 +38,44 @@ test('resolveAuthEnvironment reads trusted origins from supplied env', () => {
   });
 
   assert.deepEqual(environment.trustedOrigins, [
+    'http://localhost:3000',
     'https://one.example',
     'https://two.example',
   ]);
+});
+
+test('resolveAuthEnvironment always trusts the resolved base URL origin', () => {
+  const environment = resolveAuthEnvironment({
+    ...baseEnv,
+    AUTH_TRUSTED_ORIGINS: 'https://production.example',
+  });
+
+  assert.deepEqual(environment.trustedOrigins, [
+    'http://localhost:3000',
+    'https://production.example',
+  ]);
+});
+
+test('preview deployments keep magic-link auth when production WebAuthn vars are present', () => {
+  const environment = resolveAuthEnvironment({
+    AUTH_DATABASE_MODE: 'postgres',
+    AUTH_EMAIL_FROM: 'auth@example.com',
+    AUTH_WEBAUTHN_ORIGIN: 'https://production.example',
+    AUTH_WEBAUTHN_RP_ID: 'production.example',
+    BETTER_AUTH_SECRET: 'x'.repeat(32),
+    BETTER_AUTH_URL: 'https://production.example',
+    DATABASE_URL: 'postgres://user:pass@localhost:5432/app',
+    RESEND_API_KEY: 're_test_key',
+    VERCEL_ENV: 'preview',
+    VERCEL_URL: 'diabetes-universe-web-git-feature-resulto.vercel.app',
+  });
+
+  assert.equal(
+    environment.baseUrl,
+    'https://diabetes-universe-web-git-feature-resulto.vercel.app',
+  );
+  assert.equal(environment.passkeyEnabled, false);
+  assert.equal(environment.databaseMode, 'postgres');
 });
 
 test('passkeys require both explicit origin and RP ID', () => {
@@ -66,16 +101,15 @@ test('passkeys accept explicit localhost WebAuthn configuration', () => {
   assert.equal(environment.webauthnRpId, 'localhost');
 });
 
-test('passkeys reject mismatched preview/production origin configuration', () => {
-  assert.throws(
-    () =>
-      resolveAuthEnvironment({
-        ...baseEnv,
-        AUTH_WEBAUTHN_ORIGIN: 'https://diabetes.example',
-        AUTH_WEBAUTHN_RP_ID: 'diabetes.example',
-      }),
-    AuthConfigurationError,
-  );
+test('passkeys are disabled when WebAuthn origin does not match the auth base URL', () => {
+  const environment = resolveAuthEnvironment({
+    ...baseEnv,
+    AUTH_WEBAUTHN_ORIGIN: 'https://diabetes.example',
+    AUTH_WEBAUTHN_RP_ID: 'diabetes.example',
+  });
+
+  assert.equal(environment.passkeyEnabled, false);
+  assert.equal(environment.webauthnOrigin, undefined);
 });
 
 test('passkeys reject insecure non-localhost origins', () => {

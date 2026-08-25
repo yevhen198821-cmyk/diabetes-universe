@@ -70,6 +70,17 @@ function resolveDatabaseMode(env: NodeJS.ProcessEnv): AuthDatabaseMode {
   );
 }
 
+function resolveAuthBaseUrl(env: NodeJS.ProcessEnv): string {
+  const vercelEnv = env.VERCEL_ENV?.trim();
+  const vercelUrl = env.VERCEL_URL?.trim();
+
+  if (vercelEnv === 'preview' && vercelUrl) {
+    return `https://${vercelUrl}`;
+  }
+
+  return readRequiredString('BETTER_AUTH_URL', env.BETTER_AUTH_URL);
+}
+
 function resolveTrustedOrigins(
   baseUrl: string,
   env: NodeJS.ProcessEnv,
@@ -78,11 +89,15 @@ function resolveTrustedOrigins(
     .map((origin) => origin.trim())
     .filter(Boolean);
 
-  if (configured && configured.length > 0) {
-    return configured;
+  const origins = new Set<string>([baseUrl]);
+
+  if (configured) {
+    for (const origin of configured) {
+      origins.add(origin);
+    }
   }
 
-  return [baseUrl];
+  return [...origins];
 }
 
 function isLocalWebAuthnHostname(hostname: string): boolean {
@@ -135,9 +150,10 @@ function resolveWebAuthnConfiguration(
     originUrl.origin !== origin ||
     originUrl.origin !== baseUrlObject.origin
   ) {
-    throw new AuthConfigurationError(
-      'AUTH_WEBAUTHN_ORIGIN must be the exact BETTER_AUTH_URL origin.',
-    );
+    return {
+      passkeyEnabled: false,
+      webauthnRpName: rpName,
+    };
   }
 
   if (
@@ -184,7 +200,7 @@ export function resolveAuthEnvironment(
   env: NodeJS.ProcessEnv = process.env,
 ): AuthEnvironment {
   const databaseMode = resolveDatabaseMode(env);
-  const baseUrl = readRequiredString('BETTER_AUTH_URL', env.BETTER_AUTH_URL);
+  const baseUrl = resolveAuthBaseUrl(env);
   const webauthn = resolveWebAuthnConfiguration(baseUrl, env);
 
   const environment: AuthEnvironment = {
