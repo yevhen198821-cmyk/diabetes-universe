@@ -6,7 +6,10 @@ import { useMemo } from 'react';
 
 import { PasskeyManager } from '../auth/passkey-manager';
 import { useLocalization } from '../../lib/platform/react/use-localization';
-import { profileCardClassName } from './profile-page-background';
+import {
+  profileCardClassName,
+  profileInteractiveLinkClassName,
+} from './profile-surface-styles';
 import { resolveProfileSecurityLabels } from './profile-security-labels';
 
 export function ProfileSecuritySegment({
@@ -38,7 +41,7 @@ export function ProfileSecuritySegment({
       )}
 
       <Link
-        className="focus-visible:outline-interactive-primary flex min-h-[4.75rem] items-center justify-between gap-3 rounded-[1.15rem] border border-white/10 bg-slate-950/30 px-4 py-3 transition hover:border-white/15 hover:bg-slate-950/40 focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/10"
+        className={profileInteractiveLinkClassName}
         href="/account/security/sessions"
       >
         <span className="min-w-0">

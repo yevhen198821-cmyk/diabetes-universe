@@ -13,10 +13,11 @@ import {
 } from '../shared/segmented-control';
 import { resolveProfileLabels } from './profile-labels';
 import {
-  profileMainContainerClassName,
   ProfilePageBackground,
+  profileMainContainerClassName,
   profilePageShellClassName,
 } from './profile-page-background';
+import { profileLogoutButtonClassName } from './profile-surface-styles';
 import {
   PROFILE_SEGMENT_PATHS,
   resolveProfileSegmentFromPathname,
@@ -97,10 +98,7 @@ export function ProfileShell({ children }: ProfileShellProps) {
 export function ProfileLogoutButton({ label }: { readonly label: string }) {
   return (
     <form action={signOutCurrentSessionAction} className="pt-2">
-      <button
-        className="focus-visible:outline-interactive-primary min-h-11 w-full rounded-[1rem] border border-rose-400/30 bg-rose-500/10 px-4 text-sm font-semibold text-rose-100 transition hover:bg-rose-500/15 focus-visible:outline-2 focus-visible:outline-offset-2"
-        type="submit"
-      >
+      <button className={profileLogoutButtonClassName} type="submit">
         {label}
       </button>
     </form>

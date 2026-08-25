@@ -11,24 +11,17 @@ import {
 import { useState } from 'react';
 
 import type { ProfileLabels } from './profile-labels';
+import {
+  profileAboutExpandedDividerClassName,
+  profileComingSoonBadgeClassName,
+  profileDisabledRowClassName,
+  profileInsetSurfaceClassName,
+  PROFILE_ICON_TONE_CLASS,
+  profileSectionHeadingClassName,
+  type ProfileMenuIconTone,
+} from './profile-surface-styles';
 
 const APP_VERSION = '0.0.0';
-
-type ProfileMenuIconTone =
-  'amber' | 'blue' | 'coral' | 'neutral' | 'teal' | 'violet';
-
-const ICON_TONE_CLASS: Readonly<Record<ProfileMenuIconTone, string>> = {
-  amber:
-    'bg-amber-400/15 text-amber-200 ring-1 ring-amber-300/25 dark:text-amber-100',
-  blue: 'bg-blue-400/15 text-blue-200 ring-1 ring-blue-300/25 dark:text-blue-100',
-  coral:
-    'bg-rose-400/15 text-rose-200 ring-1 ring-rose-300/25 dark:text-rose-100',
-  neutral:
-    'bg-slate-400/10 text-slate-200 ring-1 ring-slate-300/15 dark:text-slate-100',
-  teal: 'bg-teal-400/15 text-teal-200 ring-1 ring-teal-300/25 dark:text-teal-100',
-  violet:
-    'bg-violet-400/15 text-violet-200 ring-1 ring-violet-300/25 dark:text-violet-100',
-};
 
 function ProfileMenuSection({
   title,
@@ -39,9 +32,7 @@ function ProfileMenuSection({
 }) {
   return (
     <section className="space-y-2">
-      <h3 className="px-1 text-[11px] font-bold tracking-[0.14em] text-slate-400 uppercase">
-        {title}
-      </h3>
+      <h3 className={profileSectionHeadingClassName}>{title}</h3>
       <div className="space-y-2">{children}</div>
     </section>
   );
@@ -56,7 +47,7 @@ function ProfileMenuIcon({
 }) {
   return (
     <span
-      className={`grid size-10 shrink-0 place-items-center rounded-xl ${ICON_TONE_CLASS[tone]}`}
+      className={`grid size-10 shrink-0 place-items-center rounded-xl ${PROFILE_ICON_TONE_CLASS[tone]}`}
     >
       <Icon aria-hidden="true" size={18} strokeWidth={2.2} />
     </span>
@@ -77,21 +68,20 @@ function ProfileMenuDisabledRow({
   readonly tone: ProfileMenuIconTone;
 }) {
   return (
-    <div
-      aria-disabled="true"
-      className="flex min-h-[4.75rem] items-center gap-3 rounded-[1.15rem] border border-white/6 bg-slate-950/25 px-4 py-3 opacity-80"
-    >
+    <div aria-disabled="true" className={profileDisabledRowClassName}>
       <ProfileMenuIcon icon={icon} tone={tone} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate text-sm font-semibold text-slate-200">
+          <p className="text-text-primary truncate text-sm font-semibold">
             {title}
           </p>
-          <span className="rounded-full bg-white/8 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-slate-400 uppercase">
+          <span className={profileComingSoonBadgeClassName}>
             {comingSoonLabel}
           </span>
         </div>
-        <p className="mt-0.5 line-clamp-2 text-xs text-slate-400">{subtitle}</p>
+        <p className="text-text-secondary mt-0.5 line-clamp-2 text-xs">
+          {subtitle}
+        </p>
       </div>
     </div>
   );
@@ -101,7 +91,7 @@ function ProfileMenuAboutRow({ labels }: { readonly labels: ProfileLabels }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="rounded-[1.15rem] border border-white/8 bg-slate-950/30 px-4 py-3">
+    <div className={`${profileInsetSurfaceClassName} px-4 py-3`}>
       <button
         aria-expanded={expanded}
         className="focus-visible:outline-interactive-primary flex min-h-11 w-full items-start gap-3 text-left focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -119,9 +109,9 @@ function ProfileMenuAboutRow({ labels }: { readonly labels: ProfileLabels }) {
         </span>
       </button>
       {expanded ? (
-        <div className="mt-3 border-t border-white/8 pt-3 pl-[3.25rem] text-sm text-slate-300">
+        <div className={profileAboutExpandedDividerClassName}>
           <p>{labels.about.description}</p>
-          <p className="mt-2 text-xs text-slate-400">
+          <p className="text-text-tertiary mt-2 text-xs">
             {labels.about.versionLabel}: {APP_VERSION}
           </p>
         </div>

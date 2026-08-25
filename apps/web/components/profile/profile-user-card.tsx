@@ -1,4 +1,8 @@
 import type { ProfileUserCardModel } from './profile-user-model';
+import {
+  profileUserCardAccentClassName,
+  profileUserCardClassName,
+} from './profile-surface-styles';
 
 export interface ProfileUserCardLabels {
   readonly avatarLabel: string;
@@ -13,11 +17,8 @@ export function ProfileUserCard({
   readonly model: ProfileUserCardModel;
 }) {
   return (
-    <section className="profile-card relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-900/70 p-5 shadow-[0_18px_40px_rgba(2,6,23,0.35)] backdrop-blur-md dark:bg-slate-900/75">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(45,212,191,0.12),transparent_42%),radial-gradient(circle_at_100%_0%,rgba(167,139,250,0.14),transparent_38%)]"
-      />
+    <section className={profileUserCardClassName}>
+      <div aria-hidden="true" className={profileUserCardAccentClassName} />
       <div className="relative flex items-center gap-4">
         <div
           aria-label={labels.avatarLabel}

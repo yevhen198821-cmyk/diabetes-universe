@@ -4,8 +4,12 @@ import { Palette } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { useLocalization } from '../../lib/platform/react/use-localization';
-import { profileCardClassName } from './profile-page-background';
 import { resolveProfileLabels } from './profile-labels';
+import {
+  profileCardClassName,
+  profileInsetSurfaceClassName,
+  profileSettingsThemeIconClassName,
+} from './profile-surface-styles';
 import { ProfileThemeControl } from './profile-theme-control';
 
 export function ProfileSettingsPanel() {
@@ -26,9 +30,11 @@ export function ProfileSettingsPanel() {
         </p>
       </div>
 
-      <div className="rounded-[1.15rem] border border-white/8 bg-slate-950/30 px-4 py-3">
+      <div className={`${profileInsetSurfaceClassName} px-4 py-3`}>
         <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-amber-400/15 text-amber-200 ring-1 ring-amber-300/25 dark:text-amber-100">
+          <span
+            className={`grid size-10 shrink-0 place-items-center rounded-xl ${profileSettingsThemeIconClassName}`}
+          >
             <Palette aria-hidden="true" size={18} strokeWidth={2.2} />
           </span>
           <div className="min-w-0 flex-1">

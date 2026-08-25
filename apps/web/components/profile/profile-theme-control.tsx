@@ -2,6 +2,10 @@
 
 import type { UserThemePreference } from '../../lib/theme/theme-config';
 import { useThemePreference } from '../../lib/theme/theme-provider';
+import {
+  profileThemeControlActiveClassName,
+  profileThemeControlInactiveClassName,
+} from './profile-surface-styles';
 
 export interface ProfileThemeControlLabels {
   readonly dark: string;
@@ -38,8 +42,8 @@ export function ProfileThemeControl({
             aria-pressed={isActive}
             className={`focus-visible:outline-interactive-primary min-h-11 rounded-xl border px-2 text-xs font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 sm:text-sm ${
               isActive
-                ? 'border-amber-300/70 bg-amber-400/15 text-amber-100 ring-1 ring-amber-300/40'
-                : 'border-white/10 bg-slate-950/30 text-slate-300 hover:border-white/20 hover:bg-white/5'
+                ? profileThemeControlActiveClassName
+                : profileThemeControlInactiveClassName
             }`}
             key={option.id}
             onClick={() => setPreference(option.id)}

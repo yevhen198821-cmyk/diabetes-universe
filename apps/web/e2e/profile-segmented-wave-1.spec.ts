@@ -269,6 +269,44 @@ test('selecting light and dark themes persists preference', async ({
   await expect(page.locator('html')).toHaveClass(/dark/);
 });
 
+test('profile light theme keeps disabled rows and logout readable', async ({
+  page,
+  request,
+}) => {
+  await page.addInitScript((storageKey) => {
+    window.localStorage.setItem(storageKey, 'light');
+  }, THEME_STORAGE_KEY);
+
+  await signInWithMagicLink(
+    page,
+    request,
+    'profile-wave1-light-theme@example.com',
+  );
+  await page.goto('/account');
+  await waitForApplicationReady(page);
+  await expect(page.locator('html')).toHaveClass(/light/);
+
+  const disabledRow = page
+    .getByText('Coming later')
+    .first()
+    .locator('xpath=ancestor::div[@aria-disabled="true"][1]');
+  await expect(disabledRow).toBeVisible();
+  await expect(disabledRow).toHaveCSS('opacity', '1');
+
+  const logoutButton = page.getByRole('button', {
+    name: 'Sign out',
+    exact: true,
+  });
+  await expect(logoutButton).toBeVisible();
+  await expect(logoutButton).toHaveClass(/text-rose-800/);
+  await expect(logoutButton).toHaveClass(/bg-rose-50/);
+
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await expect(
+    page.getByRole('button', { name: 'Light', pressed: true }),
+  ).toBeVisible();
+});
+
 test('sign out everywhere waits for confirmation and cancel keeps sessions', async ({
   page,
   request,
