@@ -1,7 +1,7 @@
 'use client';
 
 import type { AuthenticatedPrincipal } from '@diabetes-universe/identity';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { ProfileLogoutButton } from './profile-shell';
 import { resolveProfileLabels } from './profile-labels';
@@ -20,19 +20,34 @@ export function ProfileProfileSegment({
     () => resolveProfileLabels(localization),
     [localization],
   );
+  const [avatarUrlOverride, setAvatarUrlOverride] = useState<
+    string | null | undefined
+  >(undefined);
   const userCardModel = useMemo(
     () =>
       createProfileUserCardModel(
-        principal,
+        {
+          ...principal,
+          avatarUrl: avatarUrlOverride ?? principal.avatarUrl,
+        },
         labels.userCard,
         localization.localeContext.locale,
       ),
-    [labels.userCard, localization.localeContext.locale, principal],
+    [
+      avatarUrlOverride,
+      labels.userCard,
+      localization.localeContext.locale,
+      principal,
+    ],
   );
 
   return (
     <div className="space-y-5">
-      <ProfileUserCard labels={labels.userCard} model={userCardModel} />
+      <ProfileUserCard
+        labels={labels.userCard}
+        model={userCardModel}
+        onAvatarChange={setAvatarUrlOverride}
+      />
       <ProfileMenu labels={labels} />
       <ProfileLogoutButton label={labels.logout} />
     </div>

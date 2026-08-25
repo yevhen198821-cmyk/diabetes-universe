@@ -203,6 +203,21 @@ export const germanDraftMessages = defineDraftMessages({
   'account.profile.subtitle': 'Verwalten Sie Konto und Einstellungen',
   'account.profile.title': 'Profil',
   'account.profile.userCard.avatarLabel': 'Profilavatar',
+  'account.profile.userCard.avatarEditAction': 'Profilfoto ändern',
+  'account.profile.userCard.avatarDialog.title': 'Profilfoto',
+  'account.profile.userCard.avatarDialog.description':
+    'Wählen Sie ein Foto aus Galerie oder Dateien. Es wird in Ihrer Kontokarte angezeigt.',
+  'account.profile.userCard.avatarDialog.choosePhoto': 'Foto auswählen',
+  'account.profile.userCard.avatarDialog.removePhoto': 'Foto entfernen',
+  'account.profile.userCard.avatarDialog.save': 'Foto speichern',
+  'account.profile.userCard.avatarDialog.uploading': 'Wird hochgeladen…',
+  'account.profile.userCard.avatarDialog.success': 'Profilfoto aktualisiert.',
+  'account.profile.userCard.avatarDialog.error.invalidType':
+    'Verwenden Sie ein JPG-, PNG- oder WebP-Bild.',
+  'account.profile.userCard.avatarDialog.error.tooLarge':
+    'Bild ist zu groß. Maximal 5 MB.',
+  'account.profile.userCard.avatarDialog.error.generic':
+    'Profilfoto konnte nicht aktualisiert werden. Bitte erneut versuchen.',
   'account.profile.userCard.emailLabel': 'E-Mail',
   'account.profile.userCard.fallbackName': 'Konto',
   'account.profile.security.passkeysUnavailable.description':

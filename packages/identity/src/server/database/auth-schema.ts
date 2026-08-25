@@ -1,10 +1,17 @@
 import {
   boolean,
+  customType,
   integer,
   pgTable,
   text,
   timestamp,
 } from 'drizzle-orm/pg-core';
+
+const bytea = customType<{ data: Buffer }>({
+  dataType() {
+    return 'bytea';
+  },
+});
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -61,6 +68,16 @@ export const verification = pgTable('verification', {
   updatedAt: timestamp('updated_at', { withTimezone: true }),
 });
 
+export const userAvatarObject = pgTable('user_avatar_object', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  contentType: text('content_type').notNull(),
+  byteSize: integer('byte_size').notNull(),
+  content: bytea('content').notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+});
+
 export const passkey = pgTable('passkey', {
   id: text('id').primaryKey(),
   name: text('name'),
@@ -83,4 +100,5 @@ export const authSchema = {
   account,
   verification,
   passkey,
+  userAvatarObject,
 };

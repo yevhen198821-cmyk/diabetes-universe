@@ -7,6 +7,11 @@ export type {
   SessionSummary,
 } from './contracts/auth-contracts';
 export type {
+  AvatarMutationCode,
+  AvatarMutationResult,
+  UserAvatarContent,
+} from './contracts/avatar-contracts';
+export type {
   AccountSessionClientKind,
   AccountSessionSummary,
   SessionManagementCode,

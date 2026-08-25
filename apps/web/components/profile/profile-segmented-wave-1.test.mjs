@@ -90,6 +90,7 @@ test('profile user card model never exposes medical profile fields', () => {
   const model = createProfileUserCardModel(
     {
       accountId: 'acc-test',
+      avatarUrl: null,
       displayName: 'Test User',
       email: 'test@example.com',
       emailVerified: true,

@@ -6,6 +6,10 @@ import {
   type PasskeySummary,
 } from '../contracts/auth-contracts';
 import type {
+  AvatarMutationResult,
+  UserAvatarContent,
+} from '../contracts/avatar-contracts';
+import type {
   AccountSessionSummary,
   SessionManagementResult,
 } from '../contracts/session-management-contracts';
@@ -27,6 +31,10 @@ import {
   type AuthDatabase,
 } from './database/create-auth-database';
 import { mapAuthenticatedPrincipal } from './map-auth-session';
+import { USER_AVATAR_MAX_UPLOAD_BYTES } from './avatar/avatar-constants';
+import { processAvatarImage } from './avatar/process-avatar-image';
+import { buildUserAvatarReferenceUrl } from './avatar/resolve-user-avatar-url';
+import { createUserAvatarRepository } from './avatar/user-avatar-repository';
 import { mapAccountSessionSummaries } from './session-management/map-account-session-summary';
 import {
   createSessionManagementError,
@@ -41,9 +49,13 @@ type RequestHeaders = Headers | Record<string, string>;
 
 export interface IdentityService {
   readonly auth: BetterAuthInstance;
+  deleteUserAvatar(headers: RequestHeaders): Promise<AvatarMutationResult>;
   getCurrentPrincipal(
     headers: RequestHeaders,
   ): Promise<AuthenticatedPrincipal | null>;
+  getUserAvatarForCurrentUser(
+    headers: RequestHeaders,
+  ): Promise<UserAvatarContent | null>;
   requestMagicLink(input: {
     readonly email: string;
     readonly callbackPath?: string;
@@ -68,6 +80,10 @@ export interface IdentityService {
   revokeAllAccountSessions(
     headers: RequestHeaders,
   ): Promise<SessionManagementResult>;
+  uploadUserAvatar(input: {
+    readonly fileBytes: Buffer;
+    readonly headers: RequestHeaders;
+  }): Promise<AvatarMutationResult>;
 }
 
 export interface CreateIdentityServiceOptions {
@@ -88,6 +104,7 @@ interface AuthenticatedBetterAuthSession {
     readonly id: string;
     readonly email: string;
     readonly emailVerified: boolean;
+    readonly image?: string | null;
     readonly name: string;
     readonly accountId?: string | null;
   };
@@ -122,6 +139,7 @@ async function createIdentityServiceInternal(
 ): Promise<IdentityService> {
   const database: AuthDatabase = await createAuthDatabase(options.environment);
   const ownedSessionsRepository = createOwnedSessionsRepository(database);
+  const userAvatarRepository = createUserAvatarRepository(database);
   const emailDelivery =
     options.emailDelivery ??
     createEmailDelivery(options.environment, process.env);
@@ -174,6 +192,125 @@ async function createIdentityServiceInternal(
 
   return {
     auth,
+    async deleteUserAvatar(headers) {
+      const current = await resolveAuthenticatedSession(headers);
+
+      if (!current) {
+        return {
+          avatarUrl: null,
+          code: 'AUTHENTICATION_REQUIRED',
+          ok: false,
+        };
+      }
+
+      await userAvatarRepository.deleteForUser(current.user.id);
+
+      try {
+        await auth.api.updateUser({
+          body: { image: null },
+          headers,
+        });
+      } catch {
+        return {
+          avatarUrl: null,
+          code: 'AVATAR_PROCESSING_FAILED',
+          ok: false,
+        };
+      }
+
+      return {
+        avatarUrl: null,
+        code: 'SUCCESS',
+        ok: true,
+      };
+    },
+    async getUserAvatarForCurrentUser(headers) {
+      const current = await resolveAuthenticatedSession(headers);
+
+      if (!current) {
+        return null;
+      }
+
+      return userAvatarRepository.getForUser(current.user.id);
+    },
+    async uploadUserAvatar({ fileBytes, headers }) {
+      const current = await resolveAuthenticatedSession(headers);
+
+      if (!current) {
+        return {
+          avatarUrl: null,
+          code: 'AUTHENTICATION_REQUIRED',
+          ok: false,
+        };
+      }
+
+      if (fileBytes.byteLength === 0) {
+        return {
+          avatarUrl: null,
+          code: 'AVATAR_INVALID_TYPE',
+          ok: false,
+        };
+      }
+
+      if (fileBytes.byteLength > USER_AVATAR_MAX_UPLOAD_BYTES) {
+        return {
+          avatarUrl: null,
+          code: 'AVATAR_TOO_LARGE',
+          ok: false,
+        };
+      }
+
+      const processed = await processAvatarImage(fileBytes);
+
+      if (!processed) {
+        return {
+          avatarUrl: null,
+          code: 'AVATAR_INVALID_TYPE',
+          ok: false,
+        };
+      }
+
+      const updatedAt = new Date();
+
+      try {
+        await userAvatarRepository.upsertForUser({
+          byteSize: processed.byteSize,
+          content: processed.content,
+          contentType: processed.contentType,
+          updatedAt,
+          userId: current.user.id,
+        });
+      } catch {
+        return {
+          avatarUrl: null,
+          code: 'AVATAR_PROCESSING_FAILED',
+          ok: false,
+        };
+      }
+
+      const avatarUrl = buildUserAvatarReferenceUrl(updatedAt);
+
+      try {
+        await auth.api.updateUser({
+          body: { image: avatarUrl },
+          headers,
+        });
+      } catch {
+        await userAvatarRepository.deleteForUser(current.user.id);
+
+        return {
+          avatarUrl: null,
+          code: 'AVATAR_PROCESSING_FAILED',
+          ok: false,
+        };
+      }
+
+      return {
+        avatarUrl,
+        code: 'SUCCESS',
+        ok: true,
+      };
+    },
     async getCurrentPrincipal(headers) {
       const session = await auth.api.getSession({ headers });
 

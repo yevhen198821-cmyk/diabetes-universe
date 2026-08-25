@@ -1,5 +1,6 @@
 export interface AuthenticatedPrincipal {
   readonly accountId: string;
+  readonly avatarUrl: string | null;
   readonly email: string;
   readonly emailVerified: boolean;
   readonly displayName: string | null;

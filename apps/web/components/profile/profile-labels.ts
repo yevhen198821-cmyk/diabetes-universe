@@ -14,6 +14,8 @@ function translate(
   return localization.translate({ key }).value;
 }
 
+import type { ProfileUserCardLabels } from './profile-user-card';
+
 export interface ProfileLabels {
   readonly about: Readonly<{
     readonly description: string;
@@ -64,11 +66,10 @@ export interface ProfileLabels {
   }>;
   readonly subtitle: string;
   readonly title: string;
-  readonly userCard: Readonly<{
-    readonly avatarLabel: string;
-    readonly emailLabel: string;
-    readonly fallbackName: string;
-  }>;
+  readonly userCard: ProfileUserCardLabels &
+    Readonly<{
+      readonly fallbackName: string;
+    }>;
 }
 
 const PROFILE_TRANSLATION_KEYS = {
@@ -115,6 +116,39 @@ const PROFILE_TRANSLATION_KEYS = {
   settingsTitle: asTranslationKey('account.profile.settings.title'),
   subtitle: asTranslationKey('account.profile.subtitle'),
   title: asTranslationKey('account.profile.title'),
+  userCardAvatarEditAction: asTranslationKey(
+    'account.profile.userCard.avatarEditAction',
+  ),
+  userCardAvatarDialogChoosePhoto: asTranslationKey(
+    'account.profile.userCard.avatarDialog.choosePhoto',
+  ),
+  userCardAvatarDialogDescription: asTranslationKey(
+    'account.profile.userCard.avatarDialog.description',
+  ),
+  userCardAvatarDialogErrorGeneric: asTranslationKey(
+    'account.profile.userCard.avatarDialog.error.generic',
+  ),
+  userCardAvatarDialogErrorInvalidType: asTranslationKey(
+    'account.profile.userCard.avatarDialog.error.invalidType',
+  ),
+  userCardAvatarDialogErrorTooLarge: asTranslationKey(
+    'account.profile.userCard.avatarDialog.error.tooLarge',
+  ),
+  userCardAvatarDialogRemovePhoto: asTranslationKey(
+    'account.profile.userCard.avatarDialog.removePhoto',
+  ),
+  userCardAvatarDialogSave: asTranslationKey(
+    'account.profile.userCard.avatarDialog.save',
+  ),
+  userCardAvatarDialogSuccess: asTranslationKey(
+    'account.profile.userCard.avatarDialog.success',
+  ),
+  userCardAvatarDialogTitle: asTranslationKey(
+    'account.profile.userCard.avatarDialog.title',
+  ),
+  userCardAvatarDialogUploading: asTranslationKey(
+    'account.profile.userCard.avatarDialog.uploading',
+  ),
   userCardAvatarLabel: asTranslationKey('account.profile.userCard.avatarLabel'),
   userCardEmailLabel: asTranslationKey('account.profile.userCard.emailLabel'),
   userCardFallbackName: asTranslationKey(
@@ -239,10 +273,60 @@ export function resolveProfileLabels(
     subtitle: translate(localization, PROFILE_TRANSLATION_KEYS.subtitle),
     title: translate(localization, PROFILE_TRANSLATION_KEYS.title),
     userCard: {
-      avatarLabel: translate(
-        localization,
-        PROFILE_TRANSLATION_KEYS.userCardAvatarLabel,
-      ),
+      avatar: {
+        avatarLabel: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.userCardAvatarLabel,
+        ),
+        choosePhoto: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.userCardAvatarDialogChoosePhoto,
+        ),
+        close: translate(
+          localization,
+          asTranslationKey('common.actions.close'),
+        ),
+        description: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.userCardAvatarDialogDescription,
+        ),
+        editAction: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.userCardAvatarEditAction,
+        ),
+        errorGeneric: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.userCardAvatarDialogErrorGeneric,
+        ),
+        errorInvalidType: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.userCardAvatarDialogErrorInvalidType,
+        ),
+        errorTooLarge: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.userCardAvatarDialogErrorTooLarge,
+        ),
+        removePhoto: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.userCardAvatarDialogRemovePhoto,
+        ),
+        save: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.userCardAvatarDialogSave,
+        ),
+        success: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.userCardAvatarDialogSuccess,
+        ),
+        title: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.userCardAvatarDialogTitle,
+        ),
+        uploading: translate(
+          localization,
+          PROFILE_TRANSLATION_KEYS.userCardAvatarDialogUploading,
+        ),
+      },
       emailLabel: translate(
         localization,
         PROFILE_TRANSLATION_KEYS.userCardEmailLabel,

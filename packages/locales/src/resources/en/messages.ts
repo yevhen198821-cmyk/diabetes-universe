@@ -100,6 +100,21 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'account.profile.subtitle': 'Manage your account and preferences',
   'account.profile.title': 'Profile',
   'account.profile.userCard.avatarLabel': 'Profile avatar',
+  'account.profile.userCard.avatarEditAction': 'Change profile photo',
+  'account.profile.userCard.avatarDialog.title': 'Profile photo',
+  'account.profile.userCard.avatarDialog.description':
+    'Choose a photo from your gallery or files. It will be shown in your account card.',
+  'account.profile.userCard.avatarDialog.choosePhoto': 'Choose photo',
+  'account.profile.userCard.avatarDialog.removePhoto': 'Remove photo',
+  'account.profile.userCard.avatarDialog.save': 'Save photo',
+  'account.profile.userCard.avatarDialog.uploading': 'Uploading…',
+  'account.profile.userCard.avatarDialog.success': 'Profile photo updated.',
+  'account.profile.userCard.avatarDialog.error.invalidType':
+    'Use a JPG, PNG, or WebP image.',
+  'account.profile.userCard.avatarDialog.error.tooLarge':
+    'Image is too large. Maximum size is 5 MB.',
+  'account.profile.userCard.avatarDialog.error.generic':
+    'Could not update the profile photo. Try again.',
   'account.profile.userCard.emailLabel': 'Email',
   'account.profile.userCard.fallbackName': 'Account',
   'account.profile.security.passkeysUnavailable.description':
