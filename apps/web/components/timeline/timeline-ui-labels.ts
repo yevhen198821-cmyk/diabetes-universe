@@ -2,7 +2,13 @@ import type {
   LocalizationPlatform,
   TranslationKey,
 } from '@diabetes-universe/i18n';
+import {
+  formatPluralMessage,
+  type PluralMessageTemplates,
+} from '@diabetes-universe/i18n';
 import type { TimelineEventSource } from '@diabetes-universe/types';
+
+export type TimelinePluralCountLabels = PluralMessageTemplates;
 
 function asTranslationKey(value: string): TranslationKey {
   return value as TranslationKey;
@@ -80,12 +86,6 @@ export interface TimelineUiLabels {
   readonly dayPeriod: Readonly<{
     readonly day: string;
     readonly evening: string;
-    readonly eventCount: Readonly<{
-      readonly few: string;
-      readonly many: string;
-      readonly one: string;
-      readonly other: string;
-    }>;
     readonly morning: string;
     readonly night: string;
     readonly timeRange: Readonly<{
@@ -95,9 +95,10 @@ export interface TimelineUiLabels {
       readonly night: string;
     }>;
   }>;
+  readonly eventCount: TimelinePluralCountLabels;
   readonly eventsOfDay: Readonly<{
     readonly ariaLabel: string;
-    readonly clusterAriaLabel: string;
+    readonly clusterAriaLabel: TimelinePluralCountLabels;
     readonly currentTime: string;
     readonly helper: string;
     readonly title: string;
@@ -146,7 +147,6 @@ export interface TimelineUiLabels {
     readonly manual: string;
   }>;
   readonly toolbar: Readonly<{
-    readonly eventCount: string;
     readonly foundCount: string;
     readonly noMatches: string;
     readonly reset: string;
@@ -217,14 +217,6 @@ const TIMELINE_UI_TRANSLATION_KEYS = {
   ),
   dayPeriodDay: asTranslationKey('timeline.dayPeriod.day'),
   dayPeriodEvening: asTranslationKey('timeline.dayPeriod.evening'),
-  dayPeriodEventCountFew: asTranslationKey('timeline.dayPeriod.eventCount.few'),
-  dayPeriodEventCountMany: asTranslationKey(
-    'timeline.dayPeriod.eventCount.many',
-  ),
-  dayPeriodEventCountOne: asTranslationKey('timeline.dayPeriod.eventCount.one'),
-  dayPeriodEventCountOther: asTranslationKey(
-    'timeline.dayPeriod.eventCount.other',
-  ),
   dayPeriodMorning: asTranslationKey('timeline.dayPeriod.morning'),
   dayPeriodNight: asTranslationKey('timeline.dayPeriod.night'),
   dayPeriodTimeRangeDay: asTranslationKey('timeline.dayPeriod.timeRange.day'),
@@ -237,9 +229,22 @@ const TIMELINE_UI_TRANSLATION_KEYS = {
   dayPeriodTimeRangeNight: asTranslationKey(
     'timeline.dayPeriod.timeRange.night',
   ),
+  eventCountFew: asTranslationKey('timeline.eventCount.few'),
+  eventCountMany: asTranslationKey('timeline.eventCount.many'),
+  eventCountOne: asTranslationKey('timeline.eventCount.one'),
+  eventCountOther: asTranslationKey('timeline.eventCount.other'),
   eventsOfDayAriaLabel: asTranslationKey('timeline.eventsOfDay.ariaLabel'),
-  eventsOfDayClusterAriaLabel: asTranslationKey(
-    'timeline.eventsOfDay.clusterAriaLabel',
+  eventsOfDayClusterAriaLabelFew: asTranslationKey(
+    'timeline.eventsOfDay.clusterAriaLabel.few',
+  ),
+  eventsOfDayClusterAriaLabelMany: asTranslationKey(
+    'timeline.eventsOfDay.clusterAriaLabel.many',
+  ),
+  eventsOfDayClusterAriaLabelOne: asTranslationKey(
+    'timeline.eventsOfDay.clusterAriaLabel.one',
+  ),
+  eventsOfDayClusterAriaLabelOther: asTranslationKey(
+    'timeline.eventsOfDay.clusterAriaLabel.other',
   ),
   eventsOfDayCurrentTime: asTranslationKey('timeline.eventsOfDay.currentTime'),
   eventsOfDayHelper: asTranslationKey('timeline.eventsOfDay.helper'),
@@ -265,7 +270,6 @@ const TIMELINE_UI_TRANSLATION_KEYS = {
   sourceDevice: asTranslationKey('timeline.detail.source.device'),
   sourceImport: asTranslationKey('timeline.detail.source.import'),
   sourceManual: asTranslationKey('timeline.detail.source.manual'),
-  toolbarEventCount: asTranslationKey('timeline.toolbar.eventCount'),
   toolbarFoundCount: asTranslationKey('timeline.toolbar.foundCount'),
   toolbarNoMatches: asTranslationKey('timeline.toolbar.noMatches'),
   toolbarReset: asTranslationKey('timeline.toolbar.reset'),
@@ -458,24 +462,6 @@ export function resolveTimelineUiLabels(
         localization,
         TIMELINE_UI_TRANSLATION_KEYS.dayPeriodEvening,
       ),
-      eventCount: {
-        few: translate(
-          localization,
-          TIMELINE_UI_TRANSLATION_KEYS.dayPeriodEventCountFew,
-        ),
-        many: translate(
-          localization,
-          TIMELINE_UI_TRANSLATION_KEYS.dayPeriodEventCountMany,
-        ),
-        one: translate(
-          localization,
-          TIMELINE_UI_TRANSLATION_KEYS.dayPeriodEventCountOne,
-        ),
-        other: translate(
-          localization,
-          TIMELINE_UI_TRANSLATION_KEYS.dayPeriodEventCountOther,
-        ),
-      },
       morning: translate(
         localization,
         TIMELINE_UI_TRANSLATION_KEYS.dayPeriodMorning,
@@ -503,15 +489,41 @@ export function resolveTimelineUiLabels(
         ),
       },
     },
+    eventCount: {
+      few: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.eventCountFew),
+      many: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.eventCountMany,
+      ),
+      one: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.eventCountOne),
+      other: translate(
+        localization,
+        TIMELINE_UI_TRANSLATION_KEYS.eventCountOther,
+      ),
+    },
     eventsOfDay: {
       ariaLabel: translate(
         localization,
         TIMELINE_UI_TRANSLATION_KEYS.eventsOfDayAriaLabel,
       ),
-      clusterAriaLabel: translate(
-        localization,
-        TIMELINE_UI_TRANSLATION_KEYS.eventsOfDayClusterAriaLabel,
-      ),
+      clusterAriaLabel: {
+        few: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.eventsOfDayClusterAriaLabelFew,
+        ),
+        many: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.eventsOfDayClusterAriaLabelMany,
+        ),
+        one: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.eventsOfDayClusterAriaLabelOne,
+        ),
+        other: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.eventsOfDayClusterAriaLabelOther,
+        ),
+      },
       currentTime: translate(
         localization,
         TIMELINE_UI_TRANSLATION_KEYS.eventsOfDayCurrentTime,
@@ -617,10 +629,6 @@ export function resolveTimelineUiLabels(
       ),
     },
     toolbar: {
-      eventCount: translate(
-        localization,
-        TIMELINE_UI_TRANSLATION_KEYS.toolbarEventCount,
-      ),
       foundCount: translate(
         localization,
         TIMELINE_UI_TRANSLATION_KEYS.toolbarFoundCount,
@@ -665,19 +673,36 @@ export function resolveTimelineEventSourcePresentation(
   }
 }
 
+export function formatTimelineEventCount(
+  count: number,
+  labels: TimelinePluralCountLabels,
+  locale: string,
+  formatCount: (count: number) => string,
+): string {
+  return formatPluralMessage(count, labels, locale, formatCount);
+}
+
 export function formatTimelineToolbarResultLabel(
-  labels: TimelineUiLabels['toolbar'],
+  labels: Pick<TimelineUiLabels['toolbar'], 'noMatches'> & {
+    readonly eventCount: TimelinePluralCountLabels;
+  },
   model: Readonly<{
     readonly hasActiveSearchOrCategoryCriteria: boolean;
     readonly resultCount: number;
   }>,
+  locale: string,
   formatCount: (count: number) => string,
 ): string {
   if (model.hasActiveSearchOrCategoryCriteria && model.resultCount === 0) {
     return labels.noMatches;
   }
 
-  return labels.eventCount.replace('{count}', formatCount(model.resultCount));
+  return formatTimelineEventCount(
+    model.resultCount,
+    labels.eventCount,
+    locale,
+    formatCount,
+  );
 }
 
 export function formatTimelineLoadMoreAnnouncement(
@@ -696,48 +721,20 @@ export function formatTimelineLoadMoreRemaining(
   return template.replace('{count}', formatCount(count));
 }
 
-function resolveSlavicPluralForm(count: number): 'few' | 'many' | 'one' {
-  const absoluteCount = Math.abs(count);
-  const mod10 = absoluteCount % 10;
-  const mod100 = absoluteCount % 100;
-
-  if (mod10 === 1 && mod100 !== 11) {
-    return 'one';
-  }
-
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
-    return 'few';
-  }
-
-  return 'many';
-}
-
 export function formatTimelineDayPeriodEventCount(
   count: number,
-  labels: TimelineUiLabels['dayPeriod']['eventCount'],
+  labels: TimelinePluralCountLabels,
   locale: string,
   formatCount: (count: number) => string,
 ): string {
-  const normalizedLocale = locale.toLowerCase();
-  const formattedCount = formatCount(count);
-
-  if (normalizedLocale.startsWith('ru') || normalizedLocale.startsWith('uk')) {
-    const form = resolveSlavicPluralForm(count);
-    const template =
-      form === 'one' ? labels.one : form === 'few' ? labels.few : labels.many;
-
-    return template.replace('{count}', formattedCount);
-  }
-
-  const template = count === 1 ? labels.one : labels.other;
-
-  return template.replace('{count}', formattedCount);
+  return formatTimelineEventCount(count, labels, locale, formatCount);
 }
 
 export function formatTimelineEventsOfDayClusterAriaLabel(
-  template: string,
   count: number,
+  labels: TimelinePluralCountLabels,
+  locale: string,
   formatCount: (count: number) => string,
 ): string {
-  return template.replace('{count}', formatCount(count));
+  return formatTimelineEventCount(count, labels, locale, formatCount);
 }

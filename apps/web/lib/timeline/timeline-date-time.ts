@@ -112,6 +112,26 @@ export function formatTimelineCompactDateLabel(
   }).format(new Date(timestamp));
 }
 
+export function formatTimelineDayNavigationDateLabel(
+  dateKey: string,
+  locale: string = DEFAULT_TIMELINE_LOCALE,
+  timeZone?: string,
+): string {
+  const parsed = parseDateKey(dateKey);
+
+  if (!parsed) {
+    return dateKey;
+  }
+
+  const timestamp = Date.UTC(parsed.year, parsed.month - 1, parsed.day, 12);
+
+  return new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'long',
+    timeZone,
+  }).format(new Date(timestamp));
+}
+
 export function parseTimelineDateTime(dateTime: string): number {
   return Date.parse(dateTime);
 }
@@ -392,7 +412,7 @@ export function formatTimelineDateGroupLabel(
   const timestamp = parseTimelineDateTime(dateTime);
 
   if (Number.isNaN(timestamp) || Number.isNaN(referenceDate.getTime())) {
-    return 'Дата неизвестна';
+    return groupLabels?.earlier ?? 'Unknown date';
   }
 
   const eventYear = new Intl.DateTimeFormat('en-US-u-ca-gregory-nu-latn', {

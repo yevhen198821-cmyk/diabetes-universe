@@ -16,6 +16,7 @@ interface TimelineToolbarProps {
   readonly filterLabels: Readonly<Record<TimelineEventFilter, string>>;
   readonly formatCount: (count: number) => string;
   readonly labels: TimelineUiLabels;
+  readonly locale: string;
   readonly model: TimelineSearchFilterModel;
   readonly onDateFilterChange: (selection: TimelineDateFilterSelection) => void;
   readonly onFilterChange: (filter: TimelineEventFilter) => void;
@@ -30,6 +31,7 @@ export function TimelineToolbar({
   filterLabels,
   formatCount,
   labels,
+  locale,
   model,
   onDateFilterChange,
   onFilterChange,
@@ -38,8 +40,12 @@ export function TimelineToolbar({
   query,
 }: TimelineToolbarProps) {
   const resultLabel = formatTimelineToolbarResultLabel(
-    labels.toolbar,
+    {
+      eventCount: labels.eventCount,
+      noMatches: labels.toolbar.noMatches,
+    },
     model,
+    locale,
     formatCount,
   );
 

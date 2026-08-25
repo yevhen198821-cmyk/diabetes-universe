@@ -30,7 +30,11 @@ test('timeline search keeps composable filtering with day-scoped list', async ({
 
   await page.getByLabel('Search events').fill('NovoRapid');
 
-  await expect(page.getByText('1 events')).toBeVisible();
+  await expect(
+    page
+      .getByLabel('Timeline search and filters')
+      .getByText('1 event', { exact: true }),
+  ).toBeVisible();
   await expect(eventCards(page).first()).toBeVisible();
 });
 

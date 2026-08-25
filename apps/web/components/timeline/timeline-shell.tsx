@@ -108,11 +108,11 @@ export function TimelineShell() {
     () => (count: number) =>
       formatTimelineDayPeriodEventCount(
         count,
-        uiLabels.dayPeriod.eventCount,
+        uiLabels.eventCount,
         presentationLocale,
         formatCount,
       ),
-    [formatCount, presentationLocale, uiLabels.dayPeriod.eventCount],
+    [formatCount, presentationLocale, uiLabels.eventCount],
   );
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const mobileQuickAddFabRef = useRef<HTMLButtonElement>(null);
@@ -247,7 +247,7 @@ export function TimelineShell() {
         time,
       );
       const categoryLabel =
-        presentationDependencies.labels.filters[event.kind] ?? event.kind;
+        presentationDependencies.labels.eventKinds[event.kind] ?? event.kind;
       const primaryValue = [presentation.value, presentation.unit]
         .filter(Boolean)
         .join(' ');
@@ -267,8 +267,9 @@ export function TimelineShell() {
     return createTimelineDayViewModel({
       clusterAriaLabel: (count) =>
         formatTimelineEventsOfDayClusterAriaLabel(
-          uiLabels.eventsOfDay.clusterAriaLabel,
           count,
+          uiLabels.eventsOfDay.clusterAriaLabel,
+          presentationLocale,
           formatCount,
         ),
       dateFilter,
@@ -562,8 +563,9 @@ export function TimelineShell() {
               ariaLabel: uiLabels.eventsOfDay.ariaLabel,
               clusterAriaLabel: (count) =>
                 formatTimelineEventsOfDayClusterAriaLabel(
-                  uiLabels.eventsOfDay.clusterAriaLabel,
                   count,
+                  uiLabels.eventsOfDay.clusterAriaLabel,
+                  presentationLocale,
                   formatCount,
                 ),
               currentTimeLabel: uiLabels.eventsOfDay.currentTime,
@@ -584,6 +586,7 @@ export function TimelineShell() {
             filterLabels={presentationDependencies.labels.filters}
             formatCount={formatCount}
             labels={uiLabels}
+            locale={presentationLocale}
             model={searchFilterModel}
             onDateFilterChange={handleDateFilterChange}
             onFilterChange={handleFilterChange}

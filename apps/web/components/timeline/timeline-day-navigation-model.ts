@@ -1,6 +1,6 @@
 import {
   compareTimelineCalendarDateKeys,
-  formatTimelineCompactDateLabel,
+  formatTimelineDayNavigationDateLabel,
   shiftTimelineCalendarDateKey,
 } from '../../lib/timeline/timeline-date-time';
 import {
@@ -103,15 +103,15 @@ export function createTimelineDayNavigationModel(
   const canGoNext =
     nextDateKey !== null &&
     compareTimelineCalendarDateKeys(nextDateKey, dateRange.toDateKey) <= 0;
-  const compactDateLabel = formatTimelineCompactDateLabel(
+  const navigationDateLabel = formatTimelineDayNavigationDateLabel(
     clampedDateKey,
     locale,
     timeZone,
   );
   const isToday = todayDateKey === clampedDateKey;
   const label = isToday
-    ? `${labels.todayPrefix}, ${compactDateLabel}`
-    : compactDateLabel;
+    ? `${labels.todayPrefix}, ${navigationDateLabel}`
+    : navigationDateLabel;
 
   return {
     canGoNext,
