@@ -146,13 +146,28 @@ function createReadyMetrics(
     (mark) => mark.durationSeconds / 60,
   );
 
+  const resolveSecondaryText = (
+    kind: DashboardDaySummaryMetricKind,
+    chartValues: readonly number[],
+  ): string | null => {
+    if (chartValues.length === 0) {
+      return labels.chartEmptyHint;
+    }
+
+    if (kind === 'glucose') {
+      return summary.latestTodayGlucoseDisplayTime;
+    }
+
+    return labels.totalForDay;
+  };
+
   return [
     {
       chartAriaLabel: labels.chartAria.glucose(glucoseValues.length),
       chartValues: glucoseValues,
       kind: 'glucose',
       label: labels.glucose,
-      secondaryText: summary.latestTodayGlucoseDisplayTime,
+      secondaryText: resolveSecondaryText('glucose', glucoseValues),
       value: formattedMetrics.glucose,
     },
     {
@@ -160,7 +175,7 @@ function createReadyMetrics(
       chartValues: insulinValues,
       kind: 'insulin',
       label: labels.totalInsulin,
-      secondaryText: labels.totalForDay,
+      secondaryText: resolveSecondaryText('insulin', insulinValues),
       value: formattedMetrics.totalInsulin,
     },
     {
@@ -168,7 +183,7 @@ function createReadyMetrics(
       chartValues: nutritionValues,
       kind: 'nutrition',
       label: labels.totalCarbohydrates,
-      secondaryText: labels.totalForDay,
+      secondaryText: resolveSecondaryText('nutrition', nutritionValues),
       value: formattedMetrics.totalCarbohydrates,
     },
     {
@@ -176,7 +191,7 @@ function createReadyMetrics(
       chartValues: activityValues,
       kind: 'activity',
       label: labels.activity,
-      secondaryText: labels.totalForDay,
+      secondaryText: resolveSecondaryText('activity', activityValues),
       value: formattedMetrics.totalActivity,
     },
   ];

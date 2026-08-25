@@ -24,6 +24,10 @@ const summarySource = readFileSync(
   fileURLToPath(new URL('./dashboard-day-summary.tsx', import.meta.url)),
   'utf8',
 );
+const summaryModelSource = readFileSync(
+  fileURLToPath(new URL('./dashboard-day-summary-model.ts', import.meta.url)),
+  'utf8',
+);
 const headerSource = readFileSync(
   fileURLToPath(new URL('./dashboard-header.tsx', import.meta.url)),
   'utf8',
@@ -44,6 +48,10 @@ const miniChartsSource = readFileSync(
 );
 const shellSource = readFileSync(
   fileURLToPath(new URL('./dashboard-shell.tsx', import.meta.url)),
+  'utf8',
+);
+const navLayoutSource = readFileSync(
+  fileURLToPath(new URL('./dashboard-mobile-nav-layout.ts', import.meta.url)),
   'utf8',
 );
 const pageBackgroundSource = readFileSync(
@@ -81,7 +89,8 @@ test('today summary presents four distinct metric visual slots with real mini ch
   assert.match(summarySource, /InsulinMiniChart/);
   assert.match(summarySource, /NutritionMiniChart/);
   assert.match(summarySource, /ActivityMiniChart/);
-  assert.match(summarySource, /chartEmptyHint/);
+  assert.match(summaryModelSource, /resolveSecondaryText/);
+  assert.match(summaryModelSource, /chartEmptyHint/);
   assert.match(summarySource, /dark:from-teal-950/);
   assert.doesNotMatch(summarySource, /MetricDecoration/);
 });
@@ -89,12 +98,25 @@ test('today summary presents four distinct metric visual slots with real mini ch
 test('empty mini charts avoid fabricated data visuals and misleading chart semantics', () => {
   assert.doesNotMatch(miniChartsSource, /strokeDasharray/);
   assert.match(miniChartsSource, /sr-only/);
-  assert.match(miniChartsSource, /emptyHint/);
-  assert.doesNotMatch(
-    miniChartsSource,
-    /function EmptyMiniChart[\s\S]*role="img"/,
-  );
+
+  const emptyMiniChartSource = miniChartsSource.match(
+    /function EmptyMiniChart\([\s\S]*?\n\}/,
+  )?.[0];
+
+  assert.ok(emptyMiniChartSource, 'EmptyMiniChart helper is present');
+  assert.doesNotMatch(emptyMiniChartSource, /<svg/);
+  assert.doesNotMatch(emptyMiniChartSource, /role="img"/);
+
   assert.match(miniChartsSource, /buildSparklinePath/);
+  assert.match(summarySource, /metric\.chartValues\.length === 0/);
+});
+
+test('home shell reserves mobile nav clearance from shared layout tokens', () => {
+  assert.match(shellSource, /dashboardMainMobileNavPaddingClassName/);
+  assert.match(navLayoutSource, /DASHBOARD_MOBILE_NAV_INNER_HEIGHT/);
+  assert.match(navLayoutSource, /max\(0\.5rem,env\(safe-area-inset-bottom\)\)/);
+  assert.match(mobileNavSource, /dashboardMobileNavOuterClassName/);
+  assert.match(mobileNavSource, /id="dashboard-mobile-nav"/);
 });
 
 test('quick actions expose exactly five approved high-frequency categories including notes', () => {
@@ -111,6 +133,7 @@ test('quick actions expose exactly five approved high-frequency categories inclu
   }
 
   assert.doesNotMatch(quickActionsSource, /\btruncate\b/);
+  assert.match(quickActionsSource, /min-h-11/);
 });
 
 function visibleCategoriesCount(source) {

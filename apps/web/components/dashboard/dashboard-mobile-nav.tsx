@@ -6,6 +6,10 @@ import { useMemo, type RefObject } from 'react';
 
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { resolveDashboardMobileNavLabels } from './dashboard-mobile-nav-labels';
+import {
+  dashboardMobileNavInnerClassName,
+  dashboardMobileNavOuterClassName,
+} from './dashboard-mobile-nav-layout';
 
 export interface DashboardMobileNavProps {
   readonly activeTab?: 'home' | 'timeline';
@@ -31,9 +35,10 @@ export function DashboardMobileNav({
   return (
     <nav
       aria-label={labels.home}
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-3.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] lg:hidden"
+      className={dashboardMobileNavOuterClassName}
+      id="dashboard-mobile-nav"
     >
-      <div className="pointer-events-auto mx-auto max-w-md rounded-[1.65rem] border border-slate-200/55 bg-white/84 shadow-[0_6px_24px_rgba(15,23,42,0.07)] backdrop-blur-lg dark:border-white/8 dark:bg-slate-950/84 dark:shadow-[0_6px_24px_rgba(0,0,0,0.32)]">
+      <div className={dashboardMobileNavInnerClassName}>
         <ul
           className={`grid items-center px-1 py-1 ${showQuickAddFab ? 'grid-cols-4 items-end pt-1 pb-1.5' : 'grid-cols-3'}`}
         >

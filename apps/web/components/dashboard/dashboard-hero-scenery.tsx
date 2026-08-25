@@ -9,7 +9,7 @@ export function DashboardHeroScenery() {
         <div className="absolute top-[8%] right-[18%] size-24 rounded-full bg-gradient-to-br from-amber-100/70 to-orange-200/35 blur-2xl" />
         <div className="absolute top-[14%] left-[12%] size-32 rounded-full bg-white/18 blur-3xl" />
         <svg
-          className="absolute inset-x-0 bottom-0 h-[68%] w-full"
+          className="absolute inset-x-0 bottom-0 h-[58%] w-full sm:h-[62%] lg:h-[68%]"
           preserveAspectRatio="none"
           viewBox="0 0 480 280"
         >
@@ -87,7 +87,7 @@ export function DashboardHeroScenery() {
       </div>
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-4 -right-1 grid size-[clamp(7.5rem,30vw,11.5rem)] place-items-center sm:top-6 sm:right-1"
+        className="pointer-events-none absolute top-3 -right-1 grid size-[clamp(6.5rem,26vw,11.5rem)] place-items-center sm:top-6 sm:right-1"
       >
         <span className="absolute size-full rounded-full bg-gradient-to-br from-white/20 via-cyan-100/15 to-violet-200/20 blur-md" />
         <span className="absolute size-[94%] rounded-full border border-white/25 bg-white/8" />

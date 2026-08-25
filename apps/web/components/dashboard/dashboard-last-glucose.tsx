@@ -75,7 +75,7 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
     <section
       aria-busy={viewModel.isLoading}
       aria-labelledby={titleId}
-      className={`relative min-h-[17rem] overflow-hidden rounded-[1.75rem] border p-4 shadow-[0_24px_70px_rgba(14,116,144,0.2)] sm:min-h-[18.5rem] sm:p-6 lg:min-h-[19rem] ${
+      className={`relative min-h-[14rem] overflow-hidden rounded-[1.75rem] border p-3.5 shadow-[0_24px_70px_rgba(14,116,144,0.2)] sm:min-h-[15.5rem] sm:p-5 lg:min-h-[19rem] lg:p-6 ${
         isError
           ? 'border-status-danger/40 bg-surface'
           : hasColorHero
@@ -110,8 +110,8 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
               </span>
               <h2 id={titleId}>{labels.title}</h2>
             </div>
-            <p className="mt-4 flex flex-wrap items-end gap-x-2.5 gap-y-1 text-white drop-shadow-sm">
-              <span className="text-[clamp(3rem,12vw,5.75rem)] leading-[0.86] font-black tracking-[-0.06em] tabular-nums">
+            <p className="mt-3 flex flex-wrap items-end gap-x-2 gap-y-1 text-white drop-shadow-sm sm:mt-4">
+              <span className="text-[clamp(2.65rem,11vw,5.75rem)] leading-[0.86] font-black tracking-[-0.06em] tabular-nums">
                 {measurement.value}
               </span>
               <span className="pb-1 text-lg font-bold sm:pb-1.5 sm:text-xl">

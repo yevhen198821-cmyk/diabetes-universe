@@ -63,10 +63,10 @@ function RecentEventRow({
 
   return (
     <li>
-      <div className="flex min-h-[4.25rem] items-center gap-3 px-1.5 py-3 sm:gap-4 sm:px-2">
+      <div className="flex min-h-[3.75rem] items-center gap-2.5 px-1.5 py-2.5 sm:min-h-[4.25rem] sm:gap-4 sm:px-2 sm:py-3">
         <span
           aria-hidden="true"
-          className={`grid size-11 shrink-0 place-items-center rounded-full shadow-[0_8px_20px_rgba(15,23,42,0.10)] ${visual.iconClass}`}
+          className={`grid size-10 shrink-0 place-items-center rounded-full shadow-[0_8px_20px_rgba(15,23,42,0.10)] sm:size-11 ${visual.iconClass}`}
         >
           <Icon size={19} strokeWidth={2.2} />
         </span>
