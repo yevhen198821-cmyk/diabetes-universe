@@ -5,14 +5,14 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import {
-  MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL,
-  MEDICAL_ADOPTION_ITEM_STATES_PRIVILEGES_MIGRATION_SQL,
-  MEDICAL_ADOPTION_MIGRATION_SQL,
-  MEDICAL_ADOPTION_PRIVILEGES_MIGRATION_SQL,
-  MEDICAL_DIABETES_SETTINGS_PRIVILEGES_MIGRATION_SQL,
-  MEDICAL_FOUNDATION_MIGRATION_SQL,
-  MEDICAL_PRIVILEGES_MIGRATION_SQL,
-} from '../database/medical-foundation-migration.ts';
+  readMedicalAdoptionItemStatesMigrationSql,
+  readMedicalAdoptionItemStatesPrivilegesMigrationSql,
+  readMedicalAdoptionMigrationSql,
+  readMedicalAdoptionPrivilegesMigrationSql,
+  readMedicalDiabetesSettingsPrivilegesMigrationSql,
+  readMedicalFoundationMigrationSql,
+  readMedicalPrivilegesMigrationSql,
+} from '../database/medical-pglite-bootstrap-migrations.ts';
 
 const drizzleDirectory = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -55,23 +55,23 @@ function positionOf(pattern) {
 }
 
 test('PGlite bootstrap loads canonical 0000 migration SQL artifact', () => {
-  assert.equal(MEDICAL_FOUNDATION_MIGRATION_SQL, foundationSql);
+  assert.equal(readMedicalFoundationMigrationSql(), foundationSql);
 });
 
 test('PGlite bootstrap loads canonical adoption migration SQL artifact', () => {
-  assert.equal(MEDICAL_ADOPTION_MIGRATION_SQL, adoptionSql);
+  assert.equal(readMedicalAdoptionMigrationSql(), adoptionSql);
 });
 
 test('PGlite bootstrap loads canonical adoption item state migration SQL artifact', () => {
   assert.equal(
-    MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL,
+    readMedicalAdoptionItemStatesMigrationSql(),
     adoptionItemStatesSql,
   );
 });
 
 test('adoption item state privilege migration grants table-specific medical_app access', () => {
   assert.equal(
-    MEDICAL_ADOPTION_ITEM_STATES_PRIVILEGES_MIGRATION_SQL,
+    readMedicalAdoptionItemStatesPrivilegesMigrationSql(),
     adoptionItemStatesPrivilegesSql,
   );
   assert.match(adoptionItemStatesPrivilegesSql, /medical_adoption_item_states/);
@@ -81,7 +81,7 @@ test('adoption item state privilege migration grants table-specific medical_app 
 
 test('diabetes settings privilege migration grants table-specific medical_app access', () => {
   assert.equal(
-    MEDICAL_DIABETES_SETTINGS_PRIVILEGES_MIGRATION_SQL,
+    readMedicalDiabetesSettingsPrivilegesMigrationSql(),
     diabetesSettingsPrivilegesSql,
   );
   assert.match(diabetesSettingsPrivilegesSql, /diabetes_settings/);
@@ -92,7 +92,7 @@ test('diabetes settings privilege migration grants table-specific medical_app ac
 
 test('adoption privilege migration grants table-specific medical_app access', () => {
   assert.equal(
-    MEDICAL_ADOPTION_PRIVILEGES_MIGRATION_SQL,
+    readMedicalAdoptionPrivilegesMigrationSql(),
     adoptionPrivilegesSql,
   );
   assert.match(adoptionPrivilegesSql, /medical_adoption_sessions/);
@@ -101,7 +101,7 @@ test('adoption privilege migration grants table-specific medical_app access', ()
 });
 
 test('privilege migration SQL is executable and fails closed without Neon roles', () => {
-  assert.equal(MEDICAL_PRIVILEGES_MIGRATION_SQL, privilegesSql);
+  assert.equal(readMedicalPrivilegesMigrationSql(), privilegesSql);
   assert.match(privilegesSql, /RAISE EXCEPTION/);
   assert.match(privilegesSql, /medical_app/);
   assert.doesNotMatch(
@@ -238,17 +238,36 @@ test('maintenance role has no direct table DELETE grant', () => {
   );
 });
 
-test('postgres medical database factory does not embed duplicate migration SQL', async () => {
-  const source = readFileSync(
+test('production postgres database factory does not import PGlite bootstrap migrations', async () => {
+  const productionSource = readFileSync(
     new URL('../database/create-medical-database.ts', import.meta.url),
     'utf8',
   );
+  const pgliteSource = readFileSync(
+    new URL('../database/create-medical-pglite-database.ts', import.meta.url),
+    'utf8',
+  );
 
-  assert.equal(source.includes('MEDICAL_FOUNDATION_MIGRATION_SQL'), true);
-  assert.equal(source.includes('MEDICAL_ADOPTION_MIGRATION_SQL'), true);
-  assert.equal(source.includes('@electric-sql/pglite'), true);
   assert.equal(
-    source.includes('CREATE TABLE IF NOT EXISTS medical.medical_subjects'),
+    productionSource.includes('MEDICAL_FOUNDATION_MIGRATION_SQL'),
     false,
   );
+  assert.equal(
+    productionSource.includes('MEDICAL_ADOPTION_MIGRATION_SQL'),
+    false,
+  );
+  assert.equal(productionSource.includes('@electric-sql/pglite'), false);
+  assert.equal(
+    productionSource.includes(
+      'CREATE TABLE IF NOT EXISTS medical.medical_subjects',
+    ),
+    false,
+  );
+
+  assert.equal(
+    pgliteSource.includes('readMedicalFoundationMigrationSql'),
+    true,
+  );
+  assert.equal(pgliteSource.includes('readMedicalAdoptionMigrationSql'), true);
+  assert.equal(pgliteSource.includes('@electric-sql/pglite'), true);
 });

@@ -8,12 +8,12 @@ import { PGlite } from '@electric-sql/pglite';
 import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
 
 import {
-  MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL,
-  MEDICAL_ADOPTION_MIGRATION_SQL,
-  MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL,
-  MEDICAL_DIABETES_SETTINGS_MIGRATION_SQL,
-  MEDICAL_FOUNDATION_MIGRATION_SQL,
-} from './medical-foundation-migration.ts';
+  readMedicalAdoptionItemStatesMigrationSql,
+  readMedicalAdoptionMigrationSql,
+  readMedicalAdoptionSubjectResourceFkMigrationSql,
+  readMedicalDiabetesSettingsMigrationSql,
+  readMedicalFoundationMigrationSql,
+} from './medical-pglite-bootstrap-migrations.ts';
 import { medicalSchema } from './medical-schema.ts';
 
 const drizzleDirectory = join(
@@ -27,16 +27,16 @@ const diabetesSettingsMigrationSql = readFileSync(
 );
 
 async function bootstrapMedicalSchema(client) {
-  await client.exec(MEDICAL_FOUNDATION_MIGRATION_SQL);
-  await client.exec(MEDICAL_ADOPTION_MIGRATION_SQL);
-  await client.exec(MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL);
-  await client.exec(MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL);
-  await client.exec(MEDICAL_DIABETES_SETTINGS_MIGRATION_SQL);
+  await client.exec(readMedicalFoundationMigrationSql());
+  await client.exec(readMedicalAdoptionMigrationSql());
+  await client.exec(readMedicalAdoptionSubjectResourceFkMigrationSql());
+  await client.exec(readMedicalAdoptionItemStatesMigrationSql());
+  await client.exec(readMedicalDiabetesSettingsMigrationSql());
 }
 
 test('diabetes settings migration artifact matches exported SQL constant', () => {
   assert.equal(
-    MEDICAL_DIABETES_SETTINGS_MIGRATION_SQL,
+    readMedicalDiabetesSettingsMigrationSql(),
     diabetesSettingsMigrationSql,
   );
 });
