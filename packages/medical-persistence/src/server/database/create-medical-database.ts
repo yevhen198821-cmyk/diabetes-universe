@@ -11,6 +11,7 @@ import {
   MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL,
   MEDICAL_ADOPTION_MIGRATION_SQL,
   MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL,
+  MEDICAL_DIABETES_SETTINGS_MIGRATION_SQL,
   MEDICAL_FOUNDATION_MIGRATION_SQL,
 } from '../database/medical-foundation-migration';
 import { medicalSchema } from '../database/medical-schema';
@@ -40,6 +41,7 @@ async function ensurePgliteMedicalSchema(pgliteClient: PGlite): Promise<void> {
         pgliteClient.exec(MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL),
       )
       .then(() => pgliteClient.exec(MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL))
+      .then(() => pgliteClient.exec(MEDICAL_DIABETES_SETTINGS_MIGRATION_SQL))
       .then(() => undefined);
   }
 

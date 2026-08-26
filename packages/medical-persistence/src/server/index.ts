@@ -14,6 +14,7 @@ export { MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL } from './database/m
 export { MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { MEDICAL_ADOPTION_ITEM_STATES_PRIVILEGES_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { MEDICAL_ADOPTION_PRIVILEGES_MIGRATION_SQL } from './database/medical-foundation-migration';
+export { MEDICAL_DIABETES_SETTINGS_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { medicalSchema } from './database/medical-schema';
 export {
   createMedicalSubjectRepository,

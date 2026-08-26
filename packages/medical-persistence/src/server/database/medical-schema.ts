@@ -1,5 +1,6 @@
 import {
   bigint,
+  doublePrecision,
   foreignKey,
   integer,
   jsonb,
@@ -12,6 +13,12 @@ import {
 } from 'drizzle-orm/pg-core';
 
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
+
+import type {
+  DiabetesTypeCategory,
+  GlucoseDisplayUnit,
+  TargetRangeSource,
+} from '@diabetes-universe/medical-domain';
 
 export const medical = pgSchema('medical');
 
@@ -195,6 +202,53 @@ export const medicalAdoptionItemStates = medical.table(
   },
 );
 
+export const diabetesSettings = medical.table(
+  'diabetes_settings',
+  {
+    settingsId: uuid('settings_id').primaryKey(),
+    subjectId: uuid('subject_id')
+      .notNull()
+      .references(() => medicalSubjects.subjectId, { onDelete: 'restrict' }),
+    /**
+     * Transitional DB state: NULL means the subject has not yet explicitly chosen
+     * a display unit. Wave 2D/2E resolves this before manual glucose entry.
+     */
+    glucoseDisplayUnit: text(
+      'glucose_display_unit',
+    ).$type<GlucoseDisplayUnit>(),
+    diabetesTypeCategory: text('diabetes_type_category')
+      .$type<DiabetesTypeCategory>()
+      .notNull()
+      .default('unknown'),
+    diabetesTypeOtherText: text('diabetes_type_other_text'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+    revision: bigint('revision', { mode: 'bigint' }).notNull(),
+  },
+  (table) => [
+    uniqueIndex('diabetes_settings_subject_unique').on(table.subjectId),
+  ],
+);
+
+export const glucoseTargetProfiles = medical.table(
+  'glucose_target_profiles',
+  {
+    profileId: uuid('profile_id').primaryKey(),
+    subjectId: uuid('subject_id')
+      .notNull()
+      .references(() => medicalSubjects.subjectId, { onDelete: 'restrict' }),
+    lowMmolPerL: doublePrecision('low_mmol_per_l'),
+    highMmolPerL: doublePrecision('high_mmol_per_l'),
+    source: text('source').$type<TargetRangeSource>(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+    revision: bigint('revision', { mode: 'bigint' }).notNull(),
+  },
+  (table) => [
+    uniqueIndex('glucose_target_profiles_subject_unique').on(table.subjectId),
+  ],
+);
+
 export const medicalSchema = {
   medicalSubjects,
   accountSubjectRelationships,
@@ -205,4 +259,6 @@ export const medicalSchema = {
   medicalAdoptionSessions,
   medicalAdoptionMappings,
   medicalAdoptionItemStates,
+  diabetesSettings,
+  glucoseTargetProfiles,
 };
