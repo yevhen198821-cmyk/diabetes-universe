@@ -105,9 +105,9 @@ test('target editor validates bounds and saves canonical mmol/L payload', async 
   await expect(targetDialog.getByLabel('Lower limit')).toHaveValue('10');
   await expect(targetDialog.getByLabel('Upper limit')).toHaveValue('10');
   await targetDialog.getByRole('button', { name: 'Save', exact: true }).click();
-  await expect(
-    targetDialog.getByRole('alert'),
-  ).toContainText('The lower limit must be less than the upper limit.');
+  await expect(targetDialog.getByRole('alert')).toContainText(
+    'The lower limit must be less than the upper limit.',
+  );
 
   await targetDialog.getByLabel('Lower limit').fill('4.0');
   await targetDialog.getByLabel('Upper limit').fill('10.0');

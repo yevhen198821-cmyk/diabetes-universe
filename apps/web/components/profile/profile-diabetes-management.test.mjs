@@ -13,7 +13,9 @@ const menuSource = readFileSync(
   'utf8',
 );
 const menuLinkSource = readFileSync(
-  fileURLToPath(new URL('./profile-menu-diabetes-link-row.tsx', import.meta.url)),
+  fileURLToPath(
+    new URL('./profile-menu-diabetes-link-row.tsx', import.meta.url),
+  ),
   'utf8',
 );
 const panelSource = readFileSync(
@@ -23,12 +25,17 @@ const panelSource = readFileSync(
   'utf8',
 );
 const pageSource = readFileSync(
-  fileURLToPath(new URL('../../app/account/diabetes/page.tsx', import.meta.url)),
+  fileURLToPath(
+    new URL('../../app/account/diabetes/page.tsx', import.meta.url),
+  ),
   'utf8',
 );
 const clientSource = readFileSync(
   fileURLToPath(
-    new URL('../../lib/medical/client/diabetes-settings-client.ts', import.meta.url),
+    new URL(
+      '../../lib/medical/client/diabetes-settings-client.ts',
+      import.meta.url,
+    ),
   ),
   'utf8',
 );
@@ -45,7 +52,10 @@ const authConstantsSource = readFileSync(
 test('profile menu links to diabetes management route', () => {
   assert.match(menuSource, /ProfileMenuDiabetesLinkRow/);
   assert.match(menuLinkSource, /href="\/account\/diabetes"/);
-  assert.doesNotMatch(menuSource, /ProfileMenuDisabledRow[\s\S]*diabetesSettings/);
+  assert.doesNotMatch(
+    menuSource,
+    /ProfileMenuDisabledRow[\s\S]*diabetesSettings/,
+  );
 });
 
 test('diabetes management page renders dedicated panel', () => {
