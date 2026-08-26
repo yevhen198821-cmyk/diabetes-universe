@@ -14,6 +14,7 @@ import {
   resetMedicalApiRateLimiterForTests,
   setMedicalApiRateLimiterForTests,
 } from './medical-api-rate-limit.ts';
+import { resetMedicalProductionRuntimeForTests } from './ensure-medical-production-runtime.ts';
 import { registerMedicalApiRateLimitBackendAdapter } from './medical-api-runtime-readiness.ts';
 import { TEST_ACCOUNT_HEADER } from './resolve-medical-api-scope.ts';
 import {
@@ -58,6 +59,7 @@ test.afterEach(async () => {
   registerMedicalApiRateLimitBackendAdapter(null);
   resetMedicalApiRateLimiterForTests();
   setMedicalApiRateLimiterForTests(null);
+  resetMedicalProductionRuntimeForTests();
   await resetMedicalServiceBundleForTests();
 });
 
@@ -101,7 +103,7 @@ test('production with incomplete distributed config returns 503 before persisten
   assert.equal(getMedicalServiceBundleAccessCountForTests(), 0);
 });
 
-test('production with configured backend but no adapter returns 503 before auth and persistence', async () => {
+test('production bootstrap auto-registers adapter when distributed backend is configured', async () => {
   process.env.MEDICAL_API_PRODUCTION_GATE = '1';
   process.env.MEDICAL_API_ENABLE_TEST_AUTH = '1';
   process.env.MEDICAL_RATE_LIMIT_MODE = 'distributed';
@@ -109,24 +111,21 @@ test('production with configured backend but no adapter returns 503 before auth 
   registerMedicalApiRateLimitBackendAdapter(null);
   resetMedicalApiRateLimiterForTests();
   setMedicalApiRateLimiterForTests(null);
+  resetMedicalProductionRuntimeForTests();
 
   const response = await handleCreateMedicalEvent(
     new Request(medicalEventsUrl(), {
       method: 'POST',
       headers: {
-        ...authHeaders('acct-prod-backend-missing-adapter'),
-        [MEDICAL_IDEMPOTENCY_HEADER]: 'backend-missing-adapter',
+        ...authHeaders('acct-prod-backend-bootstrap'),
+        [MEDICAL_IDEMPOTENCY_HEADER]: 'backend-bootstrap',
         'content-type': 'application/json',
       },
       body: sampleCreateBody(),
     }),
   );
 
-  assert.equal(response.status, 503);
-  const body = await response.json();
-  assert.equal(body.error.code, 'SERVICE_UNAVAILABLE');
-  assert.equal(getMedicalServiceBundleAccessCountForTests(), 0);
-  assert.doesNotMatch(JSON.stringify(body), /approved-backend/i);
+  assert.notEqual(response.status, 503);
 });
 
 test('production with registered adapter may proceed past readiness gate', async () => {
