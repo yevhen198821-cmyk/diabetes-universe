@@ -17,6 +17,7 @@ export type DiabetesSettingsAuditResourceType =
 export const DIABETES_SETTINGS_AUDIT_ACTIONS = {
   settingsUpdated: 'diabetes_settings.updated',
   targetRangeUpdated: 'glucose_target_profile.default_range.updated',
+  targetRangeCleared: 'glucose_target_profile.default_range.cleared',
 } as const;
 
 export type DiabetesSettingsAuditAction =

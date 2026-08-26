@@ -46,3 +46,6 @@ export const MEDICAL_ADOPTION_ITEM_STATES_PRIVILEGES_MIGRATION_SQL =
 export const MEDICAL_DIABETES_SETTINGS_MIGRATION_SQL = readMedicalMigrationSql(
   '0005_medical_diabetes_settings.sql',
 );
+
+export const MEDICAL_DIABETES_SETTINGS_PRIVILEGES_MIGRATION_SQL =
+  readMedicalMigrationSql('0006_medical_diabetes_settings_privileges.sql');

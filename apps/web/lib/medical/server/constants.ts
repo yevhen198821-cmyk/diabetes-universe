@@ -8,3 +8,7 @@ export const MEDICAL_IDEMPOTENCY_KEY_PATTERN = /^[A-Za-z0-9._-]{1,128}$/;
 export const MEDICAL_ADOPTION_BASE_PATH =
   '/api/v1/medical/me/adoption-sessions';
 export const MEDICAL_ADOPTION_OPERATION_SCOPE = 'adoption.import';
+export const MEDICAL_DIABETES_SETTINGS_BASE_PATH =
+  '/api/v1/medical/me/diabetes-settings';
+export const MEDICAL_GLUCOSE_TARGET_PROFILE_BASE_PATH =
+  '/api/v1/medical/me/glucose-target-profile';

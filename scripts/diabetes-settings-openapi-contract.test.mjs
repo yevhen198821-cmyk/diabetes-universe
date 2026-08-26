@@ -64,4 +64,19 @@ test('OpenAPI diabetes settings schemas validate', async () => {
       .nullable,
     true,
   );
+  assert.equal(
+    api.components.schemas.DiabetesSettingsResponse.properties.configured.type,
+    'boolean',
+  );
+});
+
+test('OpenAPI exposes diabetes settings runtime paths', async () => {
+  const source = readFileSync(SPEC_PATH, 'utf8');
+  const document = loadYaml(source);
+
+  assert.ok(document.paths['/me/diabetes-settings']?.get);
+  assert.ok(document.paths['/me/diabetes-settings']?.patch);
+  assert.ok(document.paths['/me/glucose-target-profile']?.get);
+  assert.ok(document.paths['/me/glucose-target-profile']?.put);
+  assert.ok(document.paths['/me/glucose-target-profile']?.delete);
 });

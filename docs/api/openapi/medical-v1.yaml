@@ -13,6 +13,8 @@ tags:
     description: Self-subject medical event resources
   - name: MedicalAdoption
     description: One-time local data adoption sessions
+  - name: DiabetesSettings
+    description: Self-subject diabetes settings and glucose target profile
 security:
   - sessionAuth: []
 paths:
@@ -330,6 +332,166 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
         '429':
           $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /me/diabetes-settings:
+    get:
+      tags: [DiabetesSettings]
+      summary: Read diabetes settings
+      operationId: getDiabetesSettings
+      responses:
+        '200':
+          description: Current diabetes settings for the authenticated self subject
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiabetesSettingsResponse'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    patch:
+      tags: [DiabetesSettings]
+      summary: Update diabetes settings
+      operationId: patchDiabetesSettings
+      parameters:
+        - $ref: '#/components/parameters/IfMatchHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiabetesSettingsPatchRequest'
+      responses:
+        '200':
+          description: Updated diabetes settings
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiabetesSettingsResponse'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '412':
+          $ref: '#/components/responses/RevisionConflict'
+        '413':
+          $ref: '#/components/responses/RequestTooLarge'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /me/glucose-target-profile:
+    get:
+      tags: [DiabetesSettings]
+      summary: Read glucose target profile
+      operationId: getGlucoseTargetProfile
+      responses:
+        '200':
+          description: Current glucose target profile for the authenticated self subject
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlucoseTargetProfileResponse'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    put:
+      tags: [DiabetesSettings]
+      summary: Set glucose target profile default range
+      operationId: putGlucoseTargetProfile
+      parameters:
+        - $ref: '#/components/parameters/IfMatchHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GlucoseTargetProfilePutRequest'
+      responses:
+        '200':
+          description: Updated glucose target profile
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlucoseTargetProfileResponse'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '412':
+          $ref: '#/components/responses/RevisionConflict'
+        '413':
+          $ref: '#/components/responses/RequestTooLarge'
+        '422':
+          $ref: '#/components/responses/ValidationFailed'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    delete:
+      tags: [DiabetesSettings]
+      summary: Clear glucose target profile default range
+      operationId: deleteGlucoseTargetProfile
+      parameters:
+        - $ref: '#/components/parameters/IfMatchHeader'
+      responses:
+        '200':
+          description: Cleared glucose target profile
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/PrivateNoStore'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlucoseTargetProfileResponse'
+        '401':
+          $ref: '#/components/responses/AuthRequired'
+        '412':
+          $ref: '#/components/responses/RevisionConflict'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
         '503':
           $ref: '#/components/responses/ServiceUnavailable'
 components:
@@ -682,6 +844,7 @@ components:
           $ref: '#/components/schemas/TargetRangeSource'
     DiabetesSettings:
       type: object
+      description: Persisted diabetes settings resource (internal schema)
       required:
         - settingsId
         - subjectId
@@ -714,8 +877,57 @@ components:
         revision:
           type: string
           description: Opaque revision token for optimistic concurrency
+    DiabetesSettingsResponse:
+      type: object
+      required:
+        - configured
+        - subjectId
+        - glucoseDisplayUnit
+        - diabetesType
+        - revision
+      additionalProperties: false
+      properties:
+        configured:
+          type: boolean
+          description: False when no persisted settings row exists yet
+        settingsId:
+          type: string
+          format: uuid
+          nullable: true
+        subjectId:
+          type: string
+          format: uuid
+        glucoseDisplayUnit:
+          allOf:
+            - $ref: '#/components/schemas/GlucoseDisplayUnit'
+          nullable: true
+        diabetesType:
+          $ref: '#/components/schemas/DiabetesTypeClassification'
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        revision:
+          type: string
+          description: Opaque revision token for optimistic concurrency
+    DiabetesSettingsPatchRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        glucoseDisplayUnit:
+          allOf:
+            - $ref: '#/components/schemas/GlucoseDisplayUnit'
+          nullable: true
+        diabetesType:
+          $ref: '#/components/schemas/DiabetesTypeClassification'
     GlucoseTargetProfile:
       type: object
+      description: Persisted glucose target profile resource (internal schema)
       required:
         - profileId
         - subjectId
@@ -745,6 +957,62 @@ components:
         revision:
           type: string
           description: Opaque revision token for optimistic concurrency
+    GlucoseTargetProfileResponse:
+      type: object
+      required:
+        - configured
+        - subjectId
+        - defaultRange
+        - revision
+      additionalProperties: false
+      properties:
+        configured:
+          type: boolean
+          description: True when a personalized defaultRange is configured
+        profileId:
+          type: string
+          format: uuid
+          nullable: true
+        subjectId:
+          type: string
+          format: uuid
+        defaultRange:
+          allOf:
+            - $ref: '#/components/schemas/GlucoseTargetRange'
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        revision:
+          type: string
+          description: Opaque revision token for optimistic concurrency
+    GlucoseTargetProfilePutRequest:
+      type: object
+      required: [defaultRange]
+      additionalProperties: false
+      properties:
+        defaultRange:
+          type: object
+          required: [lowMmolPerL, highMmolPerL]
+          additionalProperties: false
+          properties:
+            lowMmolPerL:
+              type: number
+              minimum: 0.1
+              maximum: 100
+            highMmolPerL:
+              type: number
+              minimum: 0.1
+              maximum: 100
+            source:
+              type: string
+              enum: [user_defined]
+              description: Optional; server forces user_defined for self-service writes
     SemanticTimelineEvent:
       type: object
       required: [occurredAt, schemaVersion, source, kind]

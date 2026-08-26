@@ -9,6 +9,7 @@ import {
   MEDICAL_ADOPTION_ITEM_STATES_PRIVILEGES_MIGRATION_SQL,
   MEDICAL_ADOPTION_MIGRATION_SQL,
   MEDICAL_ADOPTION_PRIVILEGES_MIGRATION_SQL,
+  MEDICAL_DIABETES_SETTINGS_PRIVILEGES_MIGRATION_SQL,
   MEDICAL_FOUNDATION_MIGRATION_SQL,
   MEDICAL_PRIVILEGES_MIGRATION_SQL,
 } from '../database/medical-foundation-migration.ts';
@@ -36,6 +37,10 @@ const adoptionItemStatesSql = readFileSync(
 );
 const adoptionItemStatesPrivilegesSql = readFileSync(
   join(drizzleDirectory, '0004_medical_adoption_item_states_privileges.sql'),
+  'utf8',
+);
+const diabetesSettingsPrivilegesSql = readFileSync(
+  join(drizzleDirectory, '0006_medical_diabetes_settings_privileges.sql'),
   'utf8',
 );
 const privilegesSql = readFileSync(
@@ -72,6 +77,17 @@ test('adoption item state privilege migration grants table-specific medical_app 
   assert.match(adoptionItemStatesPrivilegesSql, /medical_adoption_item_states/);
   assert.match(adoptionItemStatesPrivilegesSql, /GRANT SELECT, INSERT, UPDATE/);
   assert.doesNotMatch(adoptionItemStatesPrivilegesSql, /GRANT DELETE/);
+});
+
+test('diabetes settings privilege migration grants table-specific medical_app access', () => {
+  assert.equal(
+    MEDICAL_DIABETES_SETTINGS_PRIVILEGES_MIGRATION_SQL,
+    diabetesSettingsPrivilegesSql,
+  );
+  assert.match(diabetesSettingsPrivilegesSql, /diabetes_settings/);
+  assert.match(diabetesSettingsPrivilegesSql, /glucose_target_profiles/);
+  assert.match(diabetesSettingsPrivilegesSql, /GRANT SELECT, INSERT, UPDATE/);
+  assert.doesNotMatch(diabetesSettingsPrivilegesSql, /GRANT DELETE/);
 });
 
 test('adoption privilege migration grants table-specific medical_app access', () => {
