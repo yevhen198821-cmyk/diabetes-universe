@@ -26,6 +26,22 @@ const VALID_RANGE = {
   source: 'user_defined',
 };
 
+function assertRevisionConflict(error) {
+  return (
+    error instanceof Error &&
+    'code' in error &&
+    error.code === 'REVISION_CONFLICT'
+  );
+}
+
+function assertInvalidRevisionToken(error) {
+  return (
+    error instanceof Error &&
+    'code' in error &&
+    error.code === 'VALIDATION_FAILED'
+  );
+}
+
 test('getSettings returns unconfigured view without persisting', async () => {
   const bundle = await createMedicalServiceBundle(
     resolveMedicalEnvironment(TEST_ENV),
@@ -133,10 +149,7 @@ test('patchSettings rejects stale revision', async () => {
         ifMatch: created.etagToken,
         patch: { glucoseDisplayUnit: 'mg_per_dl' },
       }),
-    (error) =>
-      error instanceof Error &&
-      'code' in error &&
-      error.code === 'REVISION_CONFLICT',
+    assertRevisionConflict,
   );
 
   assert.equal(updated.settings.glucoseDisplayUnit, 'mmol_per_l');
@@ -180,9 +193,307 @@ test('concurrent initial settings creates do not duplicate rows', async () => {
 
   assert.equal(fulfilled.length, 1);
   assert.equal(rejected.length, 1);
+  assert.ok(rejected.every((result) => assertRevisionConflict(result.reason)));
 
   const persisted = await bundle.diabetesSettingsService.getSettings(scope);
   assert.equal(persisted.configured, true);
+
+  await closeMedicalServiceBundle(bundle);
+});
+
+test('settings bootstrap token creates resource on first write', async () => {
+  const bundle = await createMedicalServiceBundle(
+    resolveMedicalEnvironment(TEST_ENV),
+  );
+  const relationship = await bundle.subjectService.provisionSelfSubject(
+    'acct-bootstrap-create',
+  );
+  const scope = {
+    accountId: 'acct-bootstrap-create',
+    subjectId: relationship.subjectId,
+    correlationId: 'corr-bootstrap-create',
+  };
+
+  const initial = await bundle.diabetesSettingsService.getSettings(scope);
+  assert.equal(initial.configured, false);
+
+  const created = await bundle.diabetesSettingsService.patchSettings({
+    scope,
+    ifMatch: initial.etagToken,
+    patch: { glucoseDisplayUnit: 'mmol_per_l' },
+  });
+
+  assert.equal(created.configured, true);
+  assert.equal(created.settings.glucoseDisplayUnit, 'mmol_per_l');
+
+  await closeMedicalServiceBundle(bundle);
+});
+
+test('stale settings bootstrap token returns REVISION_CONFLICT after creation', async () => {
+  const bundle = await createMedicalServiceBundle(
+    resolveMedicalEnvironment(TEST_ENV),
+  );
+  const relationship = await bundle.subjectService.provisionSelfSubject(
+    'acct-stale-bootstrap-settings',
+  );
+  const scope = {
+    accountId: 'acct-stale-bootstrap-settings',
+    subjectId: relationship.subjectId,
+    correlationId: 'corr-stale-bootstrap-settings',
+  };
+
+  const bootstrapView = await bundle.diabetesSettingsService.getSettings(scope);
+  const bootstrapToken = bootstrapView.etagToken;
+
+  const winner = await bundle.diabetesSettingsService.patchSettings({
+    scope: {
+      ...scope,
+      correlationId: 'corr-winner-settings',
+    },
+    ifMatch: bootstrapToken,
+    patch: { glucoseDisplayUnit: 'mmol_per_l' },
+  });
+
+  await assert.rejects(
+    () =>
+      bundle.diabetesSettingsService.patchSettings({
+        scope: {
+          ...scope,
+          correlationId: 'corr-loser-settings',
+        },
+        ifMatch: bootstrapToken,
+        patch: { glucoseDisplayUnit: 'mg_per_dl' },
+      }),
+    assertRevisionConflict,
+  );
+
+  const persisted = await bundle.diabetesSettingsService.getSettings(scope);
+  assert.equal(persisted.settings.glucoseDisplayUnit, 'mmol_per_l');
+  assert.equal(persisted.settings.settingsId, winner.settings.settingsId);
+
+  await closeMedicalServiceBundle(bundle);
+});
+
+test('target bootstrap token creates profile on first write', async () => {
+  const bundle = await createMedicalServiceBundle(
+    resolveMedicalEnvironment(TEST_ENV),
+  );
+  const relationship = await bundle.subjectService.provisionSelfSubject(
+    'acct-bootstrap-target',
+  );
+  const scope = {
+    accountId: 'acct-bootstrap-target',
+    subjectId: relationship.subjectId,
+    correlationId: 'corr-bootstrap-target',
+  };
+
+  const initial = await bundle.diabetesSettingsService.getTargetProfile(scope);
+  assert.equal(initial.configured, false);
+
+  const created = await bundle.diabetesSettingsService.putTargetProfile({
+    scope,
+    ifMatch: initial.etagToken,
+    range: VALID_RANGE,
+  });
+
+  assert.equal(created.configured, true);
+  assert.equal(
+    created.profile.defaultRange?.lowMmolPerL,
+    VALID_RANGE.lowMmolPerL,
+  );
+
+  await closeMedicalServiceBundle(bundle);
+});
+
+test('stale target bootstrap token returns REVISION_CONFLICT after creation', async () => {
+  const bundle = await createMedicalServiceBundle(
+    resolveMedicalEnvironment(TEST_ENV),
+  );
+  const relationship = await bundle.subjectService.provisionSelfSubject(
+    'acct-stale-bootstrap-target',
+  );
+  const scope = {
+    accountId: 'acct-stale-bootstrap-target',
+    subjectId: relationship.subjectId,
+    correlationId: 'corr-stale-bootstrap-target',
+  };
+
+  const bootstrapView =
+    await bundle.diabetesSettingsService.getTargetProfile(scope);
+  const bootstrapToken = bootstrapView.etagToken;
+
+  const winner = await bundle.diabetesSettingsService.putTargetProfile({
+    scope: {
+      ...scope,
+      correlationId: 'corr-winner-target',
+    },
+    ifMatch: bootstrapToken,
+    range: VALID_RANGE,
+  });
+
+  await assert.rejects(
+    () =>
+      bundle.diabetesSettingsService.putTargetProfile({
+        scope: {
+          ...scope,
+          correlationId: 'corr-loser-target',
+        },
+        ifMatch: bootstrapToken,
+        range: {
+          lowMmolPerL: 5.5,
+          highMmolPerL: 8.8,
+          source: 'user_defined',
+        },
+      }),
+    assertRevisionConflict,
+  );
+
+  await assert.rejects(
+    () =>
+      bundle.diabetesSettingsService.clearTargetProfile({
+        scope: {
+          ...scope,
+          correlationId: 'corr-loser-clear',
+        },
+        ifMatch: bootstrapToken,
+      }),
+    assertRevisionConflict,
+  );
+
+  const persisted =
+    await bundle.diabetesSettingsService.getTargetProfile(scope);
+  assert.equal(
+    persisted.profile.defaultRange?.lowMmolPerL,
+    winner.profile.defaultRange?.lowMmolPerL,
+  );
+
+  await closeMedicalServiceBundle(bundle);
+});
+
+test('malformed and cross-boundary revision tokens remain invalid', async () => {
+  const bundle = await createMedicalServiceBundle(
+    resolveMedicalEnvironment(TEST_ENV),
+  );
+  const owner =
+    await bundle.subjectService.provisionSelfSubject('acct-token-owner');
+  const other =
+    await bundle.subjectService.provisionSelfSubject('acct-token-other');
+
+  const ownerScope = {
+    accountId: 'acct-token-owner',
+    subjectId: owner.subjectId,
+    correlationId: 'corr-token-owner',
+  };
+  const otherScope = {
+    accountId: 'acct-token-other',
+    subjectId: other.subjectId,
+    correlationId: 'corr-token-other',
+  };
+
+  const ownerBootstrap =
+    await bundle.diabetesSettingsService.getSettings(ownerScope);
+  const ownerTargetBootstrap =
+    await bundle.diabetesSettingsService.getTargetProfile(ownerScope);
+
+  await bundle.diabetesSettingsService.patchSettings({
+    scope: ownerScope,
+    ifMatch: ownerBootstrap.etagToken,
+    patch: { glucoseDisplayUnit: 'mmol_per_l' },
+  });
+
+  await assert.rejects(
+    () =>
+      bundle.diabetesSettingsService.patchSettings({
+        scope: ownerScope,
+        ifMatch: 'not-a-valid-revision-token',
+        patch: { glucoseDisplayUnit: 'mg_per_dl' },
+      }),
+    assertInvalidRevisionToken,
+  );
+
+  await assert.rejects(
+    () =>
+      bundle.diabetesSettingsService.patchSettings({
+        scope: otherScope,
+        ifMatch: ownerBootstrap.etagToken,
+        patch: { glucoseDisplayUnit: 'mg_per_dl' },
+      }),
+    assertInvalidRevisionToken,
+  );
+
+  await assert.rejects(
+    () =>
+      bundle.diabetesSettingsService.patchSettings({
+        scope: ownerScope,
+        ifMatch: ownerTargetBootstrap.etagToken,
+        patch: { glucoseDisplayUnit: 'mg_per_dl' },
+      }),
+    assertInvalidRevisionToken,
+  );
+
+  await closeMedicalServiceBundle(bundle);
+});
+
+test('stale bootstrap write does not mutate persisted state or add audit rows', async () => {
+  const bundle = await createMedicalServiceBundle(
+    resolveMedicalEnvironment(TEST_ENV),
+  );
+  const relationship = await bundle.subjectService.provisionSelfSubject(
+    'acct-stale-no-audit',
+  );
+  const scope = {
+    accountId: 'acct-stale-no-audit',
+    subjectId: relationship.subjectId,
+    correlationId: 'corr-stale-no-audit',
+  };
+
+  const bootstrapView = await bundle.diabetesSettingsService.getSettings(scope);
+  const bootstrapToken = bootstrapView.etagToken;
+
+  await bundle.diabetesSettingsService.patchSettings({
+    scope: {
+      ...scope,
+      correlationId: 'corr-stale-no-audit-winner',
+    },
+    ifMatch: bootstrapToken,
+    patch: {
+      glucoseDisplayUnit: 'mmol_per_l',
+      diabetesType: {
+        category: 'type_1',
+        otherDescriptor: null,
+        source: 'self_reported',
+      },
+    },
+  });
+
+  const auditBefore = await bundle.database
+    .select()
+    .from(medicalSchema.medicalAuditEvents)
+    .where(eq(medicalSchema.medicalAuditEvents.subjectId, scope.subjectId));
+
+  await assert.rejects(
+    () =>
+      bundle.diabetesSettingsService.patchSettings({
+        scope: {
+          ...scope,
+          correlationId: 'corr-stale-no-audit-loser',
+        },
+        ifMatch: bootstrapToken,
+        patch: { glucoseDisplayUnit: 'mg_per_dl' },
+      }),
+    assertRevisionConflict,
+  );
+
+  const auditAfter = await bundle.database
+    .select()
+    .from(medicalSchema.medicalAuditEvents)
+    .where(eq(medicalSchema.medicalAuditEvents.subjectId, scope.subjectId));
+
+  assert.equal(auditAfter.length, auditBefore.length);
+
+  const persisted = await bundle.diabetesSettingsService.getSettings(scope);
+  assert.equal(persisted.settings.glucoseDisplayUnit, 'mmol_per_l');
+  assert.equal(persisted.settings.diabetesType.category, 'type_1');
 
   await closeMedicalServiceBundle(bundle);
 });

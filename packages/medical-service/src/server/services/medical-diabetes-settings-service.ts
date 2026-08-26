@@ -149,28 +149,69 @@ export function createMedicalDiabetesSettingsService(
     return revisionTokens.createToken(profile.profileId, profile.revision);
   }
 
-  function parseIfMatch(
-    ifMatch: string | undefined,
-    resourceId: string,
-  ): ReturnType<RevisionTokenService['verifyAndParse']> {
+  function requireIfMatch(ifMatch: string | undefined): string {
     if (!ifMatch?.trim()) {
       throw new InvalidRevisionPreconditionError(
         'If-Match header is required.',
       );
     }
 
+    return ifMatch.trim();
+  }
+
+  function isRevisionTokenValidationError(error: unknown): boolean {
+    return (
+      error instanceof MalformedRevisionTokenError ||
+      error instanceof InvalidPersistenceRevisionTokenError
+    );
+  }
+
+  function raiseInvalidRevisionToken(): never {
+    throw new InvalidRevisionTokenError('If-Match revision token is invalid.');
+  }
+
+  function parseBootstrapIfMatch(
+    ifMatch: string | undefined,
+    bootstrapResourceId: string,
+  ): ReturnType<RevisionTokenService['verifyAndParse']> {
+    const trimmed = requireIfMatch(ifMatch);
+
     try {
-      return revisionTokens.verifyAndParse(ifMatch.trim(), resourceId);
+      return revisionTokens.verifyAndParse(trimmed, bootstrapResourceId);
     } catch (error) {
-      if (
-        error instanceof MalformedRevisionTokenError ||
-        error instanceof InvalidPersistenceRevisionTokenError
-      ) {
-        throw new InvalidRevisionTokenError(
-          'If-Match revision token is invalid.',
-        );
+      if (isRevisionTokenValidationError(error)) {
+        raiseInvalidRevisionToken();
       }
       throw error;
+    }
+  }
+
+  function parseIfMatchForExistingResource(
+    ifMatch: string | undefined,
+    persistedResourceId: string,
+    bootstrapResourceId: string,
+  ): ReturnType<RevisionTokenService['verifyAndParse']> {
+    const trimmed = requireIfMatch(ifMatch);
+
+    try {
+      return revisionTokens.verifyAndParse(trimmed, persistedResourceId);
+    } catch (persistedError) {
+      if (!isRevisionTokenValidationError(persistedError)) {
+        throw persistedError;
+      }
+
+      try {
+        revisionTokens.verifyAndParse(trimmed, bootstrapResourceId);
+        throw new MedicalRevisionConflictError(
+          'The resource revision is stale.',
+        );
+      } catch (bootstrapError) {
+        if (bootstrapError instanceof MedicalRevisionConflictError) {
+          throw bootstrapError;
+        }
+
+        raiseInvalidRevisionToken();
+      }
     }
   }
 
@@ -261,7 +302,7 @@ export function createMedicalDiabetesSettingsService(
         );
 
         if (!existing) {
-          parseIfMatch(
+          parseBootstrapIfMatch(
             input.ifMatch,
             settingsBootstrapResourceId(input.scope.subjectId),
           );
@@ -322,7 +363,11 @@ export function createMedicalDiabetesSettingsService(
           };
         }
 
-        const parsed = parseIfMatch(input.ifMatch, existing.settingsId);
+        const parsed = parseIfMatchForExistingResource(
+          input.ifMatch,
+          existing.settingsId,
+          settingsBootstrapResourceId(input.scope.subjectId),
+        );
         const oldDisplayUnit = existing.glucoseDisplayUnit;
         const oldDiabetesType = existing.diabetesType;
 
@@ -417,7 +462,7 @@ export function createMedicalDiabetesSettingsService(
         );
 
         if (!existing) {
-          parseIfMatch(
+          parseBootstrapIfMatch(
             input.ifMatch,
             targetBootstrapResourceId(input.scope.subjectId),
           );
@@ -461,7 +506,11 @@ export function createMedicalDiabetesSettingsService(
           };
         }
 
-        const parsed = parseIfMatch(input.ifMatch, existing.profileId);
+        const parsed = parseIfMatchForExistingResource(
+          input.ifMatch,
+          existing.profileId,
+          targetBootstrapResourceId(input.scope.subjectId),
+        );
         const oldRange = existing.defaultRange;
 
         const updated = await profileRepository.updateRangeWithRevision(
@@ -507,7 +556,7 @@ export function createMedicalDiabetesSettingsService(
         );
 
         if (!existing) {
-          parseIfMatch(
+          parseBootstrapIfMatch(
             input.ifMatch,
             targetBootstrapResourceId(input.scope.subjectId),
           );
@@ -525,8 +574,16 @@ export function createMedicalDiabetesSettingsService(
           };
         }
 
+        const bootstrapResourceId = targetBootstrapResourceId(
+          input.scope.subjectId,
+        );
+
         if (existing.defaultRange === null) {
-          parseIfMatch(input.ifMatch, existing.profileId);
+          parseIfMatchForExistingResource(
+            input.ifMatch,
+            existing.profileId,
+            bootstrapResourceId,
+          );
 
           return {
             configured: false,
@@ -535,7 +592,11 @@ export function createMedicalDiabetesSettingsService(
           };
         }
 
-        const parsed = parseIfMatch(input.ifMatch, existing.profileId);
+        const parsed = parseIfMatchForExistingResource(
+          input.ifMatch,
+          existing.profileId,
+          bootstrapResourceId,
+        );
         const oldRange = existing.defaultRange;
 
         const updated = await profileRepository.clearRangeWithRevision(

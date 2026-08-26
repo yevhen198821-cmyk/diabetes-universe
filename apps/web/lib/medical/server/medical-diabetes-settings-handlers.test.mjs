@@ -421,3 +421,114 @@ test('subject isolation prevents cross-account settings reads from sharing state
   assert.equal(otherBody.configured, false);
   assert.equal(otherBody.glucoseDisplayUnit, null);
 });
+
+test('stale settings bootstrap token returns HTTP 412 REVISION_CONFLICT', async () => {
+  const accountId = 'acct-handler-stale-settings';
+  const initial = await handleGetDiabetesSettings(
+    request(MEDICAL_DIABETES_SETTINGS_BASE_PATH, {
+      method: 'GET',
+      headers: authHeaders(accountId),
+    }),
+  );
+  const initialBody = await initial.json();
+  const bootstrapToken = initialBody.revision;
+
+  const winner = await handlePatchDiabetesSettings(
+    request(MEDICAL_DIABETES_SETTINGS_BASE_PATH, {
+      method: 'PATCH',
+      headers: {
+        ...authHeaders(accountId),
+        'content-type': 'application/json',
+        'if-match': bootstrapToken,
+      },
+      body: JSON.stringify({ glucoseDisplayUnit: 'mmol_per_l' }),
+    }),
+  );
+  assert.equal(winner.status, 200);
+
+  const stale = await handlePatchDiabetesSettings(
+    request(MEDICAL_DIABETES_SETTINGS_BASE_PATH, {
+      method: 'PATCH',
+      headers: {
+        ...authHeaders(accountId),
+        'content-type': 'application/json',
+        'if-match': bootstrapToken,
+      },
+      body: JSON.stringify({ glucoseDisplayUnit: 'mg_per_dl' }),
+    }),
+  );
+
+  assert.equal(stale.status, 412);
+  const staleBody = await stale.json();
+  assert.equal(staleBody.error.code, 'REVISION_CONFLICT');
+
+  const persisted = await handleGetDiabetesSettings(
+    request(MEDICAL_DIABETES_SETTINGS_BASE_PATH, {
+      method: 'GET',
+      headers: authHeaders(accountId),
+    }),
+  );
+  const persistedBody = await persisted.json();
+  assert.equal(persistedBody.glucoseDisplayUnit, 'mmol_per_l');
+});
+
+test('stale target bootstrap token returns HTTP 412 REVISION_CONFLICT', async () => {
+  const accountId = 'acct-handler-stale-target';
+  const initial = await handleGetGlucoseTargetProfile(
+    request(MEDICAL_GLUCOSE_TARGET_PROFILE_BASE_PATH, {
+      method: 'GET',
+      headers: authHeaders(accountId),
+    }),
+  );
+  const initialBody = await initial.json();
+  const bootstrapToken = initialBody.revision;
+
+  const winner = await handlePutGlucoseTargetProfile(
+    request(MEDICAL_GLUCOSE_TARGET_PROFILE_BASE_PATH, {
+      method: 'PUT',
+      headers: {
+        ...authHeaders(accountId),
+        'content-type': 'application/json',
+        'if-match': bootstrapToken,
+      },
+      body: JSON.stringify({
+        defaultRange: {
+          lowMmolPerL: 4,
+          highMmolPerL: 7,
+        },
+      }),
+    }),
+  );
+  assert.equal(winner.status, 200);
+
+  const stalePut = await handlePutGlucoseTargetProfile(
+    request(MEDICAL_GLUCOSE_TARGET_PROFILE_BASE_PATH, {
+      method: 'PUT',
+      headers: {
+        ...authHeaders(accountId),
+        'content-type': 'application/json',
+        'if-match': bootstrapToken,
+      },
+      body: JSON.stringify({
+        defaultRange: {
+          lowMmolPerL: 5,
+          highMmolPerL: 8,
+        },
+      }),
+    }),
+  );
+  assert.equal(stalePut.status, 412);
+  assert.equal((await stalePut.json()).error.code, 'REVISION_CONFLICT');
+
+  const staleDelete = await handleDeleteGlucoseTargetProfile(
+    request(MEDICAL_GLUCOSE_TARGET_PROFILE_BASE_PATH, {
+      method: 'DELETE',
+      headers: {
+        ...authHeaders(accountId),
+        'if-match': bootstrapToken,
+      },
+    }),
+  );
+  assert.equal(staleDelete.status, 412);
+  assert.equal((await staleDelete.json()).error.code, 'REVISION_CONFLICT');
+});
