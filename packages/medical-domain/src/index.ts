@@ -71,3 +71,48 @@ export {
   serverOwnedSemanticFieldNames,
   toServerSemanticEvent,
 } from './mappers/semantic-event-mapper';
+export type {
+  GlucoseDisplayUnit,
+  DiabetesTypeCategory,
+  DiabetesTypeSource,
+  TargetRangeSource,
+} from './types/diabetes-settings-enums';
+export {
+  GLUCOSE_DISPLAY_UNITS,
+  DIABETES_TYPE_CATEGORIES,
+  DIABETES_TYPE_SOURCE_SELF_REPORTED,
+  TARGET_RANGE_SOURCES,
+} from './types/diabetes-settings-enums';
+export type { DiabetesTypeClassification } from './types/diabetes-type-classification';
+export type { GlucoseTargetRange } from './types/glucose-target-range';
+export type { DiabetesSettings } from './types/diabetes-settings';
+export type { GlucoseTargetProfile } from './types/glucose-target-profile';
+export {
+  GLUCOSE_MMOL_PER_L_TO_MG_PER_DL,
+  convertGlucoseMmolPerLToMgPerDl,
+  convertGlucoseMgPerDlToMmolPerL,
+} from './glucose/glucose-conversion';
+export { DIABETES_SETTINGS_VALIDATION_BOUNDS } from './validation/diabetes-settings-bounds';
+export {
+  DiabetesSettingsValidationError,
+  assertGlucoseDisplayUnit,
+  assertDiabetesTypeCategory,
+  assertTargetRangeSource,
+  isGlucoseDisplayUnit,
+  isDiabetesTypeCategory,
+  isTargetRangeSource,
+  mapGlucoseDisplayUnitToDisplaySymbol,
+  validateDiabetesTypeClassification,
+  validateGlucoseTargetRange,
+} from './validation/diabetes-settings-validation';
+export type { GlucoseDisplayUnitSymbol } from './validation/diabetes-settings-validation';
+export {
+  DIABETES_SETTINGS_AUDIT_ACTIONS,
+  DIABETES_SETTINGS_AUDIT_RESOURCE_TYPES,
+} from './audit/diabetes-settings-audit';
+export type {
+  DiabetesSettingsAuditAction,
+  DiabetesSettingsAuditDetail,
+  DiabetesSettingsAuditEventInput,
+  DiabetesSettingsAuditResourceType,
+} from './audit/diabetes-settings-audit';
