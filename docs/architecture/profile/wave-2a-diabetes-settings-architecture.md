@@ -2,41 +2,49 @@
 
 ## Document status
 
-| Field | Value |
-| --- | --- |
-| Wave | 2A — Architecture only |
-| Status | **Architecture Proposal** |
-| Date | 2026-08-26 |
-| Scope | Profile → Управление диабетом |
+| Field        | Value                                       |
+| ------------ | ------------------------------------------- |
+| Wave         | 2A — Architecture only                      |
+| Status       | **Ready for approval**                      |
+| Date         | 2026-08-26 (finalized)                      |
+| Scope        | Profile → Управление диабетом               |
 | Out of scope | UI, migrations, API routes, production code |
+| PR           | #119                                        |
 
 ## Table of contents
 
 1. [Executive summary](#1-executive-summary)
-2. [Repository audit](#2-repository-audit)
-3. [Existing domain conflicts and duplication](#3-existing-domain-conflicts-and-duplication)
-4. [Domain boundaries](#4-domain-boundaries)
-5. [Person-of-care ownership decision](#5-person-of-care-ownership-decision)
-6. [Diabetes type recommendation](#6-diabetes-type-recommendation)
-7. [Glucose unit architecture](#7-glucose-unit-architecture)
-8. [Target-range architecture](#8-target-range-architecture)
-9. [Alert-threshold decision](#9-alert-threshold-decision)
-10. [Therapy-data decision](#10-therapy-data-decision)
-11. [Security and data classification](#11-security-and-data-classification)
-12. [AI access rules](#12-ai-access-rules)
-13. [Audit and history rules](#13-audit-and-history-rules)
-14. [Canonical conceptual data model](#14-canonical-conceptual-data-model)
-15. [Field-level matrix](#15-field-level-matrix)
-16. [API boundary proposal](#16-api-boundary-proposal)
-17. [UX information architecture](#17-ux-information-architecture)
-18. [Defaults and onboarding rules](#18-defaults-and-onboarding-rules)
-19. [Internationalization rules](#19-internationalization-rules)
-20. [Edge cases and validation](#20-edge-cases-and-validation)
-21. [Migration impact](#21-migration-impact)
-22. [Architecture options comparison](#22-architecture-options-comparison)
-23. [Final recommendation](#23-final-recommendation)
-24. [Proposed Wave 2B–2F roadmap](#24-proposed-wave-2b2f-roadmap)
-25. [Open questions requiring product-owner decision](#25-open-questions-requiring-product-owner-decision)
+2. [Architecture invariants](#2-architecture-invariants)
+3. [Approved product decisions](#3-approved-product-decisions)
+4. [Repository audit](#4-repository-audit)
+5. [Repository consistency review](#5-repository-consistency-review)
+6. [Existing domain conflicts and duplication](#6-existing-domain-conflicts-and-duplication)
+7. [Domain boundaries](#7-domain-boundaries)
+8. [Person-of-care ownership decision](#8-person-of-care-ownership-decision)
+9. [Diabetes type](#9-diabetes-type)
+10. [Glucose unit architecture](#10-glucose-unit-architecture)
+11. [Target-range architecture](#11-target-range-architecture)
+12. [Target provenance](#12-target-provenance)
+13. [Alert-threshold decision](#13-alert-threshold-decision)
+14. [Therapy and regimen](#14-therapy-and-regimen)
+15. [Device and CGM](#15-device-and-cgm)
+16. [Security and data classification](#16-security-and-data-classification)
+17. [AI access rules](#17-ai-access-rules)
+18. [Audit and history rules](#18-audit-and-history-rules)
+19. [Canonical conceptual data model](#19-canonical-conceptual-data-model)
+20. [Field-level matrix](#20-field-level-matrix)
+21. [API boundary proposal](#21-api-boundary-proposal)
+22. [UX information architecture](#22-ux-information-architecture)
+23. [Defaults and onboarding rules](#23-defaults-and-onboarding-rules)
+24. [Internationalization rules](#24-internationalization-rules)
+25. [Edge cases and validation](#25-edge-cases-and-validation)
+26. [Migration impact](#26-migration-impact)
+27. [Architecture options comparison](#27-architecture-options-comparison)
+28. [Final recommendation](#28-final-recommendation)
+29. [Wave 2 scope summary](#29-wave-2-scope-summary)
+30. [Wave 2B implementation contract](#30-wave-2b-implementation-contract)
+31. [Proposed Wave 2C–2F roadmap](#31-proposed-wave-2c2f-roadmap)
+32. [Future considerations](#32-future-considerations)
 
 ---
 
@@ -44,587 +52,637 @@
 
 Diabetes Universe already has a strong **event-centric medical domain** (`SemanticTimelineEvent` with canonical `concentrationMmolPerL`) and an approved **subject-centric ownership model** (P5/P7: Account ≠ Medical Subject). Profile Wave 1 delivered account identity UX only. **No persisted diabetes settings, glucose display preference, target ranges, therapy profile, or alert thresholds exist today.**
 
-Wave 2A recommends introducing **Diabetes Settings as a subject-scoped configuration resource** attached to the existing `MedicalSubject`, not to the authenticated `Account` or Profile identity record. This aligns with approved backend architecture, preserves caregiver/clinician futures, and keeps Profile from becoming an electronic health record.
+Wave 2A introduces **Diabetes Settings as a subject-scoped configuration resource** attached to the existing `MedicalSubject`, not to the authenticated `Account` or Profile identity record. This aligns with approved backend architecture, preserves caregiver/clinician futures, and keeps Profile from becoming an electronic health record.
 
-**Canonical glucose storage remains mmol/L.** User display unit preference is a presentation setting stored separately and applied at presentation boundaries via a new domain conversion helper (ADR-0010: formatting library does not convert).
-
-**Wave 2 initial scope (settings content):**
-
-| Setting | Wave 2 recommendation |
-| --- | --- |
-| Glucose display unit | **Ship** — required for international product |
-| Diabetes type | **Ship optional** — informational, extensible taxonomy |
-| Global glucose target range | **Ship optional** — simple low/high; extensible model |
-| App alert thresholds | **Defer** — separate concept; product/clinical policy needed |
-| Therapy / regimen | **Defer minimal flag only** — optional `usesInsulin` for UX; no medication system |
-| Device/CGM configuration | **Defer** — separate bounded context (Profile menu already defers) |
-
-**Critical principle preserved:**
+**Critical principle:**
 
 ```text
 Account Profile  ≠  Diabetes Settings  ≠  Medical Record
 ```
 
-Implementation must not begin in Wave 2A. Next step is Wave 2B (data contracts/schema design).
+**Wave 2 approved settings scope:**
+
+| Setting                                    | Wave 2                                                 |
+| ------------------------------------------ | ------------------------------------------------------ |
+| Glucose display unit (`mmol/L` \| `mg/dL`) | **In scope** — required before manual glucose entry    |
+| Diabetes type (optional, informational)    | **In scope**                                           |
+| Global glucose target range (optional)     | **In scope** — via `GlucoseTargetProfile.defaultRange` |
+| App alert / notification thresholds        | **Deferred**                                           |
+| Therapy / regimen                          | **Deferred**                                           |
+| Device / CGM configuration                 | **Deferred** — separate bounded context                |
+
+Wave 2A is documentation only. **Wave 2B must not start until this document is approved and merged.**
 
 ---
 
-## 2. Repository audit
+## 2. Architecture invariants
 
-### 2.1 Domain contracts — glucose and events
+These invariants are binding for Wave 2B and all subsequent waves.
 
-| Location | Artifact | Purpose | Class | Recommendation |
-| --- | --- | --- | --- | --- |
-| `packages/types/src/semantic-timeline.ts` | `GlucoseTimelineEvent.concentrationMmolPerL` | Canonical glucose concentration | **Production domain** | **Reuse** — single storage unit |
-| Same file | `CanonicalUnitId` includes `'glucose.mmol_per_l'` | Unit identifier for medication; glucose canonical unit documented | **Domain policy** | **Reuse** |
-| Same file | `GlucoseMeasurementContext` | Measurement context enum | **Production domain** | **Reuse** — not a settings field |
-| Same file | Comment L16–17 | Display conversion belongs to presentation | **Architecture policy** | **Reuse** |
-| `packages/types/src/quick-add.ts` | `GlucoseQuickAddEntry.valueMmol` | Quick Add input always mmol/L | **Domain input contract** | **Reuse**; wire to display preference in presentation |
-| `packages/types/src/timeline.ts` | `TimelineEvent`, `DaySummary.timeInRange`, `LastGlucose` | Legacy presentation DTOs | **Legacy/demo** | **Deprecate** for new features |
-| `packages/types/src/timeline-migration.ts` | Migration/quarantine types | Legacy lift audit | **Production migration** | **Reuse** for import paths |
+### INV-001 — Canonical glucose storage
 
-### 2.2 Formatting and presentation
+All persisted glucose concentrations use canonical **mmol/L** (`concentrationMmolPerL` on `SemanticTimelineEvent` and equivalent domain fields).
 
-| Location | Artifact | Purpose | Class | Recommendation |
-| --- | --- | --- | --- | --- |
-| `packages/formatting/src/types/measurement-unit.ts` | `MeasurementUnit = 'mmol/L' \| 'mg/dL'` | Display unit enum | **Presentation contract** | **Reuse** for display preference output |
-| `packages/formatting/src/runtime/measurement.ts` | Precision defaults (mmol/L: 0–1 digits; mg/dL: 0) | Rounding at format boundary | **Production** | **Reuse** |
-| `docs/adr/0010-platform-formatting-library.md` | No medical conversion in formatting | Architectural boundary | **Approved ADR** | **Reuse** — domain owns conversion |
-| `apps/web/lib/timeline/presentation/timeline-presentation-mapper.ts` | Always labels mmol/L | Timeline display | **Production (incomplete)** | **Migrate** to preference-driven display |
-| `apps/web/lib/quick-add/format-glucose.ts` | Hardcoded RU + mmol/L | Quick Add display | **Transitional debt** | **Migrate** |
-| `apps/web/components/quick-add/glucose-quick-add-form.tsx` | Hardcoded RU strings, mmol/L suffix | Quick Add UI | **Production (i18n debt)** | **Migrate** in Wave 2E |
+Display-unit changes **MUST NOT** mutate, rewrite, duplicate, or migrate historical medical events.
 
-### 2.3 Identity, account, and profile (Wave 1)
+### INV-002 — Three-way separation
 
-| Location | Artifact | Purpose | Class | Recommendation |
-| --- | --- | --- | --- | --- |
-| `packages/identity/src/server/database/auth-schema.ts` | `user`, `session`, `passkey`, `userAvatarObject` | Authentication and avatar | **Production** | **Leave untouched** — no medical fields |
-| `packages/identity/src/contracts/auth-contracts.ts` | `AuthenticatedPrincipal` | Account identity DTO | **Production** | **Reuse** — exclude diabetes settings |
-| `apps/web/components/profile/profile-menu.tsx` | Disabled "Diabetes settings" row | UX placeholder | **Production UI hook** | **Reuse** route entry; enable in Wave 2D |
-| `apps/web/components/profile/profile-settings-panel.tsx` | Theme control only | App preferences | **Production** | **Reuse** — keep theme here, not diabetes |
-| `packages/locales/src/resources/*/messages.ts` | `account.profile.menu.diabetesSettings.*`, `section.diabetesManagement` | i18n for future screen | **Production i18n** | **Reuse** |
-| `docs/architecture/identity/p5-identity-account-data-ownership.md` | Account ≠ Subject separation | Governing architecture | **Approved** | **Reuse** as authority |
-| `apps/web/e2e/profile-segmented-wave-1.spec.ts` | Asserts no diabetes type text | Wave 1 guardrail | **Test** | **Update** when Wave 2D ships |
+```text
+Account Profile  ≠  Diabetes Settings  ≠  Medical Record
+```
 
-### 2.4 Medical backend and persistence
+Diabetes Settings belong to `MedicalSubject`. They must not be stored on `Account` or conflated with `SemanticTimelineEvent` records.
 
-| Location | Artifact | Purpose | Class | Recommendation |
-| --- | --- | --- | --- | --- |
-| `packages/medical-domain/src/types/medical-subject.ts` | `MedicalSubject` shell (`subjectKind: 'person'`) | Person whose data is stored | **Production domain** | **Extend** with settings association, not inline fields |
-| `packages/medical-persistence/.../medical-schema.ts` | `medical_subjects`, `account_subject_relationships`, `medical_event_resources` | Cloud persistence | **Production schema** | **Extend** with settings table/resource in Wave 2B |
-| `packages/medical-persistence/.../medical-schema.ts` | `medical_audit_events` | Audit trail | **Production** | **Reuse** for settings changes |
-| `docs/architecture/backend/p7-backend-medical-data-architecture.md` | Subject-centric storage selected | Approved backend model | **Approved** | **Reuse** |
-| `docs/architecture/api/p8-medical-api-contracts.md` | `/api/v1/medical/me/...` self-subject resolution | API style | **Approved** | **Extend** with settings routes in Wave 2C |
+### INV-003 — Authorization boundary
 
-### 2.5 Local timeline persistence
+`AccountSubjectRelationship` is the authorization/ownership boundary between authenticated accounts and medical subjects. Wave 2 exposes self-subject editing via `/me` routes only; the underlying model must support future caregiver/clinician relationships without schema redesign.
 
-| Location | Artifact | Purpose | Class | Recommendation |
-| --- | --- | --- | --- | --- |
-| `packages/timeline-web/.../timeline-indexeddb-schema.ts` | `timeline_events` store | Local semantic events | **Production** | **Leave untouched** — settings not in events |
-| Same | Validation requires `concentrationMmolPerL` | Local integrity | **Production** | **Reuse** |
+### INV-004 — Target ≠ alert ≠ device alarm
 
-### 2.6 Policies, thresholds, and analytics (absent by design)
+These concepts are independent. Changing one must never imply changing another:
 
-| Location | Artifact | Purpose | Class | Recommendation |
-| --- | --- | --- | --- | --- |
-| `packages/platform/src/contracts/glucose-data-staleness-policy.ts` | GP-001 contract | Data freshness policy | **Policy shell** | **Leave untouched** until approved parameters |
-| `apps/web/.../dashboard-last-glucose-model.ts` | `DEFAULT_LAST_GLUCOSE_STALE_AFTER_MS` (24h) | UX staleness, not clinical | **Production UX** | **Reuse** — not a diabetes setting |
-| `docs/architecture/dashboard/last-glucose.md` | Explicitly no target range | Product boundary | **Approved** | **Reuse** until targets ship |
-| `docs/architecture/analytics/overview.md` | Empty stub | Future module | **Placeholder** | **Leave untouched** |
-| `docs/architecture/reports/overview.md` | Empty stub | Future module | **Placeholder** | **Leave untouched** |
-| `docs/architecture/settings/overview.md` | Empty stub | Settings architecture | **Placeholder** | **Fill** from this document in Wave 2B |
+- **Glucose target** — user-defined (or future clinician-defined) desired range for presentation/analytics
+- **Diabetes Universe notification threshold** — future app notification policy (deferred)
+- **External CGM/pump/device alarm** — device bounded context (deferred)
 
-### 2.7 OpenAPI
+### INV-005 — Diabetes type independence
 
-| Location | Gap | Recommendation |
-| --- | --- | --- |
-| `docs/api/openapi/medical-v1.yaml` | `SemanticTimelineEvent` schema missing kind-specific fields (`concentrationMmolPerL`, etc.) | **Migrate** in Wave 2B/C — align with `medical-api-validation.ts` |
-| Same | No diabetes settings schemas | **Add** in Wave 2B/C |
+Diabetes type **MUST NOT** automatically determine, populate, or modify the user's glucose target range. These are independent settings.
 
-### 2.8 Demo and fixture data
+### INV-006 — Reference ≠ personalized target
 
-| Location | Purpose | Class | Recommendation |
-| --- | --- | --- | --- |
-| `apps/web/lib/mocks/timeline.ts` | Semantic demo events with `concentrationMmolPerL` | **Demo** | **Reuse** — does not include settings |
-| `apps/web/lib/mocks/preserved-legacy-demo-timeline-events.ts` | Legacy migration regression | **Fixture** | **Leave untouched** |
+A guideline or `SYSTEM_REFERENCE` range **MUST NOT** silently become the user's personalized target. Explicit user action is required to adopt a reference range as `USER_DEFINED`.
 
-### 2.9 Concepts searched but not found
+### INV-007 — Locale ≠ medical unit
 
-No production models exist for: `diabetesType`, `glucoseDisplayUnit` preference persistence, target low/high, hypo/hyper thresholds, therapy type, CGM device config, `MedicalProfile` entity, time-in-range computation, or clinician-defined targets.
+Application locale/region may suggest or pre-highlight a glucose display unit. It **MUST NOT** silently establish the user's medical display-unit preference. Explicit user confirmation is required.
+
+### INV-008 — Settings are infrequent configuration
+
+Frequent diabetes-management actions belong in their natural workflows (Timeline, Quick Add, Home). Profile → Управление диабетом remains intentionally small.
+
+### INV-009 — No event sourcing for settings
+
+Diabetes Settings use **current state + append-only audit trail**. Event sourcing is not used for settings resources.
+
+### INV-010 — Pre-adoption safety
+
+Unknown legacy/local medical settings must not be automatically promoted into canonical subject medical settings. Only clearly compatible presentation preferences may migrate automatically; medical values require explicit/controlled adoption.
 
 ---
 
-## 3. Existing domain conflicts and duplication
+## 3. Approved product decisions
 
-### 3.1 Competing glucose representations
+All product decisions required for Wave 2B are resolved below.
 
-| Representation | Storage semantics | Risk |
-| --- | --- | --- |
-| `SemanticTimelineEvent.concentrationMmolPerL` | Canonical numeric mmol/L | **Authoritative** |
-| Legacy `TimelineEvent.value` + `unit` string | Presentation string | **Deprecated** — migration only |
-| Dashboard spec note: "owner-prepared display strings" for mmol/L and mg/dL | Historical spec language for legacy path | **Conflict with P3** for semantic path — semantic owners must convert, not pass strings |
-| Quick Add hardcoded `ммоль/л` | UI assumption | **Duplication** — bypasses platform formatting |
+### 3.1 Glucose display unit
 
-**Resolution:** One canonical numeric storage (mmol/L). All surfaces convert at presentation boundary using user display preference.
+- Supported initial values: **`mmol/L`** and **`mg/dL`**
+- `glucoseDisplayUnit` is **required before a user can manually enter glucose**
+- Existing/pre-adoption subjects may temporarily have no persisted preference (`unset`)
+- The product must resolve that transitional state before manual glucose entry (see §23)
 
-### 3.2 Settings location ambiguity (future risk)
+### 3.2 First glucose entry flow
 
-| Surface | Current content | Risk if diabetes settings added here |
-| --- | --- | --- |
-| Profile → Settings tab (`/account/settings`) | Theme only | Users may conflate app theme with medical configuration |
-| Profile menu → Diabetes settings (disabled) | Placeholder | Correct IA hook — should become dedicated route |
-| Profile menu → Language/region (disabled) | Placeholder | Locale must not silently change glucose unit |
-| `PresentationContext` / `PresentationSnapshot` | locale, timeZone, hourCycle | Must not absorb medical settings without subject scope |
+If `glucoseDisplayUnit` has not been explicitly selected:
 
-**Resolution:** Diabetes settings live under Profile → **Управление диабетом** (dedicated route), backed by subject-scoped API — not under generic Settings tab or presentation snapshot alone.
+```text
+Add glucose → lightweight unit selection → continue glucose entry
+```
 
-### 3.3 Staleness vs clinical thresholds
+The choice normally happens once. The rest of the application is **not permanently blocked**.
 
-| Concept | Implementation | Confusion risk |
-| --- | --- | --- |
-| GP-001 glucose data staleness | Policy contract; always `unavailable`/`indeterminate` today | Could be mistaken for hypo/hyper |
-| Dashboard 24h UX stale indicator | Implemented | Informational only — document separation |
-| Target range | Not implemented | Must not be inferred from staleness |
+### 3.3 Locale behavior
 
-**Resolution:** Never merge staleness, targets, and alert thresholds.
+Locale/region may:
 
-### 3.4 Account vs subject ownership
+- suggest a unit;
+- pre-highlight a likely choice.
 
-P7 already rejected account-owned medical records. Any diabetes settings on `Account` would **conflict** with approved backend architecture.
+Locale **MUST NOT** silently establish the user's medical display-unit preference. Explicit user confirmation is required.
+
+### 3.4 Diabetes type
+
+- **Optional** informational metadata
+- Extensible taxonomy (see §9)
+- Not required for normal application use
+- Default: `unknown`
+- **MUST NOT** infer or populate glucose targets from diabetes type
+
+### 3.5 Glucose target range
+
+- **Optional** global target range per subject
+- Do not silently create a personalized target
+- Future guideline/reference ranges (`SYSTEM_REFERENCE`) remain conceptually distinct from user-defined targets
+- Diabetes type **MUST NOT** auto-determine or modify targets
+
+### 3.6 Caregiver editing
+
+- Wave 2: **self-subject editing only** through `/me` routes
+- Underlying subject-scoped architecture supports future caregiver/clinician authorization
+- Caregiver editing is **not implemented** in Wave 2
+
+### 3.7 Re-authentication
+
+- Changing diabetes settings or target range does **not** require forced re-authentication in Wave 2
+- Normal authenticated-session authorization is sufficient
+- Target changes **must be auditable**
+
+### 3.8 Pre-adoption / local settings
+
+- Do not automatically promote unknown legacy/local medical settings into canonical subject medical settings
+- Only clearly compatible **presentation preferences** may migrate automatically
+- Medical values require an explicit/controlled adoption strategy (aligned with P10 adoption architecture)
+
+### 3.9 Export
+
+- Diabetes settings are included in the **future medical export bundle** as a distinct settings section
+- Export includes current values and relevant timestamp/source metadata
+- Settings **must not** be represented as historical `SemanticTimelineEvent` records
+
+### 3.10 Alerts
+
+- Alert thresholds remain **deferred**
+- Targets, app notification thresholds, and device alarms are distinct (INV-004)
+
+### 3.11 Therapy
+
+- Therapy/regimen fields are **deferred** for Wave 2 (no `usesInsulin` flag)
+- Event-level insulin data remains sufficient
+
+### 3.12 Audit retention
+
+- Settings audit events follow the platform account/medical retention policy (P5/P13)
+- No separate retention policy required for Wave 2B
+
+### 3.13 Conversion constant
+
+- Domain conversion uses **`mg/dL = mmol/L × 18.0182`** (standard biochemical factor)
+- Rounding at display boundary per formatting library defaults (§10)
+
+### 3.14 Target validation bounds
+
+- Target range validation aligns with existing medical API glucose bounds: **0.1–100 mmol/L** (`medical-api-validation-bounds.ts`), with `lowMmolPerL < highMmolPerL`
+
+### 3.15 API transport shape
+
+- Logical separation of `DiabetesSettings` and `GlucoseTargetProfile` is required in the domain model
+- Combined or split HTTP resource for Wave 2C is an **implementation choice**; domain entities remain separate
 
 ---
 
-## 4. Domain boundaries
+## 4. Repository audit
+
+### 4.1 Domain contracts — glucose and events
+
+| Location                                   | Artifact                                                 | Purpose                                    | Class                     | Recommendation                   |
+| ------------------------------------------ | -------------------------------------------------------- | ------------------------------------------ | ------------------------- | -------------------------------- |
+| `packages/types/src/semantic-timeline.ts`  | `GlucoseTimelineEvent.concentrationMmolPerL`             | Canonical glucose concentration            | **Production domain**     | **Reuse**                        |
+| Same file                                  | `CanonicalUnitId` includes `'glucose.mmol_per_l'`        | Canonical unit ID                          | **Domain policy**         | **Reuse**                        |
+| Same file                                  | `GlucoseMeasurementContext`                              | Measurement context enum                   | **Production domain**     | **Reuse** — not a settings field |
+| Same file                                  | Comment L16–17                                           | Display conversion belongs to presentation | **Architecture policy**   | **Reuse**                        |
+| `packages/types/src/quick-add.ts`          | `GlucoseQuickAddEntry.valueMmol`                         | Quick Add input in mmol/L                  | **Domain input contract** | **Reuse**                        |
+| `packages/types/src/timeline.ts`           | `TimelineEvent`, `DaySummary.timeInRange`, `LastGlucose` | Legacy DTOs                                | **Legacy/demo**           | **Deprecate**                    |
+| `packages/types/src/timeline-migration.ts` | Migration/quarantine types                               | Legacy lift audit                          | **Production migration**  | **Reuse**                        |
+
+### 4.2 Formatting and presentation
+
+| Location                                                             | Artifact                                | Purpose                     | Class                       | Recommendation                     |
+| -------------------------------------------------------------------- | --------------------------------------- | --------------------------- | --------------------------- | ---------------------------------- |
+| `packages/formatting/src/types/measurement-unit.ts`                  | `MeasurementUnit = 'mmol/L' \| 'mg/dL'` | Display unit enum           | **Presentation contract**   | **Reuse**                          |
+| `packages/formatting/src/runtime/measurement.ts`                     | Precision defaults                      | Rounding at format boundary | **Production**              | **Reuse**                          |
+| `docs/adr/0010-platform-formatting-library.md`                       | No medical conversion in formatting     | Approved ADR                | **Policy**                  | **Reuse** — domain owns conversion |
+| `apps/web/lib/timeline/presentation/timeline-presentation-mapper.ts` | Always mmol/L                           | Timeline display            | **Production (incomplete)** | **Migrate** in Wave 2E             |
+| Quick Add components                                                 | Hardcoded RU / mmol/L                   | UI debt                     | **Production**              | **Migrate** in Wave 2E             |
+
+### 4.3 Identity, account, and profile (Wave 1)
+
+| Location                                                           | Artifact                       | Purpose               | Recommendation                        |
+| ------------------------------------------------------------------ | ------------------------------ | --------------------- | ------------------------------------- |
+| `packages/identity/.../auth-schema.ts`                             | Auth tables                    | Authentication        | **Leave untouched**                   |
+| `packages/identity/.../auth-contracts.ts`                          | `AuthenticatedPrincipal`       | Account DTO           | **Reuse** — exclude diabetes settings |
+| `apps/web/components/profile/profile-menu.tsx`                     | Disabled diabetes settings row | UX hook               | **Enable** in Wave 2D                 |
+| `apps/web/components/profile/profile-settings-panel.tsx`           | Theme only                     | App preferences       | **Reuse**                             |
+| `docs/architecture/identity/p5-identity-account-data-ownership.md` | Account ≠ Subject              | Approved architecture | **Authority**                         |
+
+### 4.4 Medical backend and persistence
+
+| Location                                                            | Artifact                                                                                               | Purpose           | Recommendation              |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------- | --------------------------- |
+| `packages/medical-domain/src/types/medical-subject.ts`              | `MedicalSubject` shell                                                                                 | Person entity     | **Extend** via associations |
+| `packages/medical-persistence/.../medical-schema.ts`                | `medical_subjects`, `account_subject_relationships`, `medical_event_resources`, `medical_audit_events` | Cloud persistence | **Extend** in Wave 2B       |
+| `docs/architecture/backend/p7-backend-medical-data-architecture.md` | Subject-centric storage                                                                                | Approved          | **Authority**               |
+| `docs/architecture/api/p8-medical-api-contracts.md`                 | `/api/v1/medical/me/...`                                                                               | API style         | **Extend** in Wave 2C       |
+
+### 4.5 Local timeline persistence
+
+| Location                                                 | Artifact                         | Recommendation                               |
+| -------------------------------------------------------- | -------------------------------- | -------------------------------------------- |
+| `packages/timeline-web/.../timeline-indexeddb-schema.ts` | Local semantic events            | **Leave untouched** — settings not in events |
+| Validation                                               | Requires `concentrationMmolPerL` | **Reuse**                                    |
+
+### 4.6 Policies and analytics (absent by design)
+
+| Location                         | Status                                        | Recommendation                     |
+| -------------------------------- | --------------------------------------------- | ---------------------------------- |
+| GP-001 glucose staleness policy  | Contract only; no approved numeric parameters | **Leave untouched**                |
+| Dashboard 24h UX stale indicator | Implemented; not clinical                     | **Reuse** — not a diabetes setting |
+| Analytics / Reports docs         | Empty stubs                                   | **Deferred**                       |
+
+### 4.7 OpenAPI
+
+| Gap                                                            | Recommendation        |
+| -------------------------------------------------------------- | --------------------- |
+| `SemanticTimelineEvent` schema incomplete in `medical-v1.yaml` | **Extend** in Wave 2B |
+| No diabetes settings schemas                                   | **Add** in Wave 2B    |
+
+### 4.8 Concepts not found in repository
+
+No production models exist for: persisted `glucoseDisplayUnit`, diabetes type, target ranges, alert thresholds, therapy profile, CGM config, or `MedicalProfile` entity.
+
+---
+
+## 5. Repository consistency review
+
+Wave 2A recommendations were verified against the current repository. **No contradictions requiring architecture redesign were found.**
+
+| Reference                                            | Verified assumption                                                          | Result                                                                      |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `packages/types/src/semantic-timeline.ts`            | Canonical mmol/L storage on events                                           | **Confirmed** — `concentrationMmolPerL`; comment defers display conversion  |
+| `packages/formatting`                                | Display-only; no conversion (ADR-0010)                                       | **Confirmed** — `formatMeasurement()` does not convert units                |
+| `packages/medical-persistence/.../medical-schema.ts` | `MedicalSubject`, `AccountSubjectRelationship`, `medical_audit_events` exist | **Confirmed** — settings extend via new tables, not identity schema         |
+| P5                                                   | Account ≠ Medical Subject                                                    | **Confirmed** — no conflict with subject-scoped settings                    |
+| P7                                                   | Subject-centric medical resource ownership                                   | **Confirmed** — Option B aligns; account-owned settings would contradict P7 |
+| P8                                                   | Self-subject `/me` resolution; server-authoritative authZ                    | **Confirmed** — Wave 2 `/me` routes consistent                              |
+| ADR-0010                                             | Domain converts; formatting formats                                          | **Confirmed** — Wave 2B adds domain conversion helper                       |
+| Existing medical-event APIs                          | Events stored as JSONB semantic payload                                      | **Confirmed** — settings are separate resources                             |
+| `medical-api-validation-bounds.ts`                   | Glucose 0.1–100 mmol/L                                                       | **Confirmed** — adopted for target validation                               |
+| OpenAPI `medical-v1.yaml`                            | Incomplete event schema                                                      | **Known gap** — Wave 2B extends; no conflict                                |
+
+**No repository structures were invented.** All proposed entities extend approved P7/P8 patterns.
+
+---
+
+## 6. Existing domain conflicts and duplication
+
+### 6.1 Competing glucose representations
+
+**Resolution:** One canonical numeric storage (mmol/L). All surfaces convert at presentation boundary using subject display preference.
+
+### 6.2 Settings location ambiguity
+
+**Resolution:** Diabetes settings under Profile → **Управление диабетом**, backed by subject-scoped API — not under generic Settings tab (theme) or `PresentationSnapshot`.
+
+### 6.3 Staleness vs targets vs alerts
+
+**Resolution:** GP-001 staleness, Dashboard UX stale indicator, glucose targets, and alert thresholds remain separate concepts (INV-004).
+
+### 6.4 Account vs subject ownership
+
+P7 rejected account-owned medical records. Diabetes settings on `Account` would conflict with approved architecture.
+
+---
+
+## 7. Domain boundaries
 
 ### A. Account Identity
 
-**Belongs here:** display name, email, avatar, authentication credentials, sessions, passkeys, account lifecycle status.
+Display name, email, avatar, authentication, sessions, passkeys.
 
-**Storage/API:** Identity schema (`packages/identity`), future `/api/v1/identity/me/...`.
-
-**Why:** Security principal for authentication and authorization. Not the person whose glucose is measured in caregiver scenarios.
+**Storage:** Identity schema. **Not** diabetes settings.
 
 ### B. Application Preferences
 
-**Belongs here:** theme (light/dark), future language/locale selection UI, hour cycle display where not medically meaningful, non-medical notification preferences (account security alerts).
+Theme, language/locale UI, non-medical notification preferences.
 
-**Storage/API:** Client-persisted or account-scoped preference resource — **not subject-scoped**.
+**Storage:** Account-scoped or client-persisted. **Not** subject-scoped.
 
-**Why:** Affects application chrome and formatting dimensions that should follow the **viewer/account** (caregiver may prefer dark mode while viewing child's data).
-
-**Boundary note:** Locale affects number formatting (decimal separator) but **must not** change glucose unit preference automatically.
+Locale affects number formatting but **must not** change glucose unit preference (INV-007).
 
 ### C. Diabetes Settings
 
-**Belongs here:** glucose display unit, optional diabetes type (informational), optional user-defined target range, future app-side alert preferences tied to **presentation/notification** of data about a **specific person**.
+Glucose display unit, optional diabetes type, optional target range (via linked `GlucoseTargetProfile`).
 
-**Storage/API:** Subject-scoped `DiabetesSettings` resource.
+**Storage:** Subject-scoped `DiabetesSettings` + `GlucoseTargetProfile` on `MedicalSubject`.
 
-**Why:** These settings change how diabetes information is **presented or interpreted** for a person. They are user-controlled configuration, not historical clinical facts. They must travel with the **person of care**, not the login account.
+**Authorization:** Via `AccountSubjectRelationship`.
 
 ### D. Clinical / Medical Record
 
-**Belongs here:** `SemanticTimelineEvent` records (glucose measurements, insulin doses, nutrition, etc.), future clinician-authored diagnoses, prescriptions, lab results, official device downloads as events.
+`SemanticTimelineEvent` records and future clinician-authored clinical documents.
 
-**Storage/API:** `MedicalEventResource` envelope around semantic events; future clinical document types.
+Self-reported diabetes type in settings is **informational metadata**, not a clinical diagnosis. A future clinical diagnosis record, if introduced, would live in the medical record bounded context and remain separate from settings.
 
-**Why:** Immutable or auditable **historical** medical information. Diabetes type entered by user as self-identification is **not** the same as a clinical diagnosis record — if both ever exist, diagnosis stays in medical record; self-reported type stays in settings unless product decides otherwise (**PRODUCT DECISION REQUIRED** for dual-track).
+### E. Separate future bounded contexts (not in DiabetesSettings)
 
-### E. Device / Data Source Configuration
+| Bounded context                  | Examples                                                   | Wave 2                        |
+| -------------------------------- | ---------------------------------------------------------- | ----------------------------- |
+| **Device Connections**           | CGM pairing, pump config, credentials, device alarm config | Deferred                      |
+| **Alert Policy / Notifications** | App notification thresholds, delivery channels             | Deferred                      |
+| **Therapy Profile**              | MDI, pump, basal/bolus, medication regimen                 | Deferred                      |
+| **Care Relationships**           | Caregiver/clinician delegation UI and policies             | Deferred (architecture ready) |
 
-**Belongs here:** CGM/pump/meter pairings, HealthKit/Health Connect permissions, device alert profiles, sync credentials.
-
-**Storage/API:** Separate **Device Integration** bounded context (Profile menu already lists "Devices and sources" separately).
-
-**Why:** Operational integration state with different lifecycle, security, and regulatory requirements. Must not imply app settings change device medical alert thresholds.
+Do **not** turn `DiabetesSettings` into a generic container for every diabetes-related feature.
 
 ```text
 ┌─────────────────────┐     ┌──────────────────────┐
 │   Account Identity  │     │ Application Prefs    │
-│  auth, avatar, email│     │ theme, language UI   │
 └──────────┬──────────┘     └──────────┬───────────┘
            │                           │
-           │         ┌─────────────────┴─────────────────┐
-           │         │                                   │
-           ▼         ▼                                   ▼
+           ▼                           ▼
     ┌───────────────AccountSubjectRelationship────────────────┐
-    │  self | caregiver | clinician (future)                  │
+    │  self (Wave 2) | caregiver | clinician (future)         │
     └──────────────────────────┬──────────────────────────────┘
-                               │
                                ▼
                     ┌──────────────────────┐
                     │    MedicalSubject      │
-                    │  (person of care)      │
                     └──────────┬───────────┘
                                │
-              ┌────────────────┼────────────────┐
-              ▼                ▼                ▼
-     ┌────────────────┐ ┌─────────────┐ ┌───────────────────┐
-     │DiabetesSettings│ │ Medical     │ │ Device/Data Source│
-     │ (configuration)│ │ Events      │ │ Configuration     │
-     └────────────────┘ │ (record)    │ │ (integrations)    │
-                        └─────────────┘ └───────────────────┘
+         ┌─────────────────────┼─────────────────────┐
+         ▼                     ▼                     ▼
+  DiabetesSettings    GlucoseTargetProfile    MedicalEventResource
+  (1:1)               (1:1)                   (1:N)
+         │                     │
+         │              defaultRange            SemanticTimelineEvent
+         │              (Wave 2)                (medical record)
+         │
+    [Future BCs: Devices, Alerts, Therapy, Care — separate]
 ```
 
 ---
 
-## 5. Person-of-care ownership decision
+## 8. Person-of-care ownership decision
 
-### Option A — Diabetes settings on user/account
+### Selected: Option B — Subject-scoped settings on `MedicalSubject`
 
-Attach settings columns or JSON to authenticated account / identity user record.
+P7 already selected subject-centric medical resource ownership. Diabetes Settings are configuration **about a person**, not about a login.
 
-| Dimension | Assessment |
-| --- | --- |
-| Simplicity | High for single-user MVP |
-| Security | Couples health configuration to login; caregiver sees wrong settings or needs duplication |
-| UX | Appears simple until multi-profile |
-| Database | Minimal initial schema |
-| Caregiver future | **Poor** — requires painful migration or duplicated settings per dependent |
-| Migration cost | Low now, **high later** |
-| Scalability | **Poor** — conflicts with P7 subject-centric model |
+| Wave 2                                    | Future                                               |
+| ----------------------------------------- | ---------------------------------------------------- |
+| 1 account : 1 self subject                | Multiple subjects per account (caregiver)            |
+| `/me` routes; server resolves `subjectId` | `/subjects/{subjectId}/...` with relationship policy |
+| No multi-profile UI                       | Context switching without schema change              |
 
-### Option B — Diabetes settings on MedicalSubject (recommended)
-
-Settings resource keyed by `subjectId`, authorized via `AccountSubjectRelationship`.
-
-| Dimension | Assessment |
-| --- | --- |
-| Simplicity | Moderate — reuses existing subject provisioning |
-| Security | Least privilege via relationship types; settings access auditable per subject |
-| UX | Slightly more indirection; transparent for self-user (1:1) |
-| Database | One settings row per subject — aligns with `medical_subjects` |
-| Caregiver future | **Strong** — each dependent has own settings; caregiver switches context |
-| Migration cost | Low — greenfield settings; no legacy settings data |
-| Scalability | **Strong** — matches millions of subjects, multiple relationships |
-
-### Recommendation
-
-**Select Option B.** P7 already selected subject-centric medical resource ownership. Diabetes Settings are configuration **about a person**, not about a login. Wave 2 implements self-subject only (1 account : 1 self subject), but schema and API must use `subjectId` internally even when the route is `/me/...`.
-
-Do **not** implement multi-profile UI in Wave 2. Do encode subject scoping in contracts now.
+**Rejected:** Account-scoped settings (conflicts with P7, breaks caregiver future).
 
 ---
 
-## 6. Diabetes type recommendation
+## 9. Diabetes type
 
-### Is it required for current product behavior?
+| Property          | Decision                                                                    |
+| ----------------- | --------------------------------------------------------------------------- |
+| Required?         | **No** — optional informational metadata                                    |
+| Blocks features?  | **No** — `unknown` is valid                                                 |
+| Behavioral?       | **No** in Wave 2 — must not gate glucose entry, insulin logging, or targets |
+| User changeable?  | **Yes**, with audit                                                         |
+| Infers targets?   | **No** (INV-005)                                                            |
+| AI/analytics use? | Read-only contextualization when present; non-diagnostic                    |
 
-**No.** Timeline, Quick Add, Dashboard, and Home function without diabetes type. Nothing in the codebase consumes it.
-
-### Is it informational or behavioral?
-
-**Primarily informational** in Wave 2. Future modules (AI tone, analytics cohort defaults, onboarding copy) may use it for **non-prescriptive personalization** only.
-
-It must **not** gate insulin logging, glucose entry, or therapy features in Wave 2.
-
-### Can users change it themselves?
-
-**Yes**, with audit history. Self-reported type is user-controlled settings data, not a clinician diagnosis.
-
-### Should historical changes be retained?
-
-**Yes — simple audit** (prior value + `changedAt` + `changedByAccountId`). Full temporal versioning only if product requires clinical-grade audit (**PRODUCT DECISION REQUIRED** for retention period).
-
-### Should AI/analytics be allowed to use it?
-
-**AI:** Yes, read-only, for contextual explanations ("As someone managing type 1 diabetes…") with mandatory non-diagnostic disclaimers.
-
-**Analytics:** Yes, aggregated with consent/policy guardrails — defer implementation until Analytics module.
-
-### Should absence block functionality?
-
-**No.** `unknown` / `not_specified` must be valid states. Onboarding may **ask** but must allow skip.
-
-### Taxonomy design
-
-Avoid a simplistic closed enum as the **only** extensibility mechanism.
-
-Recommended model:
+**Extensible taxonomy:**
 
 ```text
 DiabetesTypeClassification
 - category: type_1 | type_2 | gestational | other | unknown
 - otherDescriptor?: string   (when category = other)
 - source: self_reported
-- confidence: user_asserted
 ```
 
-Do **not** store ICD codes in Wave 2 unless product explicitly wants clinical coding (**PRODUCT DECISION REQUIRED**).
-
-### Recommendation
-
-**Include optional diabetes type in Wave 2 settings** using extensible taxonomy above. Default: `unknown`. Never block features. Never treat as diagnosis.
+ICD/clinical coding is **out of scope** for Wave 2. Default: `unknown`.
 
 ---
 
-## 7. Glucose unit architecture
+## 10. Glucose unit architecture
 
-### Critical question: single canonical storage?
+### Canonical storage (INV-001)
 
-**Yes.** The repository already decided this in P3:
+All persisted glucose concentrations use **mmol/L**. Verified in:
 
-- Storage: **`concentrationMmolPerL` (number, mmol/L)**
-- Events, API validation (`GLUCOSE_MMOL_MIN/MAX`), IndexedDB validation, and cloud JSONB all use this field.
+- `SemanticTimelineEvent.concentrationMmolPerL`
+- `GlucoseQuickAddEntry.valueMmol` (input normalized to mmol/L before persist)
+- IndexedDB and cloud JSONB validation
 
-**Do not store duplicate mg/dL values on events.** Do not rewrite historical events when display preference changes.
+Changing `glucoseDisplayUnit` **must not** rewrite, duplicate, or migrate historical events.
 
 ### Display preference
 
-| Aspect | Owner |
-| --- | --- |
-| Stored preference | `DiabetesSettings.glucoseDisplayUnit` |
-| Allowed values | `mmol_per_l` \| `mg_per_dl` (domain codes); maps to formatting `'mmol/L'` \| `'mg/dL'` |
-| Default for new subjects | **No silent locale guess** — see §18 |
+| Aspect                               | Decision                                                                            |
+| ------------------------------------ | ----------------------------------------------------------------------------------- |
+| Field                                | `DiabetesSettings.glucoseDisplayUnit`                                               |
+| Values                               | `mmol_per_l` \| `mg_per_dl` (domain codes → `'mmol/L'` \| `'mg/dL'` for formatting) |
+| Unset state                          | Allowed for pre-adoption/transitional subjects                                      |
+| Required before manual glucose entry | **Yes** — resolved via inline unit selection (§23)                                  |
 
 ### Conversion ownership
 
-| Layer | Responsibility |
-| --- | --- |
-| Domain (`@diabetes-universe/medical-domain` or `types`) | `convertGlucoseMmolPerLToMgPerDl`, `convertGlucoseForDisplay` — pure functions, deterministic |
-| Presentation mappers (Timeline, Dashboard, Quick Add, Reports) | Read canonical mmol/L + display preference → compute display value → pass to `formatMeasurement()` |
-| Formatting library | Format number + unit symbol only (ADR-0010) |
-| Persistence | Always mmol/L |
+| Layer                  | Responsibility                                                   |
+| ---------------------- | ---------------------------------------------------------------- |
+| Domain (Wave 2B)       | Pure conversion functions; factor **18.0182**                    |
+| Presentation (Wave 2E) | Read mmol/L + preference → display value → `formatMeasurement()` |
+| Formatting library     | Format only (ADR-0010)                                           |
+| Persistence            | Always mmol/L                                                    |
 
-**Conversion formula (domain):** `mg/dL = mmol/L × 18.0182` (standard biochemical conversion; document constant; **PRODUCT DECISION REQUIRED** if jurisdiction mandates alternate factor).
+### Rounding
 
-### Rounding rules ownership
-
-| Unit | Rule owner | Default |
-| --- | --- | --- |
-| mmol/L display | Formatting library precision | 1 decimal (0–1 fraction digits) |
-| mg/dL display | Formatting library precision | 0 decimals |
-| Internal storage | Full IEEE double | No rounding on persist |
-| Import | Domain normalizes to mmol/L once at ingest | Round only at display |
-
-Changing display unit **never mutates** stored measurements.
-
-### API representation
-
-| Context | Representation |
-| --- | --- |
-| Medical events API | Always `concentrationMmolPerL` in semantic payload |
-| Settings API | `glucoseDisplayUnit` enum |
-| Optional read models | May include **derived** `displayValue` + `displayUnit` for client convenience — must be labeled derived, never persisted |
-
-### Import / device behavior
-
-Devices may report mg/dL. Import pipeline converts **once** to mmol/L at domain boundary before creating `GlucoseTimelineEvent`. Preserve original value in `EventProvenance` if needed for audit (**optional, Wave 2E+**).
-
-### Timeline / Dashboard / reporting behavior
-
-All read paths:
-
-1. Load event canonical mmol/L
-2. Resolve subject's `glucoseDisplayUnit` (cached with TTL)
-3. Convert if needed
-4. Format with locale + unit
-
-Reports exporting raw data should export canonical mmol/L plus metadata of user's display preference.
+| Context        | Owner              | Default        |
+| -------------- | ------------------ | -------------- |
+| mmol/L display | Formatting library | 1 decimal      |
+| mg/dL display  | Formatting library | 0 decimals     |
+| Storage        | None               | Full precision |
 
 ---
 
-## 8. Target-range architecture
+## 11. Target-range architecture
+
+### Conceptual model (Wave 2)
+
+```text
+MedicalSubject
+  1:1 DiabetesSettings
+       1:1 GlucoseTargetProfile
+            defaultRange
+              lowMmolPerL: number | null
+              highMmolPerL: number | null
+              source: TargetRangeSource
+              updatedAt
+```
+
+Storage is always **mmol/L** internally. UI may accept input in user's display unit; domain normalizes before persist.
 
 ### Wave 2 scope
 
-Ship **one optional global target band** per subject:
+- One optional global `defaultRange` per subject
+- Unset (`null`) is valid — no silent personalized target
+- Used for visual reference and future analytics (TIR); non-diagnostic
+
+### Future extension point (not Wave 2)
 
 ```text
-GlucoseTargetRange (embedded in DiabetesSettings or separate 1:1 resource)
-- lowMmolPerL: number
-- highMmolPerL: number
-- label?: string (e.g. "My usual range")
-- source: user_defined | clinician_defined (future)
-- effectiveFrom?: ISO8601 (future temporal targets)
-```
-
-Storage **always mmol/L** internally regardless of display unit.
-
-### Future expansion (design now, implement later)
-
-| Future need | Extension mechanism |
-| --- | --- |
-| Time-of-day segments | `GlucoseTargetProfile` 1:N `GlucoseTargetSegment` with cron/time window |
-| Sleep / exercise / pregnancy | `segment.contextTag` or scoped override |
-| Clinician-defined targets | `source: clinician_defined`, `authorSubjectRelationshipId`, read-only for patient |
-| Temporary targets | `effectiveFrom` / `effectiveUntil` on segment |
-| Pediatric | Age-aware profiles (**PRODUCT DECISION REQUIRED**) |
-| Device-provided targets | **Device bounded context** — import as read-only reference, not app settings mirror |
-
-### Model shape (extensible)
-
-```text
-MedicalSubject 1 ── 1 GlucoseTargetProfile
 GlucoseTargetProfile
-- profileId
-- subjectId
-- status: active | archived
-- defaultSegmentId (optional)
-
-GlucoseTargetSegment
-- segmentId
-- profileId
-- lowMmolPerL, highMmolPerL
-- schedule?: RecurrenceRule (nullable = global default)
-- priority: number
-- source, effectiveFrom, effectiveUntil
+  defaultRange          ← Wave 2
+  segments[]            ← future: time/context-specific ranges
 ```
 
-Wave 2B may implement **only** a single implicit default segment (or embed in `DiabetesSettings`) while keeping segment table optional for forward compatibility.
+Future `segments[]` may support time-of-day, sleep, exercise, pregnancy, or temporary targets. **Do not implement segments or a scheduling engine in Wave 2.** Document the extension point only.
 
 ### Validation
 
-- `lowMmolPerL < highMmolPerL`
-- Bounds aligned with API glucose bounds (0.1–100 mmol/L) or tighter product limits (**PRODUCT DECISION REQUIRED**)
-- Missing targets: valid — Dashboard/TIR features show empty/neutral until configured
+- `lowMmolPerL < highMmolPerL` when both set
+- Bounds: 0.1–100 mmol/L (aligned with `medical-api-validation-bounds.ts`)
+- Partial configuration invalid; both null (unset) valid
 
-### TARGET ≠ ALERT
+### Independence rules
 
-Target range is for **visual reference and analytics (future TIR)**. Alert thresholds are separate (§9).
-
----
-
-## 9. Alert-threshold decision
-
-### Concepts
-
-| Concept | Purpose | Wave 2 |
-| --- | --- | --- |
-| Target range | Desired glycemic band for charts/TIR | **Optional settings** |
-| App notification threshold | When Diabetes Universe notifies about readings | **Defer** |
-| Urgent low / low / high (clinical) | CGM/pump alarms | **Device bounded context** |
-| GP-001 staleness | Data freshness attention | **Separate policy** — already exists |
-
-### Recommendation
-
-**Do not include alert thresholds in Wave 2 Diabetes Settings UI or schema.**
-
-Rationale:
-
-- Product has no approved notification policy or clinical thresholds (GP-001 explicitly lacks approved parameters).
-- Risk of users believing app thresholds change CGM alarms.
-- Requires notification infrastructure not yet built.
-
-**Wave 3+ placeholder entity (design only):**
-
-```text
-GlucoseAlertPreferences (subject-scoped, separate resource)
-- appNotifyBelowMmolPerL?
-- appNotifyAboveMmolPerL?
-- notifyUrgentLow?: boolean
-- deliveryChannels?: ...
-```
-
-Copy must state: **"Does not change device alarms."**
-
-Defer implementation until Notifications module and clinical policy exist.
+- Diabetes type **must not** auto-populate targets (INV-005)
+- `SYSTEM_REFERENCE` **must not** silently become `USER_DEFINED` (INV-006)
 
 ---
 
-## 10. Therapy-data decision
+## 12. Target provenance
 
-### Audit: is therapy information required now?
+Medically meaningful target values carry **source/provenance** semantics.
 
-**No.** Insulin appears only as **event-level** data (`InsulinTimelineEvent`, Quick Add). No regimen, pump model, or medication list exists.
+### TargetRangeSource (minimum taxonomy)
 
-### Data minimization recommendation
+| Value               | Meaning                                       | Wave 2                         |
+| ------------------- | --------------------------------------------- | ------------------------------ |
+| `USER_DEFINED`      | User explicitly set their personalized target | **Primary Wave 2 path**        |
+| `CLINICIAN_DEFINED` | Set by authorized clinician (future)          | Schema-ready; not exposed      |
+| `IMPORTED`          | Imported from external source (future)        | Schema-ready; not exposed      |
+| `SYSTEM_REFERENCE`  | Guideline/reference range for display only    | Schema-ready; not auto-applied |
 
-| Field | Wave 2 | Reason |
-| --- | --- | --- |
-| Full therapy regimen | **Exclude** | Medication management system out of scope |
-| MDI / pump / basal-bolus | **Exclude** | Sensitive; insufficient consumer need |
-| Non-insulin medications | **Exclude** | EHR creep |
-| `usesInsulin: boolean` optional | **Optional flag only** | Helps Quick Add prominence / copy; derivable from events later |
+### Semantic rules
 
-If `usesInsulin` is included, allow `unknown` and infer suggestion from insulin event history in UX only — **do not auto-write**.
+- `SYSTEM_REFERENCE` is **not equivalent** to `USER_DEFINED`
+- Showing a reference range **must not** silently write `USER_DEFINED` targets
+- Adopting a reference as a personal target requires **explicit user action**
+- Provenance is stored on `defaultRange` (and future `segments[]`)
 
-### Recommendation
-
-**Smallest useful model: omit therapy fields in Wave 2B** unless product confirms `usesInsulin` flag adds clear UX value (**PRODUCT DECISION REQUIRED**). Event-level insulin logging remains sufficient.
-
----
-
-## 11. Security and data classification
-
-### Classification matrix
-
-| Field / resource | Classification | AuthZ | Audit | Encryption | Export | Deletion |
-| --- | --- | --- | --- | --- | --- | --- |
-| Account email, name, avatar | Account PII | Self; identity APIs | Security events | At rest per platform | Account export | With account deletion |
-| Theme, language UI pref | Preference | Self | Optional | Standard | Optional | With account |
-| `glucoseDisplayUnit` | Health-related personal data | Subject relationship required | `updated_at` | At rest | Subject export bundle | With subject/account policy |
-| `diabetesType` | Health-related personal data | Subject relationship | Change audit | At rest | Subject export | With subject deletion |
-| Target range | Health-related personal data | Subject relationship | Change audit | At rest | Subject export | With subject deletion |
-| `SemanticTimelineEvent` | Sensitive medical data | Subject relationship | Medical audit events | At rest | Medical export | Distinct from settings deletion |
-| Future alert prefs | Health-related + notification | Subject relationship | Change audit | At rest | Export | Configurable |
-
-### Authorization rules
-
-- Deny by default (P5).
-- Diabetes settings APIs require validated session + resolved `subjectId` + active relationship (`self` initially).
-- **Do not expose** diabetes settings through generic identity `/me` profile endpoints.
-- Caregiver/clinician access to settings requires explicit relationship type + policy (future) — not implied by medical event access alone (**PRODUCT DECISION REQUIRED** for caregiver edit rights).
-
-### Least privilege
-
-- AI service receives read-only settings subset via dedicated contract — not broad medical API access.
-- Settings write requires stronger authentication freshness if product mandates re-auth for medical settings (**PRODUCT DECISION REQUIRED**).
+Wave 2 does not need to expose every future source path. The model **must not** make provenance impossible to add later.
 
 ---
 
-## 12. AI access rules
+## 13. Alert-threshold decision
+
+**Deferred for Wave 2.** Do not include in Diabetes Settings schema or UI.
+
+### Three-way distinction (INV-004)
+
+| Concept                                  | Owner                           | Wave 2            |
+| ---------------------------------------- | ------------------------------- | ----------------- |
+| Glucose target                           | `GlucoseTargetProfile`          | Optional settings |
+| Diabetes Universe notification threshold | Alert Policy / Notifications BC | **Deferred**      |
+| CGM/pump/device alarm                    | Device Connections BC           | **Deferred**      |
+
+Copy for future alert UI must state: **"Does not change device alarms."**
+
+GP-001 data staleness and Dashboard 24h UX stale remain separate policies — not alert thresholds.
+
+---
+
+## 14. Therapy and regimen
+
+**Deferred for Wave 2.**
+
+Existing event-level insulin data (`InsulinTimelineEvent`, Quick Add) remains sufficient for current product requirements.
+
+Do **not** introduce MDI, pump, basal/bolus, or medication regimen models for completeness.
+
+A **Therapy Profile** bounded context should be introduced only when a concrete product capability requires it.
+
+---
+
+## 15. Device and CGM
+
+**Deferred for Wave 2.**
+
+Future device integrations are a **separate bounded context** (Profile menu already lists "Devices and sources" separately).
+
+Do **not** place in `DiabetesSettings`:
+
+- CGM pairing
+- Pump configuration
+- Device credentials
+- Device alarm configuration
+
+---
+
+## 16. Security and data classification
+
+| Field / resource        | Classification               | AuthZ (Wave 2)     | Audit                   | Export                  |
+| ----------------------- | ---------------------------- | ------------------ | ----------------------- | ----------------------- |
+| Account identity        | Account PII                  | Self               | Security events         | Account export          |
+| Theme, locale UI        | Preference                   | Self               | Optional                | Optional                |
+| `glucoseDisplayUnit`    | Health-related personal data | Self-subject `/me` | Change audit            | Medical export §3.9     |
+| `diabetesType`          | Health-related personal data | Self-subject `/me` | Change audit            | Medical export §3.9     |
+| Target range            | Health-related personal data | Self-subject `/me` | Change audit (required) | Medical export §3.9     |
+| `SemanticTimelineEvent` | Sensitive medical data       | Self-subject       | Medical audit           | Medical export (events) |
+
+### Authorization (Wave 2)
+
+- Deny by default (P5)
+- Settings APIs: validated session + resolved self `subjectId` + active `self` relationship
+- **Do not expose** diabetes settings through identity `/me` profile endpoints
+- Re-authentication **not required** for settings changes in Wave 2 (§3.7)
+- Caregiver/clinician edit rights: **future** — architecture supports via `AccountSubjectRelationship`; not implemented in Wave 2
+
+---
+
+## 17. AI access rules
 
 ### AI may read (future)
 
-| Setting | Use |
-| --- | --- |
-| `glucoseDisplayUnit` | Format explanations consistently |
-| `diabetesType` (if set) | Personalize educational tone |
-| Target range (if set) | Contextualize readings vs user-stated goals — **not clinical judgment** |
+| Setting                 | Use                                                               |
+| ----------------------- | ----------------------------------------------------------------- |
+| `glucoseDisplayUnit`    | Format explanations consistently                                  |
+| `diabetesType` (if set) | Non-diagnostic contextual tone                                    |
+| Target range (if set)   | Compare readings to **user-stated** goals — not clinical judgment |
 
 ### AI must not
 
 - Diagnose or prescribe
-- Autonomously modify any Diabetes Settings
-- Change target ranges or therapy
-- Silently write settings based on inferred patterns
+- Autonomously modify Diabetes Settings
+- Change targets or infer targets from diabetes type
+- Silently write settings
 
-### AI-proposed changes
-
-Any suggestion to update settings must:
-
-1. Be presented as explicit user action
-2. Show before/after
-3. Require user confirmation
-4. Log audit event on acceptance
-
-AI access uses same subject authorization boundary as deterministic features (P5 Marketplace/AI section).
+AI-proposed setting changes require explicit user confirmation and audit on acceptance.
 
 ---
 
-## 13. Audit and history rules
+## 18. Audit and history rules
 
-| Change type | History requirement |
-| --- | --- |
-| Display unit mmol/L ↔ mg/dL | `updated_at` + audit event (non-clinical preference, but health-adjacent) |
-| Diabetes type | Audit event with prior value |
-| Target range change | Audit event with prior low/high — **clinically meaningful user configuration** |
+Architecture: **current settings state + append-only audit trail** (INV-009). No event sourcing.
+
+### Audit requirements by change type
+
+| Change           | Audit                                      |
+| ---------------- | ------------------------------------------ |
+| Display unit     | Audit event recommended                    |
+| Diabetes type    | Audit event with prior value               |
+| Target range     | **Required** audit — medically meaningful  |
 | Theme / language | `updated_at` only (application preference) |
-| View/read settings | No audit (unless regulatory requirement emerges) |
+| Settings read    | No audit in Wave 2                         |
 
-Avoid event sourcing for settings. Use:
+### Minimum target-change audit semantics
 
-- Current row per subject
-- Append-only `medical_audit_events` (or dedicated `diabetes_settings_history` if query needs require — defer unless needed)
+Conceptually capture:
 
-**Retention:** Follow account/medical retention policy (**PRODUCT DECISION REQUIRED**).
+```text
+DiabetesSettingsAuditEvent (logical; may use medical_audit_events)
+- subjectId
+- actorAccountId
+- resourceType: diabetes_settings | glucose_target_profile
+- field: e.g. defaultRange
+- oldValue
+- newValue
+- changedAt
+- source: TargetRangeSource (for target changes)
+```
+
+Retention follows platform account/medical retention policy (§3.12).
 
 ---
 
-## 14. Canonical conceptual data model
-
-### Entity relationship (conceptual)
+## 19. Canonical conceptual data model
 
 ```text
 Account
@@ -632,353 +690,328 @@ Account
   └──< AccountSubjectRelationship >── MedicalSubject
                                            │
                                            ├── DiabetesSettings (1:1)
-                                           ├── GlucoseTargetProfile (1:1, optional separate)
-                                           │     └── GlucoseTargetSegment (1:N, future)
+                                           │     └── glucoseDisplayUnit
+                                           │     └── diabetesTypeClassification
+                                           │
+                                           ├── GlucoseTargetProfile (1:1)
+                                           │     └── defaultRange
+                                           │           lowMmolPerL
+                                           │           highMmolPerL
+                                           │           source
+                                           │     └── segments[] (future)
+                                           │
                                            └── MedicalEventResource (1:N)
                                                  └── SemanticTimelineEvent
 ```
 
-### Entity summaries
+### Local-first note
 
-**MedicalSubject** (exists — extend associations only)
+Pre-adoption subjects may have local presentation preferences without cloud canonical settings. Rules (§3.8, INV-010):
 
-**DiabetesSettings** (new, 1:1 with subject)
-
-**GlucoseTargetProfile** (new, 1:1 with subject; may embed default range in Wave 2B minimal form)
-
-**DiabetesSettingsAuditEvent** (logical; may reuse `medical_audit_events`)
-
-Local-first note: Until cloud sync of settings is implemented, a **local DiabetesSettings cache** keyed by `subjectId` (or local-only subject placeholder pre-adoption) mirrors server authority post-adoption. Pre-adoption: local settings apply to local unattached timeline namespace (**PRODUCT DECISION REQUIRED** for pre-login behavior).
+- Do not auto-promote unknown legacy medical settings to canonical subject settings
+- Only clearly compatible presentation preferences may migrate automatically
+- Medical values require explicit/controlled adoption (P10)
+- Post-adoption: server-authoritative settings with client cache
 
 ---
 
-## 15. Field-level matrix
+## 20. Field-level matrix
 
 ### DiabetesSettings
 
-| Field | Type | Nullable | Default | Owner | Sensitivity | Reason | Consumers |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| `settingsId` | UUID | No | generated | DiabetesSettings | Internal | Primary key | API, DB |
-| `subjectId` | UUID | No | — | MedicalSubject | Internal | Scope | AuthZ, all modules |
-| `glucoseDisplayUnit` | enum | No | **none until chosen** | DiabetesSettings | Health-related | Display preference | Timeline, Home, Quick Add, Reports, AI |
-| `diabetesTypeCategory` | enum | No | `unknown` | DiabetesSettings | Health-related | Informational self-ID | AI, Analytics (future), onboarding |
-| `diabetesTypeOtherText` | string | Yes | null | DiabetesSettings | Health-related | When category=other | AI (filtered) |
-| `createdAt` | timestamp | No | now | DiabetesSettings | Internal | Lifecycle | Audit |
-| `updatedAt` | timestamp | No | now | DiabetesSettings | Internal | Lifecycle | Cache invalidation |
-| `revision` | bigint | No | 1 | DiabetesSettings | Internal | Optimistic concurrency | Sync (future) |
+| Field                   | Type      | Nullable          | Default            | Sensitivity    | Wave 2 consumers                  |
+| ----------------------- | --------- | ----------------- | ------------------ | -------------- | --------------------------------- |
+| `settingsId`            | UUID      | No                | generated          | Internal       | API, DB                           |
+| `subjectId`             | UUID      | No                | —                  | Internal       | AuthZ                             |
+| `glucoseDisplayUnit`    | enum      | **Yes** (`unset`) | unset until chosen | Health-related | Timeline, Home, Quick Add, export |
+| `diabetesTypeCategory`  | enum      | No                | `unknown`          | Health-related | AI (future), export               |
+| `diabetesTypeOtherText` | string    | Yes               | null               | Health-related | AI (filtered)                     |
+| `createdAt`             | timestamp | No                | now                | Internal       | Export metadata                   |
+| `updatedAt`             | timestamp | No                | now                | Internal       | Cache                             |
+| `revision`              | bigint    | No                | 1                  | Internal       | Concurrency                       |
 
-### GlucoseTargetProfile (minimal Wave 2)
+### GlucoseTargetProfile.defaultRange
 
-| Field | Type | Nullable | Default | Owner | Sensitivity | Reason | Consumers |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| `profileId` | UUID | No | generated | GlucoseTargetProfile | Internal | PK | API |
-| `subjectId` | UUID | No | — | MedicalSubject | Internal | Scope | AuthZ |
-| `lowMmolPerL` | decimal | Yes | null | GlucoseTargetProfile | Health-related | Target band | Dashboard, Timeline, Analytics |
-| `highMmolPerL` | decimal | Yes | null | GlucoseTargetProfile | Health-related | Target band | Same |
-| `source` | enum | No | `user_defined` | GlucoseTargetProfile | Internal | Provenance | Audit, UI badges |
-| `updatedAt` | timestamp | No | now | GlucoseTargetProfile | Internal | — | Cache |
+| Field          | Type              | Nullable | Default        | Sensitivity    | Wave 2 consumers              |
+| -------------- | ----------------- | -------- | -------------- | -------------- | ----------------------------- |
+| `profileId`    | UUID              | No       | generated      | Internal       | API, DB                       |
+| `subjectId`    | UUID              | No       | —              | Internal       | AuthZ                         |
+| `lowMmolPerL`  | decimal           | Yes      | null           | Health-related | Dashboard, Timeline (Wave 2E) |
+| `highMmolPerL` | decimal           | Yes      | null           | Health-related | Same                          |
+| `source`       | TargetRangeSource | No       | n/a when unset | Internal       | Audit, UI                     |
+| `updatedAt`    | timestamp         | No       | now            | Internal       | Export metadata               |
+| `revision`     | bigint            | No       | 1              | Internal       | Concurrency                   |
 
-Future `GlucoseTargetSegment` fields deferred to Wave 2B schema design.
+When both `lowMmolPerL` and `highMmolPerL` are null, the range is **unset** (no `source` required).
 
 ---
 
-## 16. API boundary proposal
+## 21. API boundary proposal
 
 ### Namespace separation
 
 ```text
-/api/v1/identity/me/...          → Account identity (existing)
-/api/v1/preferences/me/...       → Application preferences (future: theme, locale UI)
-/api/v1/medical/me/settings/...  → Diabetes settings (self-subject resolved)
-/api/v1/medical/me/targets/...   → Glucose targets (optional split)
-/api/v1/medical/me/medical-events/... → Events (existing)
+/api/v1/identity/me/...                 → Account identity (existing)
+/api/v1/preferences/me/...              → Application preferences (future)
+/api/v1/medical/me/diabetes-settings/... → Self-subject diabetes settings (Wave 2C)
+/api/v1/medical/me/medical-events/...   → Events (existing)
 ```
 
-Alternative: combine settings + targets under `/api/v1/medical/me/diabetes-settings` with nested objects — **implementation choice in Wave 2C**; logical separation must remain in domain model even if combined in transport.
+Combined or split transport for settings + targets is a Wave 2C implementation choice. Domain entities remain logically separate.
 
-### Self-user (Wave 2)
+### Wave 2 routes (self-subject only)
 
 ```text
 GET  /api/v1/medical/me/diabetes-settings
-PUT  /api/v1/medical/me/diabetes-settings   (partial update, If-Match/revision)
+PUT  /api/v1/medical/me/diabetes-settings   (partial update; revision/If-Match)
 ```
 
-Server resolves `subjectId` from active `self` relationship — client does not send subject ID for authorization.
+Server resolves `subjectId` from active `self` relationship. Client does not supply `subjectId` for authorization.
 
-### Future caregiver / clinician
+### Future (not Wave 2)
 
 ```text
-GET  /api/v1/medical/subjects/{subjectId}/diabetes-settings
-PUT  /api/v1/medical/subjects/{subjectId}/diabetes-settings
+GET/PUT /api/v1/medical/subjects/{subjectId}/diabetes-settings
 ```
 
-Requires relationship policy enforcement. Route shape pre-planned; not implemented in Wave 2.
-
-### Versioning
-
-- Include `schemaVersion` on settings resource
-- Breaking changes → new API version path (`/v2/`)
-- Do not expose DB columns directly; use DTOs with domain enum names
-
-### Local-first
-
-Client maintains settings cache; optimistic UI with revision conflict handling aligned with P11 sync patterns (Wave 2E+).
+Requires caregiver/clinician relationship policy.
 
 ---
 
-## 17. UX information architecture
+## 22. UX information architecture
 
-### Entry
+### Product principle (INV-008)
+
+Settings are for **infrequent configuration**. Frequent actions (log glucose, insulin, view Timeline) live in natural workflows — not behind Settings navigation.
+
+Profile → **Управление диабетом** remains intentionally small.
+
+### Entry structure
 
 ```text
-Profile (account)
-  └── Управление диабетом   (/account/diabetes-management or localized slug)
-        ├── Overview (Wave 2D landing)
-        ├── Glucose units      (primary — may be inline on overview)
-        ├── Target range       (secondary screen or expandable section)
-        ├── Diabetes type      (secondary — optional)
-        └── Advanced           (Wave 3+: alert prefs, archived targets)
+Profile
+  └── Управление диабетом
+        ├── Glucose display unit     (first level)
+        ├── Target range summary     (first level)
+        └── Diabetes type            (first level, optional)
 ```
 
-**Not in this section:** theme ( stays Settings tab ), passkeys/sessions (Security ), devices ( separate menu section ), raw medical events ( Timeline ), export ( Data section ).
+**Not here:** theme, devices, medications, CGM, alerts, export, clinical diagnoses.
 
-### Overview screen (≤ 3 taps to common actions)
+### Inline glucose entry unit selection (Wave 2D)
 
-**Purpose:** At-a-glance status of how diabetes data is interpreted in the app.
+When `glucoseDisplayUnit` is unset:
 
-**Sections:**
+```text
+Add glucose → lightweight unit picker → glucose entry form
+```
 
-1. **Glucose display unit** — first-level control (mmol/L vs mg/dL). Single tap to change with confirmation if locale suggests different unit.
-2. **Target range** — first-level summary with "Set range" / "Edit" → second screen with low/high inputs in **user's display unit**, stored as mmol/L.
-3. **Diabetes type** — second-level row ("Optional") → simple picker + skip.
-
-**Advanced (deeper):**
-
-- History of target changes (read-only audit) — optional Wave 2D or 3
-- Alert preferences — hidden until module exists
-
-**Must NOT appear:**
-
-- Medication lists, insulin regimen editor, diagnosis codes, clinician notes, CGM pairing ( lives under Devices ), lab results.
+Does not permanently block other app areas.
 
 ### Tap budget
 
-| Action | Target taps |
-| --- | --- |
-| Change display unit | 2 (open screen → select) |
-| Edit target range | 3 (open → edit range → save) |
-| Set diabetes type | 3 (open optional → pick → save) |
+| Action                       | Target taps |
+| ---------------------------- | ----------- |
+| Change display unit          | 2           |
+| Edit target range            | 3           |
+| Set diabetes type (optional) | 3           |
 
 ---
 
-## 18. Defaults and onboarding rules
+## 23. Defaults and onboarding rules
 
-| Setting | Default | Onboarding |
-| --- | --- | --- |
-| `glucoseDisplayUnit` | **No default** — use `unset` state | **Explicit choice required** before first glucose entry OR soft prompt with regional **suggestion** (not auto-apply). Suggest mmol/L for UK/EU, mg/dL for US based on locale — user must confirm. |
-| `diabetesTypeCategory` | `unknown` | Optional question; skippable |
-| Target range | `null` (unset) | Do not guess clinical targets. Explain benefits; skip allowed. |
-| Therapy | n/a | Do not ask in Wave 2 |
+| Setting                | Default            | Rule                                                                                                                           |
+| ---------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `glucoseDisplayUnit`   | **`unset`**        | Required before manual glucose entry; resolved via inline picker or Управление диабетом; locale may suggest/pre-highlight only |
+| `diabetesTypeCategory` | `unknown`          | Optional; skippable                                                                                                            |
+| Target range           | **unset** (`null`) | Never guessed; never inferred from diabetes type or locale                                                                     |
+| Therapy                | n/a                | Not collected in Wave 2                                                                                                        |
 
-**Must NEVER be guessed:** target range, alert thresholds, diabetes type (beyond default `unknown`), therapy.
-
-**Locale inference:** may pre-select **suggested** display unit in onboarding UI only; applying it requires explicit tap.
+**Must NEVER be guessed:** target range, alert thresholds, therapy, silent locale-based unit assignment.
 
 ---
 
-## 19. Internationalization rules
+## 24. Internationalization rules
 
-| Rule | Detail |
-| --- | --- |
-| Separate dimensions | `PresentationContext.locale` ≠ `DiabetesSettings.glucoseDisplayUnit` |
-| Language change | Must not mutate glucose unit |
-| Number formatting | Locale drives decimal/group separators via formatting library |
-| Unit symbols | Via `formatMeasurement()` — mmol/L and mg/dL localized symbols where applicable |
-| Clinical conventions | Target range UI shows values in user's **display unit**; storage mmol/L |
-| Regulatory | No diagnostic claims in settings copy; localized disclaimers in Wave 2D |
-| Accessibility | Unit changes update aria-labels; don't rely on color alone for in-range indicators (future) |
+| Rule                  | Detail                                                                         |
+| --------------------- | ------------------------------------------------------------------------------ |
+| Separate dimensions   | `PresentationContext.locale` ≠ `DiabetesSettings.glucoseDisplayUnit` (INV-007) |
+| Language change       | Must not mutate glucose unit                                                   |
+| Locale suggestion     | May suggest/pre-highlight unit; explicit confirmation required                 |
+| Number formatting     | Locale drives separators via formatting library                                |
+| Target UI input       | May display in user's chosen unit; storage mmol/L                              |
+| Translation namespace | `account.diabetesManagement.*` (Wave 2D)                                       |
 
-Supported Wave 1 locales: `en-GB`, `uk-UA`, `de-DE`, `ru-RU` — diabetes settings must ship with full translation keys under `account.diabetesManagement.*` (new namespace).
-
----
-
-## 20. Edge cases and validation
-
-| Case | Behavior | Validation owner |
-| --- | --- | --- |
-| Diabetes type unknown | Allowed; neutral copy | Domain enum |
-| No targets configured | Charts omit bands; no fake defaults | Presentation |
-| Imported data different units | Convert at import to mmol/L | Import domain service |
-| User changes display unit | Events unchanged; display recalculates | Presentation |
-| Invalid target range (low ≥ high) | Reject with field error | Settings domain + API |
-| Partial settings (unit set, targets null) | Valid | — |
-| Deleted diabetes profile/subject | Settings deleted with subject; UI shows unavailable | Server lifecycle |
-| Caregiver loses access | Settings inaccessible; cache invalidated | AuthZ + client cache |
-| Stale cached settings | TTL + revision/ETag on GET | Client cache policy |
-| Concurrent edits | Optimistic concurrency via `revision` | API |
-| Pre-adoption local-only user | **PRODUCT DECISION REQUIRED** — local settings partition vs post-adoption merge | Platform |
+Supported locales: `en-GB`, `uk-UA`, `de-DE`, `ru-RU`.
 
 ---
 
-## 21. Migration impact
+## 25. Edge cases and validation
 
-| Existing artifact | Action |
-| --- | --- |
-| `SemanticTimelineEvent.concentrationMmolPerL` | **Reuse** — no migration |
-| Legacy `TimelineEvent` | **No change** — continue migration lift |
-| Timeline presentation (mmol/L hardcoded) | **Migrate** presentation to read settings |
-| Quick Add hardcoded units | **Migrate** |
-| `PresentationSnapshot` | **Do not add** glucose unit — subject settings separate |
-| Profile menu placeholder | **Enable** link in Wave 2D |
-| OpenAPI medical schema | **Extend** |
-| `MedicalSubject` table | **Extend** association via new settings table |
-| Demo fixtures | **Optional** add demo settings for dev |
-| GP-001 / NA-001 | **Leave untouched** |
-| Dashboard "no target range" docs | **Update** when targets ship (Wave 2E) |
-
-No migration SQL in Wave 2A. Wave 2B introduces schema additively.
-
----
-
-## 22. Architecture options comparison
-
-### Option 1 — Minimal account-scoped settings blob
-
-JSON column on identity user: `{ glucoseUnit, diabetesType, targets }`.
-
-| Criterion | Score |
-| --- | --- |
-| Simplicity | ★★★★★ |
-| Safety | ★★★ — conflates account with health config |
-| Scalability | ★★ — breaks with caregivers |
-| Caregiver future | ★ — requires rewrite |
-| API design | ★★★ — tempting but wrong boundary |
-| UX | ★★★★ short-term |
-| Implementation cost | ★★★★★ lowest |
-| Technical debt | ★★★★★ highest long-term |
-
-### Option 2 — Subject-scoped DiabetesSettings + optional GlucoseTargetProfile (recommended)
-
-Dedicated resources on `MedicalSubject`, separate API namespace.
-
-| Criterion | Score |
-| --- | --- |
-| Simplicity | ★★★★ |
-| Safety | ★★★★★ — aligns with P5/P7 |
-| Scalability | ★★★★★ |
-| Caregiver future | ★★★★★ |
-| API design | ★★★★★ — consistent with medical API |
-| UX | ★★★★ — transparent for self-users |
-| Implementation cost | ★★★★ moderate |
-| Technical debt | ★ lowest |
-
-### Option 3 — Full clinical profile (EHR-lite)
-
-Diabetes settings embedded in comprehensive medical profile with diagnoses, medications, allergies.
-
-| Criterion | Score |
-| --- | --- |
-| Simplicity | ★ |
-| Safety | ★★ — scope creep, regulatory exposure |
-| Scalability | ★★★ |
-| Caregiver future | ★★★★ |
-| API design | ★★ |
-| UX | ★★ — form fatigue |
-| Implementation cost | ★ highest |
-| Technical debt | ★★★★ — rejected per task brief |
+| Case                               | Behavior                                                           | Owner                  |
+| ---------------------------------- | ------------------------------------------------------------------ | ---------------------- |
+| `glucoseDisplayUnit` unset         | Block manual glucose entry; show inline picker; rest of app usable | Quick Add / Wave 2D    |
+| Pre-adoption no cloud settings     | Transitional unset allowed; resolve before manual entry            | Client + adoption flow |
+| Diabetes type unknown              | Allowed; neutral copy                                              | Domain                 |
+| No targets configured              | No bands/charts reference; no fake defaults                        | Presentation           |
+| Imported data in mg/dL             | Convert once to mmol/L at ingest                                   | Import domain          |
+| User changes display unit          | Events unchanged; display recalculates                             | Presentation (INV-001) |
+| Invalid target (low ≥ high)        | Reject                                                             | Domain + API           |
+| Partial settings                   | Valid (e.g. unit set, targets unset)                               | —                      |
+| Legacy local settings              | Do not auto-promote to canonical medical settings (INV-010)        | Adoption               |
+| Compatible presentation prefs only | May migrate automatically                                          | Adoption (controlled)  |
+| Caregiver loses access (future)    | Settings inaccessible; cache invalidated                           | AuthZ                  |
+| Concurrent edits                   | Optimistic concurrency via `revision`                              | API                    |
+| `SYSTEM_REFERENCE` displayed       | Must not write `USER_DEFINED` without explicit action              | UI + domain            |
 
 ---
 
-## 23. Final recommendation
+## 26. Migration impact
 
-Adopt **Option 2 — Subject-scoped DiabetesSettings + GlucoseTargetProfile**.
+| Artifact                        | Action                                        |
+| ------------------------------- | --------------------------------------------- |
+| `concentrationMmolPerL`         | **Reuse** — no event migration                |
+| Legacy `TimelineEvent`          | **No change**                                 |
+| Timeline/Quick Add presentation | **Migrate** in Wave 2E                        |
+| `PresentationSnapshot`          | **Do not add** glucose unit                   |
+| Profile menu placeholder        | **Enable** in Wave 2D                         |
+| OpenAPI                         | **Extend** in Wave 2B                         |
+| `medical_subjects`              | **Extend** via new settings tables in Wave 2B |
+| GP-001 / NA-001                 | **Leave untouched**                           |
 
-This is the **smallest architecture that safely supports long-term product** without contradicting approved P3/P5/P7/P8 decisions.
-
-**Wave 2 functional bundle:**
-
-1. `DiabetesSettings` with `glucoseDisplayUnit` (required user choice) and optional `diabetesType`
-2. `GlucoseTargetProfile` with optional global low/high (mmol/L storage)
-3. Domain glucose display conversion helper + presentation integration plan
-4. Subject-scoped API under `/api/v1/medical/me/...`
-5. Explicit exclusion of alert thresholds and therapy regimen from Wave 2
-
-**Do not:**
-
-- Store mg/dL on events
-- Put settings on Account/Profile identity
-- Merge targets and alerts
-- Auto-apply locale as medical unit without confirmation
+No migration SQL in Wave 2A.
 
 ---
 
-## 24. Proposed Wave 2B–2F roadmap
+## 27. Architecture options comparison
 
-### Wave 2A — Architecture (this document)
+**Selected: Option 2 — Subject-scoped `DiabetesSettings` + `GlucoseTargetProfile` on `MedicalSubject`.**
 
-Deliverable: approved architecture report. **No code.**
+| Option                             | Verdict                                                   |
+| ---------------------------------- | --------------------------------------------------------- |
+| Account-scoped blob                | **Rejected** — conflicts with P7; breaks caregiver future |
+| Subject-scoped settings (Option 2) | **Selected** — smallest safe long-term architecture       |
+| EHR-lite clinical profile          | **Rejected** — scope creep; violates task brief           |
 
-### Wave 2B — Data contracts and schema
+---
 
-- TypeScript domain types in `@diabetes-universe/types` or `@diabetes-universe/medical-domain`
-- Drizzle schema: `diabetes_settings`, `glucose_target_profiles` (names TBD)
-- Domain conversion functions with unit tests
-- OpenAPI schemas for settings resources
-- Update stub docs: `docs/data/entities/glucose.md`, `docs/architecture/settings/overview.md`
-- Local IndexedDB cache contract for settings (if local-first required pre-sync)
+## 28. Final recommendation
+
+Adopt subject-scoped Diabetes Settings with the approved Wave 2 bundle:
+
+1. `DiabetesSettings`: `glucoseDisplayUnit` (required before manual entry), optional diabetes type
+2. `GlucoseTargetProfile.defaultRange`: optional global target with provenance
+3. Domain glucose conversion helper (18.0182); formatting unchanged (ADR-0010)
+4. Self-subject API under `/api/v1/medical/me/...` (Wave 2C)
+5. Explicit deferral of alerts, therapy, devices, segments, caregiver UI
+
+**Do not:** store mg/dL on events; put settings on Account; merge targets/alerts; auto-apply locale as medical unit; infer targets from diabetes type; auto-promote legacy medical settings.
+
+---
+
+## 29. Wave 2 scope summary
+
+### In scope (Wave 2 overall)
+
+| Capability                                  | Wave |
+| ------------------------------------------- | ---- |
+| Architecture (this document)                | 2A   |
+| Types, schema, conversion, OpenAPI          | 2B   |
+| API/domain services, audit                  | 2C   |
+| Управление диабетом UI + inline unit picker | 2D   |
+| Timeline/Dashboard/Quick Add integration    | 2E   |
+| QA, security, accessibility                 | 2F   |
+
+### In scope (settings content)
+
+- Glucose display unit (`mmol/L` \| `mg/dL`)
+- Optional diabetes type (informational)
+- Optional global target range with provenance
+- Audit for target changes
+- Medical export settings section (future export implementation)
+
+### Deferred
+
+- Alert / notification thresholds
+- Therapy / regimen profile
+- Device / CGM configuration
+- Target segments / scheduling
+- Caregiver/clinician editing UI
+- Analytics TIR runtime
+- Clinical diagnosis / ICD coding
+- Re-authentication for settings changes
+
+---
+
+## 30. Wave 2B implementation contract
+
+Wave 2B implements **only** the approved foundation required for shared contracts and schema. It is the direct contract for engineering work after Wave 2A approval.
+
+### Wave 2B MAY implement
+
+- Shared TypeScript domain types (`DiabetesSettings`, `GlucoseTargetProfile`, `TargetRangeSource`, enums)
+- Drizzle schema additions (`diabetes_settings`, `glucose_target_profiles` or equivalent)
+- Canonical glucose conversion domain primitive(s) with unit tests
+- OpenAPI schema definitions for settings resources
+- Schema/type validation aligned with domain bounds
+- Update stub docs: `docs/data/entities/glucose.md`, `docs/architecture/settings/overview.md` (documentation only)
+
+### Wave 2B MUST NOT implement
+
+- UI or onboarding screens
+- Alert engine or notification policy
+- CGM/device integrations
+- Therapy profile
+- Caregiver editing routes or policies
+- Analytics runtime or TIR computation
+- Target `segments[]` or scheduling engine
+- Production API route handlers (Wave 2C)
+- Presentation-layer wiring (Wave 2E)
+- Any behavior outside this foundation boundary
+
+---
+
+## 31. Proposed Wave 2C–2F roadmap
 
 ### Wave 2C — API and domain services
 
-- Medical service: settings CRUD with revision, authZ via self-subject
-- Validation bounds for targets
-- Audit events on changes
-- No alert or therapy endpoints
+- Settings CRUD with revision; authZ via self-subject
+- Target validation; audit events on target changes
+- No alert, therapy, or caregiver endpoints
 
 ### Wave 2D — UX/UI
 
-- Enable Profile → Управление диабетом route
-- Overview + unit picker + target range + optional diabetes type screens
-- Onboarding prompt for glucose unit (explicit confirmation)
-- i18n keys for en-GB, uk-UA, de-DE, ru-RU
-- E2E tests; accessibility audit
+- Enable Profile → Управление диабетом
+- Inline unit picker on first manual glucose entry
+- Target range and optional diabetes type screens
+- i18n for supported locales
 
 ### Wave 2E — Integration
 
-- Wire Timeline, Dashboard (Last Glucose, Day Summary bands), Quick Add to settings-driven display
-- Target range visual reference on charts (non-diagnostic)
-- Cache invalidation strategy across modules
-- Update architecture docs for Dashboard/Timeline
+- Timeline, Dashboard, Quick Add read display preference
+- Target range visual reference (non-diagnostic)
+- Settings cache invalidation
 
 ### Wave 2F — QA, security, accessibility
 
-- AuthZ tests (deny cross-subject access)
-- Audit log verification
-- Security review of settings APIs (no leakage via identity endpoints)
-- Manual QA: unit switch does not alter stored events
-- Performance: settings read on hot paths (cached)
-
-**Optional reorder:** If local-first offline settings are prioritized before cloud API, swap 2C and local cache portions of 2B — **PRODUCT DECISION REQUIRED** based on cloud adoption timeline.
+- AuthZ tests; audit verification
+- Confirm unit switch does not alter stored events (INV-001)
+- Accessibility audit
 
 ---
 
-## 25. Open questions requiring product-owner decision
+## 32. Future considerations
 
-| # | Question | Impact |
-| --- | --- | --- |
-| 1 | Should onboarding **block** glucose entry until display unit is chosen, or allow entry with interim default display? | Onboarding UX |
-| 2 | May locale **suggest** pre-selected unit without explicit tap? | i18n vs medical safety |
-| 3 | Is optional `usesInsulin` flag worth Wave 2 scope? | Schema size |
-| 4 | Should user self-reported diabetes type ever sync to a future clinical diagnosis record? | Dual-track medical record |
-| 5 | Retention period for diabetes settings audit history | Compliance |
-| 6 | Pre-adoption local-only settings: partition behavior before cloud account | Local-first UX |
-| 7 | Caregiver edit rights to child's diabetes settings when caregiver ships | AuthZ policy |
-| 8 | Re-auth required for changing target range? | Security UX |
-| 9 | Exact mg/dL conversion factor and rounding for edge values (e.g. 3.9 mmol/L) | Display consistency |
-| 10 | Clinician-defined targets: read-only for patient when clinician module ships? | Target profile `source` semantics |
-| 11 | Export bundle: include settings in medical export, account export, or both? | GDPR/data portability |
-| 12 | Combined vs split API resource for settings and targets | API ergonomics |
+Items intentionally deferred beyond Wave 2; not blockers for Wave 2A approval:
 
-Items marked **PRODUCT DECISION REQUIRED** in this document must not be resolved by engineering alone.
+| Topic                                    | Notes                                                                             |
+| ---------------------------------------- | --------------------------------------------------------------------------------- |
+| Clinical diagnosis vs self-reported type | Keep separate if clinical module added                                            |
+| Pediatric age-aware targets              | Extension via `segments[]`                                                        |
+| Caregiver edit policy                    | Relationship-type rules when Care Relationships BC ships                          |
+| Clinician-defined read-only targets      | `CLINICIAN_DEFINED` provenance already modeled                                    |
+| Local IndexedDB settings cache           | May be specified in Wave 2B if needed for offline; server authority post-adoption |
+| Combined vs split HTTP resource          | Wave 2C implementation choice                                                     |
 
 ---
 
@@ -988,22 +1021,24 @@ Items marked **PRODUCT DECISION REQUIRED** in this document must not be resolved
 - P5 — Identity, Account & Data Ownership (`docs/architecture/identity/p5-identity-account-data-ownership.md`)
 - P7 — Backend Medical Data Architecture (`docs/architecture/backend/p7-backend-medical-data-architecture.md`)
 - P8 — Medical API Contracts (`docs/architecture/api/p8-medical-api-contracts.md`)
-- ADR-0010 — Platform Formatting Library (no medical conversion in formatting)
+- P10 — Local Data Adoption Architecture
+- ADR-0010 — Platform Formatting Library
 - ADR-0012 — User Time Zone Policy
 - Presentation Context Foundation (`docs/architecture/presentation/presentation-context.md`)
-- Dashboard Last Glucose Architecture (no target range today)
 
 ---
 
 ## Architecture approval gate (Wave 2A)
 
-Wave 2A is ready for product/architecture review when:
+Wave 2A is **ready for approval** when reviewers confirm:
 
-- [ ] Subject-scoped ownership aligns with P7
-- [ ] Canonical mmol/L storage preserved
-- [ ] Targets and alerts remain distinct
-- [ ] Profile ≠ diabetes settings ≠ medical record principle explicit
-- [ ] Wave 2B–2F sequence agreed
-- [ ] Open questions in §25 assigned to product owners
+- [x] Subject-scoped ownership aligns with P7
+- [x] INV-001 canonical mmol/L storage preserved
+- [x] INV-004 targets, app alerts, and device alarms remain distinct
+- [x] INV-005 diabetes type does not infer targets
+- [x] Profile ≠ diabetes settings ≠ medical record (INV-002)
+- [x] All Wave 2B-blocking product decisions resolved (§3)
+- [x] Wave 2B implementation contract defined (§30)
+- [x] Repository consistency verified (§5) — no conflicts
 
-**Wave 2B must not start until this document is approved.**
+**Wave 2B must not start until this document is approved and merged.**
