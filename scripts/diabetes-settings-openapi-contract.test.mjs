@@ -60,7 +60,8 @@ test('OpenAPI diabetes settings schemas validate', async () => {
     true,
   );
   assert.equal(
-    api.components.schemas.GlucoseTargetProfile.properties.defaultRange.nullable,
+    api.components.schemas.GlucoseTargetProfile.properties.defaultRange
+      .nullable,
     true,
   );
 });
