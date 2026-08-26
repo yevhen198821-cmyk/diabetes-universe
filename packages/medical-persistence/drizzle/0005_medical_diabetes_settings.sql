@@ -20,9 +20,6 @@ CREATE TABLE IF NOT EXISTS medical.diabetes_settings (
 CREATE UNIQUE INDEX IF NOT EXISTS diabetes_settings_subject_unique
   ON medical.diabetes_settings (subject_id);
 
-CREATE INDEX IF NOT EXISTS diabetes_settings_subject_lookup
-  ON medical.diabetes_settings (subject_id);
-
 CREATE TABLE IF NOT EXISTS medical.glucose_target_profiles (
   profile_id UUID PRIMARY KEY,
   subject_id UUID NOT NULL REFERENCES medical.medical_subjects(subject_id) ON DELETE RESTRICT,
@@ -54,7 +51,4 @@ CREATE TABLE IF NOT EXISTS medical.glucose_target_profiles (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS glucose_target_profiles_subject_unique
-  ON medical.glucose_target_profiles (subject_id);
-
-CREATE INDEX IF NOT EXISTS glucose_target_profiles_subject_lookup
   ON medical.glucose_target_profiles (subject_id);
