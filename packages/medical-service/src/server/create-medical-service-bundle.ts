@@ -7,6 +7,7 @@ import {
 } from '@diabetes-universe/medical-persistence/server';
 
 import { createMedicalAdoptionService } from './services/medical-adoption-service';
+import { createMedicalDiabetesSettingsService } from './services/medical-diabetes-settings-service';
 import { createMedicalEventService } from './services/medical-event-service';
 import { createMedicalSubjectService } from './services/medical-subject-service';
 
@@ -15,6 +16,9 @@ export interface MedicalServiceBundle {
   readonly subjectService: ReturnType<typeof createMedicalSubjectService>;
   readonly eventService: ReturnType<typeof createMedicalEventService>;
   readonly adoptionService: ReturnType<typeof createMedicalAdoptionService>;
+  readonly diabetesSettingsService: ReturnType<
+    typeof createMedicalDiabetesSettingsService
+  >;
 }
 
 export async function createMedicalServiceBundle(
@@ -28,6 +32,10 @@ export async function createMedicalServiceBundle(
     subjectService: createMedicalSubjectService(subjectRepository),
     eventService: createMedicalEventService(database, environment),
     adoptionService: createMedicalAdoptionService(database, environment),
+    diabetesSettingsService: createMedicalDiabetesSettingsService(
+      database,
+      environment,
+    ),
   };
 }
 
@@ -47,3 +55,4 @@ export {
   MEDICAL_MAX_ADOPTION_BATCH_ITEMS,
   MEDICAL_DEFAULT_ADOPTION_BATCH_ITEMS,
 } from './services/medical-adoption-service';
+export { createMedicalDiabetesSettingsService } from './services/medical-diabetes-settings-service';

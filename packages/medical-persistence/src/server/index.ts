@@ -15,6 +15,7 @@ export { MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL } from './database/medical-f
 export { MEDICAL_ADOPTION_ITEM_STATES_PRIVILEGES_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { MEDICAL_ADOPTION_PRIVILEGES_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { MEDICAL_DIABETES_SETTINGS_MIGRATION_SQL } from './database/medical-foundation-migration';
+export { MEDICAL_DIABETES_SETTINGS_PRIVILEGES_MIGRATION_SQL } from './database/medical-foundation-migration';
 export { medicalSchema } from './database/medical-schema';
 export {
   createMedicalSubjectRepository,
@@ -26,6 +27,16 @@ export {
   type KeysetListQuery,
   type KeysetListCursor,
 } from './repositories/medical-event-repository';
+export {
+  createDiabetesSettingsRepository,
+  type DiabetesSettingsRepository,
+  type DiabetesSettingsInsert,
+  type DiabetesSettingsPatch,
+} from './repositories/diabetes-settings-repository';
+export {
+  createGlucoseTargetProfileRepository,
+  type GlucoseTargetProfileRepository,
+} from './repositories/glucose-target-profile-repository';
 export {
   createMedicalIdempotencyRepository,
   type MedicalIdempotencyRepository,

@@ -71,6 +71,12 @@ export {
   serverOwnedSemanticFieldNames,
   toServerSemanticEvent,
 } from './mappers/semantic-event-mapper';
+export {
+  mapRowToDiabetesSettings,
+  mapRowToGlucoseTargetProfile,
+  type DiabetesSettingsRow,
+  type GlucoseTargetProfileRow,
+} from './mappers/diabetes-settings-mapper';
 export type {
   GlucoseDisplayUnit,
   DiabetesTypeCategory,
