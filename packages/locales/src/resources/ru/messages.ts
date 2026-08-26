@@ -301,10 +301,71 @@ export const russianDraftMessages = defineDraftMessages({
   'account.profile.about.title': 'О приложении',
   'account.profile.about.versionLabel': 'Версия',
   'account.profile.comingSoon.badge': 'Скоро',
+  'account.diabetesManagement.page.title': 'Управление диабетом',
+  'account.diabetesManagement.page.description':
+    'Настройте, как Diabetes Universe отображает параметры, связанные с диабетом.',
+  'account.diabetesManagement.glucose.title': 'Единицы глюкозы',
+  'account.diabetesManagement.glucose.description':
+    'Выберите единицы, в которых Diabetes Universe будет показывать уровень глюкозы.',
+  'account.diabetesManagement.glucose.unconfigured': 'Не выбраны',
+  'account.diabetesManagement.glucose.unitMmol': 'mmol/L',
+  'account.diabetesManagement.glucose.unitMg': 'mg/dL',
+  'account.diabetesManagement.diabetesType.title': 'Тип диабета',
+  'account.diabetesManagement.diabetesType.description':
+    'Самостоятельно указанная информация для организации ваших данных.',
+  'account.diabetesManagement.diabetesType.selfReportedNote':
+    'Это не подтверждённый медицинский диагноз.',
+  'account.diabetesManagement.diabetesType.type1': 'Тип 1',
+  'account.diabetesManagement.diabetesType.type2': 'Тип 2',
+  'account.diabetesManagement.diabetesType.gestational': 'Гестационный',
+  'account.diabetesManagement.diabetesType.other': 'Другой',
+  'account.diabetesManagement.diabetesType.otherLabel': 'Опишите другой тип',
+  'account.diabetesManagement.diabetesType.unknown': 'Не указан',
+  'account.diabetesManagement.target.title': 'Целевой диапазон',
+  'account.diabetesManagement.target.notSet': 'Не установлен',
+  'account.diabetesManagement.target.editAction': 'Изменить целевой диапазон',
+  'account.diabetesManagement.target.remove': 'Удалить целевой диапазон',
+  'account.diabetesManagement.target.removeConfirm.title':
+    'Удалить целевой диапазон?',
+  'account.diabetesManagement.target.removeConfirm.description':
+    'Персональный целевой диапазон будет удалён. Diabetes Universe больше не будет считать его вашей настроенной целью. Исторические измерения глюкозы не удаляются.',
+  'account.diabetesManagement.target.removeConfirm.confirm': 'Удалить диапазон',
+  'account.diabetesManagement.target.removeConfirm.cancel': 'Отмена',
+  'account.diabetesManagement.target.dialog.title': 'Целевой диапазон',
+  'account.diabetesManagement.target.dialog.lowerLabel': 'Нижняя граница',
+  'account.diabetesManagement.target.dialog.upperLabel': 'Верхняя граница',
+  'account.diabetesManagement.target.dialog.save': 'Сохранить',
+  'account.diabetesManagement.target.dialog.cancel': 'Отмена',
+  'account.diabetesManagement.target.validation.empty':
+    'Укажите нижнюю и верхнюю границы.',
+  'account.diabetesManagement.target.validation.invalidNumber':
+    'Введите корректные числа для выбранных единиц.',
+  'account.diabetesManagement.target.validation.lowEqualHigh':
+    'Нижняя граница должна быть меньше верхней.',
+  'account.diabetesManagement.target.validation.lowGreaterThanHigh':
+    'Нижняя граница должна быть меньше верхней.',
+  'account.diabetesManagement.target.validation.outOfBounds':
+    'Значения выходят за допустимые пределы.',
+  'account.diabetesManagement.disclaimer':
+    'Целевой диапазон — это настройка Diabetes Universe. Изменение здесь не меняет настройки сигналов CGM, глюкометра или инсулиновой помпы.',
+  'account.diabetesManagement.loading': 'Загрузка настроек диабета…',
+  'account.diabetesManagement.saving': 'Сохранение…',
+  'account.diabetesManagement.errors.network':
+    'Не удалось сохранить изменения. Проверьте подключение и попробуйте ещё раз.',
+  'account.diabetesManagement.errors.rateLimited':
+    'Слишком много попыток. Попробуйте немного позже.',
+  'account.diabetesManagement.errors.revisionConflict':
+    'Настройки были изменены в другом месте. Загружены актуальные значения.',
+  'account.diabetesManagement.errors.syncRequired':
+    'Настройки рассинхронизированы. Загружены актуальные значения.',
+  'account.diabetesManagement.errors.unauthorized':
+    'Сессия истекла. Войдите снова, чтобы продолжить.',
+  'account.diabetesManagement.errors.generic':
+    'Не удалось выполнить действие. Попробуйте ещё раз.',
   'account.profile.logout': 'Выйти из аккаунта',
   'account.profile.menu.diabetesSettings.subtitle':
-    'Цели, предупреждения, единицы',
-  'account.profile.menu.diabetesSettings.title': 'Настройки диабета',
+    'Единицы глюкозы, тип диабета и целевой диапазон',
+  'account.profile.menu.diabetesSettings.title': 'Управление диабетом',
   'account.profile.menu.devices.subtitle': 'Подключения и синхронизация',
   'account.profile.menu.devices.title': 'Устройства и источники',
   'account.profile.menu.export.subtitle': 'Скачать или отправить данные',

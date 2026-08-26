@@ -177,10 +177,75 @@ export const germanDraftMessages = defineDraftMessages({
   'account.profile.about.title': 'Über die App',
   'account.profile.about.versionLabel': 'Version',
   'account.profile.comingSoon.badge': 'Demnächst',
+  'account.diabetesManagement.page.title': 'Diabetes-Verwaltung',
+  'account.diabetesManagement.page.description':
+    'Legen Sie fest, wie Diabetes Universe Ihre diabetesbezogenen Einstellungen darstellt.',
+  'account.diabetesManagement.glucose.title': 'Glukose-Einheiten',
+  'account.diabetesManagement.glucose.description':
+    'Wählen Sie die Einheiten, in denen Diabetes Universe Glukosewerte anzeigt.',
+  'account.diabetesManagement.glucose.unconfigured': 'Nicht ausgewählt',
+  'account.diabetesManagement.glucose.unitMmol': 'mmol/L',
+  'account.diabetesManagement.glucose.unitMg': 'mg/dL',
+  'account.diabetesManagement.diabetesType.title': 'Diabetes-Typ',
+  'account.diabetesManagement.diabetesType.description':
+    'Selbst angegebene Information zur Organisation Ihrer Daten.',
+  'account.diabetesManagement.diabetesType.selfReportedNote':
+    'Dies ist keine verifizierte medizinische Diagnose.',
+  'account.diabetesManagement.diabetesType.type1': 'Typ 1',
+  'account.diabetesManagement.diabetesType.type2': 'Typ 2',
+  'account.diabetesManagement.diabetesType.gestational':
+    'Schwangerschaftsdiabetes',
+  'account.diabetesManagement.diabetesType.other': 'Andere',
+  'account.diabetesManagement.diabetesType.otherLabel':
+    'Anderen Typ beschreiben',
+  'account.diabetesManagement.diabetesType.unknown': 'Nicht angegeben',
+  'account.diabetesManagement.target.title': 'Zielbereich',
+  'account.diabetesManagement.target.notSet': 'Nicht festgelegt',
+  'account.diabetesManagement.target.editAction': 'Zielbereich bearbeiten',
+  'account.diabetesManagement.target.remove': 'Zielbereich entfernen',
+  'account.diabetesManagement.target.removeConfirm.title':
+    'Zielbereich entfernen?',
+  'account.diabetesManagement.target.removeConfirm.description':
+    'Ihr personalisierter Zielbereich wird entfernt. Diabetes Universe behandelt ihn danach nicht mehr als Ihren konfigurierten Zielbereich. Historische Glukosemessungen werden nicht gelöscht.',
+  'account.diabetesManagement.target.removeConfirm.confirm':
+    'Bereich entfernen',
+  'account.diabetesManagement.target.removeConfirm.cancel': 'Abbrechen',
+  'account.diabetesManagement.target.dialog.title': 'Zielbereich',
+  'account.diabetesManagement.target.dialog.lowerLabel': 'Untere Grenze',
+  'account.diabetesManagement.target.dialog.upperLabel': 'Obere Grenze',
+  'account.diabetesManagement.target.dialog.save': 'Speichern',
+  'account.diabetesManagement.target.dialog.cancel': 'Abbrechen',
+  'account.diabetesManagement.target.validation.empty':
+    'Geben Sie untere und obere Grenze ein.',
+  'account.diabetesManagement.target.validation.invalidNumber':
+    'Geben Sie gültige Zahlen für die gewählten Einheiten ein.',
+  'account.diabetesManagement.target.validation.lowEqualHigh':
+    'Die untere Grenze muss kleiner als die obere sein.',
+  'account.diabetesManagement.target.validation.lowGreaterThanHigh':
+    'Die untere Grenze muss kleiner als die obere sein.',
+  'account.diabetesManagement.target.validation.outOfBounds':
+    'Die Werte liegen außerhalb der unterstützten Grenzen.',
+  'account.diabetesManagement.disclaimer':
+    'Der Zielbereich ist eine Diabetes-Universe-Einstellung. Änderungen hier wirken sich nicht auf CGM-, Messgerät- oder Pumpenalarme aus.',
+  'account.diabetesManagement.loading':
+    'Diabetes-Einstellungen werden geladen…',
+  'account.diabetesManagement.saving': 'Speichern…',
+  'account.diabetesManagement.errors.network':
+    'Änderungen konnten nicht gespeichert werden. Prüfen Sie die Verbindung und versuchen Sie es erneut.',
+  'account.diabetesManagement.errors.rateLimited':
+    'Zu viele Versuche. Bitte versuchen Sie es später erneut.',
+  'account.diabetesManagement.errors.revisionConflict':
+    'Einstellungen wurden an anderer Stelle geändert. Aktuelle Werte wurden geladen.',
+  'account.diabetesManagement.errors.syncRequired':
+    'Einstellungen sind nicht synchron. Aktuelle Werte wurden geladen.',
+  'account.diabetesManagement.errors.unauthorized':
+    'Ihre Sitzung ist abgelaufen. Melden Sie sich erneut an.',
+  'account.diabetesManagement.errors.generic':
+    'Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.',
   'account.profile.logout': 'Abmelden',
   'account.profile.menu.diabetesSettings.subtitle':
-    'Ziele, Warnungen und Einheiten',
-  'account.profile.menu.diabetesSettings.title': 'Diabetes-Einstellungen',
+    'Glukose-Einheiten, Diabetes-Typ und Zielbereich',
+  'account.profile.menu.diabetesSettings.title': 'Diabetes-Verwaltung',
   'account.profile.menu.devices.subtitle': 'Verbindungen und Synchronisation',
   'account.profile.menu.devices.title': 'Geräte und Quellen',
   'account.profile.menu.export.subtitle': 'Daten herunterladen oder senden',

@@ -1,15 +1,10 @@
 'use client';
 
-import {
-  Activity,
-  Download,
-  Globe2,
-  Smartphone,
-  type LucideIcon,
-} from 'lucide-react';
+import { Download, Globe2, Smartphone, type LucideIcon } from 'lucide-react';
 
 import type { ProfileLabels } from './profile-labels';
 import { ProfileMenuAboutLinkRow } from './profile-menu-about-link-row';
+import { ProfileMenuDiabetesLinkRow } from './profile-menu-diabetes-link-row';
 import {
   profileComingSoonBadgeClassName,
   profileDisabledRowClassName,
@@ -86,13 +81,7 @@ export function ProfileMenu({ labels }: { readonly labels: ProfileLabels }) {
   return (
     <div className="space-y-5">
       <ProfileMenuSection title={labels.menu.section.diabetesManagement}>
-        <ProfileMenuDisabledRow
-          comingSoonLabel={labels.comingSoonBadge}
-          icon={Activity}
-          subtitle={labels.menu.diabetesSettings.subtitle}
-          title={labels.menu.diabetesSettings.title}
-          tone="violet"
-        />
+        <ProfileMenuDiabetesLinkRow labels={labels} />
       </ProfileMenuSection>
 
       <ProfileMenuSection title={labels.menu.section.devices}>
