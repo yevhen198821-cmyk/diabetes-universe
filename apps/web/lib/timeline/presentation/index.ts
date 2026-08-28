@@ -11,11 +11,6 @@ export {
   mapTimelineSearchPresentation,
   timelinePresentationKindMappers,
 } from './timeline-presentation-mapper';
-export {
-  buildGlucosePresentation,
-  resolveGlucoseRangeState,
-  type GlucosePresentationModel,
-} from './glucose-presentation-compat';
 export type {
   TimelineEventCardPresentation,
   TimelineEventDetailPresentation,

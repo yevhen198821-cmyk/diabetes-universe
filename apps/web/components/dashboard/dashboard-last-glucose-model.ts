@@ -1,5 +1,10 @@
+import type { GlucoseFreshnessState } from '@diabetes-universe/medical-domain';
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
+import {
+  createDashboardLegacyFreshnessPolicy,
+  DASHBOARD_LEGACY_FRESHNESS_POLICY,
+} from '../../lib/medical/glucose/dashboard-legacy-freshness-policy';
 import type { DashboardLastGlucoseLabels } from './dashboard-last-glucose-labels';
 
 export interface DashboardLastGlucoseMeasurement {
@@ -42,6 +47,7 @@ export interface DashboardLastGlucoseViewModel {
   readonly isLoading: boolean;
   readonly isStale: boolean;
   readonly message: string | null;
+  readonly rangeLabel: string | null;
   readonly sourceLabel: string | null;
   readonly staleMessage: string | null;
   readonly state: 'empty' | 'error' | 'loading' | 'ready';
@@ -49,6 +55,8 @@ export interface DashboardLastGlucoseViewModel {
 }
 
 export interface DashboardLastGlucoseViewModelOptions {
+  readonly freshnessState?: GlucoseFreshnessState;
+  readonly rangeLabel?: string | null;
   readonly referenceTime?: Date;
   readonly sourceLabel?: string | null;
 }
@@ -88,6 +96,7 @@ function createEmptyViewModel(message: string): DashboardLastGlucoseViewModel {
     isLoading: false,
     isStale: false,
     message,
+    rangeLabel: null,
     sourceLabel: null,
     staleMessage: null,
     state: 'empty',
@@ -95,18 +104,18 @@ function createEmptyViewModel(message: string): DashboardLastGlucoseViewModel {
   };
 }
 
-function isMeasurementStale(
-  dateTime: string,
-  referenceTime: Date,
-  staleAfterMs: number,
-): boolean {
-  const measuredAt = Date.parse(dateTime);
-
-  if (Number.isNaN(measuredAt)) {
-    return false;
+function resolveStaleStateFromFreshness(
+  freshnessState: GlucoseFreshnessState | undefined,
+): { readonly isStale: boolean; readonly showFresh: boolean } {
+  if (freshnessState === 'old') {
+    return { isStale: true, showFresh: false };
   }
 
-  return referenceTime.getTime() - measuredAt > staleAfterMs;
+  if (freshnessState === 'current' || freshnessState === 'recent') {
+    return { isStale: false, showFresh: true };
+  }
+
+  return { isStale: false, showFresh: false };
 }
 
 export function createDashboardLastGlucoseViewModel(
@@ -125,6 +134,7 @@ export function createDashboardLastGlucoseViewModel(
         isLoading: true,
         isStale: false,
         message: props.loadingLabel?.trim() || labels.loading,
+        rangeLabel: null,
         sourceLabel: null,
         staleMessage: null,
         state: props.state,
@@ -138,25 +148,18 @@ export function createDashboardLastGlucoseViewModel(
         return createEmptyViewModel(labels.unavailable);
       }
 
-      const referenceTime =
-        props.referenceTime ?? options.referenceTime ?? new Date();
-      const staleAfterMs =
-        props.staleAfterMs ?? DEFAULT_LAST_GLUCOSE_STALE_AFTER_MS;
-      const isStale = isMeasurementStale(
-        measurement.event.occurredAt,
-        referenceTime,
-        staleAfterMs,
-      );
+      const staleState = resolveStaleStateFromFreshness(options.freshnessState);
 
       return {
         dateTime: measurement.event.occurredAt,
         displayTime: measurement.displayTime,
-        freshMessage: isStale ? null : labels.fresh,
+        freshMessage: staleState.showFresh ? labels.fresh : null,
         isLoading: false,
-        isStale,
+        isStale: staleState.isStale,
         message: null,
+        rangeLabel: options.rangeLabel?.trim() || null,
         sourceLabel: options.sourceLabel?.trim() || null,
-        staleMessage: isStale ? labels.stale : null,
+        staleMessage: staleState.isStale ? labels.stale : null,
         state: props.state,
         value: formattedValue,
       };
@@ -169,6 +172,7 @@ export function createDashboardLastGlucoseViewModel(
         isLoading: false,
         isStale: false,
         message: props.message?.trim() || labels.defaultEmpty,
+        rangeLabel: null,
         sourceLabel: null,
         staleMessage: null,
         state: props.state,
@@ -182,10 +186,19 @@ export function createDashboardLastGlucoseViewModel(
         isLoading: false,
         isStale: false,
         message: props.message?.trim() || labels.defaultError,
+        rangeLabel: null,
         sourceLabel: null,
         staleMessage: null,
         state: props.state,
         value: null,
       };
   }
+}
+
+export function resolveDashboardLastGlucoseFreshnessPolicy(
+  staleAfterMs: number = DEFAULT_LAST_GLUCOSE_STALE_AFTER_MS,
+) {
+  return staleAfterMs === DEFAULT_LAST_GLUCOSE_STALE_AFTER_MS
+    ? DASHBOARD_LEGACY_FRESHNESS_POLICY
+    : createDashboardLegacyFreshnessPolicy(staleAfterMs);
 }

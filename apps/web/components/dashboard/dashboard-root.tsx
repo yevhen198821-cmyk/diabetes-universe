@@ -41,13 +41,14 @@ export function DashboardRoot() {
   const router = useRouter();
   const localization = useLocalization();
   const formatter = useFormatter();
-  const presentationDependencies = useTimelinePresentationDependencies();
+  const quickActionsRef = useRef<HTMLButtonElement>(null);
+  const referenceTime = useMemo(() => new Date(), []);
+  const presentationDependencies =
+    useTimelinePresentationDependencies(referenceTime);
   const { addEvent, events, status: timelineStatus } = useTimelineStore();
   const [quickAddState, setQuickAddState] = useState(
     createInitialQuickAddControllerState,
   );
-  const quickActionsRef = useRef<HTMLButtonElement>(null);
-  const referenceTime = useMemo(() => new Date(), []);
   const isTimelineHydrating = timelineStatus === 'loading';
   const isTimelineError = timelineStatus === 'error';
   const dashboardTimeZone = useMemo(

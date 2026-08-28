@@ -240,6 +240,9 @@ export const russianDraftMessages = defineDraftMessages({
   'timeline.glucoseContext.bedtime': 'Перед сном',
   'timeline.glucoseContext.fasting': 'Натощак',
   'timeline.glucoseContext.other': 'Другое',
+  'timeline.glucose.range.above': 'Выше вашего диапазона',
+  'timeline.glucose.range.below': 'Ниже вашего диапазона',
+  'timeline.glucose.range.in': 'В вашем диапазоне',
   'timeline.note.fallbackTitle': 'Заметка',
   'timeline.dayEmpty.description':
     'Выберите другой день или добавьте новое событие на эту дату.',

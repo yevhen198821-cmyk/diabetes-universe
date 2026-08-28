@@ -9,6 +9,9 @@ import {
 export type CreateTestTimelinePresentationDependenciesOptions =
   CreateTestPlatformRuntimeOptions & {
     readonly glucoseDisplayUnit?: GlucoseDisplayUnit | null;
+    readonly referenceTime?: Date | string;
+    readonly targetRange?:
+      import('@diabetes-universe/medical-domain').GlucoseTargetRange | null;
   };
 
 /**
@@ -17,12 +20,19 @@ export type CreateTestTimelinePresentationDependenciesOptions =
 export async function createTestTimelinePresentationDependencies(
   options: CreateTestTimelinePresentationDependenciesOptions = {},
 ): Promise<TimelinePresentationDependencies> {
-  const { glucoseDisplayUnit = null, ...runtimeOptions } = options;
+  const {
+    glucoseDisplayUnit = null,
+    referenceTime,
+    targetRange,
+    ...runtimeOptions
+  } = options;
   const runtime = await createTestPlatformRuntime(runtimeOptions);
 
   return createTimelinePresentationDependencies({
     formatter: runtime.formatter,
     glucoseDisplayUnit,
     localization: runtime.localization,
+    referenceTime,
+    targetRange,
   });
 }

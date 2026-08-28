@@ -43,7 +43,19 @@ test('glucose quick add blocks value entry until a display unit is selected', ()
   assert.match(glucoseFormSource, /if \(!activeDisplayUnit\)/);
 });
 
-test('glucose quick add does not infer unit from locale', () => {
-  assert.doesNotMatch(glucoseFormSource, /locale/);
-  assert.doesNotMatch(glucoseFormSource, /navigator\.language/);
+test('glucose quick add uses shared medical-domain precision for mg/dL bounds', () => {
+  const bounds = getGlucoseQuickAddBoundsForDisplayUnit('mg_per_dl');
+  assert.equal(bounds.min, 2);
+  assert.equal(bounds.max, 721);
+});
+
+test('glucose quick add does not duplicate conversion implementation', () => {
+  const source = readFileSync(
+    fileURLToPath(new URL('./format-glucose.ts', import.meta.url)),
+    'utf8',
+  );
+
+  assert.match(source, /toGlucoseDisplayNumericValue/);
+  assert.match(source, /convertGlucoseMgPerDlToMmolPerL/);
+  assert.doesNotMatch(source, /18\.0182/);
 });

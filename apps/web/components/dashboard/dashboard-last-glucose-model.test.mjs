@@ -44,7 +44,7 @@ test('creates ready state from a validated measurement contract', () => {
       state: 'ready',
     },
     englishLabels,
-    { formattedValue: '6.4 mmol/L' },
+    { formattedValue: '6.4 mmol/L', freshnessState: 'recent' },
   );
 
   assert.equal(model.state, 'ready');
@@ -170,28 +170,27 @@ test('stale calculation uses canonical occurredAt and ignores display string', (
       state: 'ready',
     },
     englishLabels,
-    { formattedValue: '6.4 mmol/L' },
+    { formattedValue: '6.4 mmol/L', freshnessState: 'old' },
   );
 
   assert.equal(model.isStale, true);
   assert.equal(model.displayTime, 'not-used-for-stale');
 });
 
-test('does not expose or derive a glucose target range', () => {
+test('does not expose target range configuration on the view model', () => {
   const model = createDashboardLastGlucoseViewModel(
     {
       glucose: validMeasurement,
       state: 'ready',
     },
     englishLabels,
-    { formattedValue: '6.4 mmol/L' },
+    { formattedValue: '6.4 mmol/L', rangeLabel: 'In your range' },
   );
 
   assert.equal(model.state, 'ready');
-  assert.equal(model.value, '6.4 mmol/L');
-  assert.equal('range' in model, false);
+  assert.equal(model.rangeLabel, 'In your range');
   assert.equal('targetRange' in model, false);
-  assert.doesNotMatch(model.value ?? '', /диапазон|range/i);
+  assert.doesNotMatch(model.rangeLabel ?? '', /unknown/i);
 });
 
 test('accepts mmol per liter and mg per dL display values unchanged', () => {
@@ -228,7 +227,7 @@ test('marks a measurement older than the stale threshold as stale', () => {
       state: 'ready',
     },
     englishLabels,
-    { formattedValue: '6.4 mmol/L' },
+    { formattedValue: '6.4 mmol/L', freshnessState: 'old' },
   );
 
   assert.equal(model.state, 'ready');

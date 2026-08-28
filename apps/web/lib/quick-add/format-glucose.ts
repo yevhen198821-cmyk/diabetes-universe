@@ -1,6 +1,7 @@
 import {
-  convertGlucoseMgPerDlToMmolPerL,
   convertGlucoseMmolPerLToMgPerDl,
+  convertGlucoseMgPerDlToMmolPerL,
+  toGlucoseDisplayNumericValue,
   type GlucoseDisplayUnit,
 } from '@diabetes-universe/medical-domain';
 
@@ -12,11 +13,13 @@ export function getGlucoseQuickAddBoundsForDisplayUnit(
 ): { readonly max: number; readonly min: number } {
   if (displayUnit === 'mg_per_dl') {
     return {
-      min: Math.round(
-        convertGlucoseMmolPerLToMgPerDl(GLUCOSE_QUICK_ADD_MMOL_MIN),
+      min: toGlucoseDisplayNumericValue(
+        GLUCOSE_QUICK_ADD_MMOL_MIN,
+        'mg_per_dl',
       ),
-      max: Math.round(
-        convertGlucoseMmolPerLToMgPerDl(GLUCOSE_QUICK_ADD_MMOL_MAX),
+      max: toGlucoseDisplayNumericValue(
+        GLUCOSE_QUICK_ADD_MMOL_MAX,
+        'mg_per_dl',
       ),
     };
   }
@@ -73,3 +76,5 @@ export function getCurrentTimeString(): string {
     now.getMinutes(),
   ).padStart(2, '0')}`;
 }
+
+export { convertGlucoseMmolPerLToMgPerDl };

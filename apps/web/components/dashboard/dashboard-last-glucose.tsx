@@ -4,12 +4,12 @@ import { Clock, ClockAlert, Droplets } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { resolveDashboardMedicalEventSourceLabel } from '../../lib/dashboard/dashboard-event-source-labels';
-import { useLocalization } from '../../lib/platform/react/use-localization';
 import {
-  formatTimelineGlucoseDisplayValue,
-  mapTimelineEventCardPresentation,
-} from '../../lib/timeline/presentation';
-import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
+  DASHBOARD_LEGACY_FRESHNESS_POLICY,
+  presentGlucoseFromTimelineEvent,
+  useGlucosePresentationDependencies,
+} from '../../lib/medical/glucose';
+import { useLocalization } from '../../lib/platform/react/use-localization';
 import { DashboardHeroScenery } from './dashboard-hero-scenery';
 import { resolveDashboardLastGlucoseLabels } from './dashboard-last-glucose-labels';
 import {
@@ -21,32 +21,29 @@ const titleId = 'dashboard-last-glucose-title';
 
 export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
   const localization = useLocalization();
-  const presentationDependencies = useTimelinePresentationDependencies();
+  const glucosePresentation = useGlucosePresentationDependencies();
   const labels = useMemo(
     () => resolveDashboardLastGlucoseLabels(localization),
     [localization],
   );
-  const formattedValue = useMemo(() => {
-    if (props.state !== 'ready') {
-      return undefined;
-    }
-
-    return formatTimelineGlucoseDisplayValue(
-      props.glucose.event,
-      presentationDependencies,
-    );
-  }, [presentationDependencies, props]);
-  const measurement = useMemo(() => {
+  const glucosePresentationResult = useMemo(() => {
     if (props.state !== 'ready') {
       return null;
     }
 
-    return mapTimelineEventCardPresentation(
-      props.glucose.event,
-      presentationDependencies,
-      props.glucose.displayTime,
-    );
-  }, [presentationDependencies, props]);
+    const referenceTime = props.referenceTime ?? new Date();
+
+    return presentGlucoseFromTimelineEvent({
+      event: props.glucose.event,
+      formatter: glucosePresentation.formatter,
+      freshnessPolicy: DASHBOARD_LEGACY_FRESHNESS_POLICY,
+      glucoseDisplayUnit: glucosePresentation.glucoseDisplayUnit,
+      glucoseKindLabel: labels.title,
+      localization: glucosePresentation.localization,
+      referenceTime,
+      targetRange: glucosePresentation.targetRange,
+    });
+  }, [glucosePresentation, labels.title, props]);
   const sourceLabel = useMemo(() => {
     if (props.state !== 'ready') {
       return null;
@@ -60,16 +57,33 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
   const viewModel = useMemo(
     () =>
       createDashboardLastGlucoseViewModel(props, labels, {
-        formattedValue,
+        formattedValue: glucosePresentationResult?.formattedMeasurement,
+        freshnessState: glucosePresentationResult?.model.freshnessState,
+        rangeLabel: glucosePresentationResult?.rangeLabel ?? null,
         sourceLabel,
       }),
-    [formattedValue, labels, props, sourceLabel],
+    [glucosePresentationResult, labels, props, sourceLabel],
   );
   const isError = viewModel.state === 'error';
   const hasColorHero =
     viewModel.state === 'ready' || viewModel.state === 'loading';
   const statusMessage =
     viewModel.staleMessage ?? viewModel.freshMessage ?? null;
+  const accessibilityLabel = useMemo(() => {
+    if (viewModel.state !== 'ready' || !glucosePresentationResult) {
+      return undefined;
+    }
+
+    return [
+      glucosePresentationResult.formattedMeasurement,
+      viewModel.rangeLabel,
+      viewModel.displayTime,
+      statusMessage,
+      viewModel.sourceLabel,
+    ]
+      .filter((part) => typeof part === 'string' && part.trim().length > 0)
+      .join(', ');
+  }, [glucosePresentationResult, statusMessage, viewModel]);
 
   return (
     <section
@@ -101,7 +115,7 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
         </>
       ) : null}
 
-      {viewModel.state === 'ready' && measurement ? (
+      {viewModel.state === 'ready' && glucosePresentationResult ? (
         <div className="relative z-10 flex h-full max-w-[62%] flex-col justify-between sm:max-w-[56%] lg:max-w-[50%]">
           <div>
             <div className="flex items-center gap-2.5 text-sm font-semibold text-white/95 sm:text-base">
@@ -110,14 +124,22 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
               </span>
               <h2 id={titleId}>{labels.title}</h2>
             </div>
-            <p className="mt-3 flex flex-wrap items-end gap-x-2 gap-y-1 text-white drop-shadow-sm sm:mt-4">
+            <p
+              aria-label={accessibilityLabel}
+              className="mt-3 flex flex-wrap items-end gap-x-2 gap-y-1 text-white drop-shadow-sm sm:mt-4"
+            >
               <span className="text-[clamp(2.65rem,11vw,5.75rem)] leading-[0.86] font-black tracking-[-0.06em] tabular-nums">
-                {measurement.value}
+                {glucosePresentationResult.formattedValue}
               </span>
               <span className="pb-1 text-lg font-bold sm:pb-1.5 sm:text-xl">
-                {measurement.unit}
+                {glucosePresentationResult.model.displayUnitSymbol}
               </span>
             </p>
+            {viewModel.rangeLabel ? (
+              <p className="mt-2 text-sm font-medium text-white/90">
+                {viewModel.rangeLabel}
+              </p>
+            ) : null}
           </div>
 
           <div className="mt-4 space-y-1.5 text-sm font-medium text-white/95 sm:text-[0.925rem]">
