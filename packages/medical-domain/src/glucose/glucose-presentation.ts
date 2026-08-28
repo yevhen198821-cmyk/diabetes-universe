@@ -43,17 +43,16 @@ export interface BuildGlucosePresentationInput {
   readonly displayUnit: GlucoseDisplayUnit;
   readonly targetRange?: GlucoseTargetRange | null;
   readonly freshnessPolicy?: GlucoseFreshnessPolicy | null;
-  readonly referenceTime?: Date | string;
+  readonly referenceTime: Date | string;
 }
 
 export function buildGlucosePresentation(
   input: BuildGlucosePresentationInput,
 ): GlucosePresentationModel {
-  const referenceTime = input.referenceTime ?? new Date();
   const dataQualityState = resolveGlucoseDataQualityState({
     concentrationMmolPerL: input.reading.concentrationMmolPerL,
     measuredAt: input.reading.measuredAt,
-    referenceTime,
+    referenceTime: input.referenceTime,
   });
 
   const rangeState =
@@ -67,7 +66,7 @@ export function buildGlucosePresentation(
   const freshnessState = resolveGlucoseFreshnessState({
     measuredAt: input.reading.measuredAt,
     policy: input.freshnessPolicy,
-    referenceTime,
+    referenceTime: input.referenceTime,
   });
 
   const source = resolveGlucoseSourceDescriptor(
