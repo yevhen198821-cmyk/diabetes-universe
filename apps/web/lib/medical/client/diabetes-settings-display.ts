@@ -1,7 +1,7 @@
 import type { PlatformFormatter } from '@diabetes-universe/formatting';
 import {
-  convertGlucoseMmolPerLToMgPerDl,
   mapGlucoseDisplayUnitToDisplaySymbol,
+  toGlucoseDisplayNumericValue,
   type GlucoseDisplayUnit,
 } from '@diabetes-universe/medical-domain';
 
@@ -19,14 +19,13 @@ export function formatGlucoseValueForDisplay(
   mmolPerL: number,
   displayUnit: GlucoseDisplayUnit,
 ): string {
+  const displayValue = toGlucoseDisplayNumericValue(mmolPerL, displayUnit);
+
   if (displayUnit === 'mg_per_dl') {
-    return String(Math.round(convertGlucoseMmolPerLToMgPerDl(mmolPerL)));
+    return String(displayValue);
   }
 
-  const rounded = Math.round(mmolPerL * 10) / 10;
-  return Number.isInteger(rounded)
-    ? rounded.toFixed(1)
-    : rounded.toFixed(1).replace(/\.0$/, '.0');
+  return displayValue.toFixed(1);
 }
 
 export function formatGlucoseValueForLocalizedDisplay(
@@ -34,15 +33,13 @@ export function formatGlucoseValueForLocalizedDisplay(
   mmolPerL: number,
   displayUnit: GlucoseDisplayUnit,
 ): string {
+  const displayValue = toGlucoseDisplayNumericValue(mmolPerL, displayUnit);
+
   if (displayUnit === 'mg_per_dl') {
-    return formatter.formatNumber(
-      Math.round(convertGlucoseMmolPerLToMgPerDl(mmolPerL)),
-      GLUCOSE_MG_FRACTION_DIGITS,
-    );
+    return formatter.formatNumber(displayValue, GLUCOSE_MG_FRACTION_DIGITS);
   }
 
-  const rounded = Math.round(mmolPerL * 10) / 10;
-  return formatter.formatNumber(rounded, GLUCOSE_MMOL_FRACTION_DIGITS);
+  return formatter.formatNumber(displayValue, GLUCOSE_MMOL_FRACTION_DIGITS);
 }
 
 export function formatTargetRangeForDisplay(
@@ -62,10 +59,11 @@ export function toTargetEditorDisplayValue(
   mmolPerL: number,
   displayUnit: GlucoseDisplayUnit,
 ): string {
+  const displayValue = toGlucoseDisplayNumericValue(mmolPerL, displayUnit);
+
   if (displayUnit === 'mg_per_dl') {
-    return String(Math.round(convertGlucoseMmolPerLToMgPerDl(mmolPerL)));
+    return String(displayValue);
   }
 
-  const rounded = Math.round(mmolPerL * 10) / 10;
-  return rounded.toFixed(1);
+  return displayValue.toFixed(1);
 }

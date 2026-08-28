@@ -14,6 +14,7 @@ test('formatGlucoseValueForDisplay converts canonical mmol/L to mg/dL', () => {
 
 test('formatGlucoseValueForDisplay keeps one decimal for mmol/L', () => {
   assert.equal(formatGlucoseValueForDisplay(4, 'mmol_per_l'), '4.0');
+  assert.equal(formatGlucoseValueForDisplay(6.84, 'mmol_per_l'), '6.8');
 });
 
 test('formatGlucoseValueForLocalizedDisplay uses locale decimal separators', async () => {
