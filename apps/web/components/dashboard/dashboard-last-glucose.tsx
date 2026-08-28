@@ -7,7 +7,7 @@ import { resolveDashboardMedicalEventSourceLabel } from '../../lib/dashboard/das
 import {
   DASHBOARD_LEGACY_FRESHNESS_POLICY,
   presentGlucoseFromTimelineEvent,
-  useGlucosePresentationDependencies,
+  type GlucosePresentationDependencies,
 } from '../../lib/medical/glucose';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { DashboardHeroScenery } from './dashboard-hero-scenery';
@@ -21,7 +21,6 @@ const titleId = 'dashboard-last-glucose-title';
 
 export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
   const localization = useLocalization();
-  const glucosePresentation = useGlucosePresentationDependencies();
   const labels = useMemo(
     () => resolveDashboardLastGlucoseLabels(localization),
     [localization],
@@ -35,15 +34,15 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
 
     return presentGlucoseFromTimelineEvent({
       event: props.glucose.event,
-      formatter: glucosePresentation.formatter,
+      formatter: props.glucosePresentation.formatter,
       freshnessPolicy: DASHBOARD_LEGACY_FRESHNESS_POLICY,
-      glucoseDisplayUnit: glucosePresentation.glucoseDisplayUnit,
+      glucoseDisplayUnit: props.glucosePresentation.glucoseDisplayUnit,
       glucoseKindLabel: labels.title,
-      localization: glucosePresentation.localization,
+      localization: props.glucosePresentation.localization,
       referenceTime,
-      targetRange: glucosePresentation.targetRange,
+      targetRange: props.glucosePresentation.targetRange,
     });
-  }, [glucosePresentation, labels.title, props]);
+  }, [labels.title, props]);
   const sourceLabel = useMemo(() => {
     if (props.state !== 'ready') {
       return null;

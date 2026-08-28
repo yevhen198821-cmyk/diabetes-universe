@@ -5,6 +5,7 @@ import {
   createDashboardLegacyFreshnessPolicy,
   DASHBOARD_LEGACY_FRESHNESS_POLICY,
 } from '../../lib/medical/glucose/dashboard-legacy-freshness-policy';
+import type { GlucosePresentationDependencies } from '../../lib/medical/glucose/use-glucose-presentation-dependencies';
 import type { DashboardLastGlucoseLabels } from './dashboard-last-glucose-labels';
 
 export interface DashboardLastGlucoseMeasurement {
@@ -19,6 +20,7 @@ interface DashboardLastGlucoseLoadingProps {
 
 interface DashboardLastGlucoseReadyProps {
   readonly glucose: DashboardLastGlucoseMeasurement;
+  readonly glucosePresentation: GlucosePresentationDependencies;
   readonly referenceTime?: Date;
   readonly staleAfterMs?: number;
   readonly state: 'ready';

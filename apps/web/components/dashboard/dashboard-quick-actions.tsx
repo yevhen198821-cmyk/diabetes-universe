@@ -5,7 +5,7 @@ import { useMemo, type RefObject } from 'react';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { quickAddActions } from '../../lib/quick-add/actions';
 import type { QuickAddOpenCategory } from '../../lib/quick-add/quick-add-controller-model';
-import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
+import type { TimelinePresentationDependencies } from '../../lib/timeline/presentation';
 import { resolveDashboardQuickActionsLabels } from './dashboard-quick-actions-labels';
 
 const visibleCategories = [
@@ -69,16 +69,17 @@ function isVisibleQuickAddCategory(
 export interface DashboardQuickActionsProps {
   readonly disabled?: boolean;
   readonly onOpenCategory: (category: QuickAddOpenCategory) => void;
+  readonly presentationDependencies: TimelinePresentationDependencies;
   readonly returnFocusRef?: RefObject<HTMLButtonElement | null>;
 }
 
 export function DashboardQuickActions({
   disabled = false,
   onOpenCategory,
+  presentationDependencies,
   returnFocusRef,
 }: DashboardQuickActionsProps) {
   const localization = useLocalization();
-  const presentationDependencies = useTimelinePresentationDependencies();
   const sectionLabel = useMemo(
     () => resolveDashboardQuickActionsLabels(localization).title,
     [localization],

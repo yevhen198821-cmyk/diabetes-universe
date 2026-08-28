@@ -26,6 +26,11 @@ test('dashboard last glucose does not import timeline glucose presentation helpe
     dashboardLastGlucoseSource,
     /mapTimelineEventCardPresentation/,
   );
+  assert.doesNotMatch(
+    dashboardLastGlucoseSource,
+    /useGlucosePresentationDependencies/,
+  );
   assert.match(dashboardLastGlucoseSource, /lib\/medical\/glucose/);
   assert.match(dashboardLastGlucoseSource, /presentGlucoseFromTimelineEvent/);
+  assert.match(dashboardLastGlucoseSource, /props\.glucosePresentation/);
 });

@@ -18,6 +18,7 @@ Migrates Dashboard, Timeline, and Quick Add onto the shared glucose foundation f
 ## Target range in presentation
 
 - `useGlucosePresentationDependencies()` fetches `GlucoseTargetProfile.defaultRange` when diabetes settings exist.
+- DashboardRoot owns this hook once and composes timeline presentation dependencies for day-summary/quick-actions; `DashboardLastGlucose` receives the already-loaded dependencies via props.
 - Passed into `presentGlucoseFromTimelineEvent` → `buildGlucosePresentation()`.
 - Localized range labels via `timeline.glucose.range.*` keys (EN/RU/UK/DE).
 - No label shown when target is missing (`unknown` range state).
@@ -45,3 +46,5 @@ Migrates Dashboard, Timeline, and Quick Add onto the shared glucose foundation f
 ## Regression guard
 
 `apps/web/lib/medical/glucose/glucose-consumer-boundary.test.mjs` prevents Dashboard from re-importing Timeline glucose presentation helpers.
+
+`apps/web/lib/medical/glucose/dashboard-glucose-dependency-ownership.test.mjs` prevents duplicate glucose presentation hooks / target-profile fetch paths on Dashboard.

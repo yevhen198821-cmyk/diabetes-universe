@@ -2,11 +2,27 @@
 
 import { useMemo } from 'react';
 
-import { useGlucosePresentationDependencies } from '../../medical/glucose/use-glucose-presentation-dependencies';
+import {
+  useGlucosePresentationDependencies,
+  type GlucosePresentationDependencies,
+} from '../../medical/glucose/use-glucose-presentation-dependencies';
 import {
   createTimelinePresentationDependencies,
   type TimelinePresentationDependencies,
 } from '../presentation';
+
+export function composeTimelinePresentationDependencies(
+  glucosePresentation: GlucosePresentationDependencies,
+  referenceTime: Date | string = new Date(),
+): TimelinePresentationDependencies {
+  return createTimelinePresentationDependencies({
+    formatter: glucosePresentation.formatter,
+    glucoseDisplayUnit: glucosePresentation.glucoseDisplayUnit,
+    localization: glucosePresentation.localization,
+    referenceTime,
+    targetRange: glucosePresentation.targetRange,
+  });
+}
 
 export function useTimelinePresentationDependencies(
   referenceTime?: Date,
@@ -15,13 +31,10 @@ export function useTimelinePresentationDependencies(
 
   return useMemo(
     () =>
-      createTimelinePresentationDependencies({
-        formatter: glucosePresentation.formatter,
-        glucoseDisplayUnit: glucosePresentation.glucoseDisplayUnit,
-        localization: glucosePresentation.localization,
-        referenceTime: referenceTime ?? new Date(),
-        targetRange: glucosePresentation.targetRange,
-      }),
+      composeTimelinePresentationDependencies(
+        glucosePresentation,
+        referenceTime ?? new Date(),
+      ),
     [glucosePresentation, referenceTime],
   );
 }
