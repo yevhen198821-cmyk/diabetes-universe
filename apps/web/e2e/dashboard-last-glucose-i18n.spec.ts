@@ -23,7 +23,8 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   await expect(lastGlucoseRegion.locator('time')).toBeVisible();
 
   await page.getByRole('button', { name: 'Quick add: Glucose' }).click();
-  await page.getByLabel('Уровень глюкозы').fill('7,7');
+  await page.getByRole('button', { name: 'mmol/L', exact: true }).click();
+  await page.getByLabel('Glucose level').fill('7.7');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
   await expect(

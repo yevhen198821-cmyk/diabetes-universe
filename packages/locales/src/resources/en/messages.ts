@@ -121,6 +121,7 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'account.diabetesManagement.disclaimer':
     'The target range is a Diabetes Universe setting. Changes here do not change CGM, meter, or pump alert settings.',
   'account.diabetesManagement.loading': 'Loading diabetes settings…',
+  'account.diabetesManagement.saved': 'Saved',
   'account.diabetesManagement.saving': 'Saving…',
   'account.diabetesManagement.errors.network':
     'Could not save changes. Check your connection and try again.',
@@ -407,6 +408,7 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'timeline.mealType.snack': 'Snack',
   'timeline.note.fallbackTitle': 'Note',
   'timeline.units.activityMinutes': 'min',
+  'timeline.units.glucoseMgPerDl': 'mg/dL',
   'timeline.units.glucoseMmolPerL': 'mmol/L',
   'timeline.units.insulinDose': 'U',
   'timeline.units.massG': 'g',
@@ -414,6 +416,21 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'timeline.units.nutritionCarbs': 'g carbs',
   'timeline.units.volumeMl': 'ml',
   'quick-add.button.label': 'Add event',
+  'quickAdd.glucose.contextLabel': 'Measurement context',
+  'quickAdd.glucose.contextSheetTitle': 'Measurement context',
+  'quickAdd.glucose.save': 'Save',
+  'quickAdd.glucose.timeLabel': 'Time',
+  'quickAdd.glucose.unitGate.description':
+    'Choose how you want to enter glucose values. This preference is saved to your diabetes settings.',
+  'quickAdd.glucose.unitGate.title': 'Choose glucose units',
+  'quickAdd.glucose.unitMg': 'mg/dL',
+  'quickAdd.glucose.unitMmol': 'mmol/L',
+  'quickAdd.glucose.unitRequiredError':
+    'Select glucose units before entering a value.',
+  'quickAdd.glucose.unitSaving': 'Saving unit preference…',
+  'quickAdd.glucose.valueLabel': 'Glucose level',
+  'quickAdd.glucose.valueOutOfRangeError':
+    'Enter a valid glucose value for the selected units.',
   'validation.required': 'This field is required',
   'errors.generic': 'Something went wrong. Please try again.',
 });

@@ -111,6 +111,8 @@ export const germanDraftMessages = defineDraftMessages({
   'timeline.mealType.snack': 'Snack',
   'timeline.note.fallbackTitle': 'Notiz',
   'timeline.units.activityMinutes': 'Min.',
+  'timeline.units.glucoseMgPerDl': 'mg/dL',
+  'timeline.units.glucoseMmolPerL': 'mmol/L',
   'timeline.units.insulinDose': 'E',
   'timeline.units.massG': 'g',
   'timeline.units.nutritionCarbs': 'g Kohlenhydrate',
@@ -147,6 +149,21 @@ export const germanDraftMessages = defineDraftMessages({
   'timeline.dayPeriod.timeRange.morning': '06:00–11:59',
   'timeline.dayPeriod.timeRange.night': '00:00–05:59',
   'quick-add.button.label': 'Ereignis hinzufügen',
+  'quickAdd.glucose.contextLabel': 'Messkontext',
+  'quickAdd.glucose.contextSheetTitle': 'Messkontext',
+  'quickAdd.glucose.save': 'Speichern',
+  'quickAdd.glucose.timeLabel': 'Uhrzeit',
+  'quickAdd.glucose.unitGate.description':
+    'Wählen Sie die Einheiten für die Glukoseeingabe. Diese Einstellung wird in den Diabetes-Einstellungen gespeichert.',
+  'quickAdd.glucose.unitGate.title': 'Glukose-Einheiten wählen',
+  'quickAdd.glucose.unitMg': 'mg/dL',
+  'quickAdd.glucose.unitMmol': 'mmol/L',
+  'quickAdd.glucose.unitRequiredError':
+    'Wählen Sie Glukose-Einheiten, bevor Sie einen Wert eingeben.',
+  'quickAdd.glucose.unitSaving': 'Einheit wird gespeichert…',
+  'quickAdd.glucose.valueLabel': 'Glukosewert',
+  'quickAdd.glucose.valueOutOfRangeError':
+    'Geben Sie einen gültigen Glukosewert für die gewählten Einheiten ein.',
   'account.profile.about.description':
     'Diabetes Universe hilft Ihnen, Ihre Diabetes-Daten zu verfolgen und zu verstehen.',
   'account.profile.about.page.buildInfoLabel': 'Build',
@@ -229,6 +246,7 @@ export const germanDraftMessages = defineDraftMessages({
     'Der Zielbereich ist eine Diabetes-Universe-Einstellung. Änderungen hier wirken sich nicht auf CGM-, Messgerät- oder Pumpenalarme aus.',
   'account.diabetesManagement.loading':
     'Diabetes-Einstellungen werden geladen…',
+  'account.diabetesManagement.saved': 'Gespeichert',
   'account.diabetesManagement.saving': 'Speichern…',
   'account.diabetesManagement.errors.network':
     'Änderungen konnten nicht gespeichert werden. Prüfen Sie die Verbindung und versuchen Sie es erneut.',

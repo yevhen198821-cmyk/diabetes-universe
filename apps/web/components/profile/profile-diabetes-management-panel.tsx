@@ -12,7 +12,6 @@ import type {
 import { SessionConfirmDialog } from '../auth/session-confirm-dialog';
 import {
   deleteGlucoseTargetProfile,
-  fetchDiabetesSettings,
   fetchGlucoseTargetProfile,
   patchDiabetesSettings,
   putGlucoseTargetProfile,
@@ -22,10 +21,8 @@ import {
   toTargetEditorDisplayValue,
 } from '../../lib/medical/client/diabetes-settings-display';
 import { DiabetesSettingsClientError } from '../../lib/medical/client/diabetes-settings-types';
-import type {
-  DiabetesSettingsResource,
-  GlucoseTargetProfileResource,
-} from '../../lib/medical/client/diabetes-settings-types';
+import type { GlucoseTargetProfileResource } from '../../lib/medical/client/diabetes-settings-types';
+import { useDiabetesSettings } from '../../lib/medical/react';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import {
   buildDiabetesTypeClassification,
@@ -42,8 +39,14 @@ import {
   profileThemeControlActiveClassName,
   profileThemeControlInactiveClassName,
 } from './profile-surface-styles';
+import {
+  MutationSaveStatus,
+  type MutationSaveState,
+} from './mutation-save-status';
 
 type LoadState = 'loading' | 'ready' | 'error';
+
+const SAVED_STATUS_CLEAR_MS = 2500;
 
 function resolveClientErrorMessage(
   error: unknown,
@@ -80,6 +83,17 @@ function ProfileDiabetesLoadingSection() {
   );
 }
 
+function useAutoClearSavedState(state: MutationSaveState, onClear: () => void) {
+  useEffect(() => {
+    if (state !== 'saved') {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(onClear, SAVED_STATUS_CLEAR_MS);
+    return () => window.clearTimeout(timeoutId);
+  }, [onClear, state]);
+}
+
 export function ProfileDiabetesManagementPanel() {
   const router = useRouter();
   const localization = useLocalization();
@@ -87,18 +101,27 @@ export function ProfileDiabetesManagementPanel() {
     () => resolveProfileDiabetesManagementLabels(localization),
     [localization],
   );
+  const {
+    loadState: settingsLoadState,
+    refresh: refreshSettings,
+    settings,
+    updateSettingsFromMutation,
+  } = useDiabetesSettings();
 
-  const [loadState, setLoadState] = useState<LoadState>('loading');
-  const [settings, setSettings] = useState<DiabetesSettingsResource | null>(
-    null,
-  );
+  const [targetLoadState, setTargetLoadState] = useState<LoadState>('loading');
   const [targetProfile, setTargetProfile] =
     useState<GlucoseTargetProfileResource | null>(null);
   const [bannerError, setBannerError] = useState<string | null>(null);
-  const [unitSaving, setUnitSaving] = useState(false);
-  const [typeSaving, setTypeSaving] = useState(false);
-  const [targetSaving, setTargetSaving] = useState(false);
-  const [otherDescriptorDraft, setOtherDescriptorDraft] = useState('');
+  const [unitSaveState, setUnitSaveState] = useState<MutationSaveState>('idle');
+  const [unitSaveError, setUnitSaveError] = useState<string | null>(null);
+  const [typeSaveState, setTypeSaveState] = useState<MutationSaveState>('idle');
+  const [typeSaveError, setTypeSaveError] = useState<string | null>(null);
+  const [targetSaveState, setTargetSaveState] =
+    useState<MutationSaveState>('idle');
+  const [targetSaveError, setTargetSaveError] = useState<string | null>(null);
+  const [otherDescriptorDraft, setOtherDescriptorDraft] = useState<
+    string | null
+  >(null);
   const [targetDialogOpen, setTargetDialogOpen] = useState(false);
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
   const [targetLowInput, setTargetLowInput] = useState('');
@@ -109,28 +132,30 @@ export function ProfileDiabetesManagementPanel() {
   const targetTriggerRef = useRef<HTMLButtonElement>(null);
   const removeTriggerRef = useRef<HTMLButtonElement>(null);
 
+  useAutoClearSavedState(unitSaveState, () => setUnitSaveState('idle'));
+  useAutoClearSavedState(typeSaveState, () => setTypeSaveState('idle'));
+  useAutoClearSavedState(targetSaveState, () => setTargetSaveState('idle'));
+
   const redirectToAuth = useCallback(() => {
     router.push('/auth?callback=%2Faccount%2Fdiabetes');
   }, [router]);
 
-  const reloadResources = useCallback(async () => {
-    const [nextSettings, nextTarget] = await Promise.all([
-      fetchDiabetesSettings(),
-      fetchGlucoseTargetProfile(),
-    ]);
-
-    setSettings(nextSettings);
+  const reloadTargetProfile = useCallback(async () => {
+    const nextTarget = await fetchGlucoseTargetProfile();
     setTargetProfile(nextTarget);
-    setOtherDescriptorDraft(nextSettings.diabetesType.otherDescriptor ?? '');
-    setLoadState('ready');
+    setTargetLoadState('ready');
   }, []);
+
+  const reloadResources = useCallback(async () => {
+    await Promise.all([refreshSettings(), reloadTargetProfile()]);
+  }, [refreshSettings, reloadTargetProfile]);
 
   useEffect(() => {
     let cancelled = false;
 
     void (async () => {
       try {
-        await reloadResources();
+        await reloadTargetProfile();
 
         if (cancelled) {
           return;
@@ -150,7 +175,7 @@ export function ProfileDiabetesManagementPanel() {
           return;
         }
 
-        setLoadState('error');
+        setTargetLoadState('error');
         setBannerError(resolveClientErrorMessage(error, labels.errors));
       }
     })();
@@ -158,10 +183,19 @@ export function ProfileDiabetesManagementPanel() {
     return () => {
       cancelled = true;
     };
-  }, [labels.errors, redirectToAuth, reloadResources]);
+  }, [labels.errors, redirectToAuth, reloadTargetProfile]);
+
+  const loadState: LoadState =
+    settingsLoadState === 'loading' || targetLoadState === 'loading'
+      ? 'loading'
+      : settingsLoadState === 'error' || targetLoadState === 'error'
+        ? 'error'
+        : 'ready';
 
   const displayUnit = settings?.glucoseDisplayUnit ?? null;
   const targetEditorUnit: GlucoseDisplayUnit = displayUnit ?? 'mmol_per_l';
+  const displayedOtherDescriptor =
+    otherDescriptorDraft ?? settings?.diabetesType.otherDescriptor ?? '';
 
   const targetDisplayValue = useMemo(() => {
     const range = targetProfile?.defaultRange;
@@ -199,52 +233,60 @@ export function ProfileDiabetesManagementPanel() {
       }
     }
 
-    setBannerError(resolveClientErrorMessage(error, labels.errors));
+    return resolveClientErrorMessage(error, labels.errors);
   }
 
   async function handleUnitChange(nextUnit: GlucoseDisplayUnit) {
-    if (!settings || unitSaving || settings.glucoseDisplayUnit === nextUnit) {
+    if (
+      !settings ||
+      unitSaveState === 'saving' ||
+      settings.glucoseDisplayUnit === nextUnit
+    ) {
       return;
     }
 
-    setUnitSaving(true);
+    setUnitSaveState('saving');
+    setUnitSaveError(null);
     setBannerError(null);
 
     try {
       const updated = await patchDiabetesSettings(settings.revision, {
         glucoseDisplayUnit: nextUnit,
       });
-      setSettings(updated);
+      updateSettingsFromMutation(updated);
+      setUnitSaveState('saved');
     } catch (error) {
-      await handleMutationError(error);
-    } finally {
-      setUnitSaving(false);
+      const message = await handleMutationError(error);
+      setUnitSaveState('error');
+      setUnitSaveError(message ?? labels.errors.generic);
     }
   }
 
   async function handleDiabetesTypeChange(nextCategory: DiabetesTypeCategory) {
-    if (!settings || typeSaving) {
+    if (!settings || typeSaveState === 'saving') {
       return;
     }
 
     const classification = buildDiabetesTypeClassification(
       nextCategory,
-      nextCategory === 'other' ? otherDescriptorDraft : '',
+      nextCategory === 'other' ? displayedOtherDescriptor : '',
     );
 
-    setTypeSaving(true);
+    setTypeSaveState('saving');
+    setTypeSaveError(null);
     setBannerError(null);
 
     try {
       const updated = await patchDiabetesSettings(settings.revision, {
         diabetesType: classification,
       });
-      setSettings(updated);
-      setOtherDescriptorDraft(updated.diabetesType.otherDescriptor ?? '');
+      updateSettingsFromMutation(updated);
+      setOtherDescriptorDraft(null);
+      setTypeSaveState('saved');
     } catch (error) {
-      await handleMutationError(error);
-    } finally {
-      setTypeSaving(false);
+      const message = await handleMutationError(error);
+      setTypeSaveState('error');
+      setTypeSaveError(message ?? labels.errors.generic);
     }
   }
 
@@ -253,7 +295,7 @@ export function ProfileDiabetesManagementPanel() {
       return;
     }
 
-    const trimmed = otherDescriptorDraft.trim();
+    const trimmed = displayedOtherDescriptor.trim();
     const current = settings.diabetesType.otherDescriptor ?? '';
 
     if (trimmed === current) {
@@ -299,8 +341,9 @@ export function ProfileDiabetesManagementPanel() {
       return;
     }
 
-    setTargetSaving(true);
+    setTargetSaveState('saving');
     setTargetValidationMessage(null);
+    setTargetSaveError(null);
     setBannerError(null);
 
     try {
@@ -310,10 +353,11 @@ export function ProfileDiabetesManagementPanel() {
       });
       setTargetProfile(updated);
       setTargetDialogOpen(false);
+      setTargetSaveState('saved');
     } catch (error) {
-      await handleMutationError(error);
-    } finally {
-      setTargetSaving(false);
+      const message = await handleMutationError(error);
+      setTargetSaveState('error');
+      setTargetSaveError(message ?? labels.errors.generic);
     }
   }
 
@@ -322,17 +366,19 @@ export function ProfileDiabetesManagementPanel() {
       return;
     }
 
-    setTargetSaving(true);
+    setTargetSaveState('saving');
+    setTargetSaveError(null);
     setBannerError(null);
 
     try {
       const updated = await deleteGlucoseTargetProfile(targetProfile.revision);
       setTargetProfile(updated);
       setRemoveDialogOpen(false);
+      setTargetSaveState('saved');
     } catch (error) {
-      await handleMutationError(error);
-    } finally {
-      setTargetSaving(false);
+      const message = await handleMutationError(error);
+      setTargetSaveState('error');
+      setTargetSaveError(message ?? labels.errors.generic);
     }
   }
 
@@ -426,7 +472,7 @@ export function ProfileDiabetesManagementPanel() {
                         ? profileThemeControlActiveClassName
                         : profileThemeControlInactiveClassName
                     }`}
-                    disabled={unitSaving}
+                    disabled={unitSaveState === 'saving'}
                     key={option.id}
                     onClick={() => void handleUnitChange(option.id)}
                     type="button"
@@ -436,6 +482,13 @@ export function ProfileDiabetesManagementPanel() {
                 );
               })}
             </div>
+
+            <MutationSaveStatus
+              errorMessage={unitSaveError}
+              savedLabel={labels.saved}
+              savingLabel={labels.saving}
+              state={unitSaveState}
+            />
           </section>
 
           <section
@@ -467,7 +520,7 @@ export function ProfileDiabetesManagementPanel() {
               </span>
               <select
                 className="focus-visible:outline-interactive-primary text-text-primary border-border-default bg-surface-subtle min-h-11 w-full rounded-xl border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/10 dark:bg-slate-950/40"
-                disabled={typeSaving}
+                disabled={typeSaveState === 'saving'}
                 onChange={(event) =>
                   void handleDiabetesTypeChange(
                     event.target.value as DiabetesTypeCategory,
@@ -490,17 +543,24 @@ export function ProfileDiabetesManagementPanel() {
                 </span>
                 <input
                   className="focus-visible:outline-interactive-primary text-text-primary border-border-default bg-surface-subtle min-h-11 w-full rounded-xl border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/10 dark:bg-slate-950/40"
-                  disabled={typeSaving}
+                  disabled={typeSaveState === 'saving'}
                   maxLength={256}
                   onBlur={() => void handleOtherDescriptorBlur()}
                   onChange={(event) =>
                     setOtherDescriptorDraft(event.target.value)
                   }
                   type="text"
-                  value={otherDescriptorDraft}
+                  value={displayedOtherDescriptor}
                 />
               </label>
             ) : null}
+
+            <MutationSaveStatus
+              errorMessage={typeSaveError}
+              savedLabel={labels.saved}
+              savingLabel={labels.saving}
+              state={typeSaveState}
+            />
           </section>
 
           <section
@@ -518,6 +578,7 @@ export function ProfileDiabetesManagementPanel() {
 
             <button
               className="focus-visible:outline-interactive-primary border-border-default bg-surface hover:border-border-strong flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border px-3 py-2 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/10 dark:bg-slate-950/20"
+              disabled={targetSaveState === 'saving'}
               onClick={openTargetDialog}
               ref={targetTriggerRef}
               type="button"
@@ -545,7 +606,7 @@ export function ProfileDiabetesManagementPanel() {
             {targetProfile.defaultRange ? (
               <button
                 className="text-text-secondary hover:text-text-primary focus-visible:outline-interactive-primary min-h-11 text-sm font-semibold underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
-                disabled={targetSaving}
+                disabled={targetSaveState === 'saving'}
                 onClick={() => setRemoveDialogOpen(true)}
                 ref={removeTriggerRef}
                 type="button"
@@ -553,6 +614,13 @@ export function ProfileDiabetesManagementPanel() {
                 {labels.target.remove}
               </button>
             ) : null}
+
+            <MutationSaveStatus
+              errorMessage={targetSaveError}
+              savedLabel={labels.saved}
+              savingLabel={labels.saving}
+              state={targetSaveState}
+            />
           </section>
 
           <p className="text-text-secondary px-1 text-xs">
@@ -564,11 +632,11 @@ export function ProfileDiabetesManagementPanel() {
       <ProfileDiabetesTargetEditorDialog
         displayUnit={targetEditorUnit}
         highValue={targetHighInput}
-        isPending={targetSaving}
+        isPending={targetSaveState === 'saving'}
         labels={labels}
         lowValue={targetLowInput}
         onCancel={() => {
-          if (targetSaving) {
+          if (targetSaveState === 'saving') {
             return;
           }
 
@@ -587,9 +655,9 @@ export function ProfileDiabetesManagementPanel() {
         cancelLabel={labels.target.removeConfirm.cancel}
         confirmLabel={labels.target.removeConfirm.confirm}
         description={labels.target.removeConfirm.description}
-        isPending={targetSaving}
+        isPending={targetSaveState === 'saving'}
         onCancel={() => {
-          if (targetSaving) {
+          if (targetSaveState === 'saving') {
             return;
           }
 

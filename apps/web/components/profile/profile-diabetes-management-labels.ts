@@ -49,6 +49,7 @@ export interface ProfileDiabetesManagementLabels {
     readonly description: string;
     readonly title: string;
   }>;
+  readonly saved: string;
   readonly saving: string;
   readonly target: Readonly<{
     readonly editAction: string;
@@ -131,6 +132,7 @@ const KEYS = {
     'account.diabetesManagement.errors.unauthorized',
   ),
   loading: asTranslationKey('account.diabetesManagement.loading'),
+  saved: asTranslationKey('account.diabetesManagement.saved'),
   saving: asTranslationKey('account.diabetesManagement.saving'),
   targetEditAction: asTranslationKey(
     'account.diabetesManagement.target.editAction',
@@ -221,6 +223,7 @@ export function resolveProfileDiabetesManagementLabels(
       description: translate(localization, KEYS.pageDescription),
       title: translate(localization, KEYS.pageTitle),
     },
+    saved: translate(localization, KEYS.saved),
     saving: translate(localization, KEYS.saving),
     target: {
       editAction: translate(localization, KEYS.targetEditAction),
