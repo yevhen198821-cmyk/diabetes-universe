@@ -19,7 +19,7 @@ Migrates Dashboard, Timeline, and Quick Add onto the shared glucose foundation f
 
 - `useGlucosePresentationDependencies()` fetches `GlucoseTargetProfile.defaultRange` when diabetes settings exist.
 - Passed into `presentGlucoseFromTimelineEvent` → `buildGlucosePresentation()`.
-- Localized range labels via `glucose.range.*` keys (EN/RU/UK/DE).
+- Localized range labels via `timeline.glucose.range.*` keys (EN/RU/UK/DE).
 - No label shown when target is missing (`unknown` range state).
 
 ## Reference time
