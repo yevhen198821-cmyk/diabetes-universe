@@ -1,7 +1,10 @@
 import { expect, test } from './support/test';
 
 import { waitForApplicationReady } from './support/wait-for-application-ready';
-import { selectGlucoseUnitIfRequired } from './support/glucose-quick-add-helpers';
+import {
+  selectGlucoseUnitIfRequired,
+  setGlucoseQuickAddTime,
+} from './support/glucose-quick-add-helpers';
 
 test('dashboard quick add updates shared timeline state', async ({ page }) => {
   await page.goto('/');
@@ -192,12 +195,7 @@ test('timeline quick add updates shared dashboard state', async ({ page }) => {
 
   await selectGlucoseUnitIfRequired(page);
   await page.getByLabel('Glucose level').fill('8.8');
-  await page.getByRole('button', { name: /Время/ }).click();
-  const timePicker = page.getByRole('dialog', { name: 'Выберите время' });
-
-  await timePicker.getByRole('button', { name: '23' }).first().click();
-  await timePicker.getByRole('button', { name: '59' }).last().click();
-  await timePicker.getByRole('button', { name: 'Готово' }).click();
+  await setGlucoseQuickAddTime(page, '23', '59');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
   await expect(page.getByText('8.8 mmol/L').first()).toBeVisible();

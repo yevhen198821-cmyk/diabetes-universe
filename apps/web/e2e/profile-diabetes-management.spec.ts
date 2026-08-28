@@ -13,6 +13,46 @@ async function openProfile(page: import('./support/test').Page) {
   ).toBeVisible();
 }
 
+async function ensureMmolPerLSelected(page: import('./support/test').Page) {
+  const mmolButton = page.getByRole('button', { name: 'mmol/L', exact: true });
+  const isPressed = await mmolButton.getAttribute('aria-pressed');
+
+  if (isPressed !== 'true') {
+    const patchPromise = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/v1/medical/me/diabetes-settings') &&
+        response.request().method() === 'PATCH',
+    );
+    await mmolButton.click();
+    const patchResponse = await patchPromise;
+    expect(patchResponse.ok()).toBeTruthy();
+  }
+
+  await expect(mmolButton).toHaveAttribute('aria-pressed', 'true');
+}
+
+async function openTargetRangeDialog(page: import('./support/test').Page) {
+  await ensureMmolPerLSelected(page);
+  await page.getByRole('button', { name: /^Target range /i }).click();
+  const targetDialog = page.getByRole('dialog', { name: 'Target range' });
+  await expect(targetDialog).toBeVisible();
+
+  return targetDialog;
+}
+
+function targetRangeInputs(targetDialog: import('./support/test').Locator) {
+  return {
+    lowerInput: targetDialog.getByRole('textbox', {
+      name: 'Lower limit',
+      exact: true,
+    }),
+    upperInput: targetDialog.getByRole('textbox', {
+      name: 'Upper limit',
+      exact: true,
+    }),
+  };
+}
+
 test.describe.configure({ mode: 'serial' });
 
 test('profile menu contains diabetes management entry', async ({
@@ -95,22 +135,20 @@ test('target editor validates bounds and saves canonical mmol/L payload', async 
   await page.goto('/account/diabetes');
   await waitForApplicationReady(page);
 
-  await page.getByRole('button', { name: 'mmol/L', exact: true }).click();
-  await page.getByRole('button', { name: /Target range/i }).click();
-  const targetDialog = page.getByRole('dialog', { name: 'Target range' });
-  await expect(targetDialog).toBeVisible();
+  const targetDialog = await openTargetRangeDialog(page);
+  const { lowerInput, upperInput } = targetRangeInputs(targetDialog);
 
-  await targetDialog.getByLabel('Lower limit').fill('10');
-  await targetDialog.getByLabel('Upper limit').fill('10');
-  await expect(targetDialog.getByLabel('Lower limit')).toHaveValue('10');
-  await expect(targetDialog.getByLabel('Upper limit')).toHaveValue('10');
+  await lowerInput.fill('10');
+  await upperInput.fill('10');
+  await expect(lowerInput).toHaveValue('10');
+  await expect(upperInput).toHaveValue('10');
   await targetDialog.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(targetDialog.getByRole('alert')).toContainText(
     'The lower limit must be less than the upper limit.',
   );
 
-  await targetDialog.getByLabel('Lower limit').fill('4.0');
-  await targetDialog.getByLabel('Upper limit').fill('10.0');
+  await lowerInput.fill('4.0');
+  await upperInput.fill('10.0');
 
   const putPromise = page.waitForResponse(
     (response) =>
@@ -141,11 +179,10 @@ test('remove target requires confirmation and clears configured range', async ({
   await page.goto('/account/diabetes');
   await waitForApplicationReady(page);
 
-  await page.getByRole('button', { name: 'mmol/L', exact: true }).click();
-  await page.getByRole('button', { name: /Target range/i }).click();
-  const targetDialog = page.getByRole('dialog', { name: 'Target range' });
-  await targetDialog.getByLabel('Lower limit').fill('4.0');
-  await targetDialog.getByLabel('Upper limit').fill('10.0');
+  const targetDialog = await openTargetRangeDialog(page);
+  const { lowerInput, upperInput } = targetRangeInputs(targetDialog);
+  await lowerInput.fill('4.0');
+  await upperInput.fill('10.0');
   await targetDialog.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page.getByText('4.0–10.0 mmol/L')).toBeVisible();
 
