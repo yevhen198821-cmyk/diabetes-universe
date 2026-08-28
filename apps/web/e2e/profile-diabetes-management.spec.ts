@@ -1,4 +1,4 @@
-import { expect, test } from './support/test';
+import { expect, test, type Locator } from './support/test';
 
 import { signInWithMagicLink } from './support/auth-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
@@ -31,13 +31,62 @@ async function ensureMmolPerLSelected(page: import('./support/test').Page) {
   await expect(mmolButton).toHaveAttribute('aria-pressed', 'true');
 }
 
-async function openTargetRangeDialog(page: import('./support/test').Page) {
-  await ensureMmolPerLSelected(page);
-  await page.getByRole('button', { name: /^Target range /i }).click();
+async function ensureMgPerDlSelected(page: import('./support/test').Page) {
+  const mgButton = page.getByRole('button', { name: 'mg/dL', exact: true });
+  const isPressed = await mgButton.getAttribute('aria-pressed');
+
+  if (isPressed !== 'true') {
+    const patchPromise = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/v1/medical/me/diabetes-settings') &&
+        response.request().method() === 'PATCH',
+    );
+    await mgButton.click();
+    const patchResponse = await patchPromise;
+    expect(patchResponse.ok()).toBeTruthy();
+  }
+
+  await expect(mgButton).toHaveAttribute('aria-pressed', 'true');
+}
+
+async function openTargetRangeDialog(
+  page: import('./support/test').Page,
+  unit: 'mmol/L' | 'mg/dL' = 'mmol/L',
+) {
+  if (unit === 'mg/dL') {
+    await ensureMgPerDlSelected(page);
+  } else {
+    await ensureMmolPerLSelected(page);
+  }
+
+  const targetTrigger = page.getByRole('button', { name: /^Target range /i });
+  await targetTrigger.click();
   const targetDialog = page.getByRole('dialog', { name: 'Target range' });
   await expect(targetDialog).toBeVisible();
 
-  return targetDialog;
+  return { targetDialog, targetTrigger };
+}
+
+async function expectInputFocused(input: Locator) {
+  await expect
+    .poll(async () =>
+      input.evaluate((element) => document.activeElement === element),
+    )
+    .toBe(true);
+}
+
+async function typeWithStableFocus(
+  page: import('./support/test').Page,
+  input: Locator,
+  text: string,
+) {
+  await input.click();
+  await expectInputFocused(input);
+
+  for (const char of text) {
+    await page.keyboard.press(char);
+    await expectInputFocused(input);
+  }
 }
 
 function targetRangeInputs(targetDialog: import('./support/test').Locator) {
@@ -135,7 +184,7 @@ test('target editor validates bounds and saves canonical mmol/L payload', async 
   await page.goto('/account/diabetes');
   await waitForApplicationReady(page);
 
-  const targetDialog = await openTargetRangeDialog(page);
+  const { targetDialog } = await openTargetRangeDialog(page);
   const { lowerInput, upperInput } = targetRangeInputs(targetDialog);
 
   await lowerInput.fill('10');
@@ -167,6 +216,59 @@ test('target editor validates bounds and saves canonical mmol/L payload', async 
   await expect(page.getByText('4.0–10.0 mmol/L')).toBeVisible();
 });
 
+test('target editor keeps focus stable while typing mmol/L and mg/dL limits', async ({
+  page,
+  request,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signInWithMagicLink(
+    page,
+    request,
+    'profile-diabetes-focus@example.com',
+  );
+  await page.goto('/account/diabetes');
+  await waitForApplicationReady(page);
+
+  const { targetDialog: mmolDialog, targetTrigger: mmolTrigger } =
+    await openTargetRangeDialog(page);
+  const mmolInputs = targetRangeInputs(mmolDialog);
+
+  await expectInputFocused(mmolInputs.lowerInput);
+  await typeWithStableFocus(page, mmolInputs.lowerInput, '4.5');
+  await expect(mmolInputs.lowerInput).toHaveValue('4.5');
+  await typeWithStableFocus(page, mmolInputs.upperInput, '10.0');
+  await expect(mmolInputs.upperInput).toHaveValue('10.0');
+  await expectInputFocused(mmolInputs.upperInput);
+
+  await mmolInputs.lowerInput.fill('10');
+  await mmolInputs.upperInput.fill('10');
+  await mmolDialog.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(mmolDialog.getByRole('alert')).toContainText(
+    'The lower limit must be less than the upper limit.',
+  );
+
+  await mmolDialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(mmolDialog).toBeHidden();
+  await expectInputFocused(mmolTrigger);
+
+  const { targetDialog: mgDialog } = await openTargetRangeDialog(page, 'mg/dL');
+  const mgInputs = targetRangeInputs(mgDialog);
+
+  await expectInputFocused(mgInputs.lowerInput);
+  await typeWithStableFocus(page, mgInputs.lowerInput, '72');
+  await expect(mgInputs.lowerInput).toHaveValue('72');
+  await typeWithStableFocus(page, mgInputs.upperInput, '180');
+  await expect(mgInputs.upperInput).toHaveValue('180');
+  await expectInputFocused(mgInputs.upperInput);
+
+  await mgInputs.lowerInput.fill('180');
+  await mgInputs.upperInput.fill('180');
+  await mgDialog.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(mgDialog.getByRole('alert')).toContainText(
+    'The lower limit must be less than the upper limit.',
+  );
+});
+
 test('remove target requires confirmation and clears configured range', async ({
   page,
   request,
@@ -179,7 +281,7 @@ test('remove target requires confirmation and clears configured range', async ({
   await page.goto('/account/diabetes');
   await waitForApplicationReady(page);
 
-  const targetDialog = await openTargetRangeDialog(page);
+  const { targetDialog } = await openTargetRangeDialog(page);
   const { lowerInput, upperInput } = targetRangeInputs(targetDialog);
   await lowerInput.fill('4.0');
   await upperInput.fill('10.0');

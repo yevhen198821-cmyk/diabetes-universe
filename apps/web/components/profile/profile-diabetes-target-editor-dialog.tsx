@@ -1,6 +1,12 @@
 'use client';
 
-import { useEffect, useId, useRef, type RefObject } from 'react';
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  type RefObject,
+} from 'react';
 
 import type { GlucoseDisplayUnit } from '@diabetes-universe/medical-domain';
 
@@ -24,26 +30,25 @@ function useDialogFocusTrap(
   dialogRef: RefObject<HTMLElement | null>,
   onClose: () => void,
   restoreFocusRef?: RefObject<HTMLElement | null>,
+  initialFocusRef?: RefObject<HTMLElement | null>,
 ) {
   const restoreFocusRefSnapshot = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+  const wasOpenRef = useRef(false);
+
+  useLayoutEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   useEffect(() => {
     if (!open) {
       return;
     }
 
-    restoreFocusRefSnapshot.current =
-      restoreFocusRef?.current ??
-      (document.activeElement as HTMLElement | null);
-
-    requestAnimationFrame(() => {
-      focusableElements(dialogRef.current ?? document.body)[0]?.focus();
-    });
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
       }
     };
 
@@ -51,9 +56,36 @@ function useDialogFocusTrap(
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      restoreFocusRefSnapshot.current?.focus();
     };
-  }, [dialogRef, onClose, open, restoreFocusRef]);
+  }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      const isOpening = !wasOpenRef.current;
+      wasOpenRef.current = true;
+
+      if (isOpening) {
+        restoreFocusRefSnapshot.current =
+          restoreFocusRef?.current ??
+          (document.activeElement as HTMLElement | null);
+
+        requestAnimationFrame(() => {
+          const focusTarget =
+            initialFocusRef?.current ??
+            focusableElements(dialogRef.current ?? document.body)[0];
+          focusTarget?.focus();
+        });
+      }
+
+      return;
+    }
+
+    if (wasOpenRef.current) {
+      restoreFocusRefSnapshot.current?.focus();
+    }
+
+    wasOpenRef.current = false;
+  }, [dialogRef, initialFocusRef, open, restoreFocusRef]);
 }
 
 export function ProfileDiabetesTargetEditorDialog({
@@ -88,8 +120,9 @@ export function ProfileDiabetesTargetEditorDialog({
   const lowerInputId = useId();
   const upperInputId = useId();
   const dialogRef = useRef<HTMLElement>(null);
+  const lowerInputRef = useRef<HTMLInputElement>(null);
 
-  useDialogFocusTrap(open, dialogRef, onCancel, triggerRef);
+  useDialogFocusTrap(open, dialogRef, onCancel, triggerRef, lowerInputRef);
 
   if (!open) {
     return null;
@@ -136,6 +169,7 @@ export function ProfileDiabetesTargetEditorDialog({
               id={lowerInputId}
               inputMode={inputMode}
               onChange={(event) => onLowValueChange(event.target.value)}
+              ref={lowerInputRef}
               type="text"
               value={lowValue}
             />
