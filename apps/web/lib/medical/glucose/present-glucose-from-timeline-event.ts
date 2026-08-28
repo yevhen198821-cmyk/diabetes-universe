@@ -1,5 +1,8 @@
 import type { PlatformFormatter } from '@diabetes-universe/formatting';
-import type { LocalizationPlatform, TranslationKey } from '@diabetes-universe/i18n';
+import type {
+  LocalizationPlatform,
+  TranslationKey,
+} from '@diabetes-universe/i18n';
 import type {
   GlucoseDisplayUnit,
   GlucoseFreshnessPolicy,
