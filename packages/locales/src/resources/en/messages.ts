@@ -416,20 +416,20 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'timeline.units.nutritionCarbs': 'g carbs',
   'timeline.units.volumeMl': 'ml',
   'quick-add.button.label': 'Add event',
-  'quickAdd.glucose.contextLabel': 'Measurement context',
-  'quickAdd.glucose.contextSheetTitle': 'Measurement context',
-  'quickAdd.glucose.save': 'Save',
-  'quickAdd.glucose.timeLabel': 'Time',
-  'quickAdd.glucose.unitGate.description':
+  'quick-add.glucose.contextLabel': 'Measurement context',
+  'quick-add.glucose.contextSheetTitle': 'Measurement context',
+  'quick-add.glucose.save': 'Save',
+  'quick-add.glucose.timeLabel': 'Time',
+  'quick-add.glucose.unitGate.description':
     'Choose how you want to enter glucose values. This preference is saved to your diabetes settings.',
-  'quickAdd.glucose.unitGate.title': 'Choose glucose units',
-  'quickAdd.glucose.unitMg': 'mg/dL',
-  'quickAdd.glucose.unitMmol': 'mmol/L',
-  'quickAdd.glucose.unitRequiredError':
+  'quick-add.glucose.unitGate.title': 'Choose glucose units',
+  'quick-add.glucose.unitMg': 'mg/dL',
+  'quick-add.glucose.unitMmol': 'mmol/L',
+  'quick-add.glucose.unitRequiredError':
     'Select glucose units before entering a value.',
-  'quickAdd.glucose.unitSaving': 'Saving unit preference…',
-  'quickAdd.glucose.valueLabel': 'Glucose level',
-  'quickAdd.glucose.valueOutOfRangeError':
+  'quick-add.glucose.unitSaving': 'Saving unit preference…',
+  'quick-add.glucose.valueLabel': 'Glucose level',
+  'quick-add.glucose.valueOutOfRangeError':
     'Enter a valid glucose value for the selected units.',
   'validation.required': 'This field is required',
   'errors.generic': 'Something went wrong. Please try again.',

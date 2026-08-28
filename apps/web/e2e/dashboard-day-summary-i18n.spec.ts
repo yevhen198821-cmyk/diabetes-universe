@@ -1,6 +1,7 @@
 import { expect, type Locator, test } from './support/test';
 
 import { waitForApplicationReady } from './support/wait-for-application-ready';
+import { selectGlucoseUnitIfRequired } from './support/glucose-quick-add-helpers';
 
 function metricValue(region: Locator, label: string): Locator {
   return region.locator(`dt:has-text("${label}") + dd`).first();
@@ -29,7 +30,8 @@ test('dashboard day summary renders English labels without reminders placeholder
   await expect(daySummary.getByText('42 g')).toBeVisible();
 
   await page.getByRole('button', { name: 'Quick add: Glucose' }).click();
-  await page.getByLabel('Уровень глюкозы').fill('7,7');
+  await selectGlucoseUnitIfRequired(page);
+  await page.getByLabel('Glucose level').fill('7.7');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
   await expect(metricValue(daySummary, 'Glucose')).toContainText('7.7');

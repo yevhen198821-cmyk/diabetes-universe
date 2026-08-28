@@ -1,6 +1,7 @@
 import { expect, test, type Page } from './support/test';
 
 import { waitForApplicationReady } from './support/wait-for-application-ready';
+import { selectGlucoseUnitIfRequired } from './support/glucose-quick-add-helpers';
 
 const eventCards = (page: Page) =>
   page.getByRole('button', { name: /Open event/ });
@@ -75,7 +76,8 @@ test('timeline delete and add update the selected day list', async ({
   await page
     .getByRole('button', { name: 'Глюкоза. Записать уровень сахара' })
     .click();
-  await page.getByLabel('Уровень глюкозы').fill('8,8');
+  await selectGlucoseUnitIfRequired(page);
+  await page.getByLabel('Glucose level').fill('8.8');
   await page.getByRole('button', { name: /Время/ }).click();
   const timePicker = page.getByRole('dialog', { name: 'Выберите время' });
 

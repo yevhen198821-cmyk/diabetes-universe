@@ -30,21 +30,21 @@ export interface GlucoseQuickAddLabels {
 }
 
 const KEYS = {
-  contextLabel: asTranslationKey('quickAdd.glucose.contextLabel'),
-  contextSheetTitle: asTranslationKey('quickAdd.glucose.contextSheetTitle'),
-  save: asTranslationKey('quickAdd.glucose.save'),
-  timeLabel: asTranslationKey('quickAdd.glucose.timeLabel'),
+  contextLabel: asTranslationKey('quick-add.glucose.contextLabel'),
+  contextSheetTitle: asTranslationKey('quick-add.glucose.contextSheetTitle'),
+  save: asTranslationKey('quick-add.glucose.save'),
+  timeLabel: asTranslationKey('quick-add.glucose.timeLabel'),
   unitGateDescription: asTranslationKey(
-    'quickAdd.glucose.unitGate.description',
+    'quick-add.glucose.unitGate.description',
   ),
-  unitGateTitle: asTranslationKey('quickAdd.glucose.unitGate.title'),
-  unitMg: asTranslationKey('quickAdd.glucose.unitMg'),
-  unitMmol: asTranslationKey('quickAdd.glucose.unitMmol'),
-  unitRequiredError: asTranslationKey('quickAdd.glucose.unitRequiredError'),
-  unitSaving: asTranslationKey('quickAdd.glucose.unitSaving'),
-  valueLabel: asTranslationKey('quickAdd.glucose.valueLabel'),
+  unitGateTitle: asTranslationKey('quick-add.glucose.unitGate.title'),
+  unitMg: asTranslationKey('quick-add.glucose.unitMg'),
+  unitMmol: asTranslationKey('quick-add.glucose.unitMmol'),
+  unitRequiredError: asTranslationKey('quick-add.glucose.unitRequiredError'),
+  unitSaving: asTranslationKey('quick-add.glucose.unitSaving'),
+  valueLabel: asTranslationKey('quick-add.glucose.valueLabel'),
   valueOutOfRangeError: asTranslationKey(
-    'quickAdd.glucose.valueOutOfRangeError',
+    'quick-add.glucose.valueOutOfRangeError',
   ),
 } as const;
 

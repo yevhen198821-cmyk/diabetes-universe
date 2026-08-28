@@ -1,6 +1,7 @@
 import { expect, test } from './support/test';
 
 import { waitForApplicationReady } from './support/wait-for-application-ready';
+import { selectGlucoseUnitIfRequired } from './support/glucose-quick-add-helpers';
 
 test('dashboard quick add updates shared timeline state', async ({ page }) => {
   await page.goto('/');
@@ -189,7 +190,8 @@ test('timeline quick add updates shared dashboard state', async ({ page }) => {
     .getByRole('button', { name: 'Глюкоза. Записать уровень сахара' })
     .click();
 
-  await page.getByLabel('Уровень глюкозы').fill('8,8');
+  await selectGlucoseUnitIfRequired(page);
+  await page.getByLabel('Glucose level').fill('8.8');
   await page.getByRole('button', { name: /Время/ }).click();
   const timePicker = page.getByRole('dialog', { name: 'Выберите время' });
 

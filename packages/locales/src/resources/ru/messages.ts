@@ -270,20 +270,20 @@ export const russianDraftMessages = defineDraftMessages({
   'timeline.dayPeriod.timeRange.morning': '06:00–11:59',
   'timeline.dayPeriod.timeRange.night': '00:00–05:59',
   'quick-add.button.label': 'Добавить событие',
-  'quickAdd.glucose.contextLabel': 'Контекст измерения',
-  'quickAdd.glucose.contextSheetTitle': 'Контекст измерения',
-  'quickAdd.glucose.save': 'Сохранить',
-  'quickAdd.glucose.timeLabel': 'Время',
-  'quickAdd.glucose.unitGate.description':
+  'quick-add.glucose.contextLabel': 'Контекст измерения',
+  'quick-add.glucose.contextSheetTitle': 'Контекст измерения',
+  'quick-add.glucose.save': 'Сохранить',
+  'quick-add.glucose.timeLabel': 'Время',
+  'quick-add.glucose.unitGate.description':
     'Выберите единицы для ввода глюкозы. Предпочтение сохраняется в настройках диабета.',
-  'quickAdd.glucose.unitGate.title': 'Выберите единицы глюкозы',
-  'quickAdd.glucose.unitMg': 'мг/дл',
-  'quickAdd.glucose.unitMmol': 'ммоль/л',
-  'quickAdd.glucose.unitRequiredError':
+  'quick-add.glucose.unitGate.title': 'Выберите единицы глюкозы',
+  'quick-add.glucose.unitMg': 'мг/дл',
+  'quick-add.glucose.unitMmol': 'ммоль/л',
+  'quick-add.glucose.unitRequiredError':
     'Выберите единицы глюкозы перед вводом значения.',
-  'quickAdd.glucose.unitSaving': 'Сохранение единиц…',
-  'quickAdd.glucose.valueLabel': 'Уровень глюкозы',
-  'quickAdd.glucose.valueOutOfRangeError':
+  'quick-add.glucose.unitSaving': 'Сохранение единиц…',
+  'quick-add.glucose.valueLabel': 'Уровень глюкозы',
+  'quick-add.glucose.valueOutOfRangeError':
     'Введите корректное значение глюкозы для выбранных единиц.',
   'account.profile.about.description':
     'Diabetes Universe помогает отслеживать и понимать ваши данные о диабете.',

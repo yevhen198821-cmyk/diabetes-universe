@@ -149,20 +149,20 @@ export const germanDraftMessages = defineDraftMessages({
   'timeline.dayPeriod.timeRange.morning': '06:00–11:59',
   'timeline.dayPeriod.timeRange.night': '00:00–05:59',
   'quick-add.button.label': 'Ereignis hinzufügen',
-  'quickAdd.glucose.contextLabel': 'Messkontext',
-  'quickAdd.glucose.contextSheetTitle': 'Messkontext',
-  'quickAdd.glucose.save': 'Speichern',
-  'quickAdd.glucose.timeLabel': 'Uhrzeit',
-  'quickAdd.glucose.unitGate.description':
+  'quick-add.glucose.contextLabel': 'Messkontext',
+  'quick-add.glucose.contextSheetTitle': 'Messkontext',
+  'quick-add.glucose.save': 'Speichern',
+  'quick-add.glucose.timeLabel': 'Uhrzeit',
+  'quick-add.glucose.unitGate.description':
     'Wählen Sie die Einheiten für die Glukoseeingabe. Diese Einstellung wird in den Diabetes-Einstellungen gespeichert.',
-  'quickAdd.glucose.unitGate.title': 'Glukose-Einheiten wählen',
-  'quickAdd.glucose.unitMg': 'mg/dL',
-  'quickAdd.glucose.unitMmol': 'mmol/L',
-  'quickAdd.glucose.unitRequiredError':
+  'quick-add.glucose.unitGate.title': 'Glukose-Einheiten wählen',
+  'quick-add.glucose.unitMg': 'mg/dL',
+  'quick-add.glucose.unitMmol': 'mmol/L',
+  'quick-add.glucose.unitRequiredError':
     'Wählen Sie Glukose-Einheiten, bevor Sie einen Wert eingeben.',
-  'quickAdd.glucose.unitSaving': 'Einheit wird gespeichert…',
-  'quickAdd.glucose.valueLabel': 'Glukosewert',
-  'quickAdd.glucose.valueOutOfRangeError':
+  'quick-add.glucose.unitSaving': 'Einheit wird gespeichert…',
+  'quick-add.glucose.valueLabel': 'Glukosewert',
+  'quick-add.glucose.valueOutOfRangeError':
     'Geben Sie einen gültigen Glukosewert für die gewählten Einheiten ein.',
   'account.profile.about.description':
     'Diabetes Universe hilft Ihnen, Ihre Diabetes-Daten zu verfolgen und zu verstehen.',
