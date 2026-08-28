@@ -76,6 +76,9 @@ test('panel handles unconfigured glucose unit without selecting mmol/L', () => {
 test('panel patches glucose units and diabetes type with revision tokens', () => {
   assert.match(panelSource, /patchDiabetesSettings\(settings\.revision/);
   assert.match(panelSource, /glucoseDisplayUnit: nextUnit/);
+  assert.match(panelSource, /useDiabetesSettings/);
+  assert.match(panelSource, /MutationSaveStatus/);
+  assert.match(panelSource, /unitSaveState/);
   assert.match(clientSource, /'If-Match': revision/);
   assert.match(clientSource, /credentials: 'include'/);
 });

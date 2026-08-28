@@ -28,6 +28,7 @@ export interface TimelinePresentationLabels {
   readonly openEventAriaPrefix: string;
   readonly units: Readonly<{
     readonly activityMinutes: string;
+    readonly glucoseMgPerDl: string;
     readonly glucoseMmolPerL: string;
     readonly insulinDose: string;
     readonly massG: string;
@@ -160,6 +161,10 @@ export function resolveTimelinePresentationLabels(
       activityMinutes: translate(
         localization,
         asTranslationKey('timeline.units.activityMinutes'),
+      ),
+      glucoseMgPerDl: translate(
+        localization,
+        asTranslationKey('timeline.units.glucoseMgPerDl'),
       ),
       glucoseMmolPerL: translate(
         localization,

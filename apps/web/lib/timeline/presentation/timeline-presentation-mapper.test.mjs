@@ -112,6 +112,23 @@ test('en-GB glucose presentation uses English labels and dot decimal formatting'
   );
 });
 
+test('mg/dL glucose presentation converts from canonical mmol/L without mutating event', () => {
+  const mgDependencies = {
+    ...enGbDependencies,
+    glucoseDisplayUnit: 'mg_per_dl',
+  };
+  const card = mapTimelineEventCardPresentation(
+    glucoseEvent,
+    mgDependencies,
+    '10:15',
+  );
+
+  assert.equal(glucoseEvent.concentrationMmolPerL, 7.3);
+  assert.equal(card.value, '132');
+  assert.equal(card.unit, 'mg/dL');
+  assert.equal(card.context, 'Before meal');
+});
+
 test('ru-RU runtime uses comma decimal formatting', async () => {
   const ruDependencies = await createTestTimelinePresentationDependencies({
     request: { acceptLanguage: 'ru-RU', cookieTimeZone: 'Europe/Moscow' },
@@ -123,7 +140,7 @@ test('ru-RU runtime uses comma decimal formatting', async () => {
   );
 
   assert.equal(card.value, '7,3');
-  assert.equal(card.unit, 'mmol/L');
+  assert.equal(card.unit, 'ммоль/л');
 });
 
 test('presentation dependencies do not hardcode a medical locale formatter', async () => {

@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 
+import { useDiabetesSettings } from '../../medical/react';
 import { useFormatter } from '../../platform/react/use-formatter';
 import { useLocalization } from '../../platform/react/use-localization';
 import {
@@ -12,12 +13,15 @@ import {
 export function useTimelinePresentationDependencies(): TimelinePresentationDependencies {
   const formatter = useFormatter();
   const localization = useLocalization();
+  const { glucoseDisplayUnit } = useDiabetesSettings();
+
   return useMemo(
     () =>
       createTimelinePresentationDependencies({
         formatter,
+        glucoseDisplayUnit,
         localization,
       }),
-    [formatter, localization],
+    [formatter, glucoseDisplayUnit, localization],
   );
 }

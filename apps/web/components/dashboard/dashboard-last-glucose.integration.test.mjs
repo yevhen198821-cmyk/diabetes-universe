@@ -17,6 +17,7 @@ import {
 import { createTestTimelinePresentationDependencies } from '../../lib/timeline/presentation/testing/create-test-timeline-presentation-dependencies.ts';
 import { createTestPlatformRuntime } from '../../lib/platform/react/testing/create-test-platform-runtime.ts';
 import { TestPlatformProvider } from '../../lib/platform/react/testing/test-platform-provider.ts';
+import { TestDiabetesSettingsProvider } from '../../lib/medical/react/testing/test-diabetes-settings-provider.tsx';
 import {
   setupIntegrationDom,
   teardownIntegrationDom,
@@ -50,20 +51,24 @@ test('dashboard last glucose renders localized English copy inside platform prov
       createElement(
         TestPlatformProvider,
         { runtime },
-        createElement(DashboardLastGlucose, {
-          glucose: {
-            displayTime: '06:00',
-            event: liftLegacyTestFixture({
-              context: 'Before breakfast',
-              dateTime: '2026-08-02T05:00:00.000Z',
-              id: 'glucose-test',
-              kind: 'glucose',
-              title: 'Glucose',
-              value: '6.4 mmol/L',
-            }),
-          },
-          state: 'ready',
-        }),
+        createElement(
+          TestDiabetesSettingsProvider,
+          { glucoseDisplayUnit: 'mmol_per_l' },
+          createElement(DashboardLastGlucose, {
+            glucose: {
+              displayTime: '06:00',
+              event: liftLegacyTestFixture({
+                context: 'Before breakfast',
+                dateTime: '2026-08-02T05:00:00.000Z',
+                id: 'glucose-test',
+                kind: 'glucose',
+                title: 'Glucose',
+                value: '6.4 mmol/L',
+              }),
+            },
+            state: 'ready',
+          }),
+        ),
       ),
     );
   });
@@ -101,9 +106,13 @@ test('dashboard last glucose loading state announces localized status', async ()
       createElement(
         TestPlatformProvider,
         { runtime },
-        createElement(DashboardLastGlucose, {
-          state: 'loading',
-        }),
+        createElement(
+          TestDiabetesSettingsProvider,
+          { glucoseDisplayUnit: 'mmol_per_l' },
+          createElement(DashboardLastGlucose, {
+            state: 'loading',
+          }),
+        ),
       ),
     );
   });

@@ -1,3 +1,4 @@
+import type { GlucoseDisplayUnit } from '@diabetes-universe/medical-domain';
 import type {
   CanonicalUnitId,
   GlucoseMeasurementContext,
@@ -6,7 +7,9 @@ import type {
 } from '@diabetes-universe/types';
 import type { EventCardType } from '@diabetes-universe/ui';
 
+import { formatGlucoseValueForLocalizedDisplay } from '../../medical/client/diabetes-settings-display';
 import type { TimelinePresentationDependencies } from './timeline-presentation-dependencies';
+import { resolveTimelineGlucoseDisplayUnit } from './timeline-presentation-dependencies';
 import type {
   TimelineEventCardPresentation,
   TimelineEventDetailPresentation,
@@ -14,11 +17,6 @@ import type {
   TimelineMeasurementPresentation,
   TimelineSearchPresentation,
 } from './timeline-presentation-types';
-
-const GLUCOSE_FRACTION_DIGITS = {
-  maximumFractionDigits: 1,
-  minimumFractionDigits: 0,
-} as const;
 
 const INSULIN_FRACTION_DIGITS = {
   maximumFractionDigits: 1,
@@ -107,16 +105,26 @@ function resolveMealTypeTitle(
   return mealType;
 }
 
+function resolveGlucoseUnitLabel(
+  dependencies: TimelinePresentationDependencies,
+  displayUnit: GlucoseDisplayUnit,
+): string {
+  return displayUnit === 'mg_per_dl'
+    ? dependencies.labels.units.glucoseMgPerDl
+    : dependencies.labels.units.glucoseMmolPerL;
+}
+
 function mapGlucosePresentation(
   event: Extract<SemanticTimelineEvent, { kind: 'glucose' }>,
   dependencies: TimelinePresentationDependencies,
 ) {
-  const value = formatMedicalNumber(
-    dependencies,
+  const displayUnit = resolveTimelineGlucoseDisplayUnit(dependencies);
+  const value = formatGlucoseValueForLocalizedDisplay(
+    dependencies.formatter,
     event.concentrationMmolPerL,
-    GLUCOSE_FRACTION_DIGITS,
+    displayUnit,
   );
-  const unit = dependencies.labels.units.glucoseMmolPerL;
+  const unit = resolveGlucoseUnitLabel(dependencies, displayUnit);
   const measurement = formatMeasurementPresentation(dependencies, value, unit);
 
   return {
@@ -132,7 +140,7 @@ function mapGlucosePresentation(
           ? [dependencies.labels.glucoseContexts[event.context]]
           : []),
       ],
-      userContent: [String(event.concentrationMmolPerL)],
+      userContent: [value, String(event.concentrationMmolPerL)],
     },
     title: dependencies.labels.eventKinds.glucose,
   };

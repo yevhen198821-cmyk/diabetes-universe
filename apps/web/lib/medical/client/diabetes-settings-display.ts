@@ -1,8 +1,19 @@
+import type { PlatformFormatter } from '@diabetes-universe/formatting';
 import {
   convertGlucoseMmolPerLToMgPerDl,
   mapGlucoseDisplayUnitToDisplaySymbol,
   type GlucoseDisplayUnit,
 } from '@diabetes-universe/medical-domain';
+
+const GLUCOSE_MMOL_FRACTION_DIGITS = {
+  maximumFractionDigits: 1,
+  minimumFractionDigits: 0,
+} as const;
+
+const GLUCOSE_MG_FRACTION_DIGITS = {
+  maximumFractionDigits: 0,
+  minimumFractionDigits: 0,
+} as const;
 
 export function formatGlucoseValueForDisplay(
   mmolPerL: number,
@@ -16,6 +27,22 @@ export function formatGlucoseValueForDisplay(
   return Number.isInteger(rounded)
     ? rounded.toFixed(1)
     : rounded.toFixed(1).replace(/\.0$/, '.0');
+}
+
+export function formatGlucoseValueForLocalizedDisplay(
+  formatter: PlatformFormatter,
+  mmolPerL: number,
+  displayUnit: GlucoseDisplayUnit,
+): string {
+  if (displayUnit === 'mg_per_dl') {
+    return formatter.formatNumber(
+      Math.round(convertGlucoseMmolPerLToMgPerDl(mmolPerL)),
+      GLUCOSE_MG_FRACTION_DIGITS,
+    );
+  }
+
+  const rounded = Math.round(mmolPerL * 10) / 10;
+  return formatter.formatNumber(rounded, GLUCOSE_MMOL_FRACTION_DIGITS);
 }
 
 export function formatTargetRangeForDisplay(

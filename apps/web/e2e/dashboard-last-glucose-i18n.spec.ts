@@ -1,6 +1,7 @@
 import { expect, test } from './support/test';
 
 import { waitForApplicationReady } from './support/wait-for-application-ready';
+import { selectGlucoseUnitIfRequired } from './support/glucose-quick-add-helpers';
 
 test('dashboard last glucose renders English labels and syncs with timeline edits', async ({
   page,
@@ -23,7 +24,8 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   await expect(lastGlucoseRegion.locator('time')).toBeVisible();
 
   await page.getByRole('button', { name: 'Quick add: Glucose' }).click();
-  await page.getByLabel('Уровень глюкозы').fill('7,7');
+  await selectGlucoseUnitIfRequired(page);
+  await page.getByLabel('Glucose level').fill('7.7');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
   await expect(

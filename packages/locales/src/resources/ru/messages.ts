@@ -113,6 +113,8 @@ export const russianDraftMessages = defineDraftMessages({
   'timeline.mealType.other': 'Другое',
   'timeline.mealType.snack': 'Перекус',
   'timeline.units.activityMinutes': 'мин',
+  'timeline.units.glucoseMgPerDl': 'мг/дл',
+  'timeline.units.glucoseMmolPerL': 'ммоль/л',
   'timeline.units.insulinDose': 'ед.',
   'timeline.units.massG': 'г',
   'timeline.units.nutritionCarbs': 'г углеводов',
@@ -268,6 +270,21 @@ export const russianDraftMessages = defineDraftMessages({
   'timeline.dayPeriod.timeRange.morning': '06:00–11:59',
   'timeline.dayPeriod.timeRange.night': '00:00–05:59',
   'quick-add.button.label': 'Добавить событие',
+  'quick-add.glucose.contextLabel': 'Контекст измерения',
+  'quick-add.glucose.contextSheetTitle': 'Контекст измерения',
+  'quick-add.glucose.save': 'Сохранить',
+  'quick-add.glucose.timeLabel': 'Время',
+  'quick-add.glucose.unitGate.description':
+    'Выберите единицы для ввода глюкозы. Предпочтение сохраняется в настройках диабета.',
+  'quick-add.glucose.unitGate.title': 'Выберите единицы глюкозы',
+  'quick-add.glucose.unitMg': 'мг/дл',
+  'quick-add.glucose.unitMmol': 'ммоль/л',
+  'quick-add.glucose.unitRequiredError':
+    'Выберите единицы глюкозы перед вводом значения.',
+  'quick-add.glucose.unitSaving': 'Сохранение единиц…',
+  'quick-add.glucose.valueLabel': 'Уровень глюкозы',
+  'quick-add.glucose.valueOutOfRangeError':
+    'Введите корректное значение глюкозы для выбранных единиц.',
   'account.profile.about.description':
     'Diabetes Universe помогает отслеживать и понимать ваши данные о диабете.',
   'account.profile.about.page.buildInfoLabel': 'Сборка',
@@ -349,6 +366,7 @@ export const russianDraftMessages = defineDraftMessages({
   'account.diabetesManagement.disclaimer':
     'Целевой диапазон — это настройка Diabetes Universe. Изменение здесь не меняет настройки сигналов CGM, глюкометра или инсулиновой помпы.',
   'account.diabetesManagement.loading': 'Загрузка настроек диабета…',
+  'account.diabetesManagement.saved': 'Сохранено',
   'account.diabetesManagement.saving': 'Сохранение…',
   'account.diabetesManagement.errors.network':
     'Не удалось сохранить изменения. Проверьте подключение и попробуйте ещё раз.',
