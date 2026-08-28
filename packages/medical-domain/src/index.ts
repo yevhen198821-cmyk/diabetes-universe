@@ -98,6 +98,36 @@ export {
   convertGlucoseMmolPerLToMgPerDl,
   convertGlucoseMgPerDlToMmolPerL,
 } from './glucose/glucose-conversion';
+export type {
+  GlucoseDataQualityState,
+  GlucoseFreshnessState,
+  GlucoseRangeState,
+} from './glucose/glucose-semantics';
+export {
+  resolveGlucoseDataQualityState,
+  type ResolveGlucoseDataQualityStateInput,
+} from './glucose/glucose-data-quality';
+export { toGlucoseDisplayNumericValue } from './glucose/glucose-display-value';
+export {
+  resolveGlucoseFreshnessState,
+  type GlucoseFreshnessPolicy,
+  type ResolveGlucoseFreshnessStateInput,
+} from './glucose/glucose-freshness-policy';
+export {
+  buildGlucosePresentation,
+  type BuildGlucosePresentationInput,
+  type GlucosePresentationModel,
+  type GlucoseReadingInput,
+} from './glucose/glucose-presentation';
+export { resolveGlucoseRangeState } from './glucose/glucose-range-state';
+export {
+  mapGlucoseDisplayUnitToMeasurementUnit,
+  type GlucoseMeasurementDisplayUnit,
+} from './glucose/map-glucose-display-unit';
+export {
+  resolveGlucoseSourceDescriptor,
+  type GlucoseSourceDescriptor,
+} from './glucose/glucose-source-semantics';
 export { DIABETES_SETTINGS_VALIDATION_BOUNDS } from './validation/diabetes-settings-bounds';
 export {
   DiabetesSettingsValidationError,
