@@ -1,9 +1,7 @@
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
-import {
-  formatTimelineGlucoseDisplayValue,
-  type TimelinePresentationDependencies,
-} from '../timeline/presentation';
+import { presentGlucoseFromTimelineEvent } from '../medical/glucose/present-glucose-from-timeline-event';
+import type { TimelinePresentationDependencies } from '../timeline/presentation';
 import { deriveDashboardRecentEventSources } from './dashboard-recent-events-derivation';
 import {
   deriveDashboardDaySummaryVisualizations,
@@ -165,10 +163,16 @@ function deriveDaySummary(
   let latestTodayGlucoseDisplayTime: string | null = null;
 
   if (latestTodayGlucose && presentationDependencies) {
-    const display = formatTimelineGlucoseDisplayValue(
-      latestTodayGlucose,
-      presentationDependencies,
-    ).trim();
+    const presentation = presentGlucoseFromTimelineEvent({
+      event: latestTodayGlucose,
+      formatter: presentationDependencies.formatter,
+      glucoseDisplayUnit: presentationDependencies.glucoseDisplayUnit,
+      glucoseKindLabel: presentationDependencies.labels.eventKinds.glucose,
+      localization: presentationDependencies.localization,
+      referenceTime,
+      targetRange: presentationDependencies.targetRange,
+    });
+    const display = presentation.formattedMeasurement.trim();
 
     latestTodayGlucoseDisplay = display.length > 0 ? display : null;
 

@@ -129,6 +129,41 @@ test('mg/dL glucose presentation converts from canonical mmol/L without mutating
   assert.equal(card.context, 'Before meal');
 });
 
+test('glucose presentation resolves target boundary semantics via shared foundation', async () => {
+  const targetDependencies = await createTestTimelinePresentationDependencies({
+    glucoseDisplayUnit: 'mmol_per_l',
+    referenceTime: '2026-08-02T10:00:00.000Z',
+    targetRange: {
+      highMmolPerL: 7.3,
+      lowMmolPerL: 4,
+      source: 'user_defined',
+    },
+  });
+  const inRange = mapTimelineEventCardPresentation(
+    glucoseEvent,
+    targetDependencies,
+    '10:15',
+  );
+
+  assert.equal(inRange.value, '7.3');
+
+  const [aboveEvent] = liftLegacyTestFixtures([
+    {
+      dateTime: '2026-08-02T07:15:00.000Z',
+      id: 'glucose-above',
+      kind: 'glucose',
+      title: 'Glucose',
+      value: '8.1 mmol/L',
+    },
+  ]);
+  const above = timelinePresentationKindMappers.glucose(
+    aboveEvent,
+    targetDependencies,
+  );
+
+  assert.equal(above.rangeLabel, 'Above your range');
+});
+
 test('ru-RU runtime uses comma decimal formatting', async () => {
   const ruDependencies = await createTestTimelinePresentationDependencies({
     request: { acceptLanguage: 'ru-RU', cookieTimeZone: 'Europe/Moscow' },

@@ -66,6 +66,12 @@ test('dashboard last glucose renders localized English copy inside platform prov
                 value: '6.4 mmol/L',
               }),
             },
+            glucosePresentation: {
+              formatter: runtime.formatter,
+              glucoseDisplayUnit: 'mmol_per_l',
+              localization: runtime.localization,
+              targetRange: null,
+            },
             state: 'ready',
           }),
         ),

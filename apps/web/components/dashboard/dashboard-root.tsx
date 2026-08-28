@@ -24,7 +24,8 @@ import {
   type QuickAddOpenTrigger,
 } from '../../lib/quick-add/quick-add-controller-model';
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
-import { useTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
+import { useGlucosePresentationDependencies } from '../../lib/medical/glucose';
+import { composeTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { QuickAddHost } from '../quick-add/quick-add-host';
@@ -41,13 +42,21 @@ export function DashboardRoot() {
   const router = useRouter();
   const localization = useLocalization();
   const formatter = useFormatter();
-  const presentationDependencies = useTimelinePresentationDependencies();
+  const quickActionsRef = useRef<HTMLButtonElement>(null);
+  const referenceTime = useMemo(() => new Date(), []);
+  const glucosePresentation = useGlucosePresentationDependencies();
+  const presentationDependencies = useMemo(
+    () =>
+      composeTimelinePresentationDependencies(
+        glucosePresentation,
+        referenceTime,
+      ),
+    [glucosePresentation, referenceTime],
+  );
   const { addEvent, events, status: timelineStatus } = useTimelineStore();
   const [quickAddState, setQuickAddState] = useState(
     createInitialQuickAddControllerState,
   );
-  const quickActionsRef = useRef<HTMLButtonElement>(null);
-  const referenceTime = useMemo(() => new Date(), []);
   const isTimelineHydrating = timelineStatus === 'loading';
   const isTimelineError = timelineStatus === 'error';
   const dashboardTimeZone = useMemo(
@@ -186,6 +195,7 @@ export function DashboardRoot() {
                 displayTime: derivedBlocks.lastGlucose.displayTime,
                 event: derivedBlocks.lastGlucose.event,
               }}
+              glucosePresentation={glucosePresentation}
               referenceTime={referenceTime}
               state="ready"
             />
@@ -198,6 +208,7 @@ export function DashboardRoot() {
           <DashboardQuickActions
             disabled={quickAddState.isOpen || isTimelineHydrating}
             onOpenCategory={(category) => requestOpen('fab', category)}
+            presentationDependencies={presentationDependencies}
             returnFocusRef={quickActionsRef}
           />
         }

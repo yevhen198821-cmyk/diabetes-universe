@@ -2,26 +2,39 @@
 
 import { useMemo } from 'react';
 
-import { useDiabetesSettings } from '../../medical/react';
-import { useFormatter } from '../../platform/react/use-formatter';
-import { useLocalization } from '../../platform/react/use-localization';
+import {
+  useGlucosePresentationDependencies,
+  type GlucosePresentationDependencies,
+} from '../../medical/glucose/use-glucose-presentation-dependencies';
 import {
   createTimelinePresentationDependencies,
   type TimelinePresentationDependencies,
 } from '../presentation';
 
-export function useTimelinePresentationDependencies(): TimelinePresentationDependencies {
-  const formatter = useFormatter();
-  const localization = useLocalization();
-  const { glucoseDisplayUnit } = useDiabetesSettings();
+export function composeTimelinePresentationDependencies(
+  glucosePresentation: GlucosePresentationDependencies,
+  referenceTime: Date | string = new Date(),
+): TimelinePresentationDependencies {
+  return createTimelinePresentationDependencies({
+    formatter: glucosePresentation.formatter,
+    glucoseDisplayUnit: glucosePresentation.glucoseDisplayUnit,
+    localization: glucosePresentation.localization,
+    referenceTime,
+    targetRange: glucosePresentation.targetRange,
+  });
+}
+
+export function useTimelinePresentationDependencies(
+  referenceTime?: Date,
+): TimelinePresentationDependencies {
+  const glucosePresentation = useGlucosePresentationDependencies();
 
   return useMemo(
     () =>
-      createTimelinePresentationDependencies({
-        formatter,
-        glucoseDisplayUnit,
-        localization,
-      }),
-    [formatter, glucoseDisplayUnit, localization],
+      composeTimelinePresentationDependencies(
+        glucosePresentation,
+        referenceTime ?? new Date(),
+      ),
+    [glucosePresentation, referenceTime],
   );
 }

@@ -1,4 +1,3 @@
-import type { GlucoseDisplayUnit } from '@diabetes-universe/medical-domain';
 import type {
   CanonicalUnitId,
   GlucoseMeasurementContext,
@@ -7,9 +6,8 @@ import type {
 } from '@diabetes-universe/types';
 import type { EventCardType } from '@diabetes-universe/ui';
 
-import { formatGlucoseValueForLocalizedDisplay } from '../../medical/client/diabetes-settings-display';
+import { presentGlucoseFromTimelineEvent } from '../../medical/glucose/present-glucose-from-timeline-event';
 import type { TimelinePresentationDependencies } from './timeline-presentation-dependencies';
-import { resolveTimelineGlucoseDisplayUnit } from './timeline-presentation-dependencies';
 import type {
   TimelineEventCardPresentation,
   TimelineEventDetailPresentation,
@@ -105,43 +103,35 @@ function resolveMealTypeTitle(
   return mealType;
 }
 
-function resolveGlucoseUnitLabel(
-  dependencies: TimelinePresentationDependencies,
-  displayUnit: GlucoseDisplayUnit,
-): string {
-  return displayUnit === 'mg_per_dl'
-    ? dependencies.labels.units.glucoseMgPerDl
-    : dependencies.labels.units.glucoseMmolPerL;
-}
-
 function mapGlucosePresentation(
   event: Extract<SemanticTimelineEvent, { kind: 'glucose' }>,
   dependencies: TimelinePresentationDependencies,
 ) {
-  const displayUnit = resolveTimelineGlucoseDisplayUnit(dependencies);
-  const value = formatGlucoseValueForLocalizedDisplay(
-    dependencies.formatter,
-    event.concentrationMmolPerL,
-    displayUnit,
-  );
-  const unit = resolveGlucoseUnitLabel(dependencies, displayUnit);
-  const measurement = formatMeasurementPresentation(dependencies, value, unit);
+  const presentation = presentGlucoseFromTimelineEvent({
+    event,
+    formatter: dependencies.formatter,
+    glucoseContextLabel: resolveGlucoseContextLabel(
+      dependencies,
+      event.context,
+    ),
+    glucoseDisplayUnit: dependencies.glucoseDisplayUnit,
+    glucoseKindLabel: dependencies.labels.eventKinds.glucose,
+    localization: dependencies.localization,
+    referenceTime: dependencies.referenceTime,
+    targetRange: dependencies.targetRange,
+  });
 
   return {
     cardType: CARD_TYPE_BY_KIND.glucose,
-    context: resolveGlucoseContextLabel(dependencies, event.context),
-    kindLabel: dependencies.labels.eventKinds.glucose,
-    measurement,
-    search: {
-      localizedLabels: [
-        dependencies.labels.eventKinds.glucose,
-        unit,
-        ...(event.context
-          ? [dependencies.labels.glucoseContexts[event.context]]
-          : []),
-      ],
-      userContent: [value, String(event.concentrationMmolPerL)],
-    },
+    context: presentation.context,
+    kindLabel: presentation.kindLabel,
+    measurement: formatMeasurementPresentation(
+      dependencies,
+      presentation.value,
+      presentation.unit,
+    ),
+    rangeLabel: presentation.rangeLabel,
+    search: presentation.search,
     title: dependencies.labels.eventKinds.glucose,
   };
 }

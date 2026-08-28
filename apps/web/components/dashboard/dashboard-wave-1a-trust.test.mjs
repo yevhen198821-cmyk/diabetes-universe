@@ -31,9 +31,10 @@ test('stale ready measurement exposes non-color stale message', () => {
       referenceTime: new Date('2026-08-02T10:00:00.000Z'),
       state: 'ready',
     },
-    labels,
+    { ...labels, fresh: 'Fresh data' },
     {
       formattedValue: '6.4 mmol/L',
+      freshnessState: 'old',
       sourceLabel: 'Manual entry',
     },
   );

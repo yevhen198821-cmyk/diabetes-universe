@@ -39,7 +39,7 @@ test('app providers mount a single diabetes settings provider', () => {
   assert.match(providersSource, /DiabetesSettingsProvider/);
 });
 
-test('timeline presentation hook consumes diabetes settings provider', () => {
-  assert.match(timelineHookSource, /useDiabetesSettings/);
-  assert.match(timelineHookSource, /glucoseDisplayUnit/);
+test('timeline presentation hook consumes glucose presentation dependencies', () => {
+  assert.match(timelineHookSource, /useGlucosePresentationDependencies/);
+  assert.match(timelineHookSource, /targetRange/);
 });
