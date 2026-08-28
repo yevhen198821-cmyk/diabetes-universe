@@ -4,14 +4,14 @@ import test from 'node:test';
 import { PGlite } from '@electric-sql/pglite';
 import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
 
-import { MEDICAL_FOUNDATION_MIGRATION_SQL } from './medical-foundation-migration.ts';
+import { readMedicalFoundationMigrationSql } from './medical-pglite-bootstrap-migrations.ts';
 import { medicalSchema } from './medical-schema.ts';
 import { createMedicalEventRepository } from '../repositories/medical-event-repository.ts';
 import { createMedicalSubjectRepository } from '../repositories/medical-subject-repository.ts';
 
 test('mutation transaction rolls back all writes on failure', async () => {
   const client = new PGlite();
-  await client.exec(MEDICAL_FOUNDATION_MIGRATION_SQL);
+  await client.exec(readMedicalFoundationMigrationSql());
   const database = drizzlePglite(client, { schema: medicalSchema });
   const subjectId = (
     await createMedicalSubjectRepository(database).provisionSelfSubject(

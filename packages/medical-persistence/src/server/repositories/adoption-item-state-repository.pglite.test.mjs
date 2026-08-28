@@ -6,11 +6,11 @@ import { and, eq, sql } from 'drizzle-orm';
 import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
 
 import {
-  MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL,
-  MEDICAL_ADOPTION_MIGRATION_SQL,
-  MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL,
-  MEDICAL_FOUNDATION_MIGRATION_SQL,
-} from '../database/medical-foundation-migration.ts';
+  readMedicalAdoptionItemStatesMigrationSql,
+  readMedicalAdoptionMigrationSql,
+  readMedicalAdoptionSubjectResourceFkMigrationSql,
+  readMedicalFoundationMigrationSql,
+} from '../database/medical-pglite-bootstrap-migrations.ts';
 import {
   medicalAdoptionItemStates,
   medicalSchema,
@@ -23,10 +23,10 @@ const ZERO_DELTA = { adoptedCount: 0, skippedCount: 0, failedCount: 0 };
 
 async function bootstrapDatabase() {
   const client = new PGlite();
-  await client.exec(MEDICAL_FOUNDATION_MIGRATION_SQL);
-  await client.exec(MEDICAL_ADOPTION_MIGRATION_SQL);
-  await client.exec(MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL);
-  await client.exec(MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL);
+  await client.exec(readMedicalFoundationMigrationSql());
+  await client.exec(readMedicalAdoptionMigrationSql());
+  await client.exec(readMedicalAdoptionSubjectResourceFkMigrationSql());
+  await client.exec(readMedicalAdoptionItemStatesMigrationSql());
   const database = drizzlePglite(client, { schema: medicalSchema });
   const subjectRepository = createMedicalSubjectRepository(database);
   const relationship =

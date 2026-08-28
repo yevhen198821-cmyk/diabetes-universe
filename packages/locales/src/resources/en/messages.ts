@@ -73,10 +73,71 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'account.profile.about.title': 'About the app',
   'account.profile.about.versionLabel': 'Version',
   'account.profile.comingSoon.badge': 'Coming later',
+  'account.diabetesManagement.page.title': 'Diabetes management',
+  'account.diabetesManagement.page.description':
+    'Configure how Diabetes Universe represents your diabetes-related settings.',
+  'account.diabetesManagement.glucose.title': 'Glucose units',
+  'account.diabetesManagement.glucose.description':
+    'Choose the units Diabetes Universe uses to show glucose levels.',
+  'account.diabetesManagement.glucose.unconfigured': 'Not selected',
+  'account.diabetesManagement.glucose.unitMmol': 'mmol/L',
+  'account.diabetesManagement.glucose.unitMg': 'mg/dL',
+  'account.diabetesManagement.diabetesType.title': 'Diabetes type',
+  'account.diabetesManagement.diabetesType.description':
+    'Self-reported information to help organise your data.',
+  'account.diabetesManagement.diabetesType.selfReportedNote':
+    'This is not a verified medical diagnosis.',
+  'account.diabetesManagement.diabetesType.type1': 'Type 1',
+  'account.diabetesManagement.diabetesType.type2': 'Type 2',
+  'account.diabetesManagement.diabetesType.gestational': 'Gestational',
+  'account.diabetesManagement.diabetesType.other': 'Other',
+  'account.diabetesManagement.diabetesType.otherLabel': 'Describe other type',
+  'account.diabetesManagement.diabetesType.unknown': 'Not specified',
+  'account.diabetesManagement.target.title': 'Target range',
+  'account.diabetesManagement.target.notSet': 'Not set',
+  'account.diabetesManagement.target.editAction': 'Edit target range',
+  'account.diabetesManagement.target.remove': 'Remove target range',
+  'account.diabetesManagement.target.removeConfirm.title':
+    'Remove target range?',
+  'account.diabetesManagement.target.removeConfirm.description':
+    'Your personalised target range will be removed. Diabetes Universe will no longer treat it as your configured target. Historical glucose measurements are not deleted.',
+  'account.diabetesManagement.target.removeConfirm.confirm': 'Remove range',
+  'account.diabetesManagement.target.removeConfirm.cancel': 'Cancel',
+  'account.diabetesManagement.target.dialog.title': 'Target range',
+  'account.diabetesManagement.target.dialog.lowerLabel': 'Lower limit',
+  'account.diabetesManagement.target.dialog.upperLabel': 'Upper limit',
+  'account.diabetesManagement.target.dialog.save': 'Save',
+  'account.diabetesManagement.target.dialog.cancel': 'Cancel',
+  'account.diabetesManagement.target.validation.empty':
+    'Enter both lower and upper limits.',
+  'account.diabetesManagement.target.validation.invalidNumber':
+    'Enter valid numbers for the selected units.',
+  'account.diabetesManagement.target.validation.lowEqualHigh':
+    'The lower limit must be less than the upper limit.',
+  'account.diabetesManagement.target.validation.lowGreaterThanHigh':
+    'The lower limit must be less than the upper limit.',
+  'account.diabetesManagement.target.validation.outOfBounds':
+    'The limits are outside supported bounds.',
+  'account.diabetesManagement.disclaimer':
+    'The target range is a Diabetes Universe setting. Changes here do not change CGM, meter, or pump alert settings.',
+  'account.diabetesManagement.loading': 'Loading diabetes settings…',
+  'account.diabetesManagement.saving': 'Saving…',
+  'account.diabetesManagement.errors.network':
+    'Could not save changes. Check your connection and try again.',
+  'account.diabetesManagement.errors.rateLimited':
+    'Too many attempts. Please try again later.',
+  'account.diabetesManagement.errors.revisionConflict':
+    'Settings were changed elsewhere. The latest values have been loaded.',
+  'account.diabetesManagement.errors.syncRequired':
+    'Settings are out of sync. The latest values have been loaded.',
+  'account.diabetesManagement.errors.unauthorized':
+    'Your session has expired. Sign in again to continue.',
+  'account.diabetesManagement.errors.generic':
+    'Could not complete the action. Please try again.',
   'account.profile.logout': 'Sign out',
   'account.profile.menu.diabetesSettings.subtitle':
-    'Targets, alerts, and units',
-  'account.profile.menu.diabetesSettings.title': 'Diabetes settings',
+    'Glucose units, diabetes type, and target range',
+  'account.profile.menu.diabetesSettings.title': 'Diabetes management',
   'account.profile.menu.devices.subtitle': 'Connections and sync',
   'account.profile.menu.devices.title': 'Devices and sources',
   'account.profile.menu.export.subtitle': 'Download or send your data',

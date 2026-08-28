@@ -2,6 +2,7 @@ import {
   createCorrelationId,
   medicalApiErrorResponse,
 } from './medical-api-error';
+import { ensureMedicalApiRuntimeReady } from './ensure-medical-api-runtime';
 import { resolveMedicalApiRuntimeCapability } from './medical-api-runtime-readiness';
 import { MEDICAL_VALIDATION_BOUNDS } from './medical-api-validation-bounds';
 
@@ -40,6 +41,7 @@ function parseOptionalClientRequestId(request: Request): string | undefined {
 export function beginMedicalApiRequest(
   request: Request,
 ): BeginMedicalApiRequestResult {
+  ensureMedicalApiRuntimeReady();
   const correlationId = createCorrelationId();
   const clientRequestId = parseOptionalClientRequestId(request);
 

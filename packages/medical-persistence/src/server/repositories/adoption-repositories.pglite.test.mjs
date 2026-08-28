@@ -5,11 +5,11 @@ import { PGlite } from '@electric-sql/pglite';
 import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
 
 import {
-  MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL,
-  MEDICAL_ADOPTION_MIGRATION_SQL,
-  MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL,
-  MEDICAL_FOUNDATION_MIGRATION_SQL,
-} from '../database/medical-foundation-migration.ts';
+  readMedicalAdoptionItemStatesMigrationSql,
+  readMedicalAdoptionMigrationSql,
+  readMedicalAdoptionSubjectResourceFkMigrationSql,
+  readMedicalFoundationMigrationSql,
+} from '../database/medical-pglite-bootstrap-migrations.ts';
 import { medicalSchema } from '../database/medical-schema.ts';
 import { createAdoptionMappingRepository } from './adoption-mapping-repository.ts';
 import { createAdoptionSessionRepository } from './adoption-session-repository.ts';
@@ -34,10 +34,10 @@ function glucoseEvent(localEventId) {
 
 async function bootstrapDatabase() {
   const client = new PGlite();
-  await client.exec(MEDICAL_FOUNDATION_MIGRATION_SQL);
-  await client.exec(MEDICAL_ADOPTION_MIGRATION_SQL);
-  await client.exec(MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL);
-  await client.exec(MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL);
+  await client.exec(readMedicalFoundationMigrationSql());
+  await client.exec(readMedicalAdoptionMigrationSql());
+  await client.exec(readMedicalAdoptionSubjectResourceFkMigrationSql());
+  await client.exec(readMedicalAdoptionItemStatesMigrationSql());
   const database = drizzlePglite(client, { schema: medicalSchema });
   const subjectRepository = createMedicalSubjectRepository(database);
   const relationship =
@@ -149,10 +149,10 @@ test('adoption mapping unique constraint and fingerprint conflict', async () => 
 
 test('cross-subject canonical resource mapping fails at database level', async () => {
   const client = new PGlite();
-  await client.exec(MEDICAL_FOUNDATION_MIGRATION_SQL);
-  await client.exec(MEDICAL_ADOPTION_MIGRATION_SQL);
-  await client.exec(MEDICAL_ADOPTION_SUBJECT_RESOURCE_FK_MIGRATION_SQL);
-  await client.exec(MEDICAL_ADOPTION_ITEM_STATES_MIGRATION_SQL);
+  await client.exec(readMedicalFoundationMigrationSql());
+  await client.exec(readMedicalAdoptionMigrationSql());
+  await client.exec(readMedicalAdoptionSubjectResourceFkMigrationSql());
+  await client.exec(readMedicalAdoptionItemStatesMigrationSql());
   const database = drizzlePglite(client, { schema: medicalSchema });
   const subjectRepository = createMedicalSubjectRepository(database);
   const subjectA = await subjectRepository.provisionSelfSubject('acct-a');

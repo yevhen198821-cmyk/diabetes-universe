@@ -172,10 +172,72 @@ export const ukrainianDraftMessages = defineDraftMessages({
   'account.profile.about.title': 'Про застосунок',
   'account.profile.about.versionLabel': 'Версія',
   'account.profile.comingSoon.badge': 'Незабаром',
+  'account.diabetesManagement.page.title': 'Керування діабетом',
+  'account.diabetesManagement.page.description':
+    'Налаштуйте, як Diabetes Universe відображає параметри, пов’язані з діабетом.',
+  'account.diabetesManagement.glucose.title': 'Одиниці глюкози',
+  'account.diabetesManagement.glucose.description':
+    'Оберіть одиниці, в яких Diabetes Universe показуватиме рівень глюкози.',
+  'account.diabetesManagement.glucose.unconfigured': 'Не обрано',
+  'account.diabetesManagement.glucose.unitMmol': 'mmol/L',
+  'account.diabetesManagement.glucose.unitMg': 'mg/dL',
+  'account.diabetesManagement.diabetesType.title': 'Тип діабету',
+  'account.diabetesManagement.diabetesType.description':
+    'Самостійно вказана інформація для організації ваших даних.',
+  'account.diabetesManagement.diabetesType.selfReportedNote':
+    'Це не підтверджений медичний діагноз.',
+  'account.diabetesManagement.diabetesType.type1': 'Тип 1',
+  'account.diabetesManagement.diabetesType.type2': 'Тип 2',
+  'account.diabetesManagement.diabetesType.gestational': 'Гестаційний',
+  'account.diabetesManagement.diabetesType.other': 'Інший',
+  'account.diabetesManagement.diabetesType.otherLabel': 'Опишіть інший тип',
+  'account.diabetesManagement.diabetesType.unknown': 'Не вказано',
+  'account.diabetesManagement.target.title': 'Цільовий діапазон',
+  'account.diabetesManagement.target.notSet': 'Не встановлено',
+  'account.diabetesManagement.target.editAction': 'Змінити цільовий діапазон',
+  'account.diabetesManagement.target.remove': 'Видалити цільовий діапазон',
+  'account.diabetesManagement.target.removeConfirm.title':
+    'Видалити цільовий діапазон?',
+  'account.diabetesManagement.target.removeConfirm.description':
+    'Персональний цільовий діапазон буде видалено. Diabetes Universe більше не вважатиме його вашою налаштованою ціллю. Історичні вимірювання глюкози не видаляються.',
+  'account.diabetesManagement.target.removeConfirm.confirm':
+    'Видалити діапазон',
+  'account.diabetesManagement.target.removeConfirm.cancel': 'Скасувати',
+  'account.diabetesManagement.target.dialog.title': 'Цільовий діапазон',
+  'account.diabetesManagement.target.dialog.lowerLabel': 'Нижня межа',
+  'account.diabetesManagement.target.dialog.upperLabel': 'Верхня межа',
+  'account.diabetesManagement.target.dialog.save': 'Зберегти',
+  'account.diabetesManagement.target.dialog.cancel': 'Скасувати',
+  'account.diabetesManagement.target.validation.empty':
+    'Вкажіть нижню та верхню межі.',
+  'account.diabetesManagement.target.validation.invalidNumber':
+    'Введіть коректні числа для обраних одиниць.',
+  'account.diabetesManagement.target.validation.lowEqualHigh':
+    'Нижня межа має бути меншою за верхню.',
+  'account.diabetesManagement.target.validation.lowGreaterThanHigh':
+    'Нижня межа має бути меншою за верхню.',
+  'account.diabetesManagement.target.validation.outOfBounds':
+    'Значення виходять за допустимі межі.',
+  'account.diabetesManagement.disclaimer':
+    'Цільовий діапазон — це налаштування Diabetes Universe. Зміна тут не змінює налаштування сигналів CGM, глюкометра чи інсулінової помпи.',
+  'account.diabetesManagement.loading': 'Завантаження налаштувань діабету…',
+  'account.diabetesManagement.saving': 'Збереження…',
+  'account.diabetesManagement.errors.network':
+    'Не вдалося зберегти зміни. Перевірте підключення та спробуйте ще раз.',
+  'account.diabetesManagement.errors.rateLimited':
+    'Забагато спроб. Спробуйте трохи пізніше.',
+  'account.diabetesManagement.errors.revisionConflict':
+    'Налаштування змінено в іншому місці. Завантажено актуальні значення.',
+  'account.diabetesManagement.errors.syncRequired':
+    'Налаштування розсинхронізовано. Завантажено актуальні значення.',
+  'account.diabetesManagement.errors.unauthorized':
+    'Сесію завершено. Увійдіть знову, щоб продовжити.',
+  'account.diabetesManagement.errors.generic':
+    'Не вдалося виконати дію. Спробуйте ще раз.',
   'account.profile.logout': 'Вийти з акаунта',
   'account.profile.menu.diabetesSettings.subtitle':
-    'Цілі, попередження, одиниці',
-  'account.profile.menu.diabetesSettings.title': 'Налаштування діабету',
+    'Одиниці глюкози, тип діабету та цільовий діапазон',
+  'account.profile.menu.diabetesSettings.title': 'Керування діабетом',
   'account.profile.menu.devices.subtitle': 'Підключення та синхронізація',
   'account.profile.menu.devices.title': 'Пристрої та джерела',
   'account.profile.menu.export.subtitle': 'Завантажити або надіслати дані',

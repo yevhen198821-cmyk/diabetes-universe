@@ -12,6 +12,7 @@ export const AUTH_ALLOWED_CALLBACK_PATHS = [
   '/',
   '/account',
   '/account/about',
+  '/account/diabetes',
   '/account/settings',
   '/account/security',
   '/account/security/sessions',

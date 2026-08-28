@@ -17,7 +17,7 @@ export default defineConfig({
   },
   webServer: {
     command:
-      'rm -rf /tmp/du-auth-pglite-e2e && pnpm --dir apps/web exec next start -p 3010',
+      'rm -rf /tmp/du-auth-pglite-e2e /tmp/du-medical-pglite-e2e && pnpm --dir apps/web exec next start -p 3010',
     env: {
       AUTH_DATABASE_MODE: 'pglite',
       AUTH_E2E_FIXTURES: 'true',
@@ -29,6 +29,12 @@ export default defineConfig({
       AUTH_WEBAUTHN_RP_NAME: 'Diabetes Universe E2E',
       BETTER_AUTH_SECRET: 'test-secret-should-be-at-least-32-characters',
       BETTER_AUTH_URL: 'http://127.0.0.1:3010',
+      MEDICAL_DATABASE_MODE: 'pglite',
+      MEDICAL_PGLITE_DATA_DIR: '/tmp/du-medical-pglite-e2e',
+      MEDICAL_RATE_LIMIT_BACKEND: 'e2e-memory',
+      MEDICAL_RATE_LIMIT_MODE: 'distributed',
+      MEDICAL_REVISION_TOKEN_SECRET: 'test-medical-revision-token-secret',
+      MEDICAL_LIST_CURSOR_SECRET: 'test-medical-list-cursor-secret',
     },
     reuseExistingServer: false,
     timeout: 120_000,

@@ -234,6 +234,10 @@ test('resolveSafeAuthCallbackPath rejects external redirects', () => {
     '/account/settings',
   );
   assert.equal(
+    resolveSafeAuthCallbackPath('/account/diabetes'),
+    '/account/diabetes',
+  );
+  assert.equal(
     resolveSafeAuthCallbackPath('/account/security'),
     '/account/security',
   );

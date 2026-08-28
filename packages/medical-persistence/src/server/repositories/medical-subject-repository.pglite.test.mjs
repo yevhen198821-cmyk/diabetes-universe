@@ -4,14 +4,14 @@ import test from 'node:test';
 import { PGlite } from '@electric-sql/pglite';
 import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
 
-import { MEDICAL_FOUNDATION_MIGRATION_SQL } from '../database/medical-foundation-migration.ts';
+import { readMedicalFoundationMigrationSql } from '../database/medical-pglite-bootstrap-migrations.ts';
 import { medicalSchema } from '../database/medical-schema.ts';
 import { purgeExpiredIdempotencyRecords } from '../maintenance/purge-expired-idempotency.ts';
 import { createMedicalSubjectRepository } from '../repositories/medical-subject-repository.ts';
 
 async function createTestDatabase() {
   const client = new PGlite();
-  await client.exec(MEDICAL_FOUNDATION_MIGRATION_SQL);
+  await client.exec(readMedicalFoundationMigrationSql());
   const database = drizzlePglite(client, { schema: medicalSchema });
   return { client, database };
 }

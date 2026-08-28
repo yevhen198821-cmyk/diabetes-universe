@@ -4,7 +4,7 @@ import test from 'node:test';
 import { PGlite } from '@electric-sql/pglite';
 import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
 
-import { MEDICAL_FOUNDATION_MIGRATION_SQL } from '../database/medical-foundation-migration.ts';
+import { readMedicalFoundationMigrationSql } from '../database/medical-pglite-bootstrap-migrations.ts';
 import { medicalSchema } from '../database/medical-schema.ts';
 import { createMedicalEventRepository } from './medical-event-repository.ts';
 import { createMedicalSubjectRepository } from './medical-subject-repository.ts';
@@ -29,7 +29,7 @@ async function seedSubject(database) {
 
 test('listKeyset paginates without OFFSET and preserves traversal boundary', async () => {
   const client = new PGlite();
-  await client.exec(MEDICAL_FOUNDATION_MIGRATION_SQL);
+  await client.exec(readMedicalFoundationMigrationSql());
   const database = drizzlePglite(client, { schema: medicalSchema });
   const subjectId = await seedSubject(database);
   const repository = createMedicalEventRepository(database);
@@ -99,7 +99,7 @@ test('listKeyset paginates without OFFSET and preserves traversal boundary', asy
 
 test('updateWithRevision rejects stale revision via CAS', async () => {
   const client = new PGlite();
-  await client.exec(MEDICAL_FOUNDATION_MIGRATION_SQL);
+  await client.exec(readMedicalFoundationMigrationSql());
   const database = drizzlePglite(client, { schema: medicalSchema });
   const subjectId = await seedSubject(database);
   const repository = createMedicalEventRepository(database);
