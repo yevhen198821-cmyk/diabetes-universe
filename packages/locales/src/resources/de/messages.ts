@@ -29,6 +29,8 @@ export const germanDraftMessages = defineDraftMessages({
   'dashboard.lastGlucose.stale': 'Messung ist veraltet.',
   'dashboard.lastGlucose.title': 'Letzte Glukose',
   'dashboard.lastGlucose.unavailable': 'Letzte Messung nicht verfügbar.',
+  'dashboard.daySummary.metrics.glucoseMeasurements.one': '{count} Messung',
+  'dashboard.daySummary.metrics.glucoseMeasurements.other': '{count} Messungen',
   'timeline.glucose.range.above': 'Über Ihrem Bereich',
   'timeline.glucose.range.below': 'Unter Ihrem Bereich',
   'timeline.glucose.range.in': 'In Ihrem Bereich',

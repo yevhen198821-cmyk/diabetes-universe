@@ -29,6 +29,11 @@ export const ukrainianDraftMessages = defineDraftMessages({
   'dashboard.lastGlucose.stale': 'Вимірювання застаріле.',
   'dashboard.lastGlucose.title': 'Останній рівень глюкози',
   'dashboard.lastGlucose.unavailable': 'Останнє вимірювання недоступне.',
+  'dashboard.daySummary.metrics.glucoseMeasurements.one': '{count} вимірювання',
+  'dashboard.daySummary.metrics.glucoseMeasurements.few': '{count} вимірювання',
+  'dashboard.daySummary.metrics.glucoseMeasurements.many': '{count} вимірювань',
+  'dashboard.daySummary.metrics.glucoseMeasurements.other':
+    '{count} вимірювань',
   'timeline.glucose.range.above': 'Вище вашого діапазону',
   'timeline.glucose.range.below': 'Нижче вашого діапазону',
   'timeline.glucose.range.in': 'У вашому діапазоні',

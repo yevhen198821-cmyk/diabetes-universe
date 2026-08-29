@@ -33,8 +33,6 @@ const readySummary = {
   dayDate: '2026-08-02',
   displayDayLabel: 'Sunday, 2 August 2026',
   glucoseMeasurements: 4,
-  latestTodayGlucoseDisplay: '6.4 mmol/L',
-  latestTodayGlucoseDisplayTime: '06:00',
   medicationDoses: 2,
   totalActivitySeconds: 1800,
   totalCarbohydrateGrams: 120,
@@ -82,7 +80,7 @@ test('dashboard day summary renders localized English copy inside platform provi
     assert.match(document.body.textContent ?? '', /Activity/);
     assert.equal(document.body.textContent?.includes('Reminders'), false);
     assert.equal(document.body.textContent?.includes('Сводка дня'), false);
-    assert.match(document.body.textContent ?? '', /6\.4 mmol\/L/);
+    assert.match(document.body.textContent ?? '', /4 measurements/);
   } finally {
     await act(async () => {
       root.unmount();

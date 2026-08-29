@@ -15,7 +15,15 @@ const labels = {
   defaultEmpty: "Today's summary is not available yet.",
   defaultError: 'Could not load the day summary.',
   eyebrow: 'Current day',
+  formatGlucoseMeasurementCount: (count) =>
+    count === 1 ? '1 measurement' : `${count} measurements`,
   glucose: 'Glucose',
+  glucoseMeasurements: {
+    few: '{count} measurements',
+    many: '{count} measurements',
+    one: '{count} measurement',
+    other: '{count} measurements',
+  },
   loading: 'Loading day summary',
   title: 'Today',
   totalCarbohydrates: 'Carbohydrates',
@@ -33,8 +41,6 @@ const validSummary = {
   dayDate: '2026-08-02',
   displayDayLabel: 'Sunday, 2 August 2026',
   glucoseMeasurements: 4,
-  latestTodayGlucoseDisplay: '6.1 mmol/L',
-  latestTodayGlucoseDisplayTime: '10:15',
   medicationDoses: 2,
   totalActivitySeconds: 1800,
   totalCarbohydrateGrams: 120,
@@ -48,7 +54,7 @@ const validSummary = {
 };
 
 const formattedMetrics = {
-  glucose: '6.1 mmol/L',
+  glucose: '4 measurements',
   totalActivity: '30 mins',
   totalCarbohydrates: '120 g',
   totalInsulin: '12 U',
@@ -69,8 +75,8 @@ test('creates ready state with four today metrics', () => {
   assert.equal(model.displayDayLabel, 'Sunday, 2 August 2026');
   assert.equal(model.metrics.length, 4);
   assert.equal(model.metrics[0]?.label, 'Glucose');
-  assert.equal(model.metrics[0]?.value, '6.1 mmol/L');
-  assert.equal(model.metrics[0]?.secondaryText, '10:15');
+  assert.equal(model.metrics[0]?.value, '4 measurements');
+  assert.equal(model.metrics[0]?.secondaryText, 'Total for the day');
   assert.equal(model.metrics[1]?.value, '12 U');
   assert.equal(model.metrics[2]?.value, '120 g');
   assert.equal(model.metrics[3]?.value, '30 mins');
@@ -85,8 +91,6 @@ test('normalizes ready summary values without changing their meaning', () => {
         dayDate: ' 2026-08-02 ',
         displayDayLabel: ' Sunday, 2 August 2026 ',
         glucoseMeasurements: 4,
-        latestTodayGlucoseDisplay: ' 6.1 mmol/L ',
-        latestTodayGlucoseDisplayTime: ' 10:15 ',
         medicationDoses: 2,
         totalActivitySeconds: 1800,
         totalCarbohydrateGrams: 120,
@@ -189,8 +193,6 @@ test('accepts zero counts when the owner supplies valid current-day totals', () 
       summary: {
         ...validSummary,
         glucoseMeasurements: 0,
-        latestTodayGlucoseDisplay: null,
-        latestTodayGlucoseDisplayTime: null,
         medicationDoses: 0,
         totalActivitySeconds: 0,
         totalCarbohydrateGrams: 0,
@@ -205,7 +207,7 @@ test('accepts zero counts when the owner supplies valid current-day totals', () 
     },
     labels,
     {
-      glucose: '—',
+      glucose: '0 measurements',
       totalActivity: '0 mins',
       totalCarbohydrates: '0 g',
       totalInsulin: '0 U',
@@ -213,7 +215,7 @@ test('accepts zero counts when the owner supplies valid current-day totals', () 
   );
 
   assert.equal(model.state, 'ready');
-  assert.equal(model.metrics[0]?.value, '—');
+  assert.equal(model.metrics[0]?.value, '0 measurements');
   assert.equal(model.metrics[0]?.secondaryText, 'No entries today');
   assert.equal(model.metrics[0]?.chartValues.length, 0);
   assert.equal(model.metrics[1]?.secondaryText, 'No entries today');

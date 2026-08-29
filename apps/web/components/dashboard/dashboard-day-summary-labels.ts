@@ -1,7 +1,9 @@
 import type {
   LocalizationPlatform,
+  PluralMessageTemplates,
   TranslationKey,
 } from '@diabetes-universe/i18n';
+import { formatPluralMessage } from '@diabetes-universe/i18n';
 
 export interface DashboardDaySummaryChartAriaLabels {
   readonly activity: (count: number) => string;
@@ -17,7 +19,12 @@ export interface DashboardDaySummaryLabels {
   readonly defaultEmpty: string;
   readonly defaultError: string;
   readonly eyebrow: string;
+  readonly formatGlucoseMeasurementCount: (
+    count: number,
+    formatCount: (value: number) => string,
+  ) => string;
   readonly glucose: string;
+  readonly glucoseMeasurements: PluralMessageTemplates;
   readonly loading: string;
   readonly title: string;
   readonly totalCarbohydrates: string;
@@ -76,6 +83,20 @@ const DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS = {
   defaultError: asTranslationKey('dashboard.daySummary.error.default'),
   eyebrow: asTranslationKey('dashboard.daySummary.eyebrow'),
   glucose: asTranslationKey('dashboard.daySummary.metrics.glucose'),
+  glucoseMeasurements: {
+    few: asTranslationKey(
+      'dashboard.daySummary.metrics.glucoseMeasurements.few',
+    ),
+    many: asTranslationKey(
+      'dashboard.daySummary.metrics.glucoseMeasurements.many',
+    ),
+    one: asTranslationKey(
+      'dashboard.daySummary.metrics.glucoseMeasurements.one',
+    ),
+    other: asTranslationKey(
+      'dashboard.daySummary.metrics.glucoseMeasurements.other',
+    ),
+  },
   loading: asTranslationKey('dashboard.daySummary.loading'),
   title: asTranslationKey('dashboard.daySummary.title'),
   totalCarbohydrates: asTranslationKey(
@@ -126,6 +147,26 @@ function createChartAriaResolver(
 export function resolveDashboardDaySummaryLabels(
   localization: LocalizationPlatform,
 ): DashboardDaySummaryLabels {
+  const glucoseMeasurements: PluralMessageTemplates = {
+    few: translateDashboardDaySummaryKey(
+      localization,
+      DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.glucoseMeasurements.few,
+    ),
+    many: translateDashboardDaySummaryKey(
+      localization,
+      DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.glucoseMeasurements.many,
+    ),
+    one: translateDashboardDaySummaryKey(
+      localization,
+      DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.glucoseMeasurements.one,
+    ),
+    other: translateDashboardDaySummaryKey(
+      localization,
+      DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.glucoseMeasurements.other,
+    ),
+  };
+  const locale = localization.localeContext.locale;
+
   return {
     activity: translateDashboardDaySummaryKey(
       localization,
@@ -165,10 +206,13 @@ export function resolveDashboardDaySummaryLabels(
       localization,
       DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.eyebrow,
     ),
+    formatGlucoseMeasurementCount: (count, formatCount) =>
+      formatPluralMessage(count, glucoseMeasurements, locale, formatCount),
     glucose: translateDashboardDaySummaryKey(
       localization,
       DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.glucose,
     ),
+    glucoseMeasurements,
     loading: translateDashboardDaySummaryKey(
       localization,
       DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.loading,
@@ -221,6 +265,9 @@ export const dashboardDaySummaryTranslationKeyList: readonly TranslationKey[] =
     DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.defaultError,
     DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.eyebrow,
     DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.glucose,
+    ...Object.values(
+      DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.glucoseMeasurements,
+    ),
     DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.loading,
     DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.title,
     DASHBOARD_DAY_SUMMARY_TRANSLATION_KEYS.totalCarbohydrates,

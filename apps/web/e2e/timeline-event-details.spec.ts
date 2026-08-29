@@ -55,7 +55,6 @@ test('timeline event edit updates Timeline and Dashboard selectors', async ({
       exact: true,
     }),
   ).toBeVisible();
-  await expect(page.getByText('9.1 mmol/L').first()).toBeVisible();
 });
 
 test('timeline edit moves an event to another day via day navigation', async ({
