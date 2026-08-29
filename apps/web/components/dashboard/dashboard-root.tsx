@@ -212,7 +212,10 @@ export function DashboardRoot() {
               state="ready"
             />
           ) : (
-            <DashboardLastGlucose state="empty" />
+            <DashboardLastGlucose
+              onAddGlucose={() => requestOpen('fab', 'glucose')}
+              state="empty"
+            />
           )
         }
         mobileNav={<DashboardMobileNav />}

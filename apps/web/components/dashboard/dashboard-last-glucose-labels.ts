@@ -6,6 +6,7 @@ import type {
 export interface DashboardLastGlucoseLabels {
   readonly defaultEmpty: string;
   readonly defaultError: string;
+  readonly emptyCta: string;
   readonly eyebrow: string;
   readonly fresh: string;
   readonly loading: string;
@@ -27,6 +28,7 @@ function asTranslationKey(value: string): TranslationKey {
 const DASHBOARD_LAST_GLUCOSE_TRANSLATION_KEYS = {
   defaultEmpty: asTranslationKey('dashboard.lastGlucose.empty.default'),
   defaultError: asTranslationKey('dashboard.lastGlucose.error.default'),
+  emptyCta: asTranslationKey('dashboard.lastGlucose.empty.cta'),
   eyebrow: asTranslationKey('dashboard.lastGlucose.eyebrow'),
   fresh: asTranslationKey('dashboard.lastGlucose.fresh'),
   loading: asTranslationKey('dashboard.lastGlucose.loading'),
@@ -62,6 +64,10 @@ export function resolveDashboardLastGlucoseLabels(
     defaultError: translateDashboardLastGlucoseKey(
       localization,
       DASHBOARD_LAST_GLUCOSE_TRANSLATION_KEYS.defaultError,
+    ),
+    emptyCta: translateDashboardLastGlucoseKey(
+      localization,
+      DASHBOARD_LAST_GLUCOSE_TRANSLATION_KEYS.emptyCta,
     ),
     eyebrow: translateDashboardLastGlucoseKey(
       localization,

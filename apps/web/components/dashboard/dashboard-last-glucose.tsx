@@ -3,6 +3,8 @@
 import { Clock, ClockAlert, Droplets } from 'lucide-react';
 import { useMemo } from 'react';
 
+import { Button } from '@diabetes-universe/ui';
+
 import { resolveDashboardMedicalEventSourceLabel } from '../../lib/dashboard/dashboard-event-source-labels';
 import { presentGlucoseFromTimelineEvent } from '../../lib/medical/glucose';
 import { useLocalization } from '../../lib/platform/react/use-localization';
@@ -203,6 +205,20 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
             >
               {viewModel.message}
             </p>
+            {viewModel.state === 'empty' && viewModel.showEmptyCta ? (
+              <Button
+                className="mt-4"
+                onClick={() => {
+                  if (props.state === 'empty') {
+                    props.onAddGlucose();
+                  }
+                }}
+                size="md"
+                variant="primary"
+              >
+                {viewModel.emptyCtaLabel}
+              </Button>
+            ) : null}
           </div>
         </div>
       ) : null}

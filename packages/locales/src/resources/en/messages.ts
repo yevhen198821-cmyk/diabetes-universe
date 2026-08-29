@@ -207,6 +207,7 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'dashboard.header.title': 'Home',
   'dashboard.lastGlucose.eyebrow': 'Last measurement',
   'dashboard.lastGlucose.empty.default': 'No measurements yet.',
+  'dashboard.lastGlucose.empty.cta': 'Add glucose',
   'dashboard.lastGlucose.error.default': 'Could not load the last measurement.',
   'dashboard.lastGlucose.fresh': 'Fresh data',
   'dashboard.lastGlucose.loading': 'Loading last glucose measurement',

@@ -16,6 +16,7 @@ export const germanDraftMessages = defineDraftMessages({
   'dashboard.lastGlucose.time.justNow': 'Gerade eben',
   'dashboard.lastGlucose.time.today': 'Heute',
   'dashboard.lastGlucose.time.yesterday': 'Gestern',
+  'dashboard.lastGlucose.empty.cta': 'Glukose hinzufügen',
   'timeline.glucose.range.above': 'Über Ihrem Bereich',
   'timeline.glucose.range.below': 'Unter Ihrem Bereich',
   'timeline.glucose.range.in': 'In Ihrem Bereich',

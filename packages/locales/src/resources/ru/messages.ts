@@ -26,6 +26,7 @@ export const russianDraftMessages = defineDraftMessages({
   'dashboard.header.loading': 'Загрузка шапки',
   'dashboard.header.title': 'Главная',
   'dashboard.lastGlucose.empty.default': 'Измерений пока нет.',
+  'dashboard.lastGlucose.empty.cta': 'Добавить глюкозу',
   'dashboard.lastGlucose.error.default':
     'Не удалось загрузить последнее измерение.',
   'dashboard.lastGlucose.eyebrow': 'Последнее измерение',

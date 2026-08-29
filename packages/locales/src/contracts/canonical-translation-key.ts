@@ -163,6 +163,7 @@ export const CANONICAL_TRANSLATION_KEYS = [
   'dashboard.header.loading',
   'dashboard.header.title',
   'dashboard.lastGlucose.eyebrow',
+  'dashboard.lastGlucose.empty.cta',
   'dashboard.lastGlucose.empty.default',
   'dashboard.lastGlucose.error.default',
   'dashboard.lastGlucose.fresh',
