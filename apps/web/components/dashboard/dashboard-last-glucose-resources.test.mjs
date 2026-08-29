@@ -6,7 +6,10 @@ import {
   englishCanonicalMessages,
 } from '../../../../packages/locales/src/index.ts';
 
-import { dashboardLastGlucoseTranslationKeys } from './dashboard-last-glucose-labels.ts';
+import {
+  dashboardLastGlucoseTimeTranslationKeys,
+  dashboardLastGlucoseTranslationKeys,
+} from './dashboard-last-glucose-labels.ts';
 
 const DASHBOARD_LAST_GLUCOSE_KEYS = Object.values(
   dashboardLastGlucoseTranslationKeys,
@@ -33,6 +36,18 @@ test('dashboard last glucose keys do not duplicate dashboard header or next acti
   );
 
   assert.equal(duplicates.length, 0);
+});
+
+test('dashboard last glucose time translation keys are canonical and non-empty in English resources', () => {
+  const timeKeys = Object.values(dashboardLastGlucoseTimeTranslationKeys);
+
+  for (const key of timeKeys) {
+    assert.equal(CANONICAL_TRANSLATION_KEYS.includes(key), true);
+    assert.equal(typeof englishCanonicalMessages[key], 'string');
+    assert.equal(englishCanonicalMessages[key].trim().length > 0, true);
+  }
+
+  assert.equal(timeKeys.length, 3);
 });
 
 test('dashboard last glucose exposes exactly eight translation keys', () => {

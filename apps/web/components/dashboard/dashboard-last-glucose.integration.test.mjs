@@ -9,6 +9,7 @@ import { createRoot } from 'react-dom/client';
 import test from 'node:test';
 
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model.ts';
+import { formatDashboardGlucoseDisplayTime } from '../../lib/dashboard/format-dashboard-glucose-display-time.ts';
 import { createTimelinePresentationDependencies } from '../../lib/timeline/presentation/index.ts';
 import {
   liftLegacyTestFixture,
@@ -137,7 +138,7 @@ test('dashboard last glucose loading state announces localized status', async ()
   }
 });
 
-test('deriveLastGlucose uses injected formatter for display time', async () => {
+test('deriveLastGlucose uses dashboard glucose display-time policy for same-day readings', async () => {
   const runtime = await createTestPlatformRuntime({
     request: { acceptLanguage: 'en-GB', cookieTimeZone: 'UTC' },
   });
@@ -146,9 +147,6 @@ test('deriveLastGlucose uses injected formatter for display time', async () => {
     formatter: runtime.formatter,
     localization: runtime.localization,
   });
-  let formatTimeCalls = 0;
-  let receivedDateTime = null;
-
   const blocks = deriveDashboardQuickAddBlocks(
     {
       events: liftLegacyTestFixtures([
@@ -163,21 +161,26 @@ test('deriveLastGlucose uses injected formatter for display time', async () => {
       ]),
     },
     {
-      formatLastGlucoseDisplayTime: (dateTime) => {
-        formatTimeCalls += 1;
-        receivedDateTime = dateTime;
-        return formatter.formatTime(dateTime, { timeStyle: 'short' });
-      },
+      formatLastGlucoseDisplayTime: (dateTime) =>
+        formatDashboardGlucoseDisplayTime({
+          formatter,
+          labels: {
+            justNow: 'Just now',
+            today: 'Today',
+            yesterday: 'Yesterday',
+          },
+          measuredAt: dateTime,
+          referenceTime: new Date('2026-08-02T10:00:00.000Z'),
+          timeZone: 'UTC',
+        }),
       referenceTime: new Date('2026-08-02T10:00:00.000Z'),
       timeZone: 'UTC',
       presentationDependencies,
     },
   );
 
-  assert.equal(formatTimeCalls, 1);
-  assert.equal(receivedDateTime, '2026-08-02T08:00:00.000Z');
   assert.equal(blocks.lastGlucose?.event.concentrationMmolPerL, 6.4);
-  assert.equal(blocks.lastGlucose?.displayTime, '08:00');
+  assert.equal(blocks.lastGlucose?.displayTime, 'Today, 08:00');
   assert.equal(
     blocks.lastGlucose?.event.occurredAt,
     '2026-08-02T08:00:00.000Z',
