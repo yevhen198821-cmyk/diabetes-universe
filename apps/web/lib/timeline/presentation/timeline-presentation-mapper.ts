@@ -335,11 +335,10 @@ export function mapTimelineEventCardPresentation(
   };
 
   if (event.kind === 'glucose') {
-    const glucosePresentation = mapGlucosePresentation(event, dependencies);
     const historyPresentation = resolveGlucoseTimelineCardHistoryPresentation({
       dependencies,
-      rangeLabel: glucosePresentation.rangeLabel,
-      timestampUncertaintyLabel: glucosePresentation.timestampUncertaintyLabel,
+      rangeLabel: presentation.rangeLabel ?? null,
+      timestampUncertaintyLabel: presentation.timestampUncertaintyLabel ?? null,
     });
     const cardPresentation = {
       ...base,

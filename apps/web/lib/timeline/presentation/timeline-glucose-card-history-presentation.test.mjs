@@ -182,3 +182,29 @@ test('glucose mapper still exposes rangeLabel at kind mapper layer', () => {
   assert.equal(glucose.rangeLabel, 'In your range');
   assert.equal(glucose.timestampUncertaintyLabel, null);
 });
+
+test('card presentation reuses kind presentation glucose history labels', () => {
+  const futureEvent = createGlucoseEvent(
+    7.3,
+    '2026-08-02T20:00:00.000Z',
+    'glucose-future-single-path',
+  );
+  const kindPresentation = timelinePresentationKindMappers.glucose(
+    futureEvent,
+    targetDependencies,
+  );
+  const card = mapTimelineEventCardPresentation(
+    futureEvent,
+    targetDependencies,
+    '20:00',
+  );
+
+  assert.equal(kindPresentation.rangeLabel, null);
+  assert.equal(
+    kindPresentation.timestampUncertaintyLabel,
+    'Check measurement time',
+  );
+  assert.deepEqual(card.statusLines, [
+    kindPresentation.timestampUncertaintyLabel,
+  ]);
+});
