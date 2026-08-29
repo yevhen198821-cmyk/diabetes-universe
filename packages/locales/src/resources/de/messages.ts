@@ -16,6 +16,7 @@ export const germanDraftMessages = defineDraftMessages({
   'timeline.glucose.range.above': 'Über Ihrem Bereich',
   'timeline.glucose.range.below': 'Unter Ihrem Bereich',
   'timeline.glucose.range.in': 'In Ihrem Bereich',
+  'timeline.glucose.timestamp.check': 'Messzeit prüfen',
   'timeline.eventKind.activity': 'Aktivität',
   'timeline.eventKind.glucose': 'Glukose',
   'timeline.eventKind.insulin': 'Insulin',

@@ -17,6 +17,8 @@ import type {
 import { resolveGlucosePresentationUnit } from '../client/resolve-glucose-display-unit';
 import { adaptGlucosePresentationForDisplay } from './glucose-presentation-adapter';
 import { resolveGlucoseRangeStateLabel } from './glucose-range-state-labels';
+import { resolveGlucoseTimestampUncertaintyLabel } from './glucose-timestamp-uncertainty-label';
+import { resolveGlucoseFreshnessPolicyForTimelineEvent } from './resolve-glucose-freshness-policy-for-timeline-event';
 
 export interface PresentGlucoseFromTimelineEventInput {
   readonly event: Extract<SemanticTimelineEvent, { kind: 'glucose' }>;
@@ -41,6 +43,7 @@ export interface TimelineGlucosePresentationResult {
     readonly localizedLabels: readonly string[];
     readonly userContent: readonly string[];
   };
+  readonly timestampUncertaintyLabel: string | null;
   readonly unit: string;
   readonly value: string;
 }
@@ -56,9 +59,12 @@ export function presentGlucoseFromTimelineEvent(
   input: PresentGlucoseFromTimelineEventInput,
 ): TimelineGlucosePresentationResult {
   const displayUnit = resolveGlucosePresentationUnit(input.glucoseDisplayUnit);
+  const freshnessPolicy =
+    input.freshnessPolicy ??
+    resolveGlucoseFreshnessPolicyForTimelineEvent(input.event);
   const localized = adaptGlucosePresentationForDisplay(input.formatter, {
     displayUnit,
-    freshnessPolicy: input.freshnessPolicy ?? null,
+    freshnessPolicy,
     reading: {
       concentrationMmolPerL: input.event.concentrationMmolPerL,
       measuredAt: input.event.occurredAt,
@@ -71,6 +77,10 @@ export function presentGlucoseFromTimelineEvent(
   const rangeLabel = resolveGlucoseRangeStateLabel(
     input.localization,
     localized.model.rangeState,
+    localized.model.dataQualityState,
+  );
+  const timestampUncertaintyLabel = resolveGlucoseTimestampUncertaintyLabel(
+    input.localization,
     localized.model.dataQualityState,
   );
   const context = resolveGlucoseContextLabel(
@@ -98,6 +108,7 @@ export function presentGlucoseFromTimelineEvent(
         input.glucoseKindLabel,
         unit,
         ...(rangeLabel ? [rangeLabel] : []),
+        ...(timestampUncertaintyLabel ? [timestampUncertaintyLabel] : []),
         ...(context ? [context] : []),
       ],
       userContent: [
@@ -105,6 +116,7 @@ export function presentGlucoseFromTimelineEvent(
         String(input.event.concentrationMmolPerL),
       ],
     },
+    timestampUncertaintyLabel,
     unit,
     value: localized.formattedValue,
   };

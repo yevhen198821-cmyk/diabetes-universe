@@ -3,7 +3,7 @@ import type {
   SemanticTimelineEvent,
 } from '@diabetes-universe/types';
 
-import { getLatestGlucoseEvent } from '../../timeline/timeline-selectors';
+import { selectLatestEligibleGlucoseTimelineEvent } from '../../medical/glucose/select-latest-eligible-glucose-timeline-event';
 import type { NextActionContext } from './next-action-types';
 
 export type CreateNextActionContextInput = Readonly<{
@@ -17,7 +17,10 @@ export type CreateNextActionContextInput = Readonly<{
 export function createNextActionContext(
   input: CreateNextActionContextInput,
 ): NextActionContext {
-  const latestGlucoseEvent = getLatestGlucoseEvent(input.events);
+  const latestGlucoseEvent = selectLatestEligibleGlucoseTimelineEvent(
+    input.events,
+    { referenceTime: input.now },
+  );
 
   return {
     latestGlucose: latestGlucoseEvent

@@ -4,11 +4,7 @@ import { Clock, ClockAlert, Droplets } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { resolveDashboardMedicalEventSourceLabel } from '../../lib/dashboard/dashboard-event-source-labels';
-import {
-  DASHBOARD_LEGACY_FRESHNESS_POLICY,
-  presentGlucoseFromTimelineEvent,
-  type GlucosePresentationDependencies,
-} from '../../lib/medical/glucose';
+import { presentGlucoseFromTimelineEvent } from '../../lib/medical/glucose';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { DashboardHeroScenery } from './dashboard-hero-scenery';
 import { resolveDashboardLastGlucoseLabels } from './dashboard-last-glucose-labels';
@@ -35,7 +31,6 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
     return presentGlucoseFromTimelineEvent({
       event: props.glucose.event,
       formatter: props.glucosePresentation.formatter,
-      freshnessPolicy: DASHBOARD_LEGACY_FRESHNESS_POLICY,
       glucoseDisplayUnit: props.glucosePresentation.glucoseDisplayUnit,
       glucoseKindLabel: labels.title,
       localization: props.glucosePresentation.localization,

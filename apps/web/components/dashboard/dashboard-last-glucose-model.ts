@@ -1,10 +1,6 @@
 import type { GlucoseFreshnessState } from '@diabetes-universe/medical-domain';
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
-import {
-  createDashboardLegacyFreshnessPolicy,
-  DASHBOARD_LEGACY_FRESHNESS_POLICY,
-} from '../../lib/medical/glucose/dashboard-legacy-freshness-policy';
 import type { GlucosePresentationDependencies } from '../../lib/medical/glucose/use-glucose-presentation-dependencies';
 import type { DashboardLastGlucoseLabels } from './dashboard-last-glucose-labels';
 
@@ -22,7 +18,6 @@ interface DashboardLastGlucoseReadyProps {
   readonly glucose: DashboardLastGlucoseMeasurement;
   readonly glucosePresentation: GlucosePresentationDependencies;
   readonly referenceTime?: Date;
-  readonly staleAfterMs?: number;
   readonly state: 'ready';
 }
 
@@ -62,8 +57,6 @@ export interface DashboardLastGlucoseViewModelOptions {
   readonly referenceTime?: Date;
   readonly sourceLabel?: string | null;
 }
-
-export const DEFAULT_LAST_GLUCOSE_STALE_AFTER_MS = 24 * 60 * 60 * 1000;
 
 function isValidIsoDateTime(dateTime: string): boolean {
   return !Number.isNaN(Date.parse(dateTime));
@@ -195,12 +188,4 @@ export function createDashboardLastGlucoseViewModel(
         value: null,
       };
   }
-}
-
-export function resolveDashboardLastGlucoseFreshnessPolicy(
-  staleAfterMs: number = DEFAULT_LAST_GLUCOSE_STALE_AFTER_MS,
-) {
-  return staleAfterMs === DEFAULT_LAST_GLUCOSE_STALE_AFTER_MS
-    ? DASHBOARD_LEGACY_FRESHNESS_POLICY
-    : createDashboardLegacyFreshnessPolicy(staleAfterMs);
 }

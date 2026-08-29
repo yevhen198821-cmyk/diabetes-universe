@@ -348,6 +348,7 @@ export const CANONICAL_TRANSLATION_KEYS = [
   'timeline.glucose.range.above',
   'timeline.glucose.range.below',
   'timeline.glucose.range.in',
+  'timeline.glucose.timestamp.check',
   'timeline.header.title',
   'timeline.mealType.breakfast',
   'timeline.mealType.dinner',

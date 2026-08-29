@@ -1,3 +1,7 @@
+import {
+  GLUCOSE_FUTURE_CLOCK_SKEW_TOLERANCE_MS,
+  parseGlucoseTimestampMs,
+} from './glucose-clock-tolerance';
 import type { GlucoseFreshnessState } from './glucose-semantics';
 
 /**
@@ -22,16 +26,7 @@ export interface ResolveGlucoseFreshnessStateInput {
   readonly measuredAt: string;
   readonly referenceTime: Date | string;
   readonly policy: GlucoseFreshnessPolicy | null | undefined;
-}
-
-function parseTimestamp(value: string | Date): number | null {
-  const timestamp = value instanceof Date ? value.getTime() : Date.parse(value);
-
-  if (!Number.isFinite(timestamp)) {
-    return null;
-  }
-
-  return timestamp;
+  readonly futureToleranceMs?: number;
 }
 
 /**
@@ -43,14 +38,17 @@ function parseTimestamp(value: string | Date): number | null {
 export function resolveGlucoseFreshnessState(
   input: ResolveGlucoseFreshnessStateInput,
 ): GlucoseFreshnessState {
-  const measuredAtMs = parseTimestamp(input.measuredAt);
-  const referenceMs = parseTimestamp(input.referenceTime);
+  const measuredAtMs = parseGlucoseTimestampMs(input.measuredAt);
+  const referenceMs = parseGlucoseTimestampMs(input.referenceTime);
 
   if (measuredAtMs === null || referenceMs === null) {
     return 'unknown';
   }
 
-  if (measuredAtMs > referenceMs) {
+  const toleranceMs =
+    input.futureToleranceMs ?? GLUCOSE_FUTURE_CLOCK_SKEW_TOLERANCE_MS;
+
+  if (measuredAtMs > referenceMs + toleranceMs) {
     return 'unknown';
   }
 
@@ -63,7 +61,7 @@ export function resolveGlucoseFreshnessState(
     return 'unknown';
   }
 
-  const ageMs = referenceMs - measuredAtMs;
+  const ageMs = Math.max(0, referenceMs - measuredAtMs);
 
   if (policy.currentWithinMs !== null && ageMs <= policy.currentWithinMs) {
     return 'current';
