@@ -70,16 +70,8 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
       return undefined;
     }
 
-    return [
-      glucosePresentationResult.formattedMeasurement,
-      viewModel.rangeLabel,
-      viewModel.displayTime,
-      statusMessage,
-      viewModel.sourceLabel,
-    ]
-      .filter((part) => typeof part === 'string' && part.trim().length > 0)
-      .join(', ');
-  }, [glucosePresentationResult, statusMessage, viewModel]);
+    return glucosePresentationResult.formattedMeasurement;
+  }, [glucosePresentationResult, viewModel.state]);
 
   return (
     <section
@@ -112,13 +104,23 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
       ) : null}
 
       {viewModel.state === 'ready' && glucosePresentationResult ? (
-        <div className="relative z-10 flex h-full max-w-[62%] flex-col justify-between sm:max-w-[56%] lg:max-w-[50%]">
+        <div className="relative z-10 flex h-full max-w-[62%] min-w-0 flex-col justify-between sm:max-w-[56%] lg:max-w-[50%]">
           <div>
             <div className="flex items-center gap-2.5 text-sm font-semibold text-white/95 sm:text-base">
               <span className="grid size-9 place-items-center rounded-full bg-white text-teal-500 shadow-[0_8px_20px_rgba(15,23,42,0.14)]">
                 <Droplets aria-hidden="true" size={18} strokeWidth={2.3} />
               </span>
-              <h2 id={titleId}>{labels.title}</h2>
+              <h2
+                id={titleId}
+                ref={
+                  props.state === 'ready'
+                    ? props.readyFocusTargetRef
+                    : undefined
+                }
+                tabIndex={props.state === 'ready' ? -1 : undefined}
+              >
+                {labels.title}
+              </h2>
             </div>
             <p
               aria-label={accessibilityLabel}
@@ -208,9 +210,9 @@ export function DashboardLastGlucose(props: DashboardLastGlucoseProps) {
             {viewModel.state === 'empty' && viewModel.showEmptyCta ? (
               <Button
                 className="mt-4"
-                onClick={() => {
+                onClick={(event) => {
                   if (props.state === 'empty') {
-                    props.onAddGlucose();
+                    props.onAddGlucose(event.currentTarget);
                   }
                 }}
                 size="md"

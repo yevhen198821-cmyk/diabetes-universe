@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, type RefObject } from 'react';
+import { useMemo } from 'react';
 
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { quickAddActions } from '../../lib/quick-add/actions';
@@ -68,16 +68,17 @@ function isVisibleQuickAddCategory(
 
 export interface DashboardQuickActionsProps {
   readonly disabled?: boolean;
-  readonly onOpenCategory: (category: QuickAddOpenCategory) => void;
+  readonly onOpenCategory: (
+    category: QuickAddOpenCategory,
+    opener: HTMLButtonElement,
+  ) => void;
   readonly presentationDependencies: TimelinePresentationDependencies;
-  readonly returnFocusRef?: RefObject<HTMLButtonElement | null>;
 }
 
 export function DashboardQuickActions({
   disabled = false,
   onOpenCategory,
   presentationDependencies,
-  returnFocusRef,
 }: DashboardQuickActionsProps) {
   const localization = useLocalization();
   const sectionLabel = useMemo(
@@ -110,7 +111,7 @@ export function DashboardQuickActions({
         </h2>
 
         <div className="grid grid-cols-5 gap-0.5 sm:gap-1.5 md:gap-2">
-          {actions.map((action, index) => {
+          {actions.map((action) => {
             const category = action.category;
             const eventKind = eventKindByCategory[category];
             const label = presentationDependencies.labels.eventKinds[eventKind];
@@ -121,8 +122,9 @@ export function DashboardQuickActions({
                 className="group focus-visible:outline-interactive-primary flex min-h-11 min-w-0 flex-col items-center rounded-2xl px-0.5 py-1 text-center focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={disabled}
                 key={action.id}
-                onClick={() => onOpenCategory(category)}
-                ref={index === 0 ? returnFocusRef : undefined}
+                onClick={(event) =>
+                  onOpenCategory(category, event.currentTarget)
+                }
                 type="button"
               >
                 <span

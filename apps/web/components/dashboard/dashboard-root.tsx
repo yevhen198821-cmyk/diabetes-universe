@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { TranslationKey } from '@diabetes-universe/i18n';
 
@@ -21,9 +21,11 @@ import {
   createInitialQuickAddControllerState,
   createQuickAddOpenRequest,
   releaseQuickAddOpeningLock,
+  type QuickAddCloseReason,
   type QuickAddOpenCategory,
   type QuickAddOpenTrigger,
 } from '../../lib/quick-add/quick-add-controller-model';
+import type { QuickAddReturnFocusContext } from '../../lib/quick-add/resolve-quick-add-return-focus-target';
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
 import { useGlucosePresentationDependencies } from '../../lib/medical/glucose';
 import { composeTimelinePresentationDependencies } from '../../lib/timeline/react/use-timeline-presentation-dependencies';
@@ -44,7 +46,10 @@ export function DashboardRoot() {
   const router = useRouter();
   const localization = useLocalization();
   const formatter = useFormatter();
-  const quickActionsRef = useRef<HTMLButtonElement>(null);
+  const quickAddOpenerRef = useRef<HTMLElement | null>(null);
+  const openedFromEmptyGlucoseCtaRef = useRef(false);
+  const pendingEmptyGlucoseSuccessFocusRef = useRef(false);
+  const lastGlucoseReadyFocusRef = useRef<HTMLHeadingElement | null>(null);
   const referenceTime = useMemo(() => new Date(), []);
   const glucosePresentation = useGlucosePresentationDependencies();
   const presentationDependencies = useMemo(
@@ -140,13 +145,51 @@ export function DashboardRoot() {
   const requestOpen = (
     trigger: QuickAddOpenTrigger,
     category: QuickAddOpenCategory | null = null,
+    opener: HTMLElement | null = null,
+    fromEmptyGlucoseCta = false,
   ) => {
+    quickAddOpenerRef.current = opener;
+    openedFromEmptyGlucoseCtaRef.current = fromEmptyGlucoseCta;
+
     setQuickAddState((current) => {
       const nextState = createQuickAddOpenRequest(current, trigger, category);
 
       return nextState ?? current;
     });
   };
+
+  const handleQuickAddClosed = (reason: QuickAddCloseReason) => {
+    if (reason === 'success' && openedFromEmptyGlucoseCtaRef.current) {
+      pendingEmptyGlucoseSuccessFocusRef.current = true;
+      openedFromEmptyGlucoseCtaRef.current = false;
+    }
+  };
+
+  useEffect(() => {
+    if (
+      !pendingEmptyGlucoseSuccessFocusRef.current ||
+      isTimelineHydrating ||
+      !derivedBlocks?.lastGlucose
+    ) {
+      return;
+    }
+
+    pendingEmptyGlucoseSuccessFocusRef.current = false;
+
+    requestAnimationFrame(() => {
+      lastGlucoseReadyFocusRef.current?.focus({ preventScroll: true });
+    });
+  }, [derivedBlocks?.lastGlucose, isTimelineHydrating]);
+
+  const resolveQuickAddReturnFocusContext = (
+    reason: QuickAddCloseReason,
+  ): QuickAddReturnFocusContext => ({
+    fallback:
+      reason === 'success' && pendingEmptyGlucoseSuccessFocusRef.current
+        ? lastGlucoseReadyFocusRef.current
+        : null,
+    opener: quickAddOpenerRef.current,
+  });
 
   const handleQuickAddOpenChange = (open: boolean) => {
     setQuickAddState((current) => {
@@ -208,12 +251,15 @@ export function DashboardRoot() {
                 event: derivedBlocks.lastGlucose.event,
               }}
               glucosePresentation={glucosePresentation}
+              readyFocusTargetRef={lastGlucoseReadyFocusRef}
               referenceTime={referenceTime}
               state="ready"
             />
           ) : (
             <DashboardLastGlucose
-              onAddGlucose={() => requestOpen('fab', 'glucose')}
+              onAddGlucose={(opener) =>
+                requestOpen('fab', 'glucose', opener, true)
+              }
               state="empty"
             />
           )
@@ -222,9 +268,10 @@ export function DashboardRoot() {
         quickActions={
           <DashboardQuickActions
             disabled={quickAddState.isOpen || isTimelineHydrating}
-            onOpenCategory={(category) => requestOpen('fab', category)}
+            onOpenCategory={(category, opener) =>
+              requestOpen('fab', category, opener)
+            }
             presentationDependencies={presentationDependencies}
-            returnFocusRef={quickActionsRef}
           />
         }
         recentEvents={
@@ -261,10 +308,11 @@ export function DashboardRoot() {
           addEvent(createSemanticNutritionTimelineEvent(entry));
         }}
         onOpenChange={handleQuickAddOpenChange}
+        onClosed={handleQuickAddClosed}
         onRequestOpen={() => requestOpen('fab')}
         open={quickAddState.isOpen}
         openCategory={quickAddState.openCategory}
-        returnFocusRef={quickActionsRef}
+        resolveReturnFocusContext={resolveQuickAddReturnFocusContext}
         showFloatingActionButton={false}
       />
     </>

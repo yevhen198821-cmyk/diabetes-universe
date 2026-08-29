@@ -1,6 +1,8 @@
 import type { GlucoseFreshnessState } from '@diabetes-universe/medical-domain';
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
+import type { RefObject } from 'react';
+
 import type { GlucosePresentationDependencies } from '../../lib/medical/glucose/use-glucose-presentation-dependencies';
 import type { DashboardLastGlucoseLabels } from './dashboard-last-glucose-labels';
 
@@ -17,13 +19,14 @@ interface DashboardLastGlucoseLoadingProps {
 interface DashboardLastGlucoseReadyProps {
   readonly glucose: DashboardLastGlucoseMeasurement;
   readonly glucosePresentation: GlucosePresentationDependencies;
+  readonly readyFocusTargetRef?: RefObject<HTMLHeadingElement | null>;
   readonly referenceTime?: Date;
   readonly state: 'ready';
 }
 
 interface DashboardLastGlucoseEmptyProps {
   readonly message?: string;
-  readonly onAddGlucose: () => void;
+  readonly onAddGlucose: (opener: HTMLButtonElement) => void;
   readonly state: 'empty';
 }
 
