@@ -21,10 +21,12 @@ export interface EventCardProps {
   readonly ariaLabel?: string;
   readonly type: EventCardType;
   readonly time: string;
+  readonly dateTime?: string;
   readonly title: string;
   readonly value: string;
   readonly unit: string;
   readonly subtitle?: string;
+  readonly statusLines?: readonly string[];
   readonly context?: string;
   readonly status?: EventCardStatus;
   readonly icon?: ReactNode;

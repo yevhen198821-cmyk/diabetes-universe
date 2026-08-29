@@ -246,16 +246,12 @@ export function TimelineShell() {
         presentationDependencies,
         time,
       );
-      const categoryLabel =
-        presentationDependencies.labels.eventKinds[event.kind] ?? event.kind;
       const primaryValue = [presentation.value, presentation.unit]
         .filter(Boolean)
         .join(' ');
 
       return {
-        ariaLabel: [time, categoryLabel, presentation.title, primaryValue]
-          .filter(Boolean)
-          .join(', '),
+        ariaLabel: presentation.mapAriaLabel,
         category: event.kind,
         event,
         primaryValue: primaryValue || undefined,

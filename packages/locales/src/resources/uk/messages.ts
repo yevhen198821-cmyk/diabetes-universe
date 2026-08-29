@@ -36,6 +36,7 @@ export const ukrainianDraftMessages = defineDraftMessages({
     '{count} вимірювань',
   'timeline.glucose.range.above': 'Вище вашого діапазону',
   'timeline.glucose.range.below': 'Нижче вашого діапазону',
+  'timeline.glucose.range.currentBasis': 'Поточний цільовий діапазон',
   'timeline.glucose.range.in': 'У вашому діапазоні',
   'timeline.glucose.timestamp.check': 'Перевірте час вимірювання',
   'timeline.eventKind.activity': 'Активність',

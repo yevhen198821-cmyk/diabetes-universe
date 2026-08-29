@@ -355,6 +355,7 @@ export const CANONICAL_TRANSLATION_KEYS = [
   'timeline.glucoseContext.other',
   'timeline.glucose.range.above',
   'timeline.glucose.range.below',
+  'timeline.glucose.range.currentBasis',
   'timeline.glucose.range.in',
   'timeline.glucose.timestamp.check',
   'timeline.header.title',

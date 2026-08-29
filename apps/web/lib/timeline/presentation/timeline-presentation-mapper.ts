@@ -7,7 +7,12 @@ import type {
 import type { EventCardType } from '@diabetes-universe/ui';
 
 import { presentGlucoseFromTimelineEvent } from '../../medical/glucose/present-glucose-from-timeline-event';
+import {
+  buildTimelineEventCardAriaLabel,
+  buildTimelineEventMapMarkerAriaLabel,
+} from './build-timeline-event-card-aria-label';
 import type { TimelinePresentationDependencies } from './timeline-presentation-dependencies';
+import { resolveGlucoseTimelineCardHistoryPresentation } from './resolve-glucose-timeline-card-history-presentation';
 import type {
   TimelineEventCardPresentation,
   TimelineEventDetailPresentation,
@@ -132,6 +137,7 @@ function mapGlucosePresentation(
     ),
     rangeLabel: presentation.rangeLabel,
     search: presentation.search,
+    timestampUncertaintyLabel: presentation.timestampUncertaintyLabel,
     title: dependencies.labels.eventKinds.glucose,
   };
 }
@@ -318,14 +324,53 @@ export function mapTimelineEventCardPresentation(
   time: string,
 ): TimelineEventCardPresentation {
   const presentation = mapTimelineKindPresentation(event, dependencies);
-
-  return {
+  const base = {
     cardType: presentation.cardType,
     context: presentation.context,
+    occurredAt: event.occurredAt,
     time,
     title: presentation.title,
     unit: presentation.measurement.unit,
     value: presentation.measurement.value,
+  };
+
+  if (event.kind === 'glucose') {
+    const glucosePresentation = mapGlucosePresentation(event, dependencies);
+    const historyPresentation = resolveGlucoseTimelineCardHistoryPresentation({
+      dependencies,
+      rangeLabel: glucosePresentation.rangeLabel,
+      timestampUncertaintyLabel: glucosePresentation.timestampUncertaintyLabel,
+    });
+    const cardPresentation = {
+      ...base,
+      statusLines:
+        historyPresentation.statusLines.length > 0
+          ? historyPresentation.statusLines
+          : undefined,
+    };
+
+    return {
+      ...cardPresentation,
+      ariaLabel: buildTimelineEventCardAriaLabel(
+        cardPresentation,
+        dependencies.labels.openEventAriaPrefix,
+      ),
+      mapAriaLabel: buildTimelineEventMapMarkerAriaLabel(cardPresentation),
+    };
+  }
+
+  const cardPresentation = {
+    ...base,
+    statusLines: undefined,
+  };
+
+  return {
+    ...cardPresentation,
+    ariaLabel: buildTimelineEventCardAriaLabel(
+      cardPresentation,
+      dependencies.labels.openEventAriaPrefix,
+    ),
+    mapAriaLabel: buildTimelineEventMapMarkerAriaLabel(cardPresentation),
   };
 }
 

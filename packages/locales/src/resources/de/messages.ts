@@ -33,6 +33,7 @@ export const germanDraftMessages = defineDraftMessages({
   'dashboard.daySummary.metrics.glucoseMeasurements.other': '{count} Messungen',
   'timeline.glucose.range.above': 'Über Ihrem Bereich',
   'timeline.glucose.range.below': 'Unter Ihrem Bereich',
+  'timeline.glucose.range.currentBasis': 'Aktueller Zielbereich',
   'timeline.glucose.range.in': 'In Ihrem Bereich',
   'timeline.glucose.timestamp.check': 'Messzeit prüfen',
   'timeline.eventKind.activity': 'Aktivität',
