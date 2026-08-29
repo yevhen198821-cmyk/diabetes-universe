@@ -25,7 +25,9 @@ test('dashboard day summary renders English labels without reminders placeholder
   await expect(page.getByText('Reminders')).toHaveCount(0);
   await expect(page.getByText('Medication doses')).toHaveCount(0);
   await expect(page.getByText('Сводка дня')).toHaveCount(0);
-  await expect(metricValue(daySummary, 'Glucose')).toContainText('2 measurements');
+  await expect(metricValue(daySummary, 'Glucose')).toContainText(
+    '2 measurements',
+  );
   await expect(daySummary.getByText('4 U')).toBeVisible();
   await expect(daySummary.getByText('42 g')).toBeVisible();
 
@@ -34,7 +36,9 @@ test('dashboard day summary renders English labels without reminders placeholder
   await page.getByLabel('Glucose level').fill('7.7');
   await page.getByRole('button', { name: 'Сохранить' }).click();
 
-  await expect(metricValue(daySummary, 'Glucose')).toContainText('3 measurements');
+  await expect(metricValue(daySummary, 'Glucose')).toContainText(
+    '3 measurements',
+  );
 
   await page.getByRole('link', { name: 'All events' }).click();
   await expect(page).toHaveURL('/timeline');
@@ -43,5 +47,7 @@ test('dashboard day summary renders English labels without reminders placeholder
   await page.getByRole('link', { name: 'Go to home' }).click();
   await waitForApplicationReady(page);
 
-  await expect(metricValue(daySummary, 'Glucose')).toContainText('3 measurements');
+  await expect(metricValue(daySummary, 'Glucose')).toContainText(
+    '3 measurements',
+  );
 });
