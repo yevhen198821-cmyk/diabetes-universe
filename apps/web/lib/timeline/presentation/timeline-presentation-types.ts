@@ -2,8 +2,12 @@ import type { EventCardType } from '@diabetes-universe/ui';
 import type { TimelineEventKind } from '@diabetes-universe/types';
 
 export interface TimelineEventCardPresentation {
+  readonly ariaLabel: string;
   readonly cardType: EventCardType;
   readonly context?: string;
+  readonly mapAriaLabel: string;
+  readonly occurredAt: string;
+  readonly statusLines?: readonly string[];
   readonly time: string;
   readonly title: string;
   readonly unit: string;
@@ -35,10 +39,12 @@ export interface TimelineKindPresentation {
   readonly kindLabel: string;
   readonly measurement: TimelineMeasurementPresentation;
   readonly note?: string | null;
+  readonly rangeLabel?: string | null;
   readonly search: {
     readonly localizedLabels: readonly string[];
     readonly userContent: readonly string[];
   };
+  readonly timestampUncertaintyLabel?: string | null;
   readonly title: string;
 }
 

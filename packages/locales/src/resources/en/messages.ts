@@ -328,6 +328,7 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'timeline.glucoseContext.other': 'Other',
   'timeline.glucose.range.above': 'Above your range',
   'timeline.glucose.range.below': 'Below your range',
+  'timeline.glucose.range.currentBasis': 'Current target range',
   'timeline.glucose.range.in': 'In your range',
   'timeline.glucose.timestamp.check': 'Check measurement time',
   'timeline.detail.close': 'Close details',

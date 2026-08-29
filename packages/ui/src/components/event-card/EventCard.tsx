@@ -62,9 +62,11 @@ export function EventCard({
   ariaLabel: providedAriaLabel,
   appearance = 'default',
   context,
+  dateTime,
   icon,
   onClick,
   status = 'default',
+  statusLines,
   subtitle,
   time,
   title,
@@ -78,16 +80,30 @@ export function EventCard({
     appearance === 'vibrant' ? vibrantAccents[type] : accent;
   const isVibrant = appearance === 'vibrant';
   const statusLabel = statusLabels[status];
+  const semanticDateTime = dateTime ?? time;
   const ariaLabel =
     providedAriaLabel ??
-    [time, title, value, unit, context, statusLabel].filter(Boolean).join(', ');
+    [time, title, value, unit, context, ...(statusLines ?? []), statusLabel]
+      .filter(Boolean)
+      .join(', ');
   const isCompact = variant === 'compact';
+
+  const statusLineContent =
+    statusLines && statusLines.length > 0 ? (
+      <span className="mt-1 block space-y-0.5">
+        {statusLines.map((line) => (
+          <span className="block text-xs text-slate-500" key={line}>
+            {line}
+          </span>
+        ))}
+      </span>
+    ) : null;
 
   const compactContent = (
     <>
       <time
         className="text-sm font-medium text-slate-500 tabular-nums"
-        dateTime={time}
+        dateTime={semanticDateTime}
       >
         {time}
       </time>
@@ -114,6 +130,7 @@ export function EventCard({
             <span className="text-xs text-slate-400">{context}</span>
           ) : null}
         </span>
+        {statusLineContent}
       </span>
     </>
   );
@@ -122,7 +139,7 @@ export function EventCard({
     <>
       <time
         className="w-12 shrink-0 text-sm font-medium text-slate-500 tabular-nums"
-        dateTime={time}
+        dateTime={semanticDateTime}
       >
         {time}
       </time>
@@ -145,6 +162,7 @@ export function EventCard({
             {context}
           </span>
         ) : null}
+        {statusLineContent}
       </span>
 
       <span className="shrink-0 text-right">

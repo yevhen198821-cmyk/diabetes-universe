@@ -48,11 +48,14 @@ export function mapTimelineEventToCard(
     ICON_BY_CARD_TYPE[presentation.cardType as TimelineEventCardKind];
 
   return {
+    ariaLabel: presentation.ariaLabel,
     context: presentation.context,
+    dateTime: presentation.occurredAt,
     icon: createElement(icon, {
       'aria-hidden': true,
       size: 15,
     }),
+    statusLines: presentation.statusLines,
     time: presentation.time,
     title: presentation.title,
     type: presentation.cardType,

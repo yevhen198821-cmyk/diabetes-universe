@@ -263,15 +263,6 @@ export function TimelineList({
                         <EventCard
                           {...eventCardProps}
                           appearance="vibrant"
-                          ariaLabel={`${presentationDependencies.labels.openEventAriaPrefix}: ${[
-                            eventCardProps.title,
-                            [eventCardProps.value, eventCardProps.unit]
-                              .filter(Boolean)
-                              .join(' '),
-                            eventCardProps.time,
-                          ]
-                            .filter(Boolean)
-                            .join(', ')}`}
                           onClick={(clickEvent) => {
                             onOpenEvent(event.id, clickEvent.currentTarget);
                           }}

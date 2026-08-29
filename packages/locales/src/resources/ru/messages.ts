@@ -250,6 +250,7 @@ export const russianDraftMessages = defineDraftMessages({
   'timeline.glucoseContext.other': 'Другое',
   'timeline.glucose.range.above': 'Выше вашего диапазона',
   'timeline.glucose.range.below': 'Ниже вашего диапазона',
+  'timeline.glucose.range.currentBasis': 'Текущий целевой диапазон',
   'timeline.glucose.range.in': 'В вашем диапазоне',
   'timeline.glucose.timestamp.check': 'Проверьте время измерения',
   'timeline.note.fallbackTitle': 'Заметка',

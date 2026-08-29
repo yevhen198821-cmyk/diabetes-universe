@@ -18,6 +18,7 @@ export interface TimelinePresentationLabels {
   readonly eventKinds: Readonly<Record<TimelineEventKind, string>>;
   readonly filters: Readonly<Record<TimelineEventKind | 'all', string>>;
   readonly glucoseContexts: Readonly<Record<GlucoseMeasurementContext, string>>;
+  readonly glucoseRangeCurrentBasis: string;
   readonly groups: Readonly<{
     readonly earlier: string;
     readonly today: string;
@@ -94,6 +95,10 @@ export function resolveTimelinePresentationLabels(
         asTranslationKey(filterKeys.nutrition),
       ),
     },
+    glucoseRangeCurrentBasis: translate(
+      localization,
+      asTranslationKey('timeline.glucose.range.currentBasis'),
+    ),
     glucoseContexts: {
       after_meal: translate(
         localization,
