@@ -114,7 +114,9 @@ test.describe('Timeline glucose history card presentation', () => {
     await page.getByRole('dialog').getByLabel('Date').fill('2026-08-02');
     await page.getByRole('dialog').getByLabel('Event time').fill('20:00');
     await page.getByRole('button', { name: 'Save' }).click();
-    await page.getByRole('button', { name: 'Close details', exact: true }).click();
+    await page
+      .getByRole('button', { name: 'Close details', exact: true })
+      .click();
 
     const updatedCard = page
       .getByRole('button', { name: /Open event:.*7\.3 mmol\/L/i })
