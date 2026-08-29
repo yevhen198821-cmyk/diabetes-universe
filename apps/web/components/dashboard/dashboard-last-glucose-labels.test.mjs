@@ -2,7 +2,10 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createTestPlatformRuntime } from '../../lib/platform/react/testing/create-test-platform-runtime.ts';
-import { resolveDashboardLastGlucoseLabels } from './dashboard-last-glucose-labels.ts';
+import {
+  resolveDashboardLastGlucoseLabels,
+  resolveDashboardLastGlucoseTimeLabels,
+} from './dashboard-last-glucose-labels.ts';
 
 test('resolveDashboardLastGlucoseLabels returns canonical English strings', async () => {
   const runtime = await createTestPlatformRuntime({
@@ -18,6 +21,18 @@ test('resolveDashboardLastGlucoseLabels returns canonical English strings', asyn
   assert.equal(labels.unavailable, 'Last measurement unavailable.');
   assert.equal(labels.defaultEmpty, 'No measurements yet.');
   assert.equal(labels.defaultError, 'Could not load the last measurement.');
+});
+
+test('resolveDashboardLastGlucoseTimeLabels returns canonical English strings', async () => {
+  const runtime = await createTestPlatformRuntime({
+    request: { acceptLanguage: 'en-GB', cookieTimeZone: 'Europe/London' },
+  });
+
+  const labels = resolveDashboardLastGlucoseTimeLabels(runtime.localization);
+
+  assert.equal(labels.justNow, 'Just now');
+  assert.equal(labels.today, 'Today');
+  assert.equal(labels.yesterday, 'Yesterday');
 });
 
 test('resolveDashboardLastGlucoseLabels uses preloaded dashboard namespace', async () => {

@@ -6,6 +6,7 @@ import { useMemo, useRef, useState } from 'react';
 import type { TranslationKey } from '@diabetes-universe/i18n';
 
 import { deriveDashboardQuickAddBlocks } from '../../lib/dashboard/dashboard-quick-add-integration-model';
+import { formatDashboardGlucoseDisplayTime } from '../../lib/dashboard/format-dashboard-glucose-display-time';
 import { formatDashboardRecentEventDisplayTime } from '../../lib/dashboard/dashboard-recent-events-display-time';
 import {
   createSemanticActivityTimelineEvent,
@@ -36,6 +37,7 @@ import { DashboardLastGlucose } from './dashboard-last-glucose';
 import { DashboardMobileNav } from './dashboard-mobile-nav';
 import { DashboardQuickActions } from './dashboard-quick-actions';
 import { DashboardRecentEvents } from './dashboard-recent-events';
+import { resolveDashboardLastGlucoseTimeLabels } from './dashboard-last-glucose-labels';
 import { DashboardShell } from './dashboard-shell';
 
 export function DashboardRoot() {
@@ -70,10 +72,20 @@ export function DashboardRoot() {
       }).value,
     [localization],
   );
+  const lastGlucoseTimeLabels = useMemo(
+    () => resolveDashboardLastGlucoseTimeLabels(localization),
+    [localization],
+  );
   const formatLastGlucoseDisplayTime = useMemo(
     () => (dateTime: string) =>
-      formatter.formatTime(dateTime, { timeStyle: 'short' }),
-    [formatter],
+      formatDashboardGlucoseDisplayTime({
+        formatter,
+        labels: lastGlucoseTimeLabels,
+        measuredAt: dateTime,
+        referenceTime,
+        timeZone: dashboardTimeZone,
+      }),
+    [dashboardTimeZone, formatter, lastGlucoseTimeLabels, referenceTime],
   );
   const formatDaySummaryDisplayDate = useMemo(
     () => (date: Date) => formatter.formatDate(date, { dateStyle: 'full' }),

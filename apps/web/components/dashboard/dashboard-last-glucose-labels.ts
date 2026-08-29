@@ -14,6 +14,12 @@ export interface DashboardLastGlucoseLabels {
   readonly unavailable: string;
 }
 
+export interface DashboardLastGlucoseTimeLabels {
+  readonly justNow: string;
+  readonly today: string;
+  readonly yesterday: string;
+}
+
 function asTranslationKey(value: string): TranslationKey {
   return value as TranslationKey;
 }
@@ -27,6 +33,12 @@ const DASHBOARD_LAST_GLUCOSE_TRANSLATION_KEYS = {
   stale: asTranslationKey('dashboard.lastGlucose.stale'),
   title: asTranslationKey('dashboard.lastGlucose.title'),
   unavailable: asTranslationKey('dashboard.lastGlucose.unavailable'),
+} as const;
+
+const DASHBOARD_LAST_GLUCOSE_TIME_TRANSLATION_KEYS = {
+  justNow: asTranslationKey('dashboard.lastGlucose.time.justNow'),
+  today: asTranslationKey('dashboard.lastGlucose.time.today'),
+  yesterday: asTranslationKey('dashboard.lastGlucose.time.yesterday'),
 } as const;
 
 function translateDashboardLastGlucoseKey(
@@ -78,5 +90,27 @@ export function resolveDashboardLastGlucoseLabels(
   };
 }
 
+export function resolveDashboardLastGlucoseTimeLabels(
+  localization: LocalizationPlatform,
+): DashboardLastGlucoseTimeLabels {
+  return {
+    justNow: translateDashboardLastGlucoseKey(
+      localization,
+      DASHBOARD_LAST_GLUCOSE_TIME_TRANSLATION_KEYS.justNow,
+    ),
+    today: translateDashboardLastGlucoseKey(
+      localization,
+      DASHBOARD_LAST_GLUCOSE_TIME_TRANSLATION_KEYS.today,
+    ),
+    yesterday: translateDashboardLastGlucoseKey(
+      localization,
+      DASHBOARD_LAST_GLUCOSE_TIME_TRANSLATION_KEYS.yesterday,
+    ),
+  };
+}
+
 export const dashboardLastGlucoseTranslationKeys =
   DASHBOARD_LAST_GLUCOSE_TRANSLATION_KEYS;
+
+export const dashboardLastGlucoseTimeTranslationKeys =
+  DASHBOARD_LAST_GLUCOSE_TIME_TRANSLATION_KEYS;

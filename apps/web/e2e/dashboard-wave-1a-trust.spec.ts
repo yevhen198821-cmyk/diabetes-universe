@@ -51,16 +51,19 @@ test('dashboard status-first hierarchy places last glucose before today summary'
     .locator('#main-content > section')
     .evaluateAll((sections) =>
       sections.map((section, index) => ({
+        hasLastGlucoseHeading:
+          section.querySelector('#dashboard-last-glucose-title') !== null,
+        hasTodayHeading:
+          section.querySelector('#dashboard-day-summary-title') !== null,
         index,
-        text: section.textContent ?? '',
       })),
     );
 
-  const lastGlucoseIndex = sectionSummaries.findIndex((section) =>
-    section.text.includes('Last glucose'),
+  const lastGlucoseIndex = sectionSummaries.findIndex(
+    (section) => section.hasLastGlucoseHeading,
   );
-  const todayIndex = sectionSummaries.findIndex((section) =>
-    section.text.includes('Today'),
+  const todayIndex = sectionSummaries.findIndex(
+    (section) => section.hasTodayHeading,
   );
 
   expect(lastGlucoseIndex).toBeGreaterThanOrEqual(0);
