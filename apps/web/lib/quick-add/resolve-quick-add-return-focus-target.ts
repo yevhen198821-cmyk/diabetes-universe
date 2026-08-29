@@ -1,10 +1,6 @@
-import type { QuickAddCloseReason } from './quick-add-controller-model';
-
 export interface QuickAddReturnFocusContext {
-  readonly openedFromEmptyGlucoseCta: boolean;
+  readonly fallback: HTMLElement | null;
   readonly opener: HTMLElement | null;
-  readonly readyLastGlucoseFocusTarget: HTMLHeadingElement | null;
-  readonly reason: QuickAddCloseReason;
 }
 
 function isConnectedFocusTarget(
@@ -20,12 +16,8 @@ export function resolveQuickAddReturnFocusTarget(
     return context.opener;
   }
 
-  if (
-    context.reason === 'success' &&
-    context.openedFromEmptyGlucoseCta &&
-    isConnectedFocusTarget(context.readyLastGlucoseFocusTarget)
-  ) {
-    return context.readyLastGlucoseFocusTarget;
+  if (isConnectedFocusTarget(context.fallback)) {
+    return context.fallback;
   }
 
   return null;
@@ -52,16 +44,4 @@ export function scheduleQuickAddReturnFocus(
   };
 
   requestAnimationFrame(() => attemptFocus(0));
-}
-
-export function focusQuickAddReturnTarget(
-  target: HTMLElement | null,
-  scheduleRetry = false,
-): boolean {
-  if (!isConnectedFocusTarget(target)) {
-    return false;
-  }
-
-  scheduleQuickAddReturnFocus(() => target, scheduleRetry ? 8 : 3);
-  return true;
 }

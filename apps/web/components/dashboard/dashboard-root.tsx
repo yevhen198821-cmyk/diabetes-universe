@@ -184,11 +184,11 @@ export function DashboardRoot() {
   const resolveQuickAddReturnFocusContext = (
     reason: QuickAddCloseReason,
   ): QuickAddReturnFocusContext => ({
-    openedFromEmptyGlucoseCta:
-      reason === 'success' && pendingEmptyGlucoseSuccessFocusRef.current,
+    fallback:
+      reason === 'success' && pendingEmptyGlucoseSuccessFocusRef.current
+        ? lastGlucoseReadyFocusRef.current
+        : null,
     opener: quickAddOpenerRef.current,
-    readyLastGlucoseFocusTarget: lastGlucoseReadyFocusRef.current,
-    reason,
   });
 
   const handleQuickAddOpenChange = (open: boolean) => {

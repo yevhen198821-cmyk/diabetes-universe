@@ -6,10 +6,7 @@ import {
   setupIntegrationDom,
   teardownIntegrationDom,
 } from '../platform/integration/tests/integration-dom-setup.mjs';
-import {
-  focusQuickAddReturnTarget,
-  resolveQuickAddReturnFocusTarget,
-} from './resolve-quick-add-return-focus-target.ts';
+import { resolveQuickAddReturnFocusTarget } from './resolve-quick-add-return-focus-target.ts';
 
 after(() => {
   teardownIntegrationDom();
@@ -32,10 +29,8 @@ test('returns the opener when it is still connected', () => {
 
   assert.equal(
     resolveQuickAddReturnFocusTarget({
-      openedFromEmptyGlucoseCta: false,
+      fallback: null,
       opener,
-      readyLastGlucoseFocusTarget: null,
-      reason: 'dismiss',
     }),
     opener,
   );
@@ -43,63 +38,49 @@ test('returns the opener when it is still connected', () => {
   opener.remove();
 });
 
-test('returns empty-glucose success fallback when opener is detached', () => {
+test('returns the fallback when the opener is detached', () => {
   const opener = createButton('Add glucose');
-  const readyTarget = createButton('Last glucose');
+  const fallback = createButton('Last glucose');
   opener.remove();
 
   assert.equal(
     resolveQuickAddReturnFocusTarget({
-      openedFromEmptyGlucoseCta: true,
+      fallback,
       opener,
-      readyLastGlucoseFocusTarget: readyTarget,
-      reason: 'success',
     }),
-    readyTarget,
+    fallback,
   );
 
-  readyTarget.remove();
+  fallback.remove();
 });
 
-test('does not return ready fallback for empty-glucose dismiss', () => {
+test('returns null when neither opener nor fallback are connected', () => {
   const opener = createButton('Add glucose');
-  const readyTarget = createButton('Last glucose');
+  const fallback = createButton('Last glucose');
   opener.remove();
+  fallback.remove();
 
   assert.equal(
     resolveQuickAddReturnFocusTarget({
-      openedFromEmptyGlucoseCta: true,
+      fallback,
       opener,
-      readyLastGlucoseFocusTarget: readyTarget,
-      reason: 'dismiss',
     }),
     null,
   );
-
-  readyTarget.remove();
 });
 
-test('does not return ready fallback for quick-action success', () => {
+test('prefers the opener when both opener and fallback are connected', () => {
   const opener = createButton('Insulin');
-  const readyTarget = createButton('Last glucose');
-  opener.remove();
+  const fallback = createButton('Last glucose');
 
   assert.equal(
     resolveQuickAddReturnFocusTarget({
-      openedFromEmptyGlucoseCta: false,
+      fallback,
       opener,
-      readyLastGlucoseFocusTarget: readyTarget,
-      reason: 'success',
     }),
-    null,
+    opener,
   );
 
-  readyTarget.remove();
-});
-
-test('focusQuickAddReturnTarget rejects disconnected targets', () => {
-  const opener = createButton('Glucose');
   opener.remove();
-
-  assert.equal(focusQuickAddReturnTarget(opener), false);
+  fallback.remove();
 });
