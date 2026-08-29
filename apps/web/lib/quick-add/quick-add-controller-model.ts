@@ -100,9 +100,3 @@ export function shouldApplyQuickAddSave(reason: QuickAddCloseReason): boolean {
 export function shouldKeepQuickAddOpenAfterSubmit(success: boolean): boolean {
   return !success;
 }
-
-export function resolveQuickAddReturnFocusTarget(
-  trigger: QuickAddOpenTrigger | null,
-): QuickAddOpenTrigger | null {
-  return trigger;
-}

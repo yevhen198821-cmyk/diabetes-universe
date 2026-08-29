@@ -15,6 +15,11 @@ import { useRef, useState } from 'react';
 
 import { quickAddActions } from '../../lib/quick-add/actions';
 import type { QuickAddCloseReason } from '../../lib/quick-add/quick-add-controller-model';
+import {
+  resolveQuickAddReturnFocusTarget,
+  scheduleQuickAddReturnFocus,
+  type QuickAddReturnFocusContext,
+} from '../../lib/quick-add/resolve-quick-add-return-focus-target';
 import { ActivityQuickAddForm } from './activity-quick-add-form';
 import { GlucoseQuickAddForm } from './glucose-quick-add-form';
 import { InsulinQuickAddForm } from './insulin-quick-add-form';
@@ -37,6 +42,9 @@ export interface QuickAddHostProps {
   readonly onRequestOpen?: () => void;
   readonly open: boolean;
   readonly openCategory?: QuickAddCategory | null;
+  readonly resolveReturnFocusContext?: (
+    reason: QuickAddCloseReason,
+  ) => QuickAddReturnFocusContext;
   readonly returnFocusRef?: RefObject<HTMLElement | null>;
   readonly showFloatingActionButton?: boolean;
 }
@@ -55,6 +63,7 @@ export function QuickAddHost({
   onRequestOpen,
   open,
   openCategory = null,
+  resolveReturnFocusContext,
   returnFocusRef,
   showFloatingActionButton = false,
 }: QuickAddHostProps) {
@@ -78,13 +87,26 @@ export function QuickAddHost({
     resetSelection();
     onClosed?.(reason);
 
-    const focusTarget = returnFocusRef?.current ?? fabRef.current;
+    scheduleQuickAddReturnFocus(
+      () => {
+        if (resolveReturnFocusContext) {
+          return resolveQuickAddReturnFocusTarget(
+            resolveReturnFocusContext(reason),
+          );
+        }
 
-    if (focusTarget) {
-      requestAnimationFrame(() => {
-        focusTarget.focus();
-      });
-    }
+        if (returnFocusRef?.current?.isConnected) {
+          return returnFocusRef.current;
+        }
+
+        if (fabRef.current?.isConnected) {
+          return fabRef.current;
+        }
+
+        return null;
+      },
+      resolveReturnFocusContext ? 8 : 3,
+    );
   };
 
   const handleOpen = () => {
