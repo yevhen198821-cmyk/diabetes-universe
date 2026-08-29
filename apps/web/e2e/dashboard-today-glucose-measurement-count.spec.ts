@@ -19,7 +19,7 @@ test('Today glucose card shows measurement count without duplicating Last Glucos
   await page.getByRole('button', { name: 'Quick add: Glucose' }).click();
   await selectGlucoseUnitIfRequired(page);
   await page.getByLabel('Glucose level').fill('5.6');
-  await page.getByRole('button', { name: 'Save' }).click();
+  await page.getByRole('button', { name: 'Сохранить' }).click();
   await expect(page.getByLabel('Glucose level')).toHaveCount(0);
 
   await expect(lastGlucoseRegion.getByText('5.6')).toBeVisible();
