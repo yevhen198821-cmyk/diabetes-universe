@@ -25,6 +25,17 @@ test('resolveGlucoseDataQualityState marks future timestamps questionable', () =
   );
 });
 
+test('resolveGlucoseDataQualityState allows small future clock skew', () => {
+  assert.equal(
+    resolveGlucoseDataQualityState({
+      concentrationMmolPerL: 6.2,
+      measuredAt: '2026-01-01T12:04:00.000Z',
+      referenceTime: '2026-01-01T12:00:00.000Z',
+    }),
+    'valid',
+  );
+});
+
 test('resolveGlucoseDataQualityState marks invalid concentration', () => {
   assert.equal(
     resolveGlucoseDataQualityState({

@@ -1,19 +1,15 @@
+import {
+  GLUCOSE_FUTURE_CLOCK_SKEW_TOLERANCE_MS,
+  isGlucoseMeasuredAtBeyondFutureTolerance,
+  parseGlucoseTimestampMs,
+} from './glucose-clock-tolerance';
 import type { GlucoseDataQualityState } from './glucose-semantics';
-
-function parseTimestamp(value: string): number | null {
-  const timestamp = Date.parse(value);
-
-  if (!Number.isFinite(timestamp)) {
-    return null;
-  }
-
-  return timestamp;
-}
 
 export interface ResolveGlucoseDataQualityStateInput {
   readonly concentrationMmolPerL: number;
   readonly measuredAt: string;
   readonly referenceTime?: Date | string;
+  readonly futureToleranceMs?: number;
 }
 
 /**
@@ -34,19 +30,23 @@ export function resolveGlucoseDataQualityState(
     return 'unknown';
   }
 
-  const measuredAtMs = parseTimestamp(measuredAt);
+  const measuredAtMs = parseGlucoseTimestampMs(measuredAt);
 
   if (measuredAtMs === null) {
     return 'invalid';
   }
 
   if (input.referenceTime !== undefined) {
-    const referenceMs =
-      input.referenceTime instanceof Date
-        ? input.referenceTime.getTime()
-        : parseTimestamp(input.referenceTime);
+    const toleranceMs =
+      input.futureToleranceMs ?? GLUCOSE_FUTURE_CLOCK_SKEW_TOLERANCE_MS;
 
-    if (referenceMs !== null && measuredAtMs > referenceMs) {
+    if (
+      isGlucoseMeasuredAtBeyondFutureTolerance(
+        measuredAt,
+        input.referenceTime,
+        toleranceMs,
+      )
+    ) {
       return 'questionable';
     }
   }

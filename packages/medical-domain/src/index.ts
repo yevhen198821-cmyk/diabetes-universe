@@ -128,6 +128,37 @@ export {
   resolveGlucoseSourceDescriptor,
   type GlucoseSourceDescriptor,
 } from './glucose/glucose-source-semantics';
+export {
+  GLUCOSE_FUTURE_CLOCK_SKEW_TOLERANCE_MS,
+  isGlucoseMeasuredAtBeyondFutureTolerance,
+  parseGlucoseTimestampMs,
+  resolveGlucoseFutureOffsetMs,
+} from './glucose/glucose-clock-tolerance';
+export {
+  resolveGlucoseTimestampQuality,
+  type GlucoseTimestampQualityState,
+  type ResolveGlucoseTimestampQualityInput,
+} from './glucose/glucose-timestamp-quality';
+export {
+  normalizeGlucoseSourceCategory,
+  type GlucoseSourceCategory,
+  type NormalizeGlucoseSourceCategoryInput,
+} from './glucose/glucose-source-category';
+export {
+  GLUCOSE_PRODUCT_RECENCY_POLICIES,
+  GLUCOSE_PRODUCT_RECENCY_POLICY_DISCLAIMER,
+  resolveGlucoseFreshnessPolicyForSourceCategory,
+} from './glucose/glucose-product-recency-policy';
+export {
+  isGlucoseReadingEligibleForLatest,
+  type GlucoseReadingEligibilityInput,
+  type ResolveGlucoseReadingEligibilityInput,
+} from './glucose/glucose-reading-eligibility';
+export {
+  selectLatestEligibleGlucoseReading,
+  type GlucoseLatestSelectionReading,
+  type SelectLatestEligibleGlucoseReadingInput,
+} from './glucose/glucose-latest-selection';
 export { DIABETES_SETTINGS_VALIDATION_BOUNDS } from './validation/diabetes-settings-bounds';
 export {
   DiabetesSettingsValidationError,

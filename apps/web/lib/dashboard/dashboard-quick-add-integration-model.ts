@@ -1,6 +1,7 @@
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 
 import { presentGlucoseFromTimelineEvent } from '../medical/glucose/present-glucose-from-timeline-event';
+import { selectLatestEligibleGlucoseTimelineEvent } from '../medical/glucose/select-latest-eligible-glucose-timeline-event';
 import type { TimelinePresentationDependencies } from '../timeline/presentation';
 import { deriveDashboardRecentEventSources } from './dashboard-recent-events-derivation';
 import {
@@ -9,7 +10,6 @@ import {
 } from './dashboard-day-summary-series';
 import { getTimelineCalendarDateKey } from '../timeline/timeline-date-time';
 import {
-  getLatestGlucoseEvent,
   getTodayActivityTotalSeconds,
   getTodayInsulinTotal,
   getTodayMedicationCount,
@@ -90,9 +90,12 @@ function createDashboardDayLabel(
 
 function deriveLastGlucose(
   events: readonly SemanticTimelineEvent[],
-  formatLastGlucoseDisplayTime?: (dateTime: string) => string,
+  formatLastGlucoseDisplayTime: ((dateTime: string) => string) | undefined,
+  referenceTime: Date,
 ): DashboardDerivedLastGlucose | null {
-  const latestGlucose = getLatestGlucoseEvent(events);
+  const latestGlucose = selectLatestEligibleGlucoseTimelineEvent(events, {
+    referenceTime,
+  });
 
   if (!latestGlucose || !formatLastGlucoseDisplayTime) {
     return null;
@@ -158,7 +161,10 @@ function deriveDaySummary(
     referenceTime,
     timeZone,
   );
-  const latestTodayGlucose = getLatestGlucoseEvent(todayEvents);
+  const latestTodayGlucose = selectLatestEligibleGlucoseTimelineEvent(
+    todayEvents,
+    { referenceTime },
+  );
   let latestTodayGlucoseDisplay: string | null = null;
   let latestTodayGlucoseDisplayTime: string | null = null;
 
@@ -233,6 +239,7 @@ export function deriveDashboardQuickAddBlocks(
     lastGlucose: deriveLastGlucose(
       state.events,
       options.formatLastGlucoseDisplayTime,
+      referenceTime,
     ),
     recentEvents,
   };
