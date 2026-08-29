@@ -40,7 +40,7 @@ test('timeline event edit updates Timeline and Dashboard selectors', async ({
 
   await expect(page.getByRole('dialog', { name: 'Edit event' })).toBeVisible();
   await page.getByLabel('Value').fill('9.1');
-  await page.getByLabel('Event time').fill('23:58');
+  await page.getByLabel('Event time').fill('11:30');
   await page.getByRole('button', { name: 'Save' }).click();
 
   await expect(page.getByText('9.1 mmol/L').first()).toBeVisible();
