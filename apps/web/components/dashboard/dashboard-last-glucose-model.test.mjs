@@ -8,6 +8,7 @@ import { createDashboardLastGlucoseViewModel } from './dashboard-last-glucose-mo
 const englishLabels = {
   defaultEmpty: 'No measurements yet.',
   defaultError: 'Could not load the last measurement.',
+  emptyCta: 'Add glucose',
   eyebrow: 'Last measurement',
   fresh: 'Fresh data',
   loading: 'Loading last glucose measurement',
@@ -266,6 +267,7 @@ test('accepts a supplied loading label', () => {
 test('creates empty state with the default message when none is supplied', () => {
   const model = createDashboardLastGlucoseViewModel(
     {
+      onAddGlucose: () => {},
       state: 'empty',
     },
     englishLabels,
@@ -273,6 +275,8 @@ test('creates empty state with the default message when none is supplied', () =>
 
   assert.equal(model.state, 'empty');
   assert.equal(model.message, englishLabels.defaultEmpty);
+  assert.equal(model.showEmptyCta, true);
+  assert.equal(model.emptyCtaLabel, englishLabels.emptyCta);
   assert.equal(model.value, null);
   assert.equal(model.displayTime, null);
   assert.equal(model.dateTime, null);
@@ -282,6 +286,7 @@ test('creates empty state from caller-supplied content', () => {
   const model = createDashboardLastGlucoseViewModel(
     {
       message: 'No measurements yet.',
+      onAddGlucose: () => {},
       state: 'empty',
     },
     englishLabels,
@@ -289,6 +294,31 @@ test('creates empty state from caller-supplied content', () => {
 
   assert.equal(model.state, 'empty');
   assert.equal(model.message, 'No measurements yet.');
+  assert.equal(model.showEmptyCta, true);
+});
+
+test('does not expose empty CTA in loading, ready, or error states', () => {
+  const loading = createDashboardLastGlucoseViewModel(
+    { state: 'loading' },
+    englishLabels,
+  );
+  const ready = createDashboardLastGlucoseViewModel(
+    {
+      glucose: createGlucoseMeasurement(),
+      state: 'ready',
+    },
+    englishLabels,
+    { formattedValue: '6.4 mmol/L', freshnessState: 'recent' },
+  );
+  const error = createDashboardLastGlucoseViewModel(
+    { state: 'error' },
+    englishLabels,
+  );
+
+  for (const model of [loading, ready, error]) {
+    assert.equal(model.showEmptyCta, false);
+    assert.equal(model.emptyCtaLabel, null);
+  }
 });
 
 test('creates error state with the default message when none is supplied', () => {

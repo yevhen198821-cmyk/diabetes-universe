@@ -21,6 +21,7 @@ test('resolveDashboardLastGlucoseLabels returns canonical English strings', asyn
   assert.equal(labels.unavailable, 'Last measurement unavailable.');
   assert.equal(labels.defaultEmpty, 'No measurements yet.');
   assert.equal(labels.defaultError, 'Could not load the last measurement.');
+  assert.equal(labels.emptyCta, 'Add glucose');
 });
 
 test('resolveDashboardLastGlucoseTimeLabels returns canonical English strings', async () => {

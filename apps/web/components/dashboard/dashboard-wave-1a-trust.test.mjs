@@ -7,6 +7,7 @@ import { createDashboardLastGlucoseViewModel } from './dashboard-last-glucose-mo
 const labels = {
   defaultEmpty: 'No measurements yet.',
   defaultError: 'Could not load the last measurement.',
+  emptyCta: 'Add glucose',
   eyebrow: 'Last measurement',
   loading: 'Loading last glucose measurement',
   stale: 'Measurement is outdated.',

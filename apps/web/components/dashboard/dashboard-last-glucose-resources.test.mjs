@@ -50,6 +50,6 @@ test('dashboard last glucose time translation keys are canonical and non-empty i
   assert.equal(timeKeys.length, 3);
 });
 
-test('dashboard last glucose exposes exactly eight translation keys', () => {
-  assert.equal(DASHBOARD_LAST_GLUCOSE_KEYS.length, 8);
+test('dashboard last glucose exposes exactly nine translation keys', () => {
+  assert.equal(DASHBOARD_LAST_GLUCOSE_KEYS.length, 9);
 });

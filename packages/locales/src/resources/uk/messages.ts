@@ -16,6 +16,7 @@ export const ukrainianDraftMessages = defineDraftMessages({
   'dashboard.lastGlucose.time.justNow': 'Зараз',
   'dashboard.lastGlucose.time.today': 'Сьогодні',
   'dashboard.lastGlucose.time.yesterday': 'Вчора',
+  'dashboard.lastGlucose.empty.cta': 'Додати глюкозу',
   'timeline.glucose.range.above': 'Вище вашого діапазону',
   'timeline.glucose.range.below': 'Нижче вашого діапазону',
   'timeline.glucose.range.in': 'У вашому діапазоні',

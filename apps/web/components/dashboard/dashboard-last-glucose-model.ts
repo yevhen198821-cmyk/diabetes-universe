@@ -23,6 +23,7 @@ interface DashboardLastGlucoseReadyProps {
 
 interface DashboardLastGlucoseEmptyProps {
   readonly message?: string;
+  readonly onAddGlucose: () => void;
   readonly state: 'empty';
 }
 
@@ -40,11 +41,13 @@ export type DashboardLastGlucoseProps =
 export interface DashboardLastGlucoseViewModel {
   readonly dateTime: string | null;
   readonly displayTime: string | null;
+  readonly emptyCtaLabel: string | null;
   readonly freshMessage: string | null;
   readonly isLoading: boolean;
   readonly isStale: boolean;
   readonly message: string | null;
   readonly rangeLabel: string | null;
+  readonly showEmptyCta: boolean;
   readonly sourceLabel: string | null;
   readonly staleMessage: string | null;
   readonly state: 'empty' | 'error' | 'loading' | 'ready';
@@ -83,15 +86,21 @@ function normalizeReadyMeasurement(
   };
 }
 
-function createEmptyViewModel(message: string): DashboardLastGlucoseViewModel {
+function createEmptyViewModel(
+  message: string,
+  labels: DashboardLastGlucoseLabels,
+  showEmptyCta: boolean,
+): DashboardLastGlucoseViewModel {
   return {
     dateTime: null,
     displayTime: null,
+    emptyCtaLabel: showEmptyCta ? labels.emptyCta : null,
     freshMessage: null,
     isLoading: false,
     isStale: false,
     message,
     rangeLabel: null,
+    showEmptyCta,
     sourceLabel: null,
     staleMessage: null,
     state: 'empty',
@@ -125,11 +134,13 @@ export function createDashboardLastGlucoseViewModel(
       return {
         dateTime: null,
         displayTime: null,
+        emptyCtaLabel: null,
         freshMessage: null,
         isLoading: true,
         isStale: false,
         message: props.loadingLabel?.trim() || labels.loading,
         rangeLabel: null,
+        showEmptyCta: false,
         sourceLabel: null,
         staleMessage: null,
         state: props.state,
@@ -140,7 +151,7 @@ export function createDashboardLastGlucoseViewModel(
       const formattedValue = options.formattedValue?.trim() ?? '';
 
       if (!measurement || formattedValue.length === 0) {
-        return createEmptyViewModel(labels.unavailable);
+        return createEmptyViewModel(labels.unavailable, labels, false);
       }
 
       const staleState = resolveStaleStateFromFreshness(options.freshnessState);
@@ -148,11 +159,13 @@ export function createDashboardLastGlucoseViewModel(
       return {
         dateTime: measurement.event.occurredAt,
         displayTime: measurement.displayTime,
+        emptyCtaLabel: null,
         freshMessage: staleState.showFresh ? labels.fresh : null,
         isLoading: false,
         isStale: staleState.isStale,
         message: null,
         rangeLabel: options.rangeLabel?.trim() || null,
+        showEmptyCta: false,
         sourceLabel: options.sourceLabel?.trim() || null,
         staleMessage: staleState.isStale ? labels.stale : null,
         state: props.state,
@@ -160,28 +173,22 @@ export function createDashboardLastGlucoseViewModel(
       };
     }
     case 'empty':
-      return {
-        dateTime: null,
-        displayTime: null,
-        freshMessage: null,
-        isLoading: false,
-        isStale: false,
-        message: props.message?.trim() || labels.defaultEmpty,
-        rangeLabel: null,
-        sourceLabel: null,
-        staleMessage: null,
-        state: props.state,
-        value: null,
-      };
+      return createEmptyViewModel(
+        props.message?.trim() || labels.defaultEmpty,
+        labels,
+        true,
+      );
     case 'error':
       return {
         dateTime: null,
         displayTime: null,
+        emptyCtaLabel: null,
         freshMessage: null,
         isLoading: false,
         isStale: false,
         message: props.message?.trim() || labels.defaultError,
         rangeLabel: null,
+        showEmptyCta: false,
         sourceLabel: null,
         staleMessage: null,
         state: props.state,
