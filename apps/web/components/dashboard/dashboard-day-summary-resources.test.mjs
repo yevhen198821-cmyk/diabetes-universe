@@ -64,12 +64,23 @@ test('glucose measurement plural keys exist in EN/RU/UK/DE without English fallb
     ['de-DE', germanTranslationResource.messages],
   ]) {
     for (const key of GLUCOSE_MEASUREMENT_PLURAL_KEYS) {
-      if (localeLabel === 'de-DE' && (key.endsWith('.few') || key.endsWith('.many'))) {
+      if (
+        localeLabel === 'de-DE' &&
+        (key.endsWith('.few') || key.endsWith('.many'))
+      ) {
         continue;
       }
 
-      assert.equal(typeof messages[key], 'string', `${localeLabel} missing ${key}`);
-      assert.equal(messages[key].trim().length > 0, true, `${localeLabel} empty ${key}`);
+      assert.equal(
+        typeof messages[key],
+        'string',
+        `${localeLabel} missing ${key}`,
+      );
+      assert.equal(
+        messages[key].trim().length > 0,
+        true,
+        `${localeLabel} empty ${key}`,
+      );
       assert.notEqual(
         messages[key],
         englishCanonicalMessages[key],
