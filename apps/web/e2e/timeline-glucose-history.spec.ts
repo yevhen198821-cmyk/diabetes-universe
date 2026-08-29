@@ -38,7 +38,7 @@ async function configureTargetRangeForTimeline(page: Page) {
 
 async function openDemoGlucoseCard(page: Page) {
   const glucoseCard = page
-    .getByRole('button', { name: /Open event:.*7\.3 mmol\/L/i })
+    .getByRole('button', { name: /Open event: Glucose, 7\.3 mmol\/L/i })
     .first();
 
   await expect(glucoseCard).toBeVisible();
@@ -119,7 +119,7 @@ test.describe('Timeline glucose history card presentation', () => {
       .click();
 
     const updatedCard = page
-      .getByRole('button', { name: /Open event:.*7\.3 mmol\/L/i })
+      .getByRole('button', { name: /Open event: Glucose, 7\.3 mmol\/L/i })
       .first();
 
     await expect(updatedCard).toBeVisible();

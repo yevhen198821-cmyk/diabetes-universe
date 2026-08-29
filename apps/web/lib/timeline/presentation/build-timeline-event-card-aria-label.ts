@@ -8,9 +8,9 @@ export function buildTimelineEventCardAriaLabel(
   openEventAriaPrefix: string,
 ): string {
   const parts = [
-    presentation.time,
     presentation.title,
     [presentation.value, presentation.unit].filter(Boolean).join(' '),
+    presentation.time,
     presentation.context,
     ...(presentation.statusLines ?? []),
   ].filter((part) => Boolean(part && part.length > 0));

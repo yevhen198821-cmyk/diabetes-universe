@@ -21,9 +21,10 @@ test('card aria label includes glucose history status once', () => {
     'Open event',
   );
 
+  assert.match(ariaLabel, /^Open event: Glucose, 7\.3 mmol\/L/);
   assert.equal(
     ariaLabel,
-    'Open event: 10:15, Glucose, 7.3 mmol/L, Before meal, In your range, Current target range',
+    'Open event: Glucose, 7.3 mmol/L, 10:15, Before meal, In your range, Current target range',
   );
   assert.equal((ariaLabel.match(/Glucose/g) ?? []).length, 1);
 });
