@@ -1,33 +1,10 @@
 import { expect, test } from './support/test';
 
+import {
+  clearTimelineEventsInIndexedDb,
+  waitForTimelineBootstrapComplete,
+} from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
-
-async function clearTimelineEventsInIndexedDb(
-  page: import('@playwright/test').Page,
-) {
-  await page.evaluate(async () => {
-    await new Promise<void>((resolve, reject) => {
-      const request = indexedDB.open('diabetes-universe-timeline');
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const database = request.result;
-        const transaction = database.transaction(
-          'timeline_events',
-          'readwrite',
-        );
-        transaction.objectStore('timeline_events').clear();
-        transaction.oncomplete = () => {
-          database.close();
-          resolve();
-        };
-        transaction.onerror = () => {
-          database.close();
-          reject(transaction.error);
-        };
-      };
-    });
-  });
-}
 
 test('timeline note persists across page reload', async ({ page }) => {
   const noteText = 'E2E reload persistence marker';
@@ -89,6 +66,7 @@ test('empty durable timeline does not reseed demo data after reload', async ({
 }) => {
   await page.goto('/timeline');
   await waitForApplicationReady(page);
+  await waitForTimelineBootstrapComplete(page);
   await expect(page.locator('#timeline-events-list')).toHaveCount(1);
 
   await clearTimelineEventsInIndexedDb(page);
