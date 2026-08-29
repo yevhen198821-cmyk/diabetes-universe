@@ -227,6 +227,13 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'dashboard.daySummary.metrics.activity': 'Activity',
   'dashboard.daySummary.metrics.glucose': 'Glucose',
   'dashboard.daySummary.metrics.glucoseMeasurements': 'Glucose measurements',
+  'dashboard.daySummary.metrics.glucoseMeasurements.one': '{count} measurement',
+  'dashboard.daySummary.metrics.glucoseMeasurements.few':
+    '{count} measurements',
+  'dashboard.daySummary.metrics.glucoseMeasurements.many':
+    '{count} measurements',
+  'dashboard.daySummary.metrics.glucoseMeasurements.other':
+    '{count} measurements',
   'dashboard.daySummary.metrics.medicationDoses': 'Medication doses',
   'dashboard.daySummary.metrics.reminders': 'Reminders',
   'dashboard.daySummary.metrics.totalCarbohydrates': 'Carbohydrates',

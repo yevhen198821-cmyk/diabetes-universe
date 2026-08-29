@@ -5,8 +5,6 @@ export interface DashboardDaySummaryData {
   readonly dayDate: string;
   readonly displayDayLabel: string;
   readonly glucoseMeasurements: number;
-  readonly latestTodayGlucoseDisplay: string | null;
-  readonly latestTodayGlucoseDisplayTime: string | null;
   readonly medicationDoses: number;
   readonly totalActivitySeconds: number;
   readonly totalCarbohydrateGrams: number;
@@ -98,10 +96,6 @@ function normalizeReadySummary(
 ): DashboardDaySummaryData | null {
   const dayDate = summary.dayDate.trim();
   const displayDayLabel = summary.displayDayLabel.trim();
-  const latestTodayGlucoseDisplay =
-    summary.latestTodayGlucoseDisplay?.trim() || null;
-  const latestTodayGlucoseDisplayTime =
-    summary.latestTodayGlucoseDisplayTime?.trim() || null;
 
   if (
     !isValidDayDate(dayDate) ||
@@ -119,8 +113,6 @@ function normalizeReadySummary(
     dayDate,
     displayDayLabel,
     glucoseMeasurements: summary.glucoseMeasurements,
-    latestTodayGlucoseDisplay,
-    latestTodayGlucoseDisplayTime,
     medicationDoses: summary.medicationDoses,
     totalActivitySeconds: summary.totalActivitySeconds,
     totalCarbohydrateGrams: summary.totalCarbohydrateGrams,
@@ -147,15 +139,10 @@ function createReadyMetrics(
   );
 
   const resolveSecondaryText = (
-    kind: DashboardDaySummaryMetricKind,
     chartValues: readonly number[],
   ): string | null => {
     if (chartValues.length === 0) {
       return labels.chartEmptyHint;
-    }
-
-    if (kind === 'glucose') {
-      return summary.latestTodayGlucoseDisplayTime;
     }
 
     return labels.totalForDay;
@@ -167,7 +154,7 @@ function createReadyMetrics(
       chartValues: glucoseValues,
       kind: 'glucose',
       label: labels.glucose,
-      secondaryText: resolveSecondaryText('glucose', glucoseValues),
+      secondaryText: resolveSecondaryText(glucoseValues),
       value: formattedMetrics.glucose,
     },
     {
@@ -175,7 +162,7 @@ function createReadyMetrics(
       chartValues: insulinValues,
       kind: 'insulin',
       label: labels.totalInsulin,
-      secondaryText: resolveSecondaryText('insulin', insulinValues),
+      secondaryText: resolveSecondaryText(insulinValues),
       value: formattedMetrics.totalInsulin,
     },
     {
@@ -183,7 +170,7 @@ function createReadyMetrics(
       chartValues: nutritionValues,
       kind: 'nutrition',
       label: labels.totalCarbohydrates,
-      secondaryText: resolveSecondaryText('nutrition', nutritionValues),
+      secondaryText: resolveSecondaryText(nutritionValues),
       value: formattedMetrics.totalCarbohydrates,
     },
     {
@@ -191,7 +178,7 @@ function createReadyMetrics(
       chartValues: activityValues,
       kind: 'activity',
       label: labels.activity,
-      secondaryText: resolveSecondaryText('activity', activityValues),
+      secondaryText: resolveSecondaryText(activityValues),
       value: formattedMetrics.totalActivity,
     },
   ];

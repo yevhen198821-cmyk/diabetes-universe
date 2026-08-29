@@ -126,7 +126,14 @@ function createFormattedMetrics(
   const activityMinutes = Math.floor(summary.summary.totalActivitySeconds / 60);
 
   return {
-    glucose: summary.summary.latestTodayGlucoseDisplay ?? '—',
+    glucose: labels.formatGlucoseMeasurementCount(
+      summary.summary.glucoseMeasurements,
+      (count) =>
+        formatter.formatNumber(count, {
+          maximumFractionDigits: 0,
+          minimumFractionDigits: 0,
+        }),
+    ),
     totalActivity: formatter.formatDuration({ minutes: activityMinutes }),
     totalCarbohydrates: `${formattedCarbs} ${labels.units.compactMassG}`,
     totalInsulin: `${formattedInsulin} ${labels.units.compactInsulinDose}`,
