@@ -58,6 +58,30 @@ function EventIcon({
   );
 }
 
+export function buildEventCardFallbackAriaLabel(input: {
+  readonly context?: string;
+  readonly metadataLines?: readonly string[];
+  readonly statusLabel?: string;
+  readonly statusLines?: readonly string[];
+  readonly time: string;
+  readonly title: string;
+  readonly unit: string;
+  readonly value: string;
+}): string {
+  return [
+    input.time,
+    input.title,
+    input.value,
+    input.unit,
+    input.context,
+    ...(input.statusLines ?? []),
+    ...(input.metadataLines ?? []),
+    input.statusLabel,
+  ]
+    .filter(Boolean)
+    .join(', ');
+}
+
 export function EventCard({
   ariaLabel: providedAriaLabel,
   appearance = 'default',
@@ -84,9 +108,16 @@ export function EventCard({
   const semanticDateTime = dateTime ?? time;
   const ariaLabel =
     providedAriaLabel ??
-    [time, title, value, unit, context, ...(statusLines ?? []), statusLabel]
-      .filter(Boolean)
-      .join(', ');
+    buildEventCardFallbackAriaLabel({
+      context,
+      metadataLines,
+      statusLabel,
+      statusLines,
+      time,
+      title,
+      unit,
+      value,
+    });
   const isCompact = variant === 'compact';
 
   const statusLineContent =

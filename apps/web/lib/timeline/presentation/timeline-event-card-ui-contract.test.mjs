@@ -24,3 +24,8 @@ test('EventCard renders optional status lines with generic styling', () => {
   assert.match(eventCardSource, /metadataLines/);
   assert.match(eventCardSource, /text-xs text-slate-500/);
 });
+
+test('EventCard fallback aria construction includes metadataLines once', () => {
+  assert.match(eventCardSource, /buildEventCardFallbackAriaLabel/);
+  assert.match(eventCardSource, /\.\.\.\(input\.metadataLines \?\? \[\]\)/);
+});
