@@ -53,15 +53,15 @@ Dashboard uses the existing `QuickAddHost` with:
 
 ### Save and Close Rules
 
-| Scenario                         | Quick Add state | Dashboard data          |
-| -------------------------------- | --------------- | ----------------------- |
-| Successful submit (non-glucose)  | Closes          | Updates affected blocks |
-| Successful glucose submit        | Closes after awaited IndexedDB persistence | Updates affected blocks |
-| Glucose persistence failure      | Stays open      | Unchanged               |
-| Cancel within form               | Stays open      | Unchanged               |
-| Dismiss/backdrop/`Escape`        | Closes          | Unchanged               |
-| Validation error on submit       | Stays open      | Unchanged               |
-| Glucose submit in flight         | Stays open; dismiss blocked | Unchanged     |
+| Scenario                        | Quick Add state                            | Dashboard data          |
+| ------------------------------- | ------------------------------------------ | ----------------------- |
+| Successful submit (non-glucose) | Closes                                     | Updates affected blocks |
+| Successful glucose submit       | Closes after awaited IndexedDB persistence | Updates affected blocks |
+| Glucose persistence failure     | Stays open                                 | Unchanged               |
+| Cancel within form              | Stays open                                 | Unchanged               |
+| Dismiss/backdrop/`Escape`       | Closes                                     | Unchanged               |
+| Validation error on submit      | Stays open                                 | Unchanged               |
+| Glucose submit in flight        | Stays open; dismiss blocked                | Unchanged               |
 
 Glucose Quick Add (Wave 3D save integrity):
 

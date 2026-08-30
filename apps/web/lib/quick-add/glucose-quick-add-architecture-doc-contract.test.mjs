@@ -63,7 +63,10 @@ test('Wave 3D architecture docs document glucose awaited persistence contract', 
     );
   }
 
-  for (const signal of ['addEventAsync', 'createSemanticGlucoseTimelineEvent']) {
+  for (const signal of [
+    'addEventAsync',
+    'createSemanticGlucoseTimelineEvent',
+  ]) {
     assert.match(
       dashboardDoc,
       new RegExp(signal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),

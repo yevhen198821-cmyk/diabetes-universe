@@ -367,14 +367,14 @@ not written to the repository.
 `GlucoseQuickAddEntry` flows through `prepareGlucoseQuickAddSubmit` and
 `createSemanticGlucoseTimelineEvent(entry, { id: eventId })`:
 
-| Semantic field            | Value                                      |
-| ------------------------- | ------------------------------------------ |
-| `kind`                    | `glucose`                                  |
-| `source`                  | `manual`                                   |
-| `concentrationMmolPerL`   | canonical mmol/L from parsed input         |
-| `context`                 | optional `GlucoseMeasurementContext`       |
-| `occurredAt`              | ISO 8601 from approved utility             |
-| `id`                      | stable full ID allocated before persistence |
+| Semantic field          | Value                                       |
+| ----------------------- | ------------------------------------------- |
+| `kind`                  | `glucose`                                   |
+| `source`                | `manual`                                    |
+| `concentrationMmolPerL` | canonical mmol/L from parsed input          |
+| `context`               | optional `GlucoseMeasurementContext`        |
+| `occurredAt`            | ISO 8601 from approved utility              |
+| `id`                    | stable full ID allocated before persistence |
 
 Persistence: `TimelineStore.addEventAsync` awaits IndexedDB commit before glucose
 Quick Add success close. Dashboard and Timeline use the same contract.

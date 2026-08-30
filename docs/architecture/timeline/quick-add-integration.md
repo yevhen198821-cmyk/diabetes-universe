@@ -55,16 +55,16 @@ GlucoseQuickAddForm
 
 Glucose invariants:
 
-| Invariant | Behavior |
-| --------- | -------- |
-| Invalid input | Never enters pending; no event ID allocated |
-| Stable identity | One full event ID retained for a logical submit and all retries |
-| Persistence | `addEventAsync` is awaited before success close |
-| Single-flight | Duplicate submit ignored while pending |
-| Dismiss guard | Escape, backdrop, header Back, Cancel, and mutable controls blocked during persistence |
-| Failure | Form and entered values remain; pending/dismiss lock released; same event ID for retry |
-| Success | Retry identity cleared; panel closes once |
-| Canonical payload | `concentrationMmolPerL` with `source: "manual"`; optional `context` remains optional |
+| Invariant         | Behavior                                                                               |
+| ----------------- | -------------------------------------------------------------------------------------- |
+| Invalid input     | Never enters pending; no event ID allocated                                            |
+| Stable identity   | One full event ID retained for a logical submit and all retries                        |
+| Persistence       | `addEventAsync` is awaited before success close                                        |
+| Single-flight     | Duplicate submit ignored while pending                                                 |
+| Dismiss guard     | Escape, backdrop, header Back, Cancel, and mutable controls blocked during persistence |
+| Failure           | Form and entered values remain; pending/dismiss lock released; same event ID for retry |
+| Success           | Retry identity cleared; panel closes once                                              |
+| Canonical payload | `concentrationMmolPerL` with `source: "manual"`; optional `context` remains optional   |
 
 Implementation references:
 
