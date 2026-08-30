@@ -27,6 +27,24 @@ Timeline UI, demo data, repository storage, and future API integration.
 - **P3 — Semantic Timeline Event Model: Feature Complete** (merged PR #67 @
   `44ca315`, 2026-08-09).
 
+## Current production state (post-P4 + Wave 3D-IV)
+
+Approved runtime summary as of Wave 3D-IV closure. This section supersedes the
+post-P3h summary above for production behavior.
+
+- **`TimelineRepository`** Web production adapter is
+  **`IndexedDbTimelineRepository`** (`@diabetes-universe/timeline-web`), wired
+  through `apps/web/lib/timeline/create-web-timeline-repository.ts`.
+- Demo seed in `apps/web/lib/mocks/timeline.ts` seeds IndexedDB on first bootstrap
+  only; cleared timelines do not reseed on reload.
+- **Durable local Web persistence (IndexedDB)** is implemented (**P4 Feature
+  Complete** for approved Web scope).
+- **Glucose Quick Add save integrity (Wave 3D)** awaits IndexedDB persistence
+  through `TimelineStore.addEventAsync` before success close; see
+  [Timeline Quick Add Integration](../../architecture/timeline/quick-add-integration.md)
+  and [Timeline Shared State](../../architecture/timeline/shared-state.md).
+- Backend, auth, cloud sync, and outbox remain future scope.
+
 ## SemanticTimelineEvent contract
 
 `SemanticTimelineEvent` is a discriminated union of six approved kinds defined in
@@ -159,6 +177,10 @@ For `kind: 'note'`, journal content lives in optional `title` and required
 - During the demo stage, Dashboard and Timeline share one app-level in-memory
   Timeline store backed by a semantic repository.
 
+At Wave 3D-IV production runtime, Dashboard and Timeline share one IndexedDB-backed
+Timeline store projection through `TimelineStoreProvider`. See **Current
+production state (post-P4 + Wave 3D-IV)** above.
+
 ## API readiness
 
 The semantic contract is backend-agnostic and maps cleanly to future API responses:
@@ -206,7 +228,8 @@ directly. Presentation formatting belongs to the presentation boundary (P3d).
 ## Migration notes
 
 Historical lifecycle record. Sections below describe state **at that wave**, not
-current architecture unless the P3h / current-state summary above says otherwise.
+current architecture unless the **Current production state (post-P4 + Wave 3D-IV)**
+summary above says otherwise.
 
 Stage 2 migration changes:
 
@@ -346,15 +369,38 @@ P3h Semantic Repository Cutover changes:
 
 - reminder and `ai_insight` as Timeline events
 - backend/API implementation
-- durable persistence (IndexedDB, SQLite, backend, auth, sync) — P4 not started
+- cloud sync, auth-bound multi-device durability, and outbox
 - routine migration lift in application store (migration utilities remain for
   explicit import paths only)
+
+Web IndexedDB local persistence (P4) is in scope and implemented; see
+**Current production state (post-P4 + Wave 3D-IV)**.
 
 ## Quick Add mapping (semantic write path)
 
 Quick Add creates `SemanticTimelineEvent` records directly through semantic
 creators in `apps/web/lib/timeline/semantic-creators/`. Presentation strings are
 not written to the repository.
+
+### Glucose (Wave 3D save integrity)
+
+`GlucoseQuickAddEntry` flows through `prepareGlucoseQuickAddSubmit` and
+`createSemanticGlucoseTimelineEvent(entry, { id: eventId })`:
+
+| Semantic field          | Value                                       |
+| ----------------------- | ------------------------------------------- |
+| `kind`                  | `glucose`                                   |
+| `source`                | `manual`                                    |
+| `concentrationMmolPerL` | canonical mmol/L from parsed input          |
+| `context`               | optional `GlucoseMeasurementContext`        |
+| `occurredAt`            | ISO 8601 from approved utility              |
+| `id`                    | stable full ID allocated before persistence |
+
+Persistence: `TimelineStore.addEventAsync` awaits IndexedDB commit before glucose
+Quick Add success close. Dashboard and Timeline use the same contract.
+
+Validation: parsed value in approved display-unit range; `time` required;
+`context` optional.
 
 ### Activity
 

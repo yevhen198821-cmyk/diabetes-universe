@@ -7,7 +7,7 @@ duplicating panel logic, forms, or save behavior.
 
 ## Status
 
-Approved
+Approved — reconciled with Wave 3D-IV Glucose Quick Add save integrity closure.
 
 ## Responsibility
 
@@ -15,8 +15,10 @@ Approved
 - Open Quick Add from the mobile/tablet FAB and the desktop Header action.
 - Disable duplicate entry points while Quick Add is open.
 - Prevent repeated open requests from rapid activations.
-- Apply successful saves to Dashboard demo state and refresh affected blocks.
-- Preserve cancel and dismiss behavior without mutating Dashboard data.
+- Apply successful saves to Dashboard derived blocks through the shared Timeline
+  store.
+- Preserve cancel and dismiss behavior without mutating Dashboard data on
+  dismiss/cancel.
 - Return keyboard focus to the control that opened Quick Add.
 
 ## Dependencies
@@ -25,6 +27,7 @@ Approved
 - [Dashboard Quick Add Specification](../../specs/dashboard/quick-add.md)
 - [Dashboard Quick Add UI](../../ui/dashboard/quick-add.md)
 - [Quick Add approved behavior](../../ui-bible/003-quick-add.md)
+- [Timeline Quick Add Integration](../timeline/quick-add-integration.md)
 - Shared `QuickAddHost` in `apps/web/components/quick-add/quick-add-host.tsx`
 - Shared `QuickAddPanel` and forms from `@diabetes-universe/ui`
 
@@ -40,15 +43,42 @@ Approved
   rendered.
 - Save validation remains inside Quick Add forms; invalid submit does not close
   the panel.
-- Dashboard block updates happen only after successful submit callbacks mutate
-  shared demo state.
+- Dashboard block updates happen after successful submit callbacks update the
+  shared Timeline store projection.
 
 ## Notes
+
+### Glucose save contract (Dashboard)
+
+Dashboard glucose Quick Add uses the same awaited save integrity contract as
+Timeline:
+
+```text
+onGlucoseSubmit={async ({ entry, eventId }) => {
+  await addEventAsync(
+    createSemanticGlucoseTimelineEvent(entry, { id: eventId }),
+  );
+}}
+```
+
+Implemented in `apps/web/components/dashboard/dashboard-root.tsx`.
+
+The panel closes only after `addEventAsync` resolves and the host releases the
+glucose pending/dismiss lock. Persistence failure keeps the form open with entered
+values available for retry.
+
+### Other categories (unchanged)
+
+Insulin, nutrition, medication, activity, and note submit handlers call semantic
+creators and synchronous `addEvent`. The panel closes immediately after enqueue,
+consistent with pre–Wave 3D behavior for non-glucose categories.
+
+### Entry points and UX
 
 - Mobile and tablet use `dashboard-fab` with safe-area offsets.
 - Desktop Header disables its action while Quick Add is open.
 - Focus returns to the Header button or FAB based on the last open trigger.
 - Next Action uses `requestOpen('next-action', 'insulin')` to open the insulin
   form directly.
-- Activity and note submit handlers call `createActivityTimelineEvent` and
-  `createNoteTimelineEvent`, then `addEvent`.
+- Direct-open (`openCategory`) and picker-open entry points preserve existing
+  return-focus behavior through `resolveReturnFocusContext`.
