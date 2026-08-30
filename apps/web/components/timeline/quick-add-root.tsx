@@ -2,7 +2,6 @@
 
 import type {
   ActivityQuickAddEntry,
-  GlucoseQuickAddEntry,
   InsulinQuickAddEntry,
   MedicationQuickAddEntry,
   NoteQuickAddEntry,
@@ -11,13 +10,16 @@ import type {
 } from '@diabetes-universe/types';
 import { useRef, useState, type RefObject } from 'react';
 
+import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
 import { QuickAddHost } from '../quick-add/quick-add-host';
 
 interface QuickAddRootProps {
   readonly floatingActionButtonClassName?: string;
   readonly onOpenChange?: (open: boolean) => void;
   readonly onActivitySubmit?: (entry: ActivityQuickAddEntry) => void;
-  readonly onGlucoseSubmit?: (entry: GlucoseQuickAddEntry) => void;
+  readonly onGlucoseSubmit?: (
+    request: GlucoseQuickAddSubmitRequest,
+  ) => Promise<void>;
   readonly onInsulinSubmit?: (entry: InsulinQuickAddEntry) => void;
   readonly onMedicationSubmit?: (entry: MedicationQuickAddEntry) => void;
   readonly onNoteSubmit?: (entry: NoteQuickAddEntry) => void;

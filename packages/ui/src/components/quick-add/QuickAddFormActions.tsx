@@ -1,24 +1,33 @@
 import { Button } from '../../button';
 
 export interface QuickAddFormActionsProps {
+  readonly cancelDisabled?: boolean;
   readonly cancelLabel?: string;
   readonly inline?: boolean;
-  readonly submitLabel?: string;
+  readonly isSubmitting?: boolean;
+  readonly submitAriaDescribedBy?: string;
   readonly submitDisabled?: boolean;
+  readonly submitLabel?: string;
+  readonly submittingLabel?: string;
   readonly onCancel: () => void;
 }
 
 export function QuickAddFormActions({
+  cancelDisabled = false,
   cancelLabel = 'Отмена',
   inline = false,
+  isSubmitting = false,
   onCancel,
+  submitAriaDescribedBy,
   submitDisabled = false,
   submitLabel = 'Сохранить',
+  submittingLabel = 'Сохранение…',
 }: QuickAddFormActionsProps) {
   const actions = (
     <>
       <Button
         className="h-12 min-w-0 flex-1 basis-0"
+        disabled={cancelDisabled || isSubmitting}
         onClick={onCancel}
         type="button"
         variant="secondary"
@@ -26,11 +35,13 @@ export function QuickAddFormActions({
         {cancelLabel}
       </Button>
       <Button
+        aria-busy={isSubmitting ? true : undefined}
+        aria-describedby={submitAriaDescribedBy}
         className="h-12 min-w-0 flex-1 basis-0"
-        disabled={submitDisabled}
+        disabled={submitDisabled || isSubmitting}
         type="submit"
       >
-        {submitLabel}
+        {isSubmitting ? submittingLabel : submitLabel}
       </Button>
     </>
   );

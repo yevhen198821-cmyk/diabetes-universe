@@ -1,9 +1,6 @@
 'use client';
 
-import type {
-  GlucoseMeasurementContext,
-  GlucoseQuickAddEntry,
-} from '@diabetes-universe/types';
+import type { GlucoseMeasurementContext } from '@diabetes-universe/types';
 import {
   QuickAddFormActions,
   QuickAddFormLayout,
@@ -11,13 +8,24 @@ import {
   QuickAddTimeField,
 } from '@diabetes-universe/ui';
 import { ChevronDown } from 'lucide-react';
-import { useMemo, useState, type FormEvent, type RefObject } from 'react';
+import {
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type RefObject,
+} from 'react';
 
 import { useDiabetesSettings } from '../../lib/medical/react';
+import { getCurrentTimeString } from '../../lib/quick-add/format-glucose';
+import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
 import {
-  getCurrentTimeString,
-  parseGlucoseInput,
-} from '../../lib/quick-add/format-glucose';
+  persistPreparedGlucoseQuickAddSubmit,
+  prepareGlucoseQuickAddSubmit,
+  resetGlucoseQuickAddSubmitIdentity,
+  type GlucoseQuickAddFormState,
+} from '../../lib/quick-add/glucose-quick-add-submit-controller';
+import { createGlucoseQuickAddSubmitIdentityState } from '../../lib/quick-add/glucose-quick-add-submit-model';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { formField, formLabel } from '../timeline/ui-styles';
 import {
@@ -29,14 +37,11 @@ import {
 interface GlucoseQuickAddFormProps {
   readonly initialFocusRef?: RefObject<HTMLInputElement | null>;
   readonly onCancel: () => void;
-  readonly onSubmit: (entry: GlucoseQuickAddEntry) => void;
+  readonly onSubmit: (request: GlucoseQuickAddSubmitRequest) => Promise<void>;
+  readonly onSubmittingChange?: (isSubmitting: boolean) => void;
 }
 
-interface GlucoseFormState {
-  readonly value: string;
-  readonly time: string;
-  readonly context: GlucoseMeasurementContext | undefined;
-}
+type GlucoseFormState = GlucoseQuickAddFormState;
 
 function createInitialState(): GlucoseFormState {
   return {
@@ -50,6 +55,7 @@ export function GlucoseQuickAddForm({
   initialFocusRef,
   onCancel,
   onSubmit,
+  onSubmittingChange,
 }: GlucoseQuickAddFormProps) {
   const localization = useLocalization();
   const labels = useMemo(
@@ -66,8 +72,12 @@ export function GlucoseQuickAddForm({
   const [formState, setFormState] =
     useState<GlucoseFormState>(createInitialState);
   const [valueError, setValueError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [contextSheetOpen, setContextSheetOpen] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitIdentityRef = useRef(createGlucoseQuickAddSubmitIdentityState());
+  const isSubmittingRef = useRef(false);
 
   const isLoading = loadState === 'loading';
   const isSettingsError = loadState === 'error';
@@ -84,35 +94,78 @@ export function GlucoseQuickAddForm({
   const selectedContextLabel = formState.context
     ? resolveGlucoseContextLabel(localization, formState.context)
     : null;
+  const controlsDisabled = isSubmitting;
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const setSubmittingState = (pending: boolean) => {
+    setIsSubmitting(pending);
+    onSubmittingChange?.(pending);
+  };
+
+  const resetSubmitIdentity = () => {
+    resetGlucoseQuickAddSubmitIdentity(submitIdentityRef.current);
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!canEnterValue || !glucoseDisplayUnit) {
+    if (!canEnterValue || !glucoseDisplayUnit || isSubmittingRef.current) {
       return;
     }
 
-    const parsedValue = parseGlucoseInput(formState.value, glucoseDisplayUnit);
-
-    if (parsedValue === null) {
-      setValueError(labels.valueOutOfRangeError);
-      return;
-    }
-
-    onSubmit({
-      context: formState.context,
-      time: formState.time,
-      valueMmol: parsedValue,
+    const prepared = prepareGlucoseQuickAddSubmit({
+      canEnterValue,
+      formState,
+      glucoseDisplayUnit,
+      identity: submitIdentityRef.current,
+      valueOutOfRangeMessage: labels.valueOutOfRangeError,
     });
+
+    if (prepared.type === 'invalid-value') {
+      setValueError(prepared.message);
+      return;
+    }
+
+    if (prepared.type !== 'prepared') {
+      return;
+    }
+
+    isSubmittingRef.current = true;
+    setSubmittingState(true);
+    setSaveError(null);
+    setValueError(null);
+    setContextSheetOpen(false);
+
+    const result = await persistPreparedGlucoseQuickAddSubmit({
+      identity: submitIdentityRef.current,
+      onSubmit,
+      request: prepared.request,
+    });
+
+    if (result.type === 'error') {
+      setSaveError(labels.saveErrorDescription);
+    }
+
+    isSubmittingRef.current = false;
+    setSubmittingState(false);
   };
 
   const handleCancel = () => {
+    if (isSubmittingRef.current) {
+      return;
+    }
+
     setFormState(createInitialState());
     setValueError(null);
+    setSaveError(null);
+    resetSubmitIdentity();
     onCancel();
   };
 
   const handleContextSelect = (context: GlucoseMeasurementContext) => {
+    if (controlsDisabled) {
+      return;
+    }
+
     setFormState((current) => ({
       ...current,
       context,
@@ -121,6 +174,10 @@ export function GlucoseQuickAddForm({
   };
 
   const handleClearContext = () => {
+    if (controlsDisabled) {
+      return;
+    }
+
     setFormState((current) => ({
       ...current,
       context: undefined,
@@ -138,194 +195,246 @@ export function GlucoseQuickAddForm({
   };
 
   return (
-    <QuickAddFormLayout onSubmit={handleSubmit}>
+    <QuickAddFormLayout
+      onSubmit={(event) => {
+        void handleSubmit(event);
+      }}
+    >
       <QuickAddFormLayout.Body>
-        {isLoading ? (
-          <p className="text-sm text-slate-600" role="status">
-            {labels.loading}
-          </p>
-        ) : null}
-
-        {isSettingsError ? (
-          <section
-            aria-labelledby="quick-add-glucose-settings-error-title"
-            className="space-y-3"
-          >
-            <div className="space-y-1">
-              <h3
-                className="text-sm font-semibold text-slate-950"
-                id="quick-add-glucose-settings-error-title"
-              >
-                {labels.settingsErrorTitle}
-              </h3>
-              <p className="text-sm text-slate-600">
-                {labels.settingsErrorDescription}
-              </p>
-            </div>
-            <button
-              className="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-              disabled={isRetrying}
-              onClick={() => void handleRetrySettings()}
-              type="button"
-            >
-              {labels.settingsErrorRetry}
-            </button>
-          </section>
-        ) : null}
-
-        {loadState === 'ready' && isUnconfigured ? (
-          <section
-            aria-labelledby="quick-add-glucose-unconfigured-title"
-            className="space-y-3"
-          >
-            <div className="space-y-1">
-              <h3
-                className="text-sm font-semibold text-slate-950"
-                id="quick-add-glucose-unconfigured-title"
-              >
-                {labels.settingsUnconfiguredTitle}
-              </h3>
-              <p className="text-sm text-slate-600">
-                {labels.settingsUnconfiguredDescription}
-              </p>
-            </div>
-            <a
-              className="inline-flex min-h-11 items-center rounded-xl border border-sky-500 bg-sky-50 px-4 text-sm font-semibold text-sky-900 transition hover:bg-sky-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-              href="/account/diabetes"
-            >
-              {labels.settingsUnconfiguredAction}
-            </a>
-          </section>
-        ) : null}
-
-        <div>
-          <label className={formLabel} htmlFor="quick-add-glucose-value">
-            {labels.valueLabel}
-          </label>
-          <div className="relative mt-2">
-            <input
-              aria-describedby={
-                valueError ? 'quick-add-glucose-value-error' : undefined
-              }
-              aria-disabled={!canEnterValue}
-              aria-invalid={valueError ? true : undefined}
-              autoComplete="off"
-              className={`${formField} pr-24 ${
-                hasValue ? 'font-semibold text-slate-950' : 'text-slate-900'
-              } ${!canEnterValue ? 'cursor-not-allowed opacity-60' : ''}`}
-              disabled={!canEnterValue}
-              enterKeyHint="done"
-              id="quick-add-glucose-value"
-              inputMode={canEnterValue ? inputMode : undefined}
-              name="value"
-              onChange={(event) => {
-                setValueError(null);
-                setFormState((current) => ({
-                  ...current,
-                  value: event.target.value,
-                }));
-              }}
-              placeholder={
-                glucoseDisplayUnit === 'mg_per_dl'
-                  ? '120'
-                  : glucoseDisplayUnit === 'mmol_per_l'
-                    ? '6.4'
-                    : ''
-              }
-              ref={initialFocusRef}
-              required={canEnterValue}
-              type="text"
-              value={formState.value}
-            />
-            {unitSuffix ? (
-              <span
-                className={`pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium ${
-                  hasValue ? 'text-slate-500' : 'text-slate-400'
-                }`}
-              >
-                {unitSuffix}
-              </span>
-            ) : null}
-          </div>
-          {valueError ? (
+        <div aria-busy={isSubmitting ? true : undefined}>
+          {isSubmitting ? (
             <p
-              className="mt-2 text-sm text-rose-600"
-              id="quick-add-glucose-value-error"
-              role="alert"
+              className="text-sm text-slate-600"
+              id="quick-add-glucose-saving"
+              role="status"
             >
-              {valueError}
+              {labels.saving}
             </p>
           ) : null}
-        </div>
 
-        <QuickAddTimeField
-          id="quick-add-glucose-time"
-          label={labels.timeLabel}
-          name="time"
-          onChange={(time) => {
-            setFormState((current) => ({
-              ...current,
-              time,
-            }));
-          }}
-          required
-          value={formState.time}
-        />
+          {isLoading ? (
+            <p className="text-sm text-slate-600" role="status">
+              {labels.loading}
+            </p>
+          ) : null}
 
-        {formState.context ? (
+          {isSettingsError ? (
+            <section
+              aria-labelledby="quick-add-glucose-settings-error-title"
+              className="space-y-3"
+            >
+              <div className="space-y-1">
+                <h3
+                  className="text-sm font-semibold text-slate-950"
+                  id="quick-add-glucose-settings-error-title"
+                >
+                  {labels.settingsErrorTitle}
+                </h3>
+                <p className="text-sm text-slate-600">
+                  {labels.settingsErrorDescription}
+                </p>
+              </div>
+              <button
+                className="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                disabled={isRetrying}
+                onClick={() => void handleRetrySettings()}
+                type="button"
+              >
+                {labels.settingsErrorRetry}
+              </button>
+            </section>
+          ) : null}
+
+          {loadState === 'ready' && isUnconfigured ? (
+            <section
+              aria-labelledby="quick-add-glucose-unconfigured-title"
+              className="space-y-3"
+            >
+              <div className="space-y-1">
+                <h3
+                  className="text-sm font-semibold text-slate-950"
+                  id="quick-add-glucose-unconfigured-title"
+                >
+                  {labels.settingsUnconfiguredTitle}
+                </h3>
+                <p className="text-sm text-slate-600">
+                  {labels.settingsUnconfiguredDescription}
+                </p>
+              </div>
+              <a
+                className="inline-flex min-h-11 items-center rounded-xl border border-sky-500 bg-sky-50 px-4 text-sm font-semibold text-sky-900 transition hover:bg-sky-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                href="/account/diabetes"
+              >
+                {labels.settingsUnconfiguredAction}
+              </a>
+            </section>
+          ) : null}
+
+          {saveError ? (
+            <section
+              aria-labelledby="quick-add-glucose-save-error-title"
+              className="space-y-1"
+              role="alert"
+            >
+              <h3
+                className="text-sm font-semibold text-rose-700"
+                id="quick-add-glucose-save-error-title"
+              >
+                {labels.saveErrorTitle}
+              </h3>
+              <p
+                className="text-sm text-rose-600"
+                id="quick-add-glucose-save-error-description"
+              >
+                {saveError}
+              </p>
+            </section>
+          ) : null}
+
           <div>
-            <span className={formLabel} id="quick-add-glucose-context-label">
-              {labels.contextLabel}
-            </span>
-            <div className="mt-2 flex gap-2">
-              <button
-                aria-haspopup="dialog"
-                aria-labelledby="quick-add-glucose-context-label quick-add-glucose-context-value"
-                className={`${formField} flex min-h-11 flex-1 items-center justify-between text-left font-medium text-slate-950`}
-                onClick={() => setContextSheetOpen(true)}
-                type="button"
-              >
-                <span id="quick-add-glucose-context-value">
-                  {selectedContextLabel}
+            <label className={formLabel} htmlFor="quick-add-glucose-value">
+              {labels.valueLabel}
+            </label>
+            <div className="relative mt-2">
+              <input
+                aria-describedby={
+                  valueError ? 'quick-add-glucose-value-error' : undefined
+                }
+                aria-disabled={!canEnterValue || controlsDisabled}
+                aria-invalid={valueError ? true : undefined}
+                autoComplete="off"
+                className={`${formField} pr-24 ${
+                  hasValue ? 'font-semibold text-slate-950' : 'text-slate-900'
+                } ${!canEnterValue || controlsDisabled ? 'cursor-not-allowed opacity-60' : ''}`}
+                disabled={!canEnterValue || controlsDisabled}
+                enterKeyHint="done"
+                id="quick-add-glucose-value"
+                inputMode={canEnterValue ? inputMode : undefined}
+                name="value"
+                onChange={(event) => {
+                  setValueError(null);
+                  setFormState((current) => ({
+                    ...current,
+                    value: event.target.value,
+                  }));
+                }}
+                placeholder={
+                  glucoseDisplayUnit === 'mg_per_dl'
+                    ? '120'
+                    : glucoseDisplayUnit === 'mmol_per_l'
+                      ? '6.4'
+                      : ''
+                }
+                ref={initialFocusRef}
+                required={canEnterValue}
+                type="text"
+                value={formState.value}
+              />
+              {unitSuffix ? (
+                <span
+                  className={`pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium ${
+                    hasValue ? 'text-slate-500' : 'text-slate-400'
+                  }`}
+                >
+                  {unitSuffix}
                 </span>
-                <ChevronDown
-                  aria-hidden="true"
-                  className="text-slate-400"
-                  size={18}
-                />
-              </button>
-              <button
-                aria-label={labels.clearContext}
-                className="min-h-11 shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-                onClick={handleClearContext}
-                type="button"
-              >
-                {labels.clearContext}
-              </button>
+              ) : null}
             </div>
+            {valueError ? (
+              <p
+                className="mt-2 text-sm text-rose-600"
+                id="quick-add-glucose-value-error"
+                role="alert"
+              >
+                {valueError}
+              </p>
+            ) : null}
           </div>
-        ) : (
-          <button
-            aria-label={labels.addContext}
-            className="min-h-11 self-start rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-            onClick={() => setContextSheetOpen(true)}
-            type="button"
-          >
-            {labels.addContext}
-          </button>
-        )}
+
+          <QuickAddTimeField
+            disabled={controlsDisabled}
+            id="quick-add-glucose-time"
+            label={labels.timeLabel}
+            name="time"
+            onChange={(time) => {
+              setFormState((current) => ({
+                ...current,
+                time,
+              }));
+            }}
+            required
+            value={formState.time}
+          />
+
+          {formState.context ? (
+            <div>
+              <span className={formLabel} id="quick-add-glucose-context-label">
+                {labels.contextLabel}
+              </span>
+              <div className="mt-2 flex gap-2">
+                <button
+                  aria-haspopup="dialog"
+                  aria-labelledby="quick-add-glucose-context-label quick-add-glucose-context-value"
+                  className={`${formField} flex min-h-11 flex-1 items-center justify-between text-left font-medium text-slate-950 ${
+                    controlsDisabled ? 'cursor-not-allowed opacity-60' : ''
+                  }`}
+                  disabled={controlsDisabled}
+                  onClick={() => setContextSheetOpen(true)}
+                  type="button"
+                >
+                  <span id="quick-add-glucose-context-value">
+                    {selectedContextLabel}
+                  </span>
+                  <ChevronDown
+                    aria-hidden="true"
+                    className="text-slate-400"
+                    size={18}
+                  />
+                </button>
+                <button
+                  aria-label={labels.clearContext}
+                  className="min-h-11 shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={controlsDisabled}
+                  onClick={handleClearContext}
+                  type="button"
+                >
+                  {labels.clearContext}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              aria-label={labels.addContext}
+              className="min-h-11 self-start rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={controlsDisabled}
+              onClick={() => setContextSheetOpen(true)}
+              type="button"
+            >
+              {labels.addContext}
+            </button>
+          )}
+        </div>
       </QuickAddFormLayout.Body>
 
       <QuickAddFormLayout.Footer>
         <QuickAddFormActions
           inline
+          isSubmitting={isSubmitting}
           onCancel={handleCancel}
+          submitAriaDescribedBy={
+            isSubmitting
+              ? 'quick-add-glucose-saving'
+              : saveError
+                ? 'quick-add-glucose-save-error-description'
+                : undefined
+          }
           submitDisabled={!canEnterValue}
           submitLabel={labels.save}
+          submittingLabel={labels.saving}
         />
       </QuickAddFormLayout.Footer>
 
-      {contextSheetOpen ? (
+      {contextSheetOpen && !controlsDisabled ? (
         <QuickAddOptionSheet
           onClose={() => setContextSheetOpen(false)}
           onSelect={handleContextSelect}

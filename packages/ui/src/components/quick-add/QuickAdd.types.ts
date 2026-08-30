@@ -17,6 +17,7 @@ export interface QuickAddPanelProps {
   readonly selectedActionId: string | null;
   readonly selectedContent?: ReactNode;
   readonly initialFocusRef?: RefObject<HTMLElement | null>;
+  readonly dismissDisabled?: boolean;
   readonly onClose: () => void;
   readonly onSelectAction: (actionId: string) => void;
   readonly onBack: () => void;

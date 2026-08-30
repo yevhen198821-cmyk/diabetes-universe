@@ -28,6 +28,9 @@ export interface GlucoseQuickAddLabels {
   readonly contextSheetTitle: string;
   readonly loading: string;
   readonly save: string;
+  readonly saveErrorDescription: string;
+  readonly saveErrorTitle: string;
+  readonly saving: string;
   readonly settingsErrorDescription: string;
   readonly settingsErrorRetry: string;
   readonly settingsErrorTitle: string;
@@ -49,6 +52,11 @@ const KEYS = {
   contextSheetTitle: asTranslationKey('quick-add.glucose.contextSheetTitle'),
   loading: asTranslationKey('quick-add.glucose.loading'),
   save: asTranslationKey('quick-add.glucose.save'),
+  saveErrorDescription: asTranslationKey(
+    'quick-add.glucose.saveError.description',
+  ),
+  saveErrorTitle: asTranslationKey('quick-add.glucose.saveError.title'),
+  saving: asTranslationKey('quick-add.glucose.saving'),
   settingsErrorDescription: asTranslationKey(
     'quick-add.glucose.settingsError.description',
   ),
@@ -93,6 +101,9 @@ export function resolveGlucoseQuickAddLabels(
     contextSheetTitle: translate(localization, KEYS.contextSheetTitle),
     loading: translate(localization, KEYS.loading),
     save: translate(localization, KEYS.save),
+    saveErrorDescription: translate(localization, KEYS.saveErrorDescription),
+    saveErrorTitle: translate(localization, KEYS.saveErrorTitle),
+    saving: translate(localization, KEYS.saving),
     settingsErrorDescription: translate(
       localization,
       KEYS.settingsErrorDescription,

@@ -52,7 +52,7 @@ async function renderGlucoseForm({
           createElement(GlucoseQuickAddForm, {
             initialFocusRef,
             onCancel: () => {},
-            onSubmit: () => {},
+            onSubmit: async () => {},
           }),
         ),
       ),

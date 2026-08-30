@@ -447,6 +447,10 @@ export const englishCanonicalMessages = defineApprovedMessages({
     'Glucose entry is unavailable until settings can be loaded.',
   'quick-add.glucose.settingsError.retry': 'Retry',
   'quick-add.glucose.save': 'Save',
+  'quick-add.glucose.saveError.description':
+    'The glucose reading was not saved. Your entered data is still in the form. Please try again.',
+  'quick-add.glucose.saveError.title': 'Could not save glucose reading',
+  'quick-add.glucose.saving': 'Saving…',
   'quick-add.glucose.timeLabel': 'Time',
   'quick-add.glucose.unitGate.description':
     'Choose how you want to enter glucose values. This preference is saved to your diabetes settings.',

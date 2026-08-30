@@ -152,3 +152,120 @@ test('repository failure does not commit native semantic mutation', async () => 
     await mounted.unmount();
   }
 });
+
+test('addEventAsync resolves after applied and rejects on repository failure', async () => {
+  const repository = createInMemoryTimelineRepository({ seedEvents: [] });
+  const mounted = await mountTimelineStore({ repository });
+  let failingMounted;
+
+  try {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const semanticEvent = createSemanticGlucoseTimelineEvent(
+      {
+        time: '08:00',
+        valueMmol: 6.1,
+      },
+      { clock: fixedClock },
+    );
+
+    await act(async () => {
+      await mounted.currentStore.addEventAsync(semanticEvent);
+    });
+
+    assert.equal(mounted.currentStore.events.length, 1);
+
+    const failingRepository = {
+      addCalls: 0,
+      async initialize() {},
+      getSnapshot() {
+        return { events: [] };
+      },
+      async queryEvents() {
+        return { events: [] };
+      },
+      async addEvent() {
+        this.addCalls += 1;
+        throw new TimelineRepositoryError('TIMELINE_REPOSITORY_WRITE_FAILED');
+      },
+      async updateEvent() {
+        return { status: 'not-found' };
+      },
+      async deleteEvent() {
+        return { status: 'not-found' };
+      },
+      async replaceEvents() {
+        return { status: 'applied' };
+      },
+    };
+    failingMounted = await mountTimelineStore({
+      repository: failingRepository,
+    });
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    await act(async () => {
+      await assert.rejects(
+        failingMounted.currentStore.addEventAsync(semanticEvent),
+        (error) =>
+          error instanceof TimelineRepositoryError &&
+          error.code === 'TIMELINE_REPOSITORY_WRITE_FAILED',
+      );
+    });
+
+    assert.equal(failingRepository.addCalls, 1);
+    assert.equal(failingMounted.currentStore.events.length, 0);
+  } finally {
+    await mounted.unmount();
+  }
+});
+
+test('retry with stable event id creates exactly one stored glucose event', async () => {
+  let addCalls = 0;
+  const repository = createInMemoryTimelineRepository({ seedEvents: [] });
+  const originalAddEvent = repository.addEvent.bind(repository);
+  const mounted = await mountTimelineStore({ repository });
+
+  try {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const semanticEvent = createSemanticGlucoseTimelineEvent(
+      {
+        time: '08:30',
+        valueMmol: 5.9,
+      },
+      { clock: fixedClock, id: 'glucose-0830-retry-id' },
+    );
+
+    repository.addEvent = async (event) => {
+      addCalls += 1;
+
+      if (addCalls === 1) {
+        throw new TimelineRepositoryError('TIMELINE_REPOSITORY_WRITE_FAILED');
+      }
+
+      return originalAddEvent(event);
+    };
+
+    await act(async () => {
+      await assert.rejects(mounted.currentStore.addEventAsync(semanticEvent));
+    });
+
+    await act(async () => {
+      await mounted.currentStore.addEventAsync(semanticEvent);
+    });
+
+    assert.equal(addCalls, 2);
+    assert.equal(mounted.currentStore.events.length, 1);
+    assert.equal(mounted.currentStore.events[0]?.id, 'glucose-0830-retry-id');
+    assert.equal(mounted.currentStore.events[0]?.source, 'manual');
+  } finally {
+    await mounted.unmount();
+  }
+});

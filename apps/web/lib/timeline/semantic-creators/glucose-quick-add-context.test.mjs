@@ -51,6 +51,19 @@ test('semantic glucose creator preserves explicit before_meal context', () => {
   assert.equal(event.context, 'before_meal');
 });
 
+test('semantic glucose creator accepts explicit retry-safe event id', () => {
+  const event = createSemanticGlucoseTimelineEvent(
+    {
+      time: '08:30',
+      valueMmol: 7.3,
+    },
+    { clock: fixedClock, id: 'glucose-0830-test-client-id' },
+  );
+
+  assert.equal(event.id, 'glucose-0830-test-client-id');
+  assert.equal(event.source, 'manual');
+});
+
 test('semantic glucose creator does not map localized labels', () => {
   assert.doesNotMatch(creatorSource, /mapQuickAddGlucoseContext/);
 });

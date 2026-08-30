@@ -37,6 +37,12 @@ export function setupIntegrationDom() {
     value: domWindow.MutationObserver,
   });
 
+  if (typeof globalThis.requestAnimationFrame !== 'function') {
+    globalThis.requestAnimationFrame = (callback) =>
+      domWindow.setTimeout(callback, 0);
+    globalThis.cancelAnimationFrame = (id) => domWindow.clearTimeout(id);
+  }
+
   return domWindow;
 }
 
