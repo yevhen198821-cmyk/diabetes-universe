@@ -1,7 +1,10 @@
 import { expect, test } from './support/test';
 
 import { waitForApplicationReady } from './support/wait-for-application-ready';
-import { selectGlucoseUnitIfRequired } from './support/glucose-quick-add-helpers';
+import {
+  saveGlucoseQuickAdd,
+  selectGlucoseUnitIfRequired,
+} from './support/glucose-quick-add-helpers';
 
 test('dashboard last glucose renders English labels and syncs with timeline edits', async ({
   page,
@@ -26,7 +29,7 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   await page.getByRole('button', { name: 'Quick add: Glucose' }).click();
   await selectGlucoseUnitIfRequired(page);
   await page.getByLabel('Glucose level').fill('7.7');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
+  await saveGlucoseQuickAdd(page);
 
   await expect(
     lastGlucoseRegion.getByText('7.7', { exact: true }),

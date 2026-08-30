@@ -128,6 +128,7 @@ test('diabetes management screen renders unconfigured glucose unit state', async
   page,
   request,
 }) => {
+  await page.unroute('**/api/v1/medical/me/diabetes-settings');
   await page.setViewportSize({ width: 360, height: 740 });
   await signInWithMagicLink(
     page,
@@ -152,6 +153,7 @@ test('selecting glucose unit saves via PATCH and updates pressed state', async (
   page,
   request,
 }) => {
+  await page.unroute('**/api/v1/medical/me/diabetes-settings');
   await page.setViewportSize({ width: 412, height: 915 });
   await signInWithMagicLink(page, request, 'profile-diabetes-unit@example.com');
   await page.goto('/account/diabetes');
@@ -220,6 +222,7 @@ test('target editor keeps focus stable while typing mmol/L and mg/dL limits', as
   page,
   request,
 }) => {
+  await page.unroute('**/api/v1/medical/me/diabetes-settings');
   await page.setViewportSize({ width: 390, height: 844 });
   await signInWithMagicLink(
     page,

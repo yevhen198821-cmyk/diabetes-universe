@@ -2,6 +2,7 @@ import { expect, test, type Page } from './support/test';
 
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 import {
+  saveGlucoseQuickAdd,
   selectGlucoseUnitIfRequired,
   setGlucoseQuickAddTime,
 } from './support/glucose-quick-add-helpers';
@@ -82,9 +83,7 @@ test('timeline delete and add update the selected day list', async ({
   await selectGlucoseUnitIfRequired(page);
   await page.getByLabel('Glucose level').fill('8.8');
   await setGlucoseQuickAddTime(page, '23', '59');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
-
-  await expect(page.getByText('8.8 mmol/L').first()).toBeVisible();
+  await saveGlucoseQuickAdd(page);
   await expect(page.getByText('31 events')).toBeVisible();
 });
 

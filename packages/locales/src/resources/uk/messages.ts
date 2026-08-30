@@ -171,6 +171,21 @@ export const ukrainianDraftMessages = defineDraftMessages({
   'quick-add.button.label': 'Додати подію',
   'quick-add.glucose.contextLabel': 'Контекст вимірювання',
   'quick-add.glucose.contextSheetTitle': 'Контекст вимірювання',
+  'quick-add.glucose.addContext': 'Додати контекст',
+  'quick-add.glucose.changeContext': 'Змінити контекст',
+  'quick-add.glucose.clearContext': 'Очистити',
+  'quick-add.glucose.loading': 'Завантаження налаштувань глюкози…',
+  'quick-add.glucose.settingsUnconfigured.title':
+    'Одиниці глюкози не налаштовано',
+  'quick-add.glucose.settingsUnconfigured.description':
+    'Укажіть одиниці відображення глюкози в налаштуваннях діабету перед введенням значення.',
+  'quick-add.glucose.settingsUnconfigured.action':
+    'Відкрити налаштування діабету',
+  'quick-add.glucose.settingsError.title':
+    'Не вдалося завантажити налаштування глюкози',
+  'quick-add.glucose.settingsError.description':
+    'Введення глюкози недоступне, доки налаштування не будуть завантажені.',
+  'quick-add.glucose.settingsError.retry': 'Повторити',
   'quick-add.glucose.save': 'Зберегти',
   'quick-add.glucose.timeLabel': 'Час',
   'quick-add.glucose.unitGate.description':

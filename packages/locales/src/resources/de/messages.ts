@@ -174,6 +174,21 @@ export const germanDraftMessages = defineDraftMessages({
   'quick-add.button.label': 'Ereignis hinzufügen',
   'quick-add.glucose.contextLabel': 'Messkontext',
   'quick-add.glucose.contextSheetTitle': 'Messkontext',
+  'quick-add.glucose.addContext': 'Kontext hinzufügen',
+  'quick-add.glucose.changeContext': 'Kontext ändern',
+  'quick-add.glucose.clearContext': 'Entfernen',
+  'quick-add.glucose.loading': 'Glukose-Einstellungen werden geladen…',
+  'quick-add.glucose.settingsUnconfigured.title':
+    'Glukose-Einheit nicht konfiguriert',
+  'quick-add.glucose.settingsUnconfigured.description':
+    'Legen Sie Ihre Glukose-Anzeigeeinheit in den Diabetes-Einstellungen fest, bevor Sie einen Wert eingeben.',
+  'quick-add.glucose.settingsUnconfigured.action':
+    'Diabetes-Einstellungen öffnen',
+  'quick-add.glucose.settingsError.title':
+    'Glukose-Einstellungen konnten nicht geladen werden',
+  'quick-add.glucose.settingsError.description':
+    'Glukoseeingabe ist nicht verfügbar, bis die Einstellungen geladen werden können.',
+  'quick-add.glucose.settingsError.retry': 'Erneut versuchen',
   'quick-add.glucose.save': 'Speichern',
   'quick-add.glucose.timeLabel': 'Uhrzeit',
   'quick-add.glucose.unitGate.description':

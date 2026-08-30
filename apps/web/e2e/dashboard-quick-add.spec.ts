@@ -2,6 +2,7 @@ import { expect, test } from './support/test';
 
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 import {
+  saveGlucoseQuickAdd,
   selectGlucoseUnitIfRequired,
   setGlucoseQuickAddTime,
 } from './support/glucose-quick-add-helpers';
@@ -196,7 +197,7 @@ test('timeline quick add updates shared dashboard state', async ({ page }) => {
   await selectGlucoseUnitIfRequired(page);
   await page.getByLabel('Glucose level').fill('8.8');
   await setGlucoseQuickAddTime(page, '11', '30');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
+  await saveGlucoseQuickAdd(page);
 
   await expect(page.getByText('8.8 mmol/L').first()).toBeVisible();
 

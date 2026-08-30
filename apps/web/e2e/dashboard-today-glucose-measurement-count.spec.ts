@@ -1,6 +1,9 @@
 import { expect, test } from './support/test';
 
-import { selectGlucoseUnitIfRequired } from './support/glucose-quick-add-helpers';
+import {
+  saveGlucoseQuickAdd,
+  selectGlucoseUnitIfRequired,
+} from './support/glucose-quick-add-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
 test('Today glucose card shows measurement count without duplicating Last Glucose hero', async ({
@@ -19,7 +22,7 @@ test('Today glucose card shows measurement count without duplicating Last Glucos
   await page.getByRole('button', { name: 'Quick add: Glucose' }).click();
   await selectGlucoseUnitIfRequired(page);
   await page.getByLabel('Glucose level').fill('5.6');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
+  await saveGlucoseQuickAdd(page);
   await expect(page.getByLabel('Glucose level')).toHaveCount(0);
 
   await expect(lastGlucoseRegion.getByText('5.6')).toBeVisible();

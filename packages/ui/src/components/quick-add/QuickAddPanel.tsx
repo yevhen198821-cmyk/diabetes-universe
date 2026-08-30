@@ -18,6 +18,7 @@ function findActionAddTitle(
 
 export function QuickAddPanel({
   actions,
+  initialFocusRef,
   onBack,
   onClose,
   onSelectAction,
@@ -65,8 +66,22 @@ export function QuickAddPanel({
       return;
     }
 
-    panelRef.current?.focus();
-  }, [open, selectedActionId]);
+    const focusTarget = (): boolean => {
+      if (initialFocusRef?.current?.isConnected) {
+        initialFocusRef.current.focus();
+        return true;
+      }
+
+      panelRef.current?.focus();
+      return false;
+    };
+
+    if (!focusTarget()) {
+      requestAnimationFrame(() => {
+        focusTarget();
+      });
+    }
+  }, [initialFocusRef, open, selectedActionId]);
 
   if (!open) {
     return null;
