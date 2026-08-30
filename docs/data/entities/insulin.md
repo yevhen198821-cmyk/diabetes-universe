@@ -2,12 +2,15 @@
 
 ## Status
 
-Approved as a Timeline semantic kind. Wave 4A defines the **target recording
-contract**; production types are unchanged until later Wave 4 implementation
-PRs.
+Approved as a Timeline semantic kind. Wave 4A is the approved recording
+architecture. Wave 4B-I adds the shared TypeScript contract and
+presentation-neutral medical-domain foundation. Application writers, UI,
+IndexedDB, and the medical API remain on the current payload.
 
 Authoritative architecture:
 [Wave 4A — Insulin Recording Architecture](../../architecture/insulin/wave-4a-insulin-recording-architecture.md).
+Implementation:
+[Wave 4B-I — Shared Insulin Types and Medical-Domain Foundation](../../implementation/wave-4b-i-insulin-domain-foundation.md).
 
 ## Purpose
 
@@ -57,10 +60,14 @@ and IndexedDB. Glucose Wave 3D save integrity does **not** apply.
 - brand labels act as identifiers;
 - Quick Add options and form chrome are hardcoded in Russian;
 - UI validation `0 < dose <= 100` is a demo technical bound, not a safe dose;
-- no shared insulin module in `@diabetes-universe/medical-domain`;
+- shared insulin types and medical-domain helpers exist (Wave 4B-I); no UI
+  writer emits `preparationId` or `administrationContext` yet;
 - no bolus calculator, insulin-on-board, recommendation, pump, or therapy plan.
 
-## Target attributes (Wave 4, additive, not implemented here)
+## Target attributes (Wave 4, additive)
+
+Wave 4B-I implements the optional identity/context fields on
+`InsulinTimelineEvent`. Writers and the medical API are unchanged.
 
 Wave 4 keeps the current required fields and adds optional identity/context
 fields. `schemaVersion` stays `1` **only if** every fail-closed reader that
@@ -147,7 +154,7 @@ fields.
 - Cloud sync of the new fields is **blocked** until Wave 4E updates the
   medical API allow-list, kind validation, adoption, OpenAPI, and tests.
   Wave 4 does not add an insulin-specific sync protocol.
-- Implementation slices: 4B-I types/domain, 4B-II presentation plus
-  semantic-safe edit, 4C localized Quick Add (including required Other name),
-  4D local save integrity, 4E API/adoption/OpenAPI. None of those start in
-  Wave 4A.
+- Implementation slices: 4B-I types/domain (this wave), 4B-II presentation
+  plus semantic-safe edit, 4C localized Quick Add (including required Other
+  name), 4D local save integrity, 4E API/adoption/OpenAPI. 4B-II is not
+  started.
