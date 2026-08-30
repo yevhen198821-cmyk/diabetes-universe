@@ -72,6 +72,7 @@
 - [Dashboard Recent Events](architecture/dashboard/recent-events.md)
 - [Dashboard AI Insight](architecture/dashboard/ai-insight.md)
 - [Dashboard Quick Add Integration](architecture/dashboard/quick-add-integration.md) — Wave 3D-IV glucose save integrity closure
+- [Wave 4A — Insulin Recording Architecture](architecture/insulin/wave-4a-insulin-recording-architecture.md) — Ready for approval
 - [Dashboard States](architecture/dashboard/states.md)
 - [Dashboard Responsive Behavior](architecture/dashboard/responsive.md)
 - [Timeline Overview](architecture/timeline/overview.md) — event journal at `/timeline`
@@ -181,7 +182,7 @@ the numbered specifications above.
 - [User Entity](data/entities/user.md)
 - [Timeline Entity](data/entities/timeline.md) — approved `TimelineEvent` contract
 - [Glucose Entity](data/entities/glucose.md)
-- [Insulin Entity](data/entities/insulin.md)
+- [Insulin Entity](data/entities/insulin.md) — Wave 4A target recording contract (production types unchanged)
 - [Nutrition Entity](data/entities/nutrition.md)
 - [Medication Entity](data/entities/medication.md)
 - [Reminder Entity](data/entities/reminder.md)
