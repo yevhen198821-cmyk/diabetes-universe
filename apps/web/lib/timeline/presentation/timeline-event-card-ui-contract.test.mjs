@@ -21,5 +21,21 @@ test('EventCard supports canonical dateTime separate from visible time', () => {
 
 test('EventCard renders optional status lines with generic styling', () => {
   assert.match(eventCardSource, /statusLines/);
+  assert.match(eventCardSource, /metadataLines/);
   assert.match(eventCardSource, /text-xs text-slate-500/);
+});
+
+test('EventCard fallback aria construction includes metadataLines once', () => {
+  const fallbackAriaSource = readFileSync(
+    fileURLToPath(
+      new URL(
+        '../../../../../packages/ui/src/components/event-card/build-event-card-fallback-aria-label.ts',
+        import.meta.url,
+      ),
+    ),
+    'utf8',
+  );
+
+  assert.match(eventCardSource, /buildEventCardFallbackAriaLabel/);
+  assert.match(fallbackAriaSource, /\.\.\.\(input\.metadataLines \?\? \[\]\)/);
 });

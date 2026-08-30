@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { eventTypeAppearances } from '../../theme/event-type-appearance';
+import { buildEventCardFallbackAriaLabel } from './build-event-card-fallback-aria-label';
 import type {
   EventCardProps,
   EventCardStatus,
@@ -67,6 +68,7 @@ export function EventCard({
   onClick,
   status = 'default',
   statusLines,
+  metadataLines,
   subtitle,
   time,
   title,
@@ -83,15 +85,33 @@ export function EventCard({
   const semanticDateTime = dateTime ?? time;
   const ariaLabel =
     providedAriaLabel ??
-    [time, title, value, unit, context, ...(statusLines ?? []), statusLabel]
-      .filter(Boolean)
-      .join(', ');
+    buildEventCardFallbackAriaLabel({
+      context,
+      metadataLines,
+      statusLabel,
+      statusLines,
+      time,
+      title,
+      unit,
+      value,
+    });
   const isCompact = variant === 'compact';
 
   const statusLineContent =
     statusLines && statusLines.length > 0 ? (
       <span className="mt-1 block space-y-0.5">
         {statusLines.map((line) => (
+          <span className="block text-xs text-slate-500" key={line}>
+            {line}
+          </span>
+        ))}
+      </span>
+    ) : null;
+
+  const metadataLineContent =
+    metadataLines && metadataLines.length > 0 ? (
+      <span className="mt-1 block space-y-0.5">
+        {metadataLines.map((line) => (
           <span className="block text-xs text-slate-500" key={line}>
             {line}
           </span>
@@ -131,6 +151,7 @@ export function EventCard({
           ) : null}
         </span>
         {statusLineContent}
+        {metadataLineContent}
       </span>
     </>
   );
@@ -163,6 +184,7 @@ export function EventCard({
           </span>
         ) : null}
         {statusLineContent}
+        {metadataLineContent}
       </span>
 
       <span className="shrink-0 text-right">

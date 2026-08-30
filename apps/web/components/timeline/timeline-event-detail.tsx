@@ -25,7 +25,11 @@ import {
 
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import {
+  mapTimelineEventDetailPresentation,
   resolveTimelineEventSourcePresentation,
+  type TimelinePresentationDependencies,
+} from '../../lib/timeline/presentation';
+import {
   resolveTimelineUiLabels,
   type TimelineUiLabels,
 } from './timeline-ui-labels';
@@ -35,8 +39,6 @@ import {
   type TimelineEventEditDraft,
   type TimelineEventEditErrors,
 } from './timeline-event-detail-model';
-import { mapTimelineEventDetailPresentation } from '../../lib/timeline/presentation';
-import type { TimelinePresentationDependencies } from '../../lib/timeline/presentation';
 
 export type TimelineEventDetailMode = 'edit' | 'view';
 

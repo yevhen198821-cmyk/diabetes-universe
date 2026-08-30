@@ -7,6 +7,7 @@ import type {
 import type { EventCardType } from '@diabetes-universe/ui';
 
 import { presentGlucoseFromTimelineEvent } from '../../medical/glucose/present-glucose-from-timeline-event';
+import { resolveTimelineEventSourcePresentation } from './resolve-timeline-event-source-presentation';
 import {
   buildTimelineEventCardAriaLabel,
   buildTimelineEventMapMarkerAriaLabel,
@@ -318,6 +319,18 @@ export function formatTimelineGlucoseDisplayValue(
   return mapGlucosePresentation(event, dependencies).measurement.display;
 }
 
+function resolveGlucoseCardMetadataLines(
+  event: Extract<SemanticTimelineEvent, { kind: 'glucose' }>,
+  dependencies: TimelinePresentationDependencies,
+): readonly string[] | undefined {
+  const sourcePresentation = resolveTimelineEventSourcePresentation(
+    event.source,
+    dependencies.labels.sources,
+  );
+
+  return sourcePresentation ? [sourcePresentation.label] : undefined;
+}
+
 export function mapTimelineEventCardPresentation(
   event: SemanticTimelineEvent,
   dependencies: TimelinePresentationDependencies,
@@ -342,6 +355,7 @@ export function mapTimelineEventCardPresentation(
     });
     const cardPresentation = {
       ...base,
+      metadataLines: resolveGlucoseCardMetadataLines(event, dependencies),
       statusLines:
         historyPresentation.statusLines.length > 0
           ? historyPresentation.statusLines

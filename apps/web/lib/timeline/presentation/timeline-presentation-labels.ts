@@ -27,6 +27,12 @@ export interface TimelinePresentationLabels {
   readonly mealTypes: Readonly<Record<NutritionMealType, string>>;
   readonly noteFallbackTitle: string;
   readonly openEventAriaPrefix: string;
+  readonly sources: Readonly<{
+    readonly demo: string;
+    readonly device: string;
+    readonly import: string;
+    readonly manual: string;
+  }>;
   readonly units: Readonly<{
     readonly activityMinutes: string;
     readonly glucoseMgPerDl: string;
@@ -162,6 +168,24 @@ export function resolveTimelinePresentationLabels(
       localization,
       asTranslationKey('timeline.eventCard.openAriaPrefix'),
     ),
+    sources: {
+      demo: translate(
+        localization,
+        asTranslationKey('timeline.detail.source.demo'),
+      ),
+      device: translate(
+        localization,
+        asTranslationKey('timeline.detail.source.device'),
+      ),
+      import: translate(
+        localization,
+        asTranslationKey('timeline.detail.source.import'),
+      ),
+      manual: translate(
+        localization,
+        asTranslationKey('timeline.detail.source.manual'),
+      ),
+    },
     units: {
       activityMinutes: translate(
         localization,

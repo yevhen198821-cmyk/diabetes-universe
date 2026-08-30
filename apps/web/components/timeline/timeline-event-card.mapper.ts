@@ -56,6 +56,7 @@ export function mapTimelineEventToCard(
       size: 15,
     }),
     statusLines: presentation.statusLines,
+    metadataLines: presentation.metadataLines,
     time: presentation.time,
     title: presentation.title,
     type: presentation.cardType,
