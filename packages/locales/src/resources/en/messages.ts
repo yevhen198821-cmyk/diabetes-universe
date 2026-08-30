@@ -354,8 +354,7 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'timeline.detail.form.insulin.errors.otherNameRequired':
     'Enter the preparation name.',
   'timeline.detail.form.insulin.keepRecordedContext': 'Keep recorded text',
-  'timeline.detail.form.insulin.keepRecordedPreparation':
-    'Keep recorded name',
+  'timeline.detail.form.insulin.keepRecordedPreparation': 'Keep recorded name',
   'timeline.detail.form.insulin.legacyContextHint':
     'The recorded context text is kept unless you choose a context.',
   'timeline.detail.form.insulin.legacyPreparationHint':

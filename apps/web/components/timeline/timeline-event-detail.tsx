@@ -152,8 +152,7 @@ function TimelineEventEditForm({
   };
 
   const updateTiming =
-    (field: 'date' | 'time') =>
-    (event: ChangeEvent<HTMLInputElement>) => {
+    (field: 'date' | 'time') => (event: ChangeEvent<HTMLInputElement>) => {
       onChange({ ...draft, [field]: event.target.value });
     };
 

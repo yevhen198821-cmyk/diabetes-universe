@@ -64,12 +64,12 @@ export function TimelineInsulinEditFields({
   storedPreparation,
   storedPreparationIsUnmatched,
 }: TimelineInsulinEditFieldsProps) {
-  const preparationGroups = resolveInsulinPreparationOptionGroups(
-    presentationLabels,
-  );
+  const preparationGroups =
+    resolveInsulinPreparationOptionGroups(presentationLabels);
   const contextOptions =
     resolveInsulinAdministrationContextOptions(presentationLabels);
-  const showOtherName = selection.preparationId === INSULIN_PREPARATION_OTHER_ID;
+  const showOtherName =
+    selection.preparationId === INSULIN_PREPARATION_OTHER_ID;
 
   const handlePreparationChange = (value: string) => {
     onChange({

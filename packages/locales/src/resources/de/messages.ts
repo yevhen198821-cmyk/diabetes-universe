@@ -143,8 +143,7 @@ export const germanDraftMessages = defineDraftMessages({
     'Geben Sie eine Dosis größer als 0 und höchstens 100 ein.',
   'timeline.detail.form.insulin.errors.otherNameRequired':
     'Geben Sie den Präparatnamen ein.',
-  'timeline.detail.form.insulin.keepRecordedContext':
-    'Erfassten Text behalten',
+  'timeline.detail.form.insulin.keepRecordedContext': 'Erfassten Text behalten',
   'timeline.detail.form.insulin.keepRecordedPreparation':
     'Erfassten Namen behalten',
   'timeline.detail.form.insulin.legacyContextHint':

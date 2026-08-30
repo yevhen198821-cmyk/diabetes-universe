@@ -26,10 +26,7 @@ const INSULIN_FRACTION_DIGITS = {
  * the governed legacy mapping table.
  */
 export type InsulinContextPresentationSource =
-  | 'legacy_mapped'
-  | 'legacy_raw'
-  | 'semantic'
-  | 'unspecified';
+  'legacy_mapped' | 'legacy_raw' | 'semantic' | 'unspecified';
 
 export interface PresentInsulinFromTimelineEventInput {
   readonly event: Extract<SemanticTimelineEvent, { kind: 'insulin' }>;

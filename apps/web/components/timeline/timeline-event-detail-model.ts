@@ -30,8 +30,7 @@ interface TimelineEventEditDraftFields {
   readonly value: string;
 }
 
-export interface TimelineGenericEventEditDraft
-  extends TimelineEventEditDraftFields {
+export interface TimelineGenericEventEditDraft extends TimelineEventEditDraftFields {
   readonly variant: 'generic';
 }
 
@@ -54,14 +53,10 @@ export interface TimelineInsulinEventEditDraft {
 }
 
 export type TimelineEventEditDraft =
-  | TimelineGenericEventEditDraft
-  | TimelineInsulinEventEditDraft;
+  TimelineGenericEventEditDraft | TimelineInsulinEventEditDraft;
 
 export type TimelineEventEditErrorField =
-  | keyof TimelineEventEditDraftFields
-  | 'dose'
-  | 'otherName'
-  | 'preparation';
+  keyof TimelineEventEditDraftFields | 'dose' | 'otherName' | 'preparation';
 
 export type TimelineEventEditErrors = Partial<
   Record<TimelineEventEditErrorField, string>

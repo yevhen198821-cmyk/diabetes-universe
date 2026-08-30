@@ -68,8 +68,7 @@ export interface InsulinEditTransition {
 }
 
 export type InsulinEditTransitionErrorCode =
-  | 'insulin.dose.out_of_ui_bound'
-  | 'insulin.preparation.other_name_required';
+  'insulin.dose.out_of_ui_bound' | 'insulin.preparation.other_name_required';
 
 export interface InsulinEditTransitionErrors {
   readonly dose?: InsulinEditTransitionErrorCode;

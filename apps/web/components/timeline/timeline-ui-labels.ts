@@ -392,8 +392,7 @@ export function resolveTimelineUiLabels(
             ),
             otherNameRequired: translate(
               localization,
-              TIMELINE_UI_TRANSLATION_KEYS
-                .detailFormInsulinErrorOtherNameRequired,
+              TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinErrorOtherNameRequired,
             ),
           },
           keepRecordedContext: translate(
@@ -402,8 +401,7 @@ export function resolveTimelineUiLabels(
           ),
           keepRecordedPreparation: translate(
             localization,
-            TIMELINE_UI_TRANSLATION_KEYS
-              .detailFormInsulinKeepRecordedPreparation,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinKeepRecordedPreparation,
           ),
           legacyContextHint: translate(
             localization,
