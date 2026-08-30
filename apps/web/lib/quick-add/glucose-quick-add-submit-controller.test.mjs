@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   executeGlucoseQuickAddSubmit,
+  prepareGlucoseQuickAddSubmit,
   resetGlucoseQuickAddSubmitIdentity,
 } from './glucose-quick-add-submit-controller.ts';
 import { createGlucoseQuickAddSubmitIdentityState } from './glucose-quick-add-submit-model.ts';
@@ -12,6 +13,41 @@ const baseFormState = {
   time: '08:30',
   value: '6.4',
 };
+
+test('prepareGlucoseQuickAddSubmit rejects invalid value without creating submit identity', () => {
+  const identity = createGlucoseQuickAddSubmitIdentityState();
+
+  const prepared = prepareGlucoseQuickAddSubmit({
+    canEnterValue: true,
+    formState: {
+      ...baseFormState,
+      value: 'not-a-number',
+    },
+    glucoseDisplayUnit: 'mmol_per_l',
+    identity,
+    valueOutOfRangeMessage: 'invalid value',
+  });
+
+  assert.equal(prepared.type, 'invalid-value');
+  assert.equal(prepared.message, 'invalid value');
+  assert.equal(identity.pendingEventId, null);
+});
+
+test('prepareGlucoseQuickAddSubmit prepares stable request for valid value', () => {
+  const identity = createGlucoseQuickAddSubmitIdentityState();
+
+  const prepared = prepareGlucoseQuickAddSubmit({
+    canEnterValue: true,
+    formState: baseFormState,
+    glucoseDisplayUnit: 'mmol_per_l',
+    identity,
+    valueOutOfRangeMessage: 'invalid value',
+  });
+
+  assert.equal(prepared.type, 'prepared');
+  assert.match(prepared.request.eventId, /^glucose-0830-/);
+  assert.equal(prepared.request.entry.valueMmol, 6.4);
+});
 
 test('executeGlucoseQuickAddSubmit ignores duplicate submits while pending', async () => {
   let submitCount = 0;

@@ -20,8 +20,22 @@ test('GlucoseQuickAddForm wires submit pending changes to host callback', () => 
 });
 
 test('GlucoseQuickAddForm delegates submit identity to controller model', () => {
-  assert.match(formSource, /executeGlucoseQuickAddSubmit/);
+  assert.match(formSource, /prepareGlucoseQuickAddSubmit/);
+  assert.match(formSource, /persistPreparedGlucoseQuickAddSubmit/);
   assert.match(formSource, /createGlucoseQuickAddSubmitIdentityState/);
+});
+
+test('GlucoseQuickAddForm validates before entering submit pending state', () => {
+  assert.match(formSource, /const prepared = prepareGlucoseQuickAddSubmit\(/);
+  assert.match(formSource, /if \(prepared\.type === 'invalid-value'\)/);
+  assert.match(
+    formSource,
+    /if \(prepared\.type === 'invalid-value'\)[\s\S]*return;[\s\S]*isSubmittingRef\.current = true;/,
+  );
+  assert.doesNotMatch(
+    formSource,
+    /isSubmittingRef\.current = true;[\s\S]*prepareGlucoseQuickAddSubmit\(/,
+  );
 });
 
 test('GlucoseQuickAddForm locks mutable controls while submitting', () => {

@@ -20,7 +20,8 @@ import { useDiabetesSettings } from '../../lib/medical/react';
 import { getCurrentTimeString } from '../../lib/quick-add/format-glucose';
 import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
 import {
-  executeGlucoseQuickAddSubmit,
+  persistPreparedGlucoseQuickAddSubmit,
+  prepareGlucoseQuickAddSubmit,
   resetGlucoseQuickAddSubmitIdentity,
   type GlucoseQuickAddFormState,
 } from '../../lib/quick-add/glucose-quick-add-submit-controller';
@@ -111,25 +112,34 @@ export function GlucoseQuickAddForm({
       return;
     }
 
+    const prepared = prepareGlucoseQuickAddSubmit({
+      canEnterValue,
+      formState,
+      glucoseDisplayUnit,
+      identity: submitIdentityRef.current,
+      valueOutOfRangeMessage: labels.valueOutOfRangeError,
+    });
+
+    if (prepared.type === 'invalid-value') {
+      setValueError(prepared.message);
+      return;
+    }
+
+    if (prepared.type !== 'prepared') {
+      return;
+    }
+
     isSubmittingRef.current = true;
     setSubmittingState(true);
     setSaveError(null);
     setValueError(null);
     setContextSheetOpen(false);
 
-    const result = await executeGlucoseQuickAddSubmit({
-      canEnterValue,
-      formState,
-      glucoseDisplayUnit,
+    const result = await persistPreparedGlucoseQuickAddSubmit({
       identity: submitIdentityRef.current,
-      isSubmitting: false,
       onSubmit,
-      valueOutOfRangeMessage: labels.valueOutOfRangeError,
+      request: prepared.request,
     });
-
-    if (result.type === 'invalid-value') {
-      setValueError(result.message);
-    }
 
     if (result.type === 'error') {
       setSaveError(labels.saveErrorDescription);

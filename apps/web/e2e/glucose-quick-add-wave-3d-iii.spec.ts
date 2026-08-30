@@ -91,32 +91,38 @@ test.describe('Glucose Quick Add Wave 3D-III save integrity', () => {
     await page.getByLabel('Glucose level').fill('6.3');
     await dialog.getByRole('button', { name: 'Save', exact: true }).click();
 
-    await page.waitForFunction(() => {
-      const panel = document.querySelector('[role="dialog"][aria-busy="true"]');
+    await page.waitForFunction(
+      () => {
+        const panel = document.querySelector(
+          '[role="dialog"][aria-busy="true"]',
+        );
 
-      if (panel === null) {
-        return false;
-      }
+        if (panel === null) {
+          return false;
+        }
 
-      document.dispatchEvent(
-        new KeyboardEvent('keydown', { bubbles: true, key: 'Escape' }),
-      );
+        document.dispatchEvent(
+          new KeyboardEvent('keydown', { bubbles: true, key: 'Escape' }),
+        );
 
-      const headerBack = panel.querySelector(
-        'button[aria-label="Назад к выбору типа"]',
-      );
-      const cancelButton = [...panel.querySelectorAll('button')].find(
-        (button) => /^(Cancel|Отмена)$/.test(button.textContent ?? ''),
-      );
+        const headerBack = panel.querySelector(
+          'button[aria-label="Назад к выбору типа"]',
+        );
+        const cancelButton = [...panel.querySelectorAll('button')].find(
+          (button) => /^(Cancel|Отмена)$/.test(button.textContent ?? ''),
+        );
 
-      return (
-        panel.isConnected &&
-        headerBack instanceof HTMLButtonElement &&
-        headerBack.disabled &&
-        cancelButton instanceof HTMLButtonElement &&
-        cancelButton.disabled
-      );
-    }, undefined, { timeout: 15_000 });
+        return (
+          panel.isConnected &&
+          headerBack instanceof HTMLButtonElement &&
+          headerBack.disabled &&
+          cancelButton instanceof HTMLButtonElement &&
+          cancelButton.disabled
+        );
+      },
+      undefined,
+      { timeout: 15_000 },
+    );
 
     await expect(dialog).toBeHidden();
   });

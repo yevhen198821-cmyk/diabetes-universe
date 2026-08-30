@@ -63,7 +63,9 @@ test('glucose quick add defaults context to undefined', () => {
 
 test('glucose quick add passes semantic context through on submit', () => {
   const controllerSource = readFileSync(
-    fileURLToPath(new URL('./glucose-quick-add-submit-controller.ts', import.meta.url)),
+    fileURLToPath(
+      new URL('./glucose-quick-add-submit-controller.ts', import.meta.url),
+    ),
     'utf8',
   );
 
