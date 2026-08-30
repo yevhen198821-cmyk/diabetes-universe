@@ -187,6 +187,10 @@ export const ukrainianDraftMessages = defineDraftMessages({
     'Введення глюкози недоступне, доки налаштування не будуть завантажені.',
   'quick-add.glucose.settingsError.retry': 'Повторити',
   'quick-add.glucose.save': 'Зберегти',
+  'quick-add.glucose.saveError.description':
+    'Запис глюкози не збережено. Перевірте підключення та спробуйте ще раз.',
+  'quick-add.glucose.saveError.title': 'Не вдалося зберегти глюкозу',
+  'quick-add.glucose.saving': 'Збереження…',
   'quick-add.glucose.timeLabel': 'Час',
   'quick-add.glucose.unitGate.description':
     'Оберіть одиниці для введення глюкози. Це налаштування зберігається в керуванні діабетом.',

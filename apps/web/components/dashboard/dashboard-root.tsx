@@ -60,7 +60,12 @@ export function DashboardRoot() {
       ),
     [glucosePresentation, referenceTime],
   );
-  const { addEvent, events, status: timelineStatus } = useTimelineStore();
+  const {
+    addEvent,
+    addEventAsync,
+    events,
+    status: timelineStatus,
+  } = useTimelineStore();
   const [quickAddState, setQuickAddState] = useState(
     createInitialQuickAddControllerState,
   );
@@ -292,8 +297,10 @@ export function DashboardRoot() {
         onActivitySubmit={(entry) => {
           addEvent(createSemanticActivityTimelineEvent(entry));
         }}
-        onGlucoseSubmit={(entry) => {
-          addEvent(createSemanticGlucoseTimelineEvent(entry));
+        onGlucoseSubmit={async ({ entry, eventId }) => {
+          await addEventAsync(
+            createSemanticGlucoseTimelineEvent(entry, { id: eventId }),
+          );
         }}
         onInsulinSubmit={(entry) => {
           addEvent(createSemanticInsulinTimelineEvent(entry));

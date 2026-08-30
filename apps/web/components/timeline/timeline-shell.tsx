@@ -2,7 +2,6 @@
 
 import type {
   ActivityQuickAddEntry,
-  GlucoseQuickAddEntry,
   InsulinQuickAddEntry,
   MedicationQuickAddEntry,
   NoteQuickAddEntry,
@@ -26,6 +25,7 @@ import {
   resolveTimelinePresentationLocale,
 } from '../../lib/timeline/presentation';
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
+import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { createTimelineDayPeriodListModel } from './timeline-list-model';
@@ -90,6 +90,7 @@ export function TimelineShell() {
   );
   const {
     addEvent,
+    addEventAsync,
     deleteEvent,
     error,
     events,
@@ -496,8 +497,13 @@ export function TimelineShell() {
     focusTimelineHeading();
   };
 
-  const handleGlucoseSubmit = (entry: GlucoseQuickAddEntry) => {
-    addEvent(createSemanticGlucoseTimelineEvent(entry));
+  const handleGlucoseSubmit = async ({
+    entry,
+    eventId,
+  }: GlucoseQuickAddSubmitRequest) => {
+    await addEventAsync(
+      createSemanticGlucoseTimelineEvent(entry, { id: eventId }),
+    );
   };
 
   const handleInsulinSubmit = (entry: InsulinQuickAddEntry) => {

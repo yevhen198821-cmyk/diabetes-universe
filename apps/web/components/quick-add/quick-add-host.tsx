@@ -2,7 +2,6 @@
 
 import type {
   ActivityQuickAddEntry,
-  GlucoseQuickAddEntry,
   InsulinQuickAddEntry,
   MedicationQuickAddEntry,
   NoteQuickAddEntry,
@@ -14,8 +13,12 @@ import type { ReactNode, RefObject } from 'react';
 import { useRef, useState } from 'react';
 
 import { quickAddActions } from '../../lib/quick-add/actions';
+import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
 import type { QuickAddCloseReason } from '../../lib/quick-add/quick-add-controller-model';
-import { shouldCloseQuickAddOnFormCancel } from '../../lib/quick-add/quick-add-host-model';
+import {
+  finalizeGlucoseQuickAddSubmit,
+  shouldCloseQuickAddOnFormCancel,
+} from '../../lib/quick-add/quick-add-host-model';
 import {
   resolveQuickAddReturnFocusTarget,
   scheduleQuickAddReturnFocus,
@@ -34,7 +37,9 @@ export interface QuickAddHostProps {
   readonly floatingActionButtonRef?: RefObject<HTMLButtonElement | null>;
   readonly onActivitySubmit?: (entry: ActivityQuickAddEntry) => void;
   readonly onClosed?: (reason: QuickAddCloseReason) => void;
-  readonly onGlucoseSubmit?: (entry: GlucoseQuickAddEntry) => void;
+  readonly onGlucoseSubmit?: (
+    request: GlucoseQuickAddSubmitRequest,
+  ) => Promise<void>;
   readonly onInsulinSubmit?: (entry: InsulinQuickAddEntry) => void;
   readonly onMedicationSubmit?: (entry: MedicationQuickAddEntry) => void;
   readonly onNoteSubmit?: (entry: NoteQuickAddEntry) => void;
@@ -138,8 +143,17 @@ export function QuickAddHost({
     }
   };
 
-  const handleGlucoseSubmit = (entry: GlucoseQuickAddEntry) => {
-    onGlucoseSubmit?.(entry);
+  const handleGlucoseSubmit = async (request: GlucoseQuickAddSubmitRequest) => {
+    const didPersist = await finalizeGlucoseQuickAddSubmit(
+      onGlucoseSubmit,
+      request,
+    );
+
+    if (!didPersist) {
+      return;
+    }
+
+    haptics.success();
     closeQuickAdd('success');
   };
 

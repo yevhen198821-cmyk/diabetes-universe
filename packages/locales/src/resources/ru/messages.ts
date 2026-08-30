@@ -300,6 +300,10 @@ export const russianDraftMessages = defineDraftMessages({
     'Ввод глюкозы недоступен, пока настройки не будут загружены.',
   'quick-add.glucose.settingsError.retry': 'Повторить',
   'quick-add.glucose.save': 'Сохранить',
+  'quick-add.glucose.saveError.description':
+    'Запись глюкозы не сохранена. Проверьте подключение и попробуйте снова.',
+  'quick-add.glucose.saveError.title': 'Не удалось сохранить глюкозу',
+  'quick-add.glucose.saving': 'Сохранение…',
   'quick-add.glucose.timeLabel': 'Время',
   'quick-add.glucose.unitGate.description':
     'Выберите единицы для ввода глюкозы. Предпочтение сохраняется в настройках диабета.',

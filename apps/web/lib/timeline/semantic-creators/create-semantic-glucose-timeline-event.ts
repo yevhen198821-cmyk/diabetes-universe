@@ -13,7 +13,9 @@ import {
 export function createSemanticGlucoseTimelineEvent(
   entry: GlucoseQuickAddEntry,
   options: {
+    readonly clientUuid?: string;
     readonly clock?: SemanticTimelineClock;
+    readonly id?: string;
     readonly referenceDate?: Date;
   } = {},
 ): GlucoseTimelineEvent {
@@ -23,11 +25,14 @@ export function createSemanticGlucoseTimelineEvent(
     entry.time,
     options.referenceDate ?? clock.now(),
   );
+  const id =
+    options.id ??
+    createSemanticTimelineEventId('glucose', entry.time, options.clientUuid);
   return {
     concentrationMmolPerL: entry.valueMmol,
     context: entry.context,
     createdAt: now,
-    id: createSemanticTimelineEventId('glucose', entry.time),
+    id,
     kind: 'glucose',
     occurredAt,
     schemaVersion: 1,

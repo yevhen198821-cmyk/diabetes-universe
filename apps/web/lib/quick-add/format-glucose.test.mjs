@@ -40,10 +40,13 @@ test('parseGlucoseInput rejects values outside converted mg/dL bounds', () => {
 test('glucose quick add blocks value entry until settings are ready and configured', () => {
   assert.match(glucoseFormSource, /loadState === 'loading'/);
   assert.match(glucoseFormSource, /isUnconfigured/);
-  assert.match(glucoseFormSource, /disabled=\{!canEnterValue\}/);
   assert.match(
     glucoseFormSource,
-    /if \(!canEnterValue \|\| !glucoseDisplayUnit\)/,
+    /disabled=\{!canEnterValue \|\| isSubmitting\}/,
+  );
+  assert.match(
+    glucoseFormSource,
+    /if \(!canEnterValue \|\| !glucoseDisplayUnit \|\| isSubmittingRef\.current\)/,
   );
 });
 

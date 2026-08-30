@@ -34,6 +34,7 @@ import {
 
 export interface TimelineStoreValue {
   readonly addEvent: (event: SemanticTimelineEvent) => void;
+  readonly addEventAsync: (event: SemanticTimelineEvent) => Promise<void>;
   readonly deleteEvent: (eventId: string) => void;
   readonly diagnostics: ReturnType<typeof createTimelineDiagnosticsFromState>;
   readonly error?: string;
@@ -121,6 +122,41 @@ export function TimelineStoreProvider({
       isMountedRef.current = false;
     };
   }, [dispatchReadySnapshot, dispatchRepositoryError, timelineRepository]);
+
+  const enqueueRepositoryMutationAsync = useCallback(
+    (
+      mutation: () => Promise<TimelineRepositoryMutationResult>,
+      onApplied?: () => void,
+    ): Promise<void> => {
+      const mutationOperation = operationQueueRef.current
+        .then(async () => {
+          const result = await mutation();
+
+          if (!isMountedRef.current) {
+            return;
+          }
+
+          if (result.status === 'applied') {
+            onApplied?.();
+            return;
+          }
+
+          throw new TimelineRepositoryError('TIMELINE_REPOSITORY_WRITE_FAILED');
+        })
+        .catch((error: unknown) => {
+          if (isMountedRef.current) {
+            dispatchRepositoryError(error);
+          }
+
+          throw error;
+        });
+
+      operationQueueRef.current = mutationOperation.catch(() => {});
+
+      return mutationOperation;
+    },
+    [dispatchRepositoryError],
+  );
 
   const enqueueRepositoryMutation = useCallback(
     (
@@ -219,6 +255,17 @@ export function TimelineStoreProvider({
     [enqueueRepositoryMutation, timelineRepository],
   );
 
+  const addEventAsync = useCallback(
+    (event: SemanticTimelineEvent) =>
+      enqueueRepositoryMutationAsync(
+        () => timelineRepository.addEvent(event),
+        () => {
+          dispatch({ event, type: 'upsertEvent' });
+        },
+      ),
+    [enqueueRepositoryMutationAsync, timelineRepository],
+  );
+
   const updateEvent = useCallback(
     (event: SemanticTimelineEvent) => {
       enqueueRepositoryMutation(
@@ -263,6 +310,7 @@ export function TimelineStoreProvider({
   const value = useMemo<TimelineStoreValue>(
     () => ({
       addEvent,
+      addEventAsync,
       deleteEvent,
       diagnostics,
       error: state.error,
@@ -277,6 +325,7 @@ export function TimelineStoreProvider({
     }),
     [
       addEvent,
+      addEventAsync,
       deleteEvent,
       diagnostics,
       loadMoreHistory,

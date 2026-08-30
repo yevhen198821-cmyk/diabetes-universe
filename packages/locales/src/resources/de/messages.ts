@@ -190,6 +190,11 @@ export const germanDraftMessages = defineDraftMessages({
     'Glukoseeingabe ist nicht verfügbar, bis die Einstellungen geladen werden können.',
   'quick-add.glucose.settingsError.retry': 'Erneut versuchen',
   'quick-add.glucose.save': 'Speichern',
+  'quick-add.glucose.saveError.description':
+    'Der Glukosewert wurde nicht gespeichert. Prüfen Sie die Verbindung und versuchen Sie es erneut.',
+  'quick-add.glucose.saveError.title':
+    'Glukosewert konnte nicht gespeichert werden',
+  'quick-add.glucose.saving': 'Speichern…',
   'quick-add.glucose.timeLabel': 'Uhrzeit',
   'quick-add.glucose.unitGate.description':
     'Wählen Sie die Einheiten für die Glukoseeingabe. Diese Einstellung wird in den Diabetes-Einstellungen gespeichert.',
