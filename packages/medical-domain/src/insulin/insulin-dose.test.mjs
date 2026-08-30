@@ -3,7 +3,6 @@ import test from 'node:test';
 
 import {
   INSULIN_CANONICAL_DOSE_TECHNICAL_MAXIMUM,
-  INSULIN_PRESENTATION_DOSE_FORMAT_OPTIONS,
   validateInsulinCanonicalDose,
 } from './insulin-dose.ts';
 
@@ -83,11 +82,4 @@ test('canonical dose validation is deterministic', () => {
 
   assert.deepEqual(first, second);
   assert.equal(first.ok && first.doseUnits, 3.14159);
-});
-
-test('presentation dose format options preserve stored precision without rounding', () => {
-  assert.deepEqual(INSULIN_PRESENTATION_DOSE_FORMAT_OPTIONS, {
-    maximumFractionDigits: 20,
-    minimumFractionDigits: 0,
-  });
 });

@@ -8,6 +8,7 @@ import {
   INSULIN_EDIT_UI_DOSE_MAXIMUM,
   resolveInsulinEditLegacyContextText,
   resolveInsulinEditTransition,
+  resolveInsulinStoredContextWasAbsent,
 } from './resolve-insulin-edit-transition.ts';
 
 const semanticEvent = {
@@ -292,6 +293,32 @@ test('a dose-only edit on a no-context event preserves the absence of context fi
   assert.equal(result.ok, true);
   assert.equal(result.transition.doseUnits, 6);
   assert.deepEqual(result.transition.context, { kind: 'preserve' });
+});
+
+test('stored context absence is detected only when both context fields are missing', () => {
+  assert.equal(
+    resolveInsulinStoredContextWasAbsent({
+      doseUnits: 4,
+      preparation: 'NovoRapid',
+    }),
+    true,
+  );
+  assert.equal(
+    resolveInsulinStoredContextWasAbsent({
+      administrationContext: 'unspecified',
+      doseUnits: 4,
+      preparation: 'NovoRapid',
+    }),
+    false,
+  );
+  assert.equal(
+    resolveInsulinStoredContextWasAbsent({
+      context: 'Перед завтраком',
+      doseUnits: 4,
+      preparation: 'NovoRapid',
+    }),
+    false,
+  );
 });
 
 test('the UI dose guard rejects values at or below zero and above 100', () => {

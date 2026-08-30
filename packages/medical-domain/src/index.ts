@@ -168,7 +168,6 @@ export {
 export type { InsulinPresentationGrouping } from './insulin/insulin-catalogue';
 export {
   INSULIN_CANONICAL_DOSE_TECHNICAL_MAXIMUM,
-  INSULIN_PRESENTATION_DOSE_FORMAT_OPTIONS,
   validateInsulinCanonicalDose,
 } from './insulin/insulin-dose';
 export type {

@@ -32,6 +32,11 @@ interface TimelineInsulinEditFieldsProps {
   readonly onChange: (selection: InsulinEditSelection) => void;
   readonly presentationLabels: InsulinPresentationLabels;
   readonly selection: InsulinEditSelection;
+  /**
+   * `true` when the stored event originally omitted both context fields.
+   * Keeps the absence option available for the whole edit session.
+   */
+  readonly storedContextWasAbsent: boolean;
   /** `true` when the stored event carries no catalogue identity. */
   readonly storedPreparationIsUnmatched: boolean;
   readonly storedPreparation: string;
@@ -61,6 +66,7 @@ export function TimelineInsulinEditFields({
   onChange,
   presentationLabels,
   selection,
+  storedContextWasAbsent,
   storedPreparation,
   storedPreparationIsUnmatched,
 }: TimelineInsulinEditFieldsProps) {
@@ -79,6 +85,15 @@ export function TimelineInsulinEditFields({
   };
 
   const handleContextChange = (value: string) => {
+    if (value === '' && storedContextWasAbsent) {
+      onChange({
+        ...selection,
+        administrationContext: null,
+        contextEdited: false,
+      });
+      return;
+    }
+
     onChange({
       ...selection,
       administrationContext:
@@ -185,9 +200,7 @@ export function TimelineInsulinEditFields({
           onChange={(event) => handleContextChange(event.target.value)}
           value={selection.administrationContext ?? ''}
         >
-          {legacyContextText === null &&
-          selection.administrationContext === null &&
-          !selection.contextEdited ? (
+          {storedContextWasAbsent ? (
             <option value="">{labels.noRecordedContext}</option>
           ) : legacyContextText === null ? null : (
             <option value="">

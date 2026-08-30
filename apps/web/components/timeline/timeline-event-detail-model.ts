@@ -8,6 +8,7 @@ import {
   createInsulinEditSelection,
   resolveInsulinEditLegacyContextText,
   resolveInsulinEditTransition,
+  resolveInsulinStoredContextWasAbsent,
   type InsulinEditSelection,
   type InsulinEditTransitionErrorCode,
   type InsulinPresentationLabels,
@@ -48,6 +49,11 @@ export interface TimelineInsulinEventEditDraft {
   /** Stored `preparation` snapshot. Read-only edit chrome, never a write source. */
   readonly storedPreparation: string;
   readonly storedPreparationIsUnmatched: boolean;
+  /**
+   * `true` when the stored event originally omitted both context fields.
+   * Immutable for the edit session.
+   */
+  readonly storedContextWasAbsent: boolean;
   readonly time: string;
   readonly variant: 'insulin';
 }
@@ -189,6 +195,7 @@ export function createTimelineSemanticEventEditDraft(
         date,
         insulin,
         legacyContextText: resolveInsulinEditLegacyContextText(event),
+        storedContextWasAbsent: resolveInsulinStoredContextWasAbsent(event),
         storedPreparation: event.preparation,
         storedPreparationIsUnmatched: insulin.preparationId === null,
         time,

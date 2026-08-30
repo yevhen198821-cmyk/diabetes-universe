@@ -1,6 +1,5 @@
 import type { PlatformFormatter } from '@diabetes-universe/formatting';
 import {
-  INSULIN_PRESENTATION_DOSE_FORMAT_OPTIONS,
   isInsulinAdministrationContext,
   isInsulinPreparationId,
   mapLegacyInsulinAdministrationContext,
@@ -13,6 +12,7 @@ import type {
   SemanticTimelineEvent,
 } from '@diabetes-universe/types';
 
+import { INSULIN_PRESENTATION_DOSE_FORMAT_OPTIONS } from './insulin-presentation-dose-format';
 import type { InsulinPresentationLabels } from './insulin-presentation-labels';
 
 /**

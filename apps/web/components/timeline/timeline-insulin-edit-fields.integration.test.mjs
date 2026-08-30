@@ -4,7 +4,11 @@ import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import test from 'node:test';
 
-import { createInsulinEditSelection } from '../../lib/medical/insulin/resolve-insulin-edit-transition.ts';
+import {
+  createInsulinEditSelection,
+  resolveInsulinEditLegacyContextText,
+  resolveInsulinStoredContextWasAbsent,
+} from '../../lib/medical/insulin/resolve-insulin-edit-transition.ts';
 import { resolveInsulinPresentationLabels } from '../../lib/medical/insulin/insulin-presentation-labels.ts';
 import { createTestPlatformRuntime } from '../../lib/platform/react/testing/create-test-platform-runtime.ts';
 import {
@@ -67,7 +71,7 @@ async function renderInsulinFields({
         createElement(TimelineInsulinEditFields, {
           errors,
           labels,
-          legacyContextText: event === legacyInsulin ? 'Перед завтраком' : null,
+          legacyContextText: resolveInsulinEditLegacyContextText(event),
           onChange: (next) => {
             changes.push(next);
             selection = next;
@@ -75,6 +79,7 @@ async function renderInsulinFields({
           },
           presentationLabels,
           selection,
+          storedContextWasAbsent: resolveInsulinStoredContextWasAbsent(event),
           storedPreparation: event.preparation,
           storedPreparationIsUnmatched: event.preparationId === undefined,
         }),
@@ -381,6 +386,38 @@ test('selecting unspecified on a no-context event marks the selection as edited'
 
     assert.equal(change.administrationContext, 'unspecified');
     assert.equal(change.contextEdited, true);
+  } finally {
+    await view.cleanup();
+  }
+});
+
+test('no-context absence stays available after another context is selected', async () => {
+  const view = await renderInsulinFields({ event: noContextInsulin });
+
+  try {
+    await view.selectValue('timeline-edit-insulin-context', 'correction');
+
+    const context = view.field('timeline-edit-insulin-context');
+    const options = [...context.querySelectorAll('option')].map((option) => ({
+      label: option.textContent,
+      value: option.value,
+    }));
+
+    assert.equal(
+      options.some(
+        (option) =>
+          option.value === '' && option.label === 'No context recorded',
+      ),
+      true,
+    );
+
+    await view.selectValue('timeline-edit-insulin-context', '');
+
+    const [, revert] = view.changes;
+
+    assert.equal(revert.administrationContext, null);
+    assert.equal(revert.contextEdited, false);
+    assert.equal(context.value, '');
   } finally {
     await view.cleanup();
   }

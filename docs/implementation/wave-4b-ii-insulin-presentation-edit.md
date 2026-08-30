@@ -48,9 +48,11 @@ Not implemented (unchanged by this slice):
 @diabetes-universe/types                     canonical insulin fields
         ↓
 @diabetes-universe/medical-domain            catalogue identity, grouping resolver,
-                                             context guards, exact legacy mapping
+                                             context guards, exact legacy mapping,
+                                             canonical dose validation and bounds
         ↓
 apps/web/lib/medical/insulin                 presentation + edit-transition adapter
+                                             (including Intl dose formatting policy)
         ↓
 Timeline card / detail / search  +  Timeline Edit  +  Dashboard Recent Events
 ```
@@ -62,6 +64,7 @@ table, and grouping logic are not duplicated in `apps/web`.
 | Module                                   | Owns                                                  |
 | ---------------------------------------- | ----------------------------------------------------- |
 | `insulin-presentation-labels.ts`         | Localized context / grouping / preparation chrome     |
+| `insulin-presentation-dose-format.ts`    | Intl fraction-digit policy for dose presentation      |
 | `present-insulin-from-timeline-event.ts` | Reader precedence, title, grouping, search projection |
 | `insulin-edit-options.ts`                | Grouped picker options derived from the catalogue     |
 | `resolve-insulin-edit-transition.ts`     | Edit initialization and one atomic save transition    |
@@ -119,7 +122,8 @@ leave an identity pointing at entry A while the snapshot said entry B.
 TimelineInsulinEventEditDraft {
   variant: 'insulin', date, time,
   insulin: { preparationId, otherName, dose, administrationContext, contextEdited },
-  storedPreparation, storedPreparationIsUnmatched, legacyContextText
+  storedPreparation, storedPreparationIsUnmatched, storedContextWasAbsent,
+  legacyContextText
 }
   → updateTimelineEventFromDraft()
       → updateInsulinTimelineEventFromDraft()
@@ -188,17 +192,18 @@ representable. A semantic event is offered no control that clears its identity.
 
 ### Administration context
 
-| Stored event                                  | Initialized selection        | User action                                   | Saved context fields                                      |
-| --------------------------------------------- | ---------------------------- | --------------------------------------------- | --------------------------------------------------------- |
-| `administrationContext` = C                   | C                            | unchanged                                     | `administrationContext` = C, `context` as stored          |
-| `administrationContext` = C                   | C                            | selects D                                     | `administrationContext` = D, legacy `context` **removed** |
-| governed legacy `context` (e.g. `Перед едой`) | mapped value (`before_meal`) | unchanged                                     | legacy `context` preserved, no semantic write             |
-| governed legacy `context`                     | mapped value                 | selects D                                     | `administrationContext` = D, legacy `context` **removed** |
-| unmatched legacy `context` text T             | `null` (keep T)              | unchanged                                     | legacy `context` = T preserved                            |
-| unmatched legacy `context` text T             | `null` (keep T)              | selects D                                     | `administrationContext` = D, legacy `context` **removed** |
-| unmatched legacy `context` text T             | `null` (keep T)              | selects, then reverts to “keep recorded text” | legacy `context` = T preserved                            |
-| no context at all                             | absence (`null`)             | unchanged                                     | no context fields written                                 |
-| no context at all                             | absence (`null`)             | selects `unspecified`                         | `administrationContext` = `unspecified`                   |
+| Stored event                                  | Initialized selection        | User action                                           | Saved context fields                                      |
+| --------------------------------------------- | ---------------------------- | ----------------------------------------------------- | --------------------------------------------------------- |
+| `administrationContext` = C                   | C                            | unchanged                                             | `administrationContext` = C, `context` as stored          |
+| `administrationContext` = C                   | C                            | selects D                                             | `administrationContext` = D, legacy `context` **removed** |
+| governed legacy `context` (e.g. `Перед едой`) | mapped value (`before_meal`) | unchanged                                             | legacy `context` preserved, no semantic write             |
+| governed legacy `context`                     | mapped value                 | selects D                                             | `administrationContext` = D, legacy `context` **removed** |
+| unmatched legacy `context` text T             | `null` (keep T)              | unchanged                                             | legacy `context` = T preserved                            |
+| unmatched legacy `context` text T             | `null` (keep T)              | selects D                                             | `administrationContext` = D, legacy `context` **removed** |
+| unmatched legacy `context` text T             | `null` (keep T)              | selects, then reverts to “keep recorded text”         | legacy `context` = T preserved                            |
+| no context at all                             | absence (`null`)             | unchanged                                             | no context fields written                                 |
+| no context at all                             | absence (`null`)             | selects another context, then **No context recorded** | no context fields written                                 |
+| no context at all                             | absence (`null`)             | selects `unspecified`                                 | `administrationContext` = `unspecified`                   |
 
 `contextEdited` separates an initialized selection from an explicit choice.
 This is why a dose/time-only save on a governed legacy event preserves
@@ -209,17 +214,17 @@ persisted.
 
 ### Dose and envelope
 
-| Concern            | Behavior                                                                                                                                                             |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| UI guard           | `0 < dose <= 100` (`INSULIN_EDIT_UI_DOSE_MAXIMUM`), unchanged                                                                                                        |
-| Meaning of 100     | Technical UI typo protection, not a clinical ceiling                                                                                                                 |
-| Domain bound       | Unchanged at 500 (`INSULIN_CANONICAL_DOSE_TECHNICAL_MAXIMUM`)                                                                                                        |
-| Rounding           | None; presentation uses `INSULIN_PRESENTATION_DOSE_FORMAT_OPTIONS` (`maximumFractionDigits: 20`) so stored values such as `12.25` and `4,5` display without rounding |
-| Preserved          | `id`, `kind`, `source`, `createdAt`, `schemaVersion`, `provenance`                                                                                                   |
-| `updatedAt`        | Set on every successful save                                                                                                                                         |
-| `occurredAt`       | Changes only through the existing date/time edit contract                                                                                                            |
-| Legacy `context`   | Omitted as a key on a semantic save, never written as `undefined`                                                                                                    |
-| Validation failure | Dialog stays open; errors are announced with `role="alert"`                                                                                                          |
+| Concern            | Behavior                                                                                                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| UI guard           | `0 < dose <= 100` (`INSULIN_EDIT_UI_DOSE_MAXIMUM`), unchanged                                                                                                       |
+| Meaning of 100     | Technical UI typo protection, not a clinical ceiling                                                                                                                |
+| Domain bound       | Unchanged at 500 (`INSULIN_CANONICAL_DOSE_TECHNICAL_MAXIMUM`)                                                                                                       |
+| Rounding           | None; web presentation uses `insulin-presentation-dose-format.ts` (`maximumFractionDigits: 20`) so stored values such as `12.25` and `4,5` display without rounding |
+| Preserved          | `id`, `kind`, `source`, `createdAt`, `schemaVersion`, `provenance`                                                                                                  |
+| `updatedAt`        | Set on every successful save                                                                                                                                        |
+| `occurredAt`       | Changes only through the existing date/time edit contract                                                                                                           |
+| Legacy `context`   | Omitted as a key on a semantic save, never written as `undefined`                                                                                                   |
+| Validation failure | Dialog stays open; errors are announced with `role="alert"`                                                                                                         |
 
 Delete, close, focus trap, return focus, mobile layout, and all other Timeline
 event kinds are unchanged.

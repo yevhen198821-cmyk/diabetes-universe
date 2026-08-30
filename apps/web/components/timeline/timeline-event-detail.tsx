@@ -203,6 +203,7 @@ function TimelineEventEditForm({
           onChange={(insulin) => onChange({ ...draft, insulin })}
           presentationLabels={insulinPresentationLabels}
           selection={draft.insulin}
+          storedContextWasAbsent={draft.storedContextWasAbsent}
           storedPreparation={draft.storedPreparation}
           storedPreparationIsUnmatched={draft.storedPreparationIsUnmatched}
         />

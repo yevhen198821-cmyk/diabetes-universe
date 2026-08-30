@@ -23,6 +23,7 @@ export {
   parseInsulinEditDoseInput,
   resolveInsulinEditLegacyContextText,
   resolveInsulinEditTransition,
+  resolveInsulinStoredContextWasAbsent,
   type InsulinEditContextTransition,
   type InsulinEditPreparationTransition,
   type InsulinEditSelection,

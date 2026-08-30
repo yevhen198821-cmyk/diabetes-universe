@@ -95,9 +95,19 @@ test('legacy insulin draft exposes the recorded snapshot and text as read-only c
 
   assert.equal(draft.storedPreparation, 'NovoRapid');
   assert.equal(draft.storedPreparationIsUnmatched, true);
+  assert.equal(draft.storedContextWasAbsent, false);
   assert.equal(draft.legacyContextText, 'Перед завтраком');
   assert.equal(draft.insulin.preparationId, null);
   assert.equal(draft.insulin.administrationContext, null);
+});
+
+test('no-context insulin draft records the original absence as immutable chrome', () => {
+  const draft = createTimelineSemanticEventEditDraft(noContextInsulin);
+
+  assert.equal(draft.storedContextWasAbsent, true);
+  assert.equal(draft.legacyContextText, null);
+  assert.equal(draft.insulin.administrationContext, null);
+  assert.equal(draft.insulin.contextEdited, false);
 });
 
 test('changing preparation updates identity and snapshot in the same save', () => {
@@ -171,6 +181,16 @@ test('an explicit unspecified choice on a no-context event persists the semantic
   });
 
   assert.equal(result.event.administrationContext, 'unspecified');
+  assert.equal('context' in result.event, false);
+});
+
+test('reverting to no recorded context on an originally absent event preserves absence on save', () => {
+  const result = save(noContextInsulin, {
+    administrationContext: null,
+    contextEdited: false,
+  });
+
+  assert.equal('administrationContext' in result.event, false);
   assert.equal('context' in result.event, false);
 });
 

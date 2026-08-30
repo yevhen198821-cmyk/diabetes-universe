@@ -420,6 +420,60 @@ test('explicit unspecified selection on a no-context insulin event persists sema
   ).toHaveCount(0);
 });
 
+test('reverting to no recorded context after another choice preserves absence on save', async ({
+  page,
+}) => {
+  await openSeededNoContextInsulinEdit(page);
+
+  const context = page.getByLabel(CONTEXT_SELECT_LABEL);
+
+  await context.selectOption('correction');
+  await expect(
+    context.getByRole('option', { name: 'No context recorded' }),
+  ).toHaveCount(1);
+  await context.selectOption({ label: 'No context recorded' });
+  await page.getByRole('button', { name: 'Save' }).click();
+
+  await expect(
+    page.getByRole('dialog', { name: 'Lantus' }).getByText('Not specified'),
+  ).toBeVisible();
+
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await expect(context).toHaveValue('');
+  await expect(
+    context.getByRole('option', { name: 'No context recorded' }),
+  ).toHaveCount(1);
+
+  const storedEvent = await page.evaluate(async (eventId) => {
+    return new Promise<Record<string, unknown> | null>((resolve, reject) => {
+      const request = indexedDB.open('diabetes-universe-timeline');
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const database = request.result;
+        const transaction = database.transaction('timeline_events', 'readonly');
+        const getRequest = transaction
+          .objectStore('timeline_events')
+          .get(eventId);
+
+        getRequest.onerror = () => {
+          database.close();
+          reject(getRequest.error);
+        };
+        getRequest.onsuccess = () => {
+          database.close();
+          const record = getRequest.result as
+            { readonly event?: Record<string, unknown> } | undefined;
+          resolve(record?.event ?? null);
+        };
+      };
+    });
+  }, NO_CONTEXT_INSULIN_EVENT.id);
+
+  expect(storedEvent).not.toBeNull();
+  expect(Object.hasOwn(storedEvent ?? {}, 'administrationContext')).toBe(false);
+  expect(Object.hasOwn(storedEvent ?? {}, 'context')).toBe(false);
+});
+
 test('stored fractional insulin dose displays without rounding on timeline and dashboard', async ({
   page,
 }) => {

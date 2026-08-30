@@ -126,6 +126,22 @@ export function resolveInsulinEditLegacyContextText(
 }
 
 /**
+ * `true` when the stored event originally recorded neither a semantic
+ * `administrationContext` nor a legacy `context` field.
+ */
+export function resolveInsulinStoredContextWasAbsent(
+  event: Pick<InsulinEditSourceEvent, 'administrationContext' | 'context'>,
+): boolean {
+  if (isInsulinAdministrationContext(event.administrationContext)) {
+    return false;
+  }
+
+  return !(
+    typeof event.context === 'string' && event.context.trim().length > 0
+  );
+}
+
+/**
  * Builds the initial insulin edit selection from a stored event.
  *
  * Identity is read only from `preparationId`. The legacy display string is
