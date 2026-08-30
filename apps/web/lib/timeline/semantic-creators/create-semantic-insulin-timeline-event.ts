@@ -10,6 +10,13 @@ import {
   type SemanticTimelineClock,
 } from './semantic-timeline-clock';
 
+/**
+ * Builds one semantic insulin event from a Wave 4C Quick Add entry.
+ *
+ * Catalogue identity and its display snapshot are written together, the
+ * administration context is always a semantic ID, and the legacy free-text
+ * `context` key is never emitted. The dose is stored exactly as entered.
+ */
 export function createSemanticInsulinTimelineEvent(
   entry: InsulinQuickAddEntry,
   options: {
@@ -23,16 +30,16 @@ export function createSemanticInsulinTimelineEvent(
     entry.time,
     options.referenceDate ?? clock.now(),
   );
-  const context = entry.context?.trim();
 
   return {
-    context: context || undefined,
+    administrationContext: entry.administrationContext,
     createdAt: now,
     doseUnits: entry.doseUnits,
     id: createSemanticTimelineEventId('insulin', entry.time),
     kind: 'insulin',
     occurredAt,
     preparation: entry.preparation.trim(),
+    preparationId: entry.preparationId,
     schemaVersion: 1,
     source: 'manual',
     updatedAt: now,

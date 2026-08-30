@@ -1,6 +1,11 @@
 'use client';
 
-import type { InsulinQuickAddEntry } from '@diabetes-universe/types';
+import { INSULIN_PREPARATION_OTHER_ID } from '@diabetes-universe/medical-domain';
+import type {
+  InsulinAdministrationContext,
+  InsulinPreparationId,
+  InsulinQuickAddEntry,
+} from '@diabetes-universe/types';
 import {
   QuickAddFormActions,
   QuickAddFormLayout,
@@ -8,31 +13,33 @@ import {
   QuickAddTimeField,
 } from '@diabetes-universe/ui';
 import { ChevronDown } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 
-import { insulinContextOptions } from '../../lib/quick-add/insulin-context-options';
-import { insulinPreparationOptionGroups } from '../../lib/quick-add/insulin-preparation-options';
+import {
+  resolveInsulinAdministrationContextOptions,
+  resolveInsulinPreparationOptionGroups,
+  resolveInsulinPresentationLabels,
+} from '../../lib/medical/insulin';
+import { useLocalization } from '../../lib/platform/react/use-localization';
 import { getCurrentTimeString } from '../../lib/quick-add/format-glucose';
-import { parseInsulinDoseInput } from '../../lib/quick-add/format-insulin';
+import {
+  prepareInsulinQuickAddSubmit,
+  type InsulinQuickAddFormState,
+} from '../../lib/quick-add/insulin-quick-add-submit';
 import { formField, formLabel } from '../timeline/ui-styles';
+import { resolveInsulinQuickAddLabels } from './insulin-quick-add-labels';
 
 interface InsulinQuickAddFormProps {
   readonly onCancel: () => void;
   readonly onSubmit: (entry: InsulinQuickAddEntry) => void;
 }
 
-interface InsulinFormState {
-  readonly preparation: string;
-  readonly dose: string;
-  readonly time: string;
-  readonly context: string;
-}
-
-function createInitialState(): InsulinFormState {
+function createInitialState(): InsulinQuickAddFormState {
   return {
-    context: '',
+    administrationContext: null,
     dose: '',
-    preparation: '',
+    otherName: '',
+    preparationId: null,
     time: getCurrentTimeString(),
   };
 }
@@ -41,42 +48,96 @@ export function InsulinQuickAddForm({
   onCancel,
   onSubmit,
 }: InsulinQuickAddFormProps) {
+  const localization = useLocalization();
+  const labels = useMemo(
+    () => resolveInsulinQuickAddLabels(localization),
+    [localization],
+  );
+  const presentationLabels = useMemo(
+    () => resolveInsulinPresentationLabels(localization),
+    [localization],
+  );
+  const preparationGroups = useMemo(
+    () => resolveInsulinPreparationOptionGroups(presentationLabels),
+    [presentationLabels],
+  );
+  const contextOptions = useMemo(
+    () => resolveInsulinAdministrationContextOptions(presentationLabels),
+    [presentationLabels],
+  );
+
   const [formState, setFormState] =
-    useState<InsulinFormState>(createInitialState);
+    useState<InsulinQuickAddFormState>(createInitialState);
   const [doseError, setDoseError] = useState<string | null>(null);
+  const [otherNameError, setOtherNameError] = useState<string | null>(null);
   const [preparationSheetOpen, setPreparationSheetOpen] = useState(false);
   const [contextSheetOpen, setContextSheetOpen] = useState(false);
-  const parsedDose = parseInsulinDoseInput(formState.dose);
+
+  const showOtherName =
+    formState.preparationId === INSULIN_PREPARATION_OTHER_ID;
   const hasDose = formState.dose.trim().length > 0;
+  const selectedPreparationLabel =
+    formState.preparationId === null
+      ? null
+      : presentationLabels.preparations[formState.preparationId];
+  const selectedContextLabel =
+    formState.administrationContext === null
+      ? null
+      : presentationLabels.contexts[formState.administrationContext];
   const canSubmit =
-    formState.preparation.length > 0 &&
-    parsedDose !== null &&
-    formState.time.length > 0;
+    formState.preparationId !== null && hasDose && formState.time.length > 0;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (parsedDose === null) {
-      setDoseError('Введите дозу больше 0 и не более 100 ЕД');
-      return;
-    }
-
-    if (!formState.preparation || !formState.time) {
-      return;
-    }
-
-    onSubmit({
-      context: formState.context || undefined,
-      doseUnits: parsedDose,
-      preparation: formState.preparation,
-      time: formState.time,
+    const prepared = prepareInsulinQuickAddSubmit({
+      formState,
+      labels: presentationLabels,
     });
+
+    if (prepared.type === 'invalid') {
+      if (prepared.field === 'dose') {
+        setDoseError(labels.doseError);
+        return;
+      }
+
+      if (prepared.field === 'otherName') {
+        setOtherNameError(labels.otherNameRequiredError);
+        return;
+      }
+
+      return;
+    }
+
+    setDoseError(null);
+    setOtherNameError(null);
+    onSubmit(prepared.entry);
   };
 
   const handleCancel = () => {
     setFormState(createInitialState());
     setDoseError(null);
+    setOtherNameError(null);
     onCancel();
+  };
+
+  const handlePreparationSelect = (preparationId: InsulinPreparationId) => {
+    setOtherNameError(null);
+    setFormState((current) => ({
+      ...current,
+      otherName:
+        preparationId === INSULIN_PREPARATION_OTHER_ID ? current.otherName : '',
+      preparationId,
+    }));
+    setPreparationSheetOpen(false);
+  };
+
+  const handleContextSelect = (context: InsulinAdministrationContext) => {
+    setFormState((current) => ({
+      ...current,
+      administrationContext: context,
+    }));
+    setContextSheetOpen(false);
   };
 
   return (
@@ -84,19 +145,19 @@ export function InsulinQuickAddForm({
       <QuickAddFormLayout.Body>
         <div>
           <span className={formLabel} id="quick-add-insulin-preparation-label">
-            Препарат
+            {labels.preparationLabel}
           </span>
           <button
             aria-haspopup="dialog"
             aria-labelledby="quick-add-insulin-preparation-label quick-add-insulin-preparation-value"
             className={`${formField} mt-2 flex items-center justify-between text-left font-medium ${
-              formState.preparation ? 'text-slate-950' : 'text-slate-400'
+              selectedPreparationLabel ? 'text-slate-950' : 'text-slate-400'
             }`}
             onClick={() => setPreparationSheetOpen(true)}
             type="button"
           >
             <span id="quick-add-insulin-preparation-value">
-              {formState.preparation || 'Выберите инсулин'}
+              {selectedPreparationLabel ?? labels.preparationPlaceholder}
             </span>
             <ChevronDown
               aria-hidden="true"
@@ -106,9 +167,52 @@ export function InsulinQuickAddForm({
           </button>
         </div>
 
+        {showOtherName ? (
+          <div>
+            <label
+              className={formLabel}
+              htmlFor="quick-add-insulin-other-name"
+            >
+              {labels.otherNameLabel}
+            </label>
+            <input
+              aria-describedby={
+                otherNameError
+                  ? 'quick-add-insulin-other-name-error'
+                  : undefined
+              }
+              aria-invalid={otherNameError ? true : undefined}
+              autoComplete="off"
+              className={`${formField} mt-2`}
+              id="quick-add-insulin-other-name"
+              maxLength={120}
+              name="otherName"
+              onChange={(event) => {
+                setOtherNameError(null);
+                setFormState((current) => ({
+                  ...current,
+                  otherName: event.target.value,
+                }));
+              }}
+              placeholder={labels.otherNamePlaceholder}
+              type="text"
+              value={formState.otherName}
+            />
+            {otherNameError ? (
+              <p
+                className="mt-2 text-sm text-rose-600"
+                id="quick-add-insulin-other-name-error"
+                role="alert"
+              >
+                {otherNameError}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
         <div>
           <label className={formLabel} htmlFor="quick-add-insulin-dose">
-            Доза
+            {labels.doseLabel}
           </label>
           <div className="relative mt-2">
             <input
@@ -131,7 +235,7 @@ export function InsulinQuickAddForm({
                   dose: event.target.value,
                 }));
               }}
-              placeholder="4"
+              placeholder={labels.dosePlaceholder}
               required
               type="text"
               value={formState.dose}
@@ -141,13 +245,14 @@ export function InsulinQuickAddForm({
                 hasDose ? 'text-slate-500' : 'text-slate-400'
               }`}
             >
-              ЕД
+              {labels.doseUnit}
             </span>
           </div>
           {doseError ? (
             <p
               className="mt-2 text-sm text-rose-600"
               id="quick-add-insulin-dose-error"
+              role="alert"
             >
               {doseError}
             </p>
@@ -156,7 +261,7 @@ export function InsulinQuickAddForm({
 
         <QuickAddTimeField
           id="quick-add-insulin-time"
-          label="Время"
+          label={labels.timeLabel}
           name="time"
           onChange={(time) => {
             setFormState((current) => ({
@@ -170,19 +275,19 @@ export function InsulinQuickAddForm({
 
         <div>
           <span className={formLabel} id="quick-add-insulin-context-label">
-            Контекст
+            {labels.contextLabel}
           </span>
           <button
             aria-haspopup="dialog"
             aria-labelledby="quick-add-insulin-context-label quick-add-insulin-context-value"
             className={`${formField} mt-2 flex items-center justify-between text-left font-medium ${
-              formState.context ? 'text-slate-950' : 'text-slate-400'
+              selectedContextLabel ? 'text-slate-950' : 'text-slate-400'
             }`}
             onClick={() => setContextSheetOpen(true)}
             type="button"
           >
             <span id="quick-add-insulin-context-value">
-              {formState.context || 'Выберите контекст'}
+              {selectedContextLabel ?? labels.contextPlaceholder}
             </span>
             <ChevronDown
               aria-hidden="true"
@@ -195,41 +300,40 @@ export function InsulinQuickAddForm({
 
       <QuickAddFormLayout.Footer>
         <QuickAddFormActions
+          cancelLabel={labels.cancel}
           inline
           onCancel={handleCancel}
           submitDisabled={!canSubmit}
+          submitLabel={labels.save}
         />
       </QuickAddFormLayout.Footer>
 
       {preparationSheetOpen ? (
-        <QuickAddOptionSheet
-          groups={insulinPreparationOptionGroups}
+        <QuickAddOptionSheet<InsulinPreparationId>
+          groups={preparationGroups.map((group) => ({
+            label: group.label,
+            options: group.options.map((option) => ({
+              label: option.label,
+              value: option.id,
+            })),
+          }))}
           onClose={() => setPreparationSheetOpen(false)}
-          onSelect={(preparation) => {
-            setFormState((current) => ({
-              ...current,
-              preparation,
-            }));
-            setPreparationSheetOpen(false);
-          }}
-          selectedValue={formState.preparation || undefined}
-          title="Препарат"
+          onSelect={handlePreparationSelect}
+          selectedValue={formState.preparationId ?? undefined}
+          title={labels.preparationSheetTitle}
         />
       ) : null}
 
       {contextSheetOpen ? (
-        <QuickAddOptionSheet
+        <QuickAddOptionSheet<InsulinAdministrationContext>
           onClose={() => setContextSheetOpen(false)}
-          onSelect={(context) => {
-            setFormState((current) => ({
-              ...current,
-              context,
-            }));
-            setContextSheetOpen(false);
-          }}
-          options={insulinContextOptions}
-          selectedValue={formState.context || undefined}
-          title="Контекст"
+          onSelect={handleContextSelect}
+          options={contextOptions.map((option) => ({
+            label: option.label,
+            value: option.id,
+          }))}
+          selectedValue={formState.administrationContext ?? undefined}
+          title={labels.contextSheetTitle}
         />
       ) : null}
     </QuickAddFormLayout>

@@ -494,6 +494,23 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'quick-add.glucose.valueLabel': 'Glucose level',
   'quick-add.glucose.valueOutOfRangeError':
     'Enter a valid glucose value for the selected units.',
+  'quick-add.insulin.cancel': 'Cancel',
+  'quick-add.insulin.contextLabel': 'Administration context',
+  'quick-add.insulin.contextPlaceholder': 'Select a context',
+  'quick-add.insulin.contextSheetTitle': 'Administration context',
+  'quick-add.insulin.doseError':
+    'Enter a dose greater than 0 and no more than 100, with at most two decimal places.',
+  'quick-add.insulin.doseLabel': 'Insulin dose',
+  'quick-add.insulin.dosePlaceholder': '4',
+  'quick-add.insulin.doseUnit': 'U',
+  'quick-add.insulin.otherNameLabel': 'Preparation name',
+  'quick-add.insulin.otherNamePlaceholder': 'Enter the recorded name',
+  'quick-add.insulin.otherNameRequiredError': 'Enter the preparation name.',
+  'quick-add.insulin.preparationLabel': 'Insulin preparation',
+  'quick-add.insulin.preparationPlaceholder': 'Select an insulin',
+  'quick-add.insulin.preparationSheetTitle': 'Insulin preparation',
+  'quick-add.insulin.save': 'Save',
+  'quick-add.insulin.timeLabel': 'Time',
   'validation.required': 'This field is required',
   'errors.generic': 'Something went wrong. Please try again.',
 });

@@ -233,6 +233,23 @@ export const germanDraftMessages = defineDraftMessages({
   'quick-add.glucose.valueLabel': 'Glukosewert',
   'quick-add.glucose.valueOutOfRangeError':
     'Geben Sie einen gültigen Glukosewert für die gewählten Einheiten ein.',
+  'quick-add.insulin.cancel': 'Abbrechen',
+  'quick-add.insulin.contextLabel': 'Verabreichungskontext',
+  'quick-add.insulin.contextPlaceholder': 'Kontext auswählen',
+  'quick-add.insulin.contextSheetTitle': 'Verabreichungskontext',
+  'quick-add.insulin.doseError':
+    'Geben Sie eine Dosis größer als 0 und höchstens 100 mit maximal zwei Dezimalstellen ein.',
+  'quick-add.insulin.doseLabel': 'Insulindosis',
+  'quick-add.insulin.dosePlaceholder': '4',
+  'quick-add.insulin.doseUnit': 'IE',
+  'quick-add.insulin.otherNameLabel': 'Präparatname',
+  'quick-add.insulin.otherNamePlaceholder': 'Erfassten Namen eingeben',
+  'quick-add.insulin.otherNameRequiredError': 'Geben Sie den Präparatnamen ein.',
+  'quick-add.insulin.preparationLabel': 'Insulinpräparat',
+  'quick-add.insulin.preparationPlaceholder': 'Insulin auswählen',
+  'quick-add.insulin.preparationSheetTitle': 'Insulinpräparat',
+  'quick-add.insulin.save': 'Speichern',
+  'quick-add.insulin.timeLabel': 'Zeit',
   'account.profile.about.description':
     'Diabetes Universe hilft Ihnen, Ihre Diabetes-Daten zu verfolgen und zu verstehen.',
   'account.profile.about.page.buildInfoLabel': 'Build',

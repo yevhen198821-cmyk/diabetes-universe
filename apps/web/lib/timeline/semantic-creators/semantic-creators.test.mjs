@@ -42,19 +42,24 @@ test('semantic glucose creator preserves numeric value and timestamps', () => {
   assert.match(event.occurredAt, /T08:30:00/);
 });
 
-test('semantic insulin creator preserves dose units', () => {
+test('semantic insulin creator preserves dose units and semantic fields', () => {
   const event = createSemanticInsulinTimelineEvent(
     {
-      context: 'Перед едой',
+      administrationContext: 'before_meal',
       doseUnits: 4,
       preparation: 'NovoRapid',
+      preparationId: 'insulin.prep.aspart_novorapid',
       time: '09:00',
     },
     { clock: fixedClock },
   );
 
+  assertNoLegacyPresentationFields(event);
   assert.equal(event.doseUnits, 4);
   assert.equal(event.preparation, 'NovoRapid');
+  assert.equal(event.preparationId, 'insulin.prep.aspart_novorapid');
+  assert.equal(event.administrationContext, 'before_meal');
+  assert.equal(Object.hasOwn(event, 'context'), false);
 });
 
 test('semantic nutrition creator maps meal enum and keeps custom meal text', () => {
