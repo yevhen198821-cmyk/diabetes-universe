@@ -26,7 +26,7 @@ Timeline UI, demo data, repository storage, and future API integration.
   Complete). Backend, auth, sync, and outbox remain future scope.
 - **Glucose Quick Add save integrity (Wave 3D)** awaits IndexedDB persistence
   through `TimelineStore.addEventAsync` before success close; see
-  [Timeline Quick Add Integration](../architecture/timeline/quick-add-integration.md).
+  [Timeline Quick Add Integration](../../architecture/timeline/quick-add-integration.md).
 - **P3 — Semantic Timeline Event Model: Feature Complete** (merged PR #67 @
   `44ca315`, 2026-08-09).
 - **P4 — Durable Local Persistence: Feature Complete** for approved Web scope

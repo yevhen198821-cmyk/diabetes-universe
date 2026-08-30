@@ -33,7 +33,45 @@ async function prepareEmptyTimeline(page: Page): Promise<void> {
   await waitForEmptyTimelineInIndexedDb(page);
 }
 
+async function installIndexedDbTransactionCompleteDelay(
+  page: Page,
+  delayMs: number,
+): Promise<void> {
+  await page.addInitScript((delay) => {
+    const originalTransaction = IDBDatabase.prototype.transaction;
+
+    IDBDatabase.prototype.transaction = function (...args) {
+      const tx = originalTransaction.apply(this, args);
+      const originalAddEventListener = tx.addEventListener.bind(tx);
+
+      tx.addEventListener = function (type, listener, options) {
+        if (type !== 'complete') {
+          return originalAddEventListener(type, listener, options);
+        }
+
+        return originalAddEventListener(
+          type,
+          (event) => {
+            window.setTimeout(() => {
+              if (typeof listener === 'function') {
+                listener.call(this, event);
+                return;
+              }
+
+              listener?.handleEvent?.(event);
+            }, delay);
+          },
+          options,
+        );
+      };
+
+      return tx;
+    };
+  }, delayMs);
+}
+
 test.describe('Glucose Quick Add Wave 3D-III save integrity', () => {
+  test.describe.configure({ mode: 'serial' });
   test.use({
     extraHTTPHeaders: { 'Accept-Language': 'en-GB' },
     locale: 'en-GB',
@@ -76,6 +114,7 @@ test.describe('Glucose Quick Add Wave 3D-III save integrity', () => {
     page,
     request,
   }) => {
+    await installIndexedDbTransactionCompleteDelay(page, 750);
     await signInWithMagicLink(
       page,
       request,
@@ -91,38 +130,22 @@ test.describe('Glucose Quick Add Wave 3D-III save integrity', () => {
     await page.getByLabel('Glucose level').fill('6.3');
     await dialog.getByRole('button', { name: 'Save', exact: true }).click();
 
-    await page.waitForFunction(
-      () => {
-        const panel = document.querySelector(
-          '[role="dialog"][aria-busy="true"]',
-        );
+    await expect(dialog.getByRole('status')).toHaveText('Saving…');
+    await expect(dialog).toHaveAttribute('aria-busy', 'true');
 
-        if (panel === null) {
-          return false;
-        }
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeVisible();
 
-        document.dispatchEvent(
-          new KeyboardEvent('keydown', { bubbles: true, key: 'Escape' }),
-        );
+    const headerBack = dialog.getByRole('button', {
+      name: /Back to category selection|Назад к выбору типа/i,
+    });
+    if (await headerBack.isVisible()) {
+      await expect(headerBack).toBeDisabled();
+    }
 
-        const headerBack = panel.querySelector(
-          'button[aria-label="Назад к выбору типа"]',
-        );
-        const cancelButton = [...panel.querySelectorAll('button')].find(
-          (button) => /^(Cancel|Отмена)$/.test(button.textContent ?? ''),
-        );
-
-        return (
-          panel.isConnected &&
-          headerBack instanceof HTMLButtonElement &&
-          headerBack.disabled &&
-          cancelButton instanceof HTMLButtonElement &&
-          cancelButton.disabled
-        );
-      },
-      undefined,
-      { timeout: 15_000 },
-    );
+    await expect(
+      dialog.getByRole('button', { name: /Cancel|Отмена/i }),
+    ).toBeDisabled();
 
     await expect(dialog).toBeHidden();
   });
