@@ -373,9 +373,12 @@ export function TimelineEventDetail({
       >
         <header className="border-border-subtle flex items-center gap-3 border-b px-5 py-4 sm:px-6">
           <div className="min-w-0 flex-1">
-            <p className="text-body-small text-text-secondary">
-              {readPresentation.kindLabel}
-            </p>
+            {mode === 'view' &&
+            readPresentation.kindLabel === readPresentation.title ? null : (
+              <p className="text-body-small text-text-secondary">
+                {readPresentation.kindLabel}
+              </p>
+            )}
             <h2 className="text-section-title truncate" id={titleId}>
               {mode === 'edit'
                 ? uiLabels.detail.editTitle
@@ -412,12 +415,75 @@ export function TimelineEventDetail({
               onChange={setDraft}
               onSubmit={handleSave}
             />
+          ) : event.kind === 'glucose' ? (
+            <div className="space-y-5">
+              <div>
+                <p className="text-text-primary text-2xl font-bold">
+                  {readPresentation.primaryText}
+                </p>
+                {readPresentation.statusLines &&
+                readPresentation.statusLines.length > 0 ? (
+                  <div className="mt-2 space-y-0.5">
+                    {readPresentation.statusLines.map((line) => (
+                      <p className="text-text-secondary text-sm" key={line}>
+                        {line}
+                      </p>
+                    ))}
+                  </div>
+                ) : null}
+                <time
+                  className="text-text-secondary mt-3 block text-sm"
+                  dateTime={readPresentation.occurredAt}
+                >
+                  <span className="block">{displayDate}</span>
+                  <span className="block">{displayTime}</span>
+                </time>
+              </div>
+
+              <dl className="grid gap-3">
+                {sourcePresentation ? (
+                  <div
+                    className={`rounded-xl p-3 ${
+                      sourcePresentation.isDemo
+                        ? 'border-status-warning/50 bg-status-warning/10 border border-dashed'
+                        : 'bg-surface-subtle'
+                    }`}
+                  >
+                    <dt className="text-text-secondary text-xs font-medium">
+                      {uiLabels.detail.source}
+                    </dt>
+                    <dd
+                      className={`mt-1 text-sm font-semibold ${
+                        sourcePresentation.isDemo
+                          ? 'text-status-warning'
+                          : 'text-text-primary'
+                      }`}
+                    >
+                      {sourcePresentation.label}
+                    </dd>
+                  </div>
+                ) : null}
+                {readPresentation.context ? (
+                  <div className="bg-surface-subtle rounded-xl p-3">
+                    <dt className="text-text-secondary text-xs font-medium">
+                      {uiLabels.detail.context}
+                    </dt>
+                    <dd className="mt-1 text-sm font-semibold text-slate-900">
+                      {readPresentation.context}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+            </div>
           ) : (
             <div className="space-y-5">
               <div>
-                <p className="text-text-secondary text-sm">
+                <time
+                  className="text-text-secondary text-sm"
+                  dateTime={readPresentation.occurredAt}
+                >
                   {displayDate} · {displayTime}
-                </p>
+                </time>
                 <p className="text-text-primary mt-2 text-2xl font-bold">
                   {readPresentation.primaryText}
                 </p>

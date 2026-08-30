@@ -378,8 +378,7 @@ export function mapTimelineEventDetailPresentation(
   dependencies: TimelinePresentationDependencies,
 ): TimelineEventDetailPresentation {
   const presentation = mapTimelineKindPresentation(event, dependencies);
-
-  return {
+  const base = {
     context: presentation.context ?? null,
     kindLabel: presentation.kindLabel,
     note:
@@ -388,9 +387,28 @@ export function mapTimelineEventDetailPresentation(
       event.kind === 'activity'
         ? (presentation.note ?? null)
         : null,
+    occurredAt: event.occurredAt,
     primaryText: presentation.measurement.display,
     title: presentation.title,
   };
+
+  if (event.kind === 'glucose') {
+    const historyPresentation = resolveGlucoseTimelineCardHistoryPresentation({
+      dependencies,
+      rangeLabel: presentation.rangeLabel ?? null,
+      timestampUncertaintyLabel: presentation.timestampUncertaintyLabel ?? null,
+    });
+
+    return {
+      ...base,
+      statusLines:
+        historyPresentation.statusLines.length > 0
+          ? historyPresentation.statusLines
+          : undefined,
+    };
+  }
+
+  return base;
 }
 
 export function mapTimelineSearchPresentation(

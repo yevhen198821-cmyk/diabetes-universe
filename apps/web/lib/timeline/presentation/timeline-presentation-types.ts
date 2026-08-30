@@ -18,7 +18,9 @@ export interface TimelineEventDetailPresentation {
   readonly context: string | null;
   readonly kindLabel: string;
   readonly note: string | null;
+  readonly occurredAt: string;
   readonly primaryText: string;
+  readonly statusLines?: readonly string[];
   readonly title: string;
 }
 
