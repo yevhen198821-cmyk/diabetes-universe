@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { buildEventCardFallbackAriaLabel } from './EventCard.tsx';
+import { buildEventCardFallbackAriaLabel } from './build-event-card-fallback-aria-label.ts';
 
 test('EventCard fallback aria includes metadataLines exactly once', () => {
   const ariaLabel = buildEventCardFallbackAriaLabel({

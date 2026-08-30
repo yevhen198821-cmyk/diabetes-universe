@@ -26,6 +26,16 @@ test('EventCard renders optional status lines with generic styling', () => {
 });
 
 test('EventCard fallback aria construction includes metadataLines once', () => {
+  const fallbackAriaSource = readFileSync(
+    fileURLToPath(
+      new URL(
+        '../../../../../packages/ui/src/components/event-card/build-event-card-fallback-aria-label.ts',
+        import.meta.url,
+      ),
+    ),
+    'utf8',
+  );
+
   assert.match(eventCardSource, /buildEventCardFallbackAriaLabel/);
-  assert.match(eventCardSource, /\.\.\.\(input\.metadataLines \?\? \[\]\)/);
+  assert.match(fallbackAriaSource, /\.\.\.\(input\.metadataLines \?\? \[\]\)/);
 });
