@@ -359,6 +359,7 @@ export const englishCanonicalMessages = defineApprovedMessages({
     'The recorded context text is kept unless you choose a context.',
   'timeline.detail.form.insulin.legacyPreparationHint':
     'This entry has no catalogue match. The recorded name is kept unless you choose a preparation.',
+  'timeline.detail.form.insulin.noRecordedContext': 'No context recorded',
   'timeline.detail.form.insulin.otherNameLabel': 'Preparation name',
   'timeline.detail.form.insulin.preparationLabel': 'Insulin preparation',
   'timeline.detail.close': 'Close details',

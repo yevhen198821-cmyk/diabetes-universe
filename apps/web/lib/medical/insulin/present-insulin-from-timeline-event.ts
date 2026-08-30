@@ -1,5 +1,6 @@
 import type { PlatformFormatter } from '@diabetes-universe/formatting';
 import {
+  INSULIN_PRESENTATION_DOSE_FORMAT_OPTIONS,
   isInsulinAdministrationContext,
   isInsulinPreparationId,
   mapLegacyInsulinAdministrationContext,
@@ -13,11 +14,6 @@ import type {
 } from '@diabetes-universe/types';
 
 import type { InsulinPresentationLabels } from './insulin-presentation-labels';
-
-const INSULIN_FRACTION_DIGITS = {
-  maximumFractionDigits: 1,
-  minimumFractionDigits: 0,
-} as const;
 
 /**
  * Which reader precedence branch produced the displayed context text.
@@ -123,7 +119,7 @@ export function presentInsulinFromTimelineEvent(
   const { event, labels } = input;
   const value = input.formatter.formatNumber(
     event.doseUnits,
-    INSULIN_FRACTION_DIGITS,
+    INSULIN_PRESENTATION_DOSE_FORMAT_OPTIONS,
   );
   const contextPresentation = resolveInsulinContextPresentation(event, labels);
   const preparationId = isInsulinPreparationId(event.preparationId)

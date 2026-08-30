@@ -272,6 +272,7 @@ export const russianDraftMessages = defineDraftMessages({
     'Сохранённый текст контекста останется, если не выбрать контекст.',
   'timeline.detail.form.insulin.legacyPreparationHint':
     'Для этой записи нет совпадения в каталоге. Сохранённое название останется, если не выбрать препарат.',
+  'timeline.detail.form.insulin.noRecordedContext': 'Контекст не записан',
   'timeline.detail.form.insulin.otherNameLabel': 'Название препарата',
   'timeline.detail.form.insulin.preparationLabel': 'Препарат инсулина',
   'timeline.glucose.range.above': 'Выше вашего диапазона',

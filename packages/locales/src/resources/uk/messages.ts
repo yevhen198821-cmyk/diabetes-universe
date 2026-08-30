@@ -153,6 +153,7 @@ export const ukrainianDraftMessages = defineDraftMessages({
     'Збережений текст контексту залишиться, якщо не вибрати контекст.',
   'timeline.detail.form.insulin.legacyPreparationHint':
     'Для цього запису немає відповідності в каталозі. Збережена назва залишиться, якщо не вибрати препарат.',
+  'timeline.detail.form.insulin.noRecordedContext': 'Контекст не записано',
   'timeline.detail.form.insulin.otherNameLabel': 'Назва препарату',
   'timeline.detail.form.insulin.preparationLabel': 'Препарат інсуліну',
   'timeline.mealType.breakfast': 'Сніданок',

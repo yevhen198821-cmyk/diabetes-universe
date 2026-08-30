@@ -344,15 +344,19 @@ export function updateInsulinTimelineEventFromDraft(input: {
   }
 
   const { transition } = transitionResult;
-  const { context: storedLegacyContext, ...eventWithoutLegacyContext } = event;
+  const {
+    context: storedLegacyContext,
+    preparationId: _storedPreparationId,
+    ...eventWithoutLegacyContextAndPreparationId
+  } = event;
   const base =
     transition.context.kind === 'semantic'
       ? {
-          ...eventWithoutLegacyContext,
+          ...eventWithoutLegacyContextAndPreparationId,
           administrationContext: transition.context.administrationContext,
         }
       : {
-          ...eventWithoutLegacyContext,
+          ...eventWithoutLegacyContextAndPreparationId,
           ...(storedLegacyContext === undefined
             ? {}
             : { context: storedLegacyContext }),

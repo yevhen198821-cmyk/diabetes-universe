@@ -39,6 +39,24 @@ const legacyInsulin = {
 
 const governedLegacyInsulin = { ...legacyInsulin, context: 'Перед едой' };
 
+const noContextInsulin = {
+  createdAt: '2026-08-02T05:00:00.000Z',
+  doseUnits: 4,
+  id: 'insulin-no-context',
+  kind: 'insulin',
+  occurredAt: '2026-08-02T23:00:00.000Z',
+  preparation: 'Lantus',
+  schemaVersion: 1,
+  source: 'manual',
+  updatedAt: '2026-08-02T05:05:00.000Z',
+};
+
+const runtimeUnknownPreparationInsulin = {
+  ...semanticInsulin,
+  id: 'insulin-runtime-unknown-prep',
+  preparationId: 'insulin.prep.not_in_catalogue',
+};
+
 let copy;
 
 test.before(async () => {
@@ -134,6 +152,47 @@ test('a legacy dose-only edit preserves the snapshot and never adds an id', () =
   assert.equal('preparationId' in result.event, false);
   assert.equal(result.event.context, 'Перед завтраком');
   assert.equal('administrationContext' in result.event, false);
+});
+
+test('a dose-only edit on a no-context event omits both context fields', () => {
+  const result = save(noContextInsulin, { dose: '6' });
+
+  assert.equal(result.event.doseUnits, 6);
+  assert.equal(result.event.preparation, 'Lantus');
+  assert.equal('preparationId' in result.event, false);
+  assert.equal('context' in result.event, false);
+  assert.equal('administrationContext' in result.event, false);
+});
+
+test('an explicit unspecified choice on a no-context event persists the semantic value', () => {
+  const result = save(noContextInsulin, {
+    administrationContext: 'unspecified',
+    contextEdited: true,
+  });
+
+  assert.equal(result.event.administrationContext, 'unspecified');
+  assert.equal('context' in result.event, false);
+});
+
+test('a dose-only edit removes a runtime-unknown preparationId without changing the snapshot', () => {
+  const result = save(runtimeUnknownPreparationInsulin, { dose: '6' });
+
+  assert.equal(result.event.doseUnits, 6);
+  assert.equal(result.event.preparation, 'NovoRapid');
+  assert.equal('preparationId' in result.event, false);
+  assert.equal(result.event.administrationContext, 'before_meal');
+  assert.equal(result.event.id, runtimeUnknownPreparationInsulin.id);
+  assert.equal(result.event.kind, 'insulin');
+  assert.equal(result.event.source, runtimeUnknownPreparationInsulin.source);
+  assert.equal(
+    result.event.createdAt,
+    runtimeUnknownPreparationInsulin.createdAt,
+  );
+  assert.equal(result.event.schemaVersion, 1);
+  assert.deepEqual(
+    result.event.provenance,
+    runtimeUnknownPreparationInsulin.provenance,
+  );
 });
 
 test('a semantic context change writes the semantic value and removes legacy context', () => {

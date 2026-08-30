@@ -185,7 +185,11 @@ export function TimelineInsulinEditFields({
           onChange={(event) => handleContextChange(event.target.value)}
           value={selection.administrationContext ?? ''}
         >
-          {legacyContextText === null ? null : (
+          {legacyContextText === null &&
+          selection.administrationContext === null &&
+          !selection.contextEdited ? (
+            <option value="">{labels.noRecordedContext}</option>
+          ) : legacyContextText === null ? null : (
             <option value="">
               {`${labels.keepRecordedContext}: ${legacyContextText}`}
             </option>

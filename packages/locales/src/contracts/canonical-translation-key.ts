@@ -382,6 +382,7 @@ export const CANONICAL_TRANSLATION_KEYS = [
   'timeline.detail.form.insulin.keepRecordedPreparation',
   'timeline.detail.form.insulin.legacyContextHint',
   'timeline.detail.form.insulin.legacyPreparationHint',
+  'timeline.detail.form.insulin.noRecordedContext',
   'timeline.detail.form.insulin.otherNameLabel',
   'timeline.detail.form.insulin.preparationLabel',
   'timeline.header.title',

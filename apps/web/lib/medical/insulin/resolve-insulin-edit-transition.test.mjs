@@ -249,13 +249,13 @@ test('reverting an edited context back to the recorded text preserves the legacy
   assert.deepEqual(result.transition.context, { kind: 'preserve' });
 });
 
-test('an event with no context at all initializes to the unspecified selection', () => {
+test('an event with no context at all initializes without a semantic selection', () => {
   const selection = createInsulinEditSelection({
     doseUnits: 4,
     preparation: 'NovoRapid',
   });
 
-  assert.equal(selection.administrationContext, 'unspecified');
+  assert.equal(selection.administrationContext, null);
   assert.equal(selection.contextEdited, false);
   assert.equal(
     resolveInsulinEditLegacyContextText({
@@ -264,6 +264,34 @@ test('an event with no context at all initializes to the unspecified selection',
     }),
     null,
   );
+});
+
+test('an explicit unspecified choice on a no-context event writes the semantic value', () => {
+  const noContextEvent = {
+    doseUnits: 4,
+    preparation: 'NovoRapid',
+  };
+  const result = transition(noContextEvent, {
+    administrationContext: 'unspecified',
+    contextEdited: true,
+  });
+
+  assert.deepEqual(result.transition.context, {
+    administrationContext: 'unspecified',
+    kind: 'semantic',
+  });
+});
+
+test('a dose-only edit on a no-context event preserves the absence of context fields', () => {
+  const noContextEvent = {
+    doseUnits: 4,
+    preparation: 'NovoRapid',
+  };
+  const result = transition(noContextEvent, { dose: '6' });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.transition.doseUnits, 6);
+  assert.deepEqual(result.transition.context, { kind: 'preserve' });
 });
 
 test('the UI dose guard rejects values at or below zero and above 100', () => {

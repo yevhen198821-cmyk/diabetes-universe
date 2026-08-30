@@ -150,6 +150,7 @@ export const germanDraftMessages = defineDraftMessages({
     'Der erfasste Kontexttext bleibt erhalten, sofern Sie keinen Kontext auswählen.',
   'timeline.detail.form.insulin.legacyPreparationHint':
     'Für diesen Eintrag gibt es keine Katalogzuordnung. Der erfasste Name bleibt erhalten, sofern Sie kein Präparat auswählen.',
+  'timeline.detail.form.insulin.noRecordedContext': 'Kein Kontext erfasst',
   'timeline.detail.form.insulin.otherNameLabel': 'Präparatname',
   'timeline.detail.form.insulin.preparationLabel': 'Insulinpräparat',
   'timeline.mealType.breakfast': 'Frühstück',

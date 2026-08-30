@@ -7,6 +7,18 @@
 
 export const INSULIN_CANONICAL_DOSE_TECHNICAL_MAXIMUM = 500;
 
+/**
+ * Presentation format options for insulin dose values.
+ *
+ * Preserves stored finite precision without rounding. Manual entry may use at
+ * most two fractional digits (Wave 4C); device/import values with more digits
+ * are displayed as stored up to this bound.
+ */
+export const INSULIN_PRESENTATION_DOSE_FORMAT_OPTIONS = {
+  maximumFractionDigits: 20,
+  minimumFractionDigits: 0,
+} as const;
+
 export type InsulinCanonicalDoseValidationErrorCode =
   | 'insulin.dose.not_a_number'
   | 'insulin.dose.not_finite'

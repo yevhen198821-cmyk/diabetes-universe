@@ -197,8 +197,8 @@ representable. A semantic event is offered no control that clears its identity.
 | unmatched legacy `context` text T             | `null` (keep T)              | unchanged                                     | legacy `context` = T preserved                            |
 | unmatched legacy `context` text T             | `null` (keep T)              | selects D                                     | `administrationContext` = D, legacy `context` **removed** |
 | unmatched legacy `context` text T             | `null` (keep T)              | selects, then reverts to “keep recorded text” | legacy `context` = T preserved                            |
-| no context at all                             | `unspecified`                | unchanged                                     | no context fields written                                 |
-| no context at all                             | `unspecified`                | selects `unspecified`                         | `administrationContext` = `unspecified`                   |
+| no context at all                             | absence (`null`)             | unchanged                                     | no context fields written                                 |
+| no context at all                             | absence (`null`)             | selects `unspecified`                         | `administrationContext` = `unspecified`                   |
 
 `contextEdited` separates an initialized selection from an explicit choice.
 This is why a dose/time-only save on a governed legacy event preserves
@@ -209,17 +209,17 @@ persisted.
 
 ### Dose and envelope
 
-| Concern            | Behavior                                                           |
-| ------------------ | ------------------------------------------------------------------ |
-| UI guard           | `0 < dose <= 100` (`INSULIN_EDIT_UI_DOSE_MAXIMUM`), unchanged      |
-| Meaning of 100     | Technical UI typo protection, not a clinical ceiling               |
-| Domain bound       | Unchanged at 500 (`INSULIN_CANONICAL_DOSE_TECHNICAL_MAXIMUM`)      |
-| Rounding           | None; `12.25` and `4,5` persist exactly                            |
-| Preserved          | `id`, `kind`, `source`, `createdAt`, `schemaVersion`, `provenance` |
-| `updatedAt`        | Set on every successful save                                       |
-| `occurredAt`       | Changes only through the existing date/time edit contract          |
-| Legacy `context`   | Omitted as a key on a semantic save, never written as `undefined`  |
-| Validation failure | Dialog stays open; errors are announced with `role="alert"`        |
+| Concern            | Behavior                                                                                                                                                             |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| UI guard           | `0 < dose <= 100` (`INSULIN_EDIT_UI_DOSE_MAXIMUM`), unchanged                                                                                                        |
+| Meaning of 100     | Technical UI typo protection, not a clinical ceiling                                                                                                                 |
+| Domain bound       | Unchanged at 500 (`INSULIN_CANONICAL_DOSE_TECHNICAL_MAXIMUM`)                                                                                                        |
+| Rounding           | None; presentation uses `INSULIN_PRESENTATION_DOSE_FORMAT_OPTIONS` (`maximumFractionDigits: 20`) so stored values such as `12.25` and `4,5` display without rounding |
+| Preserved          | `id`, `kind`, `source`, `createdAt`, `schemaVersion`, `provenance`                                                                                                   |
+| `updatedAt`        | Set on every successful save                                                                                                                                         |
+| `occurredAt`       | Changes only through the existing date/time edit contract                                                                                                            |
+| Legacy `context`   | Omitted as a key on a semantic save, never written as `undefined`                                                                                                    |
+| Validation failure | Dialog stays open; errors are announced with `role="alert"`                                                                                                          |
 
 Delete, close, focus trap, return focus, mobile layout, and all other Timeline
 event kinds are unchanged.

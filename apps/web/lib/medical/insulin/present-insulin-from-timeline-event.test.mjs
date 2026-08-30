@@ -283,4 +283,11 @@ test('dose formatting does not round the stored value', async () => {
 
   assert.equal(present({ doseUnits: 4, preparation: 'X' }).value, '4');
   assert.equal(present({ doseUnits: 4.5, preparation: 'X' }).value, '4.5');
+  assert.equal(present({ doseUnits: 12.25, preparation: 'X' }).value, '12.25');
+});
+
+test('dose formatting uses the locale decimal separator without rounding', async () => {
+  const present = await createPresenter(russianRequest);
+
+  assert.equal(present({ doseUnits: 12.25, preparation: 'X' }).value, '12,25');
 });

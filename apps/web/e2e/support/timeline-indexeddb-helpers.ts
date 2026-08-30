@@ -89,6 +89,61 @@ export async function waitForTimelineBootstrapComplete(
     .not.toBeUndefined();
 }
 
+export async function seedTimelineEventInIndexedDb(
+  page: Page,
+  event: {
+    readonly createdAt: string;
+    readonly doseUnits: number;
+    readonly id: string;
+    readonly kind: 'insulin';
+    readonly occurredAt: string;
+    readonly preparation: string;
+    readonly schemaVersion: number;
+    readonly source: string;
+    readonly updatedAt: string;
+  },
+): Promise<void> {
+  const persistedAt = new Date().toISOString();
+
+  await page.evaluate(
+    async ({ databaseName, event, objectStoreName, persistedAt }) => {
+      await new Promise<void>((resolve, reject) => {
+        const request = indexedDB.open(databaseName);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const database = request.result;
+          const transaction = database.transaction(
+            objectStoreName,
+            'readwrite',
+          );
+          transaction.objectStore(objectStoreName).put({
+            event,
+            id: event.id,
+            kind: event.kind,
+            occurredAt: event.occurredAt,
+            persistedAt,
+            storageSchemaVersion: 1,
+          });
+          transaction.oncomplete = () => {
+            database.close();
+            resolve();
+          };
+          transaction.onerror = () => {
+            database.close();
+            reject(transaction.error);
+          };
+        };
+      });
+    },
+    {
+      databaseName: TIMELINE_DATABASE_NAME,
+      event,
+      objectStoreName: TIMELINE_EVENTS_STORE,
+      persistedAt,
+    },
+  );
+}
+
 export async function clearTimelineEventsInIndexedDb(
   page: Page,
 ): Promise<void> {

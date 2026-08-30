@@ -144,9 +144,7 @@ export function createInsulinEditSelection(
     ? event.administrationContext
     : legacyMapping.matched
       ? legacyMapping.administrationContext
-      : resolveInsulinEditLegacyContextText(event) === null
-        ? 'unspecified'
-        : null;
+      : null;
 
   return {
     administrationContext,

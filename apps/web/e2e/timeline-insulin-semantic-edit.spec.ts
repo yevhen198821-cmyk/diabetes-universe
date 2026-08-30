@@ -4,6 +4,10 @@ import { expect, test, type Page } from './support/test';
 
 import { CANONICAL_DEMO_LOCAL_DAY_TIME } from '../testing/demo-reference-time';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
+import {
+  seedTimelineEventInIndexedDb,
+  waitForTimelineBootstrapComplete,
+} from './support/timeline-indexeddb-helpers';
 
 const PREPARATION_SELECT_LABEL = 'Insulin preparation';
 const CONTEXT_SELECT_LABEL = 'Administration context';
@@ -336,4 +340,104 @@ test('insulin semantic edit stays usable on a mobile viewport', async ({
   );
 
   expect(hasHorizontalScroll).toBe(false);
+});
+
+const NO_CONTEXT_INSULIN_EVENT = {
+  createdAt: '2026-08-02T05:00:00.000Z',
+  doseUnits: 12,
+  id: 'insulin-no-context-e2e',
+  kind: 'insulin' as const,
+  occurredAt: '2026-08-02T23:00:00.000Z',
+  preparation: 'Lantus',
+  schemaVersion: 1,
+  source: 'manual',
+  updatedAt: '2026-08-02T05:00:00.000Z',
+};
+
+async function openSeededNoContextInsulinEdit(page: Page) {
+  await page.goto('/timeline');
+  await waitForApplicationReady(page);
+  await waitForTimelineBootstrapComplete(page);
+  await seedTimelineEventInIndexedDb(page, NO_CONTEXT_INSULIN_EVENT);
+  await page.reload();
+  await waitForApplicationReady(page);
+  await openInsulinEdit(page, /Open event: Lantus, 12 U/);
+}
+
+test('no-context insulin edit separates absence from explicit unspecified', async ({
+  page,
+}) => {
+  await openSeededNoContextInsulinEdit(page);
+
+  const context = page.getByLabel(CONTEXT_SELECT_LABEL);
+
+  await expect(context).toHaveValue('');
+  await expect(
+    context.getByRole('option', { name: 'No context recorded' }),
+  ).toHaveCount(1);
+  await expect(
+    context.getByRole('option', { name: 'Not specified', exact: true }),
+  ).toHaveCount(1);
+});
+
+test('no-context insulin dose-only edit omits context fields', async ({
+  page,
+}) => {
+  await openSeededNoContextInsulinEdit(page);
+
+  await page.getByLabel(DOSE_LABEL).fill('12.25');
+  await page.getByRole('button', { name: 'Save' }).click();
+
+  const detail = page.getByRole('dialog', { name: 'Lantus' });
+
+  await expect(detail.getByText('12.25 U')).toBeVisible();
+  await expect(detail.getByText('Not specified')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await expect(page.getByLabel(CONTEXT_SELECT_LABEL)).toHaveValue('');
+});
+
+test('explicit unspecified selection on a no-context insulin event persists semantically', async ({
+  page,
+}) => {
+  await openSeededNoContextInsulinEdit(page);
+
+  await page.getByLabel(CONTEXT_SELECT_LABEL).selectOption('unspecified');
+  await page.getByRole('button', { name: 'Save' }).click();
+
+  const detail = page.getByRole('dialog', { name: 'Lantus' });
+
+  await expect(detail.getByText('Not specified')).toBeVisible();
+
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await expect(page.getByLabel(CONTEXT_SELECT_LABEL)).toHaveValue(
+    'unspecified',
+  );
+  await expect(
+    page
+      .getByLabel(CONTEXT_SELECT_LABEL)
+      .getByRole('option', { name: 'No context recorded' }),
+  ).toHaveCount(0);
+});
+
+test('stored fractional insulin dose displays without rounding on timeline and dashboard', async ({
+  page,
+}) => {
+  await openSeededNoContextInsulinEdit(page);
+
+  await page.getByLabel(DOSE_LABEL).fill('12.25');
+  await page.getByRole('button', { name: 'Save' }).click();
+
+  await expect(
+    page.getByRole('button', { name: /Open event: Lantus, 12\.25 U/ }),
+  ).toBeVisible();
+
+  await page
+    .getByRole('button', { exact: true, name: 'Close details' })
+    .click();
+  await page.getByRole('link', { name: 'Go to home' }).click();
+
+  const recentEvents = page.getByRole('region', { name: 'Recent events' });
+
+  await expect(recentEvents.getByText('12.25 U')).toBeVisible();
 });

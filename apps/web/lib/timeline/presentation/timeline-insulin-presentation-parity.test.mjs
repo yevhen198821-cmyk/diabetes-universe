@@ -79,6 +79,35 @@ test('timeline detail and card agree on the insulin title and context', () => {
   }
 });
 
+test('insulin dose presentation preserves stored fractional precision across surfaces', () => {
+  const fractionalInsulin = {
+    ...envelope,
+    doseUnits: 12.25,
+    id: 'insulin-fractional',
+    occurredAt: '2026-08-02T06:00:00.000Z',
+    preparation: 'NovoRapid',
+  };
+  const card = mapTimelineEventCardPresentation(
+    fractionalInsulin,
+    dependencies,
+    '09:00',
+  );
+  const detail = mapTimelineEventDetailPresentation(
+    fractionalInsulin,
+    dependencies,
+  );
+  const row = deriveDashboardRecentEventSources(
+    [fractionalInsulin],
+    dependencies,
+    { formatDisplayTime: () => '09:00' },
+  )[0];
+
+  assert.equal(card.value, '12.25');
+  assert.equal(detail.primaryText, '12.25 U');
+  assert.equal(row.value, '12.25');
+  assert.match(card.ariaLabel, /12\.25 U/);
+});
+
 test('semantic insulin context is localized on both dashboard and timeline', () => {
   const englishRow = deriveDashboardRecentEventSources(
     [semanticInsulin],

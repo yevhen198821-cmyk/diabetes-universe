@@ -48,6 +48,7 @@ export interface TimelineUiLabels {
         readonly keepRecordedPreparation: string;
         readonly legacyContextHint: string;
         readonly legacyPreparationHint: string;
+        readonly noRecordedContext: string;
         readonly otherNameLabel: string;
         readonly preparationLabel: string;
       }>;
@@ -214,6 +215,9 @@ const TIMELINE_UI_TRANSLATION_KEYS = {
   ),
   detailFormInsulinLegacyPreparationHint: asTranslationKey(
     'timeline.detail.form.insulin.legacyPreparationHint',
+  ),
+  detailFormInsulinNoRecordedContext: asTranslationKey(
+    'timeline.detail.form.insulin.noRecordedContext',
   ),
   detailFormInsulinOtherNameLabel: asTranslationKey(
     'timeline.detail.form.insulin.otherNameLabel',
@@ -410,6 +414,10 @@ export function resolveTimelineUiLabels(
           legacyPreparationHint: translate(
             localization,
             TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinLegacyPreparationHint,
+          ),
+          noRecordedContext: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinNoRecordedContext,
           ),
           otherNameLabel: translate(
             localization,

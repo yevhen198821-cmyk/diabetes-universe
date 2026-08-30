@@ -31,6 +31,11 @@ const legacyInsulin = {
   preparation: 'NovoRapid',
 };
 
+const noContextInsulin = {
+  doseUnits: 12,
+  preparation: 'Lantus',
+};
+
 async function renderInsulinFields({
   errors = {},
   event,
@@ -335,6 +340,46 @@ test('an explicit context choice marks the selection as edited', async () => {
     const [change] = view.changes;
 
     assert.equal(change.administrationContext, 'correction');
+    assert.equal(change.contextEdited, true);
+  } finally {
+    await view.cleanup();
+  }
+});
+
+test('a no-context event shows absence separately from the explicit unspecified option', async () => {
+  const view = await renderInsulinFields({ event: noContextInsulin });
+
+  try {
+    const context = view.field('timeline-edit-insulin-context');
+    const options = [...context.querySelectorAll('option')].map((option) => ({
+      label: option.textContent,
+      value: option.value,
+    }));
+
+    assert.equal(context.value, '');
+    assert.equal(options[0].value, '');
+    assert.equal(options[0].label, 'No context recorded');
+    assert.equal(
+      options.some(
+        (option) =>
+          option.value === 'unspecified' && option.label === 'Not specified',
+      ),
+      true,
+    );
+  } finally {
+    await view.cleanup();
+  }
+});
+
+test('selecting unspecified on a no-context event marks the selection as edited', async () => {
+  const view = await renderInsulinFields({ event: noContextInsulin });
+
+  try {
+    await view.selectValue('timeline-edit-insulin-context', 'unspecified');
+
+    const [change] = view.changes;
+
+    assert.equal(change.administrationContext, 'unspecified');
     assert.equal(change.contextEdited, true);
   } finally {
     await view.cleanup();
