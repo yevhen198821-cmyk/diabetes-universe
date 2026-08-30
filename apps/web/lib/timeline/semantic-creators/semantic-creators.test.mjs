@@ -25,7 +25,7 @@ function assertNoLegacyPresentationFields(event) {
 test('semantic glucose creator preserves numeric value and timestamps', () => {
   const event = createSemanticGlucoseTimelineEvent(
     {
-      context: 'Натощак',
+      context: 'fasting',
       time: '08:30',
       valueMmol: 7.3,
     },

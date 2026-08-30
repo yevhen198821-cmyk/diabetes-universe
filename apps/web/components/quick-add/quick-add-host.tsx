@@ -15,6 +15,7 @@ import { useRef, useState } from 'react';
 
 import { quickAddActions } from '../../lib/quick-add/actions';
 import type { QuickAddCloseReason } from '../../lib/quick-add/quick-add-controller-model';
+import { shouldCloseQuickAddOnFormCancel } from '../../lib/quick-add/quick-add-host-model';
 import {
   resolveQuickAddReturnFocusTarget,
   scheduleQuickAddReturnFocus,
@@ -49,6 +50,13 @@ export interface QuickAddHostProps {
   readonly showFloatingActionButton?: boolean;
 }
 
+function shouldCloseOnFormCancel(
+  openCategory: QuickAddCategory | null | undefined,
+  userSelection: string | null | undefined,
+): boolean {
+  return shouldCloseQuickAddOnFormCancel(openCategory, userSelection);
+}
+
 export function QuickAddHost({
   floatingActionButtonClassName,
   floatingActionButtonRef,
@@ -71,6 +79,7 @@ export function QuickAddHost({
     undefined,
   );
   const internalFabRef = useRef<HTMLButtonElement>(null);
+  const glucoseValueInputRef = useRef<HTMLInputElement>(null);
   const fabRef = floatingActionButtonRef ?? internalFabRef;
   const selectedActionId = open
     ? userSelection === undefined
@@ -107,6 +116,15 @@ export function QuickAddHost({
       },
       resolveReturnFocusContext ? 8 : 3,
     );
+  };
+
+  const handleFormCancel = () => {
+    if (shouldCloseOnFormCancel(openCategory, userSelection)) {
+      closeQuickAdd('cancel');
+      return;
+    }
+
+    setUserSelection(null);
   };
 
   const handleOpen = () => {
@@ -156,11 +174,14 @@ export function QuickAddHost({
   };
 
   let selectedContent: ReactNode;
+  let initialFocusRef: RefObject<HTMLElement | null> | undefined;
 
   if (selectedActionId === 'glucose' && onGlucoseSubmit) {
+    initialFocusRef = glucoseValueInputRef;
     selectedContent = (
       <GlucoseQuickAddForm
-        onCancel={() => setUserSelection(null)}
+        initialFocusRef={glucoseValueInputRef}
+        onCancel={handleFormCancel}
         onSubmit={handleGlucoseSubmit}
       />
     );
@@ -169,7 +190,7 @@ export function QuickAddHost({
   if (selectedActionId === 'insulin' && onInsulinSubmit) {
     selectedContent = (
       <InsulinQuickAddForm
-        onCancel={() => setUserSelection(null)}
+        onCancel={handleFormCancel}
         onSubmit={handleInsulinSubmit}
       />
     );
@@ -178,7 +199,7 @@ export function QuickAddHost({
   if (selectedActionId === 'nutrition' && onNutritionSubmit) {
     selectedContent = (
       <NutritionQuickAddForm
-        onCancel={() => setUserSelection(null)}
+        onCancel={handleFormCancel}
         onSubmit={handleNutritionSubmit}
       />
     );
@@ -187,7 +208,7 @@ export function QuickAddHost({
   if (selectedActionId === 'medication' && onMedicationSubmit) {
     selectedContent = (
       <MedicationQuickAddForm
-        onCancel={() => setUserSelection(null)}
+        onCancel={handleFormCancel}
         onSubmit={handleMedicationSubmit}
       />
     );
@@ -196,7 +217,7 @@ export function QuickAddHost({
   if (selectedActionId === 'activity' && onActivitySubmit) {
     selectedContent = (
       <ActivityQuickAddForm
-        onCancel={() => setUserSelection(null)}
+        onCancel={handleFormCancel}
         onSubmit={handleActivitySubmit}
       />
     );
@@ -205,7 +226,7 @@ export function QuickAddHost({
   if (selectedActionId === 'note' && onNoteSubmit) {
     selectedContent = (
       <NoteQuickAddForm
-        onCancel={() => setUserSelection(null)}
+        onCancel={handleFormCancel}
         onSubmit={handleNoteSubmit}
       />
     );
@@ -222,7 +243,8 @@ export function QuickAddHost({
       ) : null}
       <QuickAddPanel
         actions={quickAddActions}
-        onBack={() => setUserSelection(null)}
+        initialFocusRef={initialFocusRef}
+        onBack={handleFormCancel}
         onClose={() => closeQuickAdd('dismiss')}
         onSelectAction={(actionId) => setUserSelection(actionId)}
         open={open}

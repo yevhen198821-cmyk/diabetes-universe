@@ -4,14 +4,19 @@ import type { GlucoseDisplayUnit } from '@diabetes-universe/medical-domain';
 import { useMemo, type ReactNode } from 'react';
 
 import type { DiabetesSettingsResource } from '../../client/diabetes-settings-types';
+import { DiabetesSettingsClientError } from '../../client/diabetes-settings-types';
 import {
   DiabetesSettingsContext,
   type DiabetesSettingsContextValue,
+  type DiabetesSettingsLoadState,
 } from '../diabetes-settings-provider';
 
 export interface TestDiabetesSettingsProviderProps {
   readonly children: ReactNode;
+  readonly error?: DiabetesSettingsClientError | null;
   readonly glucoseDisplayUnit?: GlucoseDisplayUnit | null;
+  readonly loadState?: DiabetesSettingsLoadState;
+  readonly onRefresh?: () => Promise<void>;
   readonly settings?: DiabetesSettingsResource | null;
 }
 
@@ -35,26 +40,37 @@ function createTestSettings(
 
 export function TestDiabetesSettingsProvider({
   children,
+  error = null,
   glucoseDisplayUnit = null,
+  loadState = 'ready',
+  onRefresh = async () => {},
   settings = null,
 }: TestDiabetesSettingsProviderProps) {
   const value = useMemo<DiabetesSettingsContextValue>(() => {
     const resolvedSettings = settings ?? createTestSettings(glucoseDisplayUnit);
+    const resolvedLoadState = loadState;
+    const resolvedError = resolvedLoadState === 'error' ? error : null;
+    const resolvedGlucoseDisplayUnit =
+      resolvedLoadState === 'ready'
+        ? resolvedSettings.glucoseDisplayUnit
+        : null;
 
     return {
-      error: null,
-      glucoseDisplayUnit: resolvedSettings.glucoseDisplayUnit,
-      isUnconfigured: resolvedSettings.glucoseDisplayUnit == null,
-      loadState: 'ready',
+      error: resolvedError,
+      glucoseDisplayUnit: resolvedGlucoseDisplayUnit,
+      isUnconfigured:
+        resolvedLoadState === 'ready' &&
+        resolvedSettings.glucoseDisplayUnit == null,
+      loadState: resolvedLoadState,
       patchGlucoseDisplayUnit: async (unit) => ({
         ...resolvedSettings,
         glucoseDisplayUnit: unit,
       }),
-      refresh: async () => {},
-      settings: resolvedSettings,
+      refresh: onRefresh,
+      settings: resolvedLoadState === 'ready' ? resolvedSettings : null,
       updateSettingsFromMutation: () => {},
     };
-  }, [glucoseDisplayUnit, settings]);
+  }, [error, glucoseDisplayUnit, loadState, onRefresh, settings]);
 
   return (
     <DiabetesSettingsContext.Provider value={value}>

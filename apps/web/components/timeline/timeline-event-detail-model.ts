@@ -9,7 +9,6 @@ import {
   formatTimelineDisplayTime,
   getTimelineCalendarDateKey,
 } from '../../lib/timeline/timeline-date-time';
-import { mapQuickAddGlucoseContext } from '../../lib/timeline/semantic-creators/map-quick-add-glucose-context';
 import { mapQuickAddMedicationUnit } from '../../lib/timeline/semantic-creators/map-quick-add-medication-unit';
 import { mapQuickAddNutritionMealType } from '../../lib/timeline/semantic-creators/map-quick-add-nutrition-meal-type';
 
@@ -80,6 +79,24 @@ function resolveGlucoseContextLabel(
   context: GlucoseMeasurementContext | undefined,
 ): string {
   return context ? glucoseContextFormLabels[context] : '';
+}
+
+function resolveGlucoseContextFromEditDraft(
+  contextLabel: string,
+): GlucoseMeasurementContext | undefined {
+  const normalized = contextLabel.trim();
+
+  if (normalized.length === 0) {
+    return undefined;
+  }
+
+  const matchedEntry = Object.entries(glucoseContextFormLabels).find(
+    ([, label]) => label === normalized,
+  );
+
+  return matchedEntry
+    ? (matchedEntry[0] as GlucoseMeasurementContext)
+    : undefined;
 }
 
 function resolveNutritionMealTypeLabel(mealType: string): string {
@@ -257,7 +274,7 @@ export function updateSemanticTimelineEventFromDraft(
         return { errors: validation.errors, event: null };
       }
 
-      const context = mapQuickAddGlucoseContext(draft.context);
+      const context = resolveGlucoseContextFromEditDraft(draft.context);
 
       return {
         errors: {},

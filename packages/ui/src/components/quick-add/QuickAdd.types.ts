@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, RefObject } from 'react';
 
 import type { EventCardType } from '../event-card/EventCard.types';
 
@@ -16,6 +16,7 @@ export interface QuickAddPanelProps {
   readonly actions: readonly QuickAddActionItem[];
   readonly selectedActionId: string | null;
   readonly selectedContent?: ReactNode;
+  readonly initialFocusRef?: RefObject<HTMLElement | null>;
   readonly onClose: () => void;
   readonly onSelectAction: (actionId: string) => void;
   readonly onBack: () => void;

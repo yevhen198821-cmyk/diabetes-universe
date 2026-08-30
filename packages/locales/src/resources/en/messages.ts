@@ -434,6 +434,18 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'quick-add.button.label': 'Add event',
   'quick-add.glucose.contextLabel': 'Measurement context',
   'quick-add.glucose.contextSheetTitle': 'Measurement context',
+  'quick-add.glucose.addContext': 'Add context',
+  'quick-add.glucose.changeContext': 'Change context',
+  'quick-add.glucose.clearContext': 'Clear',
+  'quick-add.glucose.loading': 'Loading glucose settings…',
+  'quick-add.glucose.settingsUnconfigured.title': 'Glucose unit not configured',
+  'quick-add.glucose.settingsUnconfigured.description':
+    'Set your glucose display unit in Diabetes settings before entering a value.',
+  'quick-add.glucose.settingsUnconfigured.action': 'Open Diabetes settings',
+  'quick-add.glucose.settingsError.title': 'Could not load glucose settings',
+  'quick-add.glucose.settingsError.description':
+    'Glucose entry is unavailable until settings can be loaded.',
+  'quick-add.glucose.settingsError.retry': 'Retry',
   'quick-add.glucose.save': 'Save',
   'quick-add.glucose.timeLabel': 'Time',
   'quick-add.glucose.unitGate.description':

@@ -285,6 +285,20 @@ export const russianDraftMessages = defineDraftMessages({
   'quick-add.button.label': 'Добавить событие',
   'quick-add.glucose.contextLabel': 'Контекст измерения',
   'quick-add.glucose.contextSheetTitle': 'Контекст измерения',
+  'quick-add.glucose.addContext': 'Добавить контекст',
+  'quick-add.glucose.changeContext': 'Изменить контекст',
+  'quick-add.glucose.clearContext': 'Очистить',
+  'quick-add.glucose.loading': 'Загрузка настроек глюкозы…',
+  'quick-add.glucose.settingsUnconfigured.title':
+    'Единицы глюкозы не настроены',
+  'quick-add.glucose.settingsUnconfigured.description':
+    'Укажите единицы отображения глюкозы в настройках диабета перед вводом значения.',
+  'quick-add.glucose.settingsUnconfigured.action': 'Открыть настройки диабета',
+  'quick-add.glucose.settingsError.title':
+    'Не удалось загрузить настройки глюкозы',
+  'quick-add.glucose.settingsError.description':
+    'Ввод глюкозы недоступен, пока настройки не будут загружены.',
+  'quick-add.glucose.settingsError.retry': 'Повторить',
   'quick-add.glucose.save': 'Сохранить',
   'quick-add.glucose.timeLabel': 'Время',
   'quick-add.glucose.unitGate.description':

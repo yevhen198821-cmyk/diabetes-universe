@@ -1,3 +1,5 @@
+import type { GlucoseMeasurementContext } from './semantic-timeline';
+
 /**
  * MVP categories available in the first Quick Add stage.
  * Aligns with user-created EventCard types.
@@ -16,7 +18,7 @@ export interface QuickAddAction {
 export interface GlucoseQuickAddEntry {
   readonly valueMmol: number;
   readonly time: string;
-  readonly context: string;
+  readonly context?: GlucoseMeasurementContext;
 }
 
 export interface InsulinQuickAddEntry {

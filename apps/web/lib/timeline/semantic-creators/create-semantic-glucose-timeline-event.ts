@@ -5,7 +5,6 @@ import type {
 
 import { createIsoDateTimeFromLocalTime } from '../timeline-date-time';
 import { createSemanticTimelineEventId } from './create-semantic-timeline-event-id';
-import { mapQuickAddGlucoseContext } from './map-quick-add-glucose-context';
 import {
   systemSemanticTimelineClock,
   type SemanticTimelineClock,
@@ -24,11 +23,9 @@ export function createSemanticGlucoseTimelineEvent(
     entry.time,
     options.referenceDate ?? clock.now(),
   );
-  const context = mapQuickAddGlucoseContext(entry.context);
-
   return {
     concentrationMmolPerL: entry.valueMmol,
-    context,
+    context: entry.context,
     createdAt: now,
     id: createSemanticTimelineEventId('glucose', entry.time),
     kind: 'glucose',

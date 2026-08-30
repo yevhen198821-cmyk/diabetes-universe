@@ -37,10 +37,28 @@ test('parseGlucoseInput rejects values outside converted mg/dL bounds', () => {
   assert.equal(parseGlucoseInput(String(bounds.max + 1), 'mg_per_dl'), null);
 });
 
-test('glucose quick add blocks value entry until a display unit is selected', () => {
-  assert.match(glucoseFormSource, /requiresUnitSelection/);
+test('glucose quick add blocks value entry until settings are ready and configured', () => {
+  assert.match(glucoseFormSource, /loadState === 'loading'/);
+  assert.match(glucoseFormSource, /isUnconfigured/);
   assert.match(glucoseFormSource, /disabled=\{!canEnterValue\}/);
-  assert.match(glucoseFormSource, /if \(!activeDisplayUnit\)/);
+  assert.match(
+    glucoseFormSource,
+    /if \(!canEnterValue \|\| !glucoseDisplayUnit\)/,
+  );
+});
+
+test('glucose quick add does not patch display unit inside the form', () => {
+  assert.doesNotMatch(glucoseFormSource, /patchGlucoseDisplayUnit/);
+  assert.doesNotMatch(glucoseFormSource, /pendingDisplayUnit/);
+});
+
+test('glucose quick add defaults context to undefined', () => {
+  assert.match(glucoseFormSource, /context: undefined/);
+  assert.doesNotMatch(glucoseFormSource, /glucoseContextOptions\[0\]/);
+});
+
+test('glucose quick add passes semantic context through on submit', () => {
+  assert.match(glucoseFormSource, /context: formState\.context/);
 });
 
 test('glucose quick add uses shared medical-domain precision for mg/dL bounds', () => {

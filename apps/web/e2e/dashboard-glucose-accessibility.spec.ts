@@ -1,7 +1,10 @@
 import { expect, test, type Locator, type Page } from './support/test';
 
 import { signInWithMagicLink } from './support/auth-helpers';
-import { selectGlucoseUnitIfRequired } from './support/glucose-quick-add-helpers';
+import {
+  selectGlucoseUnitIfRequired,
+  saveGlucoseQuickAdd,
+} from './support/glucose-quick-add-helpers';
 import { prepareEmptyTimelineDashboardFixture } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
@@ -122,7 +125,7 @@ test('empty Add glucose save moves focus to ready Last Glucose heading', async (
   await cta.click();
   await selectGlucoseUnitIfRequired(page);
   await page.getByLabel('Glucose level').fill('5.6');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
+  await saveGlucoseQuickAdd(page);
   await expect(page.getByLabel('Glucose level')).toHaveCount(0);
   await expect(cta).toHaveCount(0);
   await expect(lastGlucoseRegion.getByText('5.6')).toBeVisible();
@@ -164,7 +167,7 @@ test('ready Last Glucose hero exposes full mobile contract at 360 and 390', asyn
     await page.getByRole('button', { name: 'Quick add: Glucose' }).click();
     await selectGlucoseUnitIfRequired(page);
     await page.getByLabel('Glucose level').fill('8.1');
-    await page.getByRole('button', { name: 'Сохранить' }).click();
+    await saveGlucoseQuickAdd(page);
     await expect(page.getByLabel('Glucose level')).toHaveCount(0);
     await expect(lastGlucoseRegion.getByText('8.1')).toBeVisible();
     await expect(lastGlucoseRegion.getByText('Manual entry')).toBeVisible();
