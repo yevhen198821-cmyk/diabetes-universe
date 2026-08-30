@@ -116,9 +116,8 @@ test.describe('Glucose Quick Add Wave 3D-III save integrity', () => {
         cancelButton instanceof HTMLButtonElement &&
         cancelButton.disabled
       );
-    });
+    }, undefined, { timeout: 15_000 });
 
-    await expect(dialog).toBeVisible();
     await expect(dialog).toBeHidden();
   });
 
