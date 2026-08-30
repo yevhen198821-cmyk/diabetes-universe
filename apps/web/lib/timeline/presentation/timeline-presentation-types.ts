@@ -6,6 +6,7 @@ export interface TimelineEventCardPresentation {
   readonly cardType: EventCardType;
   readonly context?: string;
   readonly mapAriaLabel: string;
+  readonly metadataLines?: readonly string[];
   readonly occurredAt: string;
   readonly statusLines?: readonly string[];
   readonly time: string;

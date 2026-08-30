@@ -26,6 +26,7 @@ export interface EventCardProps {
   readonly value: string;
   readonly unit: string;
   readonly subtitle?: string;
+  readonly metadataLines?: readonly string[];
   readonly statusLines?: readonly string[];
   readonly context?: string;
   readonly status?: EventCardStatus;

@@ -21,5 +21,6 @@ test('EventCard supports canonical dateTime separate from visible time', () => {
 
 test('EventCard renders optional status lines with generic styling', () => {
   assert.match(eventCardSource, /statusLines/);
+  assert.match(eventCardSource, /metadataLines/);
   assert.match(eventCardSource, /text-xs text-slate-500/);
 });
