@@ -58,6 +58,7 @@ test.describe('Glucose Quick Add Wave 3D-III save integrity', () => {
 
     const dialog = page.getByRole('dialog', { name: 'Добавить глюкозу' });
     await page.getByLabel('Glucose level').fill('6.1');
+    await installOneShotTimelineEventsWriteDelay(page, 750);
     await dialog.getByRole('button', { name: 'Save', exact: true }).click();
 
     await expect(dialog.getByRole('status')).toHaveText('Saving…');
