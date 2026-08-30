@@ -13,9 +13,7 @@ function listPresentationFiles(directory) {
       return listPresentationFiles(`${path}/`);
     }
 
-    return /\.ts$/.test(entry) && !entry.endsWith('.test.mjs')
-      ? [path]
-      : [];
+    return /\.ts$/.test(entry) && !entry.endsWith('.test.mjs') ? [path] : [];
   });
 }
 
