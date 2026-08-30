@@ -1,5 +1,45 @@
 # Changelog
 
+## Wave 4B-II — Insulin Presentation Adapter and Semantic-Safe Timeline Edit
+
+Дата: 2026-08-30
+
+Статус: **Option A** implemented. Shared insulin presentation adapter and
+semantic-aware Timeline Edit. No Quick Add, API, OpenAPI, persistence, or
+`schemaVersion` change.
+
+Завершено:
+
+- added the `apps/web/lib/medical/insulin` application adapter, consuming the
+  Wave 4B-I medical-domain helpers through package-root exports only;
+- reader precedence: valid `administrationContext` wins, then the exact
+  governed legacy mapping, then unmatched legacy text verbatim, then the
+  localized `unspecified` label;
+- title always uses the stored `preparation` snapshot; a missing
+  `preparationId` stays unmatched and no identity is fabricated;
+- grouping chrome comes only from `resolveInsulinPresentationGrouping` and is
+  never persisted;
+- routed Timeline card/detail/search and Dashboard Recent Events through the
+  single shared insulin presentation trajectory;
+- replaced generic insulin title/context editing with a discriminated insulin
+  edit draft that resolves catalogue identity and display snapshot atomically;
+- an explicit semantic context edit writes `administrationContext` and removes
+  the contradictory legacy `context`; dose/time-only edits preserve stored
+  context and identity fields;
+- kept the `0 < dose <= 100` UI typo guard with no silent rounding;
+- added EN/RU/UK/DE preparation, context, grouping, and edit chrome; no
+  hardcoded Russian labels in the new insulin presentation/edit modules.
+
+Не входит в этот этап:
+
+- 4C localized semantic Quick Add (unblocked only after this PR is approved and
+  merged), 4D save integrity, 4E API/adoption/OpenAPI, calculator,
+  recommendation, pump, therapy plan, IOB, new brands, database migrations.
+
+Semantic insulin fields remain **not cloud-compatible** until Wave 4E.
+
+---
+
 ## Wave 4B-I — Shared Insulin Types and Medical-Domain Foundation
 
 Дата: 2026-08-30

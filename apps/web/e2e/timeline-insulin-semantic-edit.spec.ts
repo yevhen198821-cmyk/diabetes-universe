@@ -195,11 +195,9 @@ test('insulin dose guard rejects zero and above 100 with technical copy only', a
 
     await expect(editDialog).toBeVisible();
     await expect(
-      page
-        .getByRole('alert')
-        .filter({
-          hasText: 'Enter a dose greater than 0 and no more than 100',
-        }),
+      page.getByRole('alert').filter({
+        hasText: 'Enter a dose greater than 0 and no more than 100',
+      }),
     ).toBeVisible();
     await expect(dose).toHaveAttribute('aria-invalid', 'true');
     await expect(page.getByText(/safe dose|recommended dose/i)).toHaveCount(0);

@@ -74,6 +74,7 @@
 - [Dashboard Quick Add Integration](architecture/dashboard/quick-add-integration.md) — Wave 3D-IV glucose save integrity closure
 - [Wave 4A — Insulin Recording Architecture](architecture/insulin/wave-4a-insulin-recording-architecture.md) — Approved
 - [Wave 4B-I — Shared Insulin Types and Medical-Domain Foundation](implementation/wave-4b-i-insulin-domain-foundation.md) — Implemented
+- [Wave 4B-II — Insulin Presentation Adapter and Semantic-Safe Timeline Edit](implementation/wave-4b-ii-insulin-presentation-edit.md) — Implemented
 - [Dashboard States](architecture/dashboard/states.md)
 - [Dashboard Responsive Behavior](architecture/dashboard/responsive.md)
 - [Timeline Overview](architecture/timeline/overview.md) — event journal at `/timeline`
