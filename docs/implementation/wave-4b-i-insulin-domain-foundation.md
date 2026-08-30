@@ -114,16 +114,18 @@ Blank, partial, differently cased, and unknown strings return
 
 ## New-write result contract
 
-`prepareInsulinNewWrite(input)` returns:
+`prepareInsulinNewWrite` accepts `unknown` at the runtime boundary.
+`PrepareInsulinNewWriteInput` remains the typed caller shape. Malformed
+roots (`null`, `undefined`, primitives, arrays) return
+`{ ok: false, error: 'insulin.input.invalid' }` and do not throw.
 
-- `{ ok: true, value }` with `preparationId`, `preparation` (trimmed),
-  `doseUnits`, `administrationContext`;
-- or `{ ok: false, error }` with a technical error code.
-
-Successful output does not contain `context` or `preparationCategory`.
+Successful output contains `preparationId`, `preparation` (trimmed),
+`doseUnits`, and `administrationContext`. It does not contain `context` or
+`preparationCategory`.
 
 Error codes:
 
+- `insulin.input.invalid`
 - `insulin.preparation_id.invalid`
 - `insulin.preparation.snapshot_empty`
 - `insulin.preparation.other_name_required`
@@ -137,6 +139,22 @@ Error codes:
 not manufacture a localized “Other” / “Другое” snapshot. Invalid input is
 rejected, not repaired. There is no clock, event ID, persistence, locale, or
 hidden global state.
+
+## Registry hardening
+
+Runtime collections `INSULIN_PREPARATION_IDS`,
+`INSULIN_ADMINISTRATION_CONTEXTS`, and
+`INSULIN_LEGACY_ADMINISTRATION_CONTEXT_MAPPING` are constructed with
+`Object.freeze`. Membership Sets stay module-private and are not package-root
+exports. External mutation cannot change guard or mapping results.
+
+Preparation IDs are derived from an exhaustive
+`Record<InsulinPreparationId, InsulinPresentationGrouping>`. Administration
+contexts are derived from an exhaustive
+`Record<InsulinAdministrationContext, true>`. Both directions of
+`Exclude<Union, keyof Record> | Exclude<keyof Record, Union>` must be `never`,
+so a future union member without a registry key fails typecheck. There is no
+second independent vocabulary and no `insulin.prep.unmapped`.
 
 ## Wave 4E API incompatibility (tracked)
 

@@ -24,6 +24,14 @@ OpenAPI, or persistence writer changes.
 - 4B-II presentation/edit, 4C localized Quick Add, 4D save integrity, 4E
   API/adoption/OpenAPI, calculator/recommendation/pump.
 
+### Hardening (2026-08-30)
+
+- runtime registries are `Object.freeze`d; membership Sets are not public
+  exports and cannot be mutated by consumers;
+- type and runtime vocabularies are exhaustive via `Record<Union, Metadata>`;
+- malformed root input to `prepareInsulinNewWrite` fails closed with
+  `insulin.input.invalid` and does not throw.
+
 ---
 
 ## Wave 4A — Insulin Recording Architecture
