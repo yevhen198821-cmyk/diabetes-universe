@@ -28,6 +28,26 @@ implementation.
 - production TypeScript, UI, migrations, OpenAPI, new brands, calculator,
   pump/CGM/therapy, glucose behavior, Wave 4B implementation.
 
+### Remediation (docs only, 2026-08-30)
+
+Corrected Wave 4A after architecture review. No runtime, schema, or OpenAPI
+change.
+
+- documented that the current medical API allow-list rejects
+  `preparationId` / `administrationContext`; cloud/adoption is not compatible
+  until a named Wave 4E slice;
+- replaced the invented 1000 IU ceiling with the existing 500 IU server
+  technical bound; kept 100 IU as a UI typo guard; separated canonical
+  validity from manual two-decimal policy;
+- `preparationId` is a catalogue-entry key only; unmatched history omits it;
+  `insulin.prep.unmapped` is not an identity;
+- `preparationCategory` is not persisted;
+- `insulin.prep.other` requires a user-entered name; localized Other is not
+  the snapshot;
+- new writers always set `administrationContext` (`unspecified` if none);
+- Timeline Edit is a hard gate: 4C semantic writes do not ship until Edit is
+  semantic-aware or locks those fields.
+
 ---
 
 ## Wave 3D-IV — Glucose Quick Add Architecture Closure

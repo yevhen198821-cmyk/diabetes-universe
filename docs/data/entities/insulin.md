@@ -63,23 +63,38 @@ and IndexedDB. Glucose Wave 3D save integrity does **not** apply.
 ## Target attributes (Wave 4, additive, not implemented here)
 
 Wave 4 keeps the current required fields and adds optional identity/context
-fields on the same `schemaVersion: 1`. No destructive startup migration.
+fields. `schemaVersion` stays `1` **only if** every fail-closed reader that
+will see the new writer contract — including the medical API allow-list and
+adoption validator — is updated **before** those writes reach that boundary.
+No destructive startup migration.
 
-| Attribute               | Required on new writes | Type         | Meaning                                              |
-| ----------------------- | ---------------------- | ------------ | ---------------------------------------------------- |
-| `preparation`           | yes                    | string       | Historical **display snapshot**                      |
-| `doseUnits`             | yes                    | number       | Canonical IU; up to 2 decimal places                 |
-| `preparationId`         | yes (new writes)       | catalogue ID | Stable product key; never a brand name               |
-| `preparationCategory`   | no                     | enum         | `rapid` \| `basal` \| `unspecified` from catalogue   |
-| `administrationContext` | no                     | enum         | Semantic context; labels live in locales             |
-| `context`               | no                     | string       | Legacy only; new writes must not persist labels here |
+| Attribute               | Required on new writes | Type         | Meaning                                                                                                                                     |
+| ----------------------- | ---------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `preparation`           | yes                    | string       | Historical **display snapshot** — never compared as identity                                                                                |
+| `doseUnits`             | yes                    | number       | Canonical IU; finite, `> 0`, `<= 500` (server bound). Manual parsers may cap fractional digits; storage does not.                           |
+| `preparationId`         | when catalogue-known   | catalogue ID | Stable internal catalogue-entry key (includes `insulin.prep.other`). **Omitted** on unmatched historical strings. Never a display label. Never `insulin.prep.unmapped`. |
+| `administrationContext` | yes (new writes)       | enum         | Semantic context. Optional in TypeScript **only** so legacy rows remain readable. New writes always set it (`unspecified` if none chosen). |
+| `context`               | no                     | string       | Legacy only; new writers must not write this field                                                                                          |
+
+`preparationCategory` is **not** a persisted event field. Rapid / long-acting
+grouping is catalogue/presentation chrome derived from `preparationId` when
+the entry is known.
 
 Approved context IDs: `before_meal`, `after_meal`, `correction`, `basal`,
 `other`, `unspecified`.
 
 Approved catalogue IDs and safety rules live in the Wave 4A architecture
-document. Category must not be inferred from a display name without a governed
+document. Do not infer a catalogue ID from a display name without a governed
 mapping table.
+
+### Cloud / API compatibility (current)
+
+The current medical API validator (`validateSemanticEvent`) **rejects unknown
+fields**. `preparationId` and `administrationContext` therefore **cannot**
+pass create, update, or adoption today. Semantic insulin writes are
+**local-only** until the named **Wave 4E** API/adoption/OpenAPI slice. This
+entity page does not claim the existing cloud path already accepts the new
+fields.
 
 ## Relationships
 
@@ -95,11 +110,18 @@ mapping table.
 ## Constraints
 
 - `kind` must be `'insulin'`.
-- `doseUnits` must be a finite number greater than 0.
-- Domain technical ceiling: `doseUnits <= 1000` (overflow/typo protection).
-- Quick Add/edit may keep a tighter UI ceiling (current demo 100). Neither
-  ceiling is a therapeutic limit.
-- `preparation` must be a non-empty snapshot after trim.
+- Canonical `doseUnits` validity: finite number, greater than 0, and
+  `<= 500` (existing server technical bound
+  `INSULIN_DOSE_MAX`). This is **not** a therapeutic or “safe” ceiling.
+- Current Quick Add/Edit UI ceiling remains `<= 100` as a narrower **typo
+  guard**. Also not therapeutic.
+- Manual input (Wave 4C) may accept at most two fractional digits. Device
+  and import values must not be rejected solely for extra decimals. Do not
+  silently round persisted values.
+- `preparation` must be a non-empty snapshot after trim. For
+  `insulin.prep.other`, the snapshot is the **user-entered name**, never a
+  localized “Other/Другое” label. If that name is not collected, Other must
+  not ship as a semantic writer.
 - `occurredAt` must be valid ISO 8601; invalid Quick Add times fail create.
 - `id`, `kind`, `source`, and `createdAt` are immutable after create.
 - No default dose. No glucose-derived dose.
@@ -109,12 +131,23 @@ mapping table.
 ## Notes
 
 - Historical events shaped `{ kind, preparation, doseUnits, context? }` remain
-  readable. Presentation maps legacy Russian context strings through a governed
-  table or shows `unspecified` plus the original snapshot.
+  readable. Unmatched strings keep the original `preparation` snapshot and
+  **omit** `preparationId`. Presentation maps legacy Russian context strings
+  through a governed table or shows `unspecified` plus the original snapshot.
+- Readers prefer `administrationContext`, then the governed legacy `context`
+  mapping, then presentation fallback. When both old and new context fields
+  exist, `administrationContext` wins.
 - Application startup must not rewrite insulin rows in IndexedDB.
 - Explicit import/migration utilities may attach mapping evidence outside the
   event.
-- Future cloud sync uses the existing Timeline/P10–P12 path; Wave 4 does not
-  add an insulin-specific sync protocol.
-- Implementation slices: 4B-I types/domain, 4B-II presentation, 4C Quick Add
-  localization, 4D save integrity. None of those start in Wave 4A.
+- Timeline Edit today spreads the existing event and overwrites only
+  `preparation` / `context`. Wave 4C semantic writes **must not ship** until
+  Edit is semantic-aware for those fields **or** temporarily prevents editing
+  them on semantic insulin events.
+- Cloud sync of the new fields is **blocked** until Wave 4E updates the
+  medical API allow-list, kind validation, adoption, OpenAPI, and tests.
+  Wave 4 does not add an insulin-specific sync protocol.
+- Implementation slices: 4B-I types/domain, 4B-II presentation plus
+  semantic-safe edit, 4C localized Quick Add (including required Other name),
+  4D local save integrity, 4E API/adoption/OpenAPI. None of those start in
+  Wave 4A.
