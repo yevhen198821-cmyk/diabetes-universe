@@ -191,7 +191,7 @@ export const germanDraftMessages = defineDraftMessages({
   'quick-add.glucose.settingsError.retry': 'Erneut versuchen',
   'quick-add.glucose.save': 'Speichern',
   'quick-add.glucose.saveError.description':
-    'Der Glukosewert wurde nicht gespeichert. Prüfen Sie die Verbindung und versuchen Sie es erneut.',
+    'Der Glukosewert wurde nicht gespeichert. Ihre Eingaben sind noch im Formular. Bitte versuchen Sie es erneut.',
   'quick-add.glucose.saveError.title':
     'Glukosewert konnte nicht gespeichert werden',
   'quick-add.glucose.saving': 'Speichern…',

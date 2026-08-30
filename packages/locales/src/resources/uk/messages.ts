@@ -188,7 +188,7 @@ export const ukrainianDraftMessages = defineDraftMessages({
   'quick-add.glucose.settingsError.retry': 'Повторити',
   'quick-add.glucose.save': 'Зберегти',
   'quick-add.glucose.saveError.description':
-    'Запис глюкози не збережено. Перевірте підключення та спробуйте ще раз.',
+    'Запис глюкози не збережено. Введені дані залишилися у формі. Спробуйте ще раз.',
   'quick-add.glucose.saveError.title': 'Не вдалося зберегти глюкозу',
   'quick-add.glucose.saving': 'Збереження…',
   'quick-add.glucose.timeLabel': 'Час',

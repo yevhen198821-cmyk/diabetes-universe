@@ -18,6 +18,7 @@ function findActionAddTitle(
 
 export function QuickAddPanel({
   actions,
+  dismissDisabled = false,
   initialFocusRef,
   onBack,
   onClose,
@@ -50,6 +51,11 @@ export function QuickAddPanel({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
+
+        if (dismissDisabled) {
+          return;
+        }
+
         onClose();
       }
     };
@@ -59,7 +65,7 @@ export function QuickAddPanel({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onClose, open]);
+  }, [dismissDisabled, onClose, open]);
 
   useEffect(() => {
     if (!open) {
@@ -90,13 +96,19 @@ export function QuickAddPanel({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
       <button
+        aria-hidden={dismissDisabled ? true : undefined}
         aria-label="Закрыть быстрое добавление"
-        className="absolute inset-0 bg-slate-950/40 backdrop-blur-[1px]"
+        className={`absolute inset-0 bg-slate-950/40 backdrop-blur-[1px] ${
+          dismissDisabled ? 'pointer-events-none' : ''
+        }`}
+        disabled={dismissDisabled}
         onClick={onClose}
+        tabIndex={dismissDisabled ? -1 : undefined}
         type="button"
       />
 
       <section
+        aria-busy={dismissDisabled ? true : undefined}
         aria-labelledby={titleId}
         aria-modal="true"
         className="relative z-10 flex max-h-[min(92dvh,calc(100dvh-env(safe-area-inset-bottom)))] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10 outline-none sm:rounded-3xl"
@@ -107,8 +119,10 @@ export function QuickAddPanel({
         <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
           {selectedActionId ? (
             <button
+              aria-disabled={dismissDisabled ? true : undefined}
               aria-label="Назад к выбору типа"
-              className="grid size-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
+              className="grid size-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={dismissDisabled}
               onClick={onBack}
               type="button"
             >

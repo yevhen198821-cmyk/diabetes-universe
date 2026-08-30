@@ -1,9 +1,6 @@
 'use client';
 
-import type {
-  GlucoseMeasurementContext,
-  GlucoseQuickAddEntry,
-} from '@diabetes-universe/types';
+import type { GlucoseMeasurementContext } from '@diabetes-universe/types';
 import {
   QuickAddFormActions,
   QuickAddFormLayout,
@@ -20,13 +17,15 @@ import {
 } from 'react';
 
 import { useDiabetesSettings } from '../../lib/medical/react';
-import {
-  getCurrentTimeString,
-  parseGlucoseInput,
-} from '../../lib/quick-add/format-glucose';
+import { getCurrentTimeString } from '../../lib/quick-add/format-glucose';
 import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
+import {
+  executeGlucoseQuickAddSubmit,
+  resetGlucoseQuickAddSubmitIdentity,
+  type GlucoseQuickAddFormState,
+} from '../../lib/quick-add/glucose-quick-add-submit-controller';
+import { createGlucoseQuickAddSubmitIdentityState } from '../../lib/quick-add/glucose-quick-add-submit-model';
 import { useLocalization } from '../../lib/platform/react/use-localization';
-import { createSemanticTimelineEventId } from '../../lib/timeline/semantic-creators/create-semantic-timeline-event-id';
 import { formField, formLabel } from '../timeline/ui-styles';
 import {
   resolveGlucoseContextLabel,
@@ -35,17 +34,13 @@ import {
 } from './glucose-quick-add-labels';
 
 interface GlucoseQuickAddFormProps {
-  readonly draftState?: GlucoseFormState;
   readonly initialFocusRef?: RefObject<HTMLInputElement | null>;
   readonly onCancel: () => void;
   readonly onSubmit: (request: GlucoseQuickAddSubmitRequest) => Promise<void>;
+  readonly onSubmittingChange?: (isSubmitting: boolean) => void;
 }
 
-interface GlucoseFormState {
-  readonly value: string;
-  readonly time: string;
-  readonly context: GlucoseMeasurementContext | undefined;
-}
+type GlucoseFormState = GlucoseQuickAddFormState;
 
 function createInitialState(): GlucoseFormState {
   return {
@@ -56,10 +51,10 @@ function createInitialState(): GlucoseFormState {
 }
 
 export function GlucoseQuickAddForm({
-  draftState,
   initialFocusRef,
   onCancel,
   onSubmit,
+  onSubmittingChange,
 }: GlucoseQuickAddFormProps) {
   const localization = useLocalization();
   const labels = useMemo(
@@ -73,15 +68,14 @@ export function GlucoseQuickAddForm({
   const { glucoseDisplayUnit, isUnconfigured, loadState, refresh } =
     useDiabetesSettings();
 
-  const [formState, setFormState] = useState<GlucoseFormState>(
-    () => draftState ?? createInitialState(),
-  );
+  const [formState, setFormState] =
+    useState<GlucoseFormState>(createInitialState);
   const [valueError, setValueError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [contextSheetOpen, setContextSheetOpen] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const submitClientUuidRef = useRef<string | null>(null);
+  const submitIdentityRef = useRef(createGlucoseQuickAddSubmitIdentityState());
   const isSubmittingRef = useRef(false);
 
   const isLoading = loadState === 'loading';
@@ -99,21 +93,15 @@ export function GlucoseQuickAddForm({
   const selectedContextLabel = formState.context
     ? resolveGlucoseContextLabel(localization, formState.context)
     : null;
+  const controlsDisabled = isSubmitting;
 
-  const resetSubmitIdentity = () => {
-    submitClientUuidRef.current = null;
+  const setSubmittingState = (pending: boolean) => {
+    setIsSubmitting(pending);
+    onSubmittingChange?.(pending);
   };
 
-  const resolveSubmitEventId = (time: string) => {
-    if (submitClientUuidRef.current === null) {
-      submitClientUuidRef.current = crypto.randomUUID();
-    }
-
-    return createSemanticTimelineEventId(
-      'glucose',
-      time,
-      submitClientUuidRef.current,
-    );
+  const resetSubmitIdentity = () => {
+    resetGlucoseQuickAddSubmitIdentity(submitIdentityRef.current);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -123,35 +111,32 @@ export function GlucoseQuickAddForm({
       return;
     }
 
-    const parsedValue = parseGlucoseInput(formState.value, glucoseDisplayUnit);
-
-    if (parsedValue === null) {
-      setValueError(labels.valueOutOfRangeError);
-      return;
-    }
-
-    const entry: GlucoseQuickAddEntry = {
-      context: formState.context,
-      time: formState.time,
-      valueMmol: parsedValue,
-    };
-    const eventId = resolveSubmitEventId(entry.time);
-
     isSubmittingRef.current = true;
-    setIsSubmitting(true);
+    setSubmittingState(true);
     setSaveError(null);
     setValueError(null);
+    setContextSheetOpen(false);
 
-    try {
-      await onSubmit({ entry, eventId });
-      resetSubmitIdentity();
-      setSaveError(null);
-    } catch {
-      setSaveError(labels.saveErrorDescription);
-    } finally {
-      isSubmittingRef.current = false;
-      setIsSubmitting(false);
+    const result = await executeGlucoseQuickAddSubmit({
+      canEnterValue,
+      formState,
+      glucoseDisplayUnit,
+      identity: submitIdentityRef.current,
+      isSubmitting: false,
+      onSubmit,
+      valueOutOfRangeMessage: labels.valueOutOfRangeError,
+    });
+
+    if (result.type === 'invalid-value') {
+      setValueError(result.message);
     }
+
+    if (result.type === 'error') {
+      setSaveError(labels.saveErrorDescription);
+    }
+
+    isSubmittingRef.current = false;
+    setSubmittingState(false);
   };
 
   const handleCancel = () => {
@@ -167,6 +152,10 @@ export function GlucoseQuickAddForm({
   };
 
   const handleContextSelect = (context: GlucoseMeasurementContext) => {
+    if (controlsDisabled) {
+      return;
+    }
+
     setFormState((current) => ({
       ...current,
       context,
@@ -175,6 +164,10 @@ export function GlucoseQuickAddForm({
   };
 
   const handleClearContext = () => {
+    if (controlsDisabled) {
+      return;
+    }
+
     setFormState((current) => ({
       ...current,
       context: undefined,
@@ -297,13 +290,13 @@ export function GlucoseQuickAddForm({
                 aria-describedby={
                   valueError ? 'quick-add-glucose-value-error' : undefined
                 }
-                aria-disabled={!canEnterValue || isSubmitting}
+                aria-disabled={!canEnterValue || controlsDisabled}
                 aria-invalid={valueError ? true : undefined}
                 autoComplete="off"
                 className={`${formField} pr-24 ${
                   hasValue ? 'font-semibold text-slate-950' : 'text-slate-900'
-                } ${!canEnterValue || isSubmitting ? 'cursor-not-allowed opacity-60' : ''}`}
-                disabled={!canEnterValue || isSubmitting}
+                } ${!canEnterValue || controlsDisabled ? 'cursor-not-allowed opacity-60' : ''}`}
+                disabled={!canEnterValue || controlsDisabled}
                 enterKeyHint="done"
                 id="quick-add-glucose-value"
                 inputMode={canEnterValue ? inputMode : undefined}
@@ -349,6 +342,7 @@ export function GlucoseQuickAddForm({
           </div>
 
           <QuickAddTimeField
+            disabled={controlsDisabled}
             id="quick-add-glucose-time"
             label={labels.timeLabel}
             name="time"
@@ -371,8 +365,10 @@ export function GlucoseQuickAddForm({
                 <button
                   aria-haspopup="dialog"
                   aria-labelledby="quick-add-glucose-context-label quick-add-glucose-context-value"
-                  className={`${formField} flex min-h-11 flex-1 items-center justify-between text-left font-medium text-slate-950`}
-                  disabled={isSubmitting}
+                  className={`${formField} flex min-h-11 flex-1 items-center justify-between text-left font-medium text-slate-950 ${
+                    controlsDisabled ? 'cursor-not-allowed opacity-60' : ''
+                  }`}
+                  disabled={controlsDisabled}
                   onClick={() => setContextSheetOpen(true)}
                   type="button"
                 >
@@ -387,8 +383,8 @@ export function GlucoseQuickAddForm({
                 </button>
                 <button
                   aria-label={labels.clearContext}
-                  className="min-h-11 shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-                  disabled={isSubmitting}
+                  className="min-h-11 shrink-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={controlsDisabled}
                   onClick={handleClearContext}
                   type="button"
                 >
@@ -399,8 +395,8 @@ export function GlucoseQuickAddForm({
           ) : (
             <button
               aria-label={labels.addContext}
-              className="min-h-11 self-start rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-              disabled={isSubmitting}
+              className="min-h-11 self-start rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={controlsDisabled}
               onClick={() => setContextSheetOpen(true)}
               type="button"
             >
@@ -428,7 +424,7 @@ export function GlucoseQuickAddForm({
         />
       </QuickAddFormLayout.Footer>
 
-      {contextSheetOpen ? (
+      {contextSheetOpen && !controlsDisabled ? (
         <QuickAddOptionSheet
           onClose={() => setContextSheetOpen(false)}
           onSelect={handleContextSelect}

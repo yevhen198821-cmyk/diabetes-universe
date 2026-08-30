@@ -282,6 +282,7 @@ export function QuickAddFormPreview({
 }
 
 export interface QuickAddTimeFieldProps {
+  readonly disabled?: boolean;
   readonly id: string;
   readonly label: string;
   readonly value: string;
@@ -313,6 +314,7 @@ function focusableElements(container: HTMLElement): HTMLElement[] {
 }
 
 export function QuickAddTimeField({
+  disabled = false,
   id,
   label,
   name,
@@ -343,9 +345,13 @@ export function QuickAddTimeField({
   }, []);
 
   const openPicker = useCallback(() => {
+    if (disabled) {
+      return;
+    }
+
     setDraftTime(splitTime(value));
     setOpen(true);
-  }, [value]);
+  }, [disabled, value]);
 
   useEffect(() => {
     if (!open) {
@@ -442,6 +448,10 @@ export function QuickAddTimeField({
   );
 
   const handleTriggerKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (disabled) {
+      return;
+    }
+
     if (
       event.key === 'ArrowDown' ||
       event.key === 'Enter' ||
@@ -459,9 +469,13 @@ export function QuickAddTimeField({
       </span>
       <input name={name} type="hidden" value={value} />
       <button
+        aria-disabled={disabled ? true : undefined}
         aria-haspopup="dialog"
         aria-labelledby={`${id}-label ${valueId}`}
-        className={`${quickAddFieldClass} mt-2 flex items-center justify-between text-left font-medium text-slate-950`}
+        className={`${quickAddFieldClass} mt-2 flex items-center justify-between text-left font-medium text-slate-950 ${
+          disabled ? 'cursor-not-allowed opacity-60' : ''
+        }`}
+        disabled={disabled}
         id={id}
         onClick={openPicker}
         onKeyDown={handleTriggerKeyDown}

@@ -448,7 +448,7 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'quick-add.glucose.settingsError.retry': 'Retry',
   'quick-add.glucose.save': 'Save',
   'quick-add.glucose.saveError.description':
-    'The glucose reading was not saved. Check your connection and try again.',
+    'The glucose reading was not saved. Your entered data is still in the form. Please try again.',
   'quick-add.glucose.saveError.title': 'Could not save glucose reading',
   'quick-add.glucose.saving': 'Saving…',
   'quick-add.glucose.timeLabel': 'Time',

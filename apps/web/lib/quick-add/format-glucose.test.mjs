@@ -40,9 +40,10 @@ test('parseGlucoseInput rejects values outside converted mg/dL bounds', () => {
 test('glucose quick add blocks value entry until settings are ready and configured', () => {
   assert.match(glucoseFormSource, /loadState === 'loading'/);
   assert.match(glucoseFormSource, /isUnconfigured/);
+  assert.match(glucoseFormSource, /const controlsDisabled = isSubmitting/);
   assert.match(
     glucoseFormSource,
-    /disabled=\{!canEnterValue \|\| isSubmitting\}/,
+    /disabled=\{!canEnterValue \|\| controlsDisabled\}/,
   );
   assert.match(
     glucoseFormSource,
@@ -61,7 +62,12 @@ test('glucose quick add defaults context to undefined', () => {
 });
 
 test('glucose quick add passes semantic context through on submit', () => {
-  assert.match(glucoseFormSource, /context: formState\.context/);
+  const controllerSource = readFileSync(
+    fileURLToPath(new URL('./glucose-quick-add-submit-controller.ts', import.meta.url)),
+    'utf8',
+  );
+
+  assert.match(controllerSource, /context: formState\.context/);
 });
 
 test('glucose quick add uses shared medical-domain precision for mg/dL bounds', () => {

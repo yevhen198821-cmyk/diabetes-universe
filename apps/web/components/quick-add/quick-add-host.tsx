@@ -14,6 +14,7 @@ import { useRef, useState } from 'react';
 
 import { quickAddActions } from '../../lib/quick-add/actions';
 import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
+import { canDismissQuickAddWhileGlucoseSubmitPending } from '../../lib/quick-add/glucose-quick-add-submit-model';
 import type { QuickAddCloseReason } from '../../lib/quick-add/quick-add-controller-model';
 import {
   finalizeGlucoseQuickAddSubmit,
@@ -85,6 +86,8 @@ export function QuickAddHost({
   );
   const internalFabRef = useRef<HTMLButtonElement>(null);
   const glucoseValueInputRef = useRef<HTMLInputElement>(null);
+  const glucoseSubmitPendingRef = useRef(false);
+  const [isGlucoseSubmitPending, setIsGlucoseSubmitPending] = useState(false);
   const fabRef = floatingActionButtonRef ?? internalFabRef;
   const selectedActionId = open
     ? userSelection === undefined
@@ -97,6 +100,14 @@ export function QuickAddHost({
   };
 
   const closeQuickAdd = (reason: QuickAddCloseReason) => {
+    if (
+      !canDismissQuickAddWhileGlucoseSubmitPending(
+        glucoseSubmitPendingRef.current,
+      )
+    ) {
+      return;
+    }
+
     onOpenChange(false);
     resetSelection();
     onClosed?.(reason);
@@ -124,6 +135,14 @@ export function QuickAddHost({
   };
 
   const handleFormCancel = () => {
+    if (
+      !canDismissQuickAddWhileGlucoseSubmitPending(
+        glucoseSubmitPendingRef.current,
+      )
+    ) {
+      return;
+    }
+
     if (shouldCloseOnFormCancel(openCategory, userSelection)) {
       closeQuickAdd('cancel');
       return;
@@ -143,6 +162,16 @@ export function QuickAddHost({
     }
   };
 
+  const releaseGlucoseSubmitPending = () => {
+    glucoseSubmitPendingRef.current = false;
+    setIsGlucoseSubmitPending(false);
+  };
+
+  const handleGlucoseSubmittingChange = (pending: boolean) => {
+    glucoseSubmitPendingRef.current = pending;
+    setIsGlucoseSubmitPending(pending);
+  };
+
   const handleGlucoseSubmit = async (request: GlucoseQuickAddSubmitRequest) => {
     const didPersist = await finalizeGlucoseQuickAddSubmit(
       onGlucoseSubmit,
@@ -153,6 +182,7 @@ export function QuickAddHost({
       return;
     }
 
+    releaseGlucoseSubmitPending();
     haptics.success();
     closeQuickAdd('success');
   };
@@ -197,6 +227,7 @@ export function QuickAddHost({
         initialFocusRef={glucoseValueInputRef}
         onCancel={handleFormCancel}
         onSubmit={handleGlucoseSubmit}
+        onSubmittingChange={handleGlucoseSubmittingChange}
       />
     );
   }
@@ -257,6 +288,7 @@ export function QuickAddHost({
       ) : null}
       <QuickAddPanel
         actions={quickAddActions}
+        dismissDisabled={isGlucoseSubmitPending}
         initialFocusRef={initialFocusRef}
         onBack={handleFormCancel}
         onClose={() => closeQuickAdd('dismiss')}

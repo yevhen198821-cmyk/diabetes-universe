@@ -57,6 +57,9 @@ test.describe('Glucose Quick Add Wave 3D-III save integrity', () => {
     const dialog = page.getByRole('dialog', { name: 'Добавить глюкозу' });
     await page.getByLabel('Glucose level').fill('6.1');
     await dialog.getByRole('button', { name: 'Save', exact: true }).click();
+
+    await expect(dialog.getByRole('status')).toHaveText('Saving…');
+    await expect(dialog).toHaveAttribute('aria-busy', 'true');
     await expect(dialog).toBeHidden();
 
     await page.getByRole('link', { name: 'Details' }).click();
@@ -67,6 +70,56 @@ test.describe('Glucose Quick Add Wave 3D-III save integrity', () => {
         .getByRole('button', { name: /Open event: Glucose, 6\.1 mmol\/L/i })
         .first(),
     ).toBeVisible();
+  });
+
+  test('pending save blocks Escape and header Back dismissal', async ({
+    page,
+    request,
+  }) => {
+    await signInWithMagicLink(
+      page,
+      request,
+      'glucose-quick-add-save-dismiss@example.com',
+    );
+    await ensureGlucoseUnitConfigured(page);
+    await page.goto('/');
+    await prepareEmptyTimeline(page);
+
+    await page.getByRole('button', { name: 'Quick add: Glucose' }).click();
+
+    const dialog = page.getByRole('dialog', { name: 'Добавить глюкозу' });
+    await page.getByLabel('Glucose level').fill('6.3');
+    await dialog.getByRole('button', { name: 'Save', exact: true }).click();
+
+    await page.waitForFunction(() => {
+      const panel = document.querySelector('[role="dialog"][aria-busy="true"]');
+
+      if (panel === null) {
+        return false;
+      }
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { bubbles: true, key: 'Escape' }),
+      );
+
+      const headerBack = panel.querySelector(
+        'button[aria-label="Назад к выбору типа"]',
+      );
+      const cancelButton = [...panel.querySelectorAll('button')].find(
+        (button) => /^(Cancel|Отмена)$/.test(button.textContent ?? ''),
+      );
+
+      return (
+        panel.isConnected &&
+        headerBack instanceof HTMLButtonElement &&
+        headerBack.disabled &&
+        cancelButton instanceof HTMLButtonElement &&
+        cancelButton.disabled
+      );
+    });
+
+    await expect(dialog).toBeVisible();
+    await expect(dialog).toBeHidden();
   });
 
   test('timeline direct-open double submit creates one glucose event', async ({

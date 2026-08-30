@@ -301,7 +301,7 @@ export const russianDraftMessages = defineDraftMessages({
   'quick-add.glucose.settingsError.retry': 'Повторить',
   'quick-add.glucose.save': 'Сохранить',
   'quick-add.glucose.saveError.description':
-    'Запись глюкозы не сохранена. Проверьте подключение и попробуйте снова.',
+    'Запись глюкозы не сохранена. Введённые данные остались в форме. Попробуйте ещё раз.',
   'quick-add.glucose.saveError.title': 'Не удалось сохранить глюкозу',
   'quick-add.glucose.saving': 'Сохранение…',
   'quick-add.glucose.timeLabel': 'Время',
