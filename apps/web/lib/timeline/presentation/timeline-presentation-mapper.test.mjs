@@ -201,7 +201,7 @@ test('maps insulin presentation with user-authored preparation unchanged', () =>
   assert.equal(card.title, 'NovoRapid');
   assert.equal(card.value, '4');
   assert.equal(card.unit, 'U');
-  assert.equal(card.context, 'Перед едой');
+  assert.equal(card.context, 'Before meal');
 });
 
 test('maps nutrition enum meal type via localization and preserves custom meal text', () => {

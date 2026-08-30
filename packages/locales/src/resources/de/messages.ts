@@ -127,6 +127,32 @@ export const germanDraftMessages = defineDraftMessages({
   'timeline.glucoseContext.bedtime': 'Vor dem Schlafengehen',
   'timeline.glucoseContext.fasting': 'Nüchtern',
   'timeline.glucoseContext.other': 'Sonstiges',
+  'timeline.insulinContext.after_meal': 'Nach dem Essen',
+  'timeline.insulinContext.basal': 'Basal',
+  'timeline.insulinContext.before_meal': 'Vor dem Essen',
+  'timeline.insulinContext.correction': 'Korrektur',
+  'timeline.insulinContext.other': 'Sonstiges',
+  'timeline.insulinContext.unspecified': 'Nicht angegeben',
+  'timeline.insulinPreparation.other': 'Sonstiges',
+  'timeline.insulinGrouping.long_acting': 'Lang wirkendes Insulin',
+  'timeline.insulinGrouping.rapid_acting': 'Schnell wirkendes Insulin',
+  'timeline.insulinGrouping.unspecified': 'Anderes Insulin',
+  'timeline.detail.form.insulin.contextLabel': 'Verabreichungskontext',
+  'timeline.detail.form.insulin.doseLabel': 'Insulindosis',
+  'timeline.detail.form.insulin.errors.doseRange':
+    'Geben Sie eine Dosis größer als 0 und höchstens 100 ein.',
+  'timeline.detail.form.insulin.errors.otherNameRequired':
+    'Geben Sie den Präparatnamen ein.',
+  'timeline.detail.form.insulin.keepRecordedContext':
+    'Erfassten Text behalten',
+  'timeline.detail.form.insulin.keepRecordedPreparation':
+    'Erfassten Namen behalten',
+  'timeline.detail.form.insulin.legacyContextHint':
+    'Der erfasste Kontexttext bleibt erhalten, sofern Sie keinen Kontext auswählen.',
+  'timeline.detail.form.insulin.legacyPreparationHint':
+    'Für diesen Eintrag gibt es keine Katalogzuordnung. Der erfasste Name bleibt erhalten, sofern Sie kein Präparat auswählen.',
+  'timeline.detail.form.insulin.otherNameLabel': 'Präparatname',
+  'timeline.detail.form.insulin.preparationLabel': 'Insulinpräparat',
   'timeline.mealType.breakfast': 'Frühstück',
   'timeline.mealType.dinner': 'Abendessen',
   'timeline.mealType.lunch': 'Mittagessen',

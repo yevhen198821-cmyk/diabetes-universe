@@ -8,6 +8,10 @@ import type {
   TimelineEventKind,
 } from '@diabetes-universe/types';
 
+import {
+  resolveInsulinPresentationLabels,
+  type InsulinPresentationLabels,
+} from '../../medical/insulin/insulin-presentation-labels';
 import type { TimelineFilterLabelKey } from './timeline-presentation-types';
 
 function asTranslationKey(value: string): TranslationKey {
@@ -24,6 +28,7 @@ export interface TimelinePresentationLabels {
     readonly today: string;
     readonly yesterday: string;
   }>;
+  readonly insulin: InsulinPresentationLabels;
   readonly mealTypes: Readonly<Record<NutritionMealType, string>>;
   readonly noteFallbackTitle: string;
   readonly openEventAriaPrefix: string;
@@ -138,6 +143,7 @@ export function resolveTimelinePresentationLabels(
         asTranslationKey('timeline.group.yesterday'),
       ),
     },
+    insulin: resolveInsulinPresentationLabels(localization),
     mealTypes: {
       breakfast: translate(
         localization,

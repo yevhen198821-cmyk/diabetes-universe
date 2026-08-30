@@ -5,6 +5,14 @@ import type {
 } from '@diabetes-universe/types';
 
 import {
+  createInsulinEditSelection,
+  resolveInsulinEditLegacyContextText,
+  resolveInsulinEditTransition,
+  type InsulinEditSelection,
+  type InsulinEditTransitionErrorCode,
+  type InsulinPresentationLabels,
+} from '../../lib/medical/insulin';
+import {
   createIsoDateTimeFromLocalDateAndTime,
   formatTimelineDisplayTime,
   getTimelineCalendarDateKey,
@@ -12,7 +20,7 @@ import {
 import { mapQuickAddMedicationUnit } from '../../lib/timeline/semantic-creators/map-quick-add-medication-unit';
 import { mapQuickAddNutritionMealType } from '../../lib/timeline/semantic-creators/map-quick-add-nutrition-meal-type';
 
-export interface TimelineEventEditDraft {
+interface TimelineEventEditDraftFields {
   readonly context: string;
   readonly date: string;
   readonly note: string;
@@ -22,13 +30,56 @@ export interface TimelineEventEditDraft {
   readonly value: string;
 }
 
+export interface TimelineGenericEventEditDraft
+  extends TimelineEventEditDraftFields {
+  readonly variant: 'generic';
+}
+
+/**
+ * Insulin edit state (Wave 4B-II Option A).
+ *
+ * Preparation identity and its display snapshot are resolved together from
+ * `insulin`, so no generic title string can desynchronize them.
+ */
+export interface TimelineInsulinEventEditDraft {
+  readonly date: string;
+  readonly insulin: InsulinEditSelection;
+  /** Unmatched legacy `context` shown verbatim. Read-only edit chrome. */
+  readonly legacyContextText: string | null;
+  /** Stored `preparation` snapshot. Read-only edit chrome, never a write source. */
+  readonly storedPreparation: string;
+  readonly storedPreparationIsUnmatched: boolean;
+  readonly time: string;
+  readonly variant: 'insulin';
+}
+
+export type TimelineEventEditDraft =
+  | TimelineGenericEventEditDraft
+  | TimelineInsulinEventEditDraft;
+
+export type TimelineEventEditErrorField =
+  | keyof TimelineEventEditDraftFields
+  | 'dose'
+  | 'otherName'
+  | 'preparation';
+
 export type TimelineEventEditErrors = Partial<
-  Record<keyof TimelineEventEditDraft, string>
+  Record<TimelineEventEditErrorField, string>
 >;
 
 export interface TimelineSemanticEditResult {
   readonly errors: TimelineEventEditErrors;
   readonly event: SemanticTimelineEvent | null;
+}
+
+/**
+ * Localized copy the insulin edit save needs.
+ *
+ * Error copy is injected so no insulin edit string is hardcoded in this model.
+ */
+export interface TimelineInsulinEditCopy {
+  readonly errors: Readonly<Record<InsulinEditTransitionErrorCode, string>>;
+  readonly labels: InsulinPresentationLabels;
 }
 
 const glucoseContextFormLabels: Readonly<
@@ -123,6 +174,7 @@ export function createTimelineSemanticEventEditDraft(
         title: event.activityType,
         unit: 'мин',
         value: formatEditableNumber(event.durationSeconds / 60),
+        variant: 'generic',
       };
     case 'glucose':
       return {
@@ -133,17 +185,21 @@ export function createTimelineSemanticEventEditDraft(
         title: '',
         unit: '',
         value: formatEditableNumber(event.concentrationMmolPerL),
+        variant: 'generic',
       };
-    case 'insulin':
+    case 'insulin': {
+      const insulin = createInsulinEditSelection(event);
+
       return {
-        context: event.context ?? '',
         date,
-        note: '',
+        insulin,
+        legacyContextText: resolveInsulinEditLegacyContextText(event),
+        storedPreparation: event.preparation,
+        storedPreparationIsUnmatched: insulin.preparationId === null,
         time,
-        title: event.preparation,
-        unit: '',
-        value: formatEditableNumber(event.doseUnits),
+        variant: 'insulin',
       };
+    }
     case 'medication':
       return {
         context: event.context ?? '',
@@ -153,6 +209,7 @@ export function createTimelineSemanticEventEditDraft(
         title: event.medicationName,
         unit: resolveMedicationUnitLabel(event.doseUnit),
         value: formatEditableNumber(event.dose),
+        variant: 'generic',
       };
     case 'note':
       return {
@@ -163,6 +220,7 @@ export function createTimelineSemanticEventEditDraft(
         title: event.title ?? '',
         unit: '',
         value: event.body,
+        variant: 'generic',
       };
     case 'nutrition':
       return {
@@ -173,6 +231,7 @@ export function createTimelineSemanticEventEditDraft(
         title: resolveNutritionMealTypeLabel(event.mealType),
         unit: '',
         value: formatEditableNumber(event.carbohydratesGrams),
+        variant: 'generic',
       };
   }
 }
@@ -194,7 +253,7 @@ function validateCommonDraft(
 }
 
 function validateNumber(
-  draft: TimelineEventEditDraft,
+  draft: TimelineGenericEventEditDraft,
   max: number,
   label: string,
 ): { errors: TimelineEventEditErrors; parsed: number | null } {
@@ -220,11 +279,23 @@ function resolveOccurredAt(draft: TimelineEventEditDraft): string | null {
   }
 }
 
-export function updateSemanticTimelineEventFromDraft(
-  event: SemanticTimelineEvent,
-  draft: TimelineEventEditDraft,
-  now: Date = new Date(),
-): TimelineSemanticEditResult {
+/** Semantic timeline events edited through the generic string draft. */
+export type TimelineGenericSemanticEvent = Exclude<
+  SemanticTimelineEvent,
+  { kind: 'insulin' }
+>;
+
+export type TimelineInsulinSemanticEvent = Extract<
+  SemanticTimelineEvent,
+  { kind: 'insulin' }
+>;
+
+interface ResolvedEditTiming {
+  readonly errors: TimelineEventEditErrors;
+  readonly occurredAt: string | null;
+}
+
+function resolveEditTiming(draft: TimelineEventEditDraft): ResolvedEditTiming {
   const errors = validateCommonDraft(draft);
   const occurredAt = resolveOccurredAt(draft);
 
@@ -233,12 +304,94 @@ export function updateSemanticTimelineEventFromDraft(
     errors.time = errors.time ?? 'Укажите корректное время.';
   }
 
+  return { errors, occurredAt };
+}
+
+/**
+ * Applies one insulin edit save (Wave 4B-II Option A).
+ *
+ * Preparation identity and snapshot move together, and an explicit semantic
+ * context replaces the legacy string instead of coexisting with it. The
+ * envelope, `schemaVersion`, `source`, `createdAt`, and `provenance` are
+ * preserved.
+ */
+export function updateInsulinTimelineEventFromDraft(input: {
+  readonly copy: TimelineInsulinEditCopy;
+  readonly draft: TimelineInsulinEventEditDraft;
+  readonly event: TimelineInsulinSemanticEvent;
+  readonly now?: Date;
+}): TimelineSemanticEditResult {
+  const { copy, draft, event } = input;
+  const timing = resolveEditTiming(draft);
+
+  if (Object.keys(timing.errors).length > 0) {
+    return { errors: timing.errors, event: null };
+  }
+
+  const transitionResult = resolveInsulinEditTransition({
+    event,
+    labels: copy.labels,
+    selection: draft.insulin,
+  });
+
+  if (!transitionResult.ok) {
+    const errors: TimelineEventEditErrors = {};
+
+    if (transitionResult.errors.dose) {
+      errors.dose = copy.errors[transitionResult.errors.dose];
+    }
+
+    if (transitionResult.errors.otherName) {
+      errors.otherName = copy.errors[transitionResult.errors.otherName];
+    }
+
+    return { errors, event: null };
+  }
+
+  const { transition } = transitionResult;
+  const { context: storedLegacyContext, ...eventWithoutLegacyContext } = event;
+  const base =
+    transition.context.kind === 'semantic'
+      ? {
+          ...eventWithoutLegacyContext,
+          administrationContext: transition.context.administrationContext,
+        }
+      : {
+          ...eventWithoutLegacyContext,
+          ...(storedLegacyContext === undefined
+            ? {}
+            : { context: storedLegacyContext }),
+        };
+
+  return {
+    errors: {},
+    event: {
+      ...base,
+      doseUnits: transition.doseUnits,
+      occurredAt: timing.occurredAt ?? event.occurredAt,
+      preparation: transition.preparation.preparation,
+      ...(transition.preparation.preparationId === null
+        ? {}
+        : { preparationId: transition.preparation.preparationId }),
+      updatedAt: (input.now ?? new Date()).toISOString(),
+    },
+  };
+}
+
+export function updateSemanticTimelineEventFromDraft(
+  event: TimelineGenericSemanticEvent,
+  draft: TimelineGenericEventEditDraft,
+  now: Date = new Date(),
+): TimelineSemanticEditResult {
+  const timing = resolveEditTiming(draft);
+  const errors = timing.errors;
+
   if (Object.keys(errors).length > 0) {
     return { errors, event: null };
   }
 
   const updatedAt = now.toISOString();
-  const nextOccurredAt = occurredAt ?? event.occurredAt;
+  const nextOccurredAt = timing.occurredAt ?? event.occurredAt;
 
   switch (event.kind) {
     case 'activity': {
@@ -283,29 +436,6 @@ export function updateSemanticTimelineEventFromDraft(
           concentrationMmolPerL: validation.parsed as number,
           context,
           occurredAt: nextOccurredAt,
-          updatedAt,
-        },
-      };
-    }
-    case 'insulin': {
-      const validation = validateNumber(draft, 100, 'Инсулин');
-
-      if (Object.keys(validation.errors).length > 0) {
-        return { errors: validation.errors, event: null };
-      }
-
-      if (draft.title.trim().length === 0) {
-        return { errors: { title: 'Укажите название.' }, event: null };
-      }
-
-      return {
-        errors: {},
-        event: {
-          ...event,
-          context: draft.context.trim() || undefined,
-          doseUnits: validation.parsed as number,
-          occurredAt: nextOccurredAt,
-          preparation: draft.title.trim(),
           updatedAt,
         },
       };
@@ -391,4 +521,39 @@ export function updateSemanticTimelineEventFromDraft(
       };
     }
   }
+}
+
+/**
+ * Saves any timeline event edit, routing insulin through its semantic model.
+ */
+export function updateTimelineEventFromDraft(input: {
+  readonly copy: TimelineInsulinEditCopy;
+  readonly draft: TimelineEventEditDraft;
+  readonly event: SemanticTimelineEvent;
+  readonly now?: Date;
+}): TimelineSemanticEditResult {
+  const { copy, draft, event } = input;
+
+  if (event.kind === 'insulin') {
+    if (draft.variant !== 'insulin') {
+      return { errors: {}, event: null };
+    }
+
+    return updateInsulinTimelineEventFromDraft({
+      copy,
+      draft,
+      event,
+      now: input.now,
+    });
+  }
+
+  if (draft.variant !== 'generic') {
+    return { errors: {}, event: null };
+  }
+
+  return updateSemanticTimelineEventFromDraft(
+    event,
+    draft,
+    input.now ?? new Date(),
+  );
 }

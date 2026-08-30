@@ -248,6 +248,32 @@ export const russianDraftMessages = defineDraftMessages({
   'timeline.glucoseContext.bedtime': 'Перед сном',
   'timeline.glucoseContext.fasting': 'Натощак',
   'timeline.glucoseContext.other': 'Другое',
+  'timeline.insulinContext.after_meal': 'После еды',
+  'timeline.insulinContext.basal': 'Базальный',
+  'timeline.insulinContext.before_meal': 'Перед едой',
+  'timeline.insulinContext.correction': 'Коррекция',
+  'timeline.insulinContext.other': 'Другое',
+  'timeline.insulinContext.unspecified': 'Не указан',
+  'timeline.insulinPreparation.other': 'Другое',
+  'timeline.insulinGrouping.long_acting': 'Инсулин длительного действия',
+  'timeline.insulinGrouping.rapid_acting': 'Инсулин быстрого действия',
+  'timeline.insulinGrouping.unspecified': 'Другой инсулин',
+  'timeline.detail.form.insulin.contextLabel': 'Контекст введения',
+  'timeline.detail.form.insulin.doseLabel': 'Доза инсулина',
+  'timeline.detail.form.insulin.errors.doseRange':
+    'Введите дозу больше 0 и не более 100.',
+  'timeline.detail.form.insulin.errors.otherNameRequired':
+    'Укажите название препарата.',
+  'timeline.detail.form.insulin.keepRecordedContext':
+    'Оставить сохранённый текст',
+  'timeline.detail.form.insulin.keepRecordedPreparation':
+    'Оставить сохранённое название',
+  'timeline.detail.form.insulin.legacyContextHint':
+    'Сохранённый текст контекста останется, если не выбрать контекст.',
+  'timeline.detail.form.insulin.legacyPreparationHint':
+    'Для этой записи нет совпадения в каталоге. Сохранённое название останется, если не выбрать препарат.',
+  'timeline.detail.form.insulin.otherNameLabel': 'Название препарата',
+  'timeline.detail.form.insulin.preparationLabel': 'Препарат инсулина',
   'timeline.glucose.range.above': 'Выше вашего диапазона',
   'timeline.glucose.range.below': 'Ниже вашего диапазона',
   'timeline.glucose.range.currentBasis': 'Текущий целевой диапазон',
