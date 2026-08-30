@@ -16,11 +16,16 @@ unchanged.
 
 **Implementation progress** (annotation only):
 
-| Slice    | Status                                                                                                                  |
-| -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| 4A       | Approved and merged                                                                                                     |
-| **4B-I** | Implemented — [shared types and medical-domain foundation](../../implementation/wave-4b-i-insulin-domain-foundation.md) |
-| 4B-II–4E | Not started                                                                                                             |
+| Slice     | Status                                                                                                                                  |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 4A        | Approved and merged                                                                                                                     |
+| **4B-I**  | Implemented — [shared types and medical-domain foundation](../../implementation/wave-4b-i-insulin-domain-foundation.md)                 |
+| **4B-II** | Implemented — [presentation adapter and semantic-safe edit](../../implementation/wave-4b-ii-insulin-presentation-edit.md), **Option A** |
+| 4C–4E     | Not started                                                                                                                             |
+
+The §11.4 Timeline Edit hard gate is satisfied by **Option A**. Wave 4C is
+unblocked only after the 4B-II PR is approved and merged. Wave 4E remains a
+hard dependency for cloud create/update/adoption.
 
 “No OpenAPI changes” applies to **this documentation PR only**. Later Wave 4
 slices that reach cloud create/update/adoption **must** update the runtime

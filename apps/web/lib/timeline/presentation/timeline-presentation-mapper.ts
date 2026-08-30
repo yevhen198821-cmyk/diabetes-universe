@@ -7,6 +7,7 @@ import type {
 import type { EventCardType } from '@diabetes-universe/ui';
 
 import { presentGlucoseFromTimelineEvent } from '../../medical/glucose/present-glucose-from-timeline-event';
+import { presentInsulinFromTimelineEvent } from '../../medical/insulin/present-insulin-from-timeline-event';
 import { resolveTimelineEventSourcePresentation } from './resolve-timeline-event-source-presentation';
 import {
   buildTimelineEventCardAriaLabel,
@@ -21,11 +22,6 @@ import type {
   TimelineMeasurementPresentation,
   TimelineSearchPresentation,
 } from './timeline-presentation-types';
-
-const INSULIN_FRACTION_DIGITS = {
-  maximumFractionDigits: 1,
-  minimumFractionDigits: 0,
-} as const;
 
 const CARD_TYPE_BY_KIND = {
   activity: 'activity',
@@ -147,28 +143,25 @@ function mapInsulinPresentation(
   event: Extract<SemanticTimelineEvent, { kind: 'insulin' }>,
   dependencies: TimelinePresentationDependencies,
 ) {
-  const value = formatMedicalNumber(
-    dependencies,
-    event.doseUnits,
-    INSULIN_FRACTION_DIGITS,
-  );
-  const unit = dependencies.labels.units.insulinDose;
-  const measurement = formatMeasurementPresentation(dependencies, value, unit);
+  const presentation = presentInsulinFromTimelineEvent({
+    event,
+    formatter: dependencies.formatter,
+    insulinKindLabel: dependencies.labels.eventKinds.insulin,
+    labels: dependencies.labels.insulin,
+    unitLabel: dependencies.labels.units.insulinDose,
+  });
 
   return {
     cardType: CARD_TYPE_BY_KIND.insulin,
-    context: event.context,
-    kindLabel: dependencies.labels.eventKinds.insulin,
-    measurement,
-    search: {
-      localizedLabels: [dependencies.labels.eventKinds.insulin, unit],
-      userContent: [
-        event.preparation,
-        String(event.doseUnits),
-        event.context ?? '',
-      ],
-    },
-    title: event.preparation,
+    context: presentation.context,
+    kindLabel: presentation.kindLabel,
+    measurement: formatMeasurementPresentation(
+      dependencies,
+      presentation.value,
+      presentation.unit,
+    ),
+    search: presentation.search,
+    title: presentation.title,
   };
 }
 

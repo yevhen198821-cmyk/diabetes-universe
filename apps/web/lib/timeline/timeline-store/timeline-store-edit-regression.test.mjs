@@ -10,7 +10,9 @@ import { createInMemoryTimelineRepository } from '@diabetes-universe/timeline';
 import {
   createTimelineSemanticEventEditDraft,
   updateSemanticTimelineEventFromDraft,
+  updateTimelineEventFromDraft,
 } from '../../../components/timeline/timeline-event-detail-model.ts';
+import { createTestTimelineInsulinEditCopy } from '../../../components/timeline/testing/create-test-timeline-insulin-edit-copy.ts';
 import { createTimelineSearchFilterModel } from '../../../components/timeline/timeline-search-filter-model.ts';
 import { createTestTimelineFilterOptions } from '../testing/create-test-timeline-filter-options.ts';
 import { deriveDashboardQuickAddBlocks } from '../../dashboard/dashboard-quick-add-integration-model.ts';
@@ -270,9 +272,11 @@ test('edit flow keeps zero migration diagnostics for semantic repository events'
     assert.equal(mounted.currentStore.diagnostics.migrationRecordCount, 0);
 
     const semanticBefore = mounted.currentStore.events[0];
-    const editResult = updateSemanticTimelineEventFromDraft(semanticBefore, {
-      ...createTimelineSemanticEventEditDraft(semanticBefore),
-      value: '6',
+    const draft = createTimelineSemanticEventEditDraft(semanticBefore);
+    const editResult = updateTimelineEventFromDraft({
+      copy: await createTestTimelineInsulinEditCopy(),
+      draft: { ...draft, insulin: { ...draft.insulin, dose: '6' } },
+      event: semanticBefore,
     });
 
     await act(async () => {

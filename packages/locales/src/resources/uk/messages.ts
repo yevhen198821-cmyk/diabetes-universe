@@ -129,6 +129,33 @@ export const ukrainianDraftMessages = defineDraftMessages({
   'timeline.glucoseContext.bedtime': 'Перед сном',
   'timeline.glucoseContext.fasting': 'Натощак',
   'timeline.glucoseContext.other': 'Інше',
+  'timeline.insulinContext.after_meal': 'Після їжі',
+  'timeline.insulinContext.basal': 'Базальний',
+  'timeline.insulinContext.before_meal': 'Перед їжею',
+  'timeline.insulinContext.correction': 'Корекція',
+  'timeline.insulinContext.other': 'Інше',
+  'timeline.insulinContext.unspecified': 'Не вказано',
+  'timeline.insulinPreparation.other': 'Інше',
+  'timeline.insulinGrouping.long_acting': 'Інсулін тривалої дії',
+  'timeline.insulinGrouping.rapid_acting': 'Інсулін швидкої дії',
+  'timeline.insulinGrouping.unspecified': 'Інший інсулін',
+  'timeline.detail.form.insulin.contextLabel': 'Контекст введення',
+  'timeline.detail.form.insulin.doseLabel': 'Доза інсуліну',
+  'timeline.detail.form.insulin.errors.doseRange':
+    'Введіть дозу більше 0 і не більше 100.',
+  'timeline.detail.form.insulin.errors.otherNameRequired':
+    'Вкажіть назву препарату.',
+  'timeline.detail.form.insulin.keepRecordedContext':
+    'Залишити збережений текст',
+  'timeline.detail.form.insulin.keepRecordedPreparation':
+    'Залишити збережену назву',
+  'timeline.detail.form.insulin.legacyContextHint':
+    'Збережений текст контексту залишиться, якщо не вибрати контекст.',
+  'timeline.detail.form.insulin.legacyPreparationHint':
+    'Для цього запису немає відповідності в каталозі. Збережена назва залишиться, якщо не вибрати препарат.',
+  'timeline.detail.form.insulin.noRecordedContext': 'Контекст не записано',
+  'timeline.detail.form.insulin.otherNameLabel': 'Назва препарату',
+  'timeline.detail.form.insulin.preparationLabel': 'Препарат інсуліну',
   'timeline.mealType.breakfast': 'Сніданок',
   'timeline.mealType.dinner': 'Вечеря',
   'timeline.mealType.lunch': 'Обід',

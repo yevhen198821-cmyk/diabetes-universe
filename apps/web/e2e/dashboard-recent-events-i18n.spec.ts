@@ -110,7 +110,7 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
     .click();
   await page.getByRole('button', { name: 'Edit' }).click();
   await expect(page.getByRole('dialog', { name: 'Edit event' })).toBeVisible();
-  await page.getByLabel('Value').fill('6');
+  await page.getByLabel('Insulin dose').fill('6');
   await page.getByRole('button', { name: 'Save' }).click();
   await page
     .getByRole('button', { exact: true, name: 'Close details' })

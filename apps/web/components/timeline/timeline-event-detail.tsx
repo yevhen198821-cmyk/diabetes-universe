@@ -23,21 +23,25 @@ import {
   type RefObject,
 } from 'react';
 
+import type { InsulinPresentationLabels } from '../../lib/medical/insulin';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import {
   mapTimelineEventDetailPresentation,
   resolveTimelineEventSourcePresentation,
   type TimelinePresentationDependencies,
 } from '../../lib/timeline/presentation';
+import { resolveTimelineInsulinEditCopy } from './timeline-insulin-edit-copy';
+import { TimelineInsulinEditFields } from './timeline-insulin-edit-fields';
 import {
   resolveTimelineUiLabels,
   type TimelineUiLabels,
 } from './timeline-ui-labels';
 import {
   createTimelineSemanticEventEditDraft,
-  updateSemanticTimelineEventFromDraft,
+  updateTimelineEventFromDraft,
   type TimelineEventEditDraft,
   type TimelineEventEditErrors,
+  type TimelineGenericEventEditDraft,
 } from './timeline-event-detail-model';
 
 export type TimelineEventDetailMode = 'edit' | 'view';
@@ -128,6 +132,7 @@ function ErrorText({
 function TimelineEventEditForm({
   draft,
   errors,
+  insulinPresentationLabels,
   labels,
   onCancel,
   onChange,
@@ -135,24 +140,21 @@ function TimelineEventEditForm({
 }: {
   readonly draft: TimelineEventEditDraft;
   readonly errors: TimelineEventEditErrors;
+  readonly insulinPresentationLabels: InsulinPresentationLabels;
   readonly labels: TimelineUiLabels['detail'];
   readonly onCancel: () => void;
   readonly onChange: (draft: TimelineEventEditDraft) => void;
   readonly onSubmit: () => void;
 }) {
-  const updateField =
-    (field: keyof TimelineEventEditDraft) =>
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      onChange({
-        ...draft,
-        [field]: event.target.value,
-      });
-    };
-
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     onSubmit();
   };
+
+  const updateTiming =
+    (field: 'date' | 'time') => (event: ChangeEvent<HTMLInputElement>) => {
+      onChange({ ...draft, [field]: event.target.value });
+    };
 
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
@@ -168,7 +170,7 @@ function TimelineEventEditForm({
             aria-invalid={errors.date ? true : undefined}
             className={fieldClass}
             id="timeline-edit-date"
-            onChange={updateField('date')}
+            onChange={updateTiming('date')}
             type="date"
             value={draft.date}
           />
@@ -185,7 +187,7 @@ function TimelineEventEditForm({
             aria-invalid={errors.time ? true : undefined}
             className={fieldClass}
             id="timeline-edit-time"
-            onChange={updateField('time')}
+            onChange={updateTiming('time')}
             type="time"
             value={draft.time}
           />
@@ -193,6 +195,63 @@ function TimelineEventEditForm({
         </div>
       </div>
 
+      {draft.variant === 'insulin' ? (
+        <TimelineInsulinEditFields
+          errors={errors}
+          labels={labels.form.insulin}
+          legacyContextText={draft.legacyContextText}
+          onChange={(insulin) => onChange({ ...draft, insulin })}
+          presentationLabels={insulinPresentationLabels}
+          selection={draft.insulin}
+          storedContextWasAbsent={draft.storedContextWasAbsent}
+          storedPreparation={draft.storedPreparation}
+          storedPreparationIsUnmatched={draft.storedPreparationIsUnmatched}
+        />
+      ) : (
+        <TimelineGenericEditFields
+          draft={draft}
+          errors={errors}
+          labels={labels}
+          onChange={onChange}
+        />
+      )}
+
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <Button
+          className="border-border-default bg-surface text-text-primary hover:bg-surface-subtle border"
+          onClick={onCancel}
+          type="button"
+        >
+          {labels.close}
+        </Button>
+        <Button type="submit">{labels.form.save}</Button>
+      </div>
+    </form>
+  );
+}
+
+function TimelineGenericEditFields({
+  draft,
+  errors,
+  labels,
+  onChange,
+}: {
+  readonly draft: TimelineGenericEventEditDraft;
+  readonly errors: TimelineEventEditErrors;
+  readonly labels: TimelineUiLabels['detail'];
+  readonly onChange: (draft: TimelineEventEditDraft) => void;
+}) {
+  const updateField =
+    (field: keyof TimelineGenericEventEditDraft) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      onChange({
+        ...draft,
+        [field]: event.target.value,
+      });
+    };
+
+  return (
+    <>
       <div>
         <label className={labelClass} htmlFor="timeline-edit-title">
           {labels.form.title}
@@ -269,18 +328,7 @@ function TimelineEventEditForm({
           value={draft.note}
         />
       </div>
-
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-        <Button
-          className="border-border-default bg-surface text-text-primary hover:bg-surface-subtle border"
-          onClick={onCancel}
-          type="button"
-        >
-          {labels.close}
-        </Button>
-        <Button type="submit">{labels.form.save}</Button>
-      </div>
-    </form>
+    </>
   );
 }
 
@@ -303,6 +351,10 @@ export function TimelineEventDetail({
       localization.translate({
         key: 'common.actions.cancel' as TranslationKey,
       }).value,
+    [localization],
+  );
+  const insulinEditCopy = useMemo(
+    () => resolveTimelineInsulinEditCopy(localization),
     [localization],
   );
   const titleId = useId();
@@ -337,7 +389,11 @@ export function TimelineEventDetail({
   useDialogFocusTrap(deleteOpen, deleteDialogRef, () => setDeleteOpen(false));
 
   const handleSave = () => {
-    const result = updateSemanticTimelineEventFromDraft(event, draft);
+    const result = updateTimelineEventFromDraft({
+      copy: insulinEditCopy,
+      draft,
+      event,
+    });
 
     setErrors(result.errors);
 
@@ -405,6 +461,9 @@ export function TimelineEventDetail({
             <TimelineEventEditForm
               draft={draft}
               errors={errors}
+              insulinPresentationLabels={
+                presentationDependencies.labels.insulin
+              }
               labels={{
                 ...uiLabels.detail,
                 close: cancelLabel,

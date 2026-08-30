@@ -37,6 +37,21 @@ export interface TimelineUiLabels {
     readonly form: Readonly<{
       readonly context: string;
       readonly date: string;
+      readonly insulin: Readonly<{
+        readonly contextLabel: string;
+        readonly doseLabel: string;
+        readonly errors: Readonly<{
+          readonly doseRange: string;
+          readonly otherNameRequired: string;
+        }>;
+        readonly keepRecordedContext: string;
+        readonly keepRecordedPreparation: string;
+        readonly legacyContextHint: string;
+        readonly legacyPreparationHint: string;
+        readonly noRecordedContext: string;
+        readonly otherNameLabel: string;
+        readonly preparationLabel: string;
+      }>;
       readonly note: string;
       readonly save: string;
       readonly time: string;
@@ -177,6 +192,39 @@ const TIMELINE_UI_TRANSLATION_KEYS = {
   detailEditTitle: asTranslationKey('timeline.detail.editTitle'),
   detailFormContext: asTranslationKey('timeline.detail.form.context'),
   detailFormDate: asTranslationKey('timeline.detail.form.date'),
+  detailFormInsulinContextLabel: asTranslationKey(
+    'timeline.detail.form.insulin.contextLabel',
+  ),
+  detailFormInsulinDoseLabel: asTranslationKey(
+    'timeline.detail.form.insulin.doseLabel',
+  ),
+  detailFormInsulinErrorDoseRange: asTranslationKey(
+    'timeline.detail.form.insulin.errors.doseRange',
+  ),
+  detailFormInsulinErrorOtherNameRequired: asTranslationKey(
+    'timeline.detail.form.insulin.errors.otherNameRequired',
+  ),
+  detailFormInsulinKeepRecordedContext: asTranslationKey(
+    'timeline.detail.form.insulin.keepRecordedContext',
+  ),
+  detailFormInsulinKeepRecordedPreparation: asTranslationKey(
+    'timeline.detail.form.insulin.keepRecordedPreparation',
+  ),
+  detailFormInsulinLegacyContextHint: asTranslationKey(
+    'timeline.detail.form.insulin.legacyContextHint',
+  ),
+  detailFormInsulinLegacyPreparationHint: asTranslationKey(
+    'timeline.detail.form.insulin.legacyPreparationHint',
+  ),
+  detailFormInsulinNoRecordedContext: asTranslationKey(
+    'timeline.detail.form.insulin.noRecordedContext',
+  ),
+  detailFormInsulinOtherNameLabel: asTranslationKey(
+    'timeline.detail.form.insulin.otherNameLabel',
+  ),
+  detailFormInsulinPreparationLabel: asTranslationKey(
+    'timeline.detail.form.insulin.preparationLabel',
+  ),
   detailFormNote: asTranslationKey('timeline.detail.form.note'),
   detailFormSave: asTranslationKey('timeline.detail.form.save'),
   detailFormTime: asTranslationKey('timeline.detail.form.time'),
@@ -332,6 +380,54 @@ export function resolveTimelineUiLabels(
           localization,
           TIMELINE_UI_TRANSLATION_KEYS.detailFormDate,
         ),
+        insulin: {
+          contextLabel: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinContextLabel,
+          ),
+          doseLabel: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinDoseLabel,
+          ),
+          errors: {
+            doseRange: translate(
+              localization,
+              TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinErrorDoseRange,
+            ),
+            otherNameRequired: translate(
+              localization,
+              TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinErrorOtherNameRequired,
+            ),
+          },
+          keepRecordedContext: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinKeepRecordedContext,
+          ),
+          keepRecordedPreparation: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinKeepRecordedPreparation,
+          ),
+          legacyContextHint: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinLegacyContextHint,
+          ),
+          legacyPreparationHint: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinLegacyPreparationHint,
+          ),
+          noRecordedContext: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinNoRecordedContext,
+          ),
+          otherNameLabel: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinOtherNameLabel,
+          ),
+          preparationLabel: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinPreparationLabel,
+          ),
+        },
         note: translate(
           localization,
           TIMELINE_UI_TRANSLATION_KEYS.detailFormNote,
