@@ -154,6 +154,18 @@ test('prepareInsulinNewWrite surfaces canonical dose errors without rounding', (
   }
 });
 
+test('prepareInsulinNewWrite fails closed for malformed root input', () => {
+  const malformedRoots = [null, undefined, 'insulin', 4, true, false, []];
+
+  for (const input of malformedRoots) {
+    assert.doesNotThrow(() => prepareInsulinNewWrite(input));
+    assert.deepEqual(prepareInsulinNewWrite(input), {
+      ok: false,
+      error: 'insulin.input.invalid',
+    });
+  }
+});
+
 test('prepareInsulinNewWrite is deterministic and locale-independent', () => {
   const input = {
     preparationId: 'insulin.prep.degludec_tresiba',

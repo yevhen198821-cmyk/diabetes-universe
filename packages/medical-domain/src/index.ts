@@ -161,7 +161,6 @@ export {
 } from './glucose/glucose-latest-selection';
 export {
   INSULIN_PREPARATION_IDS,
-  INSULIN_PREPARATION_ID_SET,
   INSULIN_PREPARATION_OTHER_ID,
   isInsulinPreparationId,
   resolveInsulinPresentationGrouping,
@@ -177,7 +176,6 @@ export type {
 } from './insulin/insulin-dose';
 export {
   INSULIN_ADMINISTRATION_CONTEXTS,
-  INSULIN_ADMINISTRATION_CONTEXT_SET,
   isInsulinAdministrationContext,
   resolveInsulinNewWriteAdministrationContext,
 } from './insulin/insulin-administration-context';

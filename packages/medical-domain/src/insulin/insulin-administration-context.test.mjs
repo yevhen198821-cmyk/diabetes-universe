@@ -32,6 +32,21 @@ test('missing or no-choice new-write context becomes unspecified', () => {
   });
 });
 
+test('exported administration contexts are frozen and mutation cannot change guards', () => {
+  const snapshot = [...INSULIN_ADMINISTRATION_CONTEXTS];
+
+  assert.equal(Object.isFrozen(INSULIN_ADMINISTRATION_CONTEXTS), true);
+  assert.throws(() => {
+    INSULIN_ADMINISTRATION_CONTEXTS.push('meal');
+  }, TypeError);
+  assert.throws(() => {
+    INSULIN_ADMINISTRATION_CONTEXTS[0] = 'meal';
+  }, TypeError);
+  assert.deepEqual([...INSULIN_ADMINISTRATION_CONTEXTS], snapshot);
+  assert.equal(isInsulinAdministrationContext('meal'), false);
+  assert.equal(isInsulinAdministrationContext(snapshot[0]), true);
+});
+
 test('invalid administration context tokens are rejected', () => {
   assert.equal(isInsulinAdministrationContext('Перед едой'), false);
   assert.equal(isInsulinAdministrationContext('meal'), false);

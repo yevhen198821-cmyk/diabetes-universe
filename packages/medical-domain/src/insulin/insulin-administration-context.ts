@@ -1,15 +1,30 @@
 import type { InsulinAdministrationContext } from '@diabetes-universe/types';
 
-export const INSULIN_ADMINISTRATION_CONTEXTS = [
-  'before_meal',
-  'after_meal',
-  'correction',
-  'basal',
-  'other',
-  'unspecified',
-] as const satisfies readonly InsulinAdministrationContext[];
+import {
+  freezeKeys,
+  freezeRecord,
+  type KeysMatchUnion,
+} from './insulin-registry';
 
-export const INSULIN_ADMINISTRATION_CONTEXT_SET: ReadonlySet<InsulinAdministrationContext> =
+const INSULIN_ADMINISTRATION_CONTEXT_REGISTRY = freezeRecord({
+  before_meal: true,
+  after_meal: true,
+  correction: true,
+  basal: true,
+  other: true,
+  unspecified: true,
+} as const satisfies Record<InsulinAdministrationContext, true>);
+
+true satisfies KeysMatchUnion<
+  typeof INSULIN_ADMINISTRATION_CONTEXT_REGISTRY,
+  InsulinAdministrationContext
+>;
+
+export const INSULIN_ADMINISTRATION_CONTEXTS = freezeKeys(
+  INSULIN_ADMINISTRATION_CONTEXT_REGISTRY,
+);
+
+const INSULIN_ADMINISTRATION_CONTEXT_SET: ReadonlySet<InsulinAdministrationContext> =
   new Set(INSULIN_ADMINISTRATION_CONTEXTS);
 
 export type InsulinNewWriteAdministrationContextErrorCode =

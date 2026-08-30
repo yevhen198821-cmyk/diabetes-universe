@@ -5,13 +5,13 @@ import type { InsulinAdministrationContext } from '@diabetes-universe/types';
  *
  * Read-only compatibility adapter. Do not use this table to write `context`.
  */
-export const INSULIN_LEGACY_ADMINISTRATION_CONTEXT_MAPPING = {
+export const INSULIN_LEGACY_ADMINISTRATION_CONTEXT_MAPPING = Object.freeze({
   'Перед едой': 'before_meal',
   'После еды': 'after_meal',
   Коррекция: 'correction',
   Базальный: 'basal',
   Другое: 'other',
-} as const satisfies Readonly<Record<string, InsulinAdministrationContext>>;
+} as const satisfies Readonly<Record<string, InsulinAdministrationContext>>);
 
 export type InsulinLegacyContextMappingResult =
   | {

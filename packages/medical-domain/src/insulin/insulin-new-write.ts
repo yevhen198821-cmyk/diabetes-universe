@@ -28,6 +28,7 @@ export interface InsulinNewWritePayload {
 }
 
 export type InsulinNewWriteErrorCode =
+  | 'insulin.input.invalid'
   | 'insulin.preparation_id.invalid'
   | 'insulin.preparation.snapshot_empty'
   | 'insulin.preparation.other_name_required'
@@ -44,6 +45,10 @@ export type InsulinNewWriteResult =
       readonly error: InsulinNewWriteErrorCode;
     };
 
+function isRecordInput(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 function readTrimmedSnapshot(value: unknown): string | null {
   if (typeof value !== 'string') {
     return null;
@@ -56,13 +61,16 @@ function readTrimmedSnapshot(value: unknown): string | null {
 /**
  * Presentation-neutral new-write contract for later Wave 4C consumption.
  *
- * Rejects invalid input instead of repairing it. Does not invent localized
- * Other labels, write legacy `context`, persist grouping, or touch clocks,
- * IDs, locales, or persistence.
+ * The runtime boundary accepts `unknown` and fails closed for a malformed
+ * root. Rejects invalid input instead of repairing it. Does not invent
+ * localized Other labels, write legacy `context`, persist grouping, or touch
+ * clocks, IDs, locales, or persistence.
  */
-export function prepareInsulinNewWrite(
-  input: PrepareInsulinNewWriteInput,
-): InsulinNewWriteResult {
+export function prepareInsulinNewWrite(input: unknown): InsulinNewWriteResult {
+  if (!isRecordInput(input)) {
+    return { ok: false, error: 'insulin.input.invalid' };
+  }
+
   if (!isInsulinPreparationId(input.preparationId)) {
     return { ok: false, error: 'insulin.preparation_id.invalid' };
   }

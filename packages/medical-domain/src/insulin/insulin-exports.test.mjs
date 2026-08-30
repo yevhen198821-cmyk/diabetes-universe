@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import * as medicalDomain from '../index.ts';
 import {
   INSULIN_ADMINISTRATION_CONTEXTS,
   INSULIN_CANONICAL_DOSE_TECHNICAL_MAXIMUM,
@@ -14,6 +15,11 @@ import {
   resolveInsulinPresentationGrouping,
   validateInsulinCanonicalDose,
 } from '../index.ts';
+
+test('public root exports do not expose backing membership Sets', () => {
+  assert.equal('INSULIN_PREPARATION_ID_SET' in medicalDomain, false);
+  assert.equal('INSULIN_ADMINISTRATION_CONTEXT_SET' in medicalDomain, false);
+});
 
 test('public root exports expose insulin catalogue, dose, context, and write helpers', () => {
   assert.equal(INSULIN_PREPARATION_OTHER_ID, 'insulin.prep.other');

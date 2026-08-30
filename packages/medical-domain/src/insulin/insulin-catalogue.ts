@@ -1,5 +1,11 @@
 import type { InsulinPreparationId } from '@diabetes-universe/types';
 
+import {
+  freezeKeys,
+  freezeRecord,
+  type KeysMatchUnion,
+} from './insulin-registry';
+
 /**
  * Presentation grouping chrome derived from a known catalogue entry.
  *
@@ -12,20 +18,7 @@ export type InsulinPresentationGrouping =
 export const INSULIN_PREPARATION_OTHER_ID =
   'insulin.prep.other' as const satisfies InsulinPreparationId;
 
-export const INSULIN_PREPARATION_IDS = [
-  'insulin.prep.aspart_novorapid',
-  'insulin.prep.aspart_fiasp',
-  'insulin.prep.lispro_humalog',
-  'insulin.prep.glulisine_apidra',
-  'insulin.prep.glargine_lantus',
-  'insulin.prep.degludec_tresiba',
-  INSULIN_PREPARATION_OTHER_ID,
-] as const satisfies readonly InsulinPreparationId[];
-
-export const INSULIN_PREPARATION_ID_SET: ReadonlySet<InsulinPreparationId> =
-  new Set(INSULIN_PREPARATION_IDS);
-
-const INSULIN_PRESENTATION_GROUPING_BY_ID = {
+const INSULIN_PRESENTATION_GROUPING_BY_ID = freezeRecord({
   'insulin.prep.aspart_novorapid': 'rapid_acting',
   'insulin.prep.aspart_fiasp': 'rapid_acting',
   'insulin.prep.lispro_humalog': 'rapid_acting',
@@ -33,7 +26,20 @@ const INSULIN_PRESENTATION_GROUPING_BY_ID = {
   'insulin.prep.glargine_lantus': 'long_acting',
   'insulin.prep.degludec_tresiba': 'long_acting',
   'insulin.prep.other': 'unspecified',
-} as const satisfies Record<InsulinPreparationId, InsulinPresentationGrouping>;
+} as const satisfies Record<InsulinPreparationId, InsulinPresentationGrouping>);
+
+true satisfies KeysMatchUnion<
+  typeof INSULIN_PRESENTATION_GROUPING_BY_ID,
+  InsulinPreparationId
+>;
+
+export const INSULIN_PREPARATION_IDS = freezeKeys(
+  INSULIN_PRESENTATION_GROUPING_BY_ID,
+);
+
+const INSULIN_PREPARATION_ID_SET: ReadonlySet<InsulinPreparationId> = new Set(
+  INSULIN_PREPARATION_IDS,
+);
 
 export function isInsulinPreparationId(
   value: unknown,

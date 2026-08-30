@@ -83,3 +83,22 @@ test('catalogue helpers do not infer identity from display text', () => {
   assert.equal(isInsulinPreparationId('НовоРапид'), false);
   assert.equal(resolveInsulinPresentationGrouping('НовоРапид'), 'unspecified');
 });
+
+test('exported preparation IDs are frozen and mutation cannot change guards', () => {
+  const snapshot = [...INSULIN_PREPARATION_IDS];
+
+  assert.equal(Object.isFrozen(INSULIN_PREPARATION_IDS), true);
+  assert.throws(() => {
+    INSULIN_PREPARATION_IDS.push('insulin.prep.unmapped');
+  }, TypeError);
+  assert.throws(() => {
+    INSULIN_PREPARATION_IDS[0] = 'insulin.prep.unmapped';
+  }, TypeError);
+  assert.deepEqual([...INSULIN_PREPARATION_IDS], snapshot);
+  assert.equal(isInsulinPreparationId('insulin.prep.unmapped'), false);
+  assert.equal(isInsulinPreparationId(snapshot[0]), true);
+  assert.equal(
+    resolveInsulinPresentationGrouping('insulin.prep.unmapped'),
+    'unspecified',
+  );
+});
