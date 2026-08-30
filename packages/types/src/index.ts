@@ -14,6 +14,8 @@ export type {
   EventProvenance,
   GlucoseMeasurementContext,
   GlucoseTimelineEvent,
+  InsulinAdministrationContext,
+  InsulinPreparationId,
   InsulinTimelineEvent,
   MedicationTimelineEvent,
   NoteTimelineEvent,
