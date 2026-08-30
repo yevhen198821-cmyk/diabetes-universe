@@ -169,10 +169,7 @@ export function InsulinQuickAddForm({
 
         {showOtherName ? (
           <div>
-            <label
-              className={formLabel}
-              htmlFor="quick-add-insulin-other-name"
-            >
+            <label className={formLabel} htmlFor="quick-add-insulin-other-name">
               {labels.otherNameLabel}
             </label>
             <input

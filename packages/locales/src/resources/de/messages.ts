@@ -244,7 +244,8 @@ export const germanDraftMessages = defineDraftMessages({
   'quick-add.insulin.doseUnit': 'IE',
   'quick-add.insulin.otherNameLabel': 'Präparatname',
   'quick-add.insulin.otherNamePlaceholder': 'Erfassten Namen eingeben',
-  'quick-add.insulin.otherNameRequiredError': 'Geben Sie den Präparatnamen ein.',
+  'quick-add.insulin.otherNameRequiredError':
+    'Geben Sie den Präparatnamen ein.',
   'quick-add.insulin.preparationLabel': 'Insulinpräparat',
   'quick-add.insulin.preparationPlaceholder': 'Insulin auswählen',
   'quick-add.insulin.preparationSheetTitle': 'Insulinpräparat',

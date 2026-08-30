@@ -197,10 +197,7 @@ test('a semantic administration context is submitted as its ID', () => {
 });
 
 test('a localized context label is never submitted', () => {
-  const result = submit(
-    { administrationContext: 'correction' },
-    russianLabels,
-  );
+  const result = submit({ administrationContext: 'correction' }, russianLabels);
 
   assert.equal(result.entry.administrationContext, 'correction');
   assert.notEqual(result.entry.administrationContext, 'Коррекция');
@@ -227,10 +224,7 @@ test('the legacy free-text context is never present on the entry', () => {
   const result = submit({ administrationContext: 'before_meal' });
 
   assert.equal(Object.hasOwn(result.entry, 'context'), false);
-  assert.equal(
-    JSON.stringify(result.entry).includes('Перед едой'),
-    false,
-  );
+  assert.equal(JSON.stringify(result.entry).includes('Перед едой'), false);
 });
 
 test('an invalid manual dose is rejected before the domain write', () => {

@@ -89,7 +89,10 @@ export function resolveInsulinQuickAddLabels(
       keys.otherNameRequiredError,
     ),
     preparationLabel: translate(localization, keys.preparationLabel),
-    preparationPlaceholder: translate(localization, keys.preparationPlaceholder),
+    preparationPlaceholder: translate(
+      localization,
+      keys.preparationPlaceholder,
+    ),
     preparationSheetTitle: translate(localization, keys.preparationSheetTitle),
     save: translate(localization, keys.save),
     timeLabel: translate(localization, keys.timeLabel),

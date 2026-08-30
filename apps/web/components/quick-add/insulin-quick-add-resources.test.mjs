@@ -75,7 +75,11 @@ test('insulin Quick Add keys exist in RU/UK/DE without English fallback', () => 
     for (const key of translatedKeys) {
       const value = resource.messages[key];
 
-      assert.equal(typeof value, 'string', `${resource.metadata.locale} ${key}`);
+      assert.equal(
+        typeof value,
+        'string',
+        `${resource.metadata.locale} ${key}`,
+      );
       assert.equal(value.trim().length > 0, true);
       assert.notEqual(
         value,
@@ -97,10 +101,7 @@ test('every supported locale resolves the full insulin Quick Add chrome', async 
 
     for (const [name, value] of Object.entries(labels)) {
       assert.equal(typeof value, 'string', `${acceptLanguage}.${name}`);
-      assert.ok(
-        value.length > 0,
-        `${acceptLanguage}.${name} is non-empty`,
-      );
+      assert.ok(value.length > 0, `${acceptLanguage}.${name} is non-empty`);
       assert.equal(
         value.startsWith('quick-add.'),
         false,
@@ -150,10 +151,7 @@ test('validation copy is localized and free of clinical claims in every locale',
   for (const [acceptLanguage, timeZone] of LOCALES) {
     const labels = await resolveLabels(acceptLanguage, timeZone);
 
-    for (const message of [
-      labels.doseError,
-      labels.otherNameRequiredError,
-    ]) {
+    for (const message of [labels.doseError, labels.otherNameRequiredError]) {
       assert.ok(message.length > 0);
       assert.equal(
         /safe dose|recommended dose|correct dose|maximum safe|suggested insulin/i.test(
@@ -173,10 +171,7 @@ test('the insulin Quick Add form and labels contain no hardcoded Russian', () =>
     '../../lib/quick-add/insulin-quick-add-submit.ts',
     '../../lib/quick-add/insulin-quick-add-dose.ts',
   ]) {
-    const source = readFileSync(
-      new URL(relativePath, import.meta.url),
-      'utf8',
-    );
+    const source = readFileSync(new URL(relativePath, import.meta.url), 'utf8');
 
     assert.doesNotMatch(
       source,
