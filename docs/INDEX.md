@@ -82,7 +82,7 @@
 - [Timeline Event Deletion](architecture/timeline/event-deletion.md)
 - [Timeline Pagination](architecture/timeline/pagination.md)
 - [Timeline States](architecture/timeline/states.md)
-- [Timeline Shared State](architecture/timeline/shared-state.md)
+- [Timeline Shared State](architecture/timeline/shared-state.md) — P4 IndexedDB + Wave 3D-IV glucose save integrity closure
 - [Timeline Quick Add Integration](architecture/timeline/quick-add-integration.md) — Wave 3D-IV glucose save integrity closure
 - [Analytics](architecture/analytics/overview.md)
 - [AI](architecture/ai/overview.md)

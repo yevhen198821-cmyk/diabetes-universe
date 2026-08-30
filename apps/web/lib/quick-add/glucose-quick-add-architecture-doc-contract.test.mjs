@@ -9,12 +9,31 @@ const repositoryRoot = join(
   '../../../..',
 );
 
-const architectureDocPaths = [
-  'docs/architecture/timeline/quick-add-integration.md',
-  'docs/architecture/dashboard/quick-add-integration.md',
-  'docs/specs/dashboard/quick-add.md',
-  'docs/ui-bible/003-quick-add.md',
-  'docs/data/entities/timeline.md',
+const currentArchitectureDocPaths = [
+  {
+    path: 'docs/architecture/timeline/quick-add-integration.md',
+    section: null,
+  },
+  {
+    path: 'docs/architecture/dashboard/quick-add-integration.md',
+    section: null,
+  },
+  {
+    path: 'docs/architecture/timeline/shared-state.md',
+    section: null,
+  },
+  {
+    path: 'docs/specs/dashboard/quick-add.md',
+    section: null,
+  },
+  {
+    path: 'docs/ui-bible/003-quick-add.md',
+    section: null,
+  },
+  {
+    path: 'docs/data/entities/timeline.md',
+    section: 'Current production state (post-P4 + Wave 3D-IV)',
+  },
 ];
 
 const staleGlucosePatterns = [
@@ -31,7 +50,7 @@ const staleGlucosePatterns = [
     pattern: /demo store/i,
   },
   {
-    description: 'IndexedDB not implemented for Timeline',
+    description: 'IndexedDB not implemented for Timeline current state',
     pattern: /IndexedDB[\s\S]{0,40}is \*\*not\*\* implemented/i,
   },
 ];
@@ -40,12 +59,44 @@ function readRepoFile(relativePath) {
   return readFileSync(join(repositoryRoot, relativePath), 'utf8');
 }
 
+function extractMarkdownSection(source, sectionTitle) {
+  if (sectionTitle === null) {
+    return source;
+  }
+
+  const lines = source.split('\n');
+  const startIndex = lines.findIndex(
+    (line) => line.startsWith('## ') && line.includes(sectionTitle),
+  );
+
+  if (startIndex === -1) {
+    return '';
+  }
+
+  let endIndex = lines.length;
+  for (let index = startIndex + 1; index < lines.length; index += 1) {
+    if (lines[index].startsWith('## ')) {
+      endIndex = index;
+      break;
+    }
+  }
+
+  return lines.slice(startIndex, endIndex).join('\n');
+}
+
+function readCurrentArchitectureSection({ path, section }) {
+  return extractMarkdownSection(readRepoFile(path), section);
+}
+
 test('Wave 3D architecture docs document glucose awaited persistence contract', () => {
   const timelineDoc = readRepoFile(
     'docs/architecture/timeline/quick-add-integration.md',
   );
   const dashboardDoc = readRepoFile(
     'docs/architecture/dashboard/quick-add-integration.md',
+  );
+  const sharedStateDoc = readRepoFile(
+    'docs/architecture/timeline/shared-state.md',
   );
 
   for (const signal of [
@@ -73,45 +124,68 @@ test('Wave 3D architecture docs document glucose awaited persistence contract', 
       `dashboard quick-add integration doc missing ${signal}`,
     );
   }
+
+  for (const signal of [
+    'IndexedDbTimelineRepository',
+    'addEventAsync',
+    'reload persistence is implemented through IndexedDB',
+    'projection/cache for rendering',
+  ]) {
+    assert.match(
+      sharedStateDoc,
+      new RegExp(signal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+      `timeline shared-state doc missing ${signal}`,
+    );
+  }
 });
 
-test('Wave 3D architecture docs do not regress to legacy glucose save descriptions', () => {
-  for (const relativePath of architectureDocPaths) {
-    const source = readRepoFile(relativePath);
+test('Wave 3D current architecture sections do not regress to legacy glucose save descriptions', () => {
+  for (const doc of currentArchitectureDocPaths) {
+    const source = readCurrentArchitectureSection(doc);
+
+    assert.notEqual(
+      source.length,
+      0,
+      `${doc.path} missing current architecture section`,
+    );
 
     for (const { description, pattern } of staleGlucosePatterns) {
       assert.doesNotMatch(
         source,
         pattern,
-        `${relativePath} regressed: ${description}`,
+        `${doc.path} regressed in current-state scope: ${description}`,
       );
     }
   }
 });
 
-test('timeline entity doc reflects IndexedDB persistence and glucose mapping', () => {
-  const timelineEntityDoc = readRepoFile('docs/data/entities/timeline.md');
-
-  assert.match(timelineEntityDoc, /IndexedDbTimelineRepository/);
-  assert.match(timelineEntityDoc, /Glucose \(Wave 3D save integrity\)/);
-  assert.match(timelineEntityDoc, /concentrationMmolPerL/);
-  assert.doesNotMatch(
-    timelineEntityDoc,
-    /durable persistence \(IndexedDB, SQLite, backend, auth, sync\) is \*\*not\*\*/i,
+test('timeline entity current production section reflects IndexedDB and glucose mapping', () => {
+  const productionSection = readCurrentArchitectureSection({
+    path: 'docs/data/entities/timeline.md',
+    section: 'Current production state (post-P4 + Wave 3D-IV)',
+  });
+  const quickAddSection = extractMarkdownSection(
+    readRepoFile('docs/data/entities/timeline.md'),
+    'Quick Add mapping (semantic write path)',
   );
+
+  assert.match(productionSection, /IndexedDbTimelineRepository/);
+  assert.match(productionSection, /P4 Feature[\s\S]*Complete/);
+  assert.match(productionSection, /addEventAsync/);
+  assert.match(quickAddSection, /Glucose \(Wave 3D save integrity\)/);
+  assert.match(quickAddSection, /concentrationMmolPerL/);
 });
 
-test('dashboard and timeline glucose handlers share addEventAsync semantic contract', () => {
-  const dashboardRoot = readRepoFile(
-    'apps/web/components/dashboard/dashboard-root.tsx',
-  );
-  const timelineShell = readRepoFile(
-    'apps/web/components/timeline/timeline-shell.tsx',
+test('timeline entity post-P3h summary remains historically accurate', () => {
+  const postP3hSection = extractMarkdownSection(
+    readRepoFile('docs/data/entities/timeline.md'),
+    'Current state (post-P3h)',
   );
 
-  const expectedHandler =
-    /await addEventAsync\(\s*\n?\s*createSemanticGlucoseTimelineEvent\(entry, \{ id: eventId \}\),?\s*\n?\s*\)/;
-
-  assert.match(dashboardRoot, expectedHandler);
-  assert.match(timelineShell, expectedHandler);
+  assert.match(postP3hSection, /InMemoryTimelineRepository/);
+  assert.match(
+    postP3hSection,
+    /Durable persistence[\s\S]*is \*\*not\*\*\s*\n\s*implemented/,
+  );
+  assert.match(postP3hSection, /P4[\s\S]*has \*\*not\*\* started/);
 });

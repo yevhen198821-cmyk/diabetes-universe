@@ -9,28 +9,41 @@ Approved
 Define the canonical Timeline event contract shared by Dashboard derivations,
 Timeline UI, demo data, repository storage, and future API integration.
 
-## Current state (post-P4 + Wave 3D-IV)
+## Current state (post-P3h)
 
 - **`SemanticTimelineEvent`** is the canonical application and repository event
   model.
-- **`TimelineRepository`** stores `SemanticTimelineEvent` natively. The Web
-  production adapter is **`IndexedDbTimelineRepository`**
-  (`@diabetes-universe/timeline-web`), wired through
-  `apps/web/lib/timeline/create-web-timeline-repository.ts`.
+- **`TimelineRepository`** stores `SemanticTimelineEvent` natively through
+  `InMemoryTimelineRepository`.
 - The production demo seed in `apps/web/lib/mocks/timeline.ts` is semantic-native
-  (`readonly SemanticTimelineEvent[]`) and seeds IndexedDB on first bootstrap only.
+  (`readonly SemanticTimelineEvent[]`).
 - **Legacy `TimelineEvent`** remains in `@diabetes-universe/types` for
   migration and import utilities only (`liftLegacyToSemantic`,
-  `liftRepositorySnapshot`). Quick Add does not write legacy records.
-- **Durable local Web persistence (IndexedDB)** is implemented (P4 Feature
-  Complete). Backend, auth, sync, and outbox remain future scope.
-- **Glucose Quick Add save integrity (Wave 3D)** awaits IndexedDB persistence
-  through `TimelineStore.addEventAsync` before success close; see
-  [Timeline Quick Add Integration](../../architecture/timeline/quick-add-integration.md).
+  `liftRepositorySnapshot`).
+- **Durable persistence** (IndexedDB, SQLite, backend, auth, sync) is **not**
+  implemented.
+- **P4** has **not** started (architecture design in
+  `docs/architecture/timeline/p4-durable-local-persistence.md`).
 - **P3 — Semantic Timeline Event Model: Feature Complete** (merged PR #67 @
   `44ca315`, 2026-08-09).
-- **P4 — Durable Local Persistence: Feature Complete** for approved Web scope
-  (see `docs/architecture/timeline/p4-feature-complete.md`).
+
+## Current production state (post-P4 + Wave 3D-IV)
+
+Approved runtime summary as of Wave 3D-IV closure. This section supersedes the
+post-P3h summary above for production behavior.
+
+- **`TimelineRepository`** Web production adapter is
+  **`IndexedDbTimelineRepository`** (`@diabetes-universe/timeline-web`), wired
+  through `apps/web/lib/timeline/create-web-timeline-repository.ts`.
+- Demo seed in `apps/web/lib/mocks/timeline.ts` seeds IndexedDB on first bootstrap
+  only; cleared timelines do not reseed on reload.
+- **Durable local Web persistence (IndexedDB)** is implemented (**P4 Feature
+  Complete** for approved Web scope).
+- **Glucose Quick Add save integrity (Wave 3D)** awaits IndexedDB persistence
+  through `TimelineStore.addEventAsync` before success close; see
+  [Timeline Quick Add Integration](../../architecture/timeline/quick-add-integration.md)
+  and [Timeline Shared State](../../architecture/timeline/shared-state.md).
+- Backend, auth, cloud sync, and outbox remain future scope.
 
 ## SemanticTimelineEvent contract
 
@@ -161,8 +174,12 @@ For `kind: 'note'`, journal content lives in optional `title` and required
   `SemanticTimelineEvent[]`.
 - Timeline renders the full journal from the same semantic contract.
 - Event cards consume mapped presentation props derived from semantic events.
-- Dashboard and Timeline share one app-level Timeline store projection backed by
-  the same IndexedDB repository adapter.
+- During the demo stage, Dashboard and Timeline share one app-level in-memory
+  Timeline store backed by a semantic repository.
+
+At Wave 3D-IV production runtime, Dashboard and Timeline share one IndexedDB-backed
+Timeline store projection through `TimelineStoreProvider`. See **Current
+production state (post-P4 + Wave 3D-IV)** above.
 
 ## API readiness
 
@@ -211,7 +228,8 @@ directly. Presentation formatting belongs to the presentation boundary (P3d).
 ## Migration notes
 
 Historical lifecycle record. Sections below describe state **at that wave**, not
-current architecture unless the P3h / current-state summary above says otherwise.
+current architecture unless the **Current production state (post-P4 + Wave 3D-IV)**
+summary above says otherwise.
 
 Stage 2 migration changes:
 
@@ -343,8 +361,7 @@ P3h Semantic Repository Cutover changes:
   utilities only;
 - legacy `TimelineEvent` remains in `@diabetes-universe/types` as a migration
   contract only;
-- durable persistence (IndexedDB/SQLite/backend/sync) for Web is implemented
-  through IndexedDB (P4); backend/auth/sync remain future scope;
+- durable persistence (IndexedDB/SQLite/backend/sync) is **not** implemented;
 - P4 has **not** started;
 - P3 Feature Complete is **not** declared until a separate Final Audit.
 
@@ -352,9 +369,12 @@ P3h Semantic Repository Cutover changes:
 
 - reminder and `ai_insight` as Timeline events
 - backend/API implementation
-- cloud sync, auth-bound multi-device durability, and outbox — future approved work
+- cloud sync, auth-bound multi-device durability, and outbox
 - routine migration lift in application store (migration utilities remain for
   explicit import paths only)
+
+Web IndexedDB local persistence (P4) is in scope and implemented; see
+**Current production state (post-P4 + Wave 3D-IV)**.
 
 ## Quick Add mapping (semantic write path)
 

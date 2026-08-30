@@ -1,6 +1,7 @@
 import { expect, test, type Page } from './support/test';
 
 import { signInWithMagicLink } from './support/auth-helpers';
+import { installOneShotTimelineEventsWriteDelay } from './support/install-one-shot-timeline-events-write-delay';
 import {
   clearTimelineEventsInIndexedDb,
   waitForEmptyTimelineInIndexedDb,
@@ -31,43 +32,6 @@ async function prepareEmptyTimeline(page: Page): Promise<void> {
   await page.reload();
   await waitForApplicationReady(page);
   await waitForEmptyTimelineInIndexedDb(page);
-}
-
-async function installIndexedDbTransactionCompleteDelay(
-  page: Page,
-  delayMs: number,
-): Promise<void> {
-  await page.addInitScript((delay) => {
-    const originalTransaction = IDBDatabase.prototype.transaction;
-
-    IDBDatabase.prototype.transaction = function (...args) {
-      const tx = originalTransaction.apply(this, args);
-      const originalAddEventListener = tx.addEventListener.bind(tx);
-
-      tx.addEventListener = function (type, listener, options) {
-        if (type !== 'complete') {
-          return originalAddEventListener(type, listener, options);
-        }
-
-        return originalAddEventListener(
-          type,
-          (event) => {
-            window.setTimeout(() => {
-              if (typeof listener === 'function') {
-                listener.call(this, event);
-                return;
-              }
-
-              listener?.handleEvent?.(event);
-            }, delay);
-          },
-          options,
-        );
-      };
-
-      return tx;
-    };
-  }, delayMs);
 }
 
 test.describe('Glucose Quick Add Wave 3D-III save integrity', () => {
@@ -114,7 +78,6 @@ test.describe('Glucose Quick Add Wave 3D-III save integrity', () => {
     page,
     request,
   }) => {
-    await installIndexedDbTransactionCompleteDelay(page, 750);
     await signInWithMagicLink(
       page,
       request,
@@ -128,6 +91,7 @@ test.describe('Glucose Quick Add Wave 3D-III save integrity', () => {
 
     const dialog = page.getByRole('dialog', { name: 'Добавить глюкозу' });
     await page.getByLabel('Glucose level').fill('6.3');
+    await installOneShotTimelineEventsWriteDelay(page, 750);
     await dialog.getByRole('button', { name: 'Save', exact: true }).click();
 
     await expect(dialog.getByRole('status')).toHaveText('Saving…');
