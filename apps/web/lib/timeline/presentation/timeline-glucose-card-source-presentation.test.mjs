@@ -6,7 +6,7 @@ import { liftLegacyTestFixtures } from '../testing/lift-legacy-test-fixtures.ts'
 import { mapTimelineEventCardPresentation } from './timeline-presentation-mapper.ts';
 import { createTestTimelinePresentationDependencies } from './testing/create-test-timeline-presentation-dependencies.ts';
 
-const [glucoseEvent, insulinEvent] = liftLegacyTestFixtures([
+const [, insulinEvent] = liftLegacyTestFixtures([
   {
     context: 'Before meal',
     dateTime: '2026-08-02T07:15:00.000Z',
