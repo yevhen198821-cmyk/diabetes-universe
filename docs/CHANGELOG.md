@@ -1,5 +1,35 @@
 # Changelog
 
+## Wave 3D-IV — Glucose Quick Add Architecture Closure
+
+Дата: 2026-08-30
+
+Статус: closure/remediation wave (docs + regression contract; no new glucose
+features).
+
+Завершено:
+
+- reconciled architecture documentation with post–Wave 3D-III production glucose
+  Quick Add save path (`prepareGlucoseQuickAddSubmit` → stable event ID → awaited
+  `addEventAsync` → IndexedDB → success close);
+- corrected stale claims that Quick Add writes legacy `TimelineEvent`, uses
+  fire-and-forget glucose persistence, or treats Timeline as in-memory-only demo
+  state;
+- documented glucose invariants (validate-before-pending, dismiss lock,
+  retry identity, Dashboard/Timeline shared contract) in timeline/dashboard
+  integration docs, dashboard spec, UI bible, timeline entity doc, and
+  `apps/web/README.md`;
+- added focused documentation/architecture contract test to prevent regression
+  of legacy glucose save descriptions.
+
+Не входит в этот этап:
+
+- API/OpenAPI, schema, cloud sync, outbox, new glucose fields;
+- retry framework for non-glucose Quick Add categories;
+- Wave 3E or later waves.
+
+---
+
 ## P6c — Active Sessions & Account Security Management: Closure Candidate
 
 Дата: 2026-08-13 (обновлено 2026-08-14)

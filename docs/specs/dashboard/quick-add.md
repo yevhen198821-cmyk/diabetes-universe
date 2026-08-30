@@ -8,8 +8,8 @@ Approved
 
 Dashboard Quick Add integration connects the approved Dashboard entry points to
 the existing Quick Add framework. One shared Quick Add instance serves the
-screen, and successful saves refresh affected Dashboard blocks through shared
-demo state.
+screen, and successful saves refresh affected Dashboard blocks through the
+shared Timeline store and IndexedDB repository.
 
 ## Functional Requirements
 
@@ -53,12 +53,23 @@ Dashboard uses the existing `QuickAddHost` with:
 
 ### Save and Close Rules
 
-| Scenario                   | Quick Add state | Dashboard data          |
-| -------------------------- | --------------- | ----------------------- |
-| Successful submit          | Closes          | Updates affected blocks |
-| Cancel within form         | Stays open      | Unchanged               |
-| Dismiss/backdrop/`Escape`  | Closes          | Unchanged               |
-| Validation error on submit | Stays open      | Unchanged               |
+| Scenario                         | Quick Add state | Dashboard data          |
+| -------------------------------- | --------------- | ----------------------- |
+| Successful submit (non-glucose)  | Closes          | Updates affected blocks |
+| Successful glucose submit        | Closes after awaited IndexedDB persistence | Updates affected blocks |
+| Glucose persistence failure      | Stays open      | Unchanged               |
+| Cancel within form               | Stays open      | Unchanged               |
+| Dismiss/backdrop/`Escape`        | Closes          | Unchanged               |
+| Validation error on submit       | Stays open      | Unchanged               |
+| Glucose submit in flight         | Stays open; dismiss blocked | Unchanged     |
+
+Glucose Quick Add (Wave 3D save integrity):
+
+- invalid value never enters pending state;
+- one stable full event ID is retained across retries until success;
+- `onGlucoseSubmit` awaits `addEventAsync(createSemanticGlucoseTimelineEvent(...))`;
+- success close happens only after persistence resolves;
+- failure releases the pending/dismiss lock and keeps entered values.
 
 Affected blocks after successful save:
 
@@ -86,9 +97,13 @@ Affected blocks after successful save:
 
 `dashboard-quick-add-integration-model.ts` defines:
 
-- demo event state updates from Quick Add entries;
-- derivation of Last Glucose, Day Summary, and Recent Events block inputs;
-- no API or persistence layer.
+- derivation of Last Glucose, Day Summary, and Recent Events block inputs from
+  `SemanticTimelineEvent[]` in the shared Timeline store;
+- no separate Dashboard event collection;
+- no API or cloud sync layer.
+
+Glucose persistence is owned by `DashboardRoot` through `addEventAsync` and the
+shared IndexedDB repository adapter.
 
 ## User Flow
 
@@ -114,7 +129,10 @@ Affected blocks after successful save:
 - Ignore open requests when `open === true`.
 - Ignore open requests when opening lock is active.
 - Reject blank focus-return targets gracefully.
-- Successful submit handlers must mutate demo state before close.
+- Non-glucose successful submit handlers enqueue repository mutations through
+  `addEvent` before close.
+- Glucose successful submit must await `addEventAsync` persistence before close.
+- Invalid glucose input must not allocate an event ID or enter pending state.
 
 ## Edge Cases
 

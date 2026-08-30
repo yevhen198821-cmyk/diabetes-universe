@@ -9,23 +9,28 @@ Approved
 Define the canonical Timeline event contract shared by Dashboard derivations,
 Timeline UI, demo data, repository storage, and future API integration.
 
-## Current state (post-P3h)
+## Current state (post-P4 + Wave 3D-IV)
 
 - **`SemanticTimelineEvent`** is the canonical application and repository event
   model.
-- **`TimelineRepository`** stores `SemanticTimelineEvent` natively through
-  `InMemoryTimelineRepository`.
+- **`TimelineRepository`** stores `SemanticTimelineEvent` natively. The Web
+  production adapter is **`IndexedDbTimelineRepository`**
+  (`@diabetes-universe/timeline-web`), wired through
+  `apps/web/lib/timeline/create-web-timeline-repository.ts`.
 - The production demo seed in `apps/web/lib/mocks/timeline.ts` is semantic-native
-  (`readonly SemanticTimelineEvent[]`).
+  (`readonly SemanticTimelineEvent[]`) and seeds IndexedDB on first bootstrap only.
 - **Legacy `TimelineEvent`** remains in `@diabetes-universe/types` for
   migration and import utilities only (`liftLegacyToSemantic`,
-  `liftRepositorySnapshot`).
-- **Durable persistence** (IndexedDB, SQLite, backend, auth, sync) is **not**
-  implemented.
-- **P4** has **not** started (architecture design in
-  `docs/architecture/timeline/p4-durable-local-persistence.md`).
+  `liftRepositorySnapshot`). Quick Add does not write legacy records.
+- **Durable local Web persistence (IndexedDB)** is implemented (P4 Feature
+  Complete). Backend, auth, sync, and outbox remain future scope.
+- **Glucose Quick Add save integrity (Wave 3D)** awaits IndexedDB persistence
+  through `TimelineStore.addEventAsync` before success close; see
+  [Timeline Quick Add Integration](../architecture/timeline/quick-add-integration.md).
 - **P3 — Semantic Timeline Event Model: Feature Complete** (merged PR #67 @
   `44ca315`, 2026-08-09).
+- **P4 — Durable Local Persistence: Feature Complete** for approved Web scope
+  (see `docs/architecture/timeline/p4-feature-complete.md`).
 
 ## SemanticTimelineEvent contract
 
@@ -156,8 +161,8 @@ For `kind: 'note'`, journal content lives in optional `title` and required
   `SemanticTimelineEvent[]`.
 - Timeline renders the full journal from the same semantic contract.
 - Event cards consume mapped presentation props derived from semantic events.
-- During the demo stage, Dashboard and Timeline share one app-level in-memory
-  Timeline store backed by a semantic repository.
+- Dashboard and Timeline share one app-level Timeline store projection backed by
+  the same IndexedDB repository adapter.
 
 ## API readiness
 
@@ -338,7 +343,8 @@ P3h Semantic Repository Cutover changes:
   utilities only;
 - legacy `TimelineEvent` remains in `@diabetes-universe/types` as a migration
   contract only;
-- durable persistence (IndexedDB/SQLite/backend/sync) is **not** implemented;
+- durable persistence (IndexedDB/SQLite/backend/sync) for Web is implemented
+  through IndexedDB (P4); backend/auth/sync remain future scope;
 - P4 has **not** started;
 - P3 Feature Complete is **not** declared until a separate Final Audit.
 
@@ -346,7 +352,7 @@ P3h Semantic Repository Cutover changes:
 
 - reminder and `ai_insight` as Timeline events
 - backend/API implementation
-- durable persistence (IndexedDB, SQLite, backend, auth, sync) — P4 not started
+- cloud sync, auth-bound multi-device durability, and outbox — future approved work
 - routine migration lift in application store (migration utilities remain for
   explicit import paths only)
 
@@ -355,6 +361,26 @@ P3h Semantic Repository Cutover changes:
 Quick Add creates `SemanticTimelineEvent` records directly through semantic
 creators in `apps/web/lib/timeline/semantic-creators/`. Presentation strings are
 not written to the repository.
+
+### Glucose (Wave 3D save integrity)
+
+`GlucoseQuickAddEntry` flows through `prepareGlucoseQuickAddSubmit` and
+`createSemanticGlucoseTimelineEvent(entry, { id: eventId })`:
+
+| Semantic field            | Value                                      |
+| ------------------------- | ------------------------------------------ |
+| `kind`                    | `glucose`                                  |
+| `source`                  | `manual`                                   |
+| `concentrationMmolPerL`   | canonical mmol/L from parsed input         |
+| `context`                 | optional `GlucoseMeasurementContext`       |
+| `occurredAt`              | ISO 8601 from approved utility             |
+| `id`                      | stable full ID allocated before persistence |
+
+Persistence: `TimelineStore.addEventAsync` awaits IndexedDB commit before glucose
+Quick Add success close. Dashboard and Timeline use the same contract.
+
+Validation: parsed value in approved display-unit range; `time` required;
+`context` optional.
 
 ### Activity
 

@@ -233,6 +233,30 @@ Location: `components/dashboard/dashboard-ai-insight*`, `dashboard-ai-insight-la
 - unit, integration, resource, and E2E coverage (`dashboard-ai-insight-i18n.spec.ts`)
 - architecture: `docs/architecture/localization/dashboard-ai-insight-migration.md`
 
+## Glucose Quick Add save integrity (Wave 3D) — Feature Complete ✅
+
+Location: `components/quick-add/glucose-quick-add-form.tsx`,
+`lib/quick-add/glucose-quick-add-submit-controller.ts`,
+`lib/quick-add/glucose-quick-add-submit-model.ts`
+
+Production glucose Quick Add awaits IndexedDB persistence before success close.
+Dashboard and Timeline share the same handler contract through `addEventAsync` and
+`createSemanticGlucoseTimelineEvent(entry, { id: eventId })`.
+
+### Implemented (Wave 3D-II / 3D-III / 3D-IV)
+
+- validate-before-pending via `prepareGlucoseQuickAddSubmit`
+- stable full event ID across retries (`beginGlucoseQuickAddSubmitEventId`)
+- single-flight submit and host dismiss lock during persistence
+- failure keeps form open and releases lock; success clears identity and closes once
+- canonical mmol/L storage with `source: "manual"`; optional context unchanged
+- architecture docs reconciled in Wave 3D-IV closure
+
+Architecture references:
+
+- [Timeline Quick Add Integration](../../docs/architecture/timeline/quick-add-integration.md)
+- [Dashboard Quick Add Integration](../../docs/architecture/dashboard/quick-add-integration.md)
+
 ## Localization status summary
 
 | Surface                          | I18N status                                                           |

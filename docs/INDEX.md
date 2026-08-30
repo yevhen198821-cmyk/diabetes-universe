@@ -71,7 +71,7 @@
 - [Dashboard Day Summary](architecture/dashboard/day-summary.md)
 - [Dashboard Recent Events](architecture/dashboard/recent-events.md)
 - [Dashboard AI Insight](architecture/dashboard/ai-insight.md)
-- [Dashboard Quick Add Integration](architecture/dashboard/quick-add-integration.md)
+- [Dashboard Quick Add Integration](architecture/dashboard/quick-add-integration.md) — Wave 3D-IV glucose save integrity closure
 - [Dashboard States](architecture/dashboard/states.md)
 - [Dashboard Responsive Behavior](architecture/dashboard/responsive.md)
 - [Timeline Overview](architecture/timeline/overview.md) — event journal at `/timeline`
@@ -83,7 +83,7 @@
 - [Timeline Pagination](architecture/timeline/pagination.md)
 - [Timeline States](architecture/timeline/states.md)
 - [Timeline Shared State](architecture/timeline/shared-state.md)
-- [Timeline Quick Add Integration](architecture/timeline/quick-add-integration.md)
+- [Timeline Quick Add Integration](architecture/timeline/quick-add-integration.md) — Wave 3D-IV glucose save integrity closure
 - [Analytics](architecture/analytics/overview.md)
 - [AI](architecture/ai/overview.md)
 - [Recipes](architecture/recipes/overview.md)
