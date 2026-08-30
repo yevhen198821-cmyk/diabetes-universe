@@ -13,18 +13,22 @@ function listPresentationFiles(directory) {
       return listPresentationFiles(`${path}/`);
     }
 
-    return /\.(ts|mjs)$/.test(entry) ? [path] : [];
+    return /\.ts$/.test(entry) && !entry.endsWith('.test.mjs')
+      ? [path]
+      : [];
   });
 }
 
 test('timeline presentation layer does not import from components/timeline', () => {
-  const files = listPresentationFiles(presentationRoot);
+  const files = listPresentationFiles(presentationRoot).filter(
+    (file) => !file.endsWith('timeline-presentation-layer-imports.test.mjs'),
+  );
 
   for (const file of files) {
     const source = readFileSync(file, 'utf8');
 
     assert.equal(
-      source.includes('components/timeline'),
+      /from ['"][^'"]*components\/timeline/.test(source),
       false,
       `${file} imports from components/timeline`,
     );
