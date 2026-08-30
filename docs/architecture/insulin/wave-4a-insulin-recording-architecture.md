@@ -2,14 +2,14 @@
 
 ## Document status
 
-| Field        | Value                                                              |
-| ------------ | ------------------------------------------------------------------ |
-| Wave         | 4A — Architecture only                                             |
-| Status       | **Ready for approval**                                             |
-| Date         | 2026-08-30 (remediated)                                            |
-| Scope        | Canonical insulin administration recording                         |
-| Out of scope | Runtime, UI, migrations, production TypeScript in this PR          |
-| Base SHA     | `1067b9f9221ba2406c97078846dd7343533524e9`                         |
+| Field        | Value                                                     |
+| ------------ | --------------------------------------------------------- |
+| Wave         | 4A — Architecture only                                    |
+| Status       | **Ready for approval**                                    |
+| Date         | 2026-08-30 (remediated)                                   |
+| Scope        | Canonical insulin administration recording                |
+| Out of scope | Runtime, UI, migrations, production TypeScript in this PR |
+| Base SHA     | `1067b9f9221ba2406c97078846dd7343533524e9`                |
 
 Wave 4A is documentation only. **Wave 4B must not start until this document is
 approved and merged.**
@@ -135,15 +135,15 @@ share the Wave 3D glucose save-integrity contract.
 
 ### 2.3 Quick Add input
 
-| Concern            | Current implementation                                                                 |
-| ------------------ | -------------------------------------------------------------------------------------- |
-| Form               | `apps/web/components/quick-add/insulin-quick-add-form.tsx`                             |
+| Concern            | Current implementation                                                                                      |
+| ------------------ | ----------------------------------------------------------------------------------------------------------- |
+| Form               | `apps/web/components/quick-add/insulin-quick-add-form.tsx`                                                  |
 | Preparation list   | `insulin-preparation-options.ts` — `NovoRapid`, `Fiasp`, `Humalog`, `Apidra`, `Lantus`, `Tresiba`, `Другое` |
-| Preparation groups | Hardcoded RU: «Быстрый инсулин», «Базальный инсулин»                                   |
-| Context list       | `insulin-context-options.ts` — `Перед едой`, `После еды`, `Коррекция`, `Базальный`, `Другое` |
-| Dose parse         | `parseInsulinDoseInput()` — finite, `> 0`, `<= 100`; pattern allows one fractional group |
-| Labels             | Hardcoded Russian in the form and action metadata                                      |
-| Locale keys        | No `quick-add.insulin.*` resources                                                     |
+| Preparation groups | Hardcoded RU: «Быстрый инсулин», «Базальный инсулин»                                                        |
+| Context list       | `insulin-context-options.ts` — `Перед едой`, `После еды`, `Коррекция`, `Базальный`, `Другое`                |
+| Dose parse         | `parseInsulinDoseInput()` — finite, `> 0`, `<= 100`; pattern allows one fractional group                    |
+| Labels             | Hardcoded Russian in the form and action metadata                                                           |
+| Locale keys        | No `quick-add.insulin.*` resources                                                                          |
 
 The selected preparation **label is stored as `preparation`**. Rapid/basal
 group headings are UI-only and are not persisted.
@@ -183,29 +183,29 @@ while `context` holds a new string. That conflict is a **hard rollout gate**
 
 ### 2.6 Consumers
 
-| Surface                | Behavior                                                                                     |
-| ---------------------- | -------------------------------------------------------------------------------------------- |
-| Dashboard Day Summary  | `getTodayInsulinTotal()` sums today's `doseUnits`                                            |
-| Dashboard Recent Events | Insulin cards: title = `preparation`, value = formatted dose, context = stored string       |
-| Dashboard Quick Actions | Opens insulin Quick Add                                                                     |
-| Next Action            | Can open insulin form via `openCategory: 'insulin'`; copy does not recommend a dose          |
-| Timeline card / detail | `mapInsulinPresentation()` — title = `preparation`; search includes preparation/dose/context |
-| Timeline edit          | Generic draft as in §2.5                                                                     |
-| Timeline search / filter | Kind filter `insulin`; haystack uses stored strings                                        |
-| IndexedDB validation   | Requires `preparation` + `doseUnits`; does not validate context taxonomy                     |
-| Localization           | Kind/unit/Day Summary labels exist; Quick Add insulin copy is not localized                  |
+| Surface                  | Behavior                                                                                     |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| Dashboard Day Summary    | `getTodayInsulinTotal()` sums today's `doseUnits`                                            |
+| Dashboard Recent Events  | Insulin cards: title = `preparation`, value = formatted dose, context = stored string        |
+| Dashboard Quick Actions  | Opens insulin Quick Add                                                                      |
+| Next Action              | Can open insulin form via `openCategory: 'insulin'`; copy does not recommend a dose          |
+| Timeline card / detail   | `mapInsulinPresentation()` — title = `preparation`; search includes preparation/dose/context |
+| Timeline edit            | Generic draft as in §2.5                                                                     |
+| Timeline search / filter | Kind filter `insulin`; haystack uses stored strings                                          |
+| IndexedDB validation     | Requires `preparation` + `doseUnits`; does not validate context taxonomy                     |
+| Localization             | Kind/unit/Day Summary labels exist; Quick Add insulin copy is not localized                  |
 
 ### 2.7 Server / API / adoption (current)
 
 These paths **do not** automatically accept new semantic insulin fields.
 
-| Boundary | Current behavior |
-| -------- | ---------------- |
-| Runtime create/update | `validateSemanticEvent` in `apps/web/lib/medical/server/medical-api-validation.ts` calls `rejectUnknownTopLevelFields` with a shared allow-list. Allowed insulin-relevant keys: `preparation`, `doseUnits`, `context`, plus envelope keys. **`preparationId` and `administrationContext` are unknown and are rejected.** |
-| Kind-specific insulin rules | Requires `preparation` string and `doseUnits` in `INSULIN_DOSE_MIN` (0) … `INSULIN_DOSE_MAX` (**500**). Optional `context` is a bounded string, not a semantic enum. |
-| Adoption | `medical-adoption-validation.ts` reuses `validateSemanticEvent`. The same allow-list applies. |
-| Domain mapper | `packages/medical-domain/src/mappers/semantic-event-mapper.ts` strips server-owned lifecycle fields and projects `kind` / `occurredAt` / `schemaVersion`. It does not define insulin-specific optional fields. |
-| OpenAPI `SemanticTimelineEvent` | `docs/api/openapi/medical-v1.yaml` declares `occurredAt`, `schemaVersion`, `source`, `kind` only. It does **not** document insulin payload fields. Runtime validation, not the YAML property list, is the fail-closed gate. |
+| Boundary                        | Current behavior                                                                                                                                                                                                                                                                                                         |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Runtime create/update           | `validateSemanticEvent` in `apps/web/lib/medical/server/medical-api-validation.ts` calls `rejectUnknownTopLevelFields` with a shared allow-list. Allowed insulin-relevant keys: `preparation`, `doseUnits`, `context`, plus envelope keys. **`preparationId` and `administrationContext` are unknown and are rejected.** |
+| Kind-specific insulin rules     | Requires `preparation` string and `doseUnits` in `INSULIN_DOSE_MIN` (0) … `INSULIN_DOSE_MAX` (**500**). Optional `context` is a bounded string, not a semantic enum.                                                                                                                                                     |
+| Adoption                        | `medical-adoption-validation.ts` reuses `validateSemanticEvent`. The same allow-list applies.                                                                                                                                                                                                                            |
+| Domain mapper                   | `packages/medical-domain/src/mappers/semantic-event-mapper.ts` strips server-owned lifecycle fields and projects `kind` / `occurredAt` / `schemaVersion`. It does not define insulin-specific optional fields.                                                                                                           |
+| OpenAPI `SemanticTimelineEvent` | `docs/api/openapi/medical-v1.yaml` declares `occurredAt`, `schemaVersion`, `source`, `kind` only. It does **not** document insulin payload fields. Runtime validation, not the YAML property list, is the fail-closed gate.                                                                                              |
 
 `MEDICAL_VALIDATION_BOUNDS.INSULIN_DOSE_MAX` is **500**. That is the approved
 current transport/domain technical ceiling. There is no approved 1000 IU
@@ -276,19 +276,19 @@ system.
 
 ## 4. Approved terminology
 
-| Term | Meaning |
-| ---- | ------- |
-| **Insulin administration event** | A user-recorded dose that was taken or is being logged as taken |
-| **Catalogue entry ID (`preparationId`)** | Stable **internal** key for one governed local-catalogue entry. It may represent a branded preparation. It is never the localized or user-visible label and must never be compared using display text. |
-| **Trade/display name snapshot (`preparation`)** | The name stored on the event at write time (localized catalogue label or user-entered Other name) |
-| **Catalogue metadata** | Presentation-only grouping and labels derived from a known `preparationId`. Not persisted on the event in Wave 4. |
-| **User-entered Other name** | Non-empty free-text snapshot required when the catalogue entry is `insulin.prep.other` |
-| **Unmatched / unknown preparation** | Presentation state for a historical event with no `preparationId`. Not a catalogue identity. |
-| **Dose** | Numeric amount entered or imported, stored in international units |
-| **Administration context** | Semantic reason/timing bucket chosen by the user; not a prescription |
-| **Technical validation bound** | Input, typo, overflow, or transport protection. Not a safe-dose limit |
-| **Therapy profile** | Future subject-scoped regimen. **Out of Wave 4** |
-| **Recommendation** | Any calculated or suggested dose. **Forbidden in Wave 4** |
+| Term                                            | Meaning                                                                                                                                                                                                |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Insulin administration event**                | A user-recorded dose that was taken or is being logged as taken                                                                                                                                        |
+| **Catalogue entry ID (`preparationId`)**        | Stable **internal** key for one governed local-catalogue entry. It may represent a branded preparation. It is never the localized or user-visible label and must never be compared using display text. |
+| **Trade/display name snapshot (`preparation`)** | The name stored on the event at write time (localized catalogue label or user-entered Other name)                                                                                                      |
+| **Catalogue metadata**                          | Presentation-only grouping and labels derived from a known `preparationId`. Not persisted on the event in Wave 4.                                                                                      |
+| **User-entered Other name**                     | Non-empty free-text snapshot required when the catalogue entry is `insulin.prep.other`                                                                                                                 |
+| **Unmatched / unknown preparation**             | Presentation state for a historical event with no `preparationId`. Not a catalogue identity.                                                                                                           |
+| **Dose**                                        | Numeric amount entered or imported, stored in international units                                                                                                                                      |
+| **Administration context**                      | Semantic reason/timing bucket chosen by the user; not a prescription                                                                                                                                   |
+| **Technical validation bound**                  | Input, typo, overflow, or transport protection. Not a safe-dose limit                                                                                                                                  |
+| **Therapy profile**                             | Future subject-scoped regimen. **Out of Wave 4**                                                                                                                                                       |
+| **Recommendation**                              | Any calculated or suggested dose. **Forbidden in Wave 4**                                                                                                                                              |
 
 Do not use “safe dose”, “recommended dose”, “correct dose”, or “insulin on
 board” in Wave 4 product or architecture language except to state that those
@@ -366,24 +366,24 @@ It must not treat a display string as the identifier.
 
 ### 5.3 Field decisions
 
-| Field | Decision |
-| ----- | -------- |
-| `preparationId` | Internal catalogue entry ID on new writes when the selection is a catalogue entry or Other. **Omitted** on unmatched historical events. Never `insulin.prep.unmapped`. |
-| `preparation` | **Required** snapshot: localized catalogue display name, or the user-entered Other name. Never a localized “Other/Другое” chrome label on new semantic writes. |
-| `preparationCategory` | **Not persisted.** Derive presentation grouping from `preparationId` via catalogue metadata when the ID is known. |
-| `doseUnits` | Canonical IU. No persisted unit discriminator. |
-| `CanonicalUnitId` | Conceptual unit remains `'insulin.international_unit'`. Presentation formats it. |
-| Canonical validity | Finite number, `doseUnits > 0`, `doseUnits <= 500`. |
-| Manual input policy | Wave 4C may accept at most two fractional digits. |
-| Device/import precision | Must not be rejected only because a manual parser has a two-decimal rule. Persist the given finite value if it is in the canonical bound. |
-| Rounding | Do **not** silently round persisted values. |
-| `occurredAt` | Administration time entered by the user (ISO 8601). Not the log timestamp. |
-| `createdAt` / `updatedAt` | Local lifecycle metadata. Create sets both; later edit updates `updatedAt` only. |
-| `administrationContext` | Optional in TypeScript so legacy events remain readable. **New semantic writers always set it.** No-choice writes `unspecified`. |
-| `context` | Legacy string, read-compatible. New writers do **not** write this field. |
-| `source` | `'manual'` for Quick Add and edit. Other sources reserved. |
-| `provenance` | Unchanged optional envelope field. Wave 4 does not require it. |
-| `id` | Existing semantic ID scheme. One stable full ID per logical submit/retry (see §10). |
+| Field                     | Decision                                                                                                                                                               |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `preparationId`           | Internal catalogue entry ID on new writes when the selection is a catalogue entry or Other. **Omitted** on unmatched historical events. Never `insulin.prep.unmapped`. |
+| `preparation`             | **Required** snapshot: localized catalogue display name, or the user-entered Other name. Never a localized “Other/Другое” chrome label on new semantic writes.         |
+| `preparationCategory`     | **Not persisted.** Derive presentation grouping from `preparationId` via catalogue metadata when the ID is known.                                                      |
+| `doseUnits`               | Canonical IU. No persisted unit discriminator.                                                                                                                         |
+| `CanonicalUnitId`         | Conceptual unit remains `'insulin.international_unit'`. Presentation formats it.                                                                                       |
+| Canonical validity        | Finite number, `doseUnits > 0`, `doseUnits <= 500`.                                                                                                                    |
+| Manual input policy       | Wave 4C may accept at most two fractional digits.                                                                                                                      |
+| Device/import precision   | Must not be rejected only because a manual parser has a two-decimal rule. Persist the given finite value if it is in the canonical bound.                              |
+| Rounding                  | Do **not** silently round persisted values.                                                                                                                            |
+| `occurredAt`              | Administration time entered by the user (ISO 8601). Not the log timestamp.                                                                                             |
+| `createdAt` / `updatedAt` | Local lifecycle metadata. Create sets both; later edit updates `updatedAt` only.                                                                                       |
+| `administrationContext`   | Optional in TypeScript so legacy events remain readable. **New semantic writers always set it.** No-choice writes `unspecified`.                                       |
+| `context`                 | Legacy string, read-compatible. New writers do **not** write this field.                                                                                               |
+| `source`                  | `'manual'` for Quick Add and edit. Other sources reserved.                                                                                                             |
+| `provenance`              | Unchanged optional envelope field. Wave 4 does not require it.                                                                                                         |
+| `id`                      | Existing semantic ID scheme. One stable full ID per logical submit/retry (see §10).                                                                                    |
 
 ### 5.4 Dose unit, bounds, and precision
 
@@ -424,12 +424,12 @@ reject non-positive insulin administration doses.
 A localized “Other” / “Другое” **chrome label must not** be stored as
 `preparation` on a new semantic event.
 
-| Case | `preparationId` | `preparation` snapshot |
-| ---- | --------------- | ---------------------- |
-| Known catalogue selection | That entry’s catalogue ID | Localized catalogue display name at write time |
-| User chooses Other | `insulin.prep.other` | **Required** non-empty user-entered name |
-| Historical unmatched string | **omit** `preparationId` | Original stored string |
-| Blank Other name or blank snapshot | Reject write | — |
+| Case                               | `preparationId`           | `preparation` snapshot                         |
+| ---------------------------------- | ------------------------- | ---------------------------------------------- |
+| Known catalogue selection          | That entry’s catalogue ID | Localized catalogue display name at write time |
+| User chooses Other                 | `insulin.prep.other`      | **Required** non-empty user-entered name       |
+| Historical unmatched string        | **omit** `preparationId`  | Original stored string                         |
+| Blank Other name or blank snapshot | Reject write              | —                                              |
 
 Wave 4C cannot submit Other until the UI collects a non-empty user-entered
 name. If that field is not implemented, the Other option **must not ship** as a
@@ -469,29 +469,29 @@ Presentation / localization
 Optional grouping chrome derived from catalogue metadata via preparationId
 ```
 
-| Concern | Owner in Wave 4 | Not in Wave 4 |
-| ------- | --------------- | ------------- |
-| Stable catalogue entry ID | Local product catalogue in types/domain | External medication database |
-| Trade/display name | Locale resources (known entries) or user-entered Other snapshot | Using display text as the identity |
-| Grouping chrome (rapid/basal/unspecified) | Catalogue metadata → presentation only | Persisted event field; clinical class |
-| Historical snapshot | Event `preparation` | Live catalogue overwrite of history |
-| Unmatched historical string | Omit `preparationId`; present as unmatched | Fake catalogue ID |
-| User medication / therapy profile | Deferred (Wave 2A §14) | Linking events to a prescribed regimen |
-| External medication catalogue | Future bounded context | RxNorm/ATC/vendor import |
+| Concern                                   | Owner in Wave 4                                                 | Not in Wave 4                          |
+| ----------------------------------------- | --------------------------------------------------------------- | -------------------------------------- |
+| Stable catalogue entry ID                 | Local product catalogue in types/domain                         | External medication database           |
+| Trade/display name                        | Locale resources (known entries) or user-entered Other snapshot | Using display text as the identity     |
+| Grouping chrome (rapid/basal/unspecified) | Catalogue metadata → presentation only                          | Persisted event field; clinical class  |
+| Historical snapshot                       | Event `preparation`                                             | Live catalogue overwrite of history    |
+| Unmatched historical string               | Omit `preparationId`; present as unmatched                      | Fake catalogue ID                      |
+| User medication / therapy profile         | Deferred (Wave 2A §14)                                          | Linking events to a prescribed regimen |
+| External medication catalogue             | Future bounded context                                          | RxNorm/ATC/vendor import               |
 
 ### 6.2 Approved Wave 4 local catalogue
 
 Wave 4 may encode the **current** Quick Add list as a governed local catalogue.
 
-| Catalogue entry ID | Default EN display (locale-owned) | Presentation grouping (not persisted) |
-| ------------------ | --------------------------------- | ------------------------------------- |
-| `insulin.prep.aspart_novorapid` | NovoRapid | rapid-acting chrome |
-| `insulin.prep.aspart_fiasp` | Fiasp | rapid-acting chrome |
-| `insulin.prep.lispro_humalog` | Humalog | rapid-acting chrome |
-| `insulin.prep.glulisine_apidra` | Apidra | rapid-acting chrome |
-| `insulin.prep.glargine_lantus` | Lantus | long-acting chrome |
-| `insulin.prep.degludec_tresiba` | Tresiba | long-acting chrome |
-| `insulin.prep.other` | Other (picker label only) | unspecified chrome |
+| Catalogue entry ID              | Default EN display (locale-owned) | Presentation grouping (not persisted) |
+| ------------------------------- | --------------------------------- | ------------------------------------- |
+| `insulin.prep.aspart_novorapid` | NovoRapid                         | rapid-acting chrome                   |
+| `insulin.prep.aspart_fiasp`     | Fiasp                             | rapid-acting chrome                   |
+| `insulin.prep.lispro_humalog`   | Humalog                           | rapid-acting chrome                   |
+| `insulin.prep.glulisine_apidra` | Apidra                            | rapid-acting chrome                   |
+| `insulin.prep.glargine_lantus`  | Lantus                            | long-acting chrome                    |
+| `insulin.prep.degludec_tresiba` | Tresiba                           | long-acting chrome                    |
+| `insulin.prep.other`            | Other (picker label only)         | unspecified chrome                    |
 
 `insulin.prep.unmapped` is **not** a catalogue identity and must not be
 written.
@@ -526,14 +526,14 @@ Replace the free/localized string model with semantic identifiers.
 
 ### 7.1 Approved values
 
-| ID | Recording meaning | Must not imply |
-| -- | ----------------- | -------------- |
-| `before_meal` | User marked the dose as before a meal | That the dose is a correct meal bolus |
-| `after_meal` | User marked the dose as after a meal | Post-prandial protocol |
-| `correction` | User marked the dose as a correction | Calculated correction or hypo treatment |
-| `basal` | User marked the dose as basal/routine | That a basal rate is appropriate |
-| `other` | User chose Other | A clinical “miscellaneous” protocol |
-| `unspecified` | User chose no specific context | That missing data is clinically unsafe |
+| ID            | Recording meaning                     | Must not imply                          |
+| ------------- | ------------------------------------- | --------------------------------------- |
+| `before_meal` | User marked the dose as before a meal | That the dose is a correct meal bolus   |
+| `after_meal`  | User marked the dose as after a meal  | Post-prandial protocol                  |
+| `correction`  | User marked the dose as a correction  | Calculated correction or hypo treatment |
+| `basal`       | User marked the dose as basal/routine | That a basal rate is appropriate        |
+| `other`       | User chose Other                      | A clinical “miscellaneous” protocol     |
+| `unspecified` | User chose no specific context        | That missing data is clinically unsafe  |
 
 Labels for EN/RU/UK/DE belong only in locale resources.
 
@@ -542,13 +542,13 @@ Labels for EN/RU/UK/DE belong only in locale resources.
 There is **one** representation of “no specific context” for new writes:
 `administrationContext: 'unspecified'`.
 
-| Writer / reader | Rule |
-| --------------- | ---- |
-| TypeScript field | `administrationContext` remains **optional** so legacy events without it remain readable |
-| New semantic writes | **Always set** `administrationContext` |
-| User chooses no specific context | Write `administrationContext: 'unspecified'` |
-| New writers | Do **not** write legacy `context` |
-| Readers | Prefer `administrationContext` if present; else governed legacy `context` mapping; else presentation fallback |
+| Writer / reader                  | Rule                                                                                                          |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| TypeScript field                 | `administrationContext` remains **optional** so legacy events without it remain readable                      |
+| New semantic writes              | **Always set** `administrationContext`                                                                        |
+| User chooses no specific context | Write `administrationContext: 'unspecified'`                                                                  |
+| New writers                      | Do **not** write legacy `context`                                                                             |
+| Readers                          | Prefer `administrationContext` if present; else governed legacy `context` mapping; else presentation fallback |
 
 When **both** fields exist, `administrationContext` wins. Legacy `context` may
 still be shown only if a later edit/migration UI needs a raw snapshot; it must
@@ -561,14 +561,14 @@ none is valid and writes `unspecified`.
 
 Governed mapping for **existing** stored Russian demo strings:
 
-| Stored `context` | Maps to |
-| ---------------- | ------- |
-| `Перед едой` | `before_meal` |
-| `После еды` | `after_meal` |
-| `Коррекция` | `correction` |
-| `Базальный` | `basal` |
-| `Другое` | `other` |
-| missing / other | presentation fallback (`unspecified` semantics, keep raw snapshot if needed) |
+| Stored `context` | Maps to                                                                      |
+| ---------------- | ---------------------------------------------------------------------------- |
+| `Перед едой`     | `before_meal`                                                                |
+| `После еды`      | `after_meal`                                                                 |
+| `Коррекция`      | `correction`                                                                 |
+| `Базальный`      | `basal`                                                                      |
+| `Другое`         | `other`                                                                      |
+| missing / other  | presentation fallback (`unspecified` semantics, keep raw snapshot if needed) |
 
 This table is a compatibility adapter, not medical advice.
 
@@ -621,19 +621,19 @@ Dashboard and Timeline must **not** independently implement insulin semantics
 
 ### 9.2 Ownership
 
-| Concern | Owner |
-| ------- | ----- |
-| Canonical types | `@diabetes-universe/types` |
-| Parse + technical validation | `medical-domain` insulin foundation |
-| Catalogue entry IDs and context IDs | `medical-domain` + types |
-| Legacy string mapping | `medical-domain` (pure functions) |
-| Dose formatting (number + unit) | Platform formatting + web adapter |
-| Localized labels | `@diabetes-universe/locales` |
-| Timeline card/detail/search mapping | Web presentation adapter, then Timeline mapper consumes it |
-| Quick Add orchestration | `apps/web` Quick Add host/forms |
-| Local persistence | `TimelineStore` → `TimelineRepository` → IndexedDB |
-| Cloud create/update/adoption | Existing medical API validators + OpenAPI — **Wave 4E** before use |
-| Future continuous sync | Existing P10–P12 architecture; blocked on 4E for these fields |
+| Concern                             | Owner                                                              |
+| ----------------------------------- | ------------------------------------------------------------------ |
+| Canonical types                     | `@diabetes-universe/types`                                         |
+| Parse + technical validation        | `medical-domain` insulin foundation                                |
+| Catalogue entry IDs and context IDs | `medical-domain` + types                                           |
+| Legacy string mapping               | `medical-domain` (pure functions)                                  |
+| Dose formatting (number + unit)     | Platform formatting + web adapter                                  |
+| Localized labels                    | `@diabetes-universe/locales`                                       |
+| Timeline card/detail/search mapping | Web presentation adapter, then Timeline mapper consumes it         |
+| Quick Add orchestration             | `apps/web` Quick Add host/forms                                    |
+| Local persistence                   | `TimelineStore` → `TimelineRepository` → IndexedDB                 |
+| Cloud create/update/adoption        | Existing medical API validators + OpenAPI — **Wave 4E** before use |
+| Future continuous sync              | Existing P10–P12 architecture; blocked on 4E for these fields      |
 
 `@diabetes-universe/ui` remains presentation primitives only. It must not own
 insulin catalogue IDs or validation.
@@ -702,12 +702,12 @@ locally persisted events.
 
 ### 11.2 Presentation fallback
 
-| Available fields | Title | Context presentation |
-| ---------------- | ----- | -------------------- |
-| `preparationId` + `preparation` | Event `preparation` snapshot | `administrationContext` label |
-| `preparation` only (no ID) | Stored snapshot; unmatched chrome | See context precedence |
-| `administrationContext` set | — | Localized semantic label (**wins** if both exist) |
-| legacy `context` only | — | Governed mapping, else raw snapshot / unspecified fallback |
+| Available fields                | Title                             | Context presentation                                       |
+| ------------------------------- | --------------------------------- | ---------------------------------------------------------- |
+| `preparationId` + `preparation` | Event `preparation` snapshot      | `administrationContext` label                              |
+| `preparation` only (no ID)      | Stored snapshot; unmatched chrome | See context precedence                                     |
+| `administrationContext` set     | —                                 | Localized semantic label (**wins** if both exist)          |
+| legacy `context` only           | —                                 | Governed mapping, else raw snapshot / unspecified fallback |
 
 Do not hide a historical event because it lacks new optional fields.
 
@@ -729,10 +729,10 @@ generic save can persist **conflicting** representations.
 **Hard rollout invariant:** Wave 4C semantic writes **must not ship** until
 Timeline Edit implements **one** of:
 
-| Option | Behavior |
-| ------ | -------- |
+| Option            | Behavior                                                                                                                                                                                                                                      |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **A (preferred)** | Edit is semantic-aware: changing preparation updates or clears `preparationId` in the same save; changing context writes `administrationContext` and does not leave a contradictory legacy `context`; unmatched events do not gain a fake ID. |
-| **B (temporary)** | Edit **prevents** changing preparation and administration-context fields on events that already have `preparationId` and/or `administrationContext`. Dose/time may still be edited. |
+| **B (temporary)** | Edit **prevents** changing preparation and administration-context fields on events that already have `preparationId` and/or `administrationContext`. Dose/time may still be edited.                                                           |
 
 Preferred trajectory: **Option A in Wave 4B-II**, so 4C can ship a semantic
 Quick Add against a safe edit path. If 4B-II cannot land pickers, it must ship
@@ -766,14 +766,14 @@ already in production.
 
 ### 11.6 Cloud / API compatibility impact
 
-| Path | Today | After local semantic writes, before 4E | After 4E |
-| ---- | ----- | -------------------------------------- | -------- |
-| IndexedDB | Stores objects without this allow-list | May store new fields | Unchanged local role |
-| TypeScript | Current insulin shape | Optional fields for local compile | Same |
-| `validateSemanticEvent` | Rejects unknown keys | **Rejects** `preparationId` / `administrationContext` | Must allow and validate them |
-| Adoption | Same validator | **Rejects** those fields | Must allow and validate them |
-| OpenAPI | Envelope-only `SemanticTimelineEvent` | Does not describe the new fields | Must represent the insulin contract |
-| P10–P12 sync | Not product-activated for these fields | Must not treat local semantic insulin as sync-ready | Only after 4E + separate sync gates |
+| Path                    | Today                                  | After local semantic writes, before 4E                | After 4E                            |
+| ----------------------- | -------------------------------------- | ----------------------------------------------------- | ----------------------------------- |
+| IndexedDB               | Stores objects without this allow-list | May store new fields                                  | Unchanged local role                |
+| TypeScript              | Current insulin shape                  | Optional fields for local compile                     | Same                                |
+| `validateSemanticEvent` | Rejects unknown keys                   | **Rejects** `preparationId` / `administrationContext` | Must allow and validate them        |
+| Adoption                | Same validator                         | **Rejects** those fields                              | Must allow and validate them        |
+| OpenAPI                 | Envelope-only `SemanticTimelineEvent`  | Does not describe the new fields                      | Must represent the insulin contract |
+| P10–P12 sync            | Not product-activated for these fields | Must not treat local semantic insulin as sync-ready   | Only after 4E + separate sync gates |
 
 Do not claim the existing cloud/adoption path automatically supports the new
 fields.
@@ -785,16 +785,16 @@ fields.
 Wave 4 insulin UI must use platform localization (`en-GB`, `ru-RU`, `uk-UA`,
 `de-DE`).
 
-| Content | Storage | Locale resources |
-| ------- | ------- | ---------------- |
-| Kind label “Insulin” | No | `timeline.eventKind.insulin` (exists) |
-| Unit “U” / “ЕД” | No | `timeline.units.insulinDose` (exists) |
-| Catalogue display names | Snapshot on event at write | `insulin.preparation.<id>` (new) |
-| Context labels | Semantic ID only | `insulin.context.<id>` (new) |
-| Quick Add chrome | No | `quick-add.insulin.*` (new) |
-| Other picker label | No | Locale chrome only |
-| User-entered Other name | Event `preparation` snapshot | Not a locale key |
-| Validation / save-error copy | No | Locale keys; technical, not clinical |
+| Content                      | Storage                      | Locale resources                      |
+| ---------------------------- | ---------------------------- | ------------------------------------- |
+| Kind label “Insulin”         | No                           | `timeline.eventKind.insulin` (exists) |
+| Unit “U” / “ЕД”              | No                           | `timeline.units.insulinDose` (exists) |
+| Catalogue display names      | Snapshot on event at write   | `insulin.preparation.<id>` (new)      |
+| Context labels               | Semantic ID only             | `insulin.context.<id>` (new)          |
+| Quick Add chrome             | No                           | `quick-add.insulin.*` (new)           |
+| Other picker label           | No                           | Locale chrome only                    |
+| User-entered Other name      | Event `preparation` snapshot | Not a locale key                      |
+| Validation / save-error copy | No                           | Locale keys; technical, not clinical  |
 
 Do not persist translated context or group headings.
 
@@ -809,21 +809,21 @@ They are not event fields and are not a clinical classification.
 No visual redesign is required by this architecture. Later waves apply the
 contract to existing surfaces.
 
-| Surface | Future behavior |
-| ------- | --------------- |
-| Quick Add | Localized fields; semantic preparation/context; required Other name; no default dose |
-| Dashboard Today insulin | Sum of today’s `doseUnits`; existing visualization; no “prescribed daily” copy |
-| Timeline card | Title = snapshot; dose + localized unit; context from reader precedence |
-| Event Detail | Same fields; no recommendation chrome |
-| Edit | Semantic-aware (4B-II A) or field-locked (4B-II B) before 4C |
-| Delete | Unchanged confirmation; no clinical warning beyond existing delete copy |
-| Locales EN/RU/UK/DE | All new chrome keys required before Quick Add localization ships |
-| Loading | Existing Timeline/Dashboard loading projections |
-| Empty | No fabricated insulin total or sample dose |
-| Invalid | Inline technical validation; stay open |
-| Pending | Wave 4D: saving status + dismiss lock |
-| Error / retry | Wave 4D: keep values; reuse event ID |
-| Accessibility / mobile | Existing Quick Add 44px targets, dialog semantics, return-focus rules |
+| Surface                 | Future behavior                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------ |
+| Quick Add               | Localized fields; semantic preparation/context; required Other name; no default dose |
+| Dashboard Today insulin | Sum of today’s `doseUnits`; existing visualization; no “prescribed daily” copy       |
+| Timeline card           | Title = snapshot; dose + localized unit; context from reader precedence              |
+| Event Detail            | Same fields; no recommendation chrome                                                |
+| Edit                    | Semantic-aware (4B-II A) or field-locked (4B-II B) before 4C                         |
+| Delete                  | Unchanged confirmation; no clinical warning beyond existing delete copy              |
+| Locales EN/RU/UK/DE     | All new chrome keys required before Quick Add localization ships                     |
+| Loading                 | Existing Timeline/Dashboard loading projections                                      |
+| Empty                   | No fabricated insulin total or sample dose                                           |
+| Invalid                 | Inline technical validation; stay open                                               |
+| Pending                 | Wave 4D: saving status + dismiss lock                                                |
+| Error / retry           | Wave 4D: keep values; reuse event ID                                                 |
+| Accessibility / mobile  | Existing Quick Add 44px targets, dialog semantics, return-focus rules                |
 
 Direct-open (`openCategory: 'insulin'`) and picker-open return-focus behavior
 stay as approved for Quick Add.
@@ -834,13 +834,13 @@ stay as approved for Quick Add.
 
 Planning labels only. **Do not implement these in Wave 4A.**
 
-| Wave | Intent | Depends on | Must not include |
-| ---- | ------ | ---------- | ---------------- |
-| **4B-I** | Shared insulin types + `medical-domain` foundation + tests | This document approved | UI, Quick Add rewrite, API, persistence change |
-| **4B-II** | Presentation adapter **and** semantic-safe edit/read compatibility (Option A preferred, or Option B lock) | 4B-I | New brands, save-integrity, cloud writes |
-| **4C** | Localized semantic Quick Add, including required Other name | 4B-I + 4B-II A or B | Calculator, default dose, pump, Other without a name field |
-| **4D** | Awaited local IndexedDB persistence / save integrity | 4C | Other Quick Add categories; cloud sync |
-| **4E** | API allow-list, kind-specific validation, adoption validation, OpenAPI insulin payload, API/domain tests | 4B-I types | Activating P10–P12 sync |
+| Wave      | Intent                                                                                                    | Depends on             | Must not include                                           |
+| --------- | --------------------------------------------------------------------------------------------------------- | ---------------------- | ---------------------------------------------------------- |
+| **4B-I**  | Shared insulin types + `medical-domain` foundation + tests                                                | This document approved | UI, Quick Add rewrite, API, persistence change             |
+| **4B-II** | Presentation adapter **and** semantic-safe edit/read compatibility (Option A preferred, or Option B lock) | 4B-I                   | New brands, save-integrity, cloud writes                   |
+| **4C**    | Localized semantic Quick Add, including required Other name                                               | 4B-I + 4B-II A or B    | Calculator, default dose, pump, Other without a name field |
+| **4D**    | Awaited local IndexedDB persistence / save integrity                                                      | 4C                     | Other Quick Add categories; cloud sync                     |
+| **4E**    | API allow-list, kind-specific validation, adoption validation, OpenAPI insulin payload, API/domain tests  | 4B-I types             | Activating P10–P12 sync                                    |
 
 **4E is a hard dependency** before cloud create/update/adoption or later sync
 may accept events that contain `preparationId` or `administrationContext`.
@@ -854,15 +854,15 @@ implementation wave after this document is approved.
 
 ## 15. Risks
 
-| Risk | Mitigation |
-| ---- | ---------- |
-| Users read “correction” / grouping chrome / 100 or 500 IU as medical advice | Binding safety copy; technical-bound language only |
-| Catalogue IDs contain brand mnemonics and get shown | IDs never rendered; locales and snapshots own display |
-| Inferring grouping from leftover display strings | Governed table for presentation only; else unmatched, no ID |
-| Dual `context` + `administrationContext` | New writes set semantic field only; readers prefer semantic |
-| Generic edit desynchronizes semantic fields | Hard gate §11.4; 4C blocked until 4B-II A or B |
-| Treating IndexedDB writes as cloud-ready | Explicit 4E dependency; fail-closed allow-list documented |
-| Scope creep into therapy profile or bolus math | Wave 2A §14 + this document’s non-scope |
+| Risk                                                                        | Mitigation                                                  |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Users read “correction” / grouping chrome / 100 or 500 IU as medical advice | Binding safety copy; technical-bound language only          |
+| Catalogue IDs contain brand mnemonics and get shown                         | IDs never rendered; locales and snapshots own display       |
+| Inferring grouping from leftover display strings                            | Governed table for presentation only; else unmatched, no ID |
+| Dual `context` + `administrationContext`                                    | New writes set semantic field only; readers prefer semantic |
+| Generic edit desynchronizes semantic fields                                 | Hard gate §11.4; 4C blocked until 4B-II A or B              |
+| Treating IndexedDB writes as cloud-ready                                    | Explicit 4E dependency; fail-closed allow-list documented   |
+| Scope creep into therapy profile or bolus math                              | Wave 2A §14 + this document’s non-scope                     |
 
 Resolved in this remediation (no longer open product questions):
 

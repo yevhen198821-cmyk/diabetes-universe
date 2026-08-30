@@ -68,13 +68,13 @@ will see the new writer contract — including the medical API allow-list and
 adoption validator — is updated **before** those writes reach that boundary.
 No destructive startup migration.
 
-| Attribute               | Required on new writes | Type         | Meaning                                                                                                                                     |
-| ----------------------- | ---------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `preparation`           | yes                    | string       | Historical **display snapshot** — never compared as identity                                                                                |
-| `doseUnits`             | yes                    | number       | Canonical IU; finite, `> 0`, `<= 500` (server bound). Manual parsers may cap fractional digits; storage does not.                           |
+| Attribute               | Required on new writes | Type         | Meaning                                                                                                                                                                 |
+| ----------------------- | ---------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `preparation`           | yes                    | string       | Historical **display snapshot** — never compared as identity                                                                                                            |
+| `doseUnits`             | yes                    | number       | Canonical IU; finite, `> 0`, `<= 500` (server bound). Manual parsers may cap fractional digits; storage does not.                                                       |
 | `preparationId`         | when catalogue-known   | catalogue ID | Stable internal catalogue-entry key (includes `insulin.prep.other`). **Omitted** on unmatched historical strings. Never a display label. Never `insulin.prep.unmapped`. |
-| `administrationContext` | yes (new writes)       | enum         | Semantic context. Optional in TypeScript **only** so legacy rows remain readable. New writes always set it (`unspecified` if none chosen). |
-| `context`               | no                     | string       | Legacy only; new writers must not write this field                                                                                          |
+| `administrationContext` | yes (new writes)       | enum         | Semantic context. Optional in TypeScript **only** so legacy rows remain readable. New writes always set it (`unspecified` if none chosen).                              |
+| `context`               | no                     | string       | Legacy only; new writers must not write this field                                                                                                                      |
 
 `preparationCategory` is **not** a persisted event field. Rapid / long-acting
 grouping is catalogue/presentation chrome derived from `preparationId` when
