@@ -6,8 +6,8 @@ import type {
 } from '@diabetes-universe/types';
 import type { EventCardType } from '@diabetes-universe/ui';
 
-import { resolveTimelineEventSourcePresentation } from '../../../components/timeline/timeline-ui-labels';
 import { presentGlucoseFromTimelineEvent } from '../../medical/glucose/present-glucose-from-timeline-event';
+import { resolveTimelineEventSourcePresentation } from './resolve-timeline-event-source-presentation';
 import {
   buildTimelineEventCardAriaLabel,
   buildTimelineEventMapMarkerAriaLabel,

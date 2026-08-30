@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { resolveTimelineEventSourcePresentation } from '../../../components/timeline/timeline-ui-labels.ts';
+import { resolveTimelineEventSourcePresentation } from './resolve-timeline-event-source-presentation.ts';
 import { liftLegacyTestFixtures } from '../testing/lift-legacy-test-fixtures.ts';
 import { mapTimelineEventDetailPresentation } from './timeline-presentation-mapper.ts';
 import { createTestTimelinePresentationDependencies } from './testing/create-test-timeline-presentation-dependencies.ts';

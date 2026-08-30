@@ -10,6 +10,11 @@ export {
 export { resolveTimelinePresentationLabels } from './timeline-presentation-labels';
 export { resolveGlucoseTimelineCardHistoryPresentation } from './resolve-glucose-timeline-card-history-presentation';
 export {
+  resolveTimelineEventSourcePresentation,
+  type TimelineEventSourceLabels,
+  type TimelineEventSourcePresentation,
+} from './resolve-timeline-event-source-presentation';
+export {
   formatTimelineGlucoseDisplayValue,
   mapTimelineEventCardPresentation,
   mapTimelineEventDetailPresentation,

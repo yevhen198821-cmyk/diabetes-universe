@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { resolveTimelineEventSourcePresentation } from '../../lib/timeline/presentation/resolve-timeline-event-source-presentation.ts';
 import {
   formatTimelineDayPeriodEventCount,
   formatTimelineEventsOfDayClusterAriaLabel,
   formatTimelineLoadMoreAnnouncement,
   formatTimelineToolbarResultLabel,
-  resolveTimelineEventSourcePresentation,
 } from './timeline-ui-labels.ts';
 
 const eventCountLabels = {
