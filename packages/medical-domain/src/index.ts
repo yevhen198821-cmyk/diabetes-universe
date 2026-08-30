@@ -159,6 +159,42 @@ export {
   type GlucoseLatestSelectionReading,
   type SelectLatestEligibleGlucoseReadingInput,
 } from './glucose/glucose-latest-selection';
+export {
+  INSULIN_PREPARATION_IDS,
+  INSULIN_PREPARATION_OTHER_ID,
+  isInsulinPreparationId,
+  resolveInsulinPresentationGrouping,
+} from './insulin/insulin-catalogue';
+export type { InsulinPresentationGrouping } from './insulin/insulin-catalogue';
+export {
+  INSULIN_CANONICAL_DOSE_TECHNICAL_MAXIMUM,
+  validateInsulinCanonicalDose,
+} from './insulin/insulin-dose';
+export type {
+  InsulinCanonicalDoseValidationErrorCode,
+  InsulinCanonicalDoseValidationResult,
+} from './insulin/insulin-dose';
+export {
+  INSULIN_ADMINISTRATION_CONTEXTS,
+  isInsulinAdministrationContext,
+  resolveInsulinNewWriteAdministrationContext,
+} from './insulin/insulin-administration-context';
+export type {
+  InsulinNewWriteAdministrationContextErrorCode,
+  InsulinNewWriteAdministrationContextResult,
+} from './insulin/insulin-administration-context';
+export {
+  INSULIN_LEGACY_ADMINISTRATION_CONTEXT_MAPPING,
+  mapLegacyInsulinAdministrationContext,
+} from './insulin/insulin-legacy-context';
+export type { InsulinLegacyContextMappingResult } from './insulin/insulin-legacy-context';
+export { prepareInsulinNewWrite } from './insulin/insulin-new-write';
+export type {
+  InsulinNewWriteErrorCode,
+  InsulinNewWritePayload,
+  InsulinNewWriteResult,
+  PrepareInsulinNewWriteInput,
+} from './insulin/insulin-new-write';
 export { DIABETES_SETTINGS_VALIDATION_BOUNDS } from './validation/diabetes-settings-bounds';
 export {
   DiabetesSettingsValidationError,

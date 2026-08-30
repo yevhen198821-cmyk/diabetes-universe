@@ -27,6 +27,35 @@ export type CanonicalUnitId =
 export type GlucoseMeasurementContext =
   'fasting' | 'before_meal' | 'after_meal' | 'bedtime' | 'other';
 
+/**
+ * Stable internal catalogue-entry key for one governed insulin preparation.
+ *
+ * This is never a localized display label. Unmatched historical events omit
+ * the field. `insulin.prep.unmapped` is not a catalogue identity.
+ */
+export type InsulinPreparationId =
+  | 'insulin.prep.aspart_novorapid'
+  | 'insulin.prep.aspart_fiasp'
+  | 'insulin.prep.lispro_humalog'
+  | 'insulin.prep.glulisine_apidra'
+  | 'insulin.prep.glargine_lantus'
+  | 'insulin.prep.degludec_tresiba'
+  | 'insulin.prep.other';
+
+/**
+ * Semantic administration-context identifier for an insulin event.
+ *
+ * Optional on the event type so legacy rows remain readable. New semantic
+ * writers always set a value (`unspecified` when the user chooses none).
+ */
+export type InsulinAdministrationContext =
+  | 'before_meal'
+  | 'after_meal'
+  | 'correction'
+  | 'basal'
+  | 'other'
+  | 'unspecified';
+
 export type NutritionMealType =
   'breakfast' | 'lunch' | 'dinner' | 'snack' | 'other';
 
@@ -103,7 +132,18 @@ export interface InsulinTimelineEvent extends SemanticEventEnvelope {
   readonly preparation: string;
   /** Canonical insulin dose in international units. */
   readonly doseUnits: number;
+  /** Legacy free/localized administration string. Read-compatible only. */
   readonly context?: string;
+  /**
+   * Catalogue entry ID when the preparation is a known catalogue selection
+   * or Other. Omitted on unmatched historical events.
+   */
+  readonly preparationId?: InsulinPreparationId;
+  /**
+   * Semantic administration context. Optional so legacy events type-check.
+   * Required on new semantic writes.
+   */
+  readonly administrationContext?: InsulinAdministrationContext;
 }
 
 export interface NutritionTimelineEvent extends SemanticEventEnvelope {

@@ -5,14 +5,22 @@
 | Field        | Value                                                     |
 | ------------ | --------------------------------------------------------- |
 | Wave         | 4A — Architecture only                                    |
-| Status       | **Ready for approval**                                    |
+| Status       | **Approved** (merged)                                     |
 | Date         | 2026-08-30 (remediated)                                   |
 | Scope        | Canonical insulin administration recording                |
 | Out of scope | Runtime, UI, migrations, production TypeScript in this PR |
 | Base SHA     | `1067b9f9221ba2406c97078846dd7343533524e9`                |
 
-Wave 4A is documentation only. **Wave 4B must not start until this document is
-approved and merged.**
+Wave 4A is the approved architecture. Decisions in this document are
+unchanged.
+
+**Implementation progress** (annotation only):
+
+| Slice    | Status                                                                                                                  |
+| -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 4A       | Approved and merged                                                                                                     |
+| **4B-I** | Implemented — [shared types and medical-domain foundation](../../implementation/wave-4b-i-insulin-domain-foundation.md) |
+| 4B-II–4E | Not started                                                                                                             |
 
 “No OpenAPI changes” applies to **this documentation PR only**. Later Wave 4
 slices that reach cloud create/update/adoption **must** update the runtime
@@ -897,6 +905,9 @@ above. Those changes are out of Wave 4A, not out of Wave 4 forever.
 ## 17. Acceptance criteria for Wave 4B-I
 
 Wave 4B-I may start only after this document is approved and merged.
+The 4B-I implementation is recorded in
+[wave-4b-i-insulin-domain-foundation.md](../../implementation/wave-4b-i-insulin-domain-foundation.md).
+Approved acceptance criteria below are unchanged.
 
 4B-I is complete when all of the following are true:
 

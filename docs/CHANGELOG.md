@@ -1,5 +1,39 @@
 # Changelog
 
+## Wave 4B-I — Shared Insulin Types and Medical-Domain Foundation
+
+Дата: 2026-08-30
+
+Статус: types + presentation-neutral medical-domain foundation. No UI, API,
+OpenAPI, or persistence writer changes.
+
+Завершено:
+
+- added `InsulinPreparationId` and `InsulinAdministrationContext` and optional
+  `preparationId` / `administrationContext` on `InsulinTimelineEvent`;
+- added `@diabetes-universe/medical-domain` insulin catalogue, grouping
+  chrome resolver, canonical 500 IU technical dose validation, context
+  guards, exact legacy RU mapping, and `prepareInsulinNewWrite`;
+- documented Wave 4E API incompatibility; current allow-list still rejects
+  the new fields;
+- left `InsulinQuickAddEntry`, Quick Add, Timeline Edit, and OpenAPI
+  unchanged.
+
+Не входит в этот этап:
+
+- 4B-II presentation/edit, 4C localized Quick Add, 4D save integrity, 4E
+  API/adoption/OpenAPI, calculator/recommendation/pump.
+
+### Hardening (2026-08-30)
+
+- runtime registries are `Object.freeze`d; membership Sets are not public
+  exports and cannot be mutated by consumers;
+- type and runtime vocabularies are exhaustive via `Record<Union, Metadata>`;
+- malformed root input to `prepareInsulinNewWrite` fails closed with
+  `insulin.input.invalid` and does not throw.
+
+---
+
 ## Wave 4A — Insulin Recording Architecture
 
 Дата: 2026-08-30

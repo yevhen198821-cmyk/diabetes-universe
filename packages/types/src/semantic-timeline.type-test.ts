@@ -2,12 +2,15 @@ import type {
   ActivityTimelineEvent,
   CanonicalUnitId,
   GlucoseTimelineEvent,
+  InsulinAdministrationContext,
+  InsulinPreparationId,
   InsulinTimelineEvent,
   MedicationTimelineEvent,
   NoteTimelineEvent,
   NutritionTimelineEvent,
   SemanticTimelineEvent,
 } from './semantic-timeline';
+import type { InsulinQuickAddEntry } from './quick-add';
 import type { MigrationRecord, MigrationResult } from './timeline-migration';
 import type { TimelineEvent } from './timeline';
 
@@ -33,6 +36,83 @@ const insulinEvent: InsulinTimelineEvent = {
   preparation: 'NovoRapid',
   doseUnits: 4,
 };
+
+const semanticInsulinEvent: InsulinTimelineEvent = {
+  ...insulinEvent,
+  preparationId: 'insulin.prep.aspart_novorapid',
+  administrationContext: 'before_meal',
+};
+
+void semanticInsulinEvent;
+
+const validPreparationId: InsulinPreparationId = 'insulin.prep.other';
+void validPreparationId;
+
+const validAdministrationContext: InsulinAdministrationContext = 'unspecified';
+void validAdministrationContext;
+
+// @ts-expect-error catalogue identity does not include arbitrary strings
+const invalidPreparationId: InsulinPreparationId = 'insulin.prep.unknown';
+
+void invalidPreparationId;
+
+// @ts-expect-error unmatched history omits preparationId; unmapped is not an ID
+const unmappedPreparationId: InsulinPreparationId = 'insulin.prep.unmapped';
+
+void unmappedPreparationId;
+
+// @ts-expect-error administration context is a closed semantic union
+const invalidAdministrationContext: InsulinAdministrationContext = 'meal';
+
+void invalidAdministrationContext;
+
+const insulinMissingPreparation = {
+  ...baseEnvelope,
+  kind: 'insulin' as const,
+  doseUnits: 4,
+};
+
+// @ts-expect-error preparation remains required
+const insulinWithoutPreparation: InsulinTimelineEvent =
+  insulinMissingPreparation;
+
+void insulinWithoutPreparation;
+
+const insulinMissingDose = {
+  ...baseEnvelope,
+  kind: 'insulin' as const,
+  preparation: 'NovoRapid',
+};
+
+// @ts-expect-error doseUnits remains required
+const insulinWithoutDose: InsulinTimelineEvent = insulinMissingDose;
+
+void insulinWithoutDose;
+
+function rejectPersistedPreparationCategory(event: InsulinTimelineEvent): void {
+  // @ts-expect-error preparationCategory is not part of InsulinTimelineEvent
+  void event.preparationCategory;
+}
+
+void rejectPersistedPreparationCategory;
+
+const unchangedInsulinQuickAdd: InsulinQuickAddEntry = {
+  preparation: 'NovoRapid',
+  doseUnits: 4,
+  time: '08:00',
+};
+
+void unchangedInsulinQuickAdd;
+
+const migratedInsulinQuickAdd: InsulinQuickAddEntry = {
+  preparation: 'NovoRapid',
+  doseUnits: 4,
+  time: '08:00',
+  // @ts-expect-error Wave 4C owns InsulinQuickAddEntry semantic migration
+  preparationId: 'insulin.prep.aspart_novorapid',
+};
+
+void migratedInsulinQuickAdd;
 
 const nutritionEvent: NutritionTimelineEvent = {
   ...baseEnvelope,
