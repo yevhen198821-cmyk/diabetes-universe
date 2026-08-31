@@ -28,19 +28,19 @@
     "@diabetes-universe/timeline-web": "workspace:*",
     "@diabetes-universe/types": "workspace:*",
     "@diabetes-universe/ui": "workspace:*",
-    "better-auth": "1.7.1",
+    "better-auth": "1.7.2",
     "@tailwindcss/postcss": "^4.3.3",
-    "lucide-react": "^1.33.0",
-    "next": "^16.3.2",
+    "lucide-react": "^1.35.0",
+    "next": "^16.3.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.4.0",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
-    "happy-dom": "^20.11.6",
+    "@types/react-dom": "^19.2.5",
+    "happy-dom": "^20.11.12",
     "tsx": "^4.23.12"
   }
 }
