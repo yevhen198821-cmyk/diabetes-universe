@@ -15,10 +15,10 @@ const catalogueEntry = {
   time: '09:00',
 };
 
-function create(overrides = {}) {
+function create(overrides = {}, options = {}) {
   return createSemanticInsulinTimelineEvent(
     { ...catalogueEntry, ...overrides },
-    { clock: fixedClock },
+    { clock: fixedClock, ...options },
   );
 }
 
@@ -58,6 +58,12 @@ test('the semantic insulin event key set is exactly the Wave 4C contract', () =>
     'source',
     'updatedAt',
   ]);
+});
+
+test('the semantic insulin event accepts an explicit retry-safe id', () => {
+  const event = create(catalogueEntry, { id: 'insulin-0900-retry-id' });
+
+  assert.equal(event.id, 'insulin-0900-retry-id');
 });
 
 test('the envelope keeps manual source, schema version 1, and clock timestamps', () => {

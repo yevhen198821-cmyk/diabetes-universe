@@ -302,8 +302,10 @@ export function DashboardRoot() {
             createSemanticGlucoseTimelineEvent(entry, { id: eventId }),
           );
         }}
-        onInsulinSubmit={(entry) => {
-          addEvent(createSemanticInsulinTimelineEvent(entry));
+        onInsulinSubmit={async ({ entry, eventId }) => {
+          await addEventAsync(
+            createSemanticInsulinTimelineEvent(entry, { id: eventId }),
+          );
         }}
         onMedicationSubmit={(entry) => {
           addEvent(createSemanticMedicationTimelineEvent(entry));

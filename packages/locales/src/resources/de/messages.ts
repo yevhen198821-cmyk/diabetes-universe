@@ -250,6 +250,11 @@ export const germanDraftMessages = defineDraftMessages({
   'quick-add.insulin.preparationPlaceholder': 'Insulin auswählen',
   'quick-add.insulin.preparationSheetTitle': 'Insulinpräparat',
   'quick-add.insulin.save': 'Speichern',
+  'quick-add.insulin.saveError.description':
+    'Der Insulineintrag wurde nicht gespeichert. Ihre Werte sind noch im Formular. Versuchen Sie es erneut.',
+  'quick-add.insulin.saveError.title':
+    'Insulineintrag konnte nicht gespeichert werden',
+  'quick-add.insulin.saving': 'Speichern…',
   'quick-add.insulin.timeLabel': 'Zeit',
   'account.profile.about.description':
     'Diabetes Universe hilft Ihnen, Ihre Diabetes-Daten zu verfolgen und zu verstehen.',

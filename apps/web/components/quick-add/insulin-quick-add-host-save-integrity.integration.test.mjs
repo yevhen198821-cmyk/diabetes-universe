@@ -10,7 +10,6 @@ import test from 'node:test';
 import { QuickAddHost } from './quick-add-host.tsx';
 import { createTestPlatformRuntime } from '../../lib/platform/react/testing/create-test-platform-runtime.ts';
 import { TestPlatformProvider } from '../../lib/platform/react/testing/test-platform-provider.ts';
-import { TestDiabetesSettingsProvider } from '../../lib/medical/react/testing/test-diabetes-settings-provider.tsx';
 import {
   setupIntegrationDom,
   teardownIntegrationDom,
@@ -41,11 +40,11 @@ test('QuickAddHost guards close and cancel while async submit is pending', () =>
   assert.match(hostSource, /if \(\s*!canDismissQuickAddWhileSubmitPending/);
 });
 
-test('QuickAddHost releases async pending lock before success close', () => {
+test('QuickAddHost releases async pending lock before success close for insulin', () => {
   assert.match(hostSource, /releaseAsyncSubmitPending\(\)/);
   assert.match(
     hostSource,
-    /releaseAsyncSubmitPending\(\);\s*\n\s*haptics\.success\(\);\s*\n\s*closeQuickAdd\('success'\)/,
+    /const handleInsulinSubmit = async[\s\S]*releaseAsyncSubmitPending\(\);[\s\S]*haptics\.success\(\);[\s\S]*closeQuickAdd\('success'\)/,
   );
 });
 
@@ -65,18 +64,14 @@ test('note quick add host dismiss is unaffected without async submit pending loc
       createElement(
         TestPlatformProvider,
         { runtime },
-        createElement(
-          TestDiabetesSettingsProvider,
-          { glucoseDisplayUnit: 'mmol_per_l' },
-          createElement(QuickAddHost, {
-            onNoteSubmit: () => {},
-            onOpenChange: () => {
-              openChangeCount += 1;
-            },
-            open: true,
-            openCategory: 'note',
-          }),
-        ),
+        createElement(QuickAddHost, {
+          onNoteSubmit: () => {},
+          onOpenChange: () => {
+            openChangeCount += 1;
+          },
+          open: true,
+          openCategory: 'note',
+        }),
       ),
     );
   });

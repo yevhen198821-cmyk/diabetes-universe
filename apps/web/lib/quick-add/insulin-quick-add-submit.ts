@@ -11,6 +11,11 @@ import type {
 import type { InsulinPresentationLabels } from '../medical/insulin';
 import { parseInsulinQuickAddDoseInput } from './insulin-quick-add-dose';
 
+export interface InsulinQuickAddSubmitRequest {
+  readonly entry: InsulinQuickAddEntry;
+  readonly eventId: string;
+}
+
 /**
  * Insulin Quick Add form state.
  *

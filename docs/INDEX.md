@@ -76,6 +76,7 @@
 - [Wave 4B-I — Shared Insulin Types and Medical-Domain Foundation](implementation/wave-4b-i-insulin-domain-foundation.md) — Implemented
 - [Wave 4B-II — Insulin Presentation Adapter and Semantic-Safe Timeline Edit](implementation/wave-4b-ii-insulin-presentation-edit.md) — Implemented
 - [Wave 4C — Localized Semantic Insulin Quick Add](implementation/wave-4c-localized-semantic-insulin-quick-add.md) — Implemented
+- [Wave 4D — Insulin Quick Add Save Integrity](implementation/wave-4d-insulin-quick-add-save-integrity.md) — Implemented on branch / pending merge
 - [Dashboard States](architecture/dashboard/states.md)
 - [Dashboard Responsive Behavior](architecture/dashboard/responsive.md)
 - [Timeline Overview](architecture/timeline/overview.md) — event journal at `/timeline`

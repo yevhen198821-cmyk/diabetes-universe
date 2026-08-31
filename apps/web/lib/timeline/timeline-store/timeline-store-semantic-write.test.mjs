@@ -11,6 +11,7 @@ import {
 } from '@diabetes-universe/timeline';
 
 import { createSemanticGlucoseTimelineEvent } from '../semantic-creators/create-semantic-glucose-timeline-event.ts';
+import { createSemanticInsulinTimelineEvent } from '../semantic-creators/create-semantic-insulin-timeline-event.ts';
 import {
   setupIntegrationDom,
   teardownIntegrationDom,
@@ -265,6 +266,66 @@ test('retry with stable event id creates exactly one stored glucose event', asyn
     assert.equal(mounted.currentStore.events.length, 1);
     assert.equal(mounted.currentStore.events[0]?.id, 'glucose-0830-retry-id');
     assert.equal(mounted.currentStore.events[0]?.source, 'manual');
+  } finally {
+    await mounted.unmount();
+  }
+});
+
+test('retry with stable event id creates exactly one stored insulin event', async () => {
+  let addCalls = 0;
+  const repository = createInMemoryTimelineRepository({ seedEvents: [] });
+  const originalAddEvent = repository.addEvent.bind(repository);
+  const mounted = await mountTimelineStore({ repository });
+
+  try {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const semanticEvent = createSemanticInsulinTimelineEvent(
+      {
+        administrationContext: 'before_meal',
+        doseUnits: 4,
+        preparation: 'NovoRapid',
+        preparationId: 'insulin.prep.aspart_novorapid',
+        time: '08:30',
+      },
+      { clock: fixedClock, id: 'insulin-0830-retry-id' },
+    );
+
+    repository.addEvent = async (event) => {
+      addCalls += 1;
+
+      if (addCalls === 1) {
+        throw new TimelineRepositoryError('TIMELINE_REPOSITORY_WRITE_FAILED');
+      }
+
+      return originalAddEvent(event);
+    };
+
+    await act(async () => {
+      await assert.rejects(mounted.currentStore.addEventAsync(semanticEvent));
+    });
+
+    await act(async () => {
+      await mounted.currentStore.addEventAsync(semanticEvent);
+    });
+
+    assert.equal(addCalls, 2);
+    assert.equal(mounted.currentStore.events.length, 1);
+    assert.equal(mounted.currentStore.events[0]?.id, 'insulin-0830-retry-id');
+    assert.equal(
+      mounted.currentStore.events[0]?.preparationId,
+      'insulin.prep.aspart_novorapid',
+    );
+    assert.equal(
+      mounted.currentStore.events[0]?.administrationContext,
+      'before_meal',
+    );
+    assert.equal(
+      Object.hasOwn(mounted.currentStore.events[0] ?? {}, 'context'),
+      false,
+    );
   } finally {
     await mounted.unmount();
   }

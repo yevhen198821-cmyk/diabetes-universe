@@ -20,7 +20,9 @@ import {
 export function createSemanticInsulinTimelineEvent(
   entry: InsulinQuickAddEntry,
   options: {
+    readonly clientUuid?: string;
     readonly clock?: SemanticTimelineClock;
+    readonly id?: string;
     readonly referenceDate?: Date;
   } = {},
 ): InsulinTimelineEvent {
@@ -30,12 +32,15 @@ export function createSemanticInsulinTimelineEvent(
     entry.time,
     options.referenceDate ?? clock.now(),
   );
+  const id =
+    options.id ??
+    createSemanticTimelineEventId('insulin', entry.time, options.clientUuid);
 
   return {
     administrationContext: entry.administrationContext,
     createdAt: now,
     doseUnits: entry.doseUnits,
-    id: createSemanticTimelineEventId('insulin', entry.time),
+    id,
     kind: 'insulin',
     occurredAt,
     preparation: entry.preparation.trim(),

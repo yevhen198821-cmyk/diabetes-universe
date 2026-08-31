@@ -1,5 +1,34 @@
 # Changelog
 
+## Wave 4D — Insulin Quick Add Save Integrity
+
+Дата: 2026-08-31
+
+Статус: **Implemented on branch / pending merge.** Insulin Quick Add now awaits
+IndexedDB persistence before success close, uses a stable retry event ID, and
+blocks dismiss while pending. Wave 4C semantic payload unchanged. No API,
+OpenAPI, cloud, or `schemaVersion` change.
+
+Завершено:
+
+- generalized Quick Add submit identity (`quick-add-submit-identity-model.ts`)
+  for glucose and insulin stable event IDs;
+- `InsulinQuickAddSubmitRequest` with `{ entry, eventId }` and insulin submit
+  controller prepare/persist phases;
+- async `onInsulinSubmit` on Dashboard and Timeline via `addEventAsync` and
+  `createSemanticInsulinTimelineEvent(entry, { id: eventId })`;
+- insulin form pending state, shared host dismiss lock, localized save-error
+  chrome (`quick-add.insulin.saving`, `quick-add.insulin.saveError.*`);
+- model/controller/integration/store/E2E regression coverage; glucose
+  save-integrity contract unchanged.
+
+Не входило:
+
+- medical API allow-list, kind validation, adoption, OpenAPI, cloud
+  create/update, outbox/sync — Wave 4E;
+- other Quick Add categories, calculator, recommendation, IOB, pump, therapy
+  plan, Edit precision cleanup, global localization closure.
+
 ## Wave 4C — Localized Semantic Insulin Quick Add
 
 Дата: 2026-08-30

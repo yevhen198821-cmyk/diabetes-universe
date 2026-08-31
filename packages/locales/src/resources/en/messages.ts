@@ -510,6 +510,10 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'quick-add.insulin.preparationPlaceholder': 'Select an insulin',
   'quick-add.insulin.preparationSheetTitle': 'Insulin preparation',
   'quick-add.insulin.save': 'Save',
+  'quick-add.insulin.saveError.description':
+    'The insulin entry was not saved. Your values are still in the form. Try again.',
+  'quick-add.insulin.saveError.title': 'Could not save insulin entry',
+  'quick-add.insulin.saving': 'Saving…',
   'quick-add.insulin.timeLabel': 'Time',
   'validation.required': 'This field is required',
   'errors.generic': 'Something went wrong. Please try again.',
