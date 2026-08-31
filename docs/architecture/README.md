@@ -73,8 +73,10 @@ Applications may depend on packages; packages must not depend on applications.
 `apps/web` must not import `@diabetes-universe/medical-persistence` or database
 internals. Enforcement: `apps/web/lib/medical/medical-import-boundary.test.mjs`.
 
-Server-side medical composition uses `@diabetes-universe/medical-service` only in
-future approved server paths; public medical API routes are not yet implemented.
+Server-side medical composition uses `@diabetes-universe/medical-service` in
+the merged P8 transport routes under `apps/web/app/api/v1/medical/...`. These
+handlers are foundation/implementation-candidate code — they are not an activated
+production medical launch.
 
 ## Current product surfaces
 
@@ -84,16 +86,16 @@ future approved server paths; public medical API routes are not yet implemented.
 
 ## Medical platform architecture status
 
-| Phase             | Document                                                                                          | Lifecycle status                                                                                          | Runtime in repo                               |
-| ----------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| P7                | [Backend medical data](backend/p7-backend-medical-data-architecture.md)                           | Approved                                                                                                  | N/A (architecture)                            |
-| P8                | [Medical API contracts](api/p8-medical-api-contracts.md)                                          | Approved                                                                                                  | Public API transport implementation candidate |
-| P9 design         | [Cloud medical persistence design](backend/p9-cloud-medical-persistence-implementation-design.md) | Approved                                                                                                  | N/A (architecture)                            |
-| P9 implementation | [Medical persistence foundation](../implementation/p9-medical-persistence-foundation.md)          | Implementation complete; PostgreSQL rehearsal validated; production deployment deferred                   | Packages merged; no public routes             |
-| P10               | [Local data adoption](sync/p10-local-data-adoption-architecture.md)                               | Approved ([closure](sync/p10-approval-closure.md), [charter](sync/p10-runtime-implementation-charter.md)) | Not implemented                               |
-| P11               | [Offline sync](sync/p11-offline-sync-architecture.md)                                             | Approved ([closure record](sync/p11-approval-closure.md))                                                 | Not implemented                               |
-| P12               | [Conflict / revision / tombstone](sync/p12-conflict-revision-tombstone-architecture.md)           | Approved with clarifications ([audit closure](sync/p12-architecture-security-audit.md))                   | Not implemented                               |
-| P13               | [Security & privacy hardening](security/p13-security-privacy-hardening.md)                        | Approved (closing architecture gate)                                                                      | Operational controls not fully implemented    |
+| Phase             | Document                                                                                          | Lifecycle status                                                                                          | Runtime in repo                                                                                           |
+| ----------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| P7                | [Backend medical data](backend/p7-backend-medical-data-architecture.md)                           | Approved                                                                                                  | N/A (architecture)                                                                                        |
+| P8                | [Medical API contracts](api/p8-medical-api-contracts.md)                                          | Approved                                                                                                  | Transport routes merged under `/api/v1/medical/...`; implementation candidate; production launch deferred |
+| P9 design         | [Cloud medical persistence design](backend/p9-cloud-medical-persistence-implementation-design.md) | Approved                                                                                                  | N/A (architecture)                                                                                        |
+| P9 implementation | [Medical persistence foundation](../implementation/p9-medical-persistence-foundation.md)          | Implementation complete; PostgreSQL rehearsal validated; production deployment deferred                   | Packages merged; no public routes                                                                         |
+| P10               | [Local data adoption](sync/p10-local-data-adoption-architecture.md)                               | Approved ([closure](sync/p10-approval-closure.md), [charter](sync/p10-runtime-implementation-charter.md)) | Not implemented                                                                                           |
+| P11               | [Offline sync](sync/p11-offline-sync-architecture.md)                                             | Approved ([closure record](sync/p11-approval-closure.md))                                                 | Not implemented                                                                                           |
+| P12               | [Conflict / revision / tombstone](sync/p12-conflict-revision-tombstone-architecture.md)           | Approved with clarifications ([audit closure](sync/p12-architecture-security-audit.md))                   | Not implemented                                                                                           |
+| P13               | [Security & privacy hardening](security/p13-security-privacy-hardening.md)                        | Approved (closing architecture gate)                                                                      | Operational controls not fully implemented                                                                |
 
 The table records design and lifecycle state only. A merged or approved architecture
 document is not permission to ship runtime behavior without a separate implementation
@@ -104,7 +106,8 @@ and security gate; P10 architecture approval is recorded in
 
 The repository does **not** currently provide product/runtime capabilities for:
 
-- public medical API transport and controllers;
+- production medical API launch and operational rollout (route handlers exist as
+  P8 foundation; public product activation remains deferred);
 - P10 adoption runtime, P11 continuous sync runtime, P12 conflict/tombstone runtime;
 - medical outbox dispatcher / consumer;
 - complete production medical launch controls (production PostgreSQL provider
@@ -163,6 +166,9 @@ implementation gates, and product requirements.
 
 ## Notes
 
-- Dashboard block localization (I18N-02A–02B5) is complete; Timeline and Quick Add
-  localization migrations remain future work.
+- Dashboard block localization (I18N-02A–02B5) is complete.
+- Insulin Quick Add form and insulin Timeline presentation are localized
+  (Wave 4C / 4B-II). The shared Quick Add action menu and shared picker chrome
+  still contain Russian hardcode; nutrition, medication, activity, and note Quick
+  Add remain incompletely migrated; UK/DE locale parity is still incomplete.
 - Runtime locale switching is not production-ready.

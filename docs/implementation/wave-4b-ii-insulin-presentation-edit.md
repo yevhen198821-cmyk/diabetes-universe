@@ -294,7 +294,7 @@ Behavioral regression coverage lives in:
 
 ## Wave dependencies after this slice
 
-| Wave  | Status                                                                                                         |
+| Wave  | Status at merge (2026-08-30)                                                                                   |
 | ----- | -------------------------------------------------------------------------------------------------------------- |
 | 4B-II | Implemented (this document)                                                                                    |
 | 4C    | **Unblocked only after this PR is approved and merged.** The Wave 4A §11.4 edit gate is satisfied by Option A. |
@@ -307,4 +307,11 @@ Semantic insulin fields remain **not cloud-compatible** until Wave 4E.
 create, update, and adoption. Nothing in this slice sends them to that
 boundary.
 
-Wave 4C is not started here.
+**Scope note:** Wave 4C is not started here — Quick Add insulin migration and
+localization were explicitly out of scope for 4B-II.
+
+**Current state (post–Wave 4C):** Wave 4C has since been implemented and merged
+on `main` (PR #142). That subsequent slice localized the Insulin Quick Add form
+and routed new writes through `prepareInsulinNewWrite`; it was not part of
+4B-II. Waves **4D** (awaited local save integrity) and **4E** (API/adoption/
+OpenAPI) remain not started.

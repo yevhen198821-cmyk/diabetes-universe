@@ -82,8 +82,10 @@ and IndexedDB. Glucose Wave 3D save integrity does **not** apply.
 
 ## Target attributes (Wave 4, additive)
 
-Wave 4B-I implements the optional identity/context fields on
-`InsulinTimelineEvent`. Writers and the medical API are unchanged.
+Wave 4B-I implemented the optional identity/context fields on
+`InsulinTimelineEvent`. Wave 4B-II and Wave 4C now write them on new local
+Quick Add and Edit paths. The medical API validator is unchanged — Wave 4E
+remains required before those fields may cross the cloud boundary.
 
 Wave 4 keeps the current required fields and adds optional identity/context
 fields. `schemaVersion` stays `1` **only if** every fail-closed reader that
@@ -172,6 +174,6 @@ fields.
   medical API allow-list, kind validation, adoption, OpenAPI, and tests.
   Wave 4 does not add an insulin-specific sync protocol.
 - Implementation slices: 4B-I types/domain, 4B-II presentation plus
-  semantic-safe edit (implemented), 4C localized Quick Add including the
-  required Other name, 4D local save integrity, 4E API/adoption/OpenAPI.
-  Wave 4C is unblocked only after the 4B-II PR is approved and merged.
+  semantic-safe edit (merged), 4C localized Quick Add including the required
+  Other name (merged), 4D local save integrity (not started), 4E
+  API/adoption/OpenAPI (not started).
