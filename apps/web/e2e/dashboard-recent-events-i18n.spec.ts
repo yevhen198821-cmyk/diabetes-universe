@@ -53,10 +53,10 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   }
 
   await page.getByRole('button', { name: 'Quick add: Insulin' }).click();
-  await page.getByRole('button', { name: /Препарат/ }).click();
+  await page.getByRole('button', { name: /Insulin preparation/ }).click();
   await page.getByRole('button', { name: 'NovoRapid' }).click();
-  await page.getByLabel('Доза').fill('5');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
+  await page.getByRole('textbox', { name: 'Insulin dose' }).fill('5');
+  await page.getByRole('button', { name: 'Save' }).click();
 
   await expect(recentEvents.getByText('5 U', { exact: true })).toBeVisible();
   await expect(recentEvents.locator('li')).toHaveCount(4);
@@ -110,7 +110,7 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
     .click();
   await page.getByRole('button', { name: 'Edit' }).click();
   await expect(page.getByRole('dialog', { name: 'Edit event' })).toBeVisible();
-  await page.getByLabel('Insulin dose').fill('6');
+  await page.getByRole('textbox', { name: 'Insulin dose' }).fill('6');
   await page.getByRole('button', { name: 'Save' }).click();
   await page
     .getByRole('button', { exact: true, name: 'Close details' })

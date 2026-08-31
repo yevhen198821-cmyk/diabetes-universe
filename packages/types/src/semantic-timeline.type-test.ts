@@ -96,23 +96,63 @@ function rejectPersistedPreparationCategory(event: InsulinTimelineEvent): void {
 
 void rejectPersistedPreparationCategory;
 
-const unchangedInsulinQuickAdd: InsulinQuickAddEntry = {
-  preparation: 'NovoRapid',
-  doseUnits: 4,
-  time: '08:00',
-};
-
-void unchangedInsulinQuickAdd;
-
-const migratedInsulinQuickAdd: InsulinQuickAddEntry = {
-  preparation: 'NovoRapid',
-  doseUnits: 4,
-  time: '08:00',
-  // @ts-expect-error Wave 4C owns InsulinQuickAddEntry semantic migration
+const semanticInsulinQuickAdd: InsulinQuickAddEntry = {
   preparationId: 'insulin.prep.aspart_novorapid',
+  preparation: 'NovoRapid',
+  doseUnits: 4,
+  administrationContext: 'before_meal',
+  time: '08:00',
 };
 
-void migratedInsulinQuickAdd;
+void semanticInsulinQuickAdd;
+
+const otherInsulinQuickAdd: InsulinQuickAddEntry = {
+  preparationId: 'insulin.prep.other',
+  preparation: 'Pharmacy own-brand insulin',
+  doseUnits: 12.25,
+  administrationContext: 'unspecified',
+  time: '08:00',
+};
+
+void otherInsulinQuickAdd;
+
+const insulinQuickAddMissingIdentity = {
+  preparation: 'NovoRapid',
+  doseUnits: 4,
+  administrationContext: 'before_meal' as const,
+  time: '08:00',
+};
+
+// @ts-expect-error Wave 4C requires a catalogue identity on every new write
+const insulinQuickAddWithoutPreparationId: InsulinQuickAddEntry =
+  insulinQuickAddMissingIdentity;
+
+void insulinQuickAddWithoutPreparationId;
+
+const insulinQuickAddMissingContext = {
+  preparationId: 'insulin.prep.aspart_novorapid' as const,
+  preparation: 'NovoRapid',
+  doseUnits: 4,
+  time: '08:00',
+};
+
+// @ts-expect-error Wave 4C always resolves a semantic administration context
+const insulinQuickAddWithoutContext: InsulinQuickAddEntry =
+  insulinQuickAddMissingContext;
+
+void insulinQuickAddWithoutContext;
+
+const legacyContextInsulinQuickAdd: InsulinQuickAddEntry = {
+  preparationId: 'insulin.prep.aspart_novorapid',
+  preparation: 'NovoRapid',
+  doseUnits: 4,
+  administrationContext: 'before_meal',
+  time: '08:00',
+  // @ts-expect-error the legacy free-text context is not a Quick Add write field
+  context: 'Перед едой',
+};
+
+void legacyContextInsulinQuickAdd;
 
 const nutritionEvent: NutritionTimelineEvent = {
   ...baseEnvelope,

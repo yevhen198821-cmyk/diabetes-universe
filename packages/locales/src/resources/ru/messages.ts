@@ -343,6 +343,23 @@ export const russianDraftMessages = defineDraftMessages({
   'quick-add.glucose.valueLabel': 'Уровень глюкозы',
   'quick-add.glucose.valueOutOfRangeError':
     'Введите корректное значение глюкозы для выбранных единиц.',
+  'quick-add.insulin.cancel': 'Отмена',
+  'quick-add.insulin.contextLabel': 'Контекст введения',
+  'quick-add.insulin.contextPlaceholder': 'Выберите контекст',
+  'quick-add.insulin.contextSheetTitle': 'Контекст введения',
+  'quick-add.insulin.doseError':
+    'Введите дозу больше 0 и не более 100, не более двух знаков после запятой.',
+  'quick-add.insulin.doseLabel': 'Доза инсулина',
+  'quick-add.insulin.dosePlaceholder': '4',
+  'quick-add.insulin.doseUnit': 'ЕД',
+  'quick-add.insulin.otherNameLabel': 'Название препарата',
+  'quick-add.insulin.otherNamePlaceholder': 'Укажите название записи',
+  'quick-add.insulin.otherNameRequiredError': 'Укажите название препарата.',
+  'quick-add.insulin.preparationLabel': 'Препарат инсулина',
+  'quick-add.insulin.preparationPlaceholder': 'Выберите инсулин',
+  'quick-add.insulin.preparationSheetTitle': 'Препарат инсулина',
+  'quick-add.insulin.save': 'Сохранить',
+  'quick-add.insulin.timeLabel': 'Время',
   'account.profile.about.description':
     'Diabetes Universe помогает отслеживать и понимать ваши данные о диабете.',
   'account.profile.about.page.buildInfoLabel': 'Сборка',

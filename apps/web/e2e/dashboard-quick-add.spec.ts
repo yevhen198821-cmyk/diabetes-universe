@@ -39,10 +39,10 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
     page.getByRole('dialog', { name: 'Добавить инсулин' }),
   ).toBeVisible();
 
-  await page.getByRole('button', { name: /Препарат/ }).click();
+  await page.getByRole('button', { name: /Insulin preparation/ }).click();
   await page.getByRole('button', { name: 'NovoRapid' }).click();
-  await page.getByLabel('Доза').fill('5');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
+  await page.getByRole('textbox', { name: 'Insulin dose' }).fill('5');
+  await page.getByRole('button', { name: 'Save' }).click();
 
   await expect(
     page.getByRole('dialog', { name: 'Добавить инсулин' }),
@@ -91,10 +91,10 @@ test('quick add insulin opens directly and updates dashboard', async ({
     page.getByRole('dialog', { name: 'Добавить событие' }),
   ).toHaveCount(0);
 
-  await page.getByRole('button', { name: /Препарат/ }).click();
+  await page.getByRole('button', { name: /Insulin preparation/ }).click();
   await page.getByRole('button', { name: 'NovoRapid' }).click();
-  await page.getByLabel('Доза').fill('2');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
+  await page.getByRole('textbox', { name: 'Insulin dose' }).fill('2');
+  await page.getByRole('button', { name: 'Save' }).click();
 
   await expect(
     page.getByRole('dialog', { name: 'Добавить инсулин' }),

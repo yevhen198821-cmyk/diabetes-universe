@@ -230,6 +230,23 @@ export const ukrainianDraftMessages = defineDraftMessages({
   'quick-add.glucose.valueLabel': 'Рівень глюкози',
   'quick-add.glucose.valueOutOfRangeError':
     'Введіть коректне значення глюкози для обраних одиниць.',
+  'quick-add.insulin.cancel': 'Скасувати',
+  'quick-add.insulin.contextLabel': 'Контекст введення',
+  'quick-add.insulin.contextPlaceholder': 'Виберіть контекст',
+  'quick-add.insulin.contextSheetTitle': 'Контекст введення',
+  'quick-add.insulin.doseError':
+    'Введіть дозу більше 0 і не більше 100, не більше двох знаків після коми.',
+  'quick-add.insulin.doseLabel': 'Доза інсуліну',
+  'quick-add.insulin.dosePlaceholder': '4',
+  'quick-add.insulin.doseUnit': 'ОД',
+  'quick-add.insulin.otherNameLabel': 'Назва препарату',
+  'quick-add.insulin.otherNamePlaceholder': 'Вкажіть назву запису',
+  'quick-add.insulin.otherNameRequiredError': 'Вкажіть назву препарату.',
+  'quick-add.insulin.preparationLabel': 'Препарат інсуліну',
+  'quick-add.insulin.preparationPlaceholder': 'Виберіть інсулін',
+  'quick-add.insulin.preparationSheetTitle': 'Препарат інсуліну',
+  'quick-add.insulin.save': 'Зберегти',
+  'quick-add.insulin.timeLabel': 'Час',
   'account.profile.about.description':
     'Diabetes Universe допомагає відстежувати та розуміти ваші дані про діабет.',
   'account.profile.about.page.buildInfoLabel': 'Збірка',

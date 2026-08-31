@@ -94,10 +94,10 @@ test('dashboard quick add insulin persists across page reload', async ({
   await waitForApplicationReady(page);
 
   await page.getByRole('button', { name: 'Quick add: Insulin' }).click();
-  await page.getByRole('button', { name: /Препарат/ }).click();
+  await page.getByRole('button', { name: /Insulin preparation/ }).click();
   await page.getByRole('button', { name: 'NovoRapid' }).click();
-  await page.getByLabel('Доза').fill('7');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
+  await page.getByRole('textbox', { name: 'Insulin dose' }).fill('7');
+  await page.getByRole('button', { name: 'Save' }).click();
 
   await expect(
     page.getByRole('region', { name: 'Today' }).getByText('11 U'),

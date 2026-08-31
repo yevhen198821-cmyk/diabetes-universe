@@ -5,16 +5,17 @@
 Approved as a Timeline semantic kind. Wave 4A is the approved recording
 architecture. Wave 4B-I adds the shared TypeScript contract and
 presentation-neutral medical-domain foundation. Wave 4B-II adds the shared
-presentation adapter and the semantic-safe Timeline Edit path (**Option A**),
-so Timeline Edit can now write `preparationId` and `administrationContext`
-locally. Quick Add, IndexedDB save integrity, and the medical API remain on the
-current payload.
+presentation adapter and the semantic-safe Timeline Edit path (**Option A**).
+Wave 4C migrates Insulin Quick Add to the semantic contract, so both local
+writers now emit `preparationId` and `administrationContext`. IndexedDB save
+integrity and the medical API remain unchanged.
 
 Authoritative architecture:
 [Wave 4A — Insulin Recording Architecture](../../architecture/insulin/wave-4a-insulin-recording-architecture.md).
 Implementation:
 [Wave 4B-I — Shared Insulin Types and Medical-Domain Foundation](../../implementation/wave-4b-i-insulin-domain-foundation.md),
-[Wave 4B-II — Insulin Presentation Adapter and Semantic-Safe Timeline Edit](../../implementation/wave-4b-ii-insulin-presentation-edit.md).
+[Wave 4B-II — Insulin Presentation Adapter and Semantic-Safe Timeline Edit](../../implementation/wave-4b-ii-insulin-presentation-edit.md),
+[Wave 4C — Localized Semantic Insulin Quick Add](../../implementation/wave-4c-localized-semantic-insulin-quick-add.md).
 
 ## Purpose
 
@@ -31,43 +32,52 @@ plan.
 These fields are what Dashboard, Timeline, Quick Add, and IndexedDB persist
 today.
 
-| Attribute       | Required | Type        | Meaning                                   |
-| --------------- | -------- | ----------- | ----------------------------------------- |
-| `id`            | yes      | string      | Stable event identifier                   |
-| `kind`          | yes      | `'insulin'` | Discriminator                             |
-| `occurredAt`    | yes      | ISO 8601    | Administration time entered by the user   |
-| `createdAt`     | yes      | ISO 8601    | Local first-seen timestamp                |
-| `updatedAt`     | yes      | ISO 8601    | Local last-mutation timestamp             |
-| `schemaVersion` | yes      | `1`         | Semantic schema generation                |
-| `source`        | yes      | source      | Origin (`manual` for Quick Add)           |
-| `provenance`    | no       | object      | Optional envelope provenance              |
-| `preparation`   | yes      | string      | Free display string (often a brand label) |
-| `doseUnits`     | yes      | number      | Canonical dose in international units     |
-| `context`       | no       | string      | Free/localized administration label       |
+| Attribute               | Required    | Type         | Meaning                                                       |
+| ----------------------- | ----------- | ------------ | ------------------------------------------------------------- |
+| `id`                    | yes         | string       | Stable event identifier                                       |
+| `kind`                  | yes         | `'insulin'`  | Discriminator                                                 |
+| `occurredAt`            | yes         | ISO 8601     | Administration time entered by the user                       |
+| `createdAt`             | yes         | ISO 8601     | Local first-seen timestamp                                    |
+| `updatedAt`             | yes         | ISO 8601     | Local last-mutation timestamp                                 |
+| `schemaVersion`         | yes         | `1`          | Semantic schema generation                                    |
+| `source`                | yes         | source       | Origin (`manual` for Quick Add)                               |
+| `provenance`            | no          | object       | Optional envelope provenance                                  |
+| `preparation`           | yes         | string       | Display snapshot (catalogue label or user-entered Other name) |
+| `doseUnits`             | yes         | number       | Canonical dose in international units                         |
+| `preparationId`         | new writes  | catalogue ID | Catalogue identity; omitted on unmatched historical rows      |
+| `administrationContext` | new writes  | context ID   | Semantic context; always set by new writes                    |
+| `context`               | legacy only | string       | Free/localized administration label kept on historical rows   |
 
 Conceptual unit: `CanonicalUnitId` `'insulin.international_unit'`. The unit is
 not stored on the event.
 
 ### Current write path
 
-Quick Add collects `InsulinQuickAddEntry` (`preparation`, `doseUnits`, `time`,
-optional `context` string). `createSemanticInsulinTimelineEvent` copies
-trimmed strings and the numeric dose, sets `source: 'manual'`, and allocates a
-new event ID at create time.
+Quick Add collects the semantic `InsulinQuickAddEntry` (`preparationId`,
+`preparation` snapshot, `doseUnits`, `administrationContext`, `time`) and
+validates it through `prepareInsulinNewWrite` before submit.
+`createSemanticInsulinTimelineEvent` writes those semantic fields, sets
+`source: 'manual'` and `schemaVersion: 1`, allocates a new event ID at create
+time, and never emits the legacy `context` key.
+
+Timeline Edit writes the same semantic fields through the Wave 4B-II edit
+transition.
 
 Dashboard and Timeline persist through fire-and-forget `TimelineStore.addEvent`
 and IndexedDB. Glucose Wave 3D save integrity does **not** apply.
 
 ### Current limitations
 
-- Quick Add still writes `{ preparation, doseUnits, context? }`; its options and
-  form chrome remain hardcoded in Russian until Wave 4C;
 - UI validation `0 < dose <= 100` is a technical typo guard, not a safe dose;
-- Timeline Edit is the only writer that emits `preparationId` and
-  `administrationContext`, and only after an explicit user selection
-  (Wave 4B-II Option A);
-- those semantic fields are local-only until Wave 4E;
-- insulin still uses fire-and-forget `addEvent` until Wave 4D;
+  Quick Add additionally accepts at most two fractional digits as a manual
+  input policy, while canonical domain validity stays `> 0`, `<= 500` with no
+  precision limit;
+- semantic fields are local-only until Wave 4E; `validateSemanticEvent` still
+  rejects them at the API boundary;
+- insulin still uses fire-and-forget `addEvent` until Wave 4D, so a failed local
+  write is not surfaced and there is no retry identity;
+- the shared Quick Add action menu and shared UI picker chrome remain
+  unlocalized for every category;
 - no bolus calculator, insulin-on-board, recommendation, pump, or therapy plan.
 
 ## Target attributes (Wave 4, additive)

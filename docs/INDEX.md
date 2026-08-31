@@ -75,6 +75,7 @@
 - [Wave 4A — Insulin Recording Architecture](architecture/insulin/wave-4a-insulin-recording-architecture.md) — Approved
 - [Wave 4B-I — Shared Insulin Types and Medical-Domain Foundation](implementation/wave-4b-i-insulin-domain-foundation.md) — Implemented
 - [Wave 4B-II — Insulin Presentation Adapter and Semantic-Safe Timeline Edit](implementation/wave-4b-ii-insulin-presentation-edit.md) — Implemented
+- [Wave 4C — Localized Semantic Insulin Quick Add](implementation/wave-4c-localized-semantic-insulin-quick-add.md) — Implemented
 - [Dashboard States](architecture/dashboard/states.md)
 - [Dashboard Responsive Behavior](architecture/dashboard/responsive.md)
 - [Timeline Overview](architecture/timeline/overview.md) — event journal at `/timeline`
@@ -184,7 +185,7 @@ the numbered specifications above.
 - [User Entity](data/entities/user.md)
 - [Timeline Entity](data/entities/timeline.md) — approved `TimelineEvent` contract
 - [Glucose Entity](data/entities/glucose.md)
-- [Insulin Entity](data/entities/insulin.md) — Wave 4A contract; 4B-I shared types (writers unchanged)
+- [Insulin Entity](data/entities/insulin.md) — Wave 4A contract; semantic Quick Add and Edit writers (4B-II + 4C)
 - [Nutrition Entity](data/entities/nutrition.md)
 - [Medication Entity](data/entities/medication.md)
 - [Reminder Entity](data/entities/reminder.md)

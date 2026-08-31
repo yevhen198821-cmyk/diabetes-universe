@@ -1,5 +1,53 @@
 # Changelog
 
+## Wave 4C — Localized Semantic Insulin Quick Add
+
+Дата: 2026-08-30
+
+Статус: Implemented. Insulin Quick Add writes the Wave 4A semantic contract and
+is localized for EN/RU/UK/DE. No API, OpenAPI, cloud, persistence-integrity, or
+`schemaVersion` change.
+
+Завершено:
+
+- migrated `InsulinQuickAddEntry` to the semantic new-write shape
+  (`preparationId`, `preparation` snapshot, `doseUnits`,
+  `administrationContext`, `time`) and removed the legacy `context` string
+  without dual-write;
+- routed Quick Add submit through `prepareInsulinNewWrite`, so only a valid
+  domain payload can reach `onSubmit`;
+- preparation picker now uses catalogue IDs with labels and grouping chrome from
+  the Wave 4B-II presentation adapter; identity is never derived from a display
+  string and grouping is never persisted;
+- `insulin.prep.other` reveals a required free-text name, trims it, blocks a
+  blank submit with a localized error, and never stores a translated “Other”
+  label as the snapshot;
+- switching from Other back to a catalogue entry drops the entered name;
+- administration context uses semantic IDs only; no choice and an explicit
+  “Not specified” both persist `administrationContext: 'unspecified'`;
+- added a manual dose parser (`insulin-quick-add-dose.ts`) accepting at most two
+  fractional digits with `.` or `,`, `0 < dose <= 100` as a UI typo guard, and
+  no rounding (`12.25` stays `12.25`); canonical domain validity stays
+  `> 0`, `<= 500` with no precision policy;
+- removed `format-insulin.ts` (`parseInsulinDoseInput` and the unused
+  `formatInsulinDose` with `maximumFractionDigits: 1`) and the display-string
+  option lists `insulin-preparation-options.ts` / `insulin-context-options.ts`;
+- `createSemanticInsulinTimelineEvent` writes `preparationId` and
+  `administrationContext`, keeps `source: 'manual'` and `schemaVersion: 1`, and
+  never emits `context` or `preparationCategory`;
+- added `quick-add.insulin.*` chrome for `en-GB`, `ru-RU`, `uk-UA`, `de-DE`
+  reusing the existing insulin catalogue/context/grouping keys.
+
+Не входило:
+
+- awaited IndexedDB save integrity, pending state, dismiss lock, stable retry
+  identity — Wave 4D;
+- medical API allow-list, kind validation, adoption, OpenAPI, cloud
+  create/update, outbox/sync — Wave 4E;
+- other Quick Add categories, the shared Quick Add action menu, glucose
+  behavior;
+- calculator, dose recommendation, IOB, pump, therapy plan, new preparations.
+
 ## Wave 4B-II — Insulin Presentation Adapter and Semantic-Safe Timeline Edit
 
 Дата: 2026-08-30

@@ -1,4 +1,8 @@
-import type { GlucoseMeasurementContext } from './semantic-timeline';
+import type {
+  GlucoseMeasurementContext,
+  InsulinAdministrationContext,
+  InsulinPreparationId,
+} from './semantic-timeline';
 
 /**
  * MVP categories available in the first Quick Add stage.
@@ -21,11 +25,20 @@ export interface GlucoseQuickAddEntry {
   readonly context?: GlucoseMeasurementContext;
 }
 
+/**
+ * Semantic insulin Quick Add write (Wave 4C).
+ *
+ * `preparationId` is the only identity; `preparation` is the display snapshot
+ * resolved together with it (a catalogue label, or the user-entered name for
+ * `insulin.prep.other`). The legacy free-text `context` string is not part of
+ * this contract — administration context is always a semantic ID.
+ */
 export interface InsulinQuickAddEntry {
+  readonly preparationId: InsulinPreparationId;
   readonly preparation: string;
   readonly doseUnits: number;
+  readonly administrationContext: InsulinAdministrationContext;
   readonly time: string;
-  readonly context?: string;
 }
 
 export type NutritionEntryMode = 'manual' | 'products';
