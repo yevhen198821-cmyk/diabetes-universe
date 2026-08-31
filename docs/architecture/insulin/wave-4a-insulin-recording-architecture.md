@@ -93,10 +93,16 @@ This document is the approval gate for later Wave 4 implementation slices.
 
 ## 2. Current-state inventory
 
-Audited against `origin/main` at
-`1067b9f9221ba2406c97078846dd7343533524e9`.
+### Historical baseline (pre–Wave 4B)
 
-### 2.1 Production type contracts
+Audited against `origin/main` at
+`1067b9f9221ba2406c97078846dd7343533524e9` (2026-08-30). Subsections §2.1–§2.9
+record the **pre–Wave 4B** production inventory that informed Wave 4A
+architecture decisions. They are retained unchanged; they do not describe the
+repository after Waves 4B-I, 4B-II, or 4C merged. For the live inventory, see
+§2.10.
+
+### 2.1 Production type contracts (historical baseline)
 
 `InsulinQuickAddEntry` (`packages/types/src/quick-add.ts`):
 
@@ -253,6 +259,67 @@ considered cloud-compatible until Wave **4E** completes.
 10. Generic Timeline Edit would desynchronize new semantic fields if they shipped first.
 11. There is no dosing calculator, active-insulin model, recommendation, pump
     integration, or therapy plan.
+
+### 2.10 Current repository state (post–Wave 4C)
+
+Audited against `main` at `53dfe3676f0f73a869134cd6a074527b416c7fd0` (merge of
+PR #142).
+
+| Slice  | Status                                                                                                                         |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| 4A     | Approved and merged (this document)                                                                                            |
+| 4B-I   | Merged — [shared types and medical-domain foundation](../../implementation/wave-4b-i-insulin-domain-foundation.md)             |
+| 4B-II  | Merged — [presentation adapter and semantic-safe edit](../../implementation/wave-4b-ii-insulin-presentation-edit.md), Option A |
+| 4C     | Merged — [localized semantic Insulin Quick Add](../../implementation/wave-4c-localized-semantic-insulin-quick-add.md)          |
+| **4D** | **Not started** — awaited IndexedDB save integrity, pending state, dismiss lock, stable retry identity                         |
+| **4E** | **Not started** — API allow-list, kind validation, adoption, OpenAPI cloud compatibility                                       |
+
+**Type contracts.** `InsulinQuickAddEntry` and `InsulinTimelineEvent` carry
+optional `preparationId` and `administrationContext` on new writes. Legacy
+`context` remains readable on historical rows; new writers do not emit it.
+
+**Quick Add trajectory (current).**
+
+```text
+InsulinQuickAddForm
+  → prepareInsulinQuickAddSubmit / prepareInsulinNewWrite
+  → QuickAddHost.handleInsulinSubmit → onInsulinSubmit
+  → createSemanticInsulinTimelineEvent
+  → TimelineStore.addEvent (fire-and-forget)
+  → IndexedDB TimelineRepository
+```
+
+**Quick Add input.** Catalogue IDs with localized labels and grouping chrome
+from `apps/web/lib/medical/insulin` and `quick-add.insulin.*` locale keys
+(EN/RU/UK/DE). Manual dose parser with a two-decimal policy and a 100 IU UI
+typo guard. `insulin.prep.other` requires a user-entered name; a localized
+“Other” label is never stored as the snapshot.
+
+**Timeline Edit.** Semantic-aware (Wave 4B-II Option A): preparation identity
+and display snapshot move together in one save; an explicit context choice
+writes `administrationContext` and removes a contradictory legacy `context`.
+
+**Presentation.** Timeline card, detail, search, and Dashboard Recent Events
+use the shared insulin presentation adapter. Insulin Timeline presentation is
+localized.
+
+**Medical-domain foundation.** `@diabetes-universe/medical-domain` owns the
+insulin catalogue, context taxonomy, dose validation, and
+`prepareInsulinNewWrite`. `apps/web/lib/medical/insulin` owns presentation and
+edit-transition adaptation.
+
+**Hard gates still open.**
+
+- Insulin Quick Add still uses fire-and-forget `addEvent` and immediate close —
+  Wave **4D** is not started.
+- `validateSemanticEvent` still rejects `preparationId` and
+  `administrationContext` on create, update, and adoption — Wave **4E** is not
+  started.
+- Shared Quick Add action menu and shared picker chrome remain hardcoded in
+  Russian for non-insulin categories.
+- Nutrition, medication, activity, and note Quick Add remain incompletely
+  localized; UK/DE locale parity is still incomplete across the product.
+- Runtime locale switching is not production-ready.
 
 ---
 
@@ -862,8 +929,10 @@ may accept events that contain `preparationId` or `administrationContext`.
 4E may proceed in parallel with 4C/4D after 4B-I, but semantic insulin is not
 cloud-compatible until 4E merges.
 
-Each wave is a small PR with its own validation gates. 4B-I is the next
-implementation wave after this document is approved.
+Each wave is a small PR with its own validation gates. Waves **4B-I**, **4B-II**,
+and **4C** are merged on `main`. Wave **4D** (local save integrity) is the next
+implementation slice; Wave **4E** remains a hard dependency before cloud
+create/update/adoption accepts the new semantic insulin fields.
 
 ---
 
