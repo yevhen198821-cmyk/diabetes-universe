@@ -1,5 +1,8 @@
 import {
+  isInsulinAdministrationContext,
+  isInsulinPreparationId,
   serverOwnedSemanticFieldNames,
+  validateInsulinCanonicalDose,
   type MedicalEventResource,
 } from '@diabetes-universe/medical-domain';
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
@@ -104,7 +107,9 @@ export function validateSemanticEvent(
     'concentrationMmolPerL',
     'context',
     'preparation',
+    'preparationId',
     'doseUnits',
+    'administrationContext',
     'mode',
     'mealType',
     'carbohydratesGrams',
@@ -151,6 +156,7 @@ export function validateSemanticEvent(
     validateProvenance(event.provenance, `${fieldPath}.provenance`);
   }
 
+  rejectInsulinOnlySemanticFields(event, fieldPath);
   validateKindSpecificFields(event, fieldPath);
 
   return event as unknown as SemanticTimelineEvent;
@@ -193,15 +199,23 @@ function validateKindSpecificFields(
       return;
     case 'insulin':
       requireBoundedString(event, 'preparation', `${fieldPath}.preparation`);
-      requireNumberInRange(
-        event,
-        'doseUnits',
-        `${fieldPath}.doseUnits`,
-        MEDICAL_VALIDATION_BOUNDS.INSULIN_DOSE_MIN,
-        MEDICAL_VALIDATION_BOUNDS.INSULIN_DOSE_MAX,
-      );
+      requireCanonicalInsulinDose(event, `${fieldPath}.doseUnits`);
       if (event.context !== undefined) {
         requireBoundedString(event, 'context', `${fieldPath}.context`);
+      }
+      if (event.preparationId !== undefined) {
+        if (!isInsulinPreparationId(event.preparationId)) {
+          throw new MedicalApiValidationError(
+            `${fieldPath}.preparationId is invalid.`,
+          );
+        }
+      }
+      if (event.administrationContext !== undefined) {
+        if (!isInsulinAdministrationContext(event.administrationContext)) {
+          throw new MedicalApiValidationError(
+            `${fieldPath}.administrationContext is invalid.`,
+          );
+        }
       }
       return;
     case 'nutrition':
@@ -376,6 +390,11 @@ export function validateResourceId(resourceId: string): void {
   }
 }
 
+const INSULIN_ONLY_SEMANTIC_FIELDS = [
+  'preparationId',
+  'administrationContext',
+] as const;
+
 function rejectUnknownTopLevelFields(
   record: Record<string, unknown>,
   allowed: readonly string[],
@@ -386,6 +405,49 @@ function rejectUnknownTopLevelFields(
       throw new MedicalApiValidationError(`Unknown field: ${key}.`);
     }
   }
+}
+
+function rejectInsulinOnlySemanticFields(
+  event: Record<string, unknown>,
+  fieldPath: string,
+): void {
+  if (event.kind === 'insulin') {
+    return;
+  }
+
+  for (const field of INSULIN_ONLY_SEMANTIC_FIELDS) {
+    if (field in event) {
+      throw new MedicalApiValidationError(
+        `${fieldPath}.${field} is only valid for insulin events.`,
+      );
+    }
+  }
+}
+
+function requireCanonicalInsulinDose(
+  event: Record<string, unknown>,
+  fieldPath: string,
+): void {
+  const result = validateInsulinCanonicalDose(event.doseUnits);
+
+  if (result.ok) {
+    return;
+  }
+
+  if (
+    result.error === 'insulin.dose.not_a_number' ||
+    result.error === 'insulin.dose.not_finite'
+  ) {
+    throw new MedicalApiValidationError(
+      `${fieldPath} must be a finite number.`,
+    );
+  }
+
+  if (result.error === 'insulin.dose.not_positive') {
+    throw new MedicalApiValidationError(`${fieldPath} must be positive.`);
+  }
+
+  throw new MedicalApiValidationError(`${fieldPath} is out of allowed range.`);
 }
 
 function requireBoundedString(

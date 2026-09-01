@@ -1016,7 +1016,11 @@ components:
     SemanticTimelineEvent:
       type: object
       required: [occurredAt, schemaVersion, source, kind]
-      description: Transport-safe semantic event payload without server-owned lifecycle fields
+      description: >
+        Transport-safe semantic event payload without server-owned lifecycle
+        fields. Insulin semantic writers use preparationId and
+        administrationContext. Legacy insulin rows may omit those fields and
+        retain context. schemaVersion remains 1.
       properties:
         occurredAt:
           type: string
@@ -1030,6 +1034,59 @@ components:
         kind:
           type: string
           enum: [glucose, insulin, nutrition, medication, activity, note]
+        preparation:
+          type: string
+          minLength: 1
+          description: >
+            Historical insulin display snapshot. Not catalogue identity. Not
+            compared to current localized labels. Required on insulin events
+            at the runtime validator; optional here so other kinds remain
+            representable on the shared schema.
+        doseUnits:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          maximum: 500
+          description: >
+            Canonical insulin dose in international units. Technical transport
+            validity is finite, greater than 0, and at most 500. This is not a
+            therapeutic maximum. Precision is not rounded at API/storage. The
+            UI 100 IU typo guard is not an API rule.
+        context:
+          type: string
+          description: >
+            Legacy free or localized insulin administration string. Compatibility
+            only. Semantic writers use administrationContext instead.
+        preparationId:
+          $ref: '#/components/schemas/InsulinPreparationId'
+        administrationContext:
+          $ref: '#/components/schemas/InsulinAdministrationContext'
+    InsulinPreparationId:
+      type: string
+      description: >
+        Stable internal insulin catalogue identity. Never a display label.
+        Never insulin.prep.unmapped. Optional on persisted events so unmatched
+        historical rows remain valid without a fabricated ID.
+      enum:
+        - insulin.prep.aspart_novorapid
+        - insulin.prep.aspart_fiasp
+        - insulin.prep.lispro_humalog
+        - insulin.prep.glulisine_apidra
+        - insulin.prep.glargine_lantus
+        - insulin.prep.degludec_tresiba
+        - insulin.prep.other
+    InsulinAdministrationContext:
+      type: string
+      description: >
+        Semantic insulin administration context. Optional on persisted events
+        so legacy rows that only carry context remain readable.
+      enum:
+        - before_meal
+        - after_meal
+        - correction
+        - basal
+        - other
+        - unspecified
     ApiErrorEnvelope:
       type: object
       required: [error]

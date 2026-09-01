@@ -74,10 +74,11 @@ failure).
   Quick Add additionally accepts at most two fractional digits as a manual
   input policy, while canonical domain validity stays `> 0`, `<= 500` with no
   precision limit;
-- semantic fields are local-only until Wave 4E; `validateSemanticEvent` still
-  rejects them at the API boundary;
+- semantic insulin fields are accepted by medical API v1 create/update/adoption
+  and OpenAPI as of Wave 4E (this branch / pending merge); cloud sync engine
+  remains out of scope;
 - failed local writes surface a localized save error and retry with the same
-  event ID once Wave 4D is merged; until then see branch implementation status;
+  event ID when the semantic payload is unchanged (Wave 4D, merged);
 - the shared Quick Add action menu and shared UI picker chrome remain
   unlocalized for every category;
 - no bolus calculator, insulin-on-board, recommendation, pump, or therapy plan.
@@ -85,9 +86,11 @@ failure).
 ## Target attributes (Wave 4, additive)
 
 Wave 4B-I implemented the optional identity/context fields on
-`InsulinTimelineEvent`. Wave 4B-II and Wave 4C now write them on new local
-Quick Add and Edit paths. The medical API validator is unchanged — Wave 4E
-remains required before those fields may cross the cloud boundary.
+`InsulinTimelineEvent`. Wave 4B-II and Wave 4C write them on new local
+Quick Add and Edit paths. Wave 4E (this branch / pending merge) extends the
+medical API allow-list, kind validation, adoption, and OpenAPI so those fields
+can cross the v1 transport boundary. Continuous cloud sync remains out of
+scope.
 
 Wave 4 keeps the current required fields and adds optional identity/context
 fields. `schemaVersion` stays `1` **only if** every fail-closed reader that
@@ -114,14 +117,13 @@ Approved catalogue IDs and safety rules live in the Wave 4A architecture
 document. Do not infer a catalogue ID from a display name without a governed
 mapping table.
 
-### Cloud / API compatibility (current)
+### Cloud / API compatibility (Wave 4E)
 
-The current medical API validator (`validateSemanticEvent`) **rejects unknown
-fields**. `preparationId` and `administrationContext` therefore **cannot**
-pass create, update, or adoption today. Semantic insulin writes are
-**local-only** until the named **Wave 4E** API/adoption/OpenAPI slice. This
-entity page does not claim the existing cloud path already accepts the new
-fields.
+`validateSemanticEvent` allow-lists `preparationId` and `administrationContext`
+in addition to `preparation`, `doseUnits`, and legacy `context`. Semantic
+insulin create/update/adoption persist those fields verbatim. Historical
+insulin rows without `preparationId` remain valid. Wave 4E does **not**
+implement the cloud sync engine.
 
 ## Relationships
 
@@ -172,10 +174,11 @@ fields.
   explicit context choice writes `administrationContext` and removes the
   legacy `context`, and a legacy row never gains a fabricated identity. The
   Wave 4A §11.4 edit gate is therefore satisfied.
-- Cloud sync of the new fields is **blocked** until Wave 4E updates the
-  medical API allow-list, kind validation, adoption, OpenAPI, and tests.
-  Wave 4 does not add an insulin-specific sync protocol.
+- Cloud create/update/adoption of the new fields is covered by Wave 4E
+  (API allow-list, kind validation, adoption, OpenAPI; this branch / pending
+  merge). Wave 4 does not add an insulin-specific sync protocol; the
+  continuous sync engine remains out of scope.
 - Implementation slices: 4B-I types/domain, 4B-II presentation plus
   semantic-safe edit (merged), 4C localized Quick Add including the required
-  Other name (merged), 4D local save integrity (implemented on branch / pending
-  merge), 4E API/adoption/OpenAPI (not started).
+  Other name (merged), 4D local save integrity (merged), 4E API/adoption/OpenAPI
+  (implemented on branch / pending merge).

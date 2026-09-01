@@ -22,18 +22,14 @@ unchanged.
 | **4B-I**  | Implemented — [shared types and medical-domain foundation](../../implementation/wave-4b-i-insulin-domain-foundation.md)                 |
 | **4B-II** | Implemented — [presentation adapter and semantic-safe edit](../../implementation/wave-4b-ii-insulin-presentation-edit.md), **Option A** |
 | **4C**    | Implemented — [localized semantic insulin Quick Add](../../implementation/wave-4c-localized-semantic-insulin-quick-add.md)              |
-| 4D–4E     | Not started                                                                                                                             |
+| **4D**    | Implemented — [insulin Quick Add save integrity](../../implementation/wave-4d-insulin-quick-add-save-integrity.md)                      |
+| **4E**    | Implemented on branch / pending merge — [API / adoption / OpenAPI](../../implementation/wave-4e-insulin-api-adoption-openapi.md)        |
 
-The §11.4 Timeline Edit hard gate is satisfied by **Option A**, which unblocked
-the Wave 4C semantic Quick Add write. Wave 4D remains required for awaited local
-save integrity, and Wave 4E remains a hard dependency for cloud
-create/update/adoption.
-
-“No OpenAPI changes” applies to **this documentation PR only**. Later Wave 4
-slices that reach cloud create/update/adoption **must** update the runtime
-allow-list, kind-specific validation, adoption validation, OpenAPI contract,
-and API/domain tests before semantic insulin fields are considered
-cloud-compatible.
+The §11.4 Timeline Edit hard gate is satisfied by **Option A**. Wave 4D local
+save integrity is merged. Wave 4E (this branch / pending merge) updates the
+runtime allow-list, kind-specific validation, adoption validation, OpenAPI
+contract, and API/domain tests so semantic insulin fields are v1-transport
+compatible. The continuous cloud sync engine remains out of scope.
 
 ## Table of contents
 
@@ -223,7 +219,7 @@ These paths **do not** automatically accept new semantic insulin fields.
 | Boundary                        | Current behavior                                                                                                                                                                                                                                                                                                         |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Runtime create/update           | `validateSemanticEvent` in `apps/web/lib/medical/server/medical-api-validation.ts` calls `rejectUnknownTopLevelFields` with a shared allow-list. Allowed insulin-relevant keys: `preparation`, `doseUnits`, `context`, plus envelope keys. **`preparationId` and `administrationContext` are unknown and are rejected.** |
-| Kind-specific insulin rules     | Requires `preparation` string and `doseUnits` in `INSULIN_DOSE_MIN` (0) … `INSULIN_DOSE_MAX` (**500**). Optional `context` is a bounded string, not a semantic enum.                                                                                                                                                     |
+| Kind-specific insulin rules     | Requires `preparation` string and `doseUnits` via `validateInsulinCanonicalDose` (`finite`, `> 0`, `<= 500`). Optional `context` is a bounded string, not a semantic enum.                                                                                                                                               |
 | Adoption                        | `medical-adoption-validation.ts` reuses `validateSemanticEvent`. The same allow-list applies.                                                                                                                                                                                                                            |
 | Domain mapper                   | `packages/medical-domain/src/mappers/semantic-event-mapper.ts` strips server-owned lifecycle fields and projects `kind` / `occurredAt` / `schemaVersion`. It does not define insulin-specific optional fields.                                                                                                           |
 | OpenAPI `SemanticTimelineEvent` | `docs/api/openapi/medical-v1.yaml` declares `occurredAt`, `schemaVersion`, `source`, `kind` only. It does **not** document insulin payload fields. Runtime validation, not the YAML property list, is the fail-closed gate.                                                                                              |
@@ -262,17 +258,17 @@ considered cloud-compatible until Wave **4E** completes.
 
 ### 2.10 Current repository state (post–Wave 4C)
 
-Audited against `main` at `53dfe3676f0f73a869134cd6a074527b416c7fd0` (merge of
-PR #142).
+Audited against `main` at `8c776882c7d7af51655fd0e80b81d513fb148730` (Wave 4D
+merged). Wave 4E is implemented on branch / pending merge.
 
-| Slice  | Status                                                                                                                         |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| 4A     | Approved and merged (this document)                                                                                            |
-| 4B-I   | Merged — [shared types and medical-domain foundation](../../implementation/wave-4b-i-insulin-domain-foundation.md)             |
-| 4B-II  | Merged — [presentation adapter and semantic-safe edit](../../implementation/wave-4b-ii-insulin-presentation-edit.md), Option A |
-| 4C     | Merged — [localized semantic Insulin Quick Add](../../implementation/wave-4c-localized-semantic-insulin-quick-add.md)          |
-| **4D** | **Not started** — awaited IndexedDB save integrity, pending state, dismiss lock, stable retry identity                         |
-| **4E** | **Not started** — API allow-list, kind validation, adoption, OpenAPI cloud compatibility                                       |
+| Slice  | Status                                                                                                                           |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| 4A     | Approved and merged (this document)                                                                                              |
+| 4B-I   | Merged — [shared types and medical-domain foundation](../../implementation/wave-4b-i-insulin-domain-foundation.md)               |
+| 4B-II  | Merged — [presentation adapter and semantic-safe edit](../../implementation/wave-4b-ii-insulin-presentation-edit.md), Option A   |
+| 4C     | Merged — [localized semantic Insulin Quick Add](../../implementation/wave-4c-localized-semantic-insulin-quick-add.md)            |
+| **4D** | Merged — [insulin Quick Add save integrity](../../implementation/wave-4d-insulin-quick-add-save-integrity.md)                    |
+| **4E** | Implemented on branch / pending merge — [API / adoption / OpenAPI](../../implementation/wave-4e-insulin-api-adoption-openapi.md) |
 
 **Type contracts.** `InsulinQuickAddEntry` and `InsulinTimelineEvent` carry
 optional `preparationId` and `administrationContext` on new writes. Legacy
@@ -676,8 +672,9 @@ These invariants are binding for every Wave 4 implementation PR.
 9. Copy must not present totals, context, or grouping chrome as treatment advice.
 10. Day Summary insulin total is an arithmetic sum of recorded IU, not a
     prescribed daily dose.
-11. Semantic insulin events are **not cloud-compatible** until Wave 4E updates
-    fail-closed API/adoption/OpenAPI validators.
+11. Semantic insulin events are v1-transport compatible after Wave 4E updates
+    fail-closed API/adoption/OpenAPI validators. Continuous cloud sync remains
+    out of scope.
 
 Wave 2A therapy/regimen deferral remains in force. Event-level recording is not
 a Therapy Profile.
@@ -703,19 +700,19 @@ Dashboard and Timeline must **not** independently implement insulin semantics
 
 ### 9.2 Ownership
 
-| Concern                             | Owner                                                              |
-| ----------------------------------- | ------------------------------------------------------------------ |
-| Canonical types                     | `@diabetes-universe/types`                                         |
-| Parse + technical validation        | `medical-domain` insulin foundation                                |
-| Catalogue entry IDs and context IDs | `medical-domain` + types                                           |
-| Legacy string mapping               | `medical-domain` (pure functions)                                  |
-| Dose formatting (number + unit)     | Platform formatting + web adapter                                  |
-| Localized labels                    | `@diabetes-universe/locales`                                       |
-| Timeline card/detail/search mapping | Web presentation adapter, then Timeline mapper consumes it         |
-| Quick Add orchestration             | `apps/web` Quick Add host/forms                                    |
-| Local persistence                   | `TimelineStore` → `TimelineRepository` → IndexedDB                 |
-| Cloud create/update/adoption        | Existing medical API validators + OpenAPI — **Wave 4E** before use |
-| Future continuous sync              | Existing P10–P12 architecture; blocked on 4E for these fields      |
+| Concern                             | Owner                                                                    |
+| ----------------------------------- | ------------------------------------------------------------------------ |
+| Canonical types                     | `@diabetes-universe/types`                                               |
+| Parse + technical validation        | `medical-domain` insulin foundation                                      |
+| Catalogue entry IDs and context IDs | `medical-domain` + types                                                 |
+| Legacy string mapping               | `medical-domain` (pure functions)                                        |
+| Dose formatting (number + unit)     | Platform formatting + web adapter                                        |
+| Localized labels                    | `@diabetes-universe/locales`                                             |
+| Timeline card/detail/search mapping | Web presentation adapter, then Timeline mapper consumes it               |
+| Quick Add orchestration             | `apps/web` Quick Add host/forms                                          |
+| Local persistence                   | `TimelineStore` → `TimelineRepository` → IndexedDB                       |
+| Cloud create/update/adoption        | Medical API validators + OpenAPI — Wave 4E (this branch / pending merge) |
+| Future continuous sync              | Existing P10–P12 architecture; not started in Wave 4E                    |
 
 `@diabetes-universe/ui` remains presentation primitives only. It must not own
 insulin catalogue IDs or validation.
@@ -926,8 +923,9 @@ Planning labels only. **Do not implement these in Wave 4A.**
 
 **4E is a hard dependency** before cloud create/update/adoption or later sync
 may accept events that contain `preparationId` or `administrationContext`.
-4E may proceed in parallel with 4C/4D after 4B-I, but semantic insulin is not
-cloud-compatible until 4E merges.
+That validator/OpenAPI work is [Wave 4E](../../implementation/wave-4e-insulin-api-adoption-openapi.md)
+(**Implemented on branch / pending merge**). Continuous sync remains out of
+scope.
 
 Each wave is a small PR with its own validation gates. Waves **4B-I**, **4B-II**,
 and **4C** are merged on `main`. Wave **4D** (local save integrity) is the next

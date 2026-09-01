@@ -1,13 +1,41 @@
 # Changelog
 
+## Wave 4E — Insulin Medical API / Adoption / OpenAPI
+
+Дата: 2026-09-01
+
+Статус: **Implemented on branch / pending merge.** Medical API v1 and adoption
+accept semantic insulin `preparationId` and `administrationContext` additively.
+Legacy `context` remains valid. No cloud sync engine, no `schemaVersion`
+bump, no therapy/recommendation logic.
+
+Завершено:
+
+- fail-closed allow-list includes `preparationId` and `administrationContext`;
+- those two fields are then rejected unless `kind === 'insulin'`;
+- insulin enum validation reuses medical-domain `isInsulinPreparationId` and
+  `isInsulinAdministrationContext`;
+- `doseUnits` reuses `validateInsulinCanonicalDose` (`finite`, `> 0`,
+  `<= 500`, no rounding);
+- POST / GET / LIST / PATCH preserve semantic insulin fields verbatim;
+- adoption accepts semantic and legacy insulin rows without fabricated IDs;
+- OpenAPI `InsulinPreparationId` / `InsulinAdministrationContext` plus enum
+  parity tests against types and medical-domain.
+
+Не входило:
+
+- cloud sync, outbox consumer, P11/P12;
+- calculators, IOB, pump, therapy plans, Wave 4F;
+- production medical-cloud runtime activation.
+
 ## Wave 4D — Insulin Quick Add Save Integrity
 
 Дата: 2026-08-31
 
-Статус: **Implemented on branch / pending merge.** Insulin Quick Add now awaits
-IndexedDB persistence before success close, uses a stable retry event ID, and
-blocks dismiss while pending. Wave 4C semantic payload unchanged. No API,
-OpenAPI, cloud, or `schemaVersion` change.
+Статус: **Implemented / merged** at `8c776882c7d7af51655fd0e80b81d513fb148730`.
+Insulin Quick Add awaits IndexedDB persistence before success close, uses a
+stable retry event ID for the same logical payload, and blocks dismiss while
+pending. Wave 4C semantic payload unchanged.
 
 Завершено:
 
