@@ -63,8 +63,10 @@ time, and never emits the legacy `context` key.
 Timeline Edit writes the same semantic fields through the Wave 4B-II edit
 transition.
 
-Dashboard and Timeline persist through fire-and-forget `TimelineStore.addEvent`
-and IndexedDB. Glucose Wave 3D save integrity does **not** apply.
+Dashboard and Timeline persist through awaited `TimelineStore.addEventAsync`
+and IndexedDB. Glucose and insulin Quick Add share the Wave 3D / Wave 4D
+save-integrity contract (stable event ID, pending state, dismiss lock, retry on
+failure).
 
 ### Current limitations
 
@@ -74,8 +76,8 @@ and IndexedDB. Glucose Wave 3D save integrity does **not** apply.
   precision limit;
 - semantic fields are local-only until Wave 4E; `validateSemanticEvent` still
   rejects them at the API boundary;
-- insulin still uses fire-and-forget `addEvent` until Wave 4D, so a failed local
-  write is not surfaced and there is no retry identity;
+- failed local writes surface a localized save error and retry with the same
+  event ID once Wave 4D is merged; until then see branch implementation status;
 - the shared Quick Add action menu and shared UI picker chrome remain
   unlocalized for every category;
 - no bolus calculator, insulin-on-board, recommendation, pump, or therapy plan.
@@ -175,5 +177,5 @@ fields.
   Wave 4 does not add an insulin-specific sync protocol.
 - Implementation slices: 4B-I types/domain, 4B-II presentation plus
   semantic-safe edit (merged), 4C localized Quick Add including the required
-  Other name (merged), 4D local save integrity (not started), 4E
-  API/adoption/OpenAPI (not started).
+  Other name (merged), 4D local save integrity (implemented on branch / pending
+  merge), 4E API/adoption/OpenAPI (not started).

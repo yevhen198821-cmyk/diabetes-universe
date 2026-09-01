@@ -27,6 +27,9 @@ export interface InsulinQuickAddLabels {
   readonly preparationPlaceholder: string;
   readonly preparationSheetTitle: string;
   readonly save: string;
+  readonly saveErrorDescription: string;
+  readonly saveErrorTitle: string;
+  readonly saving: string;
   readonly timeLabel: string;
 }
 
@@ -65,6 +68,11 @@ export const INSULIN_QUICK_ADD_TRANSLATION_KEYS = {
     'quick-add.insulin.preparationSheetTitle',
   ),
   save: asTranslationKey('quick-add.insulin.save'),
+  saveErrorDescription: asTranslationKey(
+    'quick-add.insulin.saveError.description',
+  ),
+  saveErrorTitle: asTranslationKey('quick-add.insulin.saveError.title'),
+  saving: asTranslationKey('quick-add.insulin.saving'),
   timeLabel: asTranslationKey('quick-add.insulin.timeLabel'),
 } as const;
 
@@ -95,6 +103,9 @@ export function resolveInsulinQuickAddLabels(
     ),
     preparationSheetTitle: translate(localization, keys.preparationSheetTitle),
     save: translate(localization, keys.save),
+    saveErrorDescription: translate(localization, keys.saveErrorDescription),
+    saveErrorTitle: translate(localization, keys.saveErrorTitle),
+    saving: translate(localization, keys.saving),
     timeLabel: translate(localization, keys.timeLabel),
   };
 }

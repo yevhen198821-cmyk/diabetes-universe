@@ -2,7 +2,6 @@
 
 import type {
   ActivityQuickAddEntry,
-  InsulinQuickAddEntry,
   MedicationQuickAddEntry,
   NoteQuickAddEntry,
   NutritionQuickAddEntry,
@@ -14,10 +13,12 @@ import { useRef, useState } from 'react';
 
 import { quickAddActions } from '../../lib/quick-add/actions';
 import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
-import { canDismissQuickAddWhileGlucoseSubmitPending } from '../../lib/quick-add/glucose-quick-add-submit-model';
+import { canDismissQuickAddWhileSubmitPending } from '../../lib/quick-add/quick-add-submit-identity-model';
+import type { InsulinQuickAddSubmitRequest } from '../../lib/quick-add/insulin-quick-add-submit';
 import type { QuickAddCloseReason } from '../../lib/quick-add/quick-add-controller-model';
 import {
   finalizeGlucoseQuickAddSubmit,
+  finalizeQuickAddSubmit,
   shouldCloseQuickAddOnFormCancel,
 } from '../../lib/quick-add/quick-add-host-model';
 import {
@@ -41,7 +42,9 @@ export interface QuickAddHostProps {
   readonly onGlucoseSubmit?: (
     request: GlucoseQuickAddSubmitRequest,
   ) => Promise<void>;
-  readonly onInsulinSubmit?: (entry: InsulinQuickAddEntry) => void;
+  readonly onInsulinSubmit?: (
+    request: InsulinQuickAddSubmitRequest,
+  ) => Promise<void>;
   readonly onMedicationSubmit?: (entry: MedicationQuickAddEntry) => void;
   readonly onNoteSubmit?: (entry: NoteQuickAddEntry) => void;
   readonly onNutritionSubmit?: (entry: NutritionQuickAddEntry) => void;
@@ -86,8 +89,8 @@ export function QuickAddHost({
   );
   const internalFabRef = useRef<HTMLButtonElement>(null);
   const glucoseValueInputRef = useRef<HTMLInputElement>(null);
-  const glucoseSubmitPendingRef = useRef(false);
-  const [isGlucoseSubmitPending, setIsGlucoseSubmitPending] = useState(false);
+  const asyncSubmitPendingRef = useRef(false);
+  const [isAsyncSubmitPending, setIsAsyncSubmitPending] = useState(false);
   const fabRef = floatingActionButtonRef ?? internalFabRef;
   const selectedActionId = open
     ? userSelection === undefined
@@ -100,11 +103,7 @@ export function QuickAddHost({
   };
 
   const closeQuickAdd = (reason: QuickAddCloseReason) => {
-    if (
-      !canDismissQuickAddWhileGlucoseSubmitPending(
-        glucoseSubmitPendingRef.current,
-      )
-    ) {
+    if (!canDismissQuickAddWhileSubmitPending(asyncSubmitPendingRef.current)) {
       return;
     }
 
@@ -135,11 +134,7 @@ export function QuickAddHost({
   };
 
   const handleFormCancel = () => {
-    if (
-      !canDismissQuickAddWhileGlucoseSubmitPending(
-        glucoseSubmitPendingRef.current,
-      )
-    ) {
+    if (!canDismissQuickAddWhileSubmitPending(asyncSubmitPendingRef.current)) {
       return;
     }
 
@@ -162,14 +157,14 @@ export function QuickAddHost({
     }
   };
 
-  const releaseGlucoseSubmitPending = () => {
-    glucoseSubmitPendingRef.current = false;
-    setIsGlucoseSubmitPending(false);
+  const releaseAsyncSubmitPending = () => {
+    asyncSubmitPendingRef.current = false;
+    setIsAsyncSubmitPending(false);
   };
 
-  const handleGlucoseSubmittingChange = (pending: boolean) => {
-    glucoseSubmitPendingRef.current = pending;
-    setIsGlucoseSubmitPending(pending);
+  const handleAsyncSubmittingChange = (pending: boolean) => {
+    asyncSubmitPendingRef.current = pending;
+    setIsAsyncSubmitPending(pending);
   };
 
   const handleGlucoseSubmit = async (request: GlucoseQuickAddSubmitRequest) => {
@@ -182,13 +177,19 @@ export function QuickAddHost({
       return;
     }
 
-    releaseGlucoseSubmitPending();
+    releaseAsyncSubmitPending();
     haptics.success();
     closeQuickAdd('success');
   };
 
-  const handleInsulinSubmit = (entry: InsulinQuickAddEntry) => {
-    onInsulinSubmit?.(entry);
+  const handleInsulinSubmit = async (request: InsulinQuickAddSubmitRequest) => {
+    const didPersist = await finalizeQuickAddSubmit(onInsulinSubmit, request);
+
+    if (!didPersist) {
+      return;
+    }
+
+    releaseAsyncSubmitPending();
     haptics.success();
     closeQuickAdd('success');
   };
@@ -227,7 +228,7 @@ export function QuickAddHost({
         initialFocusRef={glucoseValueInputRef}
         onCancel={handleFormCancel}
         onSubmit={handleGlucoseSubmit}
-        onSubmittingChange={handleGlucoseSubmittingChange}
+        onSubmittingChange={handleAsyncSubmittingChange}
       />
     );
   }
@@ -237,6 +238,7 @@ export function QuickAddHost({
       <InsulinQuickAddForm
         onCancel={handleFormCancel}
         onSubmit={handleInsulinSubmit}
+        onSubmittingChange={handleAsyncSubmittingChange}
       />
     );
   }
@@ -288,7 +290,7 @@ export function QuickAddHost({
       ) : null}
       <QuickAddPanel
         actions={quickAddActions}
-        dismissDisabled={isGlucoseSubmitPending}
+        dismissDisabled={isAsyncSubmitPending}
         initialFocusRef={initialFocusRef}
         onBack={handleFormCancel}
         onClose={() => closeQuickAdd('dismiss')}

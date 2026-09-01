@@ -246,6 +246,10 @@ export const ukrainianDraftMessages = defineDraftMessages({
   'quick-add.insulin.preparationPlaceholder': 'Виберіть інсулін',
   'quick-add.insulin.preparationSheetTitle': 'Препарат інсуліну',
   'quick-add.insulin.save': 'Зберегти',
+  'quick-add.insulin.saveError.description':
+    'Запис про інсулін не збережено. Введені значення залишилися у формі. Спробуйте ще раз.',
+  'quick-add.insulin.saveError.title': 'Не вдалося зберегти запис про інсулін',
+  'quick-add.insulin.saving': 'Збереження…',
   'quick-add.insulin.timeLabel': 'Час',
   'account.profile.about.description':
     'Diabetes Universe допомагає відстежувати та розуміти ваші дані про діабет.',

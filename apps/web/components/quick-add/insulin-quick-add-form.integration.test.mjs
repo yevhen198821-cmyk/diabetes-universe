@@ -44,7 +44,9 @@ async function renderInsulinQuickAddForm({ request = englishRequest } = {}) {
         { runtime },
         createElement(InsulinQuickAddForm, {
           onCancel: () => {},
-          onSubmit: (entry) => submitted.push(entry),
+          onSubmit: async (request) => {
+            submitted.push(request.entry);
+          },
         }),
       ),
     );

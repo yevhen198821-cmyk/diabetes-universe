@@ -1,11 +1,15 @@
-import { createSemanticTimelineEventId } from '../timeline/semantic-creators/create-semantic-timeline-event-id';
+import {
+  beginQuickAddSubmitEventId,
+  canDismissQuickAddWhileSubmitPending,
+  clearQuickAddSubmitIdentity,
+  createQuickAddSubmitIdentityState,
+  type QuickAddSubmitIdentityState,
+} from './quick-add-submit-identity-model';
 
-export interface GlucoseQuickAddSubmitIdentityState {
-  pendingEventId: string | null;
-}
+export type GlucoseQuickAddSubmitIdentityState = QuickAddSubmitIdentityState;
 
 export function createGlucoseQuickAddSubmitIdentityState(): GlucoseQuickAddSubmitIdentityState {
-  return { pendingEventId: null };
+  return createQuickAddSubmitIdentityState();
 }
 
 export function beginGlucoseQuickAddSubmitEventId(
@@ -13,27 +17,17 @@ export function beginGlucoseQuickAddSubmitEventId(
   time: string,
   createUuid: () => string = () => crypto.randomUUID(),
 ): string {
-  if (identity.pendingEventId !== null) {
-    return identity.pendingEventId;
-  }
-
-  identity.pendingEventId = createSemanticTimelineEventId(
-    'glucose',
-    time,
-    createUuid(),
-  );
-
-  return identity.pendingEventId;
+  return beginQuickAddSubmitEventId(identity, 'glucose', time, createUuid);
 }
 
 export function clearGlucoseQuickAddSubmitIdentity(
   identity: GlucoseQuickAddSubmitIdentityState,
 ): void {
-  identity.pendingEventId = null;
+  clearQuickAddSubmitIdentity(identity);
 }
 
 export function canDismissQuickAddWhileGlucoseSubmitPending(
   isGlucoseSubmitPending: boolean,
 ): boolean {
-  return !isGlucoseSubmitPending;
+  return canDismissQuickAddWhileSubmitPending(isGlucoseSubmitPending);
 }

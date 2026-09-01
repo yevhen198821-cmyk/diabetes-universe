@@ -9,10 +9,9 @@ export function shouldCloseQuickAddOnFormCancel(
   return openCategory != null && userSelection === undefined;
 }
 
-export async function finalizeGlucoseQuickAddSubmit(
-  submit:
-    ((request: GlucoseQuickAddSubmitRequest) => Promise<void>) | undefined,
-  request: GlucoseQuickAddSubmitRequest,
+export async function finalizeQuickAddSubmit<TRequest>(
+  submit: ((request: TRequest) => Promise<void>) | undefined,
+  request: TRequest,
 ): Promise<boolean> {
   if (!submit) {
     return false;
@@ -20,4 +19,12 @@ export async function finalizeGlucoseQuickAddSubmit(
 
   await submit(request);
   return true;
+}
+
+export async function finalizeGlucoseQuickAddSubmit(
+  submit:
+    ((request: GlucoseQuickAddSubmitRequest) => Promise<void>) | undefined,
+  request: GlucoseQuickAddSubmitRequest,
+): Promise<boolean> {
+  return finalizeQuickAddSubmit(submit, request);
 }

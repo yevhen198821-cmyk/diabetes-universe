@@ -307,6 +307,31 @@ test('reports storage unavailable when indexedDB is missing', async () => {
   }
 });
 
+test('addEvent rejects without durably committing when the database is unavailable', async () => {
+  const { databaseName, repository } = await createReadyRepository(
+    'reject-without-commit',
+  );
+  const event = glucose('g-reject', '2026-08-09T08:00:00.000Z');
+
+  repository.close();
+
+  await assert.rejects(
+    () => repository.addEvent(event),
+    (error) => {
+      assert.ok(error instanceof TimelineRepositoryError);
+      assert.equal(error.code, 'TIMELINE_REPOSITORY_NOT_INITIALIZED');
+      return true;
+    },
+  );
+
+  const reopened = createIndexedDbTimelineRepository({ databaseName });
+  await reopened.initialize();
+  assert.equal(await reopened.getById('g-reject'), null);
+
+  reopened.close();
+  await deleteTestDatabase(databaseName);
+});
+
 test('queryEvents rejects invalid cursors', async () => {
   const { databaseName, repository } = await createReadyRepository('cursor');
 

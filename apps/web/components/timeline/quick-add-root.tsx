@@ -2,7 +2,6 @@
 
 import type {
   ActivityQuickAddEntry,
-  InsulinQuickAddEntry,
   MedicationQuickAddEntry,
   NoteQuickAddEntry,
   NutritionQuickAddEntry,
@@ -11,6 +10,7 @@ import type {
 import { useRef, useState, type RefObject } from 'react';
 
 import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
+import type { InsulinQuickAddSubmitRequest } from '../../lib/quick-add/insulin-quick-add-submit';
 import { QuickAddHost } from '../quick-add/quick-add-host';
 
 interface QuickAddRootProps {
@@ -20,7 +20,9 @@ interface QuickAddRootProps {
   readonly onGlucoseSubmit?: (
     request: GlucoseQuickAddSubmitRequest,
   ) => Promise<void>;
-  readonly onInsulinSubmit?: (entry: InsulinQuickAddEntry) => void;
+  readonly onInsulinSubmit?: (
+    request: InsulinQuickAddSubmitRequest,
+  ) => Promise<void>;
   readonly onMedicationSubmit?: (entry: MedicationQuickAddEntry) => void;
   readonly onNoteSubmit?: (entry: NoteQuickAddEntry) => void;
   readonly onNutritionSubmit?: (entry: NutritionQuickAddEntry) => void;
