@@ -26,6 +26,26 @@ test.before(async () => {
   );
 });
 
+async function prepareAndPersist({ formState, identity, onSubmit }) {
+  const prepared = prepareInsulinQuickAddSubmitWithIdentity({
+    formState,
+    identity,
+    labels,
+  });
+
+  if (prepared.type === 'invalid') {
+    return { prepared, persist: null };
+  }
+
+  const persist = await persistPreparedInsulinQuickAddSubmit({
+    identity,
+    onSubmit,
+    request: prepared.request,
+  });
+
+  return { prepared, persist };
+}
+
 test('prepareInsulinQuickAddSubmitWithIdentity rejects invalid dose without creating submit identity', () => {
   const identity = createInsulinQuickAddSubmitIdentityState();
 
@@ -100,19 +120,13 @@ test('persistPreparedInsulinQuickAddSubmit clears identity only on success', asy
   assert.equal(identity.pendingEventId, null);
 });
 
-test('retry after failure reuses the same stable full event id', async () => {
+test('failure then unchanged retry reuses the same stable full event id', async () => {
   const identity = createInsulinQuickAddSubmitIdentityState();
   const eventIds = [];
   let attempt = 0;
 
-  const firstPrepared = prepareInsulinQuickAddSubmitWithIdentity({
+  const first = await prepareAndPersist({
     formState: baseFormState,
-    identity,
-    labels,
-  });
-  assert.equal(firstPrepared.type, 'prepared');
-
-  const firstPersist = await persistPreparedInsulinQuickAddSubmit({
     identity,
     onSubmit: async (request) => {
       eventIds.push(request.eventId);
@@ -121,28 +135,208 @@ test('retry after failure reuses the same stable full event id', async () => {
         throw new Error('write failed');
       }
     },
-    request: firstPrepared.request,
   });
-  assert.equal(firstPersist.type, 'error');
+  assert.equal(first.prepared.type, 'prepared');
+  assert.equal(first.persist?.type, 'error');
 
-  const retryPrepared = prepareInsulinQuickAddSubmitWithIdentity({
-    formState: { ...baseFormState, dose: '5', time: '08:31' },
-    identity,
-    labels,
-  });
-  assert.equal(retryPrepared.type, 'prepared');
-
-  const secondPersist = await persistPreparedInsulinQuickAddSubmit({
+  const retry = await prepareAndPersist({
+    formState: baseFormState,
     identity,
     onSubmit: async (request) => {
       eventIds.push(request.eventId);
     },
-    request: retryPrepared.request,
   });
 
-  assert.equal(secondPersist.type, 'success');
+  assert.equal(retry.persist?.type, 'success');
   assert.equal(eventIds.length, 2);
   assert.equal(eventIds[0], eventIds[1]);
+});
+
+test('failure then changed dose allocates a new event id', async () => {
+  const identity = createInsulinQuickAddSubmitIdentityState();
+  const eventIds = [];
+  let attempt = 0;
+
+  await prepareAndPersist({
+    formState: baseFormState,
+    identity,
+    onSubmit: async (request) => {
+      eventIds.push(request.eventId);
+      attempt += 1;
+      if (attempt === 1) {
+        throw new Error('write failed');
+      }
+    },
+  });
+
+  const retry = await prepareAndPersist({
+    formState: { ...baseFormState, dose: '5' },
+    identity,
+    onSubmit: async (request) => {
+      eventIds.push(request.eventId);
+    },
+  });
+
+  assert.equal(retry.prepared.type, 'prepared');
+  assert.equal(retry.persist?.type, 'success');
+  assert.notEqual(eventIds[0], eventIds[1]);
+});
+
+test('failure then changed time allocates a new event id from the new time', async () => {
+  const identity = createInsulinQuickAddSubmitIdentityState();
+  const eventIds = [];
+  let attempt = 0;
+
+  await prepareAndPersist({
+    formState: baseFormState,
+    identity,
+    onSubmit: async (request) => {
+      eventIds.push(request.eventId);
+      attempt += 1;
+      if (attempt === 1) {
+        throw new Error('write failed');
+      }
+    },
+  });
+
+  const retry = await prepareAndPersist({
+    formState: { ...baseFormState, time: '08:31' },
+    identity,
+    onSubmit: async (request) => {
+      eventIds.push(request.eventId);
+    },
+  });
+
+  assert.equal(retry.prepared.type, 'prepared');
+  assert.equal(retry.persist?.type, 'success');
+  assert.notEqual(eventIds[0], eventIds[1]);
+  assert.match(eventIds[0] ?? '', /^insulin-0830-/);
+  assert.match(eventIds[1] ?? '', /^insulin-0831-/);
+});
+
+test('failure then changed preparation allocates a new event id', async () => {
+  const identity = createInsulinQuickAddSubmitIdentityState();
+  const eventIds = [];
+  let attempt = 0;
+
+  await prepareAndPersist({
+    formState: baseFormState,
+    identity,
+    onSubmit: async (request) => {
+      eventIds.push(request.eventId);
+      attempt += 1;
+      if (attempt === 1) {
+        throw new Error('write failed');
+      }
+    },
+  });
+
+  const retry = await prepareAndPersist({
+    formState: {
+      ...baseFormState,
+      preparationId: 'insulin.prep.glargine_lantus',
+    },
+    identity,
+    onSubmit: async (request) => {
+      eventIds.push(request.eventId);
+    },
+  });
+
+  assert.equal(retry.persist?.type, 'success');
+  assert.notEqual(eventIds[0], eventIds[1]);
+});
+
+test('failure then changed administrationContext allocates a new event id', async () => {
+  const identity = createInsulinQuickAddSubmitIdentityState();
+  const eventIds = [];
+  let attempt = 0;
+
+  await prepareAndPersist({
+    formState: baseFormState,
+    identity,
+    onSubmit: async (request) => {
+      eventIds.push(request.eventId);
+      attempt += 1;
+      if (attempt === 1) {
+        throw new Error('write failed');
+      }
+    },
+  });
+
+  const retry = await prepareAndPersist({
+    formState: {
+      ...baseFormState,
+      administrationContext: 'correction',
+    },
+    identity,
+    onSubmit: async (request) => {
+      eventIds.push(request.eventId);
+    },
+  });
+
+  assert.equal(retry.persist?.type, 'success');
+  assert.notEqual(eventIds[0], eventIds[1]);
+});
+
+test('failure then changed Other name allocates a new event id', async () => {
+  const identity = createInsulinQuickAddSubmitIdentityState();
+  const eventIds = [];
+  let attempt = 0;
+  const otherBase = {
+    ...baseFormState,
+    otherName: 'Pharmacy own-brand insulin',
+    preparationId: 'insulin.prep.other',
+  };
+
+  await prepareAndPersist({
+    formState: otherBase,
+    identity,
+    onSubmit: async (request) => {
+      eventIds.push(request.eventId);
+      attempt += 1;
+      if (attempt === 1) {
+        throw new Error('write failed');
+      }
+    },
+  });
+
+  const retry = await prepareAndPersist({
+    formState: {
+      ...otherBase,
+      otherName: 'Different pharmacy insulin',
+    },
+    identity,
+    onSubmit: async (request) => {
+      eventIds.push(request.eventId);
+    },
+  });
+
+  assert.equal(retry.persist?.type, 'success');
+  assert.notEqual(eventIds[0], eventIds[1]);
+});
+
+test('invalid edit after failure does not invoke persistence', async () => {
+  const identity = createInsulinQuickAddSubmitIdentityState();
+  let submitCount = 0;
+
+  await prepareAndPersist({
+    formState: baseFormState,
+    identity,
+    onSubmit: async () => {
+      submitCount += 1;
+      throw new Error('write failed');
+    },
+  });
+
+  const invalid = prepareInsulinQuickAddSubmitWithIdentity({
+    formState: { ...baseFormState, dose: 'not-a-number' },
+    identity,
+    labels,
+  });
+
+  assert.equal(invalid.type, 'invalid');
+  assert.equal(submitCount, 1);
+  assert.notEqual(identity.pendingEventId, null);
 });
 
 test('resetInsulinQuickAddSubmitIdentity clears pending identity explicitly', () => {
@@ -157,4 +351,5 @@ test('resetInsulinQuickAddSubmitIdentity clears pending identity explicitly', ()
 
   resetInsulinQuickAddSubmitIdentity(identity);
   assert.equal(identity.pendingEventId, null);
+  assert.equal(identity.pendingRetryPayloadKey, null);
 });

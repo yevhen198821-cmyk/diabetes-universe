@@ -134,3 +134,19 @@ export function prepareInsulinQuickAddSubmit(input: {
     type: 'prepared',
   };
 }
+
+/**
+ * Stable serialization of the persisted insulin semantic payload used to decide
+ * whether a failed save retry reuses the same event identity.
+ */
+export function serializeInsulinQuickAddRetryPayload(
+  entry: InsulinQuickAddEntry,
+): string {
+  return JSON.stringify({
+    administrationContext: entry.administrationContext,
+    doseUnits: entry.doseUnits,
+    preparation: entry.preparation,
+    preparationId: entry.preparationId,
+    time: entry.time,
+  });
+}

@@ -2,13 +2,14 @@ import type { InsulinPresentationLabels } from '../medical/insulin';
 import type { InsulinQuickAddSubmitRequest } from './insulin-quick-add-submit';
 import {
   prepareInsulinQuickAddSubmit,
+  serializeInsulinQuickAddRetryPayload,
   type InsulinQuickAddFormState,
   type InsulinQuickAddSubmitInvalidField,
 } from './insulin-quick-add-submit';
 import {
-  beginQuickAddSubmitEventId,
   clearQuickAddSubmitIdentity,
   createQuickAddSubmitIdentityState,
+  reconcileQuickAddSubmitEventId,
   type QuickAddSubmitIdentityState,
 } from './quick-add-submit-identity-model';
 
@@ -54,10 +55,11 @@ export function prepareInsulinQuickAddSubmitWithIdentity({
     return prepared;
   }
 
-  const eventId = beginQuickAddSubmitEventId(
+  const eventId = reconcileQuickAddSubmitEventId(
     identity,
     'insulin',
     prepared.entry.time,
+    serializeInsulinQuickAddRetryPayload(prepared.entry),
   );
 
   return {

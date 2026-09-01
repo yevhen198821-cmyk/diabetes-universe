@@ -6,6 +6,7 @@ import {
   canDismissQuickAddWhileSubmitPending,
   clearQuickAddSubmitIdentity,
   createQuickAddSubmitIdentityState,
+  reconcileQuickAddSubmitEventId,
 } from './quick-add-submit-identity-model.ts';
 
 test('first valid insulin submit attempt creates and stores the full event id once', () => {
@@ -24,26 +25,54 @@ test('first valid insulin submit attempt creates and stores the full event id on
   assert.equal(uuidCount, 1);
 });
 
-test('insulin retry reuses the exact full event id after field changes', () => {
+test('reconcileQuickAddSubmitEventId reuses the same id for an unchanged payload retry', () => {
   const identity = createQuickAddSubmitIdentityState();
   let uuidCount = 0;
   const createUuid = () => `uuid-${++uuidCount}`;
+  const payloadKey = '{"doseUnits":4,"time":"08:30"}';
 
-  const firstAttemptId = beginQuickAddSubmitEventId(
+  const firstAttemptId = reconcileQuickAddSubmitEventId(
     identity,
     'insulin',
     '08:30',
+    payloadKey,
     createUuid,
   );
-  const retryId = beginQuickAddSubmitEventId(
+  const retryId = reconcileQuickAddSubmitEventId(
     identity,
     'insulin',
-    '08:31',
+    '08:30',
+    payloadKey,
     createUuid,
   );
 
   assert.equal(retryId, firstAttemptId);
   assert.equal(uuidCount, 1);
+});
+
+test('reconcileQuickAddSubmitEventId allocates a new id when the payload changes', () => {
+  const identity = createQuickAddSubmitIdentityState();
+  let uuidCount = 0;
+  const createUuid = () => `uuid-${++uuidCount}`;
+
+  const firstAttemptId = reconcileQuickAddSubmitEventId(
+    identity,
+    'insulin',
+    '08:30',
+    '{"doseUnits":4,"time":"08:30"}',
+    createUuid,
+  );
+  const editedAttemptId = reconcileQuickAddSubmitEventId(
+    identity,
+    'insulin',
+    '08:31',
+    '{"doseUnits":5,"time":"08:31"}',
+    createUuid,
+  );
+
+  assert.notEqual(editedAttemptId, firstAttemptId);
+  assert.equal(editedAttemptId, 'insulin-0831-uuid-2');
+  assert.equal(uuidCount, 2);
 });
 
 test('host dismiss guard blocks while any async submit is pending', () => {
@@ -56,16 +85,27 @@ test('identity resets only after explicit clear', () => {
   let uuidCount = 0;
   const createUuid = () => `uuid-${++uuidCount}`;
 
-  beginQuickAddSubmitEventId(identity, 'insulin', '08:30', createUuid);
+  reconcileQuickAddSubmitEventId(
+    identity,
+    'insulin',
+    '08:30',
+    '{"doseUnits":4,"time":"08:30"}',
+    createUuid,
+  );
   clearQuickAddSubmitIdentity(identity);
 
-  const nextAttemptId = beginQuickAddSubmitEventId(
+  const nextAttemptId = reconcileQuickAddSubmitEventId(
     identity,
     'insulin',
     '08:31',
+    '{"doseUnits":4,"time":"08:31"}',
     createUuid,
   );
 
   assert.equal(nextAttemptId, 'insulin-0831-uuid-2');
   assert.equal(uuidCount, 2);
+  assert.equal(
+    identity.pendingRetryPayloadKey,
+    '{"doseUnits":4,"time":"08:31"}',
+  );
 });

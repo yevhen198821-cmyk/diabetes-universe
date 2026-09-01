@@ -106,6 +106,10 @@ export function InsulinQuickAddForm({
     resetInsulinQuickAddSubmitIdentity(submitIdentityRef.current);
   };
 
+  const noteFailedAttemptFieldEdit = () => {
+    setSaveError(null);
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -174,6 +178,7 @@ export function InsulinQuickAddForm({
     }
 
     setOtherNameError(null);
+    noteFailedAttemptFieldEdit();
     setFormState((current) => ({
       ...current,
       otherName:
@@ -192,6 +197,7 @@ export function InsulinQuickAddForm({
       ...current,
       administrationContext: context,
     }));
+    noteFailedAttemptFieldEdit();
     setContextSheetOpen(false);
   };
 
@@ -285,6 +291,7 @@ export function InsulinQuickAddForm({
                 name="otherName"
                 onChange={(event) => {
                   setOtherNameError(null);
+                  noteFailedAttemptFieldEdit();
                   setFormState((current) => ({
                     ...current,
                     otherName: event.target.value,
@@ -327,6 +334,7 @@ export function InsulinQuickAddForm({
                 name="dose"
                 onChange={(event) => {
                   setDoseError(null);
+                  noteFailedAttemptFieldEdit();
                   setFormState((current) => ({
                     ...current,
                     dose: event.target.value,
@@ -362,6 +370,7 @@ export function InsulinQuickAddForm({
             label={labels.timeLabel}
             name="time"
             onChange={(time) => {
+              noteFailedAttemptFieldEdit();
               setFormState((current) => ({
                 ...current,
                 time,

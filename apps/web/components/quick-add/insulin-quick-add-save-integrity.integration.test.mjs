@@ -42,3 +42,8 @@ test('InsulinQuickAddForm surfaces localized save error without closing', () => 
   assert.match(formSource, /setSaveError\(labels\.saveErrorDescription\)/);
   assert.match(formSource, /labels\.saveErrorTitle/);
 });
+
+test('InsulinQuickAddForm clears save error when the user edits a failed attempt', () => {
+  assert.match(formSource, /const noteFailedAttemptFieldEdit = \(\) => \{/);
+  assert.match(formSource, /noteFailedAttemptFieldEdit\(\)/);
+});

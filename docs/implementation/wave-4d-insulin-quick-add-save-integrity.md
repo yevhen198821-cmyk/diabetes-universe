@@ -14,7 +14,8 @@
 Insulin Quick Add now mirrors the Glucose Wave 3D save-integrity contract:
 validate, allocate one stable event ID, enter pending state, await IndexedDB
 persistence, then close only on confirmed success. Failed writes keep the form
-open, preserve entered values, and retry with the same event ID.
+open, preserve entered values, and retry with the same event ID only when the
+semantic payload is unchanged.
 
 ## Scope
 
@@ -72,11 +73,34 @@ InsulinQuickAddForm
 ## Stable identity lifecycle
 
 1. Invalid submit never allocates `pendingEventId`.
-2. First valid prepare calls `beginQuickAddSubmitEventId(identity, 'insulin', time)`.
-3. Persistence failure leaves `pendingEventId` intact.
-4. Retry reuses the same full event ID even if dose/time/context changed.
-5. Success clears identity inside `persistPreparedInsulinQuickAddSubmit`.
-6. Explicit cancel resets identity when not pending.
+2. First valid prepare calls `reconcileQuickAddSubmitEventId` with the serialized
+   insulin semantic payload.
+3. Persistence failure leaves the pending identity intact for an unchanged retry.
+4. Same logical payload retry reuses the same full event ID.
+5. Any edit to a persisted semantic field after failure (`preparationId`,
+   `preparation` snapshot, `doseUnits`, `administrationContext`, `time`) clears
+   the stale identity and allocates a fresh ID from the new payload/time.
+6. Success clears identity inside `persistPreparedInsulinQuickAddSubmit`.
+7. Explicit cancel resets identity when not pending.
+
+## Persistence rejection audit
+
+`TimelineStore.addEventAsync` awaits `timelineRepository.addEvent` and rejects
+when the mutation throws or returns a non-`applied` status.
+
+`IndexedDbTimelineRepository.addEvent` performs a single `readwrite`
+transaction: `put(record)` then `await transaction.done`. It returns
+`{ status: 'applied' }` only after `transaction.done` resolves. Any thrown
+error or rejected `transaction.done` aborts the transaction before the method
+returns success.
+
+**Conclusion:** `addEventAsync` cannot reject after a durable IndexedDB commit.
+A rejected persistence attempt means no timeline row was committed, so same-ID
+retry remains idempotent and edited failed attempts safely receive a new
+identity.
+
+Verified by `addEvent rejects without durably committing when the database is
+unavailable` in `timeline-indexeddb-repository.test.mjs`.
 
 ## Wave 4C semantic contract preserved
 
