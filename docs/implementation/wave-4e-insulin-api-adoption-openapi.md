@@ -21,9 +21,11 @@ sync, outbox replay, or multi-device conflict resolution.
 Implemented:
 
 - fail-closed semantic event allow-list includes `preparationId` and
-  `administrationContext`;
-- insulin kind validation reuses `isInsulinPreparationId` and
-  `isInsulinAdministrationContext` from `@diabetes-universe/medical-domain`;
+  `administrationContext`, then a kind-scoped guard rejects those fields on
+  every non-insulin event;
+- insulin kind validation reuses `isInsulinPreparationId`,
+  `isInsulinAdministrationContext`, and `validateInsulinCanonicalDose` from
+  `@diabetes-universe/medical-domain`;
 - POST / GET / LIST / PATCH preserve semantic insulin fields verbatim;
 - adoption accepts semantic insulin rows and legacy insulin rows;
 - OpenAPI `InsulinPreparationId` and `InsulinAdministrationContext` schemas
@@ -42,7 +44,7 @@ Not implemented (unchanged by this slice):
 Runtime `validateSemanticEvent` allowed only:
 
 - `preparation` (required non-empty string)
-- `doseUnits` (finite number, existing 0–500 transport bound)
+- `doseUnits` (finite number; pre-4E transport accepted `0`)
 - legacy `context` (optional string)
 
 `preparationId` and `administrationContext` were unknown fields and failed
@@ -62,6 +64,10 @@ When present:
 `preparation` remains a required non-empty bounded snapshot. It is never
 matched against the current catalogue label. `insulin.prep.other` still
 requires a non-empty snapshot; the API does not substitute localized “Other”.
+
+`doseUnits` uses `validateInsulinCanonicalDose`: finite, `> 0`, and `<= 500`,
+with no rounding. This is a technical validity bound, not a therapeutic
+maximum. `preparationId` and `administrationContext` are insulin-kind-only.
 
 ## Legacy compatibility
 
@@ -112,3 +118,11 @@ unchanged.
 This slice does not calculate, recommend, default, or derive insulin. Dose
 precision is not rounded at API/storage. `preparationCategory` is not a
 persisted or transport field.
+
+## Tests
+
+Persistence coverage lives in the existing medical-events and adoption handler
+suites so the web unit-test process does not open a second PGlite-backed
+medical service graph. The web `test` script does not set a global 8 GB
+`NODE_OPTIONS` heap. The earlier OOM coincided with those extra integration
+files, not with a durable need to raise the process heap.

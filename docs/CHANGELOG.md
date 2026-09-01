@@ -12,8 +12,11 @@ bump, no therapy/recommendation logic.
 Завершено:
 
 - fail-closed allow-list includes `preparationId` and `administrationContext`;
+- those two fields are then rejected unless `kind === 'insulin'`;
 - insulin enum validation reuses medical-domain `isInsulinPreparationId` and
   `isInsulinAdministrationContext`;
+- `doseUnits` reuses `validateInsulinCanonicalDose` (`finite`, `> 0`,
+  `<= 500`, no rounding);
 - POST / GET / LIST / PATCH preserve semantic insulin fields verbatim;
 - adoption accepts semantic and legacy insulin rows without fabricated IDs;
 - OpenAPI `InsulinPreparationId` / `InsulinAdministrationContext` plus enum

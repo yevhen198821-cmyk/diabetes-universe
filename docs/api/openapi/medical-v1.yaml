@@ -1044,9 +1044,14 @@ components:
             representable on the shared schema.
         doseUnits:
           type: number
+          minimum: 0
+          exclusiveMinimum: true
+          maximum: 500
           description: >
-            Canonical insulin dose in international units. Runtime bound is
-            finite and at most 500. Precision is not rounded at API/storage.
+            Canonical insulin dose in international units. Technical transport
+            validity is finite, greater than 0, and at most 500. This is not a
+            therapeutic maximum. Precision is not rounded at API/storage. The
+            UI 100 IU typo guard is not an API rule.
         context:
           type: string
           description: >

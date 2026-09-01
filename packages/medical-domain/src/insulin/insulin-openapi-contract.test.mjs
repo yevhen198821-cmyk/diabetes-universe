@@ -82,4 +82,8 @@ test('OpenAPI insulin enums match medical-domain registry and types union', () =
     openApi,
     /administrationContext:\n\s+\$ref: '#\/components\/schemas\/InsulinAdministrationContext'/,
   );
+  assert.match(
+    openApi,
+    /doseUnits:\n\s+type: number\n\s+minimum: 0\n\s+exclusiveMinimum: true\n\s+maximum: 500/,
+  );
 });
