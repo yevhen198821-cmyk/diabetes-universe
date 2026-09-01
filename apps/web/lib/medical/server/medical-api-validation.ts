@@ -1,4 +1,6 @@
 import {
+  isInsulinAdministrationContext,
+  isInsulinPreparationId,
   serverOwnedSemanticFieldNames,
   type MedicalEventResource,
 } from '@diabetes-universe/medical-domain';
@@ -104,7 +106,9 @@ export function validateSemanticEvent(
     'concentrationMmolPerL',
     'context',
     'preparation',
+    'preparationId',
     'doseUnits',
+    'administrationContext',
     'mode',
     'mealType',
     'carbohydratesGrams',
@@ -202,6 +206,20 @@ function validateKindSpecificFields(
       );
       if (event.context !== undefined) {
         requireBoundedString(event, 'context', `${fieldPath}.context`);
+      }
+      if (event.preparationId !== undefined) {
+        if (!isInsulinPreparationId(event.preparationId)) {
+          throw new MedicalApiValidationError(
+            `${fieldPath}.preparationId is invalid.`,
+          );
+        }
+      }
+      if (event.administrationContext !== undefined) {
+        if (!isInsulinAdministrationContext(event.administrationContext)) {
+          throw new MedicalApiValidationError(
+            `${fieldPath}.administrationContext is invalid.`,
+          );
+        }
       }
       return;
     case 'nutrition':

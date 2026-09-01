@@ -300,15 +300,11 @@ surfaced, there is no pending state or dismiss lock, and there is no stable
 retry identity. Wave 4C does not partially copy the glucose Wave 3D contract,
 because an incomplete save-integrity implementation is not permitted.
 
-## Cloud / API status (Wave 4E dependency)
+## Cloud / API status (Wave 4E)
 
-Semantic insulin fields written by Quick Add are **local IndexedDB fields only**.
-Nothing in this slice touches the medical API allow-list, server kind
-validation, adoption, OpenAPI, cloud create/update, outbox/sync, or P10–P12
-activation. `validateSemanticEvent` still allow-lists only `preparation`,
-`doseUnits`, and `context`, so `preparationId` and `administrationContext`
-remain rejected at that boundary and are **not cloud-compatible**. Wave 4E stays
-a hard dependency.
+Wave 4C writes remain local IndexedDB fields until the Wave 4E API slice. See
+[Wave 4E](wave-4e-insulin-api-adoption-openapi.md) for the additive medical API
+v1 / adoption / OpenAPI contract (**Implemented on branch / pending merge**).
 
 ## Safety and non-scope
 
@@ -364,7 +360,8 @@ the raw IndexedDB record and checks key presence and absence.
 | 4B-I  | Implemented                                                               |
 | 4B-II | Implemented (Option A)                                                    |
 | 4C    | Implemented (this document)                                               |
-| 4D    | **Still required** for awaited local save integrity and retry identity    |
-| 4E    | **Still required** for API allow-list, kind validation, adoption, OpenAPI |
+| 4D    | Implemented — awaited local save integrity and retry identity             |
+| 4E    | Implemented on branch / pending merge — API allow-list, adoption, OpenAPI |
 
-Wave 4D and Wave 4E are not started here.
+Wave 4D is merged. Wave 4E is documented separately and is not claimed on
+`main` until that PR merges.

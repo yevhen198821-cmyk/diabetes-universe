@@ -299,12 +299,10 @@ Behavioral regression coverage lives in:
 | 4B-II | Implemented (this document)                                                                                    |
 | 4C    | **Unblocked only after this PR is approved and merged.** The Wave 4A §11.4 edit gate is satisfied by Option A. |
 | 4D    | Still required for awaited local IndexedDB save integrity                                                      |
-| 4E    | **Still required** for API allow-list, kind validation, adoption, and OpenAPI                                  |
+| 4E    | Implemented on branch / pending merge — [API / adoption / OpenAPI](wave-4e-insulin-api-adoption-openapi.md)    |
 
-Semantic insulin fields remain **not cloud-compatible** until Wave 4E.
-`validateSemanticEvent` still allow-lists only `preparation`, `doseUnits`, and
-`context`, so `preparationId` and `administrationContext` are rejected on
-create, update, and adoption. Nothing in this slice sends them to that
+See [Wave 4E](wave-4e-insulin-api-adoption-openapi.md) for the additive medical
+API v1 contract. This 4B-II slice does not send semantic insulin fields to that
 boundary.
 
 **Scope note:** Wave 4C is not started here — Quick Add insulin migration and

@@ -164,8 +164,9 @@ insulin payload keys `preparation`, `doseUnits`, and `context` only.
 `rejectUnknownTopLevelFields` therefore **rejects** `preparationId` and
 `administrationContext` on create, update, and adoption.
 
-4B-I does **not** change that allow-list, adoption validation, or OpenAPI.
-Semantic insulin fields are **not** cloud-compatible until Wave **4E**.
+Current follow-up: Wave 4E is [implemented on branch / pending merge](wave-4e-insulin-api-adoption-openapi.md).
+`validateSemanticEvent` in this 4B-I slice did not yet allow-list the new
+fields; that gap is closed in 4E.
 
 No current UI writer emits the new fields. Quick Add still writes
 `{ preparation, doseUnits, context? }` via
@@ -179,12 +180,12 @@ be presented as clinical safety.
 
 ## Deferred work
 
-| Wave      | Scope                                                                | Status                                                                           |
-| --------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| **4B-II** | Presentation adapter and semantic-safe Timeline Edit                 | **Implemented with Option A** — [4B-II](wave-4b-ii-insulin-presentation-edit.md) |
-| **4C**    | Localized semantic Quick Add, including required Other name          | Not started; unblocked only after the 4B-II PR is approved and merged            |
-| **4D**    | Awaited local IndexedDB save integrity                               | Not started                                                                      |
-| **4E**    | API allow-list, kind validation, adoption, OpenAPI, API/domain tests | Not started; still required before semantic insulin fields are cloud-compatible  |
+| Wave      | Scope                                                                | Status                                                                                |
+| --------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **4B-II** | Presentation adapter and semantic-safe Timeline Edit                 | **Implemented with Option A** — [4B-II](wave-4b-ii-insulin-presentation-edit.md)      |
+| **4C**    | Localized semantic Quick Add, including required Other name          | Implemented — [4C](wave-4c-localized-semantic-insulin-quick-add.md)                   |
+| **4D**    | Awaited local IndexedDB save integrity                               | Implemented — [4D](wave-4d-insulin-quick-add-save-integrity.md)                       |
+| **4E**    | API allow-list, kind validation, adoption, OpenAPI, API/domain tests | Implemented on branch / pending merge — [4E](wave-4e-insulin-api-adoption-openapi.md) |
 
 Wave 4B-II was not started in this slice. It consumes these helpers through
 the `@diabetes-universe/medical-domain` package root without duplicating

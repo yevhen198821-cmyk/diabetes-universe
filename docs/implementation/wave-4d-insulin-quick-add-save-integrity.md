@@ -2,14 +2,14 @@
 
 ## Status
 
-| Field        | Value                                                                        |
-| ------------ | ---------------------------------------------------------------------------- |
-| Wave         | 4D                                                                           |
-| Status       | **Implemented on branch / pending merge**                                    |
-| Date         | 2026-08-31                                                                   |
-| Architecture | [Wave 4A](../architecture/insulin/wave-4a-insulin-recording-architecture.md) |
-| Depends on   | [Wave 4C](wave-4c-localized-semantic-insulin-quick-add.md) (merged)          |
-| Base SHA     | `6e08a35fba6fbf0d42b171bfe1b39dffba1dff9a`                                   |
+| Field        | Value                                                                                             |
+| ------------ | ------------------------------------------------------------------------------------------------- |
+| Wave         | 4D                                                                                                |
+| Status       | **Implemented / merged**                                                                          |
+| Date         | 2026-08-31                                                                                        |
+| Architecture | [Wave 4A](../architecture/insulin/wave-4a-insulin-recording-architecture.md)                      |
+| Depends on   | [Wave 4C](wave-4c-localized-semantic-insulin-quick-add.md) (merged)                               |
+| Base SHA     | `6e08a35fba6fbf0d42b171bfe1b39dffba1dff9a` (merged at `8c776882c7d7af51655fd0e80b81d513fb148730`) |
 
 Insulin Quick Add now mirrors the Glucose Wave 3D save-integrity contract:
 validate, allocate one stable event ID, enter pending state, await IndexedDB
@@ -36,7 +36,7 @@ Implemented:
 Not implemented (unchanged by this slice):
 
 - medical API allow-list, kind validation, adoption, OpenAPI, cloud
-  create/update, outbox/sync (Wave **4E**);
+  create/update, outbox/sync (Wave **4E**, tracked separately);
 - other Quick Add categories (nutrition, medication, activity, note);
 - calculator, dose recommendation, IOB, pump, therapy plan;
 - Edit precision cleanup, global localization closure, unrelated IndexedDB
