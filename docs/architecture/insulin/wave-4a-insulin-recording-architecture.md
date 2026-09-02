@@ -23,7 +23,8 @@ unchanged.
 | **4B-II** | Implemented — [presentation adapter and semantic-safe edit](../../implementation/wave-4b-ii-insulin-presentation-edit.md), **Option A** |
 | **4C**    | Implemented — [localized semantic insulin Quick Add](../../implementation/wave-4c-localized-semantic-insulin-quick-add.md)              |
 | **4D**    | Implemented — [insulin Quick Add save integrity](../../implementation/wave-4d-insulin-quick-add-save-integrity.md)                      |
-| **4E**    | Implemented on branch / pending merge — [API / adoption / OpenAPI](../../implementation/wave-4e-insulin-api-adoption-openapi.md)        |
+| **4E**    | Merged — [API / adoption / OpenAPI](../../implementation/wave-4e-insulin-api-adoption-openapi.md)                                       |
+| **4F**    | Implemented on branch / pending merge — [Vertical closure](../../implementation/wave-4f-insulin-vertical-closure.md)                    |
 
 The §11.4 Timeline Edit hard gate is satisfied by **Option A**. Wave 4D local
 save integrity is merged. Wave 4E (this branch / pending merge) updates the

@@ -2,14 +2,17 @@
 
 ## Status
 
-| Field        | Value                                                                        |
-| ------------ | ---------------------------------------------------------------------------- |
-| Wave         | 4E                                                                           |
-| Status       | **Implemented on branch / pending merge**                                    |
-| Date         | 2026-09-01                                                                   |
-| Architecture | [Wave 4A](../architecture/insulin/wave-4a-insulin-recording-architecture.md) |
-| Depends on   | [Wave 4D](wave-4d-insulin-quick-add-save-integrity.md) (merged)              |
-| Base SHA     | `8c776882c7d7af51655fd0e80b81d513fb148730`                                   |
+| Field         | Value                                                                        |
+| ------------- | ---------------------------------------------------------------------------- |
+| Wave          | 4E                                                                           |
+| Status        | **Merged / closed**                                                          |
+| Date          | 2026-09-01                                                                   |
+| Architecture  | [Wave 4A](../architecture/insulin/wave-4a-insulin-recording-architecture.md) |
+| Depends on    | [Wave 4D](wave-4d-insulin-quick-add-save-integrity.md) (merged)              |
+| Base SHA      | `8c776882c7d7af51655fd0e80b81d513fb148730`                                   |
+| Approved HEAD | `9459df4be7846bdff3da6b3bfa9a97a22838cda1`                                   |
+| Merge commit  | `6adc95de4625285497a45b13406200bb4966a38b`                                   |
+| Post-merge CI | `33564693833` SUCCESS                                                        |
 
 Medical API v1 and the adoption boundary now accept, persist, and return
 semantic insulin fields `preparationId` and `administrationContext` without

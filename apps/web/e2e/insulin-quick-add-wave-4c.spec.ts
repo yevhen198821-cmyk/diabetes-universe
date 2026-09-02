@@ -388,7 +388,7 @@ test('insulin quick add is localized in Russian without English form chrome', as
   await context.close();
 });
 
-test('insulin quick add is localized in German without Russian form chrome', async ({
+test('insulin quick add is localized in German and writes a semantic event', async ({
   browser,
 }) => {
   const { context, page } = await createLocalizedPage(browser, 'de-DE');
@@ -412,6 +412,34 @@ test('insulin quick add is localized in German without Russian form chrome', asy
   await expect(
     page.getByRole('textbox', { name: 'Доза инсулина' }),
   ).toHaveCount(0);
+
+  await page.getByRole('button', { name: /Insulinpräparat/ }).click();
+  await page
+    .getByRole('dialog', { name: 'Insulinpräparat', exact: true })
+    .getByRole('button', { name: 'Lantus', exact: true })
+    .click();
+  await page.getByRole('textbox', { name: 'Insulindosis' }).fill('12,25');
+  await page.getByRole('button', { name: /Verabreichungskontext/ }).click();
+  await page
+    .getByRole('dialog', { name: 'Verabreichungskontext', exact: true })
+    .getByRole('button', { name: 'Basal', exact: true })
+    .click();
+  await page.getByRole('button', { name: 'Speichern' }).click();
+
+  await expect(page.getByRole('textbox', { name: 'Insulindosis' })).toHaveCount(
+    0,
+  );
+
+  const stored = await readLatestManualInsulinEvent(page);
+
+  expect(stored?.preparationId).toBe('insulin.prep.glargine_lantus');
+  expect(stored?.preparation).toBe('Lantus');
+  expect(stored?.doseUnits).toBe(12.25);
+  expect(stored?.administrationContext).toBe('basal');
+  expect(stored?.schemaVersion).toBe(1);
+  expect(stored?.source).toBe('manual');
+  expect(Object.hasOwn(stored ?? {}, 'context')).toBe(false);
+  expect(Object.hasOwn(stored ?? {}, 'preparationCategory')).toBe(false);
 
   await context.close();
 });

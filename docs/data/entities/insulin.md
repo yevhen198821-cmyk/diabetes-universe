@@ -75,7 +75,8 @@ failure).
   input policy, while canonical domain validity stays `> 0`, `<= 500` with no
   precision limit;
 - semantic insulin fields are accepted by medical API v1 create/update/adoption
-  and OpenAPI as of Wave 4E (this branch / pending merge); cloud sync engine
+  and OpenAPI as of Wave 4E (merged); local IndexedDB supplemental validation
+  is hardened in Wave 4F (this branch / pending merge); cloud sync engine
   remains out of scope;
 - failed local writes surface a localized save error and retry with the same
   event ID when the semantic payload is unchanged (Wave 4D, merged);
