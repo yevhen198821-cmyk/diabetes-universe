@@ -80,6 +80,7 @@ async function renderInsulinFields({
           presentationLabels,
           selection,
           storedContextWasAbsent: resolveInsulinStoredContextWasAbsent(event),
+          storedDoseUnits: event.doseUnits,
           storedPreparation: event.preparation,
           storedPreparationIsUnmatched: event.preparationId === undefined,
         }),

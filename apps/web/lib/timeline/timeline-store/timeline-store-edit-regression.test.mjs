@@ -275,7 +275,10 @@ test('edit flow keeps zero migration diagnostics for semantic repository events'
     const draft = createTimelineSemanticEventEditDraft(semanticBefore);
     const editResult = updateTimelineEventFromDraft({
       copy: await createTestTimelineInsulinEditCopy(),
-      draft: { ...draft, insulin: { ...draft.insulin, dose: '6' } },
+      draft: {
+        ...draft,
+        insulin: { ...draft.insulin, dose: '6', doseEdited: true },
+      },
       event: semanticBefore,
     });
 

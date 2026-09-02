@@ -204,6 +204,7 @@ function TimelineEventEditForm({
           presentationLabels={insulinPresentationLabels}
           selection={draft.insulin}
           storedContextWasAbsent={draft.storedContextWasAbsent}
+          storedDoseUnits={draft.storedDoseUnits}
           storedPreparation={draft.storedPreparation}
           storedPreparationIsUnmatched={draft.storedPreparationIsUnmatched}
         />

@@ -49,6 +49,8 @@ export interface TimelineInsulinEventEditDraft {
   /** Stored `preparation` snapshot. Read-only edit chrome, never a write source. */
   readonly storedPreparation: string;
   readonly storedPreparationIsUnmatched: boolean;
+  /** Canonical stored dose preserved when the dose field is unchanged. */
+  readonly storedDoseUnits: number;
   /**
    * `true` when the stored event originally omitted both context fields.
    * Immutable for the edit session.
@@ -196,6 +198,7 @@ export function createTimelineSemanticEventEditDraft(
         insulin,
         legacyContextText: resolveInsulinEditLegacyContextText(event),
         storedContextWasAbsent: resolveInsulinStoredContextWasAbsent(event),
+        storedDoseUnits: event.doseUnits,
         storedPreparation: event.preparation,
         storedPreparationIsUnmatched: insulin.preparationId === null,
         time,
