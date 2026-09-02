@@ -50,6 +50,7 @@ export {
   IndexedDbTimelineRepository,
   createIndexedDbTimelineRepository,
 } from './persistence/indexeddb/timeline-indexeddb-repository';
+export { type TimelineSemanticEventValidator } from './persistence/indexeddb/timeline-semantic-event-validator';
 export {
   TimelineAdoptionOrchestrator,
   type TimelineAdoptionTransport,

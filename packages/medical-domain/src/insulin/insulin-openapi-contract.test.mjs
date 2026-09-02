@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import {
+  INSULIN_CANONICAL_DOSE_TECHNICAL_MAXIMUM,
   INSULIN_ADMINISTRATION_CONTEXTS,
   INSULIN_PREPARATION_IDS,
 } from '../index.ts';
@@ -84,6 +85,13 @@ test('OpenAPI insulin enums match medical-domain registry and types union', () =
   );
   assert.match(
     openApi,
-    /doseUnits:\n\s+type: number\n\s+minimum: 0\n\s+exclusiveMinimum: true\n\s+maximum: 500/,
+    new RegExp(
+      `doseUnits:\\n\\s+type: number\\n\\s+minimum: 0\\n\\s+exclusiveMinimum: true\\n\\s+maximum: ${INSULIN_CANONICAL_DOSE_TECHNICAL_MAXIMUM}`,
+    ),
+  );
+  assert.equal(
+    INSULIN_CANONICAL_DOSE_TECHNICAL_MAXIMUM,
+    500,
+    'canonical insulin dose maximum must stay aligned with API runtime validation',
   );
 });

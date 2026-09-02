@@ -2,6 +2,7 @@ import type { TimelineRepository } from '@diabetes-universe/timeline';
 import { createIndexedDbTimelineRepository } from '@diabetes-universe/timeline-web';
 
 import { timelineEvents as demoTimelineEvents } from '../mocks/timeline';
+import { createWebTimelineSemanticEventValidator } from './validate-web-timeline-insulin-event';
 
 export interface CreateWebTimelineRepositoryOptions {
   readonly repository?: TimelineRepository;
@@ -16,5 +17,6 @@ export function createWebTimelineRepository(
 
   return createIndexedDbTimelineRepository({
     seedEvents: demoTimelineEvents,
+    semanticEventValidator: createWebTimelineSemanticEventValidator(),
   });
 }
