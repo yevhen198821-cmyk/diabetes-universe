@@ -78,6 +78,10 @@ function save(event, insulinOverrides = {}, draftOverrides = {}) {
   });
 }
 
+function editedDose(dose) {
+  return { dose, doseEdited: true };
+}
+
 test('insulin edit draft is insulin-specific and carries no generic title string', () => {
   const draft = createTimelineSemanticEventEditDraft(semanticInsulin);
 
@@ -140,8 +144,8 @@ test('a blank Other name keeps the dialog open with a localized error', () => {
   assert.equal(result.errors.otherName, 'Enter the preparation name.');
 });
 
-test('an out-of-bound dose keeps the dialog open with technical validation copy', () => {
-  const result = save(semanticInsulin, { dose: '101' });
+test('an out-of-bound edited dose keeps the dialog open with technical validation copy', () => {
+  const result = save(semanticInsulin, editedDose('101'));
 
   assert.equal(result.event, null);
   assert.equal(
@@ -155,7 +159,7 @@ test('an out-of-bound dose keeps the dialog open with technical validation copy'
 });
 
 test('a legacy dose-only edit preserves the snapshot and never adds an id', () => {
-  const result = save(legacyInsulin, { dose: '6' });
+  const result = save(legacyInsulin, editedDose('6'));
 
   assert.equal(result.event.doseUnits, 6);
   assert.equal(result.event.preparation, 'NovoRapid');
@@ -165,7 +169,7 @@ test('a legacy dose-only edit preserves the snapshot and never adds an id', () =
 });
 
 test('a dose-only edit on a no-context event omits both context fields', () => {
-  const result = save(noContextInsulin, { dose: '6' });
+  const result = save(noContextInsulin, editedDose('6'));
 
   assert.equal(result.event.doseUnits, 6);
   assert.equal(result.event.preparation, 'Lantus');
@@ -195,7 +199,7 @@ test('reverting to no recorded context on an originally absent event preserves a
 });
 
 test('a dose-only edit removes a runtime-unknown preparationId without changing the snapshot', () => {
-  const result = save(runtimeUnknownPreparationInsulin, { dose: '6' });
+  const result = save(runtimeUnknownPreparationInsulin, editedDose('6'));
 
   assert.equal(result.event.doseUnits, 6);
   assert.equal(result.event.preparation, 'NovoRapid');
@@ -226,14 +230,14 @@ test('a semantic context change writes the semantic value and removes legacy con
 });
 
 test('a governed legacy context is not converted by a dose-only save', () => {
-  const result = save(governedLegacyInsulin, { dose: '5' });
+  const result = save(governedLegacyInsulin, editedDose('5'));
 
   assert.equal(result.event.context, 'Перед едой');
   assert.equal('administrationContext' in result.event, false);
 });
 
 test('a dose-only edit preserves existing semantic preparation and context fields', () => {
-  const result = save(semanticInsulin, { dose: '9' });
+  const result = save(semanticInsulin, editedDose('9'));
 
   assert.equal(result.event.doseUnits, 9);
   assert.equal(result.event.preparationId, 'insulin.prep.aspart_novorapid');
@@ -242,7 +246,7 @@ test('a dose-only edit preserves existing semantic preparation and context field
 });
 
 test('immutable envelope fields are preserved and updatedAt advances', () => {
-  const result = save(semanticInsulin, { dose: '9' });
+  const result = save(semanticInsulin, editedDose('9'));
 
   assert.equal(result.event.id, semanticInsulin.id);
   assert.equal(result.event.kind, 'insulin');
@@ -296,6 +300,33 @@ test('a semantic save never emits an explicit undefined legacy context key', () 
       ].sort(),
     ),
   );
+});
+
+test('an edited dose with more than two fractional digits is rejected', () => {
+  const result = save(semanticInsulin, editedDose('4.125'));
+
+  assert.equal(result.event, null);
+  assert.equal(
+    result.errors.dose,
+    'Enter a dose greater than 0 and no more than 100.',
+  );
+});
+
+test('canonical stored doses survive non-dose edits without manual re-entry', () => {
+  for (const doseUnits of [125, 12.125, 500]) {
+    const event = {
+      ...semanticInsulin,
+      doseUnits,
+      id: `insulin-canonical-${doseUnits}`,
+    };
+    const result = save(event, {
+      administrationContext: 'basal',
+      contextEdited: true,
+    });
+
+    assert.equal(result.event.doseUnits, doseUnits);
+    assert.equal(result.event.administrationContext, 'basal');
+  }
 });
 
 test('a variant mismatch cannot silently write an insulin event', () => {

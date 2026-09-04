@@ -1,13 +1,40 @@
 # Changelog
 
+## Wave 4F — Insulin Vertical Closure & Local Contract Hardening
+
+Дата: 2026-09-02
+
+Статус: **Implemented on branch / pending merge.** Closes the local insulin
+recording vertical without new features: shared manual dose policy, explicit
+`doseEdited` edit semantics, supplemental IndexedDB insulin validation via
+composition-root injection, DE/UK full submit E2E, vertical closure E2E, and
+OpenAPI canonical-max parity.
+
+Завершено:
+
+- shared manual insulin dose parser for Quick Add and Edit;
+- unchanged canonical stored doses (`125`, `12.125`, `500`) survive non-dose
+  edits without manual re-entry;
+- `TimelineSemanticEventValidator` injection at web composition root;
+- supplemental insulin persistence rules on all durable write and read paths;
+- German and Ukrainian full semantic Quick Add submit E2E;
+- vertical Quick Add → Dashboard → Timeline → Edit → reload E2E;
+- OpenAPI `maximum` bound tied to `INSULIN_CANONICAL_DOSE_TECHNICAL_MAXIMUM`.
+
+Не входило:
+
+- cloud sync, outbox, calculators, pump, therapy plans, new dashboard module.
+
 ## Wave 4E — Insulin Medical API / Adoption / OpenAPI
 
 Дата: 2026-09-01
 
-Статус: **Implemented on branch / pending merge.** Medical API v1 and adoption
-accept semantic insulin `preparationId` and `administrationContext` additively.
-Legacy `context` remains valid. No cloud sync engine, no `schemaVersion`
-bump, no therapy/recommendation logic.
+Статус: **Merged / closed** at `6adc95de4625285497a45b13406200bb4966a38b`
+(approved HEAD `9459df4be7846bdff3da6b3bfa9a97a22838cda1`, post-merge CI
+`33564693833` SUCCESS). Medical API v1 and adoption accept semantic insulin
+`preparationId` and `administrationContext` additively. Legacy `context`
+remains valid. No cloud sync engine, no `schemaVersion` bump, no
+therapy/recommendation logic.
 
 Завершено:
 

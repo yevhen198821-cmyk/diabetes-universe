@@ -9,15 +9,14 @@ import type {
   InsulinPreparationId,
 } from '@diabetes-universe/types';
 
+import {
+  parseInsulinManualDoseInput,
+  INSULIN_MANUAL_DOSE_UI_MAXIMUM,
+} from './insulin-manual-dose-input';
 import type { InsulinPresentationLabels } from './insulin-presentation-labels';
 
-/**
- * UI typo guard for manually entered insulin doses.
- *
- * This is input protection only. It is not a clinical ceiling and the domain
- * transport bound (500) is unchanged.
- */
-export const INSULIN_EDIT_UI_DOSE_MAXIMUM = 100;
+/** @deprecated Use INSULIN_MANUAL_DOSE_UI_MAXIMUM from insulin-manual-dose-input. */
+export const INSULIN_EDIT_UI_DOSE_MAXIMUM = INSULIN_MANUAL_DOSE_UI_MAXIMUM;
 
 /** Stored insulin fields the edit transition may read. */
 export interface InsulinEditSourceEvent {
@@ -36,12 +35,14 @@ export interface InsulinEditSourceEvent {
  * === null` means an unmatched legacy `context` string is being preserved
  * verbatim. `contextEdited` separates an initialized semantic selection from an
  * explicit user choice, so dose/time-only saves never convert a legacy
- * `context` into a semantic write.
+ * `context` into a semantic write. `doseEdited` separates unchanged canonical
+ * stored doses from explicit manual re-entry.
  */
 export interface InsulinEditSelection {
   readonly administrationContext: InsulinAdministrationContext | null;
   readonly contextEdited: boolean;
   readonly dose: string;
+  readonly doseEdited: boolean;
   readonly otherName: string;
   readonly preparationId: InsulinPreparationId | null;
 }
@@ -91,16 +92,57 @@ export function formatInsulinEditDoseInput(doseUnits: number): string {
     : doseUnits.toString().replace('.', ',');
 }
 
+/**
+ * @deprecated Use parseInsulinManualDoseInput from insulin-manual-dose-input.
+ */
 export function parseInsulinEditDoseInput(raw: string): number | null {
+  return parseInsulinManualDoseInput(raw);
+}
+
+function doseInputMatchesStoredValue(
+  storedDoseUnits: number,
+  raw: string,
+): boolean {
+  if (raw.trim() === formatInsulinEditDoseInput(storedDoseUnits).trim()) {
+    return true;
+  }
+
   const normalized = raw.trim().replace(',', '.');
 
   if (normalized.length === 0) {
-    return null;
+    return false;
   }
 
   const parsed = Number(normalized);
 
-  return Number.isFinite(parsed) ? parsed : null;
+  return Number.isFinite(parsed) && parsed === storedDoseUnits;
+}
+
+/**
+ * Reconciles dose edit state when the user changes the dose field.
+ *
+ * When the entered value resolves exactly to the stored canonical dose, the
+ * selection returns to unchanged state with the canonical presentation string.
+ */
+export function reconcileInsulinEditDoseChange(input: {
+  readonly nextDose: string;
+  readonly selection: InsulinEditSelection;
+  readonly storedDoseUnits: number;
+}): Pick<InsulinEditSelection, 'dose' | 'doseEdited'> {
+  const { nextDose, selection, storedDoseUnits } = input;
+
+  if (!selection.doseEdited && nextDose === selection.dose) {
+    return { dose: nextDose, doseEdited: false };
+  }
+
+  if (doseInputMatchesStoredValue(storedDoseUnits, nextDose)) {
+    return {
+      dose: formatInsulinEditDoseInput(storedDoseUnits),
+      doseEdited: false,
+    };
+  }
+
+  return { dose: nextDose, doseEdited: true };
 }
 
 /**
@@ -166,6 +208,7 @@ export function createInsulinEditSelection(
     administrationContext,
     contextEdited: false,
     dose: formatInsulinEditDoseInput(event.doseUnits),
+    doseEdited: false,
     otherName:
       preparationId === INSULIN_PREPARATION_OTHER_ID ? event.preparation : '',
     preparationId,
@@ -220,13 +263,25 @@ function resolveContextTransition(
   };
 }
 
+function resolveDoseUnits(
+  event: InsulinEditSourceEvent,
+  selection: InsulinEditSelection,
+): number | null {
+  if (!selection.doseEdited) {
+    return event.doseUnits;
+  }
+
+  return parseInsulinManualDoseInput(selection.dose);
+}
+
 /**
  * Resolves one atomic insulin edit save.
  *
  * A catalogue identity and its display snapshot are always resolved together,
  * so an ID can never be saved alongside another entry's snapshot. An explicit
  * semantic context choice replaces the legacy string; anything else preserves
- * the stored context fields untouched.
+ * the stored context fields untouched. Unchanged doses preserve the stored
+ * canonical value exactly without re-parsing through the manual-entry policy.
  */
 export function resolveInsulinEditTransition(input: {
   readonly event: InsulinEditSourceEvent;
@@ -237,14 +292,12 @@ export function resolveInsulinEditTransition(input: {
     dose?: InsulinEditTransitionErrorCode;
     otherName?: InsulinEditTransitionErrorCode;
   } = {};
-  const doseUnits = parseInsulinEditDoseInput(input.selection.dose);
+  const doseUnits = resolveDoseUnits(input.event, input.selection);
 
-  if (
-    doseUnits === null ||
-    doseUnits <= 0 ||
-    doseUnits > INSULIN_EDIT_UI_DOSE_MAXIMUM
-  ) {
-    errors.dose = 'insulin.dose.out_of_ui_bound';
+  if (input.selection.doseEdited) {
+    if (doseUnits === null) {
+      errors.dose = 'insulin.dose.out_of_ui_bound';
+    }
   }
 
   const preparation = resolvePreparationTransition(

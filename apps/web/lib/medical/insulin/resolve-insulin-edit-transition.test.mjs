@@ -6,10 +6,15 @@ import { resolveInsulinPresentationLabels } from './insulin-presentation-labels.
 import {
   createInsulinEditSelection,
   INSULIN_EDIT_UI_DOSE_MAXIMUM,
+  reconcileInsulinEditDoseChange,
   resolveInsulinEditLegacyContextText,
   resolveInsulinEditTransition,
   resolveInsulinStoredContextWasAbsent,
 } from './resolve-insulin-edit-transition.ts';
+
+function editedDose(dose) {
+  return { dose, doseEdited: true };
+}
 
 const semanticEvent = {
   administrationContext: 'before_meal',
@@ -126,7 +131,7 @@ test('an existing Other event keeps its snapshot when the name is untouched', ()
 });
 
 test('legacy dose-only edit preserves the snapshot and the absence of an id', () => {
-  const result = transition(legacyEvent, { dose: '6' });
+  const result = transition(legacyEvent, editedDose('6'));
 
   assert.equal(result.ok, true);
   assert.equal(result.transition.doseUnits, 6);
@@ -202,7 +207,7 @@ test('unspecified is a real semantic value for an explicit context edit', () => 
 });
 
 test('a dose-only edit preserves existing semantic preparation and context', () => {
-  const result = transition(semanticEvent, { dose: '7' });
+  const result = transition(semanticEvent, editedDose('7'));
 
   assert.equal(result.transition.doseUnits, 7);
   assert.deepEqual(result.transition.context, { kind: 'preserve' });
@@ -223,7 +228,7 @@ test('a governed legacy context initializes the selection without being written 
   assert.equal(selection.administrationContext, 'before_meal');
   assert.equal(selection.contextEdited, false);
 
-  const result = transition(governedLegacyEvent, { dose: '5' });
+  const result = transition(governedLegacyEvent, editedDose('5'));
 
   assert.deepEqual(result.transition.context, { kind: 'preserve' });
 });
@@ -288,7 +293,7 @@ test('a dose-only edit on a no-context event preserves the absence of context fi
     doseUnits: 4,
     preparation: 'NovoRapid',
   };
-  const result = transition(noContextEvent, { dose: '6' });
+  const result = transition(noContextEvent, editedDose('6'));
 
   assert.equal(result.ok, true);
   assert.equal(result.transition.doseUnits, 6);
@@ -321,18 +326,18 @@ test('stored context absence is detected only when both context fields are missi
   );
 });
 
-test('the UI dose guard rejects values at or below zero and above 100', () => {
+test('the UI dose guard rejects edited values at or below zero and above 100', () => {
   assert.equal(INSULIN_EDIT_UI_DOSE_MAXIMUM, 100);
 
-  for (const dose of ['0', '-1', '-0.5', '101', '500', '', 'abc']) {
-    const result = transition(semanticEvent, { dose });
+  for (const dose of ['0', '-1', '-0.5', '101', '500', '', 'abc', '4.125']) {
+    const result = transition(semanticEvent, editedDose(dose));
 
     assert.equal(result.ok, false);
     assert.equal(result.errors.dose, 'insulin.dose.out_of_ui_bound');
   }
 });
 
-test('the UI dose guard accepts boundary and fractional values without rounding', () => {
+test('the UI dose guard accepts boundary and fractional edited values without rounding', () => {
   for (const [dose, expected] of [
     ['0.5', 0.5],
     ['1', 1],
@@ -340,16 +345,54 @@ test('the UI dose guard accepts boundary and fractional values without rounding'
     ['12.25', 12.25],
     ['100', 100],
   ]) {
-    const result = transition(semanticEvent, { dose });
+    const result = transition(semanticEvent, editedDose(dose));
 
     assert.equal(result.ok, true);
     assert.equal(result.transition.doseUnits, expected);
   }
 });
 
-test('a blank Other name and an invalid dose are reported together', () => {
+test('unchanged canonical stored doses survive non-dose edits', () => {
+  for (const doseUnits of [125, 12.125, 500]) {
+    const event = { ...semanticEvent, doseUnits };
+    const result = transition(event, {
+      administrationContext: 'basal',
+      contextEdited: true,
+    });
+
+    assert.equal(result.ok, true);
+    assert.equal(result.transition.doseUnits, doseUnits);
+  }
+});
+
+test('changing dose back to the stored canonical value reconciles to unchanged state', () => {
+  const event = { ...semanticEvent, doseUnits: 12.125 };
+  const selection = createInsulinEditSelection(event);
+  const edited = reconcileInsulinEditDoseChange({
+    nextDose: '8',
+    selection,
+    storedDoseUnits: 12.125,
+  });
+
+  assert.equal(edited.doseEdited, true);
+
+  const reconciled = reconcileInsulinEditDoseChange({
+    nextDose: '12,125',
+    selection: { ...selection, ...edited },
+    storedDoseUnits: 12.125,
+  });
+
+  assert.deepEqual(reconciled, { dose: '12,125', doseEdited: false });
+
+  const unchangedSave = transition(event, reconciled);
+
+  assert.equal(unchangedSave.ok, true);
+  assert.equal(unchangedSave.transition.doseUnits, 12.125);
+});
+
+test('a blank Other name and an invalid edited dose are reported together', () => {
   const result = transition(semanticEvent, {
-    dose: '0',
+    ...editedDose('0'),
     otherName: '',
     preparationId: 'insulin.prep.other',
   });

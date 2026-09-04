@@ -13,6 +13,7 @@ import type {
 } from '@diabetes-universe/types';
 
 import {
+  reconcileInsulinEditDoseChange,
   resolveInsulinAdministrationContextOptions,
   resolveInsulinPreparationOptionGroups,
   type InsulinEditSelection,
@@ -32,6 +33,8 @@ interface TimelineInsulinEditFieldsProps {
   readonly onChange: (selection: InsulinEditSelection) => void;
   readonly presentationLabels: InsulinPresentationLabels;
   readonly selection: InsulinEditSelection;
+  /** Canonical stored dose preserved when the dose field is unchanged. */
+  readonly storedDoseUnits: number;
   /**
    * `true` when the stored event originally omitted both context fields.
    * Keeps the absence option available for the whole edit session.
@@ -67,6 +70,7 @@ export function TimelineInsulinEditFields({
   presentationLabels,
   selection,
   storedContextWasAbsent,
+  storedDoseUnits,
   storedPreparation,
   storedPreparationIsUnmatched,
 }: TimelineInsulinEditFieldsProps) {
@@ -177,7 +181,14 @@ export function TimelineInsulinEditFields({
           id="timeline-edit-insulin-dose"
           inputMode="decimal"
           onChange={(event) =>
-            onChange({ ...selection, dose: event.target.value })
+            onChange({
+              ...selection,
+              ...reconcileInsulinEditDoseChange({
+                nextDose: event.target.value,
+                selection,
+                storedDoseUnits,
+              }),
+            })
           }
           value={selection.dose}
         />

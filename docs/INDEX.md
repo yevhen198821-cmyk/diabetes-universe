@@ -77,7 +77,8 @@
 - [Wave 4B-II — Insulin Presentation Adapter and Semantic-Safe Timeline Edit](implementation/wave-4b-ii-insulin-presentation-edit.md) — Implemented
 - [Wave 4C — Localized Semantic Insulin Quick Add](implementation/wave-4c-localized-semantic-insulin-quick-add.md) — Implemented
 - [Wave 4D — Insulin Quick Add Save Integrity](implementation/wave-4d-insulin-quick-add-save-integrity.md) — Implemented
-- [Wave 4E — Insulin Medical API / Adoption / OpenAPI](implementation/wave-4e-insulin-api-adoption-openapi.md) — Implemented on branch / pending merge
+- [Wave 4E — Insulin Medical API / Adoption / OpenAPI](implementation/wave-4e-insulin-api-adoption-openapi.md) — Merged
+- [Wave 4F — Insulin Vertical Closure & Local Contract Hardening](implementation/wave-4f-insulin-vertical-closure.md) — Implemented on branch / pending merge
 - [Dashboard States](architecture/dashboard/states.md)
 - [Dashboard Responsive Behavior](architecture/dashboard/responsive.md)
 - [Timeline Overview](architecture/timeline/overview.md) — event journal at `/timeline`

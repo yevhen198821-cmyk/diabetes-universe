@@ -16,11 +16,13 @@ import {
   TIMELINE_INDEXEDDB_VERSION,
 } from './timeline-indexeddb-schema';
 import { applyTimelineIndexedDbSchemaUpgrade } from './timeline-indexeddb-upgrade';
+import type { TimelineSemanticEventValidator } from './timeline-semantic-event-validator';
 
 export interface TimelineIndexedDbOpenOptions {
   readonly databaseName?: string;
   readonly now?: () => string;
   readonly seedEvents?: readonly SemanticTimelineEvent[];
+  readonly semanticEventValidator?: TimelineSemanticEventValidator;
 }
 
 export interface TimelineIndexedDbOpenResult {

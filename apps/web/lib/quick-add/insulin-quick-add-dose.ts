@@ -1,37 +1,10 @@
 /**
- * Manual insulin dose input policy for Quick Add.
+ * Quick Add re-exports the shared manual insulin dose input policy.
  *
- * This is the web manual-input boundary: it checks syntax, a two-fraction-digit
- * manual limit, and a UI typo ceiling. It is not a clinical rule. `100` is
- * typo protection only — it is not a safe, recommended, or therapeutic maximum,
- * and the canonical domain transport bound stays at 500.
- *
- * The parsed number is returned exactly as entered. No rounding is applied, so
- * `12.25` stays `12.25`.
+ * @see ../medical/insulin/insulin-manual-dose-input.ts
  */
-export const INSULIN_QUICK_ADD_UI_DOSE_MAXIMUM = 100;
-
-/** Manual entry accepts at most two fractional digits, dot or comma. */
-export const INSULIN_QUICK_ADD_MANUAL_DOSE_MAXIMUM_FRACTION_DIGITS = 2;
-
-const MANUAL_DOSE_PATTERN = /^\d+(?:[.,]\d{1,2})?$/;
-
-export function parseInsulinQuickAddDoseInput(raw: string): number | null {
-  const trimmed = raw.trim();
-
-  if (!MANUAL_DOSE_PATTERN.test(trimmed)) {
-    return null;
-  }
-
-  const value = Number(trimmed.replace(',', '.'));
-
-  if (
-    !Number.isFinite(value) ||
-    value <= 0 ||
-    value > INSULIN_QUICK_ADD_UI_DOSE_MAXIMUM
-  ) {
-    return null;
-  }
-
-  return value;
-}
+export {
+  INSULIN_MANUAL_DOSE_MAXIMUM_FRACTION_DIGITS as INSULIN_QUICK_ADD_MANUAL_DOSE_MAXIMUM_FRACTION_DIGITS,
+  INSULIN_MANUAL_DOSE_UI_MAXIMUM as INSULIN_QUICK_ADD_UI_DOSE_MAXIMUM,
+  parseInsulinManualDoseInput as parseInsulinQuickAddDoseInput,
+} from '../medical/insulin/insulin-manual-dose-input';

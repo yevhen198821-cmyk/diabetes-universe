@@ -14,6 +14,7 @@ import {
   TIMELINE_INDEXEDDB_EVENT_INDEXES,
   TIMELINE_INDEXEDDB_STORES,
 } from './timeline-indexeddb-schema';
+import type { TimelineSemanticEventValidator } from './timeline-semantic-event-validator';
 import { validateIndexedDbTimelineEventRecord } from './timeline-indexeddb-validation';
 
 interface TimelineIndexedDbCursorPayload {
@@ -170,6 +171,7 @@ export async function queryIndexedDbTimelineEvents(
   database: IDBPDatabase,
   query: TimelineRepositoryQuery,
   now: () => string = () => new Date().toISOString(),
+  semanticEventValidator: TimelineSemanticEventValidator | null = null,
 ): Promise<TimelineRepositoryQueryResult> {
   if (
     !Number.isInteger(query.limit) ||
@@ -219,12 +221,36 @@ export async function queryIndexedDbTimelineEvents(
 
       const rawRecord = position.value;
       const validation = validateIndexedDbTimelineEventRecord(rawRecord);
+
       if (validation.status === 'quarantine') {
         quarantineAttempted = true;
         quarantineStore.put(
           createIndexedDbTimelineQuarantineRecord(
             rawRecord,
             validation,
+            position.primaryKey,
+            now(),
+          ),
+        );
+        store.delete(position.primaryKey);
+        await transaction.done;
+        throw new TimelineRepositoryError('TIMELINE_REPOSITORY_READ_FAILED');
+      }
+
+      if (
+        semanticEventValidator &&
+        !semanticEventValidator(validation.record.event)
+      ) {
+        quarantineAttempted = true;
+        quarantineStore.put(
+          createIndexedDbTimelineQuarantineRecord(
+            rawRecord,
+            {
+              reason: 'invalid_event_schema',
+              sourceRecordId: rawRecord.id,
+              status: 'quarantine',
+              storageSchemaVersion: rawRecord.storageSchemaVersion,
+            },
             position.primaryKey,
             now(),
           ),

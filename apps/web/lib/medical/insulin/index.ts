@@ -17,10 +17,16 @@ export {
   type TimelineInsulinPresentationResult,
 } from './present-insulin-from-timeline-event';
 export {
+  INSULIN_MANUAL_DOSE_MAXIMUM_FRACTION_DIGITS,
+  INSULIN_MANUAL_DOSE_UI_MAXIMUM,
+  parseInsulinManualDoseInput,
+} from './insulin-manual-dose-input';
+export {
   createInsulinEditSelection,
   formatInsulinEditDoseInput,
   INSULIN_EDIT_UI_DOSE_MAXIMUM,
   parseInsulinEditDoseInput,
+  reconcileInsulinEditDoseChange,
   resolveInsulinEditLegacyContextText,
   resolveInsulinEditTransition,
   resolveInsulinStoredContextWasAbsent,

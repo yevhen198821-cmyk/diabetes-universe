@@ -9,6 +9,7 @@ import {
   type TimelineRepositoryQueryResult,
   type TimelineRepositorySnapshot,
 } from '@diabetes-universe/timeline';
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 import type { IDBPDatabase } from 'idb';
 
 import { createIndexedDbTimelineEventRecord } from './timeline-indexeddb-record';
@@ -20,6 +21,7 @@ import {
 import { queryIndexedDbTimelineEvents } from './timeline-indexeddb-query';
 import { createIndexedDbTimelineQuarantineRecord } from './timeline-indexeddb-quarantine';
 import { TIMELINE_INDEXEDDB_STORES } from './timeline-indexeddb-schema';
+import type { TimelineSemanticEventValidator } from './timeline-semantic-event-validator';
 import { validateIndexedDbTimelineEventRecord } from './timeline-indexeddb-validation';
 
 export class IndexedDbTimelineRepository implements TimelineRepository {
@@ -28,6 +30,7 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
   #initialized = false;
   readonly #options: TimelineIndexedDbOpenOptions;
   readonly #now: () => string;
+  readonly #semanticEventValidator: TimelineSemanticEventValidator | null;
 
   constructor(
     options: TimelineIndexedDbOpenOptions = {},
@@ -35,6 +38,7 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
   ) {
     this.#options = options;
     this.#now = dependencies.now ?? (() => new Date().toISOString());
+    this.#semanticEventValidator = options.semanticEventValidator ?? null;
   }
 
   async initialize(): Promise<void> {
@@ -93,6 +97,7 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
       }
 
       const validation = validateIndexedDbTimelineEventRecord(record);
+
       if (validation.status === 'quarantine') {
         quarantineAttempted = true;
         transaction
@@ -105,6 +110,26 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
               this.#now(),
             ),
           );
+        eventStore.delete(eventId);
+        await transaction.done;
+        throw new TimelineRepositoryError('TIMELINE_REPOSITORY_READ_FAILED');
+      }
+
+      if (!this.#isSemanticEventValid(validation.record.event)) {
+        quarantineAttempted = true;
+        transaction.objectStore(TIMELINE_INDEXEDDB_STORES.quarantine).put(
+          createIndexedDbTimelineQuarantineRecord(
+            record,
+            {
+              reason: 'invalid_event_schema',
+              sourceRecordId: record.id,
+              status: 'quarantine',
+              storageSchemaVersion: record.storageSchemaVersion,
+            },
+            eventId,
+            this.#now(),
+          ),
+        );
         eventStore.delete(eventId);
         await transaction.done;
         throw new TimelineRepositoryError('TIMELINE_REPOSITORY_READ_FAILED');
@@ -135,6 +160,7 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
         this.#database!,
         query,
         this.#now,
+        this.#semanticEventValidator,
       );
     } catch (error) {
       if (error instanceof TimelineRepositoryError) {
@@ -149,6 +175,7 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
     event: TimelineRepositoryEvent,
   ): Promise<TimelineRepositoryMutationResult> {
     this.#assertInitialized();
+    this.#assertWritableSemanticEvent(event);
 
     try {
       const record = createIndexedDbTimelineEventRecord(event, this.#now());
@@ -173,6 +200,7 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
     event: TimelineRepositoryEvent,
   ): Promise<TimelineRepositoryMutationResult> {
     this.#assertInitialized();
+    this.#assertWritableSemanticEvent(event);
 
     try {
       const transaction = this.#database!.transaction(
@@ -238,6 +266,10 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
 
     const normalizedEvents = normalizeTimelineRepositoryEvents(events);
 
+    for (const event of normalizedEvents) {
+      this.#assertWritableSemanticEvent(event);
+    }
+
     try {
       const transaction = this.#database!.transaction(
         TIMELINE_INDEXEDDB_STORES.events,
@@ -273,6 +305,22 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
     if (!this.#initialized || this.#database === null) {
       throw new TimelineRepositoryError('TIMELINE_REPOSITORY_NOT_INITIALIZED');
     }
+  }
+
+  #assertWritableSemanticEvent(event: TimelineRepositoryEvent): void {
+    if (!this.#isSemanticEventValid(event)) {
+      throw new TimelineRepositoryError('TIMELINE_REPOSITORY_WRITE_FAILED');
+    }
+  }
+
+  #isSemanticEventValid(
+    event: SemanticTimelineEvent | undefined,
+  ): event is SemanticTimelineEvent {
+    if (event === undefined) {
+      return false;
+    }
+
+    return this.#semanticEventValidator?.(event) ?? true;
   }
 }
 
