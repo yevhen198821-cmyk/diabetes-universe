@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { resolveSafeAuthCallbackPath } from '@diabetes-universe/identity';
@@ -13,11 +12,14 @@ import {
   isWebAuthConfigured,
   isWebPasskeyConfigured,
 } from '../../lib/auth/get-web-identity-service';
+import { createLocalizedRouteMetadata } from '../../lib/platform/create-localized-route-metadata';
 
-export const metadata: Metadata = {
-  title: 'Sign in',
-  description: 'Sign in to Diabetes Universe.',
-};
+export async function generateMetadata() {
+  return createLocalizedRouteMetadata({
+    titleKey: 'account.auth.signIn.title',
+    descriptionKey: 'account.auth.signIn.description',
+  });
+}
 
 interface AuthPageProps {
   readonly searchParams: Promise<{

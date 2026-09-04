@@ -26,12 +26,29 @@ const MIGRATED_SURFACE_GLOBS = [
   'app/account',
   'app/dashboard',
   'app/timeline',
+  'app/page.tsx',
+  'app/layout.tsx',
   'lib/dashboard',
   'lib/timeline',
   'lib/medical/insulin',
   'lib/quick-add/format-glucose.ts',
   'lib/quick-add/insulin-quick-add-submit.ts',
   'lib/platform',
+];
+
+const LOCALIZED_ROUTE_PAGES = [
+  'app/page.tsx',
+  'app/timeline/page.tsx',
+  'app/account/page.tsx',
+  'app/account/language/page.tsx',
+  'app/account/about/page.tsx',
+  'app/account/settings/page.tsx',
+  'app/account/diabetes/page.tsx',
+  'app/account/security/page.tsx',
+  'app/account/security/sessions/page.tsx',
+  'app/auth/page.tsx',
+  'app/auth/check-email/page.tsx',
+  'app/auth/error/page.tsx',
 ];
 
 const EXCLUDED_NAME_PATTERN =
@@ -130,7 +147,11 @@ function looksLikeUserFacingEnglish(value) {
     return false;
   }
 
-  if (/^[a-z0-9._/-]+$/i.test(trimmed) && !/\s/.test(trimmed)) {
+  if (
+    /^[a-z0-9._/-]+$/i.test(trimmed) &&
+    !/\s/.test(trimmed) &&
+    (/[./_-]/.test(trimmed) || trimmed === trimmed.toLowerCase())
+  ) {
     return false;
   }
 
@@ -141,7 +162,45 @@ function looksLikeUserFacingEnglish(value) {
   return /[A-Za-z]{3,}/.test(trimmed) && /[A-Z]/.test(trimmed[0]);
 }
 
-function collectJsxStringLiterals(source) {
+function isMetadataExport(node) {
+  return (
+    ts.isVariableStatement(node) &&
+    Boolean(
+      node.modifiers?.some(
+        (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
+      ),
+    ) &&
+    node.declarationList.declarations.some(
+      (declaration) =>
+        ts.isIdentifier(declaration.name) &&
+        declaration.name.text === 'metadata',
+    )
+  );
+}
+
+function isGenerateMetadataFunction(node) {
+  if (
+    ts.isFunctionDeclaration(node) &&
+    node.name?.text === 'generateMetadata'
+  ) {
+    return true;
+  }
+
+  if (
+    ts.isVariableStatement(node) &&
+    node.declarationList.declarations.some(
+      (declaration) =>
+        ts.isIdentifier(declaration.name) &&
+        declaration.name.text === 'generateMetadata',
+    )
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function collectUserFacingStringLiterals(source) {
   const sourceFile = ts.createSourceFile(
     'surface.tsx',
     source,
@@ -152,6 +211,11 @@ function collectJsxStringLiterals(source) {
   const literals = [];
 
   function visit(node, userFacing = false) {
+    if (isMetadataExport(node) || isGenerateMetadataFunction(node)) {
+      ts.forEachChild(node, (child) => visit(child, true));
+      return;
+    }
+
     if (ts.isJsxText(node)) {
       const text = node.getText(sourceFile);
       if (looksLikeUserFacingEnglish(text)) {
@@ -162,6 +226,15 @@ function collectJsxStringLiterals(source) {
     if (ts.isJsxAttribute(node) && ts.isIdentifier(node.name)) {
       const nextUserFacing = USER_FACING_PROP_NAMES.has(node.name.text);
       ts.forEachChild(node, (child) => visit(child, nextUserFacing));
+      return;
+    }
+
+    if (
+      (ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node)) &&
+      ts.isIdentifier(node.name) &&
+      USER_FACING_PROP_NAMES.has(node.name.text)
+    ) {
+      ts.forEachChild(node, (child) => visit(child, true));
       return;
     }
 
@@ -319,11 +392,47 @@ test('migrated surfaces do not add new hardcoded English UI strings', async () =
     }
 
     const source = await readFile(file, 'utf8');
-    const literals = collectJsxStringLiterals(source);
+    const literals = collectUserFacingStringLiterals(source);
     for (const literal of literals) {
       findings.push(`${relative}: "${literal}"`);
     }
   }
 
   assert.deepEqual(findings, []);
+});
+
+test('hardcoded-string guard treats Metadata object literals as user-facing', () => {
+  const literals = collectUserFacingStringLiterals(`
+    export const metadata = {
+      title: 'Language',
+      description: 'Choose the language used for the app.',
+    };
+  `);
+
+  assert.deepEqual(literals, [
+    'Language',
+    'Choose the language used for the app.',
+  ]);
+});
+
+test('affected localized routes generate metadata from the catalog', async () => {
+  for (const relative of LOCALIZED_ROUTE_PAGES) {
+    const source = await readFile(path.join(WEB_ROOT, relative), 'utf8');
+
+    assert.match(
+      source,
+      /createLocalizedRouteMetadata/,
+      `${relative} must resolve titles from the locale catalog`,
+    );
+    assert.match(
+      source,
+      /export async function generateMetadata/,
+      `${relative} must expose request-aware generateMetadata`,
+    );
+    assert.doesNotMatch(
+      source,
+      /export const metadata/,
+      `${relative} still exports hardcoded metadata`,
+    );
+  }
 });

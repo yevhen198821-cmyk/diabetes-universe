@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 
 import type { PasskeySummary } from '@diabetes-universe/identity';
@@ -9,11 +8,14 @@ import {
   getWebIdentityService,
   isWebPasskeyConfigured,
 } from '../../../lib/auth/get-web-identity-service';
+import { createLocalizedRouteMetadata } from '../../../lib/platform/create-localized-route-metadata';
 
-export const metadata: Metadata = {
-  title: 'Security',
-  description: 'Manage sign-in security for Diabetes Universe.',
-};
+export async function generateMetadata() {
+  return createLocalizedRouteMetadata({
+    titleKey: 'account.profile.segments.security',
+    descriptionKey: 'account.profile.security.sessionsLink.subtitle',
+  });
+}
 
 export default async function AccountSecurityPage() {
   await requireAuthenticatedPrincipal();

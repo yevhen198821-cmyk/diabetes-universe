@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
@@ -13,11 +12,14 @@ import {
   isWebPasskeyConfigured,
 } from '../../../../lib/auth/get-web-identity-service';
 import { ACCOUNT_SECURITY_SESSIONS_AUTH_CALLBACK } from '../../../../lib/auth/session-management-mutation';
+import { createLocalizedRouteMetadata } from '../../../../lib/platform/create-localized-route-metadata';
 
-export const metadata: Metadata = {
-  title: 'Active sessions',
-  description: 'Manage active sign-in sessions for Diabetes Universe.',
-};
+export async function generateMetadata() {
+  return createLocalizedRouteMetadata({
+    titleKey: 'account.security.sessions.title',
+    descriptionKey: 'account.security.sessions.description',
+  });
+}
 
 async function readAccountSessions(): Promise<
   readonly AccountSessionSummary[]
