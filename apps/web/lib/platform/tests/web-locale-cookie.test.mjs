@@ -36,8 +36,34 @@ test('cookie parser accepts only exact canonical locales', () => {
 test('HTTPS forwarded proto enables Secure; local HTTP does not', () => {
   assert.equal(resolveWebLocaleCookieSecureFromProtocol('https'), true);
   assert.equal(resolveWebLocaleCookieSecureFromProtocol('https, http'), true);
-  assert.equal(resolveWebLocaleCookieSecureFromProtocol('http'), false);
-  assert.equal(resolveWebLocaleCookieSecureFromProtocol(undefined), false);
+  assert.equal(
+    resolveWebLocaleCookieSecureFromProtocol('http', {
+      NODE_ENV: 'production',
+    }),
+    false,
+  );
+});
+
+test('missing proto is Secure in production and HTTP-capable for local E2E', () => {
+  assert.equal(
+    resolveWebLocaleCookieSecureFromProtocol(undefined, {
+      NODE_ENV: 'production',
+    }),
+    true,
+  );
+  assert.equal(
+    resolveWebLocaleCookieSecureFromProtocol(null, {
+      AUTH_RUNTIME_ENV: 'e2e',
+      NODE_ENV: 'production',
+    }),
+    false,
+  );
+  assert.equal(
+    resolveWebLocaleCookieSecureFromProtocol(undefined, {
+      NODE_ENV: 'development',
+    }),
+    false,
+  );
 });
 
 test('request stores expose cookie locale without failing on garbage', () => {

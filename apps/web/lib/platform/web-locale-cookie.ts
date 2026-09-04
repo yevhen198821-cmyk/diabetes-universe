@@ -23,7 +23,8 @@ export type WebLocaleCookieWriteOptions = Readonly<{
 /**
  * Builds the single writer options for the locale cookie.
  *
- * `secure` is true only for HTTPS requests so local HTTP E2E can persist it.
+ * Production cookies are Secure even when the proxy omits
+ * `x-forwarded-proto`. Local HTTP E2E keeps Secure=false.
  */
 export function createWebLocaleCookieWriteOptions(
   secure: boolean,
@@ -43,15 +44,32 @@ export function parseWebLocaleCookieValue(
   return parseCanonicalSupportedLocale(value);
 }
 
+export type WebLocaleCookieSecureEnv = Readonly<{
+  readonly AUTH_RUNTIME_ENV?: string;
+  readonly NODE_ENV?: string;
+}>;
+
 export function resolveWebLocaleCookieSecureFromProtocol(
   forwardedProto: string | null | undefined,
+  env: WebLocaleCookieSecureEnv = process.env,
 ): boolean {
-  if (!forwardedProto) {
+  if (forwardedProto) {
+    const protocol = forwardedProto.split(',')[0]?.trim().toLowerCase();
+
+    if (protocol === 'https') {
+      return true;
+    }
+
+    if (protocol === 'http') {
+      return false;
+    }
+  }
+
+  if (env.AUTH_RUNTIME_ENV === 'e2e') {
     return false;
   }
 
-  const protocol = forwardedProto.split(',')[0]?.trim().toLowerCase();
-  return protocol === 'https';
+  return env.NODE_ENV === 'production';
 }
 
 export type HeaderLike = Readonly<{

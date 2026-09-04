@@ -16,7 +16,9 @@ locale E2E matrix.
 - cookie → Accept-Language → `en-GB` wired into production bootstrap;
 - Profile language selection with native names and one-step persist/apply;
 - `PlatformFormatter` presentation path for Timeline/Dashboard/Quick Add numbers;
-- translation-key parity and AST integrity gates;
+- translation-key parity, approved-bundle integrity, and AST integrity gates;
+- localized Language/Auth/Account/Dashboard/Timeline route metadata;
+- production locale-cookie `Secure=true` when `x-forwarded-proto` is absent;
 - browser matrix for `en-GB` / `de-DE` / `uk-UA` / `ru-RU` plus auth cookie persistence.
 
 Не входило:

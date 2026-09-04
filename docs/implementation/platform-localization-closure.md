@@ -82,7 +82,7 @@ from locale.
 | Path     | `/`                                           |
 | SameSite | `Lax`                                         |
 | HttpOnly | `true`                                        |
-| Secure   | HTTPS requests only                           |
+| Secure   | HTTPS, or production when proto is missing    |
 | Max-Age  | 31536000 (365 days)                           |
 | Value    | exact canonical supported locale              |
 | Invalid  | ignored; no bootstrap error                   |
@@ -125,15 +125,24 @@ CI tests assert:
 - canonical locales are exactly EN/DE/UK/RU;
 - `en-GB` is the platform default;
 - production key parity for all four locales;
+- DE/UK/RU closure bundles are `approved`, not draft;
+- every reachable closure key is explicitly authored (not English-spread);
+- English-identical values are limited to documented cognates (brand, units,
+  product names, shared medical/technical labels). Ordinary sentences are
+  not allowlisted, and `translation !== English` is not the production rule;
 - no sibling-language fallback;
 - `apps/web` locale defaults alias the catalog;
 - Profile selector uses catalog metadata;
+- Language, Auth, Dashboard, Timeline, and Account routes resolve metadata
+  from the catalog;
 - migrated surfaces do not add a second i18n library;
-- hardcoded English UI strings and ad-hoc `Intl` / `toLocale*` formatting on
+- hardcoded English UI strings — including `Metadata` and other user-facing
+  TypeScript literals — and ad-hoc `Intl` / `toLocale*` formatting on
   migrated surfaces fail the AST/source guards.
 
 Allowlisted literals are limited to brand, technical identifiers, paths, and
-fixed unit symbols.
+fixed unit symbols. Cognate message keys such as `Insulin` or `Fiasp` may
+legally match English.
 
 ## Future authenticated profile sync
 
@@ -161,9 +170,9 @@ localized `Open event` aria prefix.
 Auth boundary: logout keeps the locale cookie; auth sign-in chrome and the next
 Dashboard session stay on the selected language. Passkey enrollment chrome on
 Account Security remains Russian hardcode and is excluded from the hardcoded-
-string guard to avoid noisy CI. German and Ukrainian Home greetings and
-recent-events titles still fall back to English where those keys are not
-yet professionally translated.
+string guard to avoid noisy CI. German, Ukrainian, and Russian Home chrome,
+including greetings, Quick Add, and recent-events titles, is authored in the
+selected language.
 
 ## Explicit non-scope
 
