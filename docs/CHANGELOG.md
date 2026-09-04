@@ -20,8 +20,9 @@ locale E2E matrix.
 - localized Language/Auth/Account/Dashboard/Timeline route metadata;
 - production locale-cookie `Secure=true` when `x-forwarded-proto` is absent;
 - browser matrix for `en-GB` / `de-DE` / `uk-UA` / `ru-RU` plus auth cookie persistence;
-- web unit tests use process isolation and `--test-concurrency=2` so the
-  expanded Metadata AST guard cannot force-kill CI with a shared heap.
+- web unit tests cap suite concurrency at 2 and stop the Happy DOM
+  target-editor Save-click path from allocating a 4 GB heap that
+  force-killed GitHub CI.
 
 Не входило:
 

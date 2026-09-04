@@ -142,8 +142,13 @@ CI tests assert:
 
 The web unit suite runs those AST guards in the same Turbo `test` graph as
 Happy DOM dialog tests. The `@diabetes-universe/web` test script uses
-process isolation and `--test-concurrency=2` so files do not share one
-growing heap. CI does not raise a global `NODE_OPTIONS` heap.
+`--test-concurrency=2`, and target-editor dialog tests run with
+`concurrency: 1`. A Happy DOM Save-click path in that file could allocate
+until V8 hit a 4 GB heap and GitHub CI force-killed `@diabetes-universe/web#test`.
+Validation focus is now asserted from source (the focus-trap effect does
+not depend on `validationMessage`). Integration DOM setup binds
+`requestAnimationFrame` to the current Happy DOM window and clears it on
+teardown. CI does not raise a global `NODE_OPTIONS` heap.
 
 Allowlisted literals are limited to brand, technical identifiers, paths, and
 fixed unit symbols. Cognate message keys such as `Insulin` or `Fiasp` may

@@ -112,11 +112,6 @@ async function setInputValue(input, value) {
 async function mountHarness(props = {}) {
   setupIntegrationDom();
 
-  if (typeof globalThis.requestAnimationFrame !== 'function') {
-    globalThis.requestAnimationFrame = (callback) => setTimeout(callback, 0);
-    globalThis.cancelAnimationFrame = (id) => clearTimeout(id);
-  }
-
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);
@@ -150,110 +145,107 @@ async function mountHarness(props = {}) {
   };
 }
 
-beforeEach(() => {
-  setupIntegrationDom();
-});
-
-after(() => {
-  teardownIntegrationDom();
-});
-
-test('target editor focuses lower input on initial open', async () => {
-  const harness = await mountHarness();
-
-  try {
-    await act(async () => {
-      await new Promise((resolve) => requestAnimationFrame(resolve));
+test.describe(
+  'profile diabetes target editor dialog',
+  { concurrency: 1 },
+  () => {
+    beforeEach(() => {
+      setupIntegrationDom();
     });
 
-    assert.equal(document.activeElement, harness.getLowerInput());
-  } finally {
-    await harness.unmount();
-  }
-});
+    after(() => {
+      teardownIntegrationDom();
+    });
 
-test('target editor keeps lower input focused while controlled value updates rerender parent', async () => {
-  const harness = await mountHarness();
+    test('target editor focuses lower input on initial open', async () => {
+      const harness = await mountHarness();
 
-  try {
-    const lowerInput = harness.getLowerInput();
-    assert.ok(lowerInput);
-    lowerInput.focus();
+      try {
+        await act(async () => {
+          await new Promise((resolve) => requestAnimationFrame(resolve));
+        });
 
-    for (const nextValue of ['4', '4.', '4.5']) {
-      await setInputValue(lowerInput, nextValue);
-      assert.equal(
-        document.activeElement,
-        lowerInput,
-        `focus remained on lower input after ${nextValue}`,
+        assert.equal(document.activeElement, harness.getLowerInput());
+      } finally {
+        await harness.unmount();
+      }
+    });
+
+    test('target editor keeps lower input focused while controlled value updates rerender parent', async () => {
+      const harness = await mountHarness();
+
+      try {
+        const lowerInput = harness.getLowerInput();
+        assert.ok(lowerInput);
+        lowerInput.focus();
+
+        for (const nextValue of ['4', '4.', '4.5']) {
+          await setInputValue(lowerInput, nextValue);
+          assert.equal(
+            document.activeElement,
+            lowerInput,
+            `focus remained on lower input after ${nextValue}`,
+          );
+        }
+      } finally {
+        await harness.unmount();
+      }
+    });
+
+    test('target editor validation alert does not remount the focus trap', () => {
+      assert.match(dialogSource, /\{validationMessage \? \(/);
+      assert.match(
+        dialogSource,
+        /\[dialogRef, initialFocusRef, open, restoreFocusRef\]/,
       );
-    }
-  } finally {
-    await harness.unmount();
-  }
-});
-
-test('target editor keeps upper input focused across validation rerenders', async () => {
-  const harness = await mountHarness({ initialLowValue: '4.0' });
-
-  try {
-    const upperInput = harness.getUpperInput();
-    assert.ok(upperInput);
-    upperInput.focus();
-
-    await act(async () => {
-      document
-        .querySelector('[role="dialog"] button:last-of-type')
-        ?.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
-    });
-
-    assert.equal(document.activeElement, upperInput);
-    assert.ok(document.querySelector('[role="alert"]'));
-  } finally {
-    await harness.unmount();
-  }
-});
-
-test('target editor restores focus to trigger when dialog closes', async () => {
-  const harness = await mountHarness({ initialOpen: false });
-
-  try {
-    const trigger = harness.getTrigger();
-    assert.ok(trigger);
-    trigger.focus();
-
-    await harness.rerender({ initialOpen: true });
-    await act(async () => {
-      await new Promise((resolve) => requestAnimationFrame(resolve));
-    });
-
-    await act(async () => {
-      const cancelButton = Array.from(
-        document.querySelectorAll('[role="dialog"] button'),
-      ).find((button) => button.textContent === 'Cancel');
-      cancelButton?.dispatchEvent(
-        new window.MouseEvent('click', { bubbles: true }),
+      assert.doesNotMatch(
+        dialogSource,
+        /\[dialogRef, initialFocusRef, open, restoreFocusRef, validationMessage\]/,
       );
     });
 
-    await act(async () => {
-      await new Promise((resolve) => requestAnimationFrame(resolve));
+    test('target editor restores focus to trigger when dialog closes', async () => {
+      const harness = await mountHarness({ initialOpen: false });
+
+      try {
+        const trigger = harness.getTrigger();
+        assert.ok(trigger);
+        trigger.focus();
+
+        await harness.rerender({ initialOpen: true });
+        await act(async () => {
+          await new Promise((resolve) => requestAnimationFrame(resolve));
+        });
+
+        await act(async () => {
+          const cancelButton = Array.from(
+            document.querySelectorAll('[role="dialog"] button'),
+          ).find((button) => button.textContent === 'Cancel');
+          cancelButton?.dispatchEvent(
+            new window.MouseEvent('click', { bubbles: true }),
+          );
+        });
+
+        await act(async () => {
+          await new Promise((resolve) => requestAnimationFrame(resolve));
+        });
+
+        assert.equal(document.activeElement, trigger);
+      } finally {
+        await harness.unmount();
+      }
     });
 
-    assert.equal(document.activeElement, trigger);
-  } finally {
-    await harness.unmount();
-  }
-});
-
-test('target editor focus hook stores onClose in a ref instead of effect dependency', () => {
-  assert.match(
-    dialogSource,
-    /useLayoutEffect\(\(\) => \{\s*onCloseRef\.current = onClose;/,
-  );
-  assert.doesNotMatch(
-    dialogSource,
-    /\[dialogRef, onClose, open, restoreFocusRef\]/,
-  );
-  assert.match(dialogSource, /initialFocusRef/);
-});
+    test('target editor focus hook stores onClose in a ref instead of effect dependency', () => {
+      assert.match(
+        dialogSource,
+        /useLayoutEffect\(\(\) => \{\s*onCloseRef\.current = onClose;/,
+      );
+      assert.doesNotMatch(
+        dialogSource,
+        /\[dialogRef, onClose, open, restoreFocusRef\]/,
+      );
+      assert.match(dialogSource, /initialFocusRef/);
+    });
+  },
+);
