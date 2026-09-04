@@ -161,7 +161,9 @@ localized `Open event` aria prefix.
 Auth boundary: logout keeps the locale cookie; auth sign-in chrome and the next
 Dashboard session stay on the selected language. Passkey enrollment chrome on
 Account Security remains Russian hardcode and is excluded from the hardcoded-
-string guard to avoid noisy CI.
+string guard to avoid noisy CI. German and Ukrainian Home greetings and
+recent-events titles still fall back to English where those keys are not
+yet professionally translated.
 
 ## Explicit non-scope
 

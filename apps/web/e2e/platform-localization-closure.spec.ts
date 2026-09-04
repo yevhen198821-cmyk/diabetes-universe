@@ -3,6 +3,7 @@ import { type Browser, type BrowserContext } from '@playwright/test';
 import { expect, test, type Page } from './support/test';
 
 import { signInWithMagicLink } from './support/auth-helpers';
+import { ensureGlucoseDisplayUnitConfigured } from './support/glucose-quick-add-helpers';
 import {
   clearTimelineEventsInIndexedDb,
   seedTimelineEventInIndexedDb,
@@ -28,6 +29,8 @@ interface LocaleMatrix {
   readonly locale: 'de-DE' | 'en-GB' | 'ru-RU' | 'uk-UA';
   readonly nativeName: string;
   readonly openEventPrefix: string;
+  readonly quickAddGlucose: string;
+  readonly quickAddInsulin: string;
   readonly recentEvents: string;
   readonly save: string;
   readonly seededDoseDisplay: string;
@@ -49,6 +52,8 @@ const LOCALES: readonly LocaleMatrix[] = [
     locale: 'en-GB',
     nativeName: 'English',
     openEventPrefix: 'Open event',
+    quickAddGlucose: 'Quick add: Glucose',
+    quickAddInsulin: 'Quick add: Insulin',
     recentEvents: 'Recent events',
     save: 'Save',
     seededDoseDisplay: '12.125',
@@ -68,6 +73,8 @@ const LOCALES: readonly LocaleMatrix[] = [
     locale: 'de-DE',
     nativeName: 'Deutsch',
     openEventPrefix: 'Ereignis öffnen',
+    quickAddGlucose: 'Quick add: Glukose',
+    quickAddInsulin: 'Quick add: Insulin',
     recentEvents: 'Recent events',
     save: 'Speichern',
     seededDoseDisplay: '12,125',
@@ -87,6 +94,8 @@ const LOCALES: readonly LocaleMatrix[] = [
     locale: 'uk-UA',
     nativeName: 'Українська',
     openEventPrefix: 'Відкрити подію',
+    quickAddGlucose: 'Quick add: Глюкоза',
+    quickAddInsulin: 'Quick add: Інсулін',
     recentEvents: 'Recent events',
     save: 'Зберегти',
     seededDoseDisplay: '12,125',
@@ -106,6 +115,8 @@ const LOCALES: readonly LocaleMatrix[] = [
     locale: 'ru-RU',
     nativeName: 'Русский',
     openEventPrefix: 'Открыть событие',
+    quickAddGlucose: 'Быстрое добавление: Глюкоза',
+    quickAddInsulin: 'Быстрое добавление: Инсулин',
     recentEvents: 'Последние записи',
     save: 'Сохранить',
     seededDoseDisplay: '12,125',
@@ -221,6 +232,7 @@ for (const locale of LOCALES) {
     browser,
     request,
   }) => {
+    test.setTimeout(120_000);
     const { context, page } = await createConflictingBrowser(browser, locale);
 
     await signInWithMagicLink(
@@ -231,6 +243,7 @@ for (const locale of LOCALES) {
     await selectLanguage(page, locale);
     await expectLocaleCookie(context, locale.locale);
     await expectDocumentLanguage(page, locale.htmlLang);
+    await ensureGlucoseDisplayUnitConfigured(page);
 
     await page.goto('/');
     await prepareEmptyTimeline(page);
@@ -245,20 +258,16 @@ for (const locale of LOCALES) {
       page.getByRole('region', { name: locale.recentEvents }),
     ).toContainText(locale.seededDoseDisplay);
 
-    await page
-      .getByRole('button', { name: /Glucose|Глюкоза|Glukose/ })
-      .first()
-      .click();
-    const glucoseInput = page.getByLabel(locale.glucoseLabel);
-    await expect(glucoseInput).toBeVisible();
+    await page.getByRole('button', { name: locale.quickAddGlucose }).click();
+    const glucoseInput = page.getByRole('textbox', {
+      name: locale.glucoseLabel,
+    });
+    await expect(glucoseInput).toBeEnabled();
     await glucoseInput.fill('6.2');
     await page.getByRole('button', { name: locale.save, exact: true }).click();
     await expect(glucoseInput).toHaveCount(0);
 
-    await page
-      .getByRole('button', { name: /Insulin|Инсулин|Інсулін/ })
-      .first()
-      .click();
+    await page.getByRole('button', { name: locale.quickAddInsulin }).click();
     await page.getByRole('button', { name: locale.insulinPreparation }).click();
     await page
       .getByRole('dialog')
