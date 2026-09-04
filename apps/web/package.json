@@ -19,6 +19,7 @@
   "dependencies": {
     "@diabetes-universe/formatting": "workspace:*",
     "@diabetes-universe/i18n": "workspace:*",
+    "@diabetes-universe/i18n-locales": "workspace:*",
     "@diabetes-universe/identity": "workspace:*",
     "@diabetes-universe/medical-domain": "workspace:*",
     "@diabetes-universe/medical-service": "workspace:*",

@@ -6,16 +6,16 @@ import type { RequestPlatformBootstrapResult } from './request-platform-bootstra
 import type { RequestPresentationContext } from './request-presentation-context';
 import { resolveRequestTimeZone } from './resolve-request-time-zone';
 import { createServerPresentationSeed } from './server-presentation-seed';
+import { readRequestPresentationContextFromStores } from './web-locale-cookie';
 
 const MODULE_NAME = 'createRequestPlatformRuntime';
 
 async function readNextRequestPresentationContext(): Promise<RequestPresentationContext> {
-  const { headers } = await import('next/headers');
+  const { cookies, headers } = await import('next/headers');
   const headerStore = await headers();
+  const cookieStore = await cookies();
 
-  return {
-    acceptLanguage: headerStore.get('accept-language') ?? undefined,
-  };
+  return readRequestPresentationContextFromStores(headerStore, cookieStore);
 }
 
 /**

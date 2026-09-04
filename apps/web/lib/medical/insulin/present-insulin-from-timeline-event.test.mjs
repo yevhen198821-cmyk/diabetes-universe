@@ -291,3 +291,19 @@ test('dose formatting uses the locale decimal separator without rounding', async
 
   assert.equal(present({ doseUnits: 12.25, preparation: 'X' }).value, '12,25');
 });
+
+test('canonical insulin doses stay exact including 12.125', async () => {
+  const english = await createPresenter();
+  const german = await createPresenter({
+    acceptLanguage: 'de-DE',
+    cookieTimeZone: 'Europe/Berlin',
+  });
+
+  assert.equal(
+    english({ doseUnits: 12.125, preparation: 'X' }).value,
+    '12.125',
+  );
+  assert.equal(english({ doseUnits: 125, preparation: 'X' }).value, '125');
+  assert.equal(english({ doseUnits: 500, preparation: 'X' }).value, '500');
+  assert.equal(german({ doseUnits: 12.125, preparation: 'X' }).value, '12,125');
+});

@@ -1,3 +1,5 @@
+import type { PlatformFormatter } from '@diabetes-universe/formatting';
+
 const DECIMAL_INPUT_PATTERN = /^\d+(?:[.,]\d+)?$/;
 
 export function parseNutritionDecimalInput(
@@ -26,8 +28,11 @@ export function calculateNutritionProductCarbs(
   return (weightGrams * carbsPer100Grams) / 100;
 }
 
-export function formatNutritionCarbs(carbsGrams: number): string {
-  return carbsGrams.toLocaleString('ru-RU', {
+export function formatNutritionCarbs(
+  carbsGrams: number,
+  formatter: PlatformFormatter,
+): string {
+  return formatter.formatNumber(carbsGrams, {
     maximumFractionDigits: 1,
     minimumFractionDigits: 0,
   });
@@ -35,6 +40,7 @@ export function formatNutritionCarbs(carbsGrams: number): string {
 
 export function formatNutritionCarbsPer100Grams(
   carbsPer100Grams: number,
+  formatter: PlatformFormatter,
 ): string {
-  return `${formatNutritionCarbs(carbsPer100Grams)} г углеводов / 100 г`;
+  return `${formatNutritionCarbs(carbsPer100Grams, formatter)} г углеводов / 100 г`;
 }

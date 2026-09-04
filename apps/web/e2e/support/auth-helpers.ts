@@ -26,7 +26,11 @@ export async function signInWithMagicLink(
 
   await page.goto(`/auth?callback=${encodeURIComponent(callbackPath)}`);
   await page.getByLabel('Email').fill(email);
-  await page.getByRole('button', { name: 'Продолжить' }).click();
+  await page
+    .getByRole('button', {
+      name: /^(Continue|Продолжить|Weiter|Продовжити)$/,
+    })
+    .click();
   await expect(page).toHaveURL(/\/auth\/check-email/);
 
   await expect

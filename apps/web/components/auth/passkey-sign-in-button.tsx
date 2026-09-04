@@ -6,10 +6,16 @@ import { signInWithPasskey } from '@diabetes-universe/identity/client';
 
 interface PasskeySignInButtonProps {
   readonly callbackPath: string;
+  readonly errorFallback: string;
+  readonly idleLabel: string;
+  readonly pendingLabel: string;
 }
 
 export function PasskeySignInButton({
   callbackPath,
+  errorFallback,
+  idleLabel,
+  pendingLabel,
 }: PasskeySignInButtonProps) {
   const [isPending, setIsPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -21,7 +27,7 @@ export function PasskeySignInButton({
     const result = await signInWithPasskey();
 
     if (!result.ok) {
-      setMessage(result.message ?? 'Не удалось выполнить вход с Passkey.');
+      setMessage(result.message ?? errorFallback);
       setIsPending(false);
       return;
     }
@@ -37,7 +43,7 @@ export function PasskeySignInButton({
         onClick={handleSignIn}
         type="button"
       >
-        {isPending ? 'Открываем Passkey…' : 'Войти с Passkey'}
+        {isPending ? pendingLabel : idleLabel}
       </button>
       {message ? (
         <p className="text-sm text-rose-600 dark:text-rose-300" role="alert">

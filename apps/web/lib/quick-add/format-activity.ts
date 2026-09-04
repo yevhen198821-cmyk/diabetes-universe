@@ -1,3 +1,5 @@
+import type { PlatformFormatter } from '@diabetes-universe/formatting';
+
 const ACTIVITY_DURATION_PATTERN = /^\d+$/;
 
 export const ACTIVITY_DURATION_MAX_MINUTES = 1440;
@@ -22,8 +24,14 @@ export function parseActivityDurationInput(raw: string): number | null {
   return value;
 }
 
-export function formatActivityDuration(minutes: number): string {
-  return minutes.toLocaleString('ru-RU');
+export function formatActivityDuration(
+  minutes: number,
+  formatter: PlatformFormatter,
+): string {
+  return formatter.formatNumber(minutes, {
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+  });
 }
 
 export function validateActivityQuickAddEntry(entry: {

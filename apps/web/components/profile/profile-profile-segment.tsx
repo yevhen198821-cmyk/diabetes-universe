@@ -1,6 +1,7 @@
 'use client';
 
 import type { AuthenticatedPrincipal } from '@diabetes-universe/identity';
+import type { CanonicalSupportedLocale } from '@diabetes-universe/i18n-locales';
 import { useMemo, useState } from 'react';
 
 import { ProfileLogoutButton } from './profile-shell';
@@ -48,7 +49,12 @@ export function ProfileProfileSegment({
         model={userCardModel}
         onAvatarChange={setAvatarUrlOverride}
       />
-      <ProfileMenu labels={labels} />
+      <ProfileMenu
+        currentLocale={
+          localization.localeContext.locale as CanonicalSupportedLocale
+        }
+        labels={labels}
+      />
       <ProfileLogoutButton label={labels.logout} />
     </div>
   );

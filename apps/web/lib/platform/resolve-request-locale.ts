@@ -1,3 +1,4 @@
+import { parseCanonicalSupportedLocale } from '@diabetes-universe/i18n-locales';
 import type { LanguageCode, LocaleCode } from '@diabetes-universe/i18n';
 
 import type { RequestPresentationContext } from './request-presentation-context';
@@ -132,11 +133,7 @@ function resolveLocaleFromAcceptLanguage(
 function normalizeCookieLocale(
   cookieLocale: string | undefined,
 ): WebPlatformSupportedLocale | null {
-  if (!cookieLocale || cookieLocale.trim().length === 0) {
-    return null;
-  }
-
-  return resolveSupportedLocale(cookieLocale);
+  return parseCanonicalSupportedLocale(cookieLocale);
 }
 
 /**

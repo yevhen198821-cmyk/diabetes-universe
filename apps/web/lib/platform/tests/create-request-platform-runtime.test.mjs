@@ -263,6 +263,28 @@ test('ensureServerOnly rejects browser execution', () => {
   }
 });
 
+test('garbage cookie locale does not fail bootstrap', async () => {
+  const result = await createRequestPlatformRuntime({
+    acceptLanguage: 'de-DE',
+    cookieLocale: '%%%not-a-locale',
+    cookieTimeZone: 'Europe/Berlin',
+  });
+
+  assert.equal(result.status, 'ready');
+  assert.equal(result.runtime.localization.localeContext.locale, 'de-DE');
+});
+
+test('production request reader wires the locale cookie before runtime creation', async () => {
+  const source = await readFile(
+    new URL('../create-request-platform-runtime.ts', import.meta.url),
+    'utf8',
+  );
+
+  assert.match(source, /readRequestPresentationContextFromStores/);
+  assert.match(source, /cookies/);
+  assert.doesNotMatch(source, /cookieTimeZone: headerStore/);
+});
+
 test('createWebPlatformConfig remains independent from runtime creation for tests', () => {
   const config = createWebPlatformConfig(
     createExplicitContext({ acceptLanguage: 'en-GB' }),

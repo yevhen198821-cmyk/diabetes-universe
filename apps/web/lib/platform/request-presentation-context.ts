@@ -10,8 +10,10 @@
  */
 export type RequestPresentationContext = Readonly<{
   /**
-   * Optional locale from an existing user cookie value.
-   * Not read in production until a cookie scheme is approved for the app.
+   * Optional locale from the first-party `du-web-locale` cookie.
+   *
+   * Only exact canonical supported locales are honoured. Invalid values are
+   * ignored by `resolveRequestLocale()`.
    */
   readonly cookieLocale?: string;
 

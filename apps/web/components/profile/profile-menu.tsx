@@ -1,10 +1,13 @@
 'use client';
 
-import { Download, Globe2, Smartphone, type LucideIcon } from 'lucide-react';
+import { Download, Smartphone, type LucideIcon } from 'lucide-react';
+
+import type { CanonicalSupportedLocale } from '@diabetes-universe/i18n-locales';
 
 import type { ProfileLabels } from './profile-labels';
 import { ProfileMenuAboutLinkRow } from './profile-menu-about-link-row';
 import { ProfileMenuDiabetesLinkRow } from './profile-menu-diabetes-link-row';
+import { ProfileMenuLanguageLinkRow } from './profile-menu-language-link-row';
 import {
   profileComingSoonBadgeClassName,
   profileDisabledRowClassName,
@@ -77,7 +80,13 @@ function ProfileMenuDisabledRow({
   );
 }
 
-export function ProfileMenu({ labels }: { readonly labels: ProfileLabels }) {
+export function ProfileMenu({
+  currentLocale,
+  labels,
+}: {
+  readonly currentLocale: CanonicalSupportedLocale;
+  readonly labels: ProfileLabels;
+}) {
   return (
     <div className="space-y-5">
       <ProfileMenuSection title={labels.menu.section.diabetesManagement}>
@@ -95,12 +104,9 @@ export function ProfileMenu({ labels }: { readonly labels: ProfileLabels }) {
       </ProfileMenuSection>
 
       <ProfileMenuSection title={labels.menu.section.personalization}>
-        <ProfileMenuDisabledRow
-          comingSoonLabel={labels.comingSoonBadge}
-          icon={Globe2}
-          subtitle={labels.menu.language.subtitle}
-          title={labels.menu.language.title}
-          tone="teal"
+        <ProfileMenuLanguageLinkRow
+          currentLocale={currentLocale}
+          labels={labels}
         />
       </ProfileMenuSection>
 

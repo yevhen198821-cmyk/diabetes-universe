@@ -1,3 +1,5 @@
+import type { PlatformFormatter } from '@diabetes-universe/formatting';
+
 const MEDICATION_DOSE_PATTERN = /^\d+(?:[.,]\d+)?$/;
 const MAX_MEDICATION_DOSE = 100000;
 
@@ -17,8 +19,11 @@ export function parseMedicationDoseInput(raw: string): number | null {
   return value;
 }
 
-export function formatMedicationDose(dose: number): string {
-  return dose.toLocaleString('ru-RU', {
+export function formatMedicationDose(
+  dose: number,
+  formatter: PlatformFormatter,
+): string {
+  return formatter.formatNumber(dose, {
     maximumFractionDigits: 20,
     minimumFractionDigits: 0,
   });

@@ -362,6 +362,39 @@ export const germanDraftMessages = defineDraftMessages({
   'account.profile.menu.export.title': 'Daten exportieren',
   'account.profile.menu.language.subtitle': 'Sprache, Datums- und Zeitformat',
   'account.profile.menu.language.title': 'Sprache und Region',
+  'account.profile.language.page.title': 'Sprache',
+  'account.profile.language.page.description':
+    'Wählen Sie die Sprache für die App, Daten, Uhrzeiten und Zahlen.',
+  'account.profile.language.option.selected': 'Aktuelle Sprache',
+  'account.auth.signIn.title': 'Anmelden',
+  'account.auth.signIn.description':
+    'Verwenden Sie einen Passkey oder erhalten Sie einen einmaligen Link per E-Mail.',
+  'account.auth.signIn.continue': 'Weiter',
+  'account.auth.signIn.sending': 'Link wird gesendet…',
+  'account.auth.signIn.emailLabel': 'Email',
+  'account.auth.signIn.emailHint':
+    'Wir senden einen einmaligen Anmeldelink. Ein Passwort ist nicht erforderlich.',
+  'account.auth.signIn.orEmail': 'oder per E-Mail',
+  'account.auth.signIn.passkey': 'Mit Passkey anmelden',
+  'account.auth.signIn.passkeyPending': 'Passkey wird geöffnet…',
+  'account.auth.signIn.passkeyError': 'Anmeldung mit Passkey fehlgeschlagen.',
+  'account.auth.signIn.disclaimer':
+    'Wenn Sie fortfahren, bestätigen Sie, dass Sie Ihre eigene Anmeldemethode verwenden.',
+  'account.auth.signIn.returnToApp': 'Zurück zur App',
+  'account.auth.checkEmail.title': 'Prüfen Sie Ihre E-Mail',
+  'account.auth.checkEmail.withAddress':
+    'Wenn die Adresse registriert ist, haben wir einen Anmeldelink gesendet.',
+  'account.auth.checkEmail.withoutAddress':
+    'Wenn die Adresse korrekt ist, haben wir einen Anmeldelink gesendet.',
+  'account.auth.checkEmail.spamHint':
+    'Der Link ist nur begrenzte Zeit gültig. Prüfen Sie den Spam-Ordner, wenn die E-Mail fehlt.',
+  'account.auth.checkEmail.requestAgain': 'Neuen Link anfordern',
+  'account.auth.checkEmail.returnToApp': 'Zurück zur App',
+  'account.auth.error.title': 'Anmeldung fehlgeschlagen',
+  'account.auth.error.description':
+    'Der Link ist möglicherweise abgelaufen oder wurde bereits verwendet. Fordern Sie einen neuen Link an und versuchen Sie es erneut.',
+  'account.auth.error.backToSignIn': 'Zurück zur Anmeldung',
+  'account.auth.error.continueWithoutSignIn': 'Ohne Anmeldung fortfahren',
   'account.profile.menu.section.data': 'Daten und Informationen',
   'account.profile.menu.section.devices': 'Geräte und Daten',
   'account.profile.menu.section.diabetesManagement': 'Diabetes-Management',

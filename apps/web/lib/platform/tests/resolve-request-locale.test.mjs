@@ -83,3 +83,85 @@ test('resolveLanguageFromLocale maps supported locales to language codes', () =>
   assert.equal(resolveLanguageFromLocale('de-DE'), 'de');
   assert.equal(resolveLanguageFromLocale('ru-RU'), 'ru');
 });
+
+test('cookie de-DE wins over browser ru', () => {
+  assert.equal(
+    resolveRequestLocale({ cookieLocale: 'de-DE', acceptLanguage: 'ru' }),
+    'de-DE',
+  );
+});
+
+test('cookie uk-UA wins over browser de', () => {
+  assert.equal(
+    resolveRequestLocale({ cookieLocale: 'uk-UA', acceptLanguage: 'de' }),
+    'uk-UA',
+  );
+});
+
+test('invalid cookie falls back to browser de-DE', () => {
+  assert.equal(
+    resolveRequestLocale({
+      cookieLocale: 'not-a-locale',
+      acceptLanguage: 'de-DE',
+    }),
+    'de-DE',
+  );
+});
+
+test('language-only cookie is ignored in favor of Accept-Language', () => {
+  assert.equal(
+    resolveRequestLocale({ cookieLocale: 'de', acceptLanguage: 'ru-RU' }),
+    'ru-RU',
+  );
+});
+
+test('no cookie uses browser ru-RU', () => {
+  assert.equal(resolveRequestLocale({ acceptLanguage: 'ru-RU' }), 'ru-RU');
+});
+
+test('no cookie maps browser uk to uk-UA', () => {
+  assert.equal(resolveRequestLocale({ acceptLanguage: 'uk' }), 'uk-UA');
+});
+
+test('no cookie maps browser de-AT to de-DE', () => {
+  assert.equal(resolveRequestLocale({ acceptLanguage: 'de-AT' }), 'de-DE');
+});
+
+test('no cookie maps browser en-US to en-GB', () => {
+  assert.equal(resolveRequestLocale({ acceptLanguage: 'en-US' }), 'en-GB');
+});
+
+test('no cookie and unsupported browser locale uses en-GB', () => {
+  assert.equal(resolveRequestLocale({ acceptLanguage: 'fr-FR' }), 'en-GB');
+});
+
+test('Accept-Language q-values keep priority semantics', () => {
+  assert.equal(
+    resolveRequestLocale({
+      acceptLanguage: 'ru-RU;q=0.4, de-DE;q=0.8, fr-FR;q=0.9',
+    }),
+    'de-DE',
+  );
+  assert.equal(
+    resolveRequestLocale({
+      acceptLanguage: 'uk;q=0.2, de-AT;q=0.7, en-US;q=0.9',
+    }),
+    'en-GB',
+  );
+});
+
+test('garbage cookie never throws and is ignored', () => {
+  assert.doesNotThrow(() =>
+    resolveRequestLocale({
+      cookieLocale: '%%%\n\0not-locale',
+      acceptLanguage: 'en-GB',
+    }),
+  );
+  assert.equal(
+    resolveRequestLocale({
+      cookieLocale: '%%%\n\0not-locale',
+      acceptLanguage: 'en-GB',
+    }),
+    'en-GB',
+  );
+});

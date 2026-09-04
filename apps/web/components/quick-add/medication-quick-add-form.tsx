@@ -27,6 +27,7 @@ import {
   formatMedicationDose,
   parseMedicationDoseInput,
 } from '../../lib/quick-add/format-medication';
+import { useFormatter } from '../../lib/platform/react/use-formatter';
 
 const NOTE_COUNTER_THRESHOLD = 160;
 const NOTE_MAX_LENGTH = 200;
@@ -60,6 +61,7 @@ export function MedicationQuickAddForm({
   onCancel,
   onSubmit,
 }: MedicationQuickAddFormProps) {
+  const formatter = useFormatter();
   const [formState, setFormState] =
     useState<MedicationFormState>(createInitialState);
   const [doseError, setDoseError] = useState<string | null>(null);
@@ -83,7 +85,7 @@ export function MedicationQuickAddForm({
     : undefined;
   const previewPrimary =
     canSubmit && formState.medication && parsedDose !== null
-      ? `${formState.medication.name} · ${formatMedicationDose(parsedDose)} ${
+      ? `${formState.medication.name} · ${formatMedicationDose(parsedDose, formatter)} ${
           formState.unit
         }`
       : '';

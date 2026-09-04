@@ -1,24 +1,35 @@
-import type { FallbackPolicy, HourCycle } from '@diabetes-universe/i18n';
+import {
+  CANONICAL_LANGUAGE_DEFAULT_LOCALES,
+  CANONICAL_PLATFORM_DEFAULT_LOCALE,
+  CANONICAL_SUPPORTED_LOCALE_CODES,
+  CANONICAL_TRANSLATION_FALLBACK_POLICY,
+  type CanonicalSupportedLocale,
+} from '@diabetes-universe/i18n-locales';
+import type {
+  FallbackPolicy,
+  HourCycle,
+  LocaleCode,
+} from '@diabetes-universe/i18n';
 
 import { asLocaleCode, asNamespace } from './platform-type-helpers';
 
 /**
- * Wave 1 supported locale codes for the web bootstrap boundary.
+ * Web bootstrap aliases of the canonical Diabetes Universe locale catalog.
+ *
+ * Do not redeclare supported locales here. The catalog in
+ * `@diabetes-universe/i18n-locales` is the authority.
  */
-export const WEB_PLATFORM_SUPPORTED_LOCALES = [
-  asLocaleCode('en-GB'),
-  asLocaleCode('uk-UA'),
-  asLocaleCode('de-DE'),
-  asLocaleCode('ru-RU'),
-] as const;
+export const WEB_PLATFORM_SUPPORTED_LOCALES =
+  CANONICAL_SUPPORTED_LOCALE_CODES.map((locale) => asLocaleCode(locale));
 
-export type WebPlatformSupportedLocale =
-  (typeof WEB_PLATFORM_SUPPORTED_LOCALES)[number];
+export type WebPlatformSupportedLocale = CanonicalSupportedLocale & LocaleCode;
 
 /**
- * Platform default locale from Localization Platform v1.0 registry.
+ * Platform default locale from the canonical Diabetes Universe catalog.
  */
-export const WEB_PLATFORM_DEFAULT_LOCALE = asLocaleCode('en-GB');
+export const WEB_PLATFORM_DEFAULT_LOCALE = asLocaleCode(
+  CANONICAL_PLATFORM_DEFAULT_LOCALE,
+);
 
 /**
  * Default hour cycle for web presentation context when not supplied by request.
@@ -27,20 +38,13 @@ export const WEB_PLATFORM_DEFAULT_HOUR_CYCLE =
   'h23' as const satisfies HourCycle;
 
 /**
- * Immutable resource fallback policy for Wave 1 locales.
+ * Immutable resource fallback policy: requested locale → en-GB.
  *
  * Separate from user presentation preferences; governs translation bundle
  * resolution only.
  */
-export const WEB_PLATFORM_FALLBACK_POLICY = Object.freeze({
-  defaultLocale: asLocaleCode('en-GB'),
-  localeFallbackChain: Object.freeze([
-    asLocaleCode('en-GB'),
-    asLocaleCode('uk-UA'),
-    asLocaleCode('de-DE'),
-    asLocaleCode('ru-RU'),
-  ]),
-}) satisfies FallbackPolicy;
+export const WEB_PLATFORM_FALLBACK_POLICY =
+  CANONICAL_TRANSLATION_FALLBACK_POLICY satisfies FallbackPolicy;
 
 /**
  * Minimal namespace preloaded to verify translation-ready bootstrap path.
@@ -72,11 +76,11 @@ export const WEB_PLATFORM_APPLICATION_PRELOAD_NAMESPACES = Object.freeze([
 ]);
 
 /**
- * Canonical default locale per supported language (Localization Platform v1.0).
+ * Canonical default locale per supported language.
  */
 export const WEB_PLATFORM_LANGUAGE_DEFAULT_LOCALES = Object.freeze({
-  en: asLocaleCode('en-GB'),
-  uk: asLocaleCode('uk-UA'),
-  de: asLocaleCode('de-DE'),
-  ru: asLocaleCode('ru-RU'),
+  en: asLocaleCode(CANONICAL_LANGUAGE_DEFAULT_LOCALES.en),
+  uk: asLocaleCode(CANONICAL_LANGUAGE_DEFAULT_LOCALES.uk),
+  de: asLocaleCode(CANONICAL_LANGUAGE_DEFAULT_LOCALES.de),
+  ru: asLocaleCode(CANONICAL_LANGUAGE_DEFAULT_LOCALES.ru),
 });

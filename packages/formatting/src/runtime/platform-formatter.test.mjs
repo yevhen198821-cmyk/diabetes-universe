@@ -1543,7 +1543,7 @@ test('cache stores formatter instances only', () => {
   });
   const numberKey = createNumberFormatCacheKey('en-GB', { style: 'decimal' });
 
-  assert.equal(dateKey, 'date|en-GB|UTC|-|medium|-');
+  assert.equal(dateKey, 'date|en-GB|UTC|-|medium|-|-|-|-|-|-|-|-');
   assert.equal(numberKey, 'number|en-GB|-|group=-|min=-|max=-');
   assert.ok(
     __getCachedFormatterForTests(dateKey) instanceof Intl.DateTimeFormat,
@@ -1558,4 +1558,61 @@ test('cache reuses NumberFormat instances for identical parameters', () => {
   const second = getCachedNumberFormat('en-GB', { style: 'percent' });
 
   assert.equal(first, second);
+});
+
+test('formatDate field options produce locale-aware compact dates', () => {
+  const formatter = createPlatformFormatter(createContext('en-GB'));
+
+  assert.match(
+    formatter.formatDate(new Date('2026-08-02T12:00:00Z'), {
+      day: 'numeric',
+      month: 'short',
+    }),
+    /2 Aug/,
+  );
+});
+
+test('formatTime field options keep a 24-hour clock', () => {
+  const formatter = createPlatformFormatter(
+    createContext('en-GB', { hourCycle: 'h23' }),
+  );
+
+  assert.equal(
+    formatter.formatTime(new Date('2026-08-02T08:05:00Z'), {
+      hour: '2-digit',
+      hour12: false,
+      minute: '2-digit',
+    }),
+    '08:05',
+  );
+});
+
+test('insulin-precision numbers keep 12.125 without rounding', () => {
+  const options = {
+    maximumFractionDigits: 20,
+    minimumFractionDigits: 0,
+  };
+
+  assert.equal(
+    createPlatformFormatter(createContext('en-GB')).formatNumber(
+      12.125,
+      options,
+    ),
+    '12.125',
+  );
+  assert.equal(
+    createPlatformFormatter(createContext('de-DE')).formatNumber(
+      12.125,
+      options,
+    ),
+    '12,125',
+  );
+  assert.equal(
+    createPlatformFormatter(createContext('en-GB')).formatNumber(125, options),
+    '125',
+  );
+  assert.equal(
+    createPlatformFormatter(createContext('en-GB')).formatNumber(500, options),
+    '500',
+  );
 });

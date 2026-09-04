@@ -63,6 +63,15 @@ function createDateTimeFormatCacheKey(
     formatCacheSegment(options.hourCycle),
     formatCacheSegment(hasDateStyle ? String(options.dateStyle) : undefined),
     formatCacheSegment(hasTimeStyle ? String(options.timeStyle) : undefined),
+    formatCacheSegment(options.day),
+    formatCacheSegment(options.month),
+    formatCacheSegment(options.year),
+    formatCacheSegment(options.hour),
+    formatCacheSegment(options.minute),
+    formatCacheSegment(options.second),
+    formatCacheSegment(
+      options.hour12 === undefined ? undefined : String(options.hour12),
+    ),
   ].join('|');
 }
 

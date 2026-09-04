@@ -470,6 +470,39 @@ export const russianDraftMessages = defineDraftMessages({
   'account.profile.menu.export.title': 'Экспорт данных',
   'account.profile.menu.language.subtitle': 'Язык, формат даты и времени',
   'account.profile.menu.language.title': 'Язык и регион',
+  'account.profile.language.page.title': 'Язык',
+  'account.profile.language.page.description':
+    'Выберите язык приложения, дат, времени и чисел.',
+  'account.profile.language.option.selected': 'Текущий язык',
+  'account.auth.signIn.title': 'Вход',
+  'account.auth.signIn.description':
+    'Используйте Passkey или получите одноразовую ссылку на email.',
+  'account.auth.signIn.continue': 'Продолжить',
+  'account.auth.signIn.sending': 'Отправляем ссылку…',
+  'account.auth.signIn.emailLabel': 'Email',
+  'account.auth.signIn.emailHint':
+    'Мы отправим одноразовую ссылку для входа. Пароль не нужен.',
+  'account.auth.signIn.orEmail': 'или по email',
+  'account.auth.signIn.passkey': 'Войти с Passkey',
+  'account.auth.signIn.passkeyPending': 'Открываем Passkey…',
+  'account.auth.signIn.passkeyError': 'Не удалось выполнить вход с Passkey.',
+  'account.auth.signIn.disclaimer':
+    'Продолжая, вы подтверждаете, что используете свой способ входа.',
+  'account.auth.signIn.returnToApp': 'Вернуться в приложение',
+  'account.auth.checkEmail.title': 'Проверьте почту',
+  'account.auth.checkEmail.withAddress':
+    'Если адрес зарегистрирован, мы отправили ссылку для входа.',
+  'account.auth.checkEmail.withoutAddress':
+    'Если адрес указан верно, мы отправили ссылку для входа.',
+  'account.auth.checkEmail.spamHint':
+    'Ссылка действует ограниченное время. Проверьте папку «Спам», если письма нет.',
+  'account.auth.checkEmail.requestAgain': 'Запросить ссылку снова',
+  'account.auth.checkEmail.returnToApp': 'Вернуться в приложение',
+  'account.auth.error.title': 'Не удалось войти',
+  'account.auth.error.description':
+    'Ссылка могла истечь или уже была использована. Запросите новую ссылку и попробуйте снова.',
+  'account.auth.error.backToSignIn': 'Вернуться ко входу',
+  'account.auth.error.continueWithoutSignIn': 'Продолжить без входа',
   'account.profile.menu.section.data': 'Данные и информация',
   'account.profile.menu.section.devices': 'Устройства и данные',
   'account.profile.menu.section.diabetesManagement': 'Управление диабетом',

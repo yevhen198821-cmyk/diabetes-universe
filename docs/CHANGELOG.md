@@ -1,5 +1,29 @@
 # Changelog
 
+## Platform Localization Closure
+
+Дата: 2026-09-04
+
+Статус: **Implemented on branch / pending merge.** Closes Localization Platform
+for the four Web locales before Nutrition. Single catalog authority, requested
+→ `en-GB` fallback, first-party `du-web-locale` cookie, Profile language UX,
+SSR/client bootstrap equivalence, formatting closure, integrity gates, and
+locale E2E matrix.
+
+Завершено:
+
+- canonical locale catalog in `@diabetes-universe/i18n-locales`;
+- cookie → Accept-Language → `en-GB` wired into production bootstrap;
+- Profile language selection with native names and one-step persist/apply;
+- `PlatformFormatter` presentation path for Timeline/Dashboard/Quick Add numbers;
+- translation-key parity and AST integrity gates;
+- browser matrix for `en-GB` / `de-DE` / `uk-UA` / `ru-RU` plus auth cookie persistence.
+
+Не входило:
+
+- Nutrition/Activity architecture, locale routing, cloud preference sync,
+  new languages, i18n library migration, medical schema changes.
+
 ## Wave 4F — Insulin Vertical Closure & Local Contract Hardening
 
 Дата: 2026-09-02

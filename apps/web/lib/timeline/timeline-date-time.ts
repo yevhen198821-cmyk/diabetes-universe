@@ -1,3 +1,8 @@
+import {
+  createPlatformFormatter,
+  type PlatformFormatter,
+} from '@diabetes-universe/formatting';
+
 import { WEB_PLATFORM_DEFAULT_LOCALE } from '../platform/web-platform-defaults';
 
 export const DEFAULT_TIMELINE_LOCALE = WEB_PLATFORM_DEFAULT_LOCALE;
@@ -5,6 +10,17 @@ export const DEFAULT_TIMELINE_LOCALE = WEB_PLATFORM_DEFAULT_LOCALE;
 export type TimelineDayGroupKey = 'earlier' | 'today' | 'yesterday';
 
 const INVALID_DISPLAY_TIME = '--:--';
+
+function resolvePresentationFormatter(
+  locale: string,
+  timeZone?: string,
+): PlatformFormatter {
+  return createPlatformFormatter({
+    hourCycle: 'h23',
+    locale,
+    timeZone: timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
+  });
+}
 
 function parseTimeString(
   time: string,
@@ -105,11 +121,13 @@ export function formatTimelineCompactDateLabel(
 
   const timestamp = Date.UTC(parsed.year, parsed.month - 1, parsed.day, 12);
 
-  return new Intl.DateTimeFormat(locale, {
-    day: 'numeric',
-    month: 'short',
-    timeZone,
-  }).format(new Date(timestamp));
+  return resolvePresentationFormatter(locale, timeZone).formatDate(
+    new Date(timestamp),
+    {
+      day: 'numeric',
+      month: 'short',
+    },
+  );
 }
 
 export function formatTimelineDayNavigationDateLabel(
@@ -125,11 +143,13 @@ export function formatTimelineDayNavigationDateLabel(
 
   const timestamp = Date.UTC(parsed.year, parsed.month - 1, parsed.day, 12);
 
-  return new Intl.DateTimeFormat(locale, {
-    day: 'numeric',
-    month: 'long',
-    timeZone,
-  }).format(new Date(timestamp));
+  return resolvePresentationFormatter(locale, timeZone).formatDate(
+    new Date(timestamp),
+    {
+      day: 'numeric',
+      month: 'long',
+    },
+  );
 }
 
 export function parseTimelineDateTime(dateTime: string): number {
@@ -229,12 +249,14 @@ export function formatTimelineDisplayTime(
     return INVALID_DISPLAY_TIME;
   }
 
-  return new Intl.DateTimeFormat(locale, {
-    hour: '2-digit',
-    hour12: false,
-    minute: '2-digit',
-    timeZone,
-  }).format(new Date(timestamp));
+  return resolvePresentationFormatter(locale, timeZone).formatTime(
+    new Date(timestamp),
+    {
+      hour: '2-digit',
+      hour12: false,
+      minute: '2-digit',
+    },
+  );
 }
 
 export function getTimelineMinutesFromMidnight(
@@ -361,11 +383,13 @@ export function formatTimelineDayGroupLabel(
     return groupLabels?.earlier ?? 'Earlier';
   }
 
-  return new Intl.DateTimeFormat(locale, {
-    day: 'numeric',
-    month: 'long',
-    timeZone,
-  }).format(new Date(timestamp));
+  return resolvePresentationFormatter(locale, timeZone).formatDate(
+    new Date(timestamp),
+    {
+      day: 'numeric',
+      month: 'long',
+    },
+  );
 }
 
 export function formatTimelineDisplayDate(
@@ -379,11 +403,13 @@ export function formatTimelineDisplayDate(
     return 'Earlier';
   }
 
-  return new Intl.DateTimeFormat(locale, {
-    day: 'numeric',
-    month: 'long',
-    timeZone,
-  }).format(new Date(timestamp));
+  return resolvePresentationFormatter(locale, timeZone).formatDate(
+    new Date(timestamp),
+    {
+      day: 'numeric',
+      month: 'long',
+    },
+  );
 }
 
 export function formatTimelineDateGroupLabel(
@@ -424,10 +450,12 @@ export function formatTimelineDateGroupLabel(
     year: 'numeric',
   }).format(referenceDate);
 
-  return new Intl.DateTimeFormat(locale, {
-    day: 'numeric',
-    month: 'long',
-    timeZone,
-    year: eventYear === referenceYear ? undefined : 'numeric',
-  }).format(new Date(timestamp));
+  return resolvePresentationFormatter(locale, timeZone).formatDate(
+    new Date(timestamp),
+    {
+      day: 'numeric',
+      month: 'long',
+      year: eventYear === referenceYear ? undefined : 'numeric',
+    },
+  );
 }

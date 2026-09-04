@@ -62,7 +62,7 @@ test('profile menu shows disabled coming-later rows and sign out action', async 
   await signInWithMagicLink(page, request, 'profile-wave1-menu@example.com');
   await openProfile(page);
 
-  await expect(page.getByText('Coming later')).toHaveCount(3);
+  await expect(page.getByText('Coming later')).toHaveCount(2);
   await expect(
     page.getByRole('button', { name: 'Sign out', exact: true }),
   ).toBeVisible();

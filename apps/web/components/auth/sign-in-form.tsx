@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useMemo } from 'react';
 
 import { AUTH_UNAVAILABLE_MESSAGE } from '@diabetes-universe/identity';
 
@@ -8,6 +8,8 @@ import {
   requestMagicLinkAction,
   type RequestMagicLinkState,
 } from '../../lib/auth/request-magic-link-action';
+import { useLocalization } from '../../lib/platform/react/use-localization';
+import { resolveAuthSignInLabels } from './auth-labels';
 import { PasskeySignInButton } from './passkey-sign-in-button';
 
 const initialState: RequestMagicLinkState = {
@@ -25,6 +27,11 @@ export function SignInForm({
   isAuthAvailable,
   isPasskeyAvailable,
 }: SignInFormProps) {
+  const localization = useLocalization();
+  const labels = useMemo(
+    () => resolveAuthSignInLabels(localization),
+    [localization],
+  );
   const [state, formAction, isPending] = useActionState(
     requestMagicLinkAction,
     initialState,
@@ -45,11 +52,16 @@ export function SignInForm({
     <div className="space-y-5">
       {isPasskeyAvailable ? (
         <>
-          <PasskeySignInButton callbackPath={callbackPath} />
+          <PasskeySignInButton
+            callbackPath={callbackPath}
+            errorFallback={labels.passkeyError}
+            idleLabel={labels.passkey}
+            pendingLabel={labels.passkeyPending}
+          />
           <div className="flex items-center gap-3" aria-hidden="true">
             <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
             <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              или по email
+              {labels.orEmail}
             </span>
             <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
           </div>
@@ -64,7 +76,7 @@ export function SignInForm({
             className="text-sm font-semibold text-slate-800 dark:text-slate-100"
             htmlFor="auth-email"
           >
-            Email
+            {labels.emailLabel}
           </label>
           <input
             aria-describedby="auth-email-hint"
@@ -91,7 +103,7 @@ export function SignInForm({
               className="text-sm text-slate-600 dark:text-slate-300"
               id="auth-email-hint"
             >
-              Мы отправим одноразовую ссылку для входа. Пароль не нужен.
+              {labels.emailHint}
             </p>
           )}
         </div>
@@ -101,7 +113,7 @@ export function SignInForm({
           disabled={isPending}
           type="submit"
         >
-          {isPending ? 'Отправляем ссылку…' : 'Продолжить'}
+          {isPending ? labels.sending : labels.continue}
         </button>
       </form>
     </div>

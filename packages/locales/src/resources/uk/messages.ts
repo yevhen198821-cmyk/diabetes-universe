@@ -355,6 +355,39 @@ export const ukrainianDraftMessages = defineDraftMessages({
   'account.profile.menu.export.title': 'Експорт даних',
   'account.profile.menu.language.subtitle': 'Мова, формат дати та часу',
   'account.profile.menu.language.title': 'Мова та регіон',
+  'account.profile.language.page.title': 'Мова',
+  'account.profile.language.page.description':
+    'Оберіть мову для застосунку, дат, часу та чисел.',
+  'account.profile.language.option.selected': 'Поточна мова',
+  'account.auth.signIn.title': 'Вхід',
+  'account.auth.signIn.description':
+    'Скористайтеся ключем доступу або отримайте одноразове посилання на email.',
+  'account.auth.signIn.continue': 'Продовжити',
+  'account.auth.signIn.sending': 'Надсилаємо посилання…',
+  'account.auth.signIn.emailLabel': 'Email',
+  'account.auth.signIn.emailHint':
+    'Ми надішлемо одноразове посилання для входу. Пароль не потрібен.',
+  'account.auth.signIn.orEmail': 'або електронною поштою',
+  'account.auth.signIn.passkey': 'Увійти з ключем доступу',
+  'account.auth.signIn.passkeyPending': 'Відкриваємо ключ доступу…',
+  'account.auth.signIn.passkeyError': 'Не вдалося увійти з ключем доступу.',
+  'account.auth.signIn.disclaimer':
+    'Продовжуючи, ви підтверджуєте, що використовуєте власний спосіб входу.',
+  'account.auth.signIn.returnToApp': 'Повернутися до застосунку',
+  'account.auth.checkEmail.title': 'Перевірте пошту',
+  'account.auth.checkEmail.withAddress':
+    'Якщо адресу зареєстровано, ми надіслали посилання для входу.',
+  'account.auth.checkEmail.withoutAddress':
+    'Якщо адресу вказано правильно, ми надіслали посилання для входу.',
+  'account.auth.checkEmail.spamHint':
+    'Посилання діє обмежений час. Перевірте папку «Спам», якщо листа немає.',
+  'account.auth.checkEmail.requestAgain': 'Запросити посилання ще раз',
+  'account.auth.checkEmail.returnToApp': 'Повернутися до застосунку',
+  'account.auth.error.title': 'Не вдалося увійти',
+  'account.auth.error.description':
+    'Посилання могло закінчитися або вже було використано. Запросіть нове посилання та спробуйте знову.',
+  'account.auth.error.backToSignIn': 'Повернутися до входу',
+  'account.auth.error.continueWithoutSignIn': 'Продовжити без входу',
   'account.profile.menu.section.data': 'Дані та інформація',
   'account.profile.menu.section.devices': 'Пристрої та дані',
   'account.profile.menu.section.diabetesManagement': 'Керування діабетом',
