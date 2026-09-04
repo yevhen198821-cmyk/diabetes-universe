@@ -5,13 +5,9 @@ import {
   CANONICAL_TRANSLATION_FALLBACK_POLICY,
   type CanonicalSupportedLocale,
 } from '@diabetes-universe/i18n-locales';
-import type {
-  FallbackPolicy,
-  HourCycle,
-  LocaleCode,
-} from '@diabetes-universe/i18n';
+import type { FallbackPolicy, HourCycle } from '@diabetes-universe/i18n';
 
-import { asLocaleCode, asNamespace } from './platform-type-helpers';
+import { asNamespace } from './platform-type-helpers';
 
 /**
  * Web bootstrap aliases of the canonical Diabetes Universe locale catalog.
@@ -19,17 +15,14 @@ import { asLocaleCode, asNamespace } from './platform-type-helpers';
  * Do not redeclare supported locales here. The catalog in
  * `@diabetes-universe/i18n-locales` is the authority.
  */
-export const WEB_PLATFORM_SUPPORTED_LOCALES =
-  CANONICAL_SUPPORTED_LOCALE_CODES.map((locale) => asLocaleCode(locale));
+export const WEB_PLATFORM_SUPPORTED_LOCALES = CANONICAL_SUPPORTED_LOCALE_CODES;
 
-export type WebPlatformSupportedLocale = CanonicalSupportedLocale & LocaleCode;
+export type WebPlatformSupportedLocale = CanonicalSupportedLocale;
 
 /**
  * Platform default locale from the canonical Diabetes Universe catalog.
  */
-export const WEB_PLATFORM_DEFAULT_LOCALE = asLocaleCode(
-  CANONICAL_PLATFORM_DEFAULT_LOCALE,
-);
+export const WEB_PLATFORM_DEFAULT_LOCALE = CANONICAL_PLATFORM_DEFAULT_LOCALE;
 
 /**
  * Default hour cycle for web presentation context when not supplied by request.
@@ -78,9 +71,5 @@ export const WEB_PLATFORM_APPLICATION_PRELOAD_NAMESPACES = Object.freeze([
 /**
  * Canonical default locale per supported language.
  */
-export const WEB_PLATFORM_LANGUAGE_DEFAULT_LOCALES = Object.freeze({
-  en: asLocaleCode(CANONICAL_LANGUAGE_DEFAULT_LOCALES.en),
-  uk: asLocaleCode(CANONICAL_LANGUAGE_DEFAULT_LOCALES.uk),
-  de: asLocaleCode(CANONICAL_LANGUAGE_DEFAULT_LOCALES.de),
-  ru: asLocaleCode(CANONICAL_LANGUAGE_DEFAULT_LOCALES.ru),
-});
+export const WEB_PLATFORM_LANGUAGE_DEFAULT_LOCALES =
+  CANONICAL_LANGUAGE_DEFAULT_LOCALES;

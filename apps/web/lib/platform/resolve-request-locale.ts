@@ -164,7 +164,9 @@ export function resolveRequestLocale(
 /**
  * Derives the platform language code for a supported locale.
  */
-export function resolveLanguageFromLocale(locale: LocaleCode): LanguageCode {
+export function resolveLanguageFromLocale(
+  locale: LocaleCode | WebPlatformSupportedLocale,
+): LanguageCode {
   const language = locale.split('-')[0];
 
   if (
