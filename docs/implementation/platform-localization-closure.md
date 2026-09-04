@@ -150,8 +150,13 @@ select language → Dashboard → Quick Add glucose → Quick Add insulin → Ti
 → Detail → Edit → reload → Dashboard.
 
 Assertions include selected language, cookie persistence, `html lang`,
-critical translated labels, locale-neutral IndexedDB records, exact insulin
-doses, and no rewrite of medical events after language change.
+desktop-visible critical labels (`Last glucose` / `Letzte Glukose` /
+`Останній рівень глюкози` / `Последняя глюкоза`, recent-events region,
+Quick Add field labels, Timeline heading), locale-neutral IndexedDB
+records, exact insulin doses, and no rewrite of medical events after
+language change. Desktop Playwright uses those headings instead of the
+`lg:hidden` mobile Home/Start nav labels. Timeline cards use the
+localized `Open event` aria prefix.
 
 Auth boundary: logout keeps the locale cookie; auth sign-in chrome and the next
 Dashboard session stay on the selected language. Passkey enrollment chrome on

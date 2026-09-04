@@ -19,16 +19,18 @@ interface LocaleMatrix {
     readonly basal: string;
     readonly correction: string;
   };
-  readonly dashboardHome: string;
   readonly edit: string;
   readonly glucoseLabel: string;
   readonly htmlLang: string;
   readonly insulinDose: string;
   readonly insulinPreparation: string;
+  readonly lastGlucose: string;
   readonly locale: 'de-DE' | 'en-GB' | 'ru-RU' | 'uk-UA';
   readonly nativeName: string;
+  readonly openEventPrefix: string;
   readonly recentEvents: string;
   readonly save: string;
+  readonly seededDoseDisplay: string;
   readonly signInContinue: string;
   readonly signInTitle: string;
   readonly timelineHeading: string;
@@ -38,16 +40,18 @@ const LOCALES: readonly LocaleMatrix[] = [
   {
     acceptLanguageConflict: 'ru-RU',
     contexts: { basal: 'Basal', correction: 'Correction' },
-    dashboardHome: 'Home',
     edit: 'Edit',
     glucoseLabel: 'Glucose level',
     htmlLang: 'en',
     insulinDose: 'Insulin dose',
     insulinPreparation: 'Insulin preparation',
+    lastGlucose: 'Last glucose',
     locale: 'en-GB',
     nativeName: 'English',
+    openEventPrefix: 'Open event',
     recentEvents: 'Recent events',
     save: 'Save',
+    seededDoseDisplay: '12.125',
     signInContinue: 'Continue',
     signInTitle: 'Sign in',
     timelineHeading: 'Timeline',
@@ -55,16 +59,18 @@ const LOCALES: readonly LocaleMatrix[] = [
   {
     acceptLanguageConflict: 'ru-RU',
     contexts: { basal: 'Basal', correction: 'Korrektur' },
-    dashboardHome: 'Start',
     edit: 'Bearbeiten',
     glucoseLabel: 'Glukosewert',
     htmlLang: 'de',
     insulinDose: 'Insulindosis',
     insulinPreparation: 'Insulinpräparat',
+    lastGlucose: 'Letzte Glukose',
     locale: 'de-DE',
     nativeName: 'Deutsch',
+    openEventPrefix: 'Ereignis öffnen',
     recentEvents: 'Recent events',
     save: 'Speichern',
+    seededDoseDisplay: '12,125',
     signInContinue: 'Weiter',
     signInTitle: 'Anmelden',
     timelineHeading: 'Zeitachse',
@@ -72,16 +78,18 @@ const LOCALES: readonly LocaleMatrix[] = [
   {
     acceptLanguageConflict: 'de-DE',
     contexts: { basal: 'Базал', correction: 'Корекція' },
-    dashboardHome: 'Головна',
     edit: 'Редагувати',
     glucoseLabel: 'Рівень глюкози',
     htmlLang: 'uk',
     insulinDose: 'Доза інсуліну',
     insulinPreparation: 'Препарат інсуліну',
+    lastGlucose: 'Останній рівень глюкози',
     locale: 'uk-UA',
     nativeName: 'Українська',
+    openEventPrefix: 'Відкрити подію',
     recentEvents: 'Recent events',
     save: 'Зберегти',
+    seededDoseDisplay: '12,125',
     signInContinue: 'Продовжити',
     signInTitle: 'Вхід',
     timelineHeading: 'Хронологія',
@@ -89,16 +97,18 @@ const LOCALES: readonly LocaleMatrix[] = [
   {
     acceptLanguageConflict: 'de-DE',
     contexts: { basal: 'Базал', correction: 'Коррекция' },
-    dashboardHome: 'Главная',
     edit: 'Редактировать',
     glucoseLabel: 'Уровень глюкозы',
     htmlLang: 'ru',
     insulinDose: 'Доза инсулина',
     insulinPreparation: 'Препарат инсулина',
+    lastGlucose: 'Последняя глюкоза',
     locale: 'ru-RU',
     nativeName: 'Русский',
+    openEventPrefix: 'Открыть событие',
     recentEvents: 'Последние записи',
     save: 'Сохранить',
+    seededDoseDisplay: '12,125',
     signInContinue: 'Продолжить',
     signInTitle: 'Вход',
     timelineHeading: 'Таймлайн',
@@ -226,11 +236,14 @@ for (const locale of LOCALES) {
     await prepareEmptyTimeline(page);
     await expectDocumentLanguage(page, locale.htmlLang);
     await expect(
-      page.getByRole('link', { name: locale.dashboardHome }).first(),
+      page.getByRole('heading', { name: locale.lastGlucose }),
     ).toBeVisible();
     await expect(
       page.getByRole('region', { name: locale.recentEvents }),
     ).toBeVisible();
+    await expect(
+      page.getByRole('region', { name: locale.recentEvents }),
+    ).toContainText(locale.seededDoseDisplay);
 
     await page
       .getByRole('button', { name: /Glucose|Глюкоза|Glukose/ })
@@ -264,7 +277,9 @@ for (const locale of LOCALES) {
       page.getByRole('heading', { level: 1, name: locale.timelineHeading }),
     ).toBeVisible();
 
-    const insulinCard = page.getByRole('button', { name: /Open event: Fiasp/ });
+    const insulinCard = page.getByRole('button', {
+      name: new RegExp(`${locale.openEventPrefix}: Fiasp`),
+    });
     await expect(insulinCard).toBeVisible();
     await insulinCard.click();
     await expect(page.getByRole('dialog', { name: 'Fiasp' })).toBeVisible();
@@ -302,7 +317,7 @@ for (const locale of LOCALES) {
     await page.goto('/');
     await waitForApplicationReady(page);
     await expect(
-      page.getByRole('link', { name: locale.dashboardHome }).first(),
+      page.getByRole('heading', { name: locale.lastGlucose }),
     ).toBeVisible();
     await expect(
       page.getByRole('region', { name: locale.recentEvents }),
@@ -365,7 +380,9 @@ test('logout keeps the locale cookie and auth UI in the selected language', asyn
   await page.goto('/');
   await waitForApplicationReady(page);
   await expectDocumentLanguage(page, 'de');
-  await expect(page.getByRole('link', { name: 'Start' }).first()).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: locale.lastGlucose }),
+  ).toBeVisible();
   await expectLocaleCookie(context, 'de-DE');
 
   await context.close();
