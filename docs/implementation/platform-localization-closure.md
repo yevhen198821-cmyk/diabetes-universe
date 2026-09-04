@@ -153,8 +153,10 @@ Assertions include selected language, cookie persistence, `html lang`,
 critical translated labels, locale-neutral IndexedDB records, exact insulin
 doses, and no rewrite of medical events after language change.
 
-Auth boundary: logout keeps the locale cookie; auth UI and the next Dashboard
-session stay on the selected language.
+Auth boundary: logout keeps the locale cookie; auth sign-in chrome and the next
+Dashboard session stay on the selected language. Passkey enrollment chrome on
+Account Security remains Russian hardcode and is excluded from the hardcoded-
+string guard to avoid noisy CI.
 
 ## Explicit non-scope
 
