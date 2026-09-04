@@ -19,7 +19,9 @@ locale E2E matrix.
 - translation-key parity, approved-bundle integrity, and AST integrity gates;
 - localized Language/Auth/Account/Dashboard/Timeline route metadata;
 - production locale-cookie `Secure=true` when `x-forwarded-proto` is absent;
-- browser matrix for `en-GB` / `de-DE` / `uk-UA` / `ru-RU` plus auth cookie persistence.
+- browser matrix for `en-GB` / `de-DE` / `uk-UA` / `ru-RU` plus auth cookie persistence;
+- web unit tests use process isolation and `--test-concurrency=2` so the
+  expanded Metadata AST guard cannot force-kill CI with a shared heap.
 
 Не входило:
 

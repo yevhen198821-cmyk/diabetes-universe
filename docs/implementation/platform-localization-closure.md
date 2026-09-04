@@ -140,6 +140,11 @@ CI tests assert:
   TypeScript literals — and ad-hoc `Intl` / `toLocale*` formatting on
   migrated surfaces fail the AST/source guards.
 
+The web unit suite runs those AST guards in the same Turbo `test` graph as
+Happy DOM dialog tests. The `@diabetes-universe/web` test script uses
+process isolation and `--test-concurrency=2` so files do not share one
+growing heap. CI does not raise a global `NODE_OPTIONS` heap.
+
 Allowlisted literals are limited to brand, technical identifiers, paths, and
 fixed unit symbols. Cognate message keys such as `Insulin` or `Fiasp` may
 legally match English.
