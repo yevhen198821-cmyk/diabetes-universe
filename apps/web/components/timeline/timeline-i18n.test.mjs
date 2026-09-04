@@ -3,9 +3,9 @@ import test from 'node:test';
 
 import { CANONICAL_TRANSLATION_KEYS } from '../../../../packages/locales/src/index.ts';
 import { englishCanonicalMessages } from '../../../../packages/locales/src/resources/en/messages.ts';
-import { germanDraftMessages } from '../../../../packages/locales/src/resources/de/messages.ts';
-import { russianDraftMessages } from '../../../../packages/locales/src/resources/ru/messages.ts';
-import { ukrainianDraftMessages } from '../../../../packages/locales/src/resources/uk/messages.ts';
+import { germanCanonicalMessages } from '../../../../packages/locales/src/resources/de/messages.ts';
+import { russianCanonicalMessages } from '../../../../packages/locales/src/resources/ru/messages.ts';
+import { ukrainianCanonicalMessages } from '../../../../packages/locales/src/resources/uk/messages.ts';
 import {
   formatTimelineDayPeriodEventCount,
   formatTimelineToolbarResultLabel,
@@ -78,15 +78,15 @@ function assertLocalizedBundle(bundle, localeCode) {
 }
 
 test('Russian Timeline Variant B keys are localized', () => {
-  assertLocalizedBundle(russianDraftMessages, 'ru-RU');
+  assertLocalizedBundle(russianCanonicalMessages, 'ru-RU');
 });
 
 test('Ukrainian Timeline Variant B keys are localized', () => {
-  assertLocalizedBundle(ukrainianDraftMessages, 'uk-UA');
+  assertLocalizedBundle(ukrainianCanonicalMessages, 'uk-UA');
 });
 
 test('German Timeline Variant B keys are localized', () => {
-  assertLocalizedBundle(germanDraftMessages, 'de-DE');
+  assertLocalizedBundle(germanCanonicalMessages, 'de-DE');
 });
 
 test('English Timeline chrome does not leak Russian strings in canonical messages', () => {
@@ -97,10 +97,10 @@ test('English Timeline chrome does not leak Russian strings in canonical message
 
 test('Russian toolbar and period counts share pluralization rules', () => {
   const labels = {
-    few: russianDraftMessages['timeline.eventCount.few'],
-    many: russianDraftMessages['timeline.eventCount.many'],
-    one: russianDraftMessages['timeline.eventCount.one'],
-    other: russianDraftMessages['timeline.eventCount.other'],
+    few: russianCanonicalMessages['timeline.eventCount.few'],
+    many: russianCanonicalMessages['timeline.eventCount.many'],
+    one: russianCanonicalMessages['timeline.eventCount.one'],
+    other: russianCanonicalMessages['timeline.eventCount.other'],
   };
 
   assert.equal(
@@ -124,10 +124,10 @@ test('Russian toolbar and period counts share pluralization rules', () => {
 
 test('Ukrainian event count pluralization matches product terminology', () => {
   const labels = {
-    few: ukrainianDraftMessages['timeline.eventCount.few'],
-    many: ukrainianDraftMessages['timeline.eventCount.many'],
-    one: ukrainianDraftMessages['timeline.eventCount.one'],
-    other: ukrainianDraftMessages['timeline.eventCount.other'],
+    few: ukrainianCanonicalMessages['timeline.eventCount.few'],
+    many: ukrainianCanonicalMessages['timeline.eventCount.many'],
+    one: ukrainianCanonicalMessages['timeline.eventCount.one'],
+    other: ukrainianCanonicalMessages['timeline.eventCount.other'],
   };
 
   assert.equal(
@@ -147,8 +147,8 @@ test('Ukrainian event count pluralization matches product terminology', () => {
 
 test('German event count pluralization matches product terminology', () => {
   const labels = {
-    one: germanDraftMessages['timeline.eventCount.one'],
-    other: germanDraftMessages['timeline.eventCount.other'],
+    one: germanCanonicalMessages['timeline.eventCount.one'],
+    other: germanCanonicalMessages['timeline.eventCount.other'],
   };
 
   assert.equal(

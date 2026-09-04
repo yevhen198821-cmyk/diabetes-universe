@@ -1,13 +1,13 @@
-import { defineDraftMessages } from '../../contracts';
+import { defineApprovedMessages } from '../../contracts';
 import { englishCanonicalMessages } from '../en/messages';
 
 /**
- * Russian draft bundle.
+ * Russian approved closure bundle.
  *
- * Account security sessions strings are localized to match the Russian
- * account shell. Other namespaces remain English placeholders until translated.
+ * Reachable Localization Platform namespaces are authored in Russian. Brand,
+ * unit, and product cognates may legally match English.
  */
-export const russianDraftMessages = defineDraftMessages({
+export const russianCanonicalMessages = defineApprovedMessages({
   ...englishCanonicalMessages,
   'dashboard.header.brandLineAccent': 'Universe',
   'dashboard.header.brandLinePrimary': 'Diabetes',
@@ -543,4 +543,27 @@ export const russianDraftMessages = defineDraftMessages({
   'account.profile.security.sessionsLink.subtitle':
     'Устройства, на которых выполнен вход',
   'account.profile.security.sessionsLink.title': 'Активные сессии',
+  'common.accessibility.skipLink': 'Перейти к содержимому',
+  'common.actions.close': 'Закрыть',
+  'common.actions.save': 'Сохранить',
+  'dashboard.aiInsight.disclaimer': 'Это не диагноз и не назначение лечения.',
+  'dashboard.aiInsight.empty.default': 'Подсказка ИИ пока недоступна.',
+  'dashboard.aiInsight.error.default': 'Не удалось загрузить подсказку ИИ.',
+  'dashboard.aiInsight.eyebrow': 'Автоматическое пояснение',
+  'dashboard.aiInsight.loading': 'Загрузка подсказки ИИ',
+  'dashboard.aiInsight.relatedEvents.label': 'Связанные записи',
+  'dashboard.aiInsight.relatedEvents.none':
+    'Связанные записи: нет подтверждённых записей',
+  'dashboard.aiInsight.title': 'Подсказка ИИ',
+  'dashboard.aiInsight.unavailable': 'Подсказка ИИ недоступна.',
+  'errors.generic': 'Что-то пошло не так. Попробуйте ещё раз.',
+  'timeline.insulinPreparation.aspart_fiasp': 'Fiasp',
+  'timeline.insulinPreparation.aspart_novorapid': 'NovoRapid',
+  'timeline.insulinPreparation.degludec_tresiba': 'Tresiba',
+  'timeline.insulinPreparation.glargine_lantus': 'Lantus',
+  'timeline.insulinPreparation.glulisine_apidra': 'Apidra',
+  'timeline.insulinPreparation.lispro_humalog': 'Humalog',
+  'timeline.units.massMg': 'мг',
+  'timeline.units.volumeMl': 'мл',
+  'validation.required': 'Это поле обязательно',
 });

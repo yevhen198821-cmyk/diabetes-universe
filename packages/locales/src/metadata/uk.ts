@@ -5,6 +5,6 @@ export const ukrainianMetadata = {
   language: 'uk',
   locale: 'uk-UA',
   version: '1.0.0',
-  status: 'draft',
+  status: 'approved',
   namespaces: CANONICAL_NAMESPACES,
 } as const satisfies TranslationMetadata;

@@ -1,13 +1,13 @@
-import { defineDraftMessages } from '../../contracts';
+import { defineApprovedMessages } from '../../contracts';
 import { englishCanonicalMessages } from '../en/messages';
 
 /**
- * German draft bundle.
+ * German approved closure bundle.
  *
- * Timeline Variant B strings are localized; other namespaces remain English
- * placeholders until professional translation.
+ * Reachable Localization Platform namespaces are authored in German. Brand,
+ * unit, and product cognates may legally match English.
  */
-export const germanDraftMessages = defineDraftMessages({
+export const germanCanonicalMessages = defineApprovedMessages({
   ...englishCanonicalMessages,
   'dashboard.navigation.account': 'Konto',
   'dashboard.navigation.home': 'Start',
@@ -435,4 +435,148 @@ export const germanDraftMessages = defineDraftMessages({
   'account.profile.security.sessionsLink.subtitle':
     'Geräte, auf denen Sie angemeldet sind',
   'account.profile.security.sessionsLink.title': 'Aktive Sitzungen',
+  'account.security.sessions.back': 'Anmeldesicherheit',
+  'account.security.sessions.confirmRevokeAll.confirm': 'Überall abmelden',
+  'account.security.sessions.confirmRevokeAll.description':
+    'Alle aktiven Sitzungen werden beendet, einschließlich dieser. Für die erneute Anmeldung ist eine Bestätigung per E-Mail erforderlich.',
+  'account.security.sessions.confirmRevokeAll.title': 'Überall abmelden?',
+  'account.security.sessions.confirmRevokeOne.confirm': 'Sitzung beenden',
+  'account.security.sessions.confirmRevokeOne.description':
+    'Der Zugriff von {clientLabel} wird widerrufen.',
+  'account.security.sessions.confirmRevokeOne.title': 'Diese Sitzung beenden?',
+  'account.security.sessions.confirmRevokeOthers.confirm':
+    'Andere Sitzungen abmelden',
+  'account.security.sessions.confirmRevokeOthers.description':
+    'Andere aktive Sitzungen werden abgemeldet. Dieses Gerät bleibt angemeldet.',
+  'account.security.sessions.confirmRevokeOthers.title':
+    'Andere Sitzungen abmelden?',
+  'account.security.sessions.currentBadge': 'Aktuelle Sitzung',
+  'account.security.sessions.description':
+    'Geräte, auf denen Ihr Konto derzeit angemeldet ist.',
+  'account.security.sessions.emptyOthers':
+    'Keine weiteren aktiven Sitzungen gefunden.',
+  'account.security.sessions.error.generic':
+    'Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.',
+  'account.security.sessions.expires': 'Läuft ab',
+  'account.security.sessions.freshAuth.action': 'Anmeldung bestätigen',
+  'account.security.sessions.freshAuth.message':
+    'Bestätigen Sie die Anmeldung und wiederholen Sie die Aktion.',
+  'account.security.sessions.passkeysLink': 'Passkeys verwalten',
+  'account.security.sessions.revokeAll': 'Überall abmelden',
+  'account.security.sessions.revokeAllPending': 'Überall abmelden…',
+  'account.security.sessions.revokeOne': 'Sitzung beenden',
+  'account.security.sessions.revokeOnePending': 'Sitzung wird beendet…',
+  'account.security.sessions.revokeOthers': 'Andere Sitzungen abmelden',
+  'account.security.sessions.revokeOthersPending':
+    'Andere Sitzungen werden abgemeldet…',
+  'account.security.sessions.signOut': 'Abmelden',
+  'account.security.sessions.signOutPending': 'Abmelden…',
+  'account.security.sessions.signedIn': 'Angemeldet',
+  'account.security.sessions.success': 'Aktion abgeschlossen.',
+  'account.security.sessions.title': 'Aktive Sitzungen',
+  'common.accessibility.skipLink': 'Zum Inhalt springen',
+  'common.actions.cancel': 'Abbrechen',
+  'common.actions.close': 'Schließen',
+  'common.actions.save': 'Speichern',
+  'dashboard.aiInsight.disclaimer':
+    'Keine Diagnose und keine Behandlungsempfehlung.',
+  'dashboard.aiInsight.empty.default': 'KI-Hinweis ist noch nicht verfügbar.',
+  'dashboard.aiInsight.error.default':
+    'KI-Hinweis konnte nicht geladen werden.',
+  'dashboard.aiInsight.eyebrow': 'Automatische Erklärung',
+  'dashboard.aiInsight.loading': 'KI-Hinweis wird geladen',
+  'dashboard.aiInsight.relatedEvents.label': 'Zugehörige Einträge',
+  'dashboard.aiInsight.relatedEvents.none':
+    'Zugehörige Einträge: keine bestätigten Einträge',
+  'dashboard.aiInsight.title': 'KI-Hinweis',
+  'dashboard.aiInsight.unavailable': 'KI-Hinweis nicht verfügbar.',
+  'dashboard.daySummary.chartAria.activity.multiple':
+    '{count} Aktivitätseinträge heute',
+  'dashboard.daySummary.chartAria.activity.none':
+    'Heute keine Aktivität erfasst',
+  'dashboard.daySummary.chartAria.activity.single': '1 Aktivitätseintrag heute',
+  'dashboard.daySummary.chartAria.glucose.multiple':
+    '{count} Glukosemessungen heute',
+  'dashboard.daySummary.chartAria.glucose.none': 'Heute keine Glukosemessungen',
+  'dashboard.daySummary.chartAria.glucose.single': '1 Glukosemessung heute',
+  'dashboard.daySummary.chartAria.insulin.multiple':
+    '{count} Insulindosen heute',
+  'dashboard.daySummary.chartAria.insulin.none': 'Heute keine Insulindosen',
+  'dashboard.daySummary.chartAria.insulin.single': '1 Insulindosis heute',
+  'dashboard.daySummary.chartAria.nutrition.multiple':
+    '{count} Ernährungseinträge heute',
+  'dashboard.daySummary.chartAria.nutrition.none':
+    'Heute keine Ernährungseinträge',
+  'dashboard.daySummary.chartAria.nutrition.single':
+    '1 Ernährungseintrag heute',
+  'dashboard.daySummary.chartEmpty.hint': 'Heute keine Einträge',
+  'dashboard.daySummary.empty.default':
+    'Die heutige Übersicht ist noch nicht verfügbar.',
+  'dashboard.daySummary.error.default':
+    'Tagesübersicht konnte nicht geladen werden.',
+  'dashboard.daySummary.eyebrow': 'Aktueller Tag',
+  'dashboard.daySummary.loading': 'Tagesübersicht wird geladen',
+  'dashboard.daySummary.metrics.activity': 'Aktivität',
+  'dashboard.daySummary.metrics.glucose': 'Glukose',
+  'dashboard.daySummary.metrics.glucoseMeasurements': 'Glukosemessungen',
+  'dashboard.daySummary.metrics.glucoseMeasurements.few': '{count} Messungen',
+  'dashboard.daySummary.metrics.glucoseMeasurements.many': '{count} Messungen',
+  'dashboard.daySummary.metrics.medicationDoses': 'Medikamentendosen',
+  'dashboard.daySummary.metrics.reminders': 'Erinnerungen',
+  'dashboard.daySummary.metrics.totalCarbohydrates': 'Kohlenhydrate',
+  'dashboard.daySummary.metrics.totalForDay': 'Gesamt für den Tag',
+  'dashboard.daySummary.metrics.totalInsulin': 'Insulin',
+  'dashboard.daySummary.title': 'Heute',
+  'dashboard.daySummary.unavailable': 'Tagesübersicht nicht verfügbar.',
+  'dashboard.daySummary.viewDetails': 'Details anzeigen',
+  'dashboard.header.addEvent': 'Ereignis hinzufügen',
+  'dashboard.header.avatar.action': 'Konto öffnen',
+  'dashboard.header.avatar.label': 'Benutzerprofil',
+  'dashboard.header.brandLineAccent': 'Universe',
+  'dashboard.header.brandLinePrimary': 'Diabetes',
+  'dashboard.header.brandName': 'Diabetes Universe',
+  'dashboard.header.context.today': 'Ihre Daten für heute',
+  'dashboard.header.date.label': 'Aktuelles Datum',
+  'dashboard.header.date.unavailable': 'Datum nicht verfügbar',
+  'dashboard.header.error.default': 'Kopfzeile konnte nicht geladen werden.',
+  'dashboard.header.greeting.afternoon': 'Guten Tag',
+  'dashboard.header.greeting.evening': 'Guten Abend',
+  'dashboard.header.greeting.morning': 'Guten Morgen',
+  'dashboard.header.greeting.night': 'Gute Nacht',
+  'dashboard.header.loading': 'Kopfzeile wird geladen',
+  'dashboard.header.title': 'Start',
+  'dashboard.nextAction.action': 'Hinzufügen',
+  'dashboard.nextAction.description': 'Insulin hinzufügen',
+  'dashboard.nextAction.empty.description': 'Neue Schritte erscheinen hier.',
+  'dashboard.nextAction.empty.title': 'Keine Schritte verfügbar',
+  'dashboard.nextAction.error.description':
+    'Bitte versuchen Sie es später erneut.',
+  'dashboard.nextAction.error.title': 'Schritt nicht verfügbar',
+  'dashboard.nextAction.fallback.description':
+    'Details zum nächsten Schritt sind vorübergehend nicht verfügbar.',
+  'dashboard.nextAction.fallback.title': 'Nächster Schritt nicht verfügbar',
+  'dashboard.nextAction.loading': 'Nächster Schritt wird geladen',
+  'dashboard.nextAction.title': 'Nächster Schritt',
+  'dashboard.quickActions.title': 'Schnell hinzufügen',
+  'dashboard.recentEvents.categories.activity': 'Aktivität',
+  'dashboard.recentEvents.categories.insulin': 'Insulin',
+  'dashboard.recentEvents.categories.medication': 'Medikament',
+  'dashboard.recentEvents.categories.nutrition': 'Ernährung',
+  'dashboard.recentEvents.empty.default': 'Noch keine letzten Einträge.',
+  'dashboard.recentEvents.error.default':
+    'Letzte Einträge konnten nicht geladen werden.',
+  'dashboard.recentEvents.loading': 'Letzte Einträge werden geladen',
+  'dashboard.recentEvents.title': 'Letzte Einträge',
+  'dashboard.recentEvents.unavailable': 'Letzte Einträge nicht verfügbar.',
+  'dashboard.recentEvents.viewAll': 'Alle Einträge',
+  'errors.generic': 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.',
+  'timeline.insulinPreparation.aspart_fiasp': 'Fiasp',
+  'timeline.insulinPreparation.aspart_novorapid': 'NovoRapid',
+  'timeline.insulinPreparation.degludec_tresiba': 'Tresiba',
+  'timeline.insulinPreparation.glargine_lantus': 'Lantus',
+  'timeline.insulinPreparation.glulisine_apidra': 'Apidra',
+  'timeline.insulinPreparation.lispro_humalog': 'Humalog',
+  'timeline.units.massMg': 'mg',
+  'timeline.units.volumeMl': 'ml',
+  'validation.required': 'Dieses Feld ist erforderlich',
 });

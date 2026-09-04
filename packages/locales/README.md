@@ -7,8 +7,7 @@ Platform.
 
 ## Responsibility
 
-- Own approved English canonical messages and draft bundles for `uk`, `de`, and
-  `ru`.
+- Own approved canonical messages for `en-GB`, `de-DE`, `uk-UA`, and `ru-RU`.
 - Define stable namespaces and resource metadata contracts.
 - Remain serializable, immutable, and framework-independent at the package
   boundary.
@@ -22,9 +21,9 @@ packages/locales/src/
 ├── namespaces/    # Canonical namespace identifiers
 └── resources/
     ├── en/        # Approved canonical English bundle
-    ├── uk/        # Draft bundle
-    ├── de/        # Draft bundle
-    └── ru/        # Draft bundle
+    ├── uk/        # Approved Ukrainian bundle
+    ├── de/        # Approved German bundle
+    └── ru/        # Approved Russian bundle
 ```
 
 ## Namespaces
@@ -40,13 +39,13 @@ Approved v1.0 namespaces:
 
 Namespaces are stable kebab-case identifiers and do not depend on language.
 
-## Draft status
+## Production status
 
-Bundles for `uk`, `de`, and `ru` are marked `status: draft` in metadata. They may
-contain incomplete message sets and currently use English placeholder values
-until professional translation is added.
+`en-GB`, `de-DE`, `uk-UA`, and `ru-RU` are marked `status: approved`. Reachable
+closure namespaces are explicitly authored. English-identical values are limited
+to documented cognates such as brand names, unit symbols, and product names.
 
-English (`en-GB`) is the approved canonical source for translation keys.
+English (`en-GB`) remains the canonical source for translation keys.
 
 ## Not implemented yet
 

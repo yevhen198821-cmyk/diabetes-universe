@@ -1,8 +1,7 @@
 /**
  * Diabetes Universe locale resource package.
  *
- * Canonical English resources and draft bundles for supported languages.
- * Runtime loading and formatting are not implemented in this sprint.
+ * Canonical approved resources for the four supported Web locales.
  */
 
 export type {
@@ -38,6 +37,15 @@ export {
   englishCanonicalMessages,
   englishTranslationResource,
 } from './resources/en';
-export { germanTranslationResource } from './resources/de';
-export { russianTranslationResource } from './resources/ru';
-export { ukrainianTranslationResource } from './resources/uk';
+export {
+  germanCanonicalMessages,
+  germanTranslationResource,
+} from './resources/de';
+export {
+  russianCanonicalMessages,
+  russianTranslationResource,
+} from './resources/ru';
+export {
+  ukrainianCanonicalMessages,
+  ukrainianTranslationResource,
+} from './resources/uk';
