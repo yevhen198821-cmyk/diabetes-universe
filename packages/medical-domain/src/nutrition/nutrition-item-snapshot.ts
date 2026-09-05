@@ -53,12 +53,18 @@ function readTrimmedName(value: unknown): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
-function validateOptionalPositiveFiniteMass(value: unknown): boolean {
+function readOptionalPositiveFiniteMass(
+  value: unknown,
+): { readonly ok: true; readonly value?: number } | { readonly ok: false } {
   if (value === undefined) {
-    return true;
+    return { ok: true };
   }
 
-  return typeof value === 'number' && Number.isFinite(value) && value > 0;
+  if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+    return { ok: true, value };
+  }
+
+  return { ok: false };
 }
 
 /**
@@ -94,11 +100,17 @@ export function validateNutritionItemSnapshot(
     return carbsResult;
   }
 
-  if (!validateOptionalPositiveFiniteMass(value.weightGrams)) {
+  const weightResult = readOptionalPositiveFiniteMass(value.weightGrams);
+
+  if (!weightResult.ok) {
     return { ok: false, error: 'nutrition.item.weight_grams.invalid' };
   }
 
-  if (!validateOptionalPositiveFiniteMass(value.carbsPer100Grams)) {
+  const carbsPer100Result = readOptionalPositiveFiniteMass(
+    value.carbsPer100Grams,
+  );
+
+  if (!carbsPer100Result.ok) {
     return { ok: false, error: 'nutrition.item.carbs_per_100_grams.invalid' };
   }
 
@@ -106,30 +118,13 @@ export function validateNutritionItemSnapshot(
     itemId,
     name,
     carbohydratesGrams: carbsResult.carbohydratesGrams,
+    ...(weightResult.value === undefined
+      ? {}
+      : { weightGrams: weightResult.value }),
+    ...(carbsPer100Result.value === undefined
+      ? {}
+      : { carbsPer100Grams: carbsPer100Result.value }),
   };
-
-  if (value.weightGrams !== undefined) {
-    return {
-      ok: true,
-      value: {
-        ...snapshot,
-        weightGrams: value.weightGrams,
-        ...(value.carbsPer100Grams === undefined
-          ? {}
-          : { carbsPer100Grams: value.carbsPer100Grams }),
-      },
-    };
-  }
-
-  if (value.carbsPer100Grams !== undefined) {
-    return {
-      ok: true,
-      value: {
-        ...snapshot,
-        carbsPer100Grams: value.carbsPer100Grams,
-      },
-    };
-  }
 
   return { ok: true, value: snapshot };
 }
