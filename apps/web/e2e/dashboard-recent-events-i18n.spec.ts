@@ -62,10 +62,10 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   await expect(recentEvents.locator('li')).toHaveCount(4);
 
   await page.getByRole('button', { name: 'Quick add: Nutrition' }).click();
-  await page.getByRole('button', { name: /Тип приёма пищи/ }).click();
-  await page.getByRole('button', { name: 'Завтрак' }).click();
-  await page.getByLabel('Углеводы').fill('10');
-  await page.getByRole('button', { name: 'Сохранить' }).click();
+  await page.getByRole('button', { name: /Meal type/ }).click();
+  await page.getByRole('button', { name: 'Breakfast' }).click();
+  await page.getByLabel('Carbohydrates').fill('10');
+  await page.getByRole('button', { name: 'Save' }).click();
 
   await expect(
     recentEvents.getByText('10 g carbs', { exact: true }),

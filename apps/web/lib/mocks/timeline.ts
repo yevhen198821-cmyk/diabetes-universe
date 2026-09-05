@@ -1,4 +1,7 @@
-import type { SemanticTimelineEvent } from '@diabetes-universe/types';
+import type {
+  SemanticEventEnvelope,
+  SemanticTimelineEvent,
+} from '@diabetes-universe/types';
 
 export const DEMO_TIMELINE_REFERENCE_DATE = '2026-08-02T10:00:00.000Z';
 
@@ -7,10 +10,7 @@ const DEMO_EVENT_LIFECYCLE_AT = '2026-08-09T08:30:00.000Z';
 function createDemoSemanticEnvelope(
   id: string,
   occurredAt: string,
-): Pick<
-  SemanticTimelineEvent,
-  'createdAt' | 'id' | 'occurredAt' | 'schemaVersion' | 'source' | 'updatedAt'
-> {
+): Omit<SemanticEventEnvelope, 'provenance'> {
   return {
     createdAt: DEMO_EVENT_LIFECYCLE_AT,
     id,

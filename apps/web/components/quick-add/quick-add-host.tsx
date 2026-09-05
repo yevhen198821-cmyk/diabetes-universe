@@ -9,8 +9,9 @@ import type {
 } from '@diabetes-universe/types';
 import { haptics, QuickAddPanel } from '@diabetes-universe/ui';
 import type { ReactNode, RefObject } from 'react';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
+import { useLocalization } from '../../lib/platform/react/use-localization';
 import { quickAddActions } from '../../lib/quick-add/actions';
 import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
 import { canDismissQuickAddWhileSubmitPending } from '../../lib/quick-add/quick-add-submit-identity-model';
@@ -32,6 +33,7 @@ import { InsulinQuickAddForm } from './insulin-quick-add-form';
 import { MedicationQuickAddForm } from './medication-quick-add-form';
 import { NoteQuickAddForm } from './note-quick-add-form';
 import { NutritionQuickAddForm } from './nutrition-quick-add-form';
+import { resolveNutritionQuickAddLabels } from './nutrition-quick-add-labels';
 import { FloatingActionButton } from '../timeline/floating-action-button';
 
 export interface QuickAddHostProps {
@@ -84,6 +86,25 @@ export function QuickAddHost({
   returnFocusRef,
   showFloatingActionButton = false,
 }: QuickAddHostProps) {
+  const localization = useLocalization();
+  const nutritionLabels = useMemo(
+    () => resolveNutritionQuickAddLabels(localization),
+    [localization],
+  );
+  const actions = useMemo(
+    () =>
+      quickAddActions.map((action) =>
+        action.category === 'nutrition'
+          ? {
+              ...action,
+              addTitle: nutritionLabels.title,
+              description: nutritionLabels.categoryDescription,
+              label: nutritionLabels.categoryLabel,
+            }
+          : action,
+      ),
+    [nutritionLabels],
+  );
   const [userSelection, setUserSelection] = useState<string | null | undefined>(
     undefined,
   );
@@ -289,7 +310,7 @@ export function QuickAddHost({
         />
       ) : null}
       <QuickAddPanel
-        actions={quickAddActions}
+        actions={actions}
         dismissDisabled={isAsyncSubmitPending}
         initialFocusRef={initialFocusRef}
         onBack={handleFormCancel}

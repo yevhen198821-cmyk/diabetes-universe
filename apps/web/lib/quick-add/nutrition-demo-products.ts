@@ -1,57 +1,39 @@
+export const NUTRITION_DEMO_PRODUCT_IDS = [
+  'apple',
+  'banana',
+  'oatmealCooked',
+  'riceBoiled',
+  'potatoBoiled',
+  'wholegrainBread',
+  'milk',
+  'plainYogurt',
+] as const;
+
+export type NutritionDemoProductId =
+  (typeof NUTRITION_DEMO_PRODUCT_IDS)[number];
+
 export interface NutritionDemoProduct {
-  readonly id: string;
-  readonly name: string;
+  readonly id: NutritionDemoProductId;
   readonly carbsPer100Grams: number;
 }
 
+/**
+ * Presentation-only demo catalogue. IDs are not food-database identities
+ * and must not be persisted on canonical Nutrition v2 events.
+ */
 export const nutritionDemoProducts: readonly NutritionDemoProduct[] = [
-  {
-    carbsPer100Grams: 14,
-    id: 'apple',
-    name: 'Яблоко',
-  },
-  {
-    carbsPer100Grams: 23,
-    id: 'banana',
-    name: 'Банан',
-  },
-  {
-    carbsPer100Grams: 12,
-    id: 'oatmeal-cooked',
-    name: 'Овсянка готовая',
-  },
-  {
-    carbsPer100Grams: 28,
-    id: 'rice-boiled',
-    name: 'Рис варёный',
-  },
-  {
-    carbsPer100Grams: 17,
-    id: 'potato-boiled',
-    name: 'Картофель варёный',
-  },
-  {
-    carbsPer100Grams: 43,
-    id: 'wholegrain-bread',
-    name: 'Хлеб цельнозерновой',
-  },
-  {
-    carbsPer100Grams: 5,
-    id: 'milk',
-    name: 'Молоко',
-  },
-  {
-    carbsPer100Grams: 4,
-    id: 'plain-yogurt',
-    name: 'Йогурт без сахара',
-  },
+  { carbsPer100Grams: 14, id: 'apple' },
+  { carbsPer100Grams: 23, id: 'banana' },
+  { carbsPer100Grams: 12, id: 'oatmealCooked' },
+  { carbsPer100Grams: 28, id: 'riceBoiled' },
+  { carbsPer100Grams: 17, id: 'potatoBoiled' },
+  { carbsPer100Grams: 43, id: 'wholegrainBread' },
+  { carbsPer100Grams: 5, id: 'milk' },
+  { carbsPer100Grams: 4, id: 'plainYogurt' },
 ];
 
-export const nutritionDemoProductOptions: readonly string[] =
-  nutritionDemoProducts.map((product) => product.name);
-
-export function findNutritionDemoProductByName(
-  productName: string,
+export function findNutritionDemoProductById(
+  productId: string,
 ): NutritionDemoProduct | undefined {
-  return nutritionDemoProducts.find((product) => product.name === productName);
+  return nutritionDemoProducts.find((product) => product.id === productId);
 }

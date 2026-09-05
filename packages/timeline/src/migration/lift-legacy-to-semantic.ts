@@ -8,6 +8,7 @@ import type {
   NoteTimelineEvent,
   NutritionTimelineEvent,
   QuarantineRecord,
+  SemanticEventEnvelope,
   SemanticTimelineEvent,
   TimelineEvent,
   TimelineEventKind,
@@ -61,8 +62,6 @@ function resolveLifecycleTimestamps(
 
   return { createdAt, updatedAt };
 }
-
-type SemanticEventEnvelope = Omit<SemanticTimelineEvent, 'kind'>;
 
 function createBaseEnvelope(
   raw: TimelineEvent,
