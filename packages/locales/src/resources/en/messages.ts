@@ -231,6 +231,8 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'dashboard.header.context.today': 'Your data for today',
   'dashboard.header.date.label': 'Current date',
   'dashboard.header.date.unavailable': 'Date unavailable',
+  'dashboard.header.description':
+    'Home dashboard for glucose, insulin, and recent diabetes events.',
   'dashboard.header.error.default': 'Could not load header data.',
   'dashboard.header.greeting.afternoon': 'Good afternoon',
   'dashboard.header.greeting.evening': 'Good evening',
@@ -462,6 +464,7 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'timeline.dayPeriod.timeRange.night': '00:00–05:59',
   'timeline.filters.ariaLabel': 'Event filter',
   'timeline.group.unknownDate': 'Unknown date',
+  'timeline.header.description': 'Timeline of recorded diabetes events.',
   'timeline.header.title': 'Timeline',
   'timeline.historyLoad.error':
     'Could not load earlier events. Try refreshing the page.',

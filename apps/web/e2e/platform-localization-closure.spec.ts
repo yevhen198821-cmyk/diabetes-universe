@@ -22,6 +22,8 @@ interface LocaleMatrix {
   };
   readonly edit: string;
   readonly glucoseLabel: string;
+  readonly homeDescription: string;
+  readonly homeTitle: string;
   readonly htmlLang: string;
   readonly insulinDose: string;
   readonly insulinPreparation: string;
@@ -36,6 +38,7 @@ interface LocaleMatrix {
   readonly seededDoseDisplay: string;
   readonly signInContinue: string;
   readonly signInTitle: string;
+  readonly timelineDescription: string;
   readonly timelineHeading: string;
 }
 
@@ -45,6 +48,9 @@ const LOCALES: readonly LocaleMatrix[] = [
     contexts: { basal: 'Basal', correction: 'Correction' },
     edit: 'Edit',
     glucoseLabel: 'Glucose level',
+    homeDescription:
+      'Home dashboard for glucose, insulin, and recent diabetes events.',
+    homeTitle: 'Home',
     htmlLang: 'en',
     insulinDose: 'Insulin dose',
     insulinPreparation: 'Insulin preparation',
@@ -59,6 +65,7 @@ const LOCALES: readonly LocaleMatrix[] = [
     seededDoseDisplay: '12.125',
     signInContinue: 'Continue',
     signInTitle: 'Sign in',
+    timelineDescription: 'Timeline of recorded diabetes events.',
     timelineHeading: 'Timeline',
   },
   {
@@ -66,6 +73,9 @@ const LOCALES: readonly LocaleMatrix[] = [
     contexts: { basal: 'Basal', correction: 'Korrektur' },
     edit: 'Bearbeiten',
     glucoseLabel: 'Glukosewert',
+    homeDescription:
+      'Startübersicht für Glukose, Insulin und letzte Diabetes-Einträge.',
+    homeTitle: 'Start',
     htmlLang: 'de',
     insulinDose: 'Insulindosis',
     insulinPreparation: 'Insulinpräparat',
@@ -80,6 +90,7 @@ const LOCALES: readonly LocaleMatrix[] = [
     seededDoseDisplay: '12,125',
     signInContinue: 'Weiter',
     signInTitle: 'Anmelden',
+    timelineDescription: 'Zeitachse der erfassten Diabetes-Einträge.',
     timelineHeading: 'Zeitachse',
   },
   {
@@ -87,6 +98,9 @@ const LOCALES: readonly LocaleMatrix[] = [
     contexts: { basal: 'Базал', correction: 'Корекція' },
     edit: 'Редагувати',
     glucoseLabel: 'Рівень глюкози',
+    homeDescription:
+      'Головна панель для глюкози, інсуліну та останніх записів про діабет.',
+    homeTitle: 'Головна',
     htmlLang: 'uk',
     insulinDose: 'Доза інсуліну',
     insulinPreparation: 'Препарат інсуліну',
@@ -101,6 +115,7 @@ const LOCALES: readonly LocaleMatrix[] = [
     seededDoseDisplay: '12,125',
     signInContinue: 'Продовжити',
     signInTitle: 'Вхід',
+    timelineDescription: 'Хронологія записаних подій, пов’язаних із діабетом.',
     timelineHeading: 'Хронологія',
   },
   {
@@ -108,6 +123,9 @@ const LOCALES: readonly LocaleMatrix[] = [
     contexts: { basal: 'Базал', correction: 'Коррекция' },
     edit: 'Редактировать',
     glucoseLabel: 'Уровень глюкозы',
+    homeDescription:
+      'Главная панель для глюкозы, инсулина и последних записей о диабете.',
+    homeTitle: 'Главная',
     htmlLang: 'ru',
     insulinDose: 'Доза инсулина',
     insulinPreparation: 'Препарат инсулина',
@@ -122,6 +140,7 @@ const LOCALES: readonly LocaleMatrix[] = [
     seededDoseDisplay: '12,125',
     signInContinue: 'Продолжить',
     signInTitle: 'Вход',
+    timelineDescription: 'Лента записанных событий, связанных с диабетом.',
     timelineHeading: 'Таймлайн',
   },
 ];
@@ -161,6 +180,18 @@ async function expectLocaleCookie(context: BrowserContext, locale: string) {
 
 async function expectDocumentLanguage(page: Page, htmlLang: string) {
   await expect(page.locator('html')).toHaveAttribute('lang', htmlLang);
+}
+
+async function expectLocalizedRouteMetadata(
+  page: Page,
+  title: string,
+  description: string,
+) {
+  await expect(page).toHaveTitle(`${title} | Diabetes Universe`);
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    'content',
+    description,
+  );
 }
 
 async function selectLanguage(page: Page, locale: LocaleMatrix) {
@@ -248,6 +279,11 @@ for (const locale of LOCALES) {
     await page.goto('/');
     await prepareEmptyTimeline(page);
     await expectDocumentLanguage(page, locale.htmlLang);
+    await expectLocalizedRouteMetadata(
+      page,
+      locale.homeTitle,
+      locale.homeDescription,
+    );
     await expect(
       page.getByRole('heading', { name: locale.lastGlucose }),
     ).toBeVisible();
@@ -282,6 +318,11 @@ for (const locale of LOCALES) {
     await page.goto('/timeline');
     await waitForApplicationReady(page);
     await expectDocumentLanguage(page, locale.htmlLang);
+    await expectLocalizedRouteMetadata(
+      page,
+      locale.timelineHeading,
+      locale.timelineDescription,
+    );
     await expect(
       page.getByRole('heading', { level: 1, name: locale.timelineHeading }),
     ).toBeVisible();

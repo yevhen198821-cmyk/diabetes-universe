@@ -42,6 +42,7 @@ export const germanCanonicalMessages = defineApprovedMessages({
   'timeline.eventKind.medication': 'Medikament',
   'timeline.eventKind.note': 'Notizen',
   'timeline.eventKind.nutrition': 'Ernährung',
+  'timeline.header.description': 'Zeitachse der erfassten Diabetes-Einträge.',
   'timeline.header.title': 'Zeitachse',
   'timeline.shell.eyebrow': 'Ereignisprotokoll',
   'timeline.filter.all': 'Alle',
@@ -538,6 +539,8 @@ export const germanCanonicalMessages = defineApprovedMessages({
   'dashboard.header.context.today': 'Ihre Daten für heute',
   'dashboard.header.date.label': 'Aktuelles Datum',
   'dashboard.header.date.unavailable': 'Datum nicht verfügbar',
+  'dashboard.header.description':
+    'Startübersicht für Glukose, Insulin und letzte Diabetes-Einträge.',
   'dashboard.header.error.default': 'Kopfzeile konnte nicht geladen werden.',
   'dashboard.header.greeting.afternoon': 'Guten Tag',
   'dashboard.header.greeting.evening': 'Guten Abend',

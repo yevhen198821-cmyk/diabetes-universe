@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
 import { cookies, headers } from 'next/headers';
 
-import { LOCALE_RESOURCE_CATALOG } from '@diabetes-universe/i18n-locales';
+import {
+  LOCALE_RESOURCE_CATALOG,
+  type CanonicalTranslationKey,
+} from '@diabetes-universe/i18n-locales';
 
 import { resolveRequestLocale } from './resolve-request-locale';
 import { readRequestPresentationContextFromStores } from './web-locale-cookie';
 
 const BRAND_TITLE_SUFFIX = 'Diabetes Universe';
-
-type CatalogMessageKey = string;
 
 /**
  * Builds request-aware route metadata from the catalog already used by Web.
@@ -18,8 +19,8 @@ type CatalogMessageKey = string;
  * template.
  */
 export async function createLocalizedRouteMetadata(options: {
-  readonly titleKey: CatalogMessageKey;
-  readonly descriptionKey?: CatalogMessageKey;
+  readonly titleKey: CanonicalTranslationKey;
+  readonly descriptionKey?: CanonicalTranslationKey;
 }): Promise<Metadata> {
   const headerStore = await headers();
   const cookieStore = await cookies();

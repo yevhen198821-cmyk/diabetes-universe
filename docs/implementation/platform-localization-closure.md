@@ -76,19 +76,19 @@ from locale.
 
 ## Cookie persistence contract
 
-| Field    | Value                                         |
-| -------- | --------------------------------------------- |
-| Name     | `du-web-locale`                               |
-| Path     | `/`                                           |
-| SameSite | `Lax`                                         |
-| HttpOnly | `true`                                        |
-| Secure   | HTTPS, or production when proto is missing    |
-| Max-Age  | 31536000 (365 days)                           |
-| Value    | exact canonical supported locale              |
-| Invalid  | ignored; no bootstrap error                   |
-| Contents | locale code only; no medical data or user IDs |
-| Logout   | cookie is not cleared                         |
-| Sync     | no cloud or profile sync in this wave         |
+| Field    | Value                                                   |
+| -------- | ------------------------------------------------------- |
+| Name     | `du-web-locale`                                         |
+| Path     | `/`                                                     |
+| SameSite | `Lax`                                                   |
+| HttpOnly | `true`                                                  |
+| Secure   | always in production; E2E HTTP is a dedicated exception |
+| Max-Age  | 31536000 (365 days)                                     |
+| Value    | exact canonical supported locale                        |
+| Invalid  | ignored; no bootstrap error                             |
+| Contents | locale code only; no medical data or user IDs           |
+| Logout   | cookie is not cleared                                   |
+| Sync     | no cloud or profile sync in this wave                   |
 
 Writer: `persistWebLocalePreferenceAction`. Parser:
 `parseCanonicalSupportedLocale` / `parseWebLocaleCookieValue`.
@@ -127,14 +127,15 @@ CI tests assert:
 - production key parity for all four locales;
 - DE/UK/RU closure bundles are `approved`, not draft;
 - every reachable closure key is explicitly authored (not English-spread);
-- English-identical values are limited to documented cognates (brand, units,
-  product names, shared medical/technical labels). Ordinary sentences are
-  not allowlisted, and `translation !== English` is not the production rule;
+- English-identical values are limited to locale-aware cognates (shared
+  brand/units/product names, plus German-only medical labels such as
+  `Insulin`). Ordinary sentences are not allowlisted, and
+  `translation !== English` is not the production rule;
 - no sibling-language fallback;
 - `apps/web` locale defaults alias the catalog;
 - Profile selector uses catalog metadata;
 - Language, Auth, Dashboard, Timeline, and Account routes resolve metadata
-  from the catalog;
+  from the catalog, including Dashboard/Timeline descriptions;
 - migrated surfaces do not add a second i18n library;
 - hardcoded English UI strings — including `Metadata` and other user-facing
   TypeScript literals — and ad-hoc `Intl` / `toLocale*` formatting on
@@ -151,8 +152,9 @@ not depend on `validationMessage`). Integration DOM setup binds
 teardown. CI does not raise a global `NODE_OPTIONS` heap.
 
 Allowlisted literals are limited to brand, technical identifiers, paths, and
-fixed unit symbols. Cognate message keys such as `Insulin` or `Fiasp` may
-legally match English.
+fixed unit symbols. Shared cognates such as `Fiasp` may match English in every
+locale. German-only labels such as `Insulin` are not granted to Ukrainian or
+Russian.
 
 ## Future authenticated profile sync
 
@@ -169,7 +171,8 @@ select language → Dashboard → Quick Add glucose → Quick Add insulin → Ti
 → Detail → Edit → reload → Dashboard.
 
 Assertions include selected language, cookie persistence, `html lang`,
-desktop-visible critical labels (`Last glucose` / `Letzte Glukose` /
+localized Home/Timeline document titles and meta descriptions, desktop-visible
+critical labels (`Last glucose` / `Letzte Glukose` /
 `Останній рівень глюкози` / `Последняя глюкоза`, recent-events region,
 Quick Add field labels, Timeline heading), locale-neutral IndexedDB
 records, exact insulin doses, and no rewrite of medical events after

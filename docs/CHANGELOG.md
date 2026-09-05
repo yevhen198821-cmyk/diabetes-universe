@@ -17,8 +17,13 @@ locale E2E matrix.
 - Profile language selection with native names and one-step persist/apply;
 - `PlatformFormatter` presentation path for Timeline/Dashboard/Quick Add numbers;
 - translation-key parity, approved-bundle integrity, and AST integrity gates;
-- localized Language/Auth/Account/Dashboard/Timeline route metadata;
-- production locale-cookie `Secure=true` when `x-forwarded-proto` is absent;
+- localized Language/Auth/Account/Dashboard/Timeline route metadata,
+  including Dashboard/Timeline descriptions from the catalog;
+- production locale-cookie always `Secure=true`; HTTP is only allowed by
+  the dedicated E2E runtime exception;
+- locale-aware cognate policy (German-only medical labels are not granted
+  to Ukrainian or Russian);
+- route metadata keys use `CanonicalTranslationKey` instead of `string`;
 - browser matrix for `en-GB` / `de-DE` / `uk-UA` / `ru-RU` plus auth cookie persistence;
 - web unit tests cap suite concurrency at 2 and stop the Happy DOM
   target-editor Save-click path from allocating a 4 GB heap that

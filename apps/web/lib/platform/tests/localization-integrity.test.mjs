@@ -436,3 +436,26 @@ test('affected localized routes generate metadata from the catalog', async () =>
     );
   }
 });
+
+test('Dashboard and Timeline metadata descriptions come from the catalog', async () => {
+  const home = await readFile(path.join(WEB_ROOT, 'app/page.tsx'), 'utf8');
+  const timeline = await readFile(
+    path.join(WEB_ROOT, 'app/timeline/page.tsx'),
+    'utf8',
+  );
+
+  assert.match(home, /descriptionKey: 'dashboard.header.description'/);
+  assert.match(timeline, /descriptionKey: 'timeline.header.description'/);
+  assert.doesNotMatch(home, /APP_BASELINE_DESCRIPTION/);
+  assert.doesNotMatch(timeline, /APP_BASELINE_DESCRIPTION/);
+});
+
+test('route metadata helper types keys as CanonicalTranslationKey', async () => {
+  const source = await readFile(
+    path.join(WEB_ROOT, 'lib/platform/create-localized-route-metadata.ts'),
+    'utf8',
+  );
+
+  assert.match(source, /CanonicalTranslationKey/);
+  assert.doesNotMatch(source, /type CatalogMessageKey = string/);
+});

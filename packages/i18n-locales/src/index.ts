@@ -24,4 +24,5 @@ export {
   TranslationBundleNotFoundError,
 } from './in-memory-translation-bundle-loader';
 export { LOCALE_RESOURCE_CATALOG } from './locale-resource-catalog';
+export type { CanonicalTranslationKey } from '@diabetes-universe/locales';
 export { resolveLocaleChain } from './resolve-locale-chain';

@@ -45,6 +45,8 @@ export const ukrainianCanonicalMessages = defineApprovedMessages({
   'timeline.eventKind.medication': 'Ліки',
   'timeline.eventKind.note': 'Нотатки',
   'timeline.eventKind.nutrition': 'Харчування',
+  'timeline.header.description':
+    'Хронологія записаних подій, пов’язаних із діабетом.',
   'timeline.header.title': 'Хронологія',
   'timeline.shell.eyebrow': 'Журнал подій',
   'timeline.filter.all': 'Усі',
@@ -526,6 +528,8 @@ export const ukrainianCanonicalMessages = defineApprovedMessages({
   'dashboard.header.context.today': 'Ваші дані за сьогодні',
   'dashboard.header.date.label': 'Поточна дата',
   'dashboard.header.date.unavailable': 'Дата недоступна',
+  'dashboard.header.description':
+    'Головна панель для глюкози, інсуліну та останніх записів про діабет.',
   'dashboard.header.error.default': 'Не вдалося завантажити дані шапки.',
   'dashboard.header.greeting.afternoon': 'Добрий день',
   'dashboard.header.greeting.evening': 'Добрий вечір',

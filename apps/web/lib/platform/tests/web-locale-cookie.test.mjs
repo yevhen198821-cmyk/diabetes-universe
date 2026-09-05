@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   createWebLocaleCookieWriteOptions,
+  isWebLocaleCookieE2ERuntime,
   parseWebLocaleCookieValue,
   readRequestPresentationContextFromStores,
   resolveWebLocaleCookieSecureFromProtocol,
@@ -38,18 +39,36 @@ test('HTTPS forwarded proto enables Secure; local HTTP does not', () => {
   assert.equal(resolveWebLocaleCookieSecureFromProtocol('https, http'), true);
   assert.equal(
     resolveWebLocaleCookieSecureFromProtocol('http', {
-      NODE_ENV: 'production',
+      NODE_ENV: 'development',
     }),
     false,
   );
 });
 
-test('missing proto is Secure in production and HTTP-capable for local E2E', () => {
+test('production cookies are always Secure, including forwarded HTTP', () => {
+  assert.equal(
+    resolveWebLocaleCookieSecureFromProtocol('http', {
+      NODE_ENV: 'production',
+    }),
+    true,
+  );
   assert.equal(
     resolveWebLocaleCookieSecureFromProtocol(undefined, {
       NODE_ENV: 'production',
     }),
     true,
+  );
+});
+
+test('E2E runtime is a dedicated HTTP exception', () => {
+  assert.equal(isWebLocaleCookieE2ERuntime({ AUTH_RUNTIME_ENV: 'e2e' }), true);
+  assert.equal(isWebLocaleCookieE2ERuntime({ NODE_ENV: 'production' }), false);
+  assert.equal(
+    resolveWebLocaleCookieSecureFromProtocol('http', {
+      AUTH_RUNTIME_ENV: 'e2e',
+      NODE_ENV: 'production',
+    }),
+    false,
   );
   assert.equal(
     resolveWebLocaleCookieSecureFromProtocol(null, {
@@ -57,6 +76,13 @@ test('missing proto is Secure in production and HTTP-capable for local E2E', () 
       NODE_ENV: 'production',
     }),
     false,
+  );
+  assert.equal(
+    resolveWebLocaleCookieSecureFromProtocol('https', {
+      AUTH_RUNTIME_ENV: 'e2e',
+      NODE_ENV: 'production',
+    }),
+    true,
   );
   assert.equal(
     resolveWebLocaleCookieSecureFromProtocol(undefined, {

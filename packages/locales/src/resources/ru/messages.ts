@@ -24,6 +24,8 @@ export const russianCanonicalMessages = defineApprovedMessages({
   'dashboard.header.greeting.morning': 'Доброе утро',
   'dashboard.header.greeting.night': 'Доброй ночи',
   'dashboard.header.loading': 'Загрузка шапки',
+  'dashboard.header.description':
+    'Главная панель для глюкозы, инсулина и последних записей о диабете.',
   'dashboard.header.title': 'Главная',
   'dashboard.lastGlucose.empty.default': 'Измерений пока нет.',
   'dashboard.lastGlucose.empty.cta': 'Добавить глюкозу',
@@ -165,6 +167,8 @@ export const russianCanonicalMessages = defineApprovedMessages({
   'account.security.sessions.success': 'Действие выполнено.',
   'account.security.sessions.title': 'Активные сессии',
   'common.actions.cancel': 'Отмена',
+  'timeline.header.description':
+    'Лента записанных событий, связанных с диабетом.',
   'timeline.header.title': 'Таймлайн',
   'timeline.shell.eyebrow': 'Журнал событий',
   'timeline.filter.all': 'Все',

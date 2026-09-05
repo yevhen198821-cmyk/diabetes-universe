@@ -23,8 +23,8 @@ export type WebLocaleCookieWriteOptions = Readonly<{
 /**
  * Builds the single writer options for the locale cookie.
  *
- * Production cookies are Secure even when the proxy omits
- * `x-forwarded-proto`. Local HTTP E2E keeps Secure=false.
+ * Production cookies are always Secure. The dedicated E2E runtime exception
+ * is the only path that may keep HTTP cookies.
  */
 export function createWebLocaleCookieWriteOptions(
   secure: boolean,
@@ -49,27 +49,33 @@ export type WebLocaleCookieSecureEnv = Readonly<{
   readonly NODE_ENV?: string;
 }>;
 
+export function isWebLocaleCookieE2ERuntime(
+  env: WebLocaleCookieSecureEnv = process.env,
+): boolean {
+  return env.AUTH_RUNTIME_ENV === 'e2e';
+}
+
+function firstForwardedProtocol(
+  forwardedProto: string | null | undefined,
+): string | undefined {
+  return forwardedProto?.split(',')[0]?.trim().toLowerCase();
+}
+
 export function resolveWebLocaleCookieSecureFromProtocol(
   forwardedProto: string | null | undefined,
   env: WebLocaleCookieSecureEnv = process.env,
 ): boolean {
-  if (forwardedProto) {
-    const protocol = forwardedProto.split(',')[0]?.trim().toLowerCase();
+  const protocol = firstForwardedProtocol(forwardedProto);
 
-    if (protocol === 'https') {
-      return true;
-    }
-
-    if (protocol === 'http') {
-      return false;
-    }
+  if (isWebLocaleCookieE2ERuntime(env)) {
+    return protocol === 'https';
   }
 
-  if (env.AUTH_RUNTIME_ENV === 'e2e') {
-    return false;
+  if (env.NODE_ENV === 'production') {
+    return true;
   }
 
-  return env.NODE_ENV === 'production';
+  return protocol === 'https';
 }
 
 export type HeaderLike = Readonly<{

@@ -15,6 +15,8 @@ import { ukrainianMetadata } from './metadata/uk.ts';
 import {
   CLOSURE_PRODUCTION_COGNATE_KEYS,
   CLOSURE_PRODUCTION_KEYS,
+  CLOSURE_PRODUCTION_LOCALE_COGNATE_KEYS,
+  isClosureProductionCognateKey,
 } from './closure-production.ts';
 
 const RESOURCE_ROOT = path.resolve(import.meta.dirname, 'resources');
@@ -91,7 +93,7 @@ test('closure keys are explicitly authored, not English-spread placeholders', as
   }
 });
 
-test('English-identical closure values are limited to documented cognates', () => {
+test('English-identical closure values are limited to locale-aware cognates', () => {
   for (const [locale, bundle] of Object.entries(PRODUCTION_BUNDLES)) {
     const unexpected = [];
 
@@ -99,7 +101,7 @@ test('English-identical closure values are limited to documented cognates', () =
       const value = bundle.messages[key];
       const english = englishCanonicalMessages[key];
 
-      if (value === english && !CLOSURE_PRODUCTION_COGNATE_KEYS.has(key)) {
+      if (value === english && !isClosureProductionCognateKey(locale, key)) {
         unexpected.push(key);
       }
     }
@@ -107,8 +109,24 @@ test('English-identical closure values are limited to documented cognates', () =
     assert.deepEqual(
       unexpected,
       [],
-      `${locale} still uses English placeholders outside the cognate allowlist: ${unexpected.join(', ')}`,
+      `${locale} still uses English placeholders outside its cognate allowlist: ${unexpected.join(', ')}`,
     );
+  }
+});
+
+test('German-only medical cognates are not granted to Ukrainian or Russian', () => {
+  for (const key of CLOSURE_PRODUCTION_LOCALE_COGNATE_KEYS['de-DE']) {
+    assert.equal(
+      isClosureProductionCognateKey('uk-UA', key),
+      false,
+      `${key} must not be a Ukrainian cognate`,
+    );
+    assert.equal(
+      isClosureProductionCognateKey('ru-RU', key),
+      false,
+      `${key} must not be a Russian cognate`,
+    );
+    assert.equal(isClosureProductionCognateKey('de-DE', key), true);
   }
 });
 
