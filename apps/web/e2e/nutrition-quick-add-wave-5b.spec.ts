@@ -189,7 +189,10 @@ test('itemized nutrition quick add stores snapshots without demo productId', asy
   await page.goto('/');
   await waitForApplicationReady(page);
   await page.getByRole('button', { name: 'Quick add: Nutrition' }).click();
-  await page.getByRole('radio', { name: 'Items' }).click();
+  await page
+    .locator('label')
+    .filter({ has: page.getByRole('radio', { name: 'Items' }) })
+    .click();
   await page.getByRole('button', { name: /Meal type/ }).click();
   await page
     .getByRole('dialog', { name: 'Meal type', exact: true })
