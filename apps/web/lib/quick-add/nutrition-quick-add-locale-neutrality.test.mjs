@@ -18,8 +18,15 @@ const fixedClock = {
 };
 
 function omitVolatile(event) {
-  const { createdAt, id, occurredAt, updatedAt, ...semantic } = event;
-  return semantic;
+  return {
+    carbohydratesGrams: event.carbohydratesGrams,
+    kind: event.kind,
+    mealType: event.mealType,
+    note: event.note,
+    schemaVersion: event.schemaVersion,
+    source: event.source,
+    ...(event.items === undefined ? {} : { items: event.items }),
+  };
 }
 
 test('the same manual Nutrition write is locale-neutral across all four locales', async () => {

@@ -15,10 +15,19 @@ function cloneSemanticTimelineEvent(
     case 'note':
       return { ...event };
     case 'nutrition':
+      if (event.schemaVersion === 1) {
+        return {
+          ...event,
+          products: event.products
+            ? event.products.map((product) => ({ ...product }))
+            : undefined,
+        };
+      }
+
       return {
         ...event,
-        products: event.products
-          ? event.products.map((product) => ({ ...product }))
+        items: event.items
+          ? event.items.map((item) => ({ ...item }))
           : undefined,
       };
   }
