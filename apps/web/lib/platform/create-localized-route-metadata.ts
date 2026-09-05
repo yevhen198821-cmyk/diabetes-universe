@@ -14,9 +14,8 @@ const BRAND_TITLE_SUFFIX = 'Diabetes Universe';
 /**
  * Builds request-aware route metadata from the catalog already used by Web.
  *
- * Child `generateMetadata` replaces the layout title, so the brand suffix is
- * applied here instead of relying on the unused `%s | Diabetes Universe`
- * template.
+ * Child titles use `absolute` so the layout `%s | Diabetes Universe`
+ * template cannot double the brand suffix.
  */
 export async function createLocalizedRouteMetadata(options: {
   readonly titleKey: CanonicalTranslationKey;
@@ -33,7 +32,9 @@ export async function createLocalizedRouteMetadata(options: {
   const title = messages[options.titleKey];
 
   return {
-    title: title ? `${title} | ${BRAND_TITLE_SUFFIX}` : BRAND_TITLE_SUFFIX,
+    title: {
+      absolute: title ? `${title} | ${BRAND_TITLE_SUFFIX}` : BRAND_TITLE_SUFFIX,
+    },
     ...(options.descriptionKey
       ? { description: messages[options.descriptionKey] }
       : {}),
