@@ -110,7 +110,11 @@ Approved kinds for the current architecture:
 - `note`
 
 `meal` is not a canonical kind. Historical demo data and UI mappings must use
-`nutrition` only.
+`nutrition` only. Wave 5A keeps that kind and adds a canonical Nutrition v2
+domain contract in `@diabetes-universe/medical-domain`; persisted production
+rows remain schemaVersion `1` until later adoption waves. See
+[Nutrition Entity](nutrition.md) and
+[Wave 5A — Nutrition Semantic Architecture](../../architecture/nutrition/wave-5a-nutrition-semantic-architecture.md).
 
 `reminder` and `ai_insight` are not `TimelineEventKind` values in the current
 scope. Reminders belong to planning flows; AI insights are generated artifacts,

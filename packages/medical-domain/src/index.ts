@@ -195,6 +195,43 @@ export type {
   InsulinNewWriteResult,
   PrepareInsulinNewWriteInput,
 } from './insulin/insulin-new-write';
+export {
+  NUTRITION_CANONICAL_MAX_CARBOHYDRATES_GRAMS,
+  NUTRITION_KIND,
+  NUTRITION_LEGACY_SCHEMA_VERSION,
+  NUTRITION_SCHEMA_VERSION,
+} from './nutrition/nutrition-constants';
+export {
+  NUTRITION_MEAL_TYPES,
+  isNutritionMealType,
+} from './nutrition/nutrition-meal-type';
+export type { NutritionMealType } from './nutrition/nutrition-meal-type';
+export { validateNutritionCanonicalCarbohydratesGrams } from './nutrition/nutrition-carbohydrates';
+export type {
+  NutritionCanonicalCarbohydratesValidationErrorCode,
+  NutritionCanonicalCarbohydratesValidationResult,
+} from './nutrition/nutrition-carbohydrates';
+export { validateNutritionItemSnapshot } from './nutrition/nutrition-item-snapshot';
+export type {
+  NutritionItemSnapshot,
+  NutritionItemSnapshotValidationErrorCode,
+  NutritionItemSnapshotValidationResult,
+} from './nutrition/nutrition-item-snapshot';
+export { validateNutritionTimelineEventV2 } from './nutrition/nutrition-timeline-event-v2';
+export type {
+  NutritionTimelineEventV2,
+  NutritionTimelineEventV2ValidationErrorCode,
+  NutritionTimelineEventV2ValidationResult,
+} from './nutrition/nutrition-timeline-event-v2';
+export {
+  classifyNutritionTimelineEvent,
+  isNutritionCanonicalSchemaVersion,
+  isNutritionLegacySchemaVersion,
+} from './nutrition/nutrition-legacy';
+export type {
+  NutritionTimelineEventClassification,
+  NutritionTimelineEventLegacy,
+} from './nutrition/nutrition-legacy';
 export { DIABETES_SETTINGS_VALIDATION_BOUNDS } from './validation/diabetes-settings-bounds';
 export {
   DiabetesSettingsValidationError,
