@@ -1,8 +1,7 @@
 'use client';
 
 import type {
-  NutritionEntryMode,
-  NutritionProductEntry,
+  NutritionItemSnapshot,
   NutritionQuickAddEntry,
 } from '@diabetes-universe/types';
 import {
@@ -12,134 +11,132 @@ import {
   QuickAddTimeField,
 } from '@diabetes-universe/ui';
 import { ChevronDown, Plus, Trash2 } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 
 import {
-  findNutritionDemoProductByName,
-  nutritionDemoProductOptions,
-} from '../../lib/quick-add/nutrition-demo-products';
-import { nutritionMealOptions } from '../../lib/quick-add/nutrition-meal-options';
+  parseNutritionManualCarbsInput,
+  parseNutritionManualDecimalInput,
+} from '../../lib/medical/nutrition/nutrition-manual-carbs-input';
+import { useFormatter } from '../../lib/platform/react/use-formatter';
+import { useLocalization } from '../../lib/platform/react/use-localization';
 import { getCurrentTimeString } from '../../lib/quick-add/format-glucose';
 import {
-  calculateNutritionProductCarbs,
   formatNutritionCarbs,
   formatNutritionCarbsPer100Grams,
-  parseNutritionDecimalInput,
 } from '../../lib/quick-add/format-nutrition';
-import { useFormatter } from '../../lib/platform/react/use-formatter';
+import {
+  findNutritionDemoProductById,
+  NUTRITION_DEMO_PRODUCT_IDS,
+  type NutritionDemoProductId,
+} from '../../lib/quick-add/nutrition-demo-products';
+import {
+  buildNutritionQuickAddItemSnapshot,
+  isNutritionQuickAddMealType,
+  NUTRITION_QUICK_ADD_MEAL_TYPES,
+  prepareNutritionQuickAddSubmit,
+  sumNutritionItemCarbohydrates,
+  type NutritionQuickAddMealType,
+} from '../../lib/quick-add/nutrition-quick-add-submit';
 import { formField, formLabel } from '../timeline/ui-styles';
+import { resolveNutritionQuickAddLabels } from './nutrition-quick-add-labels';
 
-const MAX_MANUAL_CARBS_GRAMS = 500;
-const MAX_PRODUCT_WEIGHT_GRAMS = 3000;
-const MAX_PRODUCT_ROWS = 10;
+const MAX_ITEM_WEIGHT_GRAMS = 3000;
+const MAX_ITEM_ROWS = 10;
 const NOTE_COUNTER_THRESHOLD = 160;
 const NOTE_MAX_LENGTH = 200;
+
+type NutritionFormMode = 'manual' | 'items';
 
 interface NutritionQuickAddFormProps {
   readonly onCancel: () => void;
   readonly onSubmit: (entry: NutritionQuickAddEntry) => void;
 }
 
-interface NutritionProductRowState {
-  readonly id: string;
-  readonly productId: string;
-  readonly productName: string;
+interface NutritionItemRowState {
   readonly carbsPer100Grams: number | null;
+  readonly demoProductId: NutritionDemoProductId | '';
+  readonly id: string;
+  readonly name: string;
   readonly weight: string;
 }
 
 interface NutritionFormState {
-  readonly mode: NutritionEntryMode;
-  readonly mealType: string;
+  readonly itemRows: readonly NutritionItemRowState[];
   readonly manualCarbs: string;
-  readonly time: string;
+  readonly mealType: NutritionQuickAddMealType | '';
+  readonly mode: NutritionFormMode;
   readonly note: string;
-  readonly productRows: readonly NutritionProductRowState[];
+  readonly time: string;
 }
 
-let productRowIdCounter = 0;
+let itemRowIdCounter = 0;
 
-function createProductRow(): NutritionProductRowState {
-  productRowIdCounter += 1;
+function createItemRow(): NutritionItemRowState {
+  itemRowIdCounter += 1;
 
   return {
     carbsPer100Grams: null,
-    id: `nutrition-product-row-${productRowIdCounter}`,
-    productId: '',
-    productName: '',
+    demoProductId: '',
+    id: `nutrition-item-${itemRowIdCounter}`,
+    name: '',
     weight: '',
   };
 }
 
 function createInitialState(): NutritionFormState {
   return {
+    itemRows: [createItemRow()],
     manualCarbs: '',
     mealType: '',
     mode: 'manual',
     note: '',
-    productRows: [createProductRow()],
     time: getCurrentTimeString(),
   };
 }
 
-function getProductRowCarbs(row: NutritionProductRowState): number | null {
-  const weightGrams = parseNutritionDecimalInput(
+function getItemRowCarbs(row: NutritionItemRowState): number | null {
+  const weightGrams = parseNutritionManualDecimalInput(
     row.weight,
-    MAX_PRODUCT_WEIGHT_GRAMS,
+    MAX_ITEM_WEIGHT_GRAMS,
   );
 
   if (weightGrams === null || row.carbsPer100Grams === null) {
     return null;
   }
 
-  return calculateNutritionProductCarbs(weightGrams, row.carbsPer100Grams);
+  return (weightGrams * row.carbsPer100Grams) / 100;
 }
 
-function isProductRowEmpty(row: NutritionProductRowState): boolean {
-  return row.productId.length === 0 && row.weight.trim().length === 0;
+function isItemRowEmpty(row: NutritionItemRowState): boolean {
+  return row.demoProductId.length === 0 && row.weight.trim().length === 0;
 }
 
-function isProductRowValid(row: NutritionProductRowState): boolean {
-  return getProductRowCarbs(row) !== null && row.productId.length > 0;
+function isItemRowValid(row: NutritionItemRowState): boolean {
+  return getItemRowCarbs(row) !== null && row.name.length > 0;
 }
 
-function buildProductEntry(
-  row: NutritionProductRowState,
-): NutritionProductEntry | null {
-  const weightGrams = parseNutritionDecimalInput(
+function buildItemSnapshot(
+  row: NutritionItemRowState,
+): NutritionItemSnapshot | null {
+  const weightGrams = parseNutritionManualDecimalInput(
     row.weight,
-    MAX_PRODUCT_WEIGHT_GRAMS,
+    MAX_ITEM_WEIGHT_GRAMS,
   );
-  const calculatedCarbsGrams = getProductRowCarbs(row);
 
   if (
     weightGrams === null ||
-    calculatedCarbsGrams === null ||
     row.carbsPer100Grams === null ||
-    !row.productId ||
-    !row.productName
+    row.name.length === 0
   ) {
     return null;
   }
 
-  return {
-    calculatedCarbsGrams,
+  return buildNutritionQuickAddItemSnapshot({
     carbsPer100Grams: row.carbsPer100Grams,
-    id: row.id,
-    productId: row.productId,
-    productName: row.productName,
+    itemId: row.id,
+    name: row.name,
     weightGrams,
-  };
-}
-
-function getProductsTotalCarbs(
-  rows: readonly NutritionProductRowState[],
-): number {
-  return rows.reduce((total, row) => {
-    const rowCarbs = getProductRowCarbs(row);
-
-    return total + (rowCarbs ?? 0);
-  }, 0);
+  });
 }
 
 export function NutritionQuickAddForm({
@@ -147,120 +144,155 @@ export function NutritionQuickAddForm({
   onSubmit,
 }: NutritionQuickAddFormProps) {
   const formatter = useFormatter();
+  const localization = useLocalization();
+  const labels = useMemo(
+    () => resolveNutritionQuickAddLabels(localization),
+    [localization],
+  );
   const [formState, setFormState] =
     useState<NutritionFormState>(createInitialState);
   const [mealSheetOpen, setMealSheetOpen] = useState(false);
-  const [selectedProductRowId, setSelectedProductRowId] = useState<
-    string | null
-  >(null);
+  const [selectedItemRowId, setSelectedItemRowId] = useState<string | null>(
+    null,
+  );
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const parsedManualCarbs = parseNutritionDecimalInput(
+  const parsedManualCarbs = parseNutritionManualCarbsInput(
     formState.manualCarbs,
-    MAX_MANUAL_CARBS_GRAMS,
   );
   const manualCarbsHasValue = formState.manualCarbs.trim().length > 0;
   const manualCarbsInvalid = manualCarbsHasValue && parsedManualCarbs === null;
-  const activeProductRows = formState.productRows.filter(
-    (row) => !isProductRowEmpty(row),
+  const activeItemRows = formState.itemRows.filter(
+    (row) => !isItemRowEmpty(row),
   );
-  const productRowsValid = activeProductRows.every(isProductRowValid);
-  const productEntries = activeProductRows
-    .map(buildProductEntry)
-    .filter((entry): entry is NutritionProductEntry => entry !== null);
-  const productsTotalCarbs = getProductsTotalCarbs(activeProductRows);
+  const itemRowsValid = activeItemRows.every(isItemRowValid);
+  const itemSnapshots = activeItemRows
+    .map(buildItemSnapshot)
+    .filter((entry): entry is NutritionItemSnapshot => entry !== null);
+  const itemsTotalCarbs = sumNutritionItemCarbohydrates(itemSnapshots);
+  const mealTypeSelected = isNutritionQuickAddMealType(formState.mealType);
   const canSubmitManual =
-    formState.mealType.length > 0 &&
-    parsedManualCarbs !== null &&
-    formState.time.length > 0;
-  const canSubmitProducts =
-    formState.mealType.length > 0 &&
-    activeProductRows.length > 0 &&
-    productRowsValid &&
-    productsTotalCarbs > 0 &&
+    mealTypeSelected && parsedManualCarbs !== null && formState.time.length > 0;
+  const canSubmitItems =
+    mealTypeSelected &&
+    activeItemRows.length > 0 &&
+    itemRowsValid &&
+    itemsTotalCarbs > 0 &&
     formState.time.length > 0;
   const canSubmit =
-    formState.mode === 'manual' ? canSubmitManual : canSubmitProducts;
-  const selectedProductRow = selectedProductRowId
-    ? formState.productRows.find((row) => row.id === selectedProductRowId)
+    formState.mode === 'manual' ? canSubmitManual : canSubmitItems;
+  const selectedItemRow = selectedItemRowId
+    ? formState.itemRows.find((row) => row.id === selectedItemRowId)
     : undefined;
   const showNoteCounter = formState.note.length >= NOTE_COUNTER_THRESHOLD;
+  const mealOptions = NUTRITION_QUICK_ADD_MEAL_TYPES.map((mealType) => ({
+    label: labels.mealTypes[mealType],
+    value: mealType,
+  }));
+  const itemOptions = NUTRITION_DEMO_PRODUCT_IDS.map((productId) => ({
+    label: labels.demoProducts[productId],
+    value: productId,
+  }));
+  const selectedMealLabel = mealTypeSelected
+    ? labels.mealTypes[formState.mealType]
+    : labels.mealTypePlaceholder;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setSubmitError(null);
 
-    if (!canSubmit) {
+    if (!canSubmit || !mealTypeSelected) {
       return;
     }
 
     const note = formState.note.trim();
 
     if (formState.mode === 'manual' && parsedManualCarbs !== null) {
-      onSubmit({
+      const prepared = prepareNutritionQuickAddSubmit({
         carbohydratesGrams: parsedManualCarbs,
         mealType: formState.mealType,
-        mode: 'manual',
-        note: note || undefined,
+        note,
         time: formState.time,
       });
+
+      if (!prepared.ok) {
+        setSubmitError(labels.carbsError);
+        return;
+      }
+
+      onSubmit(prepared.value);
       return;
     }
 
-    if (formState.mode === 'products') {
-      onSubmit({
-        carbohydratesGrams: productsTotalCarbs,
+    if (formState.mode === 'items') {
+      const prepared = prepareNutritionQuickAddSubmit({
+        carbohydratesGrams: itemsTotalCarbs,
+        items: itemSnapshots,
         mealType: formState.mealType,
-        mode: 'products',
-        note: note || undefined,
-        products: productEntries,
+        note,
         time: formState.time,
       });
+
+      if (!prepared.ok) {
+        setSubmitError(labels.carbsError);
+        return;
+      }
+
+      onSubmit(prepared.value);
     }
   };
 
   const handleCancel = () => {
     setFormState(createInitialState());
-    setSelectedProductRowId(null);
+    setSelectedItemRowId(null);
+    setSubmitError(null);
     onCancel();
   };
 
-  const updateProductRow = (
+  const updateItemRow = (
     rowId: string,
-    update: Partial<NutritionProductRowState>,
+    update: Partial<NutritionItemRowState>,
   ) => {
     setFormState((current) => ({
       ...current,
-      productRows: current.productRows.map((row) =>
+      itemRows: current.itemRows.map((row) =>
         row.id === rowId ? { ...row, ...update } : row,
       ),
     }));
   };
 
-  const handleProductSelect = (productName: string) => {
-    const product = findNutritionDemoProductByName(productName);
+  const handleItemSelect = (productId: NutritionDemoProductId) => {
+    const product = findNutritionDemoProductById(productId);
 
-    if (!product || !selectedProductRowId) {
-      setSelectedProductRowId(null);
+    if (!product || !selectedItemRowId) {
+      setSelectedItemRowId(null);
       return;
     }
 
-    updateProductRow(selectedProductRowId, {
+    updateItemRow(selectedItemRowId, {
       carbsPer100Grams: product.carbsPer100Grams,
-      productId: product.id,
-      productName: product.name,
+      demoProductId: product.id,
+      name: labels.demoProducts[product.id],
     });
-    setSelectedProductRowId(null);
+    setSelectedItemRowId(null);
   };
 
   return (
     <QuickAddFormLayout onSubmit={handleSubmit}>
       <QuickAddFormLayout.Body>
+        {submitError ? (
+          <p className="text-sm text-rose-600" role="alert">
+            {submitError}
+          </p>
+        ) : null}
+
         <fieldset>
-          <legend className="sr-only">Способ добавления углеводов</legend>
+          <legend className="sr-only">{labels.modeLegend}</legend>
           <div className="grid grid-cols-2 rounded-2xl border border-slate-200 bg-slate-100 p-1">
             {(
               [
-                ['manual', 'Вручную'],
-                ['products', 'По продуктам'],
+                ['manual', labels.modeManual],
+                ['items', labels.modeItems],
               ] as const
             ).map(([mode, label]) => (
               <label
@@ -292,20 +324,18 @@ export function NutritionQuickAddForm({
 
         <div>
           <span className={formLabel} id="quick-add-nutrition-meal-label">
-            Тип приёма пищи
+            {labels.mealTypeLabel}
           </span>
           <button
             aria-haspopup="dialog"
             aria-labelledby="quick-add-nutrition-meal-label quick-add-nutrition-meal-value"
             className={`${formField} mt-2 flex items-center justify-between text-left font-medium ${
-              formState.mealType ? 'text-slate-950' : 'text-slate-400'
+              mealTypeSelected ? 'text-slate-950' : 'text-slate-400'
             }`}
             onClick={() => setMealSheetOpen(true)}
             type="button"
           >
-            <span id="quick-add-nutrition-meal-value">
-              {formState.mealType || 'Выберите тип приёма пищи'}
-            </span>
+            <span id="quick-add-nutrition-meal-value">{selectedMealLabel}</span>
             <ChevronDown
               aria-hidden="true"
               className="text-slate-400"
@@ -320,7 +350,7 @@ export function NutritionQuickAddForm({
               className={formLabel}
               htmlFor="quick-add-nutrition-manual-carbs"
             >
-              Углеводы
+              {labels.carbsLabel}
             </label>
             <div className="relative mt-2">
               <input
@@ -341,12 +371,13 @@ export function NutritionQuickAddForm({
                 inputMode="decimal"
                 name="manualCarbs"
                 onChange={(event) => {
+                  setSubmitError(null);
                   setFormState((current) => ({
                     ...current,
                     manualCarbs: event.target.value,
                   }));
                 }}
-                placeholder="42"
+                placeholder={labels.carbsPlaceholder}
                 required={formState.mode === 'manual'}
                 type="text"
                 value={formState.manualCarbs}
@@ -356,81 +387,85 @@ export function NutritionQuickAddForm({
                   manualCarbsHasValue ? 'text-slate-500' : 'text-slate-400'
                 }`}
               >
-                г
+                {labels.carbsUnit}
               </span>
             </div>
             {manualCarbsInvalid ? (
               <p
                 className="mt-2 text-sm text-rose-600"
                 id="quick-add-nutrition-manual-carbs-error"
+                role="alert"
               >
-                Введите углеводы больше 0 и не более 500 г
+                {labels.carbsError}
               </p>
             ) : null}
           </div>
         ) : (
           <div className="space-y-3">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">Продукты</h3>
+              <h3 className="text-sm font-semibold text-slate-900">
+                {labels.itemsHeading}
+              </h3>
               <p className="mt-1 text-xs leading-5 text-slate-500">
-                Demo-каталог используется только для интерфейса и не является
-                медицинской или нормативной базой продуктов.
+                {labels.itemsHelp}
               </p>
             </div>
 
             <div className="space-y-2">
-              {formState.productRows.map((row, index) => {
-                const rowCarbs = getProductRowCarbs(row);
+              {formState.itemRows.map((row, index) => {
+                const rowCarbs = getItemRowCarbs(row);
                 const weightHasValue = row.weight.trim().length > 0;
                 const weightInvalid =
                   weightHasValue &&
-                  parseNutritionDecimalInput(
+                  parseNutritionManualDecimalInput(
                     row.weight,
-                    MAX_PRODUCT_WEIGHT_GRAMS,
+                    MAX_ITEM_WEIGHT_GRAMS,
                   ) === null;
+                const itemAriaLabel = `${labels.itemAriaLabel} ${index + 1}`;
 
                 return (
                   <section
-                    aria-label={`Продукт ${index + 1}`}
+                    aria-label={itemAriaLabel}
                     className="space-y-2 rounded-2xl bg-slate-50/80 p-3"
                     key={row.id}
                   >
                     <div>
                       <span
                         className={formLabel}
-                        id={`quick-add-nutrition-product-${row.id}-label`}
+                        id={`quick-add-nutrition-item-${row.id}-label`}
                       >
-                        Продукт
+                        {labels.itemLabel}
                       </span>
                       <button
                         aria-describedby={
                           row.carbsPer100Grams !== null
-                            ? `quick-add-nutrition-product-${row.id}-carbs`
+                            ? `quick-add-nutrition-item-${row.id}-carbs`
                             : undefined
                         }
                         aria-haspopup="dialog"
-                        aria-labelledby={`quick-add-nutrition-product-${row.id}-label quick-add-nutrition-product-${row.id}-value`}
+                        aria-labelledby={`quick-add-nutrition-item-${row.id}-label quick-add-nutrition-item-${row.id}-value`}
                         className={`mt-1.5 flex min-h-14 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 text-left text-sm font-medium transition hover:border-slate-300 focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:outline-none ${
-                          row.productName ? 'text-slate-950' : 'text-slate-400'
+                          row.name ? 'text-slate-950' : 'text-slate-400'
                         }`}
-                        onClick={() => setSelectedProductRowId(row.id)}
+                        onClick={() => setSelectedItemRowId(row.id)}
                         type="button"
                       >
                         <span
                           className="min-w-0 pr-3"
-                          id={`quick-add-nutrition-product-${row.id}-value`}
+                          id={`quick-add-nutrition-item-${row.id}-value`}
                         >
                           <span className="block truncate">
-                            {row.productName || 'Выберите продукт'}
+                            {row.name || labels.itemPlaceholder}
                           </span>
                           {row.carbsPer100Grams !== null ? (
                             <span
                               className="mt-0.5 block truncate text-xs font-normal text-slate-500"
-                              id={`quick-add-nutrition-product-${row.id}-carbs`}
+                              id={`quick-add-nutrition-item-${row.id}-carbs`}
                             >
                               {formatNutritionCarbsPer100Grams(
                                 row.carbsPer100Grams,
                                 formatter,
+                                labels.carbsPer100Label,
                               )}
                             </span>
                           ) : null}
@@ -449,7 +484,7 @@ export function NutritionQuickAddForm({
                           className={formLabel}
                           htmlFor={`quick-add-nutrition-weight-${row.id}`}
                         >
-                          Вес порции, г
+                          {labels.weightLabel}
                         </label>
                         <div className="relative mt-1.5">
                           <input
@@ -468,13 +503,13 @@ export function NutritionQuickAddForm({
                             enterKeyHint="done"
                             id={`quick-add-nutrition-weight-${row.id}`}
                             inputMode="decimal"
-                            name={`productWeight-${row.id}`}
+                            name={`itemWeight-${row.id}`}
                             onChange={(event) => {
-                              updateProductRow(row.id, {
+                              updateItemRow(row.id, {
                                 weight: event.target.value,
                               });
                             }}
-                            placeholder="100"
+                            placeholder={labels.weightPlaceholder}
                             type="text"
                             value={row.weight}
                           />
@@ -485,44 +520,47 @@ export function NutritionQuickAddForm({
                                 : 'text-slate-400'
                             }`}
                           >
-                            г
+                            {labels.carbsUnit}
                           </span>
                         </div>
                         {weightInvalid ? (
                           <p
                             className="mt-2 text-sm text-rose-600"
                             id={`quick-add-nutrition-weight-${row.id}-error`}
+                            role="alert"
                           >
-                            Вес должен быть больше 0 и не более 3000 г
+                            {labels.weightError}
                           </p>
                         ) : null}
                       </div>
 
                       <div>
-                        <span className={formLabel}>Углеводы</span>
+                        <span className={formLabel}>
+                          {labels.itemCarbsLabel}
+                        </span>
                         <p className="mt-1.5 flex h-11 items-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-950">
                           {rowCarbs === null
                             ? '—'
-                            : `${formatNutritionCarbs(rowCarbs, formatter)} г`}
+                            : `${formatNutritionCarbs(rowCarbs, formatter)} ${labels.carbsUnit}`}
                         </p>
                       </div>
                     </div>
 
-                    {formState.productRows.length > 1 ? (
+                    {formState.itemRows.length > 1 ? (
                       <button
                         className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2 text-sm font-semibold text-slate-500 transition hover:bg-rose-50 hover:text-rose-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
                         onClick={() => {
                           setFormState((current) => ({
                             ...current,
-                            productRows: current.productRows.filter(
-                              (productRow) => productRow.id !== row.id,
+                            itemRows: current.itemRows.filter(
+                              (itemRow) => itemRow.id !== row.id,
                             ),
                           }));
                         }}
                         type="button"
                       >
                         <Trash2 aria-hidden="true" size={16} />
-                        Удалить продукт
+                        {labels.removeItem}
                       </button>
                     ) : null}
                   </section>
@@ -532,33 +570,34 @@ export function NutritionQuickAddForm({
 
             <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
               <span className="text-sm font-medium text-slate-600">
-                Всего углеводов
+                {labels.totalCarbsLabel}
               </span>
               <span className="text-xl font-bold text-slate-950">
-                {formatNutritionCarbs(productsTotalCarbs, formatter)} г
+                {formatNutritionCarbs(itemsTotalCarbs, formatter)}{' '}
+                {labels.carbsUnit}
               </span>
             </div>
 
             <button
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={formState.productRows.length >= MAX_PRODUCT_ROWS}
+              disabled={formState.itemRows.length >= MAX_ITEM_ROWS}
               onClick={() => {
                 setFormState((current) => ({
                   ...current,
-                  productRows: [...current.productRows, createProductRow()],
+                  itemRows: [...current.itemRows, createItemRow()],
                 }));
               }}
               type="button"
             >
               <Plus aria-hidden="true" size={16} />
-              Добавить ещё продукт
+              {labels.addItem}
             </button>
           </div>
         )}
 
         <QuickAddTimeField
           id="quick-add-nutrition-time"
-          label="Время"
+          label={labels.timeLabel}
           name="time"
           onChange={(time) => {
             setFormState((current) => ({
@@ -572,7 +611,7 @@ export function NutritionQuickAddForm({
 
         <div>
           <label className={formLabel} htmlFor="quick-add-nutrition-note">
-            Заметка
+            {labels.noteLabel} ({labels.noteOptional})
           </label>
           <textarea
             className={`${formField} mt-2 min-h-24 resize-none py-3`}
@@ -585,7 +624,7 @@ export function NutritionQuickAddForm({
                 note: event.target.value,
               }));
             }}
-            placeholder="Добавьте заметку"
+            placeholder={labels.notePlaceholder}
             value={formState.note}
           />
           {showNoteCounter ? (
@@ -598,14 +637,16 @@ export function NutritionQuickAddForm({
 
       <QuickAddFormLayout.Footer>
         <QuickAddFormActions
+          cancelLabel={labels.cancel}
           inline
           onCancel={handleCancel}
           submitDisabled={!canSubmit}
+          submitLabel={labels.save}
         />
       </QuickAddFormLayout.Footer>
 
       {mealSheetOpen ? (
-        <QuickAddOptionSheet
+        <QuickAddOptionSheet<NutritionQuickAddMealType>
           onClose={() => setMealSheetOpen(false)}
           onSelect={(mealType) => {
             setFormState((current) => ({
@@ -614,19 +655,19 @@ export function NutritionQuickAddForm({
             }));
             setMealSheetOpen(false);
           }}
-          options={nutritionMealOptions}
-          selectedValue={formState.mealType || undefined}
-          title="Тип приёма пищи"
+          options={mealOptions}
+          selectedValue={mealTypeSelected ? formState.mealType : undefined}
+          title={labels.mealTypeSheetTitle}
         />
       ) : null}
 
-      {selectedProductRowId ? (
-        <QuickAddOptionSheet
-          onClose={() => setSelectedProductRowId(null)}
-          onSelect={handleProductSelect}
-          options={nutritionDemoProductOptions}
-          selectedValue={selectedProductRow?.productName || undefined}
-          title="Продукт"
+      {selectedItemRowId ? (
+        <QuickAddOptionSheet<NutritionDemoProductId>
+          onClose={() => setSelectedItemRowId(null)}
+          onSelect={handleItemSelect}
+          options={itemOptions}
+          selectedValue={selectedItemRow?.demoProductId || undefined}
+          title={labels.itemSheetTitle}
         />
       ) : null}
     </QuickAddFormLayout>

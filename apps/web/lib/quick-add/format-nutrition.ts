@@ -41,6 +41,7 @@ export function formatNutritionCarbs(
 export function formatNutritionCarbsPer100Grams(
   carbsPer100Grams: number,
   formatter: PlatformFormatter,
+  carbsPer100Label: string,
 ): string {
-  return `${formatNutritionCarbs(carbsPer100Grams, formatter)} г углеводов / 100 г`;
+  return `${formatNutritionCarbs(carbsPer100Grams, formatter)} ${carbsPer100Label}`;
 }

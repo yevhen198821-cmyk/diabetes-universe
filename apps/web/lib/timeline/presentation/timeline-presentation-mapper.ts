@@ -97,7 +97,8 @@ function resolveMealTypeTitle(
     mealType === 'lunch' ||
     mealType === 'dinner' ||
     mealType === 'snack' ||
-    mealType === 'other'
+    mealType === 'other' ||
+    mealType === 'unspecified'
   ) {
     return dependencies.labels.mealTypes[mealType];
   }
@@ -189,7 +190,7 @@ function mapNutritionPresentation(
         title,
         String(event.carbohydratesGrams),
         event.note ?? '',
-        event.mode,
+        event.schemaVersion === 1 ? event.mode : '',
       ],
     },
     title,

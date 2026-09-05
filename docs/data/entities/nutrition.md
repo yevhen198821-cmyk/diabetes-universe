@@ -2,15 +2,18 @@
 
 ## Status
 
-Approved as a Timeline semantic kind. Wave 5A adds the canonical Nutrition
-v2 domain contract in `@diabetes-universe/medical-domain`. Production
-writers, IndexedDB, Timeline UI, and the medical API still persist and read
-**Nutrition v1** (`schemaVersion: 1`).
+Approved as a Timeline semantic kind. Wave 5A owns the canonical Nutrition
+v2 domain contract in `@diabetes-universe/medical-domain`. Wave 5B writes
+**new Nutrition Quick Add events** as v2 and localizes the production Quick
+Add. Existing v1 history stays readable. Persistence save-integrity is
+Wave 5C. Medical API / OpenAPI / Detail / Edit remain on their current
+contracts.
 
 Authoritative architecture:
 [Wave 5A — Nutrition Semantic Architecture](../../architecture/nutrition/wave-5a-nutrition-semantic-architecture.md).
 Implementation:
-[Wave 5A — Nutrition Domain Contract](../../implementation/wave-5a-nutrition-domain-contract.md).
+[Wave 5A — Nutrition Domain Contract](../../implementation/wave-5a-nutrition-domain-contract.md),
+[Wave 5B — Canonical + Localized Nutrition Quick Add](../../implementation/wave-5b-canonical-localized-nutrition-quick-add.md).
 
 ## Purpose
 
@@ -50,27 +53,31 @@ event.
 
 ### Current write path
 
-Quick Add still collects `NutritionQuickAddEntry` (`mode`, localized
-`mealType` string, `carbohydratesGrams`, optional `products`) and
-`createSemanticNutritionTimelineEvent` writes `schemaVersion: 1`. Meal labels
-may be mapped through `mapQuickAddNutritionMealType`. That adapter is not
-the Wave 5A canonical validator.
+New Nutrition Quick Add submissions collect a canonical
+`NutritionQuickAddEntry` (`mealType` ID, `carbohydratesGrams`, optional
+`items` / `note`) and `createSemanticNutritionTimelineEvent` writes
+`schemaVersion: 2`. Wave 5A `validateNutritionTimelineEventV2` runs before
+the payload is produced. Form `mode` is presentation state and is not
+persisted.
+
+Legacy v1 rows (`mode`, `products`, free-form `mealType`) remain readable
+and are not rewritten.
 
 ### Current limitations
 
-- meal options and some Quick Add copy remain hardcoded in Russian;
-- persisted `mealType` still allows free-form strings;
-- demo `productId` is not a real food-catalogue identity;
+- Nutrition Detail / Edit are unchanged and are not a v2 adoption path;
+- demo catalogue IDs stay presentation-only and are not food-database keys;
 - medical API transport carbs bounds remain `0…2000` and `schemaVersion: 1`;
-- Quick Add / Timeline still use fire-and-forget save for nutrition;
+- Quick Add / Timeline still use fire-and-forget save for nutrition
+  (Wave 5C);
 - no food database, barcode, photo recognition, recipes, or macros;
 - no insulin-from-carbs recommendation.
 
 ## Target attributes (Wave 5A domain contract, schemaVersion 2)
 
-Canonical v2 is implemented as a **domain payload**
-(`NutritionTimelineEventV2`). It is **not** yet the persisted
-`SemanticTimelineEvent` variant. Later waves will adopt it on write paths.
+Canonical v2 is the **new Quick Add write** shape
+(`NutritionTimelineEventV2` in `@diabetes-universe/types`). Existing v1
+history stays on `NutritionTimelineEventV1`. The medical API is still v1.
 
 | Attribute            | Required on new canonical writes | Type            | Meaning                                                               |
 | -------------------- | -------------------------------- | --------------- | --------------------------------------------------------------------- |
@@ -104,8 +111,8 @@ not promoted to catalogue identity.
 - Canonical v2 `carbohydratesGrams`: finite number, greater than 0, and
   `<= NUTRITION_CANONICAL_MAX_CARBOHYDRATES_GRAMS` (`1000`). This is a
   technical domain ceiling, not a dietary recommendation.
-- A future Quick Add 500 g guard is presentation policy (Wave 5B), not
-  domain validity.
+- The Quick Add 500 g guard is presentation policy (Wave 5B), not domain
+  validity.
 - Canonical v2 `mealType` accepts only the closed identifier set. Localized
   labels are invalid in the domain validator.
 - `items`, when present, must be a non-empty array. `items: []` is invalid
@@ -116,9 +123,10 @@ not promoted to catalogue identity.
 
 ## Notes
 
-- Wave 5A does **not** claim that Quick Add, API, or persistence already
-  write canonical v2.
+- Wave 5B writes new Quick Add events as canonical v2. It does not migrate
+  v1 history or close save integrity.
 - `classifyNutritionTimelineEvent` distinguishes `legacy_v1` from
   `canonical_v2` without applying the strict v2 validator to v1 rows.
 - Application startup must not rewrite nutrition rows in IndexedDB.
-- Localization of meal labels belongs to later presentation waves.
+- Meal labels for new Quick Add / Timeline cards come from the localization
+  platform. Stored `mealType` stays a canonical ID.

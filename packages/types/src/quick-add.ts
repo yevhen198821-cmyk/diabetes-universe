@@ -2,6 +2,8 @@ import type {
   GlucoseMeasurementContext,
   InsulinAdministrationContext,
   InsulinPreparationId,
+  NutritionItemSnapshot,
+  NutritionMealType,
 } from './semantic-timeline';
 
 /**
@@ -43,6 +45,10 @@ export interface InsulinQuickAddEntry {
 
 export type NutritionEntryMode = 'manual' | 'products';
 
+/**
+ * Legacy product line used by Nutrition v1 history. New Quick Add writes
+ * do not emit this shape.
+ */
 export interface NutritionProductEntry {
   readonly id: string;
   readonly productId: string;
@@ -52,13 +58,18 @@ export interface NutritionProductEntry {
   readonly calculatedCarbsGrams: number;
 }
 
+/**
+ * Canonical Nutrition Quick Add write (Wave 5B).
+ *
+ * `mealType` is a closed identifier. `mode` and `products` are not part of
+ * this contract — itemized lines use `items` snapshots.
+ */
 export interface NutritionQuickAddEntry {
-  readonly mode: NutritionEntryMode;
-  readonly mealType: string;
+  readonly mealType: NutritionMealType;
   readonly carbohydratesGrams: number;
   readonly time: string;
   readonly note?: string;
-  readonly products?: readonly NutritionProductEntry[];
+  readonly items?: readonly NutritionItemSnapshot[];
 }
 
 export interface MedicationReference {

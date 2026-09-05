@@ -373,9 +373,10 @@ changes — that is later-wave work.
 ```text
 Canonical Nutrition v2 contract (@diabetes-universe/medical-domain)
         ↓
-Future 5B presentation / Quick Add adapter (apps/web)
+Wave 5B Quick Add adapter (apps/web) — new writes only
         ↓
-Dashboard / Timeline / persistence / API   ← unchanged in Wave 5A
+Dashboard / Timeline / IndexedDB structural accept
+API / OpenAPI / Detail / Edit              ← unchanged in Wave 5A and 5B
 ```
 
 | Concern                               | Owner in Wave 5A                              | Not in Wave 5A         |
@@ -413,16 +414,15 @@ Domain error codes are locale-neutral (`nutrition.carbohydrates.not_positive`,
 
 ## 13. Phased implementation plan
 
-Planning labels only. **Only Wave 5A is implemented in this PR.**
+| Wave   | Intent                                                                 | Must not include                          |
+| ------ | ---------------------------------------------------------------------- | ----------------------------------------- |
+| **5A** | Domain contract, locale-neutral validators, architecture docs, tests   | UI, persistence, API, OpenAPI, writers    |
+| **5B** | Canonical + localized Nutrition Quick Add; presentation policy (500 g) | Food DB, API, save integrity, Edit/Detail |
+| **5C** | Persistence / save integrity                                           | Nutrition Edit adoption, Medical API      |
 
-| Wave   | Intent                                                                 | Must not include                           |
-| ------ | ---------------------------------------------------------------------- | ------------------------------------------ |
-| **5A** | Domain contract, locale-neutral validators, architecture docs, tests   | UI, persistence, API, OpenAPI, writers     |
-| **5B** | Canonical + localized Nutrition Quick Add; presentation policy (500 g) | Food DB, API, persistence semantic rewrite |
-| Later  | Edit adoption v1→v2, save integrity, API/OpenAPI, Timeline Detail      | Insulin recommendations                    |
-
-Do not claim that Quick Add, API, or persistence already write or validate
-canonical v2. They still use Nutrition v1.
+Wave 5A remains domain-only. New Quick Add v2 writes are documented in
+[Wave 5B](../../implementation/wave-5b-canonical-localized-nutrition-quick-add.md).
+The Nutrition vertical is not closed.
 
 ---
 

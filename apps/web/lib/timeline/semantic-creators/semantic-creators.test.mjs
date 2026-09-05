@@ -62,28 +62,26 @@ test('semantic insulin creator preserves dose units and semantic fields', () => 
   assert.equal(Object.hasOwn(event, 'context'), false);
 });
 
-test('semantic nutrition creator maps meal enum and keeps custom meal text', () => {
-  const enumEvent = createSemanticNutritionTimelineEvent(
+test('semantic nutrition creator writes canonical v2 without legacy UI fields', () => {
+  const event = createSemanticNutritionTimelineEvent(
     {
       carbohydratesGrams: 42,
-      mealType: 'Завтрак',
-      mode: 'manual',
+      mealType: 'breakfast',
       time: '09:30',
     },
     { clock: fixedClock },
   );
-  const customEvent = createSemanticNutritionTimelineEvent(
-    {
-      carbohydratesGrams: 15,
-      mealType: 'Поздний перекус',
-      mode: 'manual',
-      time: '22:00',
-    },
-    { clock: fixedClock },
-  );
 
-  assert.equal(enumEvent.mealType, 'breakfast');
-  assert.equal(customEvent.mealType, 'Поздний перекус');
+  assertNoLegacyPresentationFields(event);
+  assert.equal(event.kind, 'nutrition');
+  assert.equal(event.schemaVersion, 2);
+  assert.equal(event.mealType, 'breakfast');
+  assert.equal(event.carbohydratesGrams, 42);
+  assert.equal(event.source, 'manual');
+  assert.equal(Object.hasOwn(event, 'mode'), false);
+  assert.equal(Object.hasOwn(event, 'products'), false);
+  assert.equal(Object.hasOwn(event, 'calculatedCarbsGrams'), false);
+  assert.equal(Object.hasOwn(event, 'items'), false);
 });
 
 test('semantic medication creator maps canonical units', () => {

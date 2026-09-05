@@ -57,10 +57,10 @@ export type InsulinAdministrationContext =
   | 'unspecified';
 
 export type NutritionMealType =
-  'breakfast' | 'lunch' | 'dinner' | 'snack' | 'other';
+  'breakfast' | 'lunch' | 'dinner' | 'snack' | 'other' | 'unspecified';
 
 /**
- * Product line captured on a nutrition event at the time of entry.
+ * Product line captured on a legacy Nutrition v1 event at the time of entry.
  */
 export interface NutritionProductSnapshot {
   readonly productId: string;
@@ -68,6 +68,19 @@ export interface NutritionProductSnapshot {
   readonly weightGrams: number;
   readonly carbsPer100Grams: number;
   readonly calculatedCarbsGrams: number;
+}
+
+/**
+ * Historical item snapshot on a canonical Nutrition v2 event.
+ *
+ * `itemId` is an opaque in-record identity. It is not a food-catalogue key.
+ */
+export interface NutritionItemSnapshot {
+  readonly itemId: string;
+  readonly name: string;
+  readonly carbohydratesGrams: number;
+  readonly weightGrams?: number;
+  readonly carbsPer100Grams?: number;
 }
 
 /**
@@ -146,7 +159,10 @@ export interface InsulinTimelineEvent extends SemanticEventEnvelope {
   readonly administrationContext?: InsulinAdministrationContext;
 }
 
-export interface NutritionTimelineEvent extends SemanticEventEnvelope {
+/**
+ * Persisted Nutrition v1 event. Existing history stays on this shape.
+ */
+export interface NutritionTimelineEventV1 extends SemanticEventEnvelope {
   readonly kind: 'nutrition';
   readonly mode: NutritionEntryMode;
   readonly mealType: NutritionMealType | string;
@@ -155,6 +171,26 @@ export interface NutritionTimelineEvent extends SemanticEventEnvelope {
   readonly products?: readonly NutritionProductSnapshot[];
   readonly note?: string;
 }
+
+/**
+ * Canonical Nutrition v2 event written by Wave 5B Quick Add.
+ *
+ * Envelope `schemaVersion` is overridden so other kinds stay on generation 1.
+ */
+export interface NutritionTimelineEventV2 extends Omit<
+  SemanticEventEnvelope,
+  'schemaVersion'
+> {
+  readonly kind: 'nutrition';
+  readonly schemaVersion: 2;
+  readonly mealType: NutritionMealType;
+  readonly carbohydratesGrams: number;
+  readonly items?: readonly NutritionItemSnapshot[];
+  readonly note?: string;
+}
+
+export type NutritionTimelineEvent =
+  NutritionTimelineEventV1 | NutritionTimelineEventV2;
 
 export interface MedicationTimelineEvent extends SemanticEventEnvelope {
   readonly kind: 'medication';
