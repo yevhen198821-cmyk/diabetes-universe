@@ -12,14 +12,12 @@ test('sign-in page renders passkey-first entry with email fallback', async ({
 }) => {
   await page.goto('/auth');
 
+  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
   await expect(
-    page.getByRole('heading', { name: 'Вход в аккаунт' }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('button', { name: 'Войти с Passkey' }),
+    page.getByRole('button', { name: 'Sign in with passkey' }),
   ).toBeVisible();
   await expect(page.getByLabel('Email')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Продолжить' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible();
 });
 
 test('magic link request navigates to check-email without exposing provider errors', async ({
@@ -27,11 +25,11 @@ test('magic link request navigates to check-email without exposing provider erro
 }) => {
   await page.goto('/auth');
   await page.getByLabel('Email').fill('p6b-e2e@example.com');
-  await page.getByRole('button', { name: 'Продолжить' }).click();
+  await page.getByRole('button', { name: 'Continue' }).click();
 
   await expect(page).toHaveURL(/\/auth\/check-email/);
   await expect(
-    page.getByRole('heading', { name: 'Проверьте почту' }),
+    page.getByRole('heading', { name: 'Check your email' }),
   ).toBeVisible();
   await expect(page.getByText('p6b-e2e@example.com')).toBeVisible();
 });
@@ -87,7 +85,7 @@ test('user can enroll a passkey, revoke current session, and sign in with the pa
   expect(signedOutSession.ok()).toBeTruthy();
   expect(await signedOutSession.json()).toBeNull();
 
-  await page.getByRole('button', { name: 'Войти с Passkey' }).click();
+  await page.getByRole('button', { name: 'Sign in with passkey' }).click();
   await expect(page).toHaveURL(/\/account$/);
 
   const restoredSession = await page.request.get('/api/auth/get-session');

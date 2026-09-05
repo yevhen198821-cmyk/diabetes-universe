@@ -5,6 +5,6 @@ export const russianMetadata = {
   language: 'ru',
   locale: 'ru-RU',
   version: '1.0.0',
-  status: 'draft',
+  status: 'approved',
   namespaces: CANONICAL_NAMESPACES,
 } as const satisfies TranslationMetadata;

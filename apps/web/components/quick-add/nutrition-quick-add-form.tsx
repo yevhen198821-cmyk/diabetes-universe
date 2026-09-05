@@ -26,6 +26,7 @@ import {
   formatNutritionCarbsPer100Grams,
   parseNutritionDecimalInput,
 } from '../../lib/quick-add/format-nutrition';
+import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { formField, formLabel } from '../timeline/ui-styles';
 
 const MAX_MANUAL_CARBS_GRAMS = 500;
@@ -145,6 +146,7 @@ export function NutritionQuickAddForm({
   onCancel,
   onSubmit,
 }: NutritionQuickAddFormProps) {
+  const formatter = useFormatter();
   const [formState, setFormState] =
     useState<NutritionFormState>(createInitialState);
   const [mealSheetOpen, setMealSheetOpen] = useState(false);
@@ -428,6 +430,7 @@ export function NutritionQuickAddForm({
                             >
                               {formatNutritionCarbsPer100Grams(
                                 row.carbsPer100Grams,
+                                formatter,
                               )}
                             </span>
                           ) : null}
@@ -500,7 +503,7 @@ export function NutritionQuickAddForm({
                         <p className="mt-1.5 flex h-11 items-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-950">
                           {rowCarbs === null
                             ? '—'
-                            : `${formatNutritionCarbs(rowCarbs)} г`}
+                            : `${formatNutritionCarbs(rowCarbs, formatter)} г`}
                         </p>
                       </div>
                     </div>
@@ -532,7 +535,7 @@ export function NutritionQuickAddForm({
                 Всего углеводов
               </span>
               <span className="text-xl font-bold text-slate-950">
-                {formatNutritionCarbs(productsTotalCarbs)} г
+                {formatNutritionCarbs(productsTotalCarbs, formatter)} г
               </span>
             </div>
 

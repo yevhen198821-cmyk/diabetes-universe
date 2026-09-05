@@ -62,12 +62,23 @@ export class PlatformFormatterImpl implements PlatformFormatter {
 
   formatDate(value: DateLike, options?: DateFormatOptions): string {
     const instant = assertValidDateLike(value);
+    const hasDateFields =
+      options?.day !== undefined ||
+      options?.month !== undefined ||
+      options?.year !== undefined;
+    const intlOptions: Intl.DateTimeFormatOptions = hasDateFields
+      ? {
+          day: options?.day,
+          month: options?.month,
+          year: options?.year,
+        }
+      : {
+          dateStyle: options?.dateStyle ?? 'medium',
+        };
     const formatter = getCachedDateTimeFormat(
       this.context.locale,
       this.context.timeZone,
-      {
-        dateStyle: options?.dateStyle ?? 'medium',
-      },
+      intlOptions,
     );
 
     return formatter.format(instant);
@@ -75,9 +86,21 @@ export class PlatformFormatterImpl implements PlatformFormatter {
 
   formatTime(value: DateLike, options?: TimeFormatOptions): string {
     const instant = assertValidDateLike(value);
-    const intlOptions: Intl.DateTimeFormatOptions = {
-      timeStyle: options?.timeStyle ?? 'short',
-    };
+    const hasTimeFields =
+      options?.hour !== undefined ||
+      options?.minute !== undefined ||
+      options?.second !== undefined ||
+      options?.hour12 !== undefined;
+    const intlOptions: Intl.DateTimeFormatOptions = hasTimeFields
+      ? {
+          hour: options?.hour,
+          minute: options?.minute,
+          second: options?.second,
+          hour12: options?.hour12,
+        }
+      : {
+          timeStyle: options?.timeStyle ?? 'short',
+        };
 
     if (this.context.hourCycle !== undefined) {
       intlOptions.hourCycle = this.context.hourCycle;

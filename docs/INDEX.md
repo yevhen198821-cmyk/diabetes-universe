@@ -47,6 +47,7 @@
 
 - [Architecture Overview](architecture/README.md)
 - [Localization Platform Overview](architecture/localization/overview.md)
+- [Platform Localization Closure](implementation/platform-localization-closure.md) — implemented
 - [Platform Readiness](architecture/localization/platform-readiness.md)
 - [Web Composition Root](architecture/composition-root/web-composition-root.md)
 - [Presentation Context Foundation](architecture/presentation/presentation-context.md) — CR-03A, Feature Complete

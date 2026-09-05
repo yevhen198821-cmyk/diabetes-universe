@@ -24,7 +24,8 @@
     },
     "test": {
       "dependsOn": ["^test"],
-      "outputs": []
+      "outputs": [],
+      "passThroughEnv": ["AUTH_TEST_POSTGRES_URL"]
     }
   }
 }

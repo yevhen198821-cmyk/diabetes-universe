@@ -1,12 +1,13 @@
-import type { Metadata } from 'next';
-
 import { ProfileProfileSegment } from '../../components/profile/profile-profile-segment';
 import { requireAuthenticatedPrincipal } from '../../lib/auth/get-authenticated-principal';
+import { createLocalizedRouteMetadata } from '../../lib/platform/create-localized-route-metadata';
 
-export const metadata: Metadata = {
-  title: 'Profile',
-  description: 'Manage your Diabetes Universe account and preferences.',
-};
+export async function generateMetadata() {
+  return createLocalizedRouteMetadata({
+    titleKey: 'account.profile.title',
+    descriptionKey: 'account.profile.subtitle',
+  });
+}
 
 export default async function AccountPage() {
   const principal = await requireAuthenticatedPrincipal();

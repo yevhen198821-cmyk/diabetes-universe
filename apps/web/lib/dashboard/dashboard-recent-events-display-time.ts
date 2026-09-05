@@ -1,7 +1,8 @@
 import {
+  formatTimelineCompactDateLabel,
   formatTimelineDisplayTime,
+  getTimelineCalendarDateKey,
   getTimelineDayGroupKey,
-  parseTimelineDateTime,
 } from '../timeline/timeline-date-time';
 
 export function formatDashboardRecentEventDisplayTime(
@@ -27,17 +28,13 @@ export function formatDashboardRecentEventDisplayTime(
     return `${yesterdayLabel}, ${time}`;
   }
 
-  const timestamp = parseTimelineDateTime(dateTime);
+  const dateKey = getTimelineCalendarDateKey(dateTime, timeZone);
 
-  if (Number.isNaN(timestamp)) {
+  if (!dateKey) {
     return time;
   }
 
-  const datePart = new Intl.DateTimeFormat(locale, {
-    day: 'numeric',
-    month: 'short',
-    timeZone,
-  }).format(new Date(timestamp));
+  const datePart = formatTimelineCompactDateLabel(dateKey, locale, timeZone);
 
   return `${datePart}, ${time}`;
 }

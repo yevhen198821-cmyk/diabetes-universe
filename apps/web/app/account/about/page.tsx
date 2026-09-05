@@ -1,12 +1,13 @@
-import type { Metadata } from 'next';
-
 import { ProfileAboutPanel } from '../../../components/profile/profile-about-panel';
 import { resolveAppBuildMetadata } from '../../../lib/app/app-metadata';
+import { createLocalizedRouteMetadata } from '../../../lib/platform/create-localized-route-metadata';
 
-export const metadata: Metadata = {
-  title: 'About',
-  description: 'About Diabetes Universe.',
-};
+export async function generateMetadata() {
+  return createLocalizedRouteMetadata({
+    titleKey: 'account.profile.about.page.title',
+    descriptionKey: 'account.profile.about.description',
+  });
+}
 
 export default function AccountAboutPage() {
   const metadata = resolveAppBuildMetadata();

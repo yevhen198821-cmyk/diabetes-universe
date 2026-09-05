@@ -137,7 +137,8 @@ implementation gates, and product requirements.
 
 ## Platform modules
 
-- [Localization Platform Overview](localization/overview.md)
+- [Localization Platform Overview](localization/overview.md) — four-locale Web closure
+- [Platform Localization Closure](../implementation/platform-localization-closure.md) — implemented locale authority, cookie, fallback, and E2E matrix
 - [Dashboard Header Localization Migration (I18N-02A)](localization/dashboard-header-migration.md) — Feature Complete
 - [Dashboard Next Action Localization Migration (I18N-02B1)](localization/dashboard-next-action-migration.md) — Feature Complete
 - [Dashboard Last Glucose Localization Migration (I18N-02B2)](localization/dashboard-last-glucose-migration.md) — Feature Complete
@@ -171,4 +172,6 @@ implementation gates, and product requirements.
   (Wave 4C / 4B-II). The shared Quick Add action menu and shared picker chrome
   still contain Russian hardcode; nutrition, medication, activity, and note Quick
   Add remain incompletely migrated; UK/DE locale parity is still incomplete.
-- Runtime locale switching is not production-ready.
+- Runtime locale switching is production-ready through Profile language
+  selection and the `du-web-locale` cookie. Shared Quick Add host chrome and
+  nutrition/activity/note forms still contain leftover Russian hardcode.

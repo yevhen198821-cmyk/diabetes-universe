@@ -145,6 +145,10 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'account.profile.menu.export.title': 'Export data',
   'account.profile.menu.language.subtitle': 'Language, date, and time format',
   'account.profile.menu.language.title': 'Language and region',
+  'account.profile.language.page.title': 'Language',
+  'account.profile.language.page.description':
+    'Choose the language used for the app, dates, times, and numbers.',
+  'account.profile.language.option.selected': 'Current language',
   'account.profile.menu.section.data': 'Data and information',
   'account.profile.menu.section.devices': 'Devices and data',
   'account.profile.menu.section.diabetesManagement': 'Diabetes management',
@@ -185,6 +189,35 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'account.profile.security.sessionsLink.subtitle':
     'Devices where you are currently signed in',
   'account.profile.security.sessionsLink.title': 'Active sessions',
+  'account.auth.signIn.title': 'Sign in',
+  'account.auth.signIn.description':
+    'Use a passkey or get a one-time link by email.',
+  'account.auth.signIn.continue': 'Continue',
+  'account.auth.signIn.sending': 'Sending the link…',
+  'account.auth.signIn.emailLabel': 'Email',
+  'account.auth.signIn.emailHint':
+    'We will send a one-time sign-in link. A password is not required.',
+  'account.auth.signIn.orEmail': 'or by email',
+  'account.auth.signIn.passkey': 'Sign in with passkey',
+  'account.auth.signIn.passkeyPending': 'Opening passkey…',
+  'account.auth.signIn.passkeyError': 'Could not sign in with passkey.',
+  'account.auth.signIn.disclaimer':
+    'By continuing, you confirm that you are using your own sign-in method.',
+  'account.auth.signIn.returnToApp': 'Return to the app',
+  'account.auth.checkEmail.title': 'Check your email',
+  'account.auth.checkEmail.withAddress':
+    'If the address is registered, we sent a sign-in link.',
+  'account.auth.checkEmail.withoutAddress':
+    'If the address is correct, we sent a sign-in link.',
+  'account.auth.checkEmail.spamHint':
+    'The link expires after a limited time. Check spam if the email is missing.',
+  'account.auth.checkEmail.requestAgain': 'Request another link',
+  'account.auth.checkEmail.returnToApp': 'Return to the app',
+  'account.auth.error.title': 'Could not sign in',
+  'account.auth.error.description':
+    'The link may have expired or already been used. Request a new link and try again.',
+  'account.auth.error.backToSignIn': 'Back to sign-in',
+  'account.auth.error.continueWithoutSignIn': 'Continue without signing in',
   'common.accessibility.skipLink': 'Skip to main content',
   'common.actions.save': 'Save',
   'common.actions.cancel': 'Cancel',
@@ -198,6 +231,8 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'dashboard.header.context.today': 'Your data for today',
   'dashboard.header.date.label': 'Current date',
   'dashboard.header.date.unavailable': 'Date unavailable',
+  'dashboard.header.description':
+    'Home dashboard for glucose, insulin, and recent diabetes events.',
   'dashboard.header.error.default': 'Could not load header data.',
   'dashboard.header.greeting.afternoon': 'Good afternoon',
   'dashboard.header.greeting.evening': 'Good evening',
@@ -429,6 +464,7 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'timeline.dayPeriod.timeRange.night': '00:00–05:59',
   'timeline.filters.ariaLabel': 'Event filter',
   'timeline.group.unknownDate': 'Unknown date',
+  'timeline.header.description': 'Timeline of recorded diabetes events.',
   'timeline.header.title': 'Timeline',
   'timeline.historyLoad.error':
     'Could not load earlier events. Try refreshing the page.',

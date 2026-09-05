@@ -1,13 +1,13 @@
-import { defineDraftMessages } from '../../contracts';
+import { defineApprovedMessages } from '../../contracts';
 import { englishCanonicalMessages } from '../en/messages';
 
 /**
- * Ukrainian draft bundle.
+ * Ukrainian approved closure bundle.
  *
- * Timeline Variant B strings are localized; other namespaces remain English
- * placeholders until professional translation.
+ * Reachable Localization Platform namespaces are authored in Ukrainian. Brand,
+ * unit, and product cognates may legally match English.
  */
-export const ukrainianDraftMessages = defineDraftMessages({
+export const ukrainianCanonicalMessages = defineApprovedMessages({
   ...englishCanonicalMessages,
   'dashboard.navigation.account': 'Профіль',
   'dashboard.navigation.home': 'Головна',
@@ -45,6 +45,8 @@ export const ukrainianDraftMessages = defineDraftMessages({
   'timeline.eventKind.medication': 'Ліки',
   'timeline.eventKind.note': 'Нотатки',
   'timeline.eventKind.nutrition': 'Харчування',
+  'timeline.header.description':
+    'Хронологія записаних подій, пов’язаних із діабетом.',
   'timeline.header.title': 'Хронологія',
   'timeline.shell.eyebrow': 'Журнал подій',
   'timeline.filter.all': 'Усі',
@@ -355,6 +357,39 @@ export const ukrainianDraftMessages = defineDraftMessages({
   'account.profile.menu.export.title': 'Експорт даних',
   'account.profile.menu.language.subtitle': 'Мова, формат дати та часу',
   'account.profile.menu.language.title': 'Мова та регіон',
+  'account.profile.language.page.title': 'Мова',
+  'account.profile.language.page.description':
+    'Оберіть мову для застосунку, дат, часу та чисел.',
+  'account.profile.language.option.selected': 'Поточна мова',
+  'account.auth.signIn.title': 'Вхід',
+  'account.auth.signIn.description':
+    'Скористайтеся ключем доступу або отримайте одноразове посилання на email.',
+  'account.auth.signIn.continue': 'Продовжити',
+  'account.auth.signIn.sending': 'Надсилаємо посилання…',
+  'account.auth.signIn.emailLabel': 'Email',
+  'account.auth.signIn.emailHint':
+    'Ми надішлемо одноразове посилання для входу. Пароль не потрібен.',
+  'account.auth.signIn.orEmail': 'або електронною поштою',
+  'account.auth.signIn.passkey': 'Увійти з ключем доступу',
+  'account.auth.signIn.passkeyPending': 'Відкриваємо ключ доступу…',
+  'account.auth.signIn.passkeyError': 'Не вдалося увійти з ключем доступу.',
+  'account.auth.signIn.disclaimer':
+    'Продовжуючи, ви підтверджуєте, що використовуєте власний спосіб входу.',
+  'account.auth.signIn.returnToApp': 'Повернутися до застосунку',
+  'account.auth.checkEmail.title': 'Перевірте пошту',
+  'account.auth.checkEmail.withAddress':
+    'Якщо адресу зареєстровано, ми надіслали посилання для входу.',
+  'account.auth.checkEmail.withoutAddress':
+    'Якщо адресу вказано правильно, ми надіслали посилання для входу.',
+  'account.auth.checkEmail.spamHint':
+    'Посилання діє обмежений час. Перевірте папку «Спам», якщо листа немає.',
+  'account.auth.checkEmail.requestAgain': 'Запросити посилання ще раз',
+  'account.auth.checkEmail.returnToApp': 'Повернутися до застосунку',
+  'account.auth.error.title': 'Не вдалося увійти',
+  'account.auth.error.description':
+    'Посилання могло закінчитися або вже було використано. Запросіть нове посилання та спробуйте знову.',
+  'account.auth.error.backToSignIn': 'Повернутися до входу',
+  'account.auth.error.continueWithoutSignIn': 'Продовжити без входу',
   'account.profile.menu.section.data': 'Дані та інформація',
   'account.profile.menu.section.devices': 'Пристрої та дані',
   'account.profile.menu.section.diabetesManagement': 'Керування діабетом',
@@ -395,4 +430,144 @@ export const ukrainianDraftMessages = defineDraftMessages({
   'account.profile.security.sessionsLink.subtitle':
     'Пристрої, на яких ви зараз увійшли',
   'account.profile.security.sessionsLink.title': 'Активні сесії',
+  'account.security.sessions.back': 'Безпека входу',
+  'account.security.sessions.confirmRevokeAll.confirm': 'Вийти всюди',
+  'account.security.sessions.confirmRevokeAll.description':
+    'Усі активні сесії буде завершено, включно з поточною. Для повторного входу потрібне підтвердження електронною поштою.',
+  'account.security.sessions.confirmRevokeAll.title': 'Вийти всюди?',
+  'account.security.sessions.confirmRevokeOne.confirm': 'Завершити сесію',
+  'account.security.sessions.confirmRevokeOne.description':
+    'Доступ із {clientLabel} буде скасовано.',
+  'account.security.sessions.confirmRevokeOne.title': 'Завершити цю сесію?',
+  'account.security.sessions.confirmRevokeOthers.confirm':
+    'Вийти з інших сесій',
+  'account.security.sessions.confirmRevokeOthers.description':
+    'Інші активні сесії буде завершено. На цьому пристрої вхід збережеться.',
+  'account.security.sessions.confirmRevokeOthers.title': 'Вийти з інших сесій?',
+  'account.security.sessions.currentBadge': 'Поточна сесія',
+  'account.security.sessions.description':
+    'Пристрої, на яких зараз виконано вхід до акаунта.',
+  'account.security.sessions.emptyOthers': 'Інших активних сесій не знайдено.',
+  'account.security.sessions.error.generic':
+    'Не вдалося виконати дію. Спробуйте ще раз.',
+  'account.security.sessions.expires': 'Закінчується',
+  'account.security.sessions.freshAuth.action': 'Підтвердити вхід',
+  'account.security.sessions.freshAuth.message':
+    'Підтвердіть вхід і повторіть дію.',
+  'account.security.sessions.passkeysLink': 'Керування Passkeys',
+  'account.security.sessions.revokeAll': 'Вийти всюди',
+  'account.security.sessions.revokeAllPending': 'Виходимо на всіх пристроях…',
+  'account.security.sessions.revokeOne': 'Завершити сесію',
+  'account.security.sessions.revokeOnePending': 'Завершуємо сесію…',
+  'account.security.sessions.revokeOthers': 'Вийти з інших сесій',
+  'account.security.sessions.revokeOthersPending': 'Виходимо з інших сесій…',
+  'account.security.sessions.signOut': 'Вийти',
+  'account.security.sessions.signOutPending': 'Виходимо…',
+  'account.security.sessions.signedIn': 'Вхід виконано',
+  'account.security.sessions.success': 'Дію виконано.',
+  'account.security.sessions.title': 'Активні сесії',
+  'common.accessibility.skipLink': 'Перейти до вмісту',
+  'common.actions.cancel': 'Скасувати',
+  'common.actions.close': 'Закрити',
+  'common.actions.save': 'Зберегти',
+  'dashboard.aiInsight.disclaimer': 'Це не діагноз і не призначення лікування.',
+  'dashboard.aiInsight.empty.default': 'Підказка ШІ поки недоступна.',
+  'dashboard.aiInsight.error.default': 'Не вдалося завантажити підказку ШІ.',
+  'dashboard.aiInsight.eyebrow': 'Автоматичне пояснення',
+  'dashboard.aiInsight.loading': 'Завантаження підказки ШІ',
+  'dashboard.aiInsight.relatedEvents.label': 'Пов’язані записи',
+  'dashboard.aiInsight.relatedEvents.none':
+    'Пов’язані записи: немає підтверджених записів',
+  'dashboard.aiInsight.title': 'Підказка ШІ',
+  'dashboard.aiInsight.unavailable': 'Підказка ШІ недоступна.',
+  'dashboard.daySummary.chartAria.activity.multiple':
+    '{count} записів активності сьогодні',
+  'dashboard.daySummary.chartAria.activity.none':
+    'Сьогодні активність не записано',
+  'dashboard.daySummary.chartAria.activity.single':
+    '1 запис активності сьогодні',
+  'dashboard.daySummary.chartAria.glucose.multiple':
+    '{count} вимірювань глюкози сьогодні',
+  'dashboard.daySummary.chartAria.glucose.none':
+    'Сьогодні немає вимірювань глюкози',
+  'dashboard.daySummary.chartAria.glucose.single':
+    '1 вимірювання глюкози сьогодні',
+  'dashboard.daySummary.chartAria.insulin.multiple':
+    '{count} доз інсуліну сьогодні',
+  'dashboard.daySummary.chartAria.insulin.none': 'Сьогодні немає доз інсуліну',
+  'dashboard.daySummary.chartAria.insulin.single': '1 доза інсуліну сьогодні',
+  'dashboard.daySummary.chartAria.nutrition.multiple':
+    '{count} записів харчування сьогодні',
+  'dashboard.daySummary.chartAria.nutrition.none':
+    'Сьогодні немає записів харчування',
+  'dashboard.daySummary.chartAria.nutrition.single':
+    '1 запис харчування сьогодні',
+  'dashboard.daySummary.chartEmpty.hint': 'Сьогодні немає записів',
+  'dashboard.daySummary.empty.default':
+    'Підсумок за сьогодні поки недоступний.',
+  'dashboard.daySummary.error.default': 'Не вдалося завантажити підсумок дня.',
+  'dashboard.daySummary.eyebrow': 'Поточний день',
+  'dashboard.daySummary.loading': 'Завантаження підсумку дня',
+  'dashboard.daySummary.metrics.activity': 'Активність',
+  'dashboard.daySummary.metrics.glucose': 'Глюкоза',
+  'dashboard.daySummary.metrics.glucoseMeasurements': 'Вимірювання глюкози',
+  'dashboard.daySummary.metrics.medicationDoses': 'Прийоми ліків',
+  'dashboard.daySummary.metrics.reminders': 'Нагадування',
+  'dashboard.daySummary.metrics.totalCarbohydrates': 'Вуглеводи',
+  'dashboard.daySummary.metrics.totalForDay': 'Усього за день',
+  'dashboard.daySummary.metrics.totalInsulin': 'Інсулін',
+  'dashboard.daySummary.title': 'Сьогодні',
+  'dashboard.daySummary.unavailable': 'Підсумок дня недоступний.',
+  'dashboard.daySummary.viewDetails': 'Докладно',
+  'dashboard.header.addEvent': 'Додати подію',
+  'dashboard.header.avatar.action': 'Відкрити акаунт',
+  'dashboard.header.avatar.label': 'Профіль користувача',
+  'dashboard.header.brandLineAccent': 'Universe',
+  'dashboard.header.brandLinePrimary': 'Diabetes',
+  'dashboard.header.brandName': 'Diabetes Universe',
+  'dashboard.header.context.today': 'Ваші дані за сьогодні',
+  'dashboard.header.date.label': 'Поточна дата',
+  'dashboard.header.date.unavailable': 'Дата недоступна',
+  'dashboard.header.description':
+    'Головна панель для глюкози, інсуліну та останніх записів про діабет.',
+  'dashboard.header.error.default': 'Не вдалося завантажити дані шапки.',
+  'dashboard.header.greeting.afternoon': 'Добрий день',
+  'dashboard.header.greeting.evening': 'Добрий вечір',
+  'dashboard.header.greeting.morning': 'Доброго ранку',
+  'dashboard.header.greeting.night': 'Доброї ночі',
+  'dashboard.header.loading': 'Завантаження шапки',
+  'dashboard.header.title': 'Головна',
+  'dashboard.nextAction.action': 'Додати',
+  'dashboard.nextAction.description': 'Додати інсулін',
+  'dashboard.nextAction.empty.description': 'Нові дії з’являться тут.',
+  'dashboard.nextAction.empty.title': 'Немає доступних дій',
+  'dashboard.nextAction.error.description': 'Спробуйте пізніше.',
+  'dashboard.nextAction.error.title': 'Дія недоступна',
+  'dashboard.nextAction.fallback.description':
+    'Відомості про наступну дію тимчасово недоступні.',
+  'dashboard.nextAction.fallback.title': 'Наступна дія недоступна',
+  'dashboard.nextAction.loading': 'Завантаження наступної дії',
+  'dashboard.nextAction.title': 'Наступна дія',
+  'dashboard.quickActions.title': 'Швидке додавання',
+  'dashboard.recentEvents.categories.activity': 'Активність',
+  'dashboard.recentEvents.categories.insulin': 'Інсулін',
+  'dashboard.recentEvents.categories.medication': 'Ліки',
+  'dashboard.recentEvents.categories.nutrition': 'Харчування',
+  'dashboard.recentEvents.empty.default': 'Нещодавніх подій поки немає.',
+  'dashboard.recentEvents.error.default':
+    'Не вдалося завантажити нещодавні події.',
+  'dashboard.recentEvents.loading': 'Завантаження нещодавніх подій',
+  'dashboard.recentEvents.title': 'Останні записи',
+  'dashboard.recentEvents.unavailable': 'Нещодавні події недоступні.',
+  'dashboard.recentEvents.viewAll': 'Усі записи',
+  'errors.generic': 'Щось пішло не так. Спробуйте ще раз.',
+  'timeline.insulinPreparation.aspart_fiasp': 'Fiasp',
+  'timeline.insulinPreparation.aspart_novorapid': 'NovoRapid',
+  'timeline.insulinPreparation.degludec_tresiba': 'Tresiba',
+  'timeline.insulinPreparation.glargine_lantus': 'Lantus',
+  'timeline.insulinPreparation.glulisine_apidra': 'Apidra',
+  'timeline.insulinPreparation.lispro_humalog': 'Humalog',
+  'timeline.units.massMg': 'мг',
+  'timeline.units.volumeMl': 'мл',
+  'validation.required': "Це поле обов'язкове",
 });

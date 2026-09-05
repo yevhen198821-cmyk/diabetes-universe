@@ -11,7 +11,7 @@ test('dashboard quick add updates shared timeline state', async ({ page }) => {
   await page.goto('/');
   await waitForApplicationReady(page);
 
-  await expect(page).toHaveTitle(/Dashboard \| Diabetes Universe/);
+  await expect(page).toHaveTitle(/Home \| Diabetes Universe/);
   await expect(
     page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),
   ).toBeVisible();

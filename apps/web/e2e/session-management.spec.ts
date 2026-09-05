@@ -107,9 +107,7 @@ test.describe('P6c session management', () => {
 
     await expectUnauthenticatedViaNavigation(pageB);
     await pageB.goto('/auth');
-    await expect(
-      pageB.getByRole('heading', { name: 'Вход в аккаунт' }),
-    ).toBeVisible();
+    await expect(pageB.getByRole('heading', { name: 'Sign in' })).toBeVisible();
 
     await contextA.close();
     await contextB.close();

@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import { CANONICAL_TRANSLATION_KEYS } from '../../../../packages/locales/src/index.ts';
 import { englishCanonicalMessages } from '../../../../packages/locales/src/resources/en/messages.ts';
-import { russianDraftMessages } from '../../../../packages/locales/src/resources/ru/messages.ts';
+import { russianCanonicalMessages } from '../../../../packages/locales/src/resources/ru/messages.ts';
 
 const HOME_DASHBOARD_KEY_PREFIXES = [
   'dashboard.header.',
@@ -42,7 +42,7 @@ const homeDashboardKeys = CANONICAL_TRANSLATION_KEYS.filter(
 
 test('Russian Home dashboard keys are localized and differ from English placeholders', () => {
   for (const key of homeDashboardKeys) {
-    const russianValue = russianDraftMessages[key];
+    const russianValue = russianCanonicalMessages[key];
     const englishValue = englishCanonicalMessages[key];
 
     assert.equal(typeof russianValue, 'string');
@@ -58,7 +58,7 @@ test('Russian Home dashboard keys are localized and differ from English placehol
 
 test('Russian Home timeline presentation keys are localized', () => {
   for (const key of HOME_TIMELINE_KEYS) {
-    const russianValue = russianDraftMessages[key];
+    const russianValue = russianCanonicalMessages[key];
     const englishValue = englishCanonicalMessages[key];
 
     assert.equal(typeof russianValue, 'string');

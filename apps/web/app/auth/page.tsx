@@ -1,5 +1,3 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { resolveSafeAuthCallbackPath } from '@diabetes-universe/identity';
@@ -8,18 +6,20 @@ import {
   probeAuthConfiguration,
 } from '@diabetes-universe/identity';
 
-import { AuthShell } from '../../components/auth/auth-shell';
-import { SignInForm } from '../../components/auth/sign-in-form';
+import { SignInPageContent } from '../../components/auth/sign-in-page-content';
 import { getAuthenticatedPrincipal } from '../../lib/auth/get-authenticated-principal';
 import {
   isWebAuthConfigured,
   isWebPasskeyConfigured,
 } from '../../lib/auth/get-web-identity-service';
+import { createLocalizedRouteMetadata } from '../../lib/platform/create-localized-route-metadata';
 
-export const metadata: Metadata = {
-  title: 'Вход',
-  description: 'Войдите в Diabetes Universe безопасным способом.',
-};
+export async function generateMetadata() {
+  return createLocalizedRouteMetadata({
+    titleKey: 'account.auth.signIn.title',
+    descriptionKey: 'account.auth.signIn.description',
+  });
+}
 
 interface AuthPageProps {
   readonly searchParams: Promise<{
@@ -51,24 +51,10 @@ export default async function AuthPage({ searchParams }: AuthPageProps) {
   }
 
   return (
-    <AuthShell
-      description="Используйте Passkey или получите одноразовую ссылку на email."
-      title="Вход в аккаунт"
-    >
-      <SignInForm
-        callbackPath={callbackPath}
-        isAuthAvailable={isAuthAvailable}
-        isPasskeyAvailable={isAuthAvailable && isWebPasskeyConfigured()}
-      />
-      <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-300">
-        Продолжая, вы подтверждаете, что используете свой способ входа.{' '}
-        <Link
-          className="font-semibold text-teal-700 underline-offset-2 hover:underline dark:text-teal-300"
-          href="/"
-        >
-          Вернуться в приложение
-        </Link>
-      </p>
-    </AuthShell>
+    <SignInPageContent
+      callbackPath={callbackPath}
+      isAuthAvailable={isAuthAvailable}
+      isPasskeyAvailable={isAuthAvailable && isWebPasskeyConfigured()}
+    />
   );
 }

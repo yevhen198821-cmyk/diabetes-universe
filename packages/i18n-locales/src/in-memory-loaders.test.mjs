@@ -37,13 +37,13 @@ test('loads the English bundle for en-GB', async () => {
   assert.equal(bundle.entries['common.actions.close'], 'Close');
 });
 
-test('loads draft bundles for supported draft locales', async () => {
+test('loads approved bundles for supported production locales', async () => {
   const loader = new InMemoryTranslationBundleLoader(platformFallbackPolicy);
 
   const expectedTitles = {
-    'de-DE': 'Home',
+    'de-DE': 'Start',
     'ru-RU': 'Главная',
-    'uk-UA': 'Home',
+    'uk-UA': 'Головна',
   };
 
   for (const locale of ['uk-UA', 'de-DE', 'ru-RU']) {

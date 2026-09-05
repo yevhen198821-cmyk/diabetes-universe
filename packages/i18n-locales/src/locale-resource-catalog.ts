@@ -3,13 +3,14 @@ import {
   germanTranslationResource,
   russianTranslationResource,
   ukrainianTranslationResource,
+  type CanonicalTranslationKey,
 } from '@diabetes-universe/locales';
 
 import type { LocaleCode } from '@diabetes-universe/i18n';
 
 type LocaleResourceEntry = {
   readonly locale: LocaleCode;
-  readonly messages: Readonly<Record<string, string>>;
+  readonly messages: Readonly<Record<CanonicalTranslationKey, string>>;
 };
 
 const localeResources: readonly LocaleResourceEntry[] = [

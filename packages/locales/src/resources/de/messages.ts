@@ -1,13 +1,13 @@
-import { defineDraftMessages } from '../../contracts';
+import { defineApprovedMessages } from '../../contracts';
 import { englishCanonicalMessages } from '../en/messages';
 
 /**
- * German draft bundle.
+ * German approved closure bundle.
  *
- * Timeline Variant B strings are localized; other namespaces remain English
- * placeholders until professional translation.
+ * Reachable Localization Platform namespaces are authored in German. Brand,
+ * unit, and product cognates may legally match English.
  */
-export const germanDraftMessages = defineDraftMessages({
+export const germanCanonicalMessages = defineApprovedMessages({
   ...englishCanonicalMessages,
   'dashboard.navigation.account': 'Konto',
   'dashboard.navigation.home': 'Start',
@@ -42,6 +42,7 @@ export const germanDraftMessages = defineDraftMessages({
   'timeline.eventKind.medication': 'Medikament',
   'timeline.eventKind.note': 'Notizen',
   'timeline.eventKind.nutrition': 'Ernährung',
+  'timeline.header.description': 'Zeitachse der erfassten Diabetes-Einträge.',
   'timeline.header.title': 'Zeitachse',
   'timeline.shell.eyebrow': 'Ereignisprotokoll',
   'timeline.filter.all': 'Alle',
@@ -362,6 +363,39 @@ export const germanDraftMessages = defineDraftMessages({
   'account.profile.menu.export.title': 'Daten exportieren',
   'account.profile.menu.language.subtitle': 'Sprache, Datums- und Zeitformat',
   'account.profile.menu.language.title': 'Sprache und Region',
+  'account.profile.language.page.title': 'Sprache',
+  'account.profile.language.page.description':
+    'Wählen Sie die Sprache für die App, Daten, Uhrzeiten und Zahlen.',
+  'account.profile.language.option.selected': 'Aktuelle Sprache',
+  'account.auth.signIn.title': 'Anmelden',
+  'account.auth.signIn.description':
+    'Verwenden Sie einen Passkey oder erhalten Sie einen einmaligen Link per E-Mail.',
+  'account.auth.signIn.continue': 'Weiter',
+  'account.auth.signIn.sending': 'Link wird gesendet…',
+  'account.auth.signIn.emailLabel': 'Email',
+  'account.auth.signIn.emailHint':
+    'Wir senden einen einmaligen Anmeldelink. Ein Passwort ist nicht erforderlich.',
+  'account.auth.signIn.orEmail': 'oder per E-Mail',
+  'account.auth.signIn.passkey': 'Mit Passkey anmelden',
+  'account.auth.signIn.passkeyPending': 'Passkey wird geöffnet…',
+  'account.auth.signIn.passkeyError': 'Anmeldung mit Passkey fehlgeschlagen.',
+  'account.auth.signIn.disclaimer':
+    'Wenn Sie fortfahren, bestätigen Sie, dass Sie Ihre eigene Anmeldemethode verwenden.',
+  'account.auth.signIn.returnToApp': 'Zurück zur App',
+  'account.auth.checkEmail.title': 'Prüfen Sie Ihre E-Mail',
+  'account.auth.checkEmail.withAddress':
+    'Wenn die Adresse registriert ist, haben wir einen Anmeldelink gesendet.',
+  'account.auth.checkEmail.withoutAddress':
+    'Wenn die Adresse korrekt ist, haben wir einen Anmeldelink gesendet.',
+  'account.auth.checkEmail.spamHint':
+    'Der Link ist nur begrenzte Zeit gültig. Prüfen Sie den Spam-Ordner, wenn die E-Mail fehlt.',
+  'account.auth.checkEmail.requestAgain': 'Neuen Link anfordern',
+  'account.auth.checkEmail.returnToApp': 'Zurück zur App',
+  'account.auth.error.title': 'Anmeldung fehlgeschlagen',
+  'account.auth.error.description':
+    'Der Link ist möglicherweise abgelaufen oder wurde bereits verwendet. Fordern Sie einen neuen Link an und versuchen Sie es erneut.',
+  'account.auth.error.backToSignIn': 'Zurück zur Anmeldung',
+  'account.auth.error.continueWithoutSignIn': 'Ohne Anmeldung fortfahren',
   'account.profile.menu.section.data': 'Daten und Informationen',
   'account.profile.menu.section.devices': 'Geräte und Daten',
   'account.profile.menu.section.diabetesManagement': 'Diabetes-Management',
@@ -402,4 +436,150 @@ export const germanDraftMessages = defineDraftMessages({
   'account.profile.security.sessionsLink.subtitle':
     'Geräte, auf denen Sie angemeldet sind',
   'account.profile.security.sessionsLink.title': 'Aktive Sitzungen',
+  'account.security.sessions.back': 'Anmeldesicherheit',
+  'account.security.sessions.confirmRevokeAll.confirm': 'Überall abmelden',
+  'account.security.sessions.confirmRevokeAll.description':
+    'Alle aktiven Sitzungen werden beendet, einschließlich dieser. Für die erneute Anmeldung ist eine Bestätigung per E-Mail erforderlich.',
+  'account.security.sessions.confirmRevokeAll.title': 'Überall abmelden?',
+  'account.security.sessions.confirmRevokeOne.confirm': 'Sitzung beenden',
+  'account.security.sessions.confirmRevokeOne.description':
+    'Der Zugriff von {clientLabel} wird widerrufen.',
+  'account.security.sessions.confirmRevokeOne.title': 'Diese Sitzung beenden?',
+  'account.security.sessions.confirmRevokeOthers.confirm':
+    'Andere Sitzungen abmelden',
+  'account.security.sessions.confirmRevokeOthers.description':
+    'Andere aktive Sitzungen werden abgemeldet. Dieses Gerät bleibt angemeldet.',
+  'account.security.sessions.confirmRevokeOthers.title':
+    'Andere Sitzungen abmelden?',
+  'account.security.sessions.currentBadge': 'Aktuelle Sitzung',
+  'account.security.sessions.description':
+    'Geräte, auf denen Ihr Konto derzeit angemeldet ist.',
+  'account.security.sessions.emptyOthers':
+    'Keine weiteren aktiven Sitzungen gefunden.',
+  'account.security.sessions.error.generic':
+    'Die Aktion konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.',
+  'account.security.sessions.expires': 'Läuft ab',
+  'account.security.sessions.freshAuth.action': 'Anmeldung bestätigen',
+  'account.security.sessions.freshAuth.message':
+    'Bestätigen Sie die Anmeldung und wiederholen Sie die Aktion.',
+  'account.security.sessions.passkeysLink': 'Passkeys verwalten',
+  'account.security.sessions.revokeAll': 'Überall abmelden',
+  'account.security.sessions.revokeAllPending': 'Überall abmelden…',
+  'account.security.sessions.revokeOne': 'Sitzung beenden',
+  'account.security.sessions.revokeOnePending': 'Sitzung wird beendet…',
+  'account.security.sessions.revokeOthers': 'Andere Sitzungen abmelden',
+  'account.security.sessions.revokeOthersPending':
+    'Andere Sitzungen werden abgemeldet…',
+  'account.security.sessions.signOut': 'Abmelden',
+  'account.security.sessions.signOutPending': 'Abmelden…',
+  'account.security.sessions.signedIn': 'Angemeldet',
+  'account.security.sessions.success': 'Aktion abgeschlossen.',
+  'account.security.sessions.title': 'Aktive Sitzungen',
+  'common.accessibility.skipLink': 'Zum Inhalt springen',
+  'common.actions.cancel': 'Abbrechen',
+  'common.actions.close': 'Schließen',
+  'common.actions.save': 'Speichern',
+  'dashboard.aiInsight.disclaimer':
+    'Keine Diagnose und keine Behandlungsempfehlung.',
+  'dashboard.aiInsight.empty.default': 'KI-Hinweis ist noch nicht verfügbar.',
+  'dashboard.aiInsight.error.default':
+    'KI-Hinweis konnte nicht geladen werden.',
+  'dashboard.aiInsight.eyebrow': 'Automatische Erklärung',
+  'dashboard.aiInsight.loading': 'KI-Hinweis wird geladen',
+  'dashboard.aiInsight.relatedEvents.label': 'Zugehörige Einträge',
+  'dashboard.aiInsight.relatedEvents.none':
+    'Zugehörige Einträge: keine bestätigten Einträge',
+  'dashboard.aiInsight.title': 'KI-Hinweis',
+  'dashboard.aiInsight.unavailable': 'KI-Hinweis nicht verfügbar.',
+  'dashboard.daySummary.chartAria.activity.multiple':
+    '{count} Aktivitätseinträge heute',
+  'dashboard.daySummary.chartAria.activity.none':
+    'Heute keine Aktivität erfasst',
+  'dashboard.daySummary.chartAria.activity.single': '1 Aktivitätseintrag heute',
+  'dashboard.daySummary.chartAria.glucose.multiple':
+    '{count} Glukosemessungen heute',
+  'dashboard.daySummary.chartAria.glucose.none': 'Heute keine Glukosemessungen',
+  'dashboard.daySummary.chartAria.glucose.single': '1 Glukosemessung heute',
+  'dashboard.daySummary.chartAria.insulin.multiple':
+    '{count} Insulindosen heute',
+  'dashboard.daySummary.chartAria.insulin.none': 'Heute keine Insulindosen',
+  'dashboard.daySummary.chartAria.insulin.single': '1 Insulindosis heute',
+  'dashboard.daySummary.chartAria.nutrition.multiple':
+    '{count} Ernährungseinträge heute',
+  'dashboard.daySummary.chartAria.nutrition.none':
+    'Heute keine Ernährungseinträge',
+  'dashboard.daySummary.chartAria.nutrition.single':
+    '1 Ernährungseintrag heute',
+  'dashboard.daySummary.chartEmpty.hint': 'Heute keine Einträge',
+  'dashboard.daySummary.empty.default':
+    'Die heutige Übersicht ist noch nicht verfügbar.',
+  'dashboard.daySummary.error.default':
+    'Tagesübersicht konnte nicht geladen werden.',
+  'dashboard.daySummary.eyebrow': 'Aktueller Tag',
+  'dashboard.daySummary.loading': 'Tagesübersicht wird geladen',
+  'dashboard.daySummary.metrics.activity': 'Aktivität',
+  'dashboard.daySummary.metrics.glucose': 'Glukose',
+  'dashboard.daySummary.metrics.glucoseMeasurements': 'Glukosemessungen',
+  'dashboard.daySummary.metrics.glucoseMeasurements.few': '{count} Messungen',
+  'dashboard.daySummary.metrics.glucoseMeasurements.many': '{count} Messungen',
+  'dashboard.daySummary.metrics.medicationDoses': 'Medikamentendosen',
+  'dashboard.daySummary.metrics.reminders': 'Erinnerungen',
+  'dashboard.daySummary.metrics.totalCarbohydrates': 'Kohlenhydrate',
+  'dashboard.daySummary.metrics.totalForDay': 'Gesamt für den Tag',
+  'dashboard.daySummary.metrics.totalInsulin': 'Insulin',
+  'dashboard.daySummary.title': 'Heute',
+  'dashboard.daySummary.unavailable': 'Tagesübersicht nicht verfügbar.',
+  'dashboard.daySummary.viewDetails': 'Details anzeigen',
+  'dashboard.header.addEvent': 'Ereignis hinzufügen',
+  'dashboard.header.avatar.action': 'Konto öffnen',
+  'dashboard.header.avatar.label': 'Benutzerprofil',
+  'dashboard.header.brandLineAccent': 'Universe',
+  'dashboard.header.brandLinePrimary': 'Diabetes',
+  'dashboard.header.brandName': 'Diabetes Universe',
+  'dashboard.header.context.today': 'Ihre Daten für heute',
+  'dashboard.header.date.label': 'Aktuelles Datum',
+  'dashboard.header.date.unavailable': 'Datum nicht verfügbar',
+  'dashboard.header.description':
+    'Startübersicht für Glukose, Insulin und letzte Diabetes-Einträge.',
+  'dashboard.header.error.default': 'Kopfzeile konnte nicht geladen werden.',
+  'dashboard.header.greeting.afternoon': 'Guten Tag',
+  'dashboard.header.greeting.evening': 'Guten Abend',
+  'dashboard.header.greeting.morning': 'Guten Morgen',
+  'dashboard.header.greeting.night': 'Gute Nacht',
+  'dashboard.header.loading': 'Kopfzeile wird geladen',
+  'dashboard.header.title': 'Start',
+  'dashboard.nextAction.action': 'Hinzufügen',
+  'dashboard.nextAction.description': 'Insulin hinzufügen',
+  'dashboard.nextAction.empty.description': 'Neue Schritte erscheinen hier.',
+  'dashboard.nextAction.empty.title': 'Keine Schritte verfügbar',
+  'dashboard.nextAction.error.description':
+    'Bitte versuchen Sie es später erneut.',
+  'dashboard.nextAction.error.title': 'Schritt nicht verfügbar',
+  'dashboard.nextAction.fallback.description':
+    'Details zum nächsten Schritt sind vorübergehend nicht verfügbar.',
+  'dashboard.nextAction.fallback.title': 'Nächster Schritt nicht verfügbar',
+  'dashboard.nextAction.loading': 'Nächster Schritt wird geladen',
+  'dashboard.nextAction.title': 'Nächster Schritt',
+  'dashboard.quickActions.title': 'Schnell hinzufügen',
+  'dashboard.recentEvents.categories.activity': 'Aktivität',
+  'dashboard.recentEvents.categories.insulin': 'Insulin',
+  'dashboard.recentEvents.categories.medication': 'Medikament',
+  'dashboard.recentEvents.categories.nutrition': 'Ernährung',
+  'dashboard.recentEvents.empty.default': 'Noch keine letzten Einträge.',
+  'dashboard.recentEvents.error.default':
+    'Letzte Einträge konnten nicht geladen werden.',
+  'dashboard.recentEvents.loading': 'Letzte Einträge werden geladen',
+  'dashboard.recentEvents.title': 'Letzte Einträge',
+  'dashboard.recentEvents.unavailable': 'Letzte Einträge nicht verfügbar.',
+  'dashboard.recentEvents.viewAll': 'Alle Einträge',
+  'errors.generic': 'Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.',
+  'timeline.insulinPreparation.aspart_fiasp': 'Fiasp',
+  'timeline.insulinPreparation.aspart_novorapid': 'NovoRapid',
+  'timeline.insulinPreparation.degludec_tresiba': 'Tresiba',
+  'timeline.insulinPreparation.glargine_lantus': 'Lantus',
+  'timeline.insulinPreparation.glulisine_apidra': 'Apidra',
+  'timeline.insulinPreparation.lispro_humalog': 'Humalog',
+  'timeline.units.massMg': 'mg',
+  'timeline.units.volumeMl': 'ml',
+  'validation.required': 'Dieses Feld ist erforderlich',
 });

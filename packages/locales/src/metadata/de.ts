@@ -5,6 +5,6 @@ export const germanMetadata = {
   language: 'de',
   locale: 'de-DE',
   version: '1.0.0',
-  status: 'draft',
+  status: 'approved',
   namespaces: CANONICAL_NAMESPACES,
 } as const satisfies TranslationMetadata;

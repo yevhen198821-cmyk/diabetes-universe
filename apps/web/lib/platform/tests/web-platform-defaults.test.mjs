@@ -16,4 +16,8 @@ test('resource fallback policy default locale stays en-GB separate from presenta
     WEB_PLATFORM_FALLBACK_POLICY.defaultLocale,
     WEB_PLATFORM_DEFAULT_LOCALE,
   );
+  assert.deepEqual(
+    [...WEB_PLATFORM_FALLBACK_POLICY.localeFallbackChain],
+    ['en-GB'],
+  );
 });

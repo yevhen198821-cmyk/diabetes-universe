@@ -1,13 +1,13 @@
-import { defineDraftMessages } from '../../contracts';
+import { defineApprovedMessages } from '../../contracts';
 import { englishCanonicalMessages } from '../en/messages';
 
 /**
- * Russian draft bundle.
+ * Russian approved closure bundle.
  *
- * Account security sessions strings are localized to match the Russian
- * account shell. Other namespaces remain English placeholders until translated.
+ * Reachable Localization Platform namespaces are authored in Russian. Brand,
+ * unit, and product cognates may legally match English.
  */
-export const russianDraftMessages = defineDraftMessages({
+export const russianCanonicalMessages = defineApprovedMessages({
   ...englishCanonicalMessages,
   'dashboard.header.brandLineAccent': 'Universe',
   'dashboard.header.brandLinePrimary': 'Diabetes',
@@ -24,6 +24,8 @@ export const russianDraftMessages = defineDraftMessages({
   'dashboard.header.greeting.morning': 'Доброе утро',
   'dashboard.header.greeting.night': 'Доброй ночи',
   'dashboard.header.loading': 'Загрузка шапки',
+  'dashboard.header.description':
+    'Главная панель для глюкозы, инсулина и последних записей о диабете.',
   'dashboard.header.title': 'Главная',
   'dashboard.lastGlucose.empty.default': 'Измерений пока нет.',
   'dashboard.lastGlucose.empty.cta': 'Добавить глюкозу',
@@ -165,6 +167,8 @@ export const russianDraftMessages = defineDraftMessages({
   'account.security.sessions.success': 'Действие выполнено.',
   'account.security.sessions.title': 'Активные сессии',
   'common.actions.cancel': 'Отмена',
+  'timeline.header.description':
+    'Лента записанных событий, связанных с диабетом.',
   'timeline.header.title': 'Таймлайн',
   'timeline.shell.eyebrow': 'Журнал событий',
   'timeline.filter.all': 'Все',
@@ -470,6 +474,39 @@ export const russianDraftMessages = defineDraftMessages({
   'account.profile.menu.export.title': 'Экспорт данных',
   'account.profile.menu.language.subtitle': 'Язык, формат даты и времени',
   'account.profile.menu.language.title': 'Язык и регион',
+  'account.profile.language.page.title': 'Язык',
+  'account.profile.language.page.description':
+    'Выберите язык приложения, дат, времени и чисел.',
+  'account.profile.language.option.selected': 'Текущий язык',
+  'account.auth.signIn.title': 'Вход',
+  'account.auth.signIn.description':
+    'Используйте Passkey или получите одноразовую ссылку на email.',
+  'account.auth.signIn.continue': 'Продолжить',
+  'account.auth.signIn.sending': 'Отправляем ссылку…',
+  'account.auth.signIn.emailLabel': 'Email',
+  'account.auth.signIn.emailHint':
+    'Мы отправим одноразовую ссылку для входа. Пароль не нужен.',
+  'account.auth.signIn.orEmail': 'или по email',
+  'account.auth.signIn.passkey': 'Войти с Passkey',
+  'account.auth.signIn.passkeyPending': 'Открываем Passkey…',
+  'account.auth.signIn.passkeyError': 'Не удалось выполнить вход с Passkey.',
+  'account.auth.signIn.disclaimer':
+    'Продолжая, вы подтверждаете, что используете свой способ входа.',
+  'account.auth.signIn.returnToApp': 'Вернуться в приложение',
+  'account.auth.checkEmail.title': 'Проверьте почту',
+  'account.auth.checkEmail.withAddress':
+    'Если адрес зарегистрирован, мы отправили ссылку для входа.',
+  'account.auth.checkEmail.withoutAddress':
+    'Если адрес указан верно, мы отправили ссылку для входа.',
+  'account.auth.checkEmail.spamHint':
+    'Ссылка действует ограниченное время. Проверьте папку «Спам», если письма нет.',
+  'account.auth.checkEmail.requestAgain': 'Запросить ссылку снова',
+  'account.auth.checkEmail.returnToApp': 'Вернуться в приложение',
+  'account.auth.error.title': 'Не удалось войти',
+  'account.auth.error.description':
+    'Ссылка могла истечь или уже была использована. Запросите новую ссылку и попробуйте снова.',
+  'account.auth.error.backToSignIn': 'Вернуться ко входу',
+  'account.auth.error.continueWithoutSignIn': 'Продолжить без входа',
   'account.profile.menu.section.data': 'Данные и информация',
   'account.profile.menu.section.devices': 'Устройства и данные',
   'account.profile.menu.section.diabetesManagement': 'Управление диабетом',
@@ -510,4 +547,27 @@ export const russianDraftMessages = defineDraftMessages({
   'account.profile.security.sessionsLink.subtitle':
     'Устройства, на которых выполнен вход',
   'account.profile.security.sessionsLink.title': 'Активные сессии',
+  'common.accessibility.skipLink': 'Перейти к содержимому',
+  'common.actions.close': 'Закрыть',
+  'common.actions.save': 'Сохранить',
+  'dashboard.aiInsight.disclaimer': 'Это не диагноз и не назначение лечения.',
+  'dashboard.aiInsight.empty.default': 'Подсказка ИИ пока недоступна.',
+  'dashboard.aiInsight.error.default': 'Не удалось загрузить подсказку ИИ.',
+  'dashboard.aiInsight.eyebrow': 'Автоматическое пояснение',
+  'dashboard.aiInsight.loading': 'Загрузка подсказки ИИ',
+  'dashboard.aiInsight.relatedEvents.label': 'Связанные записи',
+  'dashboard.aiInsight.relatedEvents.none':
+    'Связанные записи: нет подтверждённых записей',
+  'dashboard.aiInsight.title': 'Подсказка ИИ',
+  'dashboard.aiInsight.unavailable': 'Подсказка ИИ недоступна.',
+  'errors.generic': 'Что-то пошло не так. Попробуйте ещё раз.',
+  'timeline.insulinPreparation.aspart_fiasp': 'Fiasp',
+  'timeline.insulinPreparation.aspart_novorapid': 'NovoRapid',
+  'timeline.insulinPreparation.degludec_tresiba': 'Tresiba',
+  'timeline.insulinPreparation.glargine_lantus': 'Lantus',
+  'timeline.insulinPreparation.glulisine_apidra': 'Apidra',
+  'timeline.insulinPreparation.lispro_humalog': 'Humalog',
+  'timeline.units.massMg': 'мг',
+  'timeline.units.volumeMl': 'мл',
+  'validation.required': 'Это поле обязательно',
 });

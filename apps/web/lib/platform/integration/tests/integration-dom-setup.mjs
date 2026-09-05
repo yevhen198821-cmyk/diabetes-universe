@@ -37,11 +37,10 @@ export function setupIntegrationDom() {
     value: domWindow.MutationObserver,
   });
 
-  if (typeof globalThis.requestAnimationFrame !== 'function') {
-    globalThis.requestAnimationFrame = (callback) =>
-      domWindow.setTimeout(callback, 0);
-    globalThis.cancelAnimationFrame = (id) => domWindow.clearTimeout(id);
-  }
+  const activeWindow = domWindow;
+  globalThis.requestAnimationFrame = (callback) =>
+    activeWindow.setTimeout(callback, 0);
+  globalThis.cancelAnimationFrame = (id) => activeWindow.clearTimeout(id);
 
   return domWindow;
 }
@@ -63,6 +62,8 @@ export function teardownIntegrationDom() {
     'MutationObserver',
     'React',
     'IS_REACT_ACT_ENVIRONMENT',
+    'requestAnimationFrame',
+    'cancelAnimationFrame',
   ]) {
     if (Object.prototype.hasOwnProperty.call(globalThis, key)) {
       delete globalThis[key];

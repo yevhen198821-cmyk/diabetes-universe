@@ -71,6 +71,7 @@ test('profile menu keeps disabled rows for unavailable actions', () => {
   assert.doesNotMatch(menuSource, /ProfileThemeControl/);
   assert.match(menuSource, /ProfileMenuAboutLinkRow/);
   assert.match(menuSource, /ProfileMenuDiabetesLinkRow/);
+  assert.match(menuSource, /ProfileMenuLanguageLinkRow/);
   assert.match(menuAboutLinkSource, /href="\/account\/about"/);
   assert.doesNotMatch(menuSource, /ProfileMenuAboutRow/);
   assert.doesNotMatch(menuSource, /0\.0\.0/);
