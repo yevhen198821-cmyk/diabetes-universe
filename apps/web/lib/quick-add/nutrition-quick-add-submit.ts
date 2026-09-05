@@ -143,10 +143,14 @@ export function prepareNutritionQuickAddSubmit(input: {
     ok: true,
     value: {
       carbohydratesGrams: domainResult.value.carbohydratesGrams,
-      items: domainResult.value.items,
       mealType: domainResult.value.mealType,
-      note: domainResult.value.note,
       time: input.time,
+      ...(domainResult.value.items === undefined
+        ? {}
+        : { items: domainResult.value.items }),
+      ...(domainResult.value.note === undefined
+        ? {}
+        : { note: domainResult.value.note }),
     },
   };
 }
