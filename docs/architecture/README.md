@@ -165,6 +165,11 @@ implementation gates, and product requirements.
 - [P12 — Conflict / Revision / Tombstone Architecture](sync/p12-conflict-revision-tombstone-architecture.md) · [P12 audit closure](sync/p12-architecture-security-audit.md)
 - [P13 — Security, Privacy, and Production Hardening](security/p13-security-privacy-hardening.md)
 
+## Recording verticals
+
+- [Wave 4A — Insulin Recording Architecture](insulin/wave-4a-insulin-recording-architecture.md)
+- [Wave 5A — Nutrition Semantic Architecture](nutrition/wave-5a-nutrition-semantic-architecture.md) — domain contract only; production Nutrition writes remain v1
+
 ## Notes
 
 - Dashboard block localization (I18N-02A–02B5) is complete.
