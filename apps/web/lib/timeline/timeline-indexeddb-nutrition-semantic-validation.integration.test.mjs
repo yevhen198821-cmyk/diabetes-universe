@@ -1,13 +1,15 @@
+import 'fake-indexeddb/auto';
+
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { TimelineRepositoryError } from '@diabetes-universe/timeline';
-
-import { createWebTimelineSemanticEventValidator } from '../../../../../apps/web/lib/timeline/validate-web-timeline-semantic-event.ts';
 import {
   TIMELINE_INDEXEDDB_STORES,
   createIndexedDbTimelineRepository,
-} from '../../index.ts';
+} from '@diabetes-universe/timeline-web';
+
+import { createWebTimelineSemanticEventValidator } from './validate-web-timeline-semantic-event.ts';
 
 const FIXED_NOW = '2026-09-05T08:00:00.000Z';
 
@@ -49,6 +51,40 @@ async function deleteTestDatabase(databaseName) {
     request.onerror = () => reject(request.error);
     request.onblocked = () => resolve(undefined);
   });
+}
+
+async function openNativeDatabase(databaseName) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(databaseName);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function readStorageEvidence(databaseName, eventId) {
+  const database = await openNativeDatabase(databaseName);
+  const transaction = database.transaction(
+    [TIMELINE_INDEXEDDB_STORES.events, TIMELINE_INDEXEDDB_STORES.quarantine],
+    'readonly',
+  );
+  const eventRequest = transaction
+    .objectStore(TIMELINE_INDEXEDDB_STORES.events)
+    .get(eventId);
+  const quarantineRequest = transaction
+    .objectStore(TIMELINE_INDEXEDDB_STORES.quarantine)
+    .getAll();
+  const [event, quarantine] = await Promise.all([
+    new Promise((resolve, reject) => {
+      eventRequest.onsuccess = () => resolve(eventRequest.result);
+      eventRequest.onerror = () => reject(eventRequest.error);
+    }),
+    new Promise((resolve, reject) => {
+      quarantineRequest.onsuccess = () => resolve(quarantineRequest.result);
+      quarantineRequest.onerror = () => reject(quarantineRequest.error);
+    }),
+  ]);
+  database.close();
+  return { event, quarantine };
 }
 
 test('indexeddb repository rejects invalid nutrition v2 writes before durable commit', async () => {
@@ -107,11 +143,7 @@ test('indexeddb repository quarantines seeded invalid nutrition v2 on read', asy
     storageSchemaVersion: 1,
   };
 
-  const database = await new Promise((resolve, reject) => {
-    const request = indexedDB.open(databaseName);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
+  const database = await openNativeDatabase(databaseName);
   const transaction = database.transaction(
     TIMELINE_INDEXEDDB_STORES.events,
     'readwrite',
@@ -137,6 +169,13 @@ test('indexeddb repository quarantines seeded invalid nutrition v2 on read', asy
       return true;
     },
   );
+
+  const evidence = await readStorageEvidence(databaseName, 'nutrition-bad');
+  assert.equal(evidence.event, undefined);
+  assert.equal(evidence.quarantine.length, 1);
+  assert.equal(evidence.quarantine[0].sourceRecordId, 'nutrition-bad');
+  assert.equal(evidence.quarantine[0].reason, 'invalid_event_schema');
+  assert.deepEqual(evidence.quarantine[0].raw, raw);
 
   const v1Neighbour = await reopened.getById('nutrition-v1-neighbour');
   const v2Neighbour = await reopened.getById('nutrition-v2-neighbour');

@@ -117,6 +117,52 @@ test('failure then unchanged retry reuses the same stable full event id', async 
   assert.equal(eventIds[0], eventIds[1]);
 });
 
+for (const { field, firstInput, secondInput } of [
+  {
+    field: 'mealType',
+    firstInput: baseManualInput,
+    secondInput: { ...baseManualInput, mealType: 'lunch' },
+  },
+  {
+    field: 'time',
+    firstInput: baseManualInput,
+    secondInput: { ...baseManualInput, time: '08:31' },
+  },
+  {
+    field: 'note',
+    firstInput: baseManualInput,
+    secondInput: { ...baseManualInput, note: 'before work' },
+  },
+]) {
+  test(`failure then changed ${field} allocates a new event id`, async () => {
+    const identity = createNutritionQuickAddSubmitIdentityState();
+    const eventIds = [];
+    let attempt = 0;
+
+    await prepareAndPersist({
+      identity,
+      input: firstInput,
+      onSubmit: async (request) => {
+        eventIds.push(request.eventId);
+        attempt += 1;
+        if (attempt === 1) {
+          throw new Error('write failed');
+        }
+      },
+    });
+
+    await prepareAndPersist({
+      identity,
+      input: secondInput,
+      onSubmit: async (request) => {
+        eventIds.push(request.eventId);
+      },
+    });
+
+    assert.notEqual(eventIds[0], eventIds[1]);
+  });
+}
+
 test('failure then changed carbs allocates a new event id', async () => {
   const identity = createNutritionQuickAddSubmitIdentityState();
   const eventIds = [];
