@@ -124,7 +124,7 @@ function resolveItemRowDisplayName(
   row: NutritionItemRowState,
   labels: NutritionQuickAddLabels,
 ): string {
-  return row.demoProductId.length > 0
+  return row.demoProductId !== ''
     ? labels.demoProducts[row.demoProductId]
     : labels.itemPlaceholder;
 }
