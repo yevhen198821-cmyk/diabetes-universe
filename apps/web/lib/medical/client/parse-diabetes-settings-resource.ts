@@ -80,7 +80,7 @@ export function parseDiabetesSettingsResource(
     configured: value.configured,
     createdAt: typeof value.createdAt === 'string' ? value.createdAt : null,
     diabetesType:
-      value.diabetesType as DiabetesSettingsResource['diabetesType'],
+      value.diabetesType as unknown as DiabetesSettingsResource['diabetesType'],
     glucoseDisplayUnit: value.glucoseDisplayUnit,
     revision: value.revision,
     settingsId: typeof value.settingsId === 'string' ? value.settingsId : null,

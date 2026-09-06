@@ -1,7 +1,7 @@
 'use client';
 
 import type { GlucoseDisplayUnit } from '@diabetes-universe/medical-domain';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 
 import type { DiabetesSettingsResource } from '../../client/diabetes-settings-types';
 import { DiabetesSettingsClientError } from '../../client/diabetes-settings-types';
@@ -52,23 +52,19 @@ export function TestDiabetesSettingsProvider({
 }: TestDiabetesSettingsProviderProps) {
   const [sessionDisplayUnit, setSessionDisplayUnit] =
     useState<GlucoseDisplayUnit | null>(null);
-  const [internalLoadState, setInternalLoadState] =
-    useState<DiabetesSettingsLoadState>(loadState);
-  const [internalError, setInternalError] =
-    useState<DiabetesSettingsClientError | null>(error);
-
-  useEffect(() => {
-    setInternalLoadState(loadState);
-    setInternalError(error);
-  }, [error, loadState]);
+  const [refreshOutcome, setRefreshOutcome] = useState<{
+    readonly error: DiabetesSettingsClientError | null;
+    readonly loadState: DiabetesSettingsLoadState;
+  } | null>(null);
 
   const value = useMemo<DiabetesSettingsContextValue>(() => {
     const resolvedSettings =
       settings === undefined
         ? createTestSettings(glucoseDisplayUnit)
         : settings;
-    const resolvedLoadState = internalLoadState;
-    const resolvedError = resolvedLoadState === 'error' ? internalError : null;
+    const resolvedLoadState = refreshOutcome?.loadState ?? loadState;
+    const resolvedError =
+      resolvedLoadState === 'error' ? (refreshOutcome?.error ?? error) : null;
     const resolvedGlucoseDisplayUnit =
       resolvedLoadState === 'ready'
         ? (resolvedSettings?.glucoseDisplayUnit ?? sessionDisplayUnit)
@@ -85,22 +81,22 @@ export function TestDiabetesSettingsProvider({
         glucoseDisplayUnit: unit,
       }),
       refresh: async () => {
-        setInternalLoadState('loading');
-        setInternalError(null);
+        setRefreshOutcome({ error: null, loadState: 'loading' });
 
         try {
           await onRefresh();
-          setInternalLoadState('ready');
+          setRefreshOutcome({ error: null, loadState: 'ready' });
         } catch (caughtError) {
-          setInternalError(
-            caughtError instanceof DiabetesSettingsClientError
-              ? caughtError
-              : new DiabetesSettingsClientError(
-                  'network',
-                  'Network request failed.',
-                ),
-          );
-          setInternalLoadState('error');
+          setRefreshOutcome({
+            error:
+              caughtError instanceof DiabetesSettingsClientError
+                ? caughtError
+                : new DiabetesSettingsClientError(
+                    'network',
+                    'Network request failed.',
+                  ),
+            loadState: 'error',
+          });
         }
       },
       selectGlucoseDisplayUnit: async (unit) => {
@@ -114,10 +110,11 @@ export function TestDiabetesSettingsProvider({
       updateSettingsFromMutation: () => {},
     };
   }, [
+    error,
     glucoseDisplayUnit,
-    internalError,
-    internalLoadState,
+    loadState,
     onRefresh,
+    refreshOutcome,
     onSelectGlucoseDisplayUnit,
     sessionDisplayUnit,
     settings,

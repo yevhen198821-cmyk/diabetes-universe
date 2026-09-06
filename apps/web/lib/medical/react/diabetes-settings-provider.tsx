@@ -64,46 +64,53 @@ export function DiabetesSettingsProvider({
     useState<GlucoseDisplayUnit | null>(null);
   const requestIdRef = useRef(0);
 
+  const applyLoadResult = useCallback(
+    (requestId: number, result: Promise<DiabetesSettingsResource>) => {
+      return result
+        .then((nextSettings) => {
+          if (requestId !== requestIdRef.current) {
+            return;
+          }
+
+          setSettings(nextSettings);
+          setError(null);
+          setLoadState('ready');
+        })
+        .catch((caughtError: unknown) => {
+          if (requestId !== requestIdRef.current) {
+            return;
+          }
+
+          const interpreted = interpretDiabetesSettingsLoadFailure(caughtError);
+          if (interpreted.type === 'unconfigured') {
+            setSettings(null);
+            setError(null);
+            setLoadState('ready');
+            return;
+          }
+
+          setError(interpreted.error);
+          setLoadState('error');
+        });
+    },
+    [],
+  );
+
   const refresh = useCallback(async () => {
     const requestId = ++requestIdRef.current;
     setLoadState('loading');
     setError(null);
-
-    try {
-      const nextSettings = await fetchDiabetesSettings();
-
-      if (requestId !== requestIdRef.current) {
-        return;
-      }
-
-      setSettings(nextSettings);
-      setError(null);
-      setLoadState('ready');
-    } catch (caughtError) {
-      if (requestId !== requestIdRef.current) {
-        return;
-      }
-
-      const interpreted = interpretDiabetesSettingsLoadFailure(caughtError);
-      if (interpreted.type === 'unconfigured') {
-        setSettings(null);
-        setError(null);
-        setLoadState('ready');
-        return;
-      }
-
-      setError(interpreted.error);
-      setLoadState('error');
-    }
-  }, []);
+    await applyLoadResult(requestId, fetchDiabetesSettings());
+  }, [applyLoadResult]);
 
   useEffect(() => {
-    void refresh();
+    const requestId = ++requestIdRef.current;
+    void applyLoadResult(requestId, fetchDiabetesSettings());
 
     return () => {
       requestIdRef.current += 1;
     };
-  }, [refresh]);
+  }, [applyLoadResult]);
 
   const updateSettingsFromMutation = useCallback(
     (nextSettings: DiabetesSettingsResource) => {

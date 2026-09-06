@@ -40,6 +40,7 @@ test('diabetes settings provider treats unauthorized as unconfigured without err
 test('diabetes settings provider guards overlapping refresh completions', () => {
   assert.match(providerSource, /requestIdRef/);
   assert.match(providerSource, /requestId !== requestIdRef.current/);
+  assert.match(providerSource, /applyLoadResult/);
   assert.match(providerSource, /setLoadState\('loading'\)/);
 });
 
