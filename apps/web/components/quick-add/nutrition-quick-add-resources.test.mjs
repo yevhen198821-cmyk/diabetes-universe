@@ -34,6 +34,9 @@ const CRITICAL_LABELS = [
   'carbsUnit',
   'noteLabel',
   'save',
+  'saving',
+  'saveErrorTitle',
+  'saveErrorDescription',
   'cancel',
 ];
 
