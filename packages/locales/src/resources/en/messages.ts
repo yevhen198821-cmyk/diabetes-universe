@@ -397,6 +397,40 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'timeline.detail.form.insulin.noRecordedContext': 'No context recorded',
   'timeline.detail.form.insulin.otherNameLabel': 'Preparation name',
   'timeline.detail.form.insulin.preparationLabel': 'Insulin preparation',
+  'timeline.detail.form.nutrition.addItem': 'Add food',
+  'timeline.detail.form.nutrition.carbsLabel': 'Carbohydrates',
+  'timeline.detail.form.nutrition.editTitle': 'Edit nutrition',
+  'timeline.detail.form.nutrition.errors.carbsPrecision':
+    'Enter at most two decimal places.',
+  'timeline.detail.form.nutrition.errors.carbsRange':
+    'Enter carbohydrates greater than 0 and no more than 500.',
+  'timeline.detail.form.nutrition.errors.dateRequired': 'Enter a date.',
+  'timeline.detail.form.nutrition.errors.itemCarbs':
+    'Enter valid item carbohydrates.',
+  'timeline.detail.form.nutrition.errors.itemNameRequired':
+    'Enter the food name.',
+  'timeline.detail.form.nutrition.errors.mealTypeRequired':
+    'Choose a meal type.',
+  'timeline.detail.form.nutrition.errors.timeRequired': 'Enter a time.',
+  'timeline.detail.form.nutrition.itemCarbsLabel': 'Item carbohydrates',
+  'timeline.detail.form.nutrition.itemNameLabel': 'Food name',
+  'timeline.detail.form.nutrition.itemsHeading': 'Foods',
+  'timeline.detail.form.nutrition.legacyMealGuidance':
+    'Choose a meal type before saving this historical entry.',
+  'timeline.detail.form.nutrition.mealTypeLabel': 'Meal type',
+  'timeline.detail.form.nutrition.mealTypePlaceholder': 'Choose meal type',
+  'timeline.detail.form.nutrition.noteLabel': 'Note',
+  'timeline.detail.form.nutrition.removeItem': 'Remove food',
+  'timeline.detail.form.nutrition.saveError.description':
+    'The entry could not be saved. Check your connection and try again.',
+  'timeline.detail.form.nutrition.saveError.title': 'Could not save',
+  'timeline.detail.form.nutrition.saving': 'Saving…',
+  'timeline.detail.nutrition.carbohydrates': 'Carbohydrates',
+  'timeline.detail.nutrition.itemCarbs': 'Carbohydrates',
+  'timeline.detail.nutrition.itemCarbsPer100': 'Carbs per 100 g',
+  'timeline.detail.nutrition.itemWeight': 'Weight',
+  'timeline.detail.nutrition.items': 'Foods',
+  'timeline.detail.nutrition.mealType': 'Meal type',
   'timeline.detail.close': 'Close details',
   'timeline.detail.closeButton': 'Close',
   'timeline.detail.closeOverlay': 'Close event details',

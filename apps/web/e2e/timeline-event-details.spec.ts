@@ -66,7 +66,7 @@ test('timeline edit moves an event to another day via day navigation', async ({
   await openEvent(page, /Open event: Breakfast/);
   await page.getByRole('button', { name: 'Edit' }).click();
   await page
-    .getByRole('dialog', { name: 'Edit event' })
+    .getByRole('dialog', { name: 'Edit nutrition' })
     .getByLabel('Date')
     .fill('2026-08-01');
   await page.getByRole('button', { name: 'Save' }).click();

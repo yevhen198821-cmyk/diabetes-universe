@@ -158,6 +158,41 @@ export const ukrainianCanonicalMessages = defineApprovedMessages({
   'timeline.detail.form.insulin.noRecordedContext': 'Контекст не записано',
   'timeline.detail.form.insulin.otherNameLabel': 'Назва препарату',
   'timeline.detail.form.insulin.preparationLabel': 'Препарат інсуліну',
+  'timeline.detail.form.nutrition.addItem': 'Додати продукт',
+  'timeline.detail.form.nutrition.carbsLabel': 'Вуглеводи',
+  'timeline.detail.form.nutrition.editTitle': 'Редагувати харчування',
+  'timeline.detail.form.nutrition.errors.carbsPrecision':
+    'Введіть не більше двох знаків після коми.',
+  'timeline.detail.form.nutrition.errors.carbsRange':
+    'Введіть вуглеводи більше 0 і не більше 500.',
+  'timeline.detail.form.nutrition.errors.dateRequired': 'Вкажіть дату.',
+  'timeline.detail.form.nutrition.errors.itemCarbs':
+    'Введіть коректні вуглеводи продукту.',
+  'timeline.detail.form.nutrition.errors.itemNameRequired':
+    'Вкажіть назву продукту.',
+  'timeline.detail.form.nutrition.errors.mealTypeRequired':
+    'Оберіть тип прийому їжі.',
+  'timeline.detail.form.nutrition.errors.timeRequired': 'Вкажіть час.',
+  'timeline.detail.form.nutrition.itemCarbsLabel': 'Вуглеводи продукту',
+  'timeline.detail.form.nutrition.itemNameLabel': 'Назва продукту',
+  'timeline.detail.form.nutrition.itemsHeading': 'Продукти',
+  'timeline.detail.form.nutrition.legacyMealGuidance':
+    'Оберіть тип прийому їжі, перш ніж зберегти цей історичний запис.',
+  'timeline.detail.form.nutrition.mealTypeLabel': 'Тип прийому їжі',
+  'timeline.detail.form.nutrition.mealTypePlaceholder':
+    'Оберіть тип прийому їжі',
+  'timeline.detail.form.nutrition.noteLabel': 'Нотатка',
+  'timeline.detail.form.nutrition.removeItem': 'Видалити продукт',
+  'timeline.detail.form.nutrition.saveError.description':
+    'Запис не вдалося зберегти. Перевірте з’єднання та спробуйте ще раз.',
+  'timeline.detail.form.nutrition.saveError.title': 'Не вдалося зберегти',
+  'timeline.detail.form.nutrition.saving': 'Збереження…',
+  'timeline.detail.nutrition.carbohydrates': 'Вуглеводи',
+  'timeline.detail.nutrition.itemCarbs': 'Вуглеводи',
+  'timeline.detail.nutrition.itemCarbsPer100': 'Вуглеводи на 100 г',
+  'timeline.detail.nutrition.itemWeight': 'Вага',
+  'timeline.detail.nutrition.items': 'Продукти',
+  'timeline.detail.nutrition.mealType': 'Тип прийому їжі',
   'timeline.mealType.breakfast': 'Сніданок',
   'timeline.mealType.dinner': 'Вечеря',
   'timeline.mealType.lunch': 'Обід',

@@ -24,6 +24,8 @@ import {
 } from 'react';
 
 import type { InsulinPresentationLabels } from '../../lib/medical/insulin';
+import { presentNutritionFromTimelineEvent } from '../../lib/medical/nutrition/present-nutrition-from-timeline-event';
+import type { NutritionTimelineEditErrors } from '../../lib/medical/nutrition/nutrition-timeline-edit-model';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import {
   mapTimelineEventDetailPresentation,
@@ -32,6 +34,8 @@ import {
 } from '../../lib/timeline/presentation';
 import { resolveTimelineInsulinEditCopy } from './timeline-insulin-edit-copy';
 import { TimelineInsulinEditFields } from './timeline-insulin-edit-fields';
+import { resolveTimelineNutritionEditCopy } from './timeline-nutrition-edit-copy';
+import { TimelineNutritionEditFields } from './timeline-nutrition-edit-fields';
 import {
   resolveTimelineUiLabels,
   type TimelineUiLabels,
@@ -52,7 +56,7 @@ interface TimelineEventDetailProps {
   readonly onClose: () => void;
   readonly onDelete: (eventId: string) => void;
   readonly onModeChange: (mode: TimelineEventDetailMode) => void;
-  readonly onUpdate: (event: SemanticTimelineEvent) => void;
+  readonly onUpdate: (event: SemanticTimelineEvent) => Promise<void> | void;
   readonly presentationDependencies: TimelinePresentationDependencies;
 }
 
@@ -115,6 +119,110 @@ function useDialogFocusTrap(
   }, [dialogRef, onClose, open]);
 }
 
+function NutritionTimelineDetailView({
+  displayDate,
+  displayTime,
+  labels,
+  occurredAt,
+  presentation,
+  sourcePresentation,
+}: {
+  readonly displayDate: string;
+  readonly displayTime: string;
+  readonly labels: TimelineUiLabels['detail'];
+  readonly occurredAt: string;
+  readonly presentation: ReturnType<typeof presentNutritionFromTimelineEvent>;
+  readonly sourcePresentation: ReturnType<
+    typeof resolveTimelineEventSourcePresentation
+  >;
+}) {
+  return (
+    <div className="space-y-5">
+      <div>
+        <time className="text-text-secondary text-sm" dateTime={occurredAt}>
+          {displayDate} · {displayTime}
+        </time>
+        <p className="text-text-primary mt-2 text-2xl font-bold">
+          {presentation.carbohydratesDisplay} {labels.nutrition.carbohydrates}
+        </p>
+      </div>
+
+      <dl className="grid gap-3">
+        <div className="bg-surface-subtle rounded-xl p-3">
+          <dt className="text-text-secondary text-xs font-medium">
+            {labels.nutrition.mealType}
+          </dt>
+          <dd className="mt-1 text-sm font-semibold text-slate-900">
+            {presentation.mealTypeDisplay}
+          </dd>
+        </div>
+        {presentation.note ? (
+          <div className="bg-surface-subtle rounded-xl p-3">
+            <dt className="text-text-secondary text-xs font-medium">
+              {labels.note}
+            </dt>
+            <dd className="mt-1 text-sm font-semibold text-slate-900">
+              {presentation.note}
+            </dd>
+          </div>
+        ) : null}
+        {presentation.items.length > 0 ? (
+          <div className="bg-surface-subtle rounded-xl p-3">
+            <dt className="text-text-secondary text-xs font-medium">
+              {labels.nutrition.items}
+            </dt>
+            <dd className="mt-2 space-y-3">
+              {presentation.items.map((item) => (
+                <div key={`${item.name}-${item.carbohydratesDisplay}`}>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {item.name}
+                  </p>
+                  <p className="text-text-secondary text-sm">
+                    {labels.nutrition.itemCarbs}: {item.carbohydratesDisplay}
+                  </p>
+                  {item.weightDisplay ? (
+                    <p className="text-text-secondary text-sm">
+                      {labels.nutrition.itemWeight}: {item.weightDisplay}
+                    </p>
+                  ) : null}
+                  {item.carbsPer100Display ? (
+                    <p className="text-text-secondary text-sm">
+                      {labels.nutrition.itemCarbsPer100}:{' '}
+                      {item.carbsPer100Display}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </dd>
+          </div>
+        ) : null}
+        {sourcePresentation ? (
+          <div
+            className={`rounded-xl p-3 ${
+              sourcePresentation.isDemo
+                ? 'border-status-warning/50 bg-status-warning/10 border border-dashed'
+                : 'bg-surface-subtle'
+            }`}
+          >
+            <dt className="text-text-secondary text-xs font-medium">
+              {labels.source}
+            </dt>
+            <dd
+              className={`mt-1 text-sm font-semibold ${
+                sourcePresentation.isDemo
+                  ? 'text-status-warning'
+                  : 'text-text-primary'
+              }`}
+            >
+              {sourcePresentation.label}
+            </dd>
+          </div>
+        ) : null}
+      </dl>
+    </div>
+  );
+}
+
 function ErrorText({
   id,
   message,
@@ -133,18 +241,26 @@ function TimelineEventEditForm({
   draft,
   errors,
   insulinPresentationLabels,
+  isSubmitting,
   labels,
+  mealTypeLabels,
+  nutritionErrors,
   onCancel,
   onChange,
   onSubmit,
+  saveError,
 }: {
   readonly draft: TimelineEventEditDraft;
   readonly errors: TimelineEventEditErrors;
   readonly insulinPresentationLabels: InsulinPresentationLabels;
+  readonly isSubmitting: boolean;
   readonly labels: TimelineUiLabels['detail'];
+  readonly mealTypeLabels: TimelinePresentationDependencies['labels']['mealTypes'];
+  readonly nutritionErrors: NutritionTimelineEditErrors;
   readonly onCancel: () => void;
   readonly onChange: (draft: TimelineEventEditDraft) => void;
   readonly onSubmit: () => void;
+  readonly saveError: string | null;
 }) {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -157,7 +273,24 @@ function TimelineEventEditForm({
     };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit}>
+    <form
+      aria-busy={isSubmitting || undefined}
+      className="space-y-4"
+      onSubmit={handleSubmit}
+    >
+      {isSubmitting ? (
+        <p className="text-text-secondary text-sm" role="status">
+          {labels.form.nutrition.saving}
+        </p>
+      ) : null}
+      {saveError ? (
+        <div className="bg-status-danger/10 rounded-xl p-3" role="alert">
+          <p className="text-status-danger text-sm font-semibold">
+            {labels.form.nutrition.saveErrorTitle}
+          </p>
+          <p className="text-status-danger mt-1 text-sm">{saveError}</p>
+        </div>
+      ) : null}
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className={labelClass} htmlFor="timeline-edit-date">
@@ -169,6 +302,7 @@ function TimelineEventEditForm({
             }
             aria-invalid={errors.date ? true : undefined}
             className={fieldClass}
+            disabled={isSubmitting}
             id="timeline-edit-date"
             onChange={updateTiming('date')}
             type="date"
@@ -186,6 +320,7 @@ function TimelineEventEditForm({
             }
             aria-invalid={errors.time ? true : undefined}
             className={fieldClass}
+            disabled={isSubmitting}
             id="timeline-edit-time"
             onChange={updateTiming('time')}
             type="time"
@@ -208,6 +343,15 @@ function TimelineEventEditForm({
           storedPreparation={draft.storedPreparation}
           storedPreparationIsUnmatched={draft.storedPreparationIsUnmatched}
         />
+      ) : draft.variant === 'nutrition' ? (
+        <TimelineNutritionEditFields
+          disabled={isSubmitting}
+          draft={draft}
+          errors={nutritionErrors}
+          labels={labels.form.nutrition}
+          mealTypeLabels={mealTypeLabels}
+          onChange={onChange}
+        />
       ) : (
         <TimelineGenericEditFields
           draft={draft}
@@ -220,12 +364,15 @@ function TimelineEventEditForm({
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <Button
           className="border-border-default bg-surface text-text-primary hover:bg-surface-subtle border"
+          disabled={isSubmitting}
           onClick={onCancel}
           type="button"
         >
           {labels.close}
         </Button>
-        <Button type="submit">{labels.form.save}</Button>
+        <Button disabled={isSubmitting} type="submit">
+          {labels.form.save}
+        </Button>
       </div>
     </form>
   );
@@ -358,6 +505,10 @@ export function TimelineEventDetail({
     () => resolveTimelineInsulinEditCopy(localization),
     [localization],
   );
+  const nutritionEditCopy = useMemo(
+    () => resolveTimelineNutritionEditCopy(localization),
+    [localization],
+  );
   const titleId = useId();
   const descriptionId = useId();
   const deleteTitleId = useId();
@@ -373,6 +524,33 @@ export function TimelineEventDetail({
   );
   const [errors, setErrors] = useState<TimelineEventEditErrors>({});
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const nutritionPresentation =
+    event.kind === 'nutrition'
+      ? presentNutritionFromTimelineEvent({
+          event,
+          formatter: presentationDependencies.formatter,
+          labels: {
+            carbsPer100: uiLabels.detail.nutrition.itemCarbsPer100,
+            carbohydrates: uiLabels.detail.nutrition.carbohydrates,
+            itemCarbs: uiLabels.detail.nutrition.itemCarbs,
+            itemWeight: uiLabels.detail.nutrition.itemWeight,
+            items: uiLabels.detail.nutrition.items,
+            mealType: uiLabels.detail.nutrition.mealType,
+            mealTypes: presentationDependencies.labels.mealTypes,
+          },
+        })
+      : null;
+
+  const closeIfIdle = () => {
+    if (isSubmittingRef.current) {
+      return;
+    }
+
+    onClose();
+  };
   const sourcePresentation = resolveTimelineEventSourcePresentation(
     event.source,
     uiLabels.sources,
@@ -386,14 +564,19 @@ export function TimelineEventDetail({
     { timeStyle: 'short' },
   );
 
-  useDialogFocusTrap(!deleteOpen, dialogRef, onClose);
+  useDialogFocusTrap(!deleteOpen, dialogRef, closeIfIdle);
   useDialogFocusTrap(deleteOpen, deleteDialogRef, () => setDeleteOpen(false));
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (isSubmittingRef.current) {
+      return;
+    }
+
     const result = updateTimelineEventFromDraft({
       copy: insulinEditCopy,
       draft,
       event,
+      nutritionCopy: nutritionEditCopy,
     });
 
     setErrors(result.errors);
@@ -402,7 +585,26 @@ export function TimelineEventDetail({
       return;
     }
 
-    onUpdate(result.event);
+    if (result.event.kind === 'nutrition') {
+      isSubmittingRef.current = true;
+      setIsSubmitting(true);
+      setSaveError(null);
+
+      try {
+        await onUpdate(result.event);
+        onModeChange('view');
+        haptics.success();
+      } catch {
+        setSaveError(uiLabels.detail.form.nutrition.saveErrorDescription);
+      } finally {
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
+      }
+
+      return;
+    }
+
+    await onUpdate(result.event);
     onModeChange('view');
     haptics.success();
   };
@@ -418,7 +620,8 @@ export function TimelineEventDetail({
       <button
         aria-label={uiLabels.detail.closeOverlay}
         className={overlayScrimClass}
-        onClick={onClose}
+        disabled={isSubmitting}
+        onClick={closeIfIdle}
         type="button"
       />
       <section
@@ -440,14 +643,17 @@ export function TimelineEventDetail({
             )}
             <h2 className="text-section-title truncate" id={titleId}>
               {mode === 'edit'
-                ? uiLabels.detail.editTitle
+                ? event.kind === 'nutrition'
+                  ? uiLabels.detail.form.nutrition.editTitle
+                  : uiLabels.detail.editTitle
                 : readPresentation.title}
             </h2>
           </div>
           <button
             aria-label={uiLabels.detail.closeButton}
             className="border-border-default bg-surface text-text-secondary hover:border-border-strong hover:bg-surface-subtle focus-visible:outline-interactive-primary grid size-10 shrink-0 place-items-center rounded-xl border transition focus-visible:outline-2 focus-visible:outline-offset-2"
-            onClick={onClose}
+            disabled={isSubmitting}
+            onClick={closeIfIdle}
             type="button"
           >
             <X aria-hidden="true" size={18} />
@@ -465,17 +671,47 @@ export function TimelineEventDetail({
               insulinPresentationLabels={
                 presentationDependencies.labels.insulin
               }
+              isSubmitting={isSubmitting}
               labels={{
                 ...uiLabels.detail,
                 close: cancelLabel,
               }}
+              mealTypeLabels={presentationDependencies.labels.mealTypes}
+              nutritionErrors={{
+                carbs: errors.carbs,
+                date: errors.date,
+                itemCarbs: errors.itemCarbs,
+                itemName: errors.itemName,
+                mealType: errors.mealType,
+                time: errors.time,
+              }}
               onCancel={() => {
+                if (isSubmittingRef.current) {
+                  return;
+                }
+
                 setDraft(createTimelineSemanticEventEditDraft(event));
                 setErrors({});
+                setSaveError(null);
                 onModeChange('view');
               }}
-              onChange={setDraft}
-              onSubmit={handleSave}
+              onChange={(nextDraft) => {
+                setDraft(nextDraft);
+                setSaveError(null);
+              }}
+              onSubmit={() => {
+                void handleSave();
+              }}
+              saveError={saveError}
+            />
+          ) : event.kind === 'nutrition' && nutritionPresentation ? (
+            <NutritionTimelineDetailView
+              displayDate={displayDate}
+              displayTime={displayTime}
+              labels={uiLabels.detail}
+              occurredAt={readPresentation.occurredAt}
+              presentation={nutritionPresentation}
+              sourcePresentation={sourcePresentation}
             />
           ) : event.kind === 'glucose' ? (
             <div className="space-y-5">

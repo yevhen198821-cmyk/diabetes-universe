@@ -12,6 +12,7 @@ import {
 
 import { createSemanticGlucoseTimelineEvent } from '../semantic-creators/create-semantic-glucose-timeline-event.ts';
 import { createSemanticInsulinTimelineEvent } from '../semantic-creators/create-semantic-insulin-timeline-event.ts';
+import { createSemanticNutritionTimelineEvent } from '../semantic-creators/create-semantic-nutrition-timeline-event.ts';
 import {
   setupIntegrationDom,
   teardownIntegrationDom,
@@ -326,6 +327,54 @@ test('retry with stable event id creates exactly one stored insulin event', asyn
       Object.hasOwn(mounted.currentStore.events[0] ?? {}, 'context'),
       false,
     );
+  } finally {
+    await mounted.unmount();
+  }
+});
+
+test('updateEventAsync resolves after applied and rejects on repository failure', async () => {
+  const repository = createInMemoryTimelineRepository({ seedEvents: [] });
+  const mounted = await mountTimelineStore({ repository });
+
+  try {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const semanticEvent = createSemanticNutritionTimelineEvent(
+      {
+        carbohydratesGrams: 12.12,
+        mealType: 'breakfast',
+        time: '08:00',
+      },
+      { clock: fixedClock, id: 'nutrition-0800-edit-id' },
+    );
+
+    await act(async () => {
+      await mounted.currentStore.addEventAsync(semanticEvent);
+    });
+
+    const updated = {
+      ...semanticEvent,
+      carbohydratesGrams: 15,
+      mealType: 'lunch',
+      updatedAt: '2026-09-06T12:00:00.000Z',
+    };
+
+    await act(async () => {
+      await mounted.currentStore.updateEventAsync(updated);
+    });
+
+    assert.equal(mounted.currentStore.events[0]?.carbohydratesGrams, 15);
+    assert.equal(mounted.currentStore.events[0]?.id, 'nutrition-0800-edit-id');
+
+    repository.updateEvent = async () => {
+      throw new TimelineRepositoryError('TIMELINE_REPOSITORY_WRITE_FAILED');
+    };
+
+    await act(async () => {
+      await assert.rejects(mounted.currentStore.updateEventAsync(updated));
+    });
   } finally {
     await mounted.unmount();
   }
