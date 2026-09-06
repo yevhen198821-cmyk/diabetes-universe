@@ -6,7 +6,7 @@ Approved as a Timeline semantic kind. Wave 5A owns the canonical Nutrition
 v2 domain contract in `@diabetes-universe/medical-domain`. Wave 5B writes
 **new Nutrition Quick Add events** as v2 and localizes the production Quick
 Add. Existing v1 history stays readable. Persistence save-integrity is
-Wave 5C. Medical API / OpenAPI / Detail / Edit remain on their current
+Wave 6C. Medical API / OpenAPI / Detail / Edit remain on their current
 contracts.
 
 Authoritative architecture:
@@ -68,8 +68,7 @@ and are not rewritten.
 - Nutrition Detail / Edit are unchanged and are not a v2 adoption path;
 - demo catalogue IDs stay presentation-only and are not food-database keys;
 - medical API transport carbs bounds remain `0…2000` and `schemaVersion: 1`;
-- Quick Add / Timeline still use fire-and-forget save for nutrition
-  (Wave 5C);
+- Quick Add / Timeline await durable save for nutrition (Wave 6C);
 - no food database, barcode, photo recognition, recipes, or macros;
 - no insulin-from-carbs recommendation.
 

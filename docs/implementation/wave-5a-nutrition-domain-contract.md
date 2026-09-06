@@ -87,8 +87,8 @@ scanner, or macro model.
 
 ## Deferred work
 
-| Wave   | Scope                                                                | Status      |
-| ------ | -------------------------------------------------------------------- | ----------- |
-| **5B** | Canonical + localized Nutrition Quick Add; 500 g presentation policy | Implemented |
-| **5C** | Persistence / save integrity                                         | Not started |
-| Later  | Edit adoption, API/OpenAPI, Timeline Detail                          | Not started |
+| Wave   | Scope                                                                | Status                                                                         |
+| ------ | -------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **5B** | Canonical + localized Nutrition Quick Add; 500 g presentation policy | Implemented                                                                    |
+| **6C** | Persistence / save integrity                                         | Implemented — [6C](./wave-6c-nutrition-save-integrity-indexeddb-validation.md) |
+| Later  | Edit adoption, API/OpenAPI, Timeline Detail                          | Not started                                                                    |
