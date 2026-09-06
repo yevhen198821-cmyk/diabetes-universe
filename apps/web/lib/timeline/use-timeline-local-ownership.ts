@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { readTimelineSessionAccountResolution } from './read-timeline-local-session';
 import {
@@ -23,68 +23,71 @@ export function useTimelineLocalOwnership(): TimelineLocalOwnership {
   const requestIdRef = useRef(0);
   const lastAuthenticatedAccountIdRef = useRef<string | null>(null);
 
-  const refresh = useCallback(async () => {
+  useEffect(() => {
     if (!canUseBrowserStorage()) {
       return;
     }
 
-    const requestId = requestIdRef.current + 1;
-    requestIdRef.current = requestId;
+    const applyResolution = async () => {
+      const requestId = requestIdRef.current + 1;
+      requestIdRef.current = requestId;
+      const resolution = await readTimelineSessionAccountResolution();
 
-    const resolution = await readTimelineSessionAccountResolution();
-
-    if (requestIdRef.current !== requestId) {
-      return;
-    }
-
-    if (resolution.status === 'indeterminate') {
-      if (lastAuthenticatedAccountIdRef.current) {
+      if (requestIdRef.current !== requestId) {
         return;
       }
 
+      if (resolution.status === 'indeterminate') {
+        if (lastAuthenticatedAccountIdRef.current) {
+          return;
+        }
+
+        setOwnership(
+          createAnonymousTimelineOwnership(
+            resolveAnonymousOwnerKey(window.localStorage),
+          ),
+        );
+        return;
+      }
+
+      if (resolution.status === 'blocked') {
+        lastAuthenticatedAccountIdRef.current = null;
+        setOwnership({ kind: 'blocked' });
+        return;
+      }
+
+      if (resolution.status === 'authenticated') {
+        lastAuthenticatedAccountIdRef.current = resolution.accountId;
+        setOwnership(
+          createAuthenticatedTimelineOwnership(resolution.accountId),
+        );
+        return;
+      }
+
+      lastAuthenticatedAccountIdRef.current = null;
       setOwnership(
         createAnonymousTimelineOwnership(
           resolveAnonymousOwnerKey(window.localStorage),
         ),
       );
-      return;
-    }
-
-    if (resolution.status === 'blocked') {
-      lastAuthenticatedAccountIdRef.current = null;
-      setOwnership({ kind: 'blocked' });
-      return;
-    }
-
-    if (resolution.status === 'authenticated') {
-      lastAuthenticatedAccountIdRef.current = resolution.accountId;
-      setOwnership(createAuthenticatedTimelineOwnership(resolution.accountId));
-      return;
-    }
-
-    lastAuthenticatedAccountIdRef.current = null;
-    setOwnership(
-      createAnonymousTimelineOwnership(
-        resolveAnonymousOwnerKey(window.localStorage),
-      ),
-    );
-  }, []);
-
-  useEffect(() => {
-    void refresh();
+    };
 
     const onResume = () => {
-      void refresh();
+      void applyResolution();
     };
 
     window.addEventListener('focus', onResume);
     document.addEventListener('visibilitychange', onResume);
+    queueMicrotask(() => {
+      void applyResolution();
+    });
 
     return () => {
+      requestIdRef.current += 1;
       window.removeEventListener('focus', onResume);
       document.removeEventListener('visibilitychange', onResume);
     };
-  }, [refresh]);
+  }, []);
 
   return ownership;
 }
