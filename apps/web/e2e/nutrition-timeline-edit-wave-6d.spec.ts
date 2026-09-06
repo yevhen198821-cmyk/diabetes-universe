@@ -34,6 +34,7 @@ const LOCALES = [
     locale: 'en-GB',
     mealType: /Meal type/,
     mealTypeSheet: 'Meal type',
+    openEvent: /Open event:/,
     openQuickAdd: /Quick add: Nutrition/,
     save: 'Save',
     timeline: 'Timeline',
@@ -46,6 +47,7 @@ const LOCALES = [
     locale: 'de-DE',
     mealType: /Mahlzeitentyp/,
     mealTypeSheet: 'Mahlzeitentyp',
+    openEvent: /Ereignis öffnen:/,
     openQuickAdd: /Schnell hinzufügen: Ernährung/,
     save: 'Speichern',
     timeline: 'Verlauf',
@@ -58,6 +60,7 @@ const LOCALES = [
     locale: 'uk-UA',
     mealType: /Тип прийому їжі/,
     mealTypeSheet: 'Тип прийому їжі',
+    openEvent: /Відкрити подію:/,
     openQuickAdd: /Швидке додавання: Харчування/,
     save: 'Зберегти',
     timeline: 'Хронологія',
@@ -70,6 +73,7 @@ const LOCALES = [
     locale: 'ru-RU',
     mealType: /Тип приёма пищи/,
     mealTypeSheet: 'Тип приёма пищи',
+    openEvent: /Открыть событие:/,
     openQuickAdd: /Быстрое добавление: Питание/,
     save: 'Сохранить',
     timeline: 'Хроника',
@@ -170,10 +174,7 @@ for (const copy of LOCALES) {
 
     await page.goto('/timeline');
     await waitForApplicationReady(page);
-    await page
-      .getByRole('button', { name: /Open event:/ })
-      .first()
-      .click();
+    await page.getByRole('button', { name: copy.openEvent }).first().click();
     await page.getByRole('button', { name: copy.edit }).click();
     await expect(
       page.getByRole('dialog', { name: copy.editTitle }),
@@ -210,7 +211,7 @@ test('legacy nutrition v1 is adopted to v2 only after a successful edit', async 
   page,
 }) => {
   const eventId = 'nutrition-legacy-adoption-e2e';
-  const occurredAt = '2026-09-05T08:00:00.000Z';
+  const occurredAt = '2026-08-02T05:20:00.000Z';
 
   await page.goto('/timeline');
   await waitForApplicationReady(page);
@@ -249,8 +250,9 @@ test('legacy nutrition v1 is adopted to v2 only after a successful edit', async 
     .getByRole('button', { name: /Open event:/ })
     .first()
     .click();
-  await expect(page.getByText('Завтрак')).toBeVisible();
-  await expect(page.getByText('Apple')).toBeVisible();
+  const detail = page.getByRole('dialog');
+  await expect(detail.getByRole('heading', { name: 'Завтрак' })).toBeVisible();
+  await expect(detail.getByText('Apple')).toBeVisible();
   await page.getByRole('button', { name: 'Edit' }).click();
   await expect(
     page.getByRole('dialog', { name: 'Edit nutrition' }),
