@@ -2,6 +2,7 @@ import { expect, test } from './support/test';
 
 import {
   clearTimelineEventsInIndexedDb,
+  prepareCanonicalDemoTimelineFixture,
   waitForTimelineBootstrapComplete,
 } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
@@ -91,7 +92,7 @@ test('dashboard quick add insulin persists across page reload', async ({
   page,
 }) => {
   await page.goto('/');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await page.getByRole('button', { name: 'Quick add: Insulin' }).click();
   await page.getByRole('button', { name: /Insulin preparation/ }).click();

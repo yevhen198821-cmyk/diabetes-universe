@@ -4,6 +4,8 @@ import { expect, test, type Page } from './support/test';
 
 import {
   clearTimelineEventsInIndexedDb,
+  readActiveTimelineStoredEventById,
+  readActiveTimelineStoredEvents,
   seedTimelineEventInIndexedDb,
   waitForTimelineBootstrapComplete,
 } from './support/timeline-indexeddb-helpers';
@@ -54,68 +56,29 @@ async function selectContext(page: Page, optionLabel: string) {
 async function readLatestManualInsulinEvent(
   page: Page,
 ): Promise<RawInsulinEvent | null> {
-  return page.evaluate(async () => {
-    return new Promise<RawInsulinEvent | null>((resolve, reject) => {
-      const request = indexedDB.open('diabetes-universe-timeline');
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const database = request.result;
-        const transaction = database.transaction('timeline_events', 'readonly');
-        const getAll = transaction.objectStore('timeline_events').getAll();
+  const events = (await readActiveTimelineStoredEvents(
+    page,
+  )) as readonly RawInsulinEvent[];
+  const insulinEvents = events
+    .filter(
+      (event): event is RawInsulinEvent =>
+        event?.kind === 'insulin' && event?.source === 'manual',
+    )
+    .sort((left, right) =>
+      (left.occurredAt ?? '').localeCompare(right.occurredAt ?? ''),
+    );
 
-        getAll.onerror = () => {
-          database.close();
-          reject(getAll.error);
-        };
-        getAll.onsuccess = () => {
-          database.close();
-
-          const rows = (getAll.result ?? []) as readonly {
-            readonly event?: RawInsulinEvent;
-          }[];
-          const insulinEvents = rows
-            .map((row) => row.event)
-            .filter(
-              (event): event is RawInsulinEvent =>
-                event?.kind === 'insulin' && event?.source === 'manual',
-            )
-            .sort((left, right) =>
-              (left.occurredAt ?? '').localeCompare(right.occurredAt ?? ''),
-            );
-
-          resolve(insulinEvents.at(-1) ?? null);
-        };
-      };
-    });
-  });
+  return insulinEvents.at(-1) ?? null;
 }
 
 async function readInsulinEventById(
   page: Page,
   eventId: string,
 ): Promise<RawInsulinEvent | null> {
-  return page.evaluate(async (id) => {
-    return new Promise<RawInsulinEvent | null>((resolve, reject) => {
-      const request = indexedDB.open('diabetes-universe-timeline');
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const database = request.result;
-        const transaction = database.transaction('timeline_events', 'readonly');
-        const getRequest = transaction.objectStore('timeline_events').get(id);
-
-        getRequest.onerror = () => {
-          database.close();
-          reject(getRequest.error);
-        };
-        getRequest.onsuccess = () => {
-          database.close();
-          const record = getRequest.result as
-            { readonly event?: RawInsulinEvent } | undefined;
-          resolve(record?.event ?? null);
-        };
-      };
-    });
-  }, eventId);
+  return (await readActiveTimelineStoredEventById(
+    page,
+    eventId,
+  )) as RawInsulinEvent | null;
 }
 
 async function openInsulinQuickAdd(page: Page) {

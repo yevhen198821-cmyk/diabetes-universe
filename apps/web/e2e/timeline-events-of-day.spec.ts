@@ -1,5 +1,6 @@
 import { expect, test } from './support/test';
 
+import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
 test('timeline loads events of the day map and day period groups', async ({
@@ -7,7 +8,7 @@ test('timeline loads events of the day map and day period groups', async ({
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await expect(
     page.getByRole('heading', { name: 'Events of the day', exact: true }),
@@ -23,7 +24,7 @@ test('timeline marker tap opens understandable event details', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const marker = page.getByRole('button', { name: /NovoRapid/i }).first();
   await marker.click();
@@ -36,7 +37,7 @@ test('timeline category filter updates map markers and grouped list', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await page.getByRole('button', { name: 'Insulin' }).click();
 
@@ -55,7 +56,7 @@ test('timeline day navigation moves between days within active window', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const dayLabel = page.locator('nav[aria-label="Day navigation"] p').first();
   const initialLabel = await dayLabel.textContent();
@@ -71,7 +72,7 @@ test('timeline night group appears only when night events exist', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await expect(page.getByRole('heading', { name: 'Night' })).toHaveCount(0);
 });
@@ -81,7 +82,7 @@ test('timeline FAB is embedded in bottom navigation and opens quick add', async 
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const nav = page.locator('#dashboard-mobile-nav');
   const fab = nav.locator('#timeline-mobile-quick-add-fab');
@@ -116,7 +117,7 @@ test('home keeps bottom navigation without FAB', async ({ page }) => {
 test('timeline mobile layout avoids horizontal overflow', async ({ page }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const hasHorizontalScroll = await page.evaluate(
     () =>

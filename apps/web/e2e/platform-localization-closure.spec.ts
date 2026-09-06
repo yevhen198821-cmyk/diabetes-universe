@@ -6,6 +6,7 @@ import { signInWithMagicLink } from './support/auth-helpers';
 import { ensureGlucoseDisplayUnitConfigured } from './support/glucose-quick-add-helpers';
 import {
   clearTimelineEventsInIndexedDb,
+  readActiveTimelineStoredEvents,
   seedTimelineEventInIndexedDb,
   waitForTimelineBootstrapComplete,
 } from './support/timeline-indexeddb-helpers';
@@ -211,32 +212,7 @@ async function selectLanguage(page: Page, locale: LocaleMatrix) {
 }
 
 async function readManualEvents(page: Page): Promise<readonly StoredEvent[]> {
-  return page.evaluate(async () => {
-    return new Promise<StoredEvent[]>((resolve, reject) => {
-      const request = indexedDB.open('diabetes-universe-timeline');
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const database = request.result;
-        const transaction = database.transaction('timeline_events', 'readonly');
-        const getAll = transaction.objectStore('timeline_events').getAll();
-        getAll.onerror = () => {
-          database.close();
-          reject(getAll.error);
-        };
-        getAll.onsuccess = () => {
-          database.close();
-          const rows = (getAll.result ?? []) as readonly {
-            readonly event?: StoredEvent;
-          }[];
-          resolve(
-            rows
-              .map((row) => row.event)
-              .filter((event): event is StoredEvent => Boolean(event)),
-          );
-        };
-      };
-    });
-  });
+  return (await readActiveTimelineStoredEvents(page)) as StoredEvent[];
 }
 
 async function prepareEmptyTimeline(page: Page) {

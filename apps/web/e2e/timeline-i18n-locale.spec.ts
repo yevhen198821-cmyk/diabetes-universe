@@ -3,14 +3,14 @@ import { type Browser } from '@playwright/test';
 import { expect, test } from './support/test';
 
 import { CANONICAL_DEMO_LOCAL_DAY_TIME } from '../testing/demo-reference-time';
-import { waitForApplicationReady } from './support/wait-for-application-ready';
+import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 
 async function openTimeline(
   page: import('./support/test').Page,
   headingName: string | RegExp,
 ) {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
   await expect(
     page.getByRole('heading', { level: 1, name: headingName }),
   ).toBeVisible();

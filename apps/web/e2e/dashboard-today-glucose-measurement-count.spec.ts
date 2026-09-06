@@ -4,13 +4,13 @@ import {
   saveGlucoseQuickAdd,
   selectGlucoseUnitIfRequired,
 } from './support/glucose-quick-add-helpers';
-import { waitForApplicationReady } from './support/wait-for-application-ready';
+import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 
 test('Today glucose card shows measurement count without duplicating Last Glucose hero', async ({
   page,
 }) => {
   await page.goto('/');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const lastGlucoseRegion = page.getByRole('region', { name: 'Last glucose' });
   const todayRegion = page.getByRole('region', { name: 'Today' });

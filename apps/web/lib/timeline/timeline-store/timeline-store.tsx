@@ -18,7 +18,6 @@ import {
 } from 'react';
 
 import { cloneSemanticTimelineEvents } from '../semantic-timeline-clone';
-import { createWebTimelineRepository } from '../create-web-timeline-repository';
 import {
   createTimelineDiagnosticsFromState,
   initialTimelineStoreState,
@@ -51,7 +50,7 @@ export interface TimelineStoreValue {
 
 interface TimelineStoreProviderProps {
   readonly children: ReactNode;
-  readonly repository?: TimelineRepository;
+  readonly repository: TimelineRepository;
 }
 
 const TimelineStoreContext = createContext<TimelineStoreValue | null>(null);
@@ -70,10 +69,15 @@ export function TimelineStoreProvider({
 }: TimelineStoreProviderProps) {
   const isMountedRef = useRef(false);
   const operationQueueRef = useRef<Promise<void>>(Promise.resolve());
-  const timelineRepository = useMemo(
-    () => repositoryOverride ?? createWebTimelineRepository(),
-    [repositoryOverride],
-  );
+  const timelineRepository = useMemo(() => {
+    if (!repositoryOverride) {
+      throw new Error(
+        'TimelineStoreProvider requires an explicit owned repository.',
+      );
+    }
+
+    return repositoryOverride;
+  }, [repositoryOverride]);
   const [state, dispatch] = useReducer(
     timelineStoreReducer,
     initialTimelineStoreState,

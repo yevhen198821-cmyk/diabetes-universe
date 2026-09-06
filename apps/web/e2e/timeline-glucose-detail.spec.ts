@@ -1,6 +1,7 @@
 import { expect, test, type Page } from './support/test';
 
 import { signInWithMagicLink } from './support/auth-helpers';
+import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
 async function configureTargetRangeForTimeline(page: Page) {
@@ -63,7 +64,7 @@ test.describe('Timeline glucose event detail presentation', () => {
     );
     await configureTargetRangeForTimeline(page);
     await page.goto('/timeline');
-    await waitForApplicationReady(page);
+    await prepareCanonicalDemoTimelineFixture(page);
 
     const glucoseCard = await openDemoGlucoseCard(page);
     await glucoseCard.click();
@@ -90,7 +91,7 @@ test.describe('Timeline glucose event detail presentation', () => {
       'timeline-glucose-detail-no-target@example.com',
     );
     await page.goto('/timeline');
-    await waitForApplicationReady(page);
+    await prepareCanonicalDemoTimelineFixture(page);
 
     const glucoseCard = await openDemoGlucoseCard(page);
     await glucoseCard.click();
@@ -116,7 +117,7 @@ test.describe('Timeline glucose event detail presentation', () => {
     );
     await configureTargetRangeForTimeline(page);
     await page.goto('/timeline');
-    await waitForApplicationReady(page);
+    await prepareCanonicalDemoTimelineFixture(page);
 
     const glucoseCard = await openDemoGlucoseCard(page);
     await glucoseCard.click();
@@ -149,7 +150,7 @@ test.describe('Timeline glucose event detail presentation', () => {
     );
     await configureTargetRangeForTimeline(page);
     await page.goto('/timeline');
-    await waitForApplicationReady(page);
+    await prepareCanonicalDemoTimelineFixture(page);
 
     const glucoseCard = await openDemoGlucoseCard(page);
     await glucoseCard.click();

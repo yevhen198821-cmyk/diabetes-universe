@@ -1,6 +1,6 @@
 import { expect, test, type Page } from './support/test';
 
-import { waitForApplicationReady } from './support/wait-for-application-ready';
+import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 
 const openEvent = async (page: Page, name: RegExp | string) => {
   const card = page.getByRole('button', { name }).first();
@@ -14,7 +14,7 @@ test('timeline event details open, close with Escape, and return focus', async (
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const card = await openEvent(page, /Open event: Метформин/);
 
@@ -33,7 +33,7 @@ test('timeline event edit updates Timeline and Dashboard selectors', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await openEvent(page, /Open event: Glucose, 7\.3 mmol\/L/);
   await page.getByRole('button', { name: 'Edit' }).click();
@@ -61,7 +61,7 @@ test('timeline edit moves an event to another day via day navigation', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await openEvent(page, /Open event: Breakfast/);
   await page.getByRole('button', { name: 'Edit' }).click();
@@ -82,7 +82,7 @@ test('timeline event delete requires confirmation and updates Dashboard', async 
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await openEvent(page, /Open event: NovoRapid/);
   await page.getByRole('button', { name: 'Delete' }).click();
@@ -113,7 +113,7 @@ test('timeline closes details when edited event leaves search results', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const search = page.getByLabel('Search events');
 
@@ -134,7 +134,7 @@ test('timeline event details work on mobile without horizontal scroll', async ({
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await openEvent(page, /Open event: Метформин/);
 

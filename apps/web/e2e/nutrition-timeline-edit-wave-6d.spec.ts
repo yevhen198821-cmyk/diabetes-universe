@@ -5,6 +5,8 @@ import { expect, test, type Page } from './support/test';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 import {
   clearTimelineEventsInIndexedDb,
+  readActiveTimelineStoredEventById,
+  readActiveTimelineStoredEvents,
   seedSemanticTimelineEventInIndexedDb,
   waitForTimelineBootstrapComplete,
 } from './support/timeline-indexeddb-helpers';
@@ -93,63 +95,23 @@ async function readNutritionEventById(
   page: Page,
   eventId: string,
 ): Promise<RawNutritionEvent | null> {
-  return page.evaluate(async (id) => {
-    return new Promise<RawNutritionEvent | null>((resolve, reject) => {
-      const request = indexedDB.open('diabetes-universe-timeline');
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const database = request.result;
-        const transaction = database.transaction('timeline_events', 'readonly');
-        const getRequest = transaction.objectStore('timeline_events').get(id);
-
-        getRequest.onerror = () => {
-          database.close();
-          reject(getRequest.error);
-        };
-        getRequest.onsuccess = () => {
-          database.close();
-          resolve(
-            (getRequest.result?.event as RawNutritionEvent | undefined) ?? null,
-          );
-        };
-      };
-    });
-  }, eventId);
+  return (await readActiveTimelineStoredEventById(
+    page,
+    eventId,
+  )) as RawNutritionEvent | null;
 }
 
 async function readLatestManualNutritionEvent(
   page: Page,
 ): Promise<RawNutritionEvent | null> {
-  return page.evaluate(async () => {
-    return new Promise<RawNutritionEvent | null>((resolve, reject) => {
-      const request = indexedDB.open('diabetes-universe-timeline');
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const database = request.result;
-        const transaction = database.transaction('timeline_events', 'readonly');
-        const getAll = transaction.objectStore('timeline_events').getAll();
-
-        getAll.onerror = () => {
-          database.close();
-          reject(getAll.error);
-        };
-        getAll.onsuccess = () => {
-          database.close();
-          const rows = (getAll.result ?? []) as readonly {
-            readonly event?: RawNutritionEvent;
-          }[];
-          const nutritionEvents = rows
-            .map((row) => row.event)
-            .filter(
-              (event): event is RawNutritionEvent =>
-                event?.kind === 'nutrition' && event?.schemaVersion === 2,
-            );
-
-          resolve(nutritionEvents.at(-1) ?? null);
-        };
-      };
-    });
-  });
+  const events = (await readActiveTimelineStoredEvents(
+    page,
+  )) as readonly RawNutritionEvent[];
+  return (
+    events.find(
+      (event) => event?.kind === 'nutrition' && event?.schemaVersion === 2,
+    ) ?? null
+  );
 }
 
 for (const copy of LOCALES) {
