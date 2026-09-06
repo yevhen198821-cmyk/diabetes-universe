@@ -216,3 +216,23 @@ test('the Nutrition Quick Add form and labels contain no hardcoded language copy
     );
   }
 });
+
+test('the Nutrition Quick Add form writes demo snapshot names, not UI labels', () => {
+  const formSource = readFileSync(
+    new URL('./nutrition-quick-add-form.tsx', import.meta.url),
+    'utf8',
+  );
+  const demoSource = readFileSync(
+    new URL('../../lib/quick-add/nutrition-demo-products.ts', import.meta.url),
+    'utf8',
+  );
+
+  assert.match(formSource, /buildNutritionDemoItemWriteSnapshot/);
+  assert.match(formSource, /labels\.demoProducts\[row\.demoProductId\]/);
+  assert.doesNotMatch(formSource, /name:\s*labels\.demoProducts/);
+  assert.doesNotMatch(formSource, /name:\s*labels\.demoProducts\[/);
+  assert.match(demoSource, /canonicalSnapshotName/);
+  assert.match(demoSource, /name:\s*input\.product\.canonicalSnapshotName/);
+  assert.doesNotMatch(demoSource, /productId:/);
+  assert.doesNotMatch(demoSource, /demoProductId:/);
+});

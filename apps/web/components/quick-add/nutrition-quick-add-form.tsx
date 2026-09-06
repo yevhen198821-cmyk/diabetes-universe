@@ -25,12 +25,12 @@ import {
   formatNutritionCarbsPer100Grams,
 } from '../../lib/quick-add/format-nutrition';
 import {
+  buildNutritionDemoItemWriteSnapshot,
   findNutritionDemoProductById,
   NUTRITION_DEMO_PRODUCT_IDS,
   type NutritionDemoProductId,
 } from '../../lib/quick-add/nutrition-demo-products';
 import {
-  buildNutritionQuickAddItemSnapshot,
   isNutritionQuickAddMealType,
   NUTRITION_QUICK_ADD_MEAL_TYPES,
   prepareNutritionQuickAddSubmit,
@@ -38,7 +38,10 @@ import {
   type NutritionQuickAddMealType,
 } from '../../lib/quick-add/nutrition-quick-add-submit';
 import { formField, formLabel } from '../timeline/ui-styles';
-import { resolveNutritionQuickAddLabels } from './nutrition-quick-add-labels';
+import {
+  resolveNutritionQuickAddLabels,
+  type NutritionQuickAddLabels,
+} from './nutrition-quick-add-labels';
 
 const MAX_ITEM_WEIGHT_GRAMS = 3000;
 const MAX_ITEM_ROWS = 10;
@@ -56,7 +59,6 @@ interface NutritionItemRowState {
   readonly carbsPer100Grams: number | null;
   readonly demoProductId: NutritionDemoProductId | '';
   readonly id: string;
-  readonly name: string;
   readonly weight: string;
 }
 
@@ -78,7 +80,6 @@ function createItemRow(): NutritionItemRowState {
     carbsPer100Grams: null,
     demoProductId: '',
     id: `nutrition-item-${itemRowIdCounter}`,
-    name: '',
     weight: '',
   };
 }
@@ -112,7 +113,20 @@ function isItemRowEmpty(row: NutritionItemRowState): boolean {
 }
 
 function isItemRowValid(row: NutritionItemRowState): boolean {
-  return getItemRowCarbs(row) !== null && row.name.length > 0;
+  return (
+    row.demoProductId.length > 0 &&
+    findNutritionDemoProductById(row.demoProductId) !== undefined &&
+    getItemRowCarbs(row) !== null
+  );
+}
+
+function resolveItemRowDisplayName(
+  row: NutritionItemRowState,
+  labels: NutritionQuickAddLabels,
+): string {
+  return row.demoProductId.length > 0
+    ? labels.demoProducts[row.demoProductId]
+    : labels.itemPlaceholder;
 }
 
 function buildItemSnapshot(
@@ -123,18 +137,19 @@ function buildItemSnapshot(
     MAX_ITEM_WEIGHT_GRAMS,
   );
 
-  if (
-    weightGrams === null ||
-    row.carbsPer100Grams === null ||
-    row.name.length === 0
-  ) {
+  if (weightGrams === null || row.demoProductId.length === 0) {
     return null;
   }
 
-  return buildNutritionQuickAddItemSnapshot({
-    carbsPer100Grams: row.carbsPer100Grams,
+  const product = findNutritionDemoProductById(row.demoProductId);
+
+  if (!product) {
+    return null;
+  }
+
+  return buildNutritionDemoItemWriteSnapshot({
     itemId: row.id,
-    name: row.name,
+    product,
     weightGrams,
   });
 }
@@ -272,7 +287,6 @@ export function NutritionQuickAddForm({
     updateItemRow(selectedItemRowId, {
       carbsPer100Grams: product.carbsPer100Grams,
       demoProductId: product.id,
-      name: labels.demoProducts[product.id],
     });
     setSelectedItemRowId(null);
   };
@@ -422,6 +436,8 @@ export function NutritionQuickAddForm({
                     MAX_ITEM_WEIGHT_GRAMS,
                   ) === null;
                 const itemAriaLabel = `${labels.itemAriaLabel} ${index + 1}`;
+                const itemDisplayName = resolveItemRowDisplayName(row, labels);
+                const itemSelected = row.demoProductId.length > 0;
 
                 return (
                   <section
@@ -445,7 +461,7 @@ export function NutritionQuickAddForm({
                         aria-haspopup="dialog"
                         aria-labelledby={`quick-add-nutrition-item-${row.id}-label quick-add-nutrition-item-${row.id}-value`}
                         className={`mt-1.5 flex min-h-14 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 text-left text-sm font-medium transition hover:border-slate-300 focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:outline-none ${
-                          row.name ? 'text-slate-950' : 'text-slate-400'
+                          itemSelected ? 'text-slate-950' : 'text-slate-400'
                         }`}
                         onClick={() => setSelectedItemRowId(row.id)}
                         type="button"
@@ -455,7 +471,7 @@ export function NutritionQuickAddForm({
                           id={`quick-add-nutrition-item-${row.id}-value`}
                         >
                           <span className="block truncate">
-                            {row.name || labels.itemPlaceholder}
+                            {itemDisplayName}
                           </span>
                           {row.carbsPer100Grams !== null ? (
                             <span

@@ -77,7 +77,8 @@ Locales: `en-GB`, `de-DE`, `uk-UA`, `ru-RU`.
 
 Meal labels reuse `timeline.mealType.*`. Form chrome uses
 `quick-add.nutrition.*`. Form state stores canonical IDs. Changing locale
-does not mutate stored medical data.
+does not mutate stored medical data. Localized demo product labels stay in
+the UI; they are not written into `NutritionItemSnapshot.name`.
 
 `unspecified` is a valid domain value for legacy/import/adoption. It is
 not offered as a manual Quick Add choice.
@@ -97,10 +98,17 @@ canonical precision. `500` is not a medical-domain rule.
 
 ## Itemized entry
 
-The demo catalogue is presentation-only. Saved items contain:
+The demo catalogue is presentation-only. UI labels come from
+`labels.demoProducts[...]`. The write path uses a separate locale-independent
+`canonicalSnapshotName` on the demo source. That field is a historical
+snapshot value only: it is not a product identity and is not a catalogue
+lookup key. Demo `productId` / `demoProductId` are still not persisted.
+
+Saved items contain:
 
 - opaque `itemId` (form-row identity, not a name or catalogue key)
-- `name` snapshot (localized display text at write time)
+- `name` snapshot from `canonicalSnapshotName` (locale-independent; not the
+  localized UI label)
 - `carbohydratesGrams` = `weightGrams * carbsPer100Grams / 100`
 - optional `weightGrams` / `carbsPer100Grams` snapshots
 
@@ -139,4 +147,6 @@ Those belong to Wave 5C. Current Nutrition save remains fire-and-forget
   a localized meal title as editable text.
 - Local v2 events are not cloud-adoption ready (`schemaVersion !== 1`
   stays unsupported in the adoption scanner).
-- Demo product names are UI catalogue labels, not a food database.
+- Demo catalogue IDs and localized UI labels are presentation-only. The
+  write snapshot uses a separate locale-independent `canonicalSnapshotName`.
+  This is not a food database.

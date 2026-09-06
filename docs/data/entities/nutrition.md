@@ -91,10 +91,11 @@ history stays on `NutritionTimelineEventV1`. The medical API is still v1.
 Legacy-only fields (`mode`, `products`, `calculatedCarbsGrams`, free-form
 `mealType`) are not part of canonical v2. Wave 5A does not rewrite them.
 
-Each `NutritionItemSnapshot` has an opaque in-record `itemId`, a display
-`name`, item-level `carbohydratesGrams`, and optional `weightGrams` /
+Each `NutritionItemSnapshot` has an opaque in-record `itemId`, a historical
+`name` snapshot, item-level `carbohydratesGrams`, and optional `weightGrams` /
 `carbsPer100Grams`. Items are not looked up by name. Demo `productId` is
-not promoted to catalogue identity.
+not promoted to catalogue identity. Wave 5B demo writes take `name` from a
+locale-independent `canonicalSnapshotName`, not from the localized UI label.
 
 ## Relationships
 

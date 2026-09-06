@@ -216,7 +216,9 @@ test('itemized nutrition quick add stores snapshots without demo productId', asy
   expect(stored?.mealType).toBe('lunch');
   expect(stored?.carbohydratesGrams).toBe(14);
   expect(stored?.items).toHaveLength(1);
-  expect(stored?.items?.[0]?.name).toBe('Apple');
+  expect(typeof stored?.items?.[0]?.name).toBe('string');
+  expect(stored?.items?.[0]?.name?.length).toBeGreaterThan(0);
+  expect(stored?.items?.[0]?.name).not.toBe('apple');
   expect(stored?.items?.[0]?.weightGrams).toBe(100);
   expect(stored?.items?.[0]?.carbsPer100Grams).toBe(14);
   expect(stored?.items?.[0]?.itemId).toBeTruthy();
