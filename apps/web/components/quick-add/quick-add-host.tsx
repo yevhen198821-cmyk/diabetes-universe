@@ -4,7 +4,6 @@ import type {
   ActivityQuickAddEntry,
   MedicationQuickAddEntry,
   NoteQuickAddEntry,
-  NutritionQuickAddEntry,
   QuickAddCategory,
 } from '@diabetes-universe/types';
 import { haptics, QuickAddPanel } from '@diabetes-universe/ui';
@@ -16,6 +15,7 @@ import { quickAddActions } from '../../lib/quick-add/actions';
 import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
 import { canDismissQuickAddWhileSubmitPending } from '../../lib/quick-add/quick-add-submit-identity-model';
 import type { InsulinQuickAddSubmitRequest } from '../../lib/quick-add/insulin-quick-add-submit';
+import type { NutritionQuickAddSubmitRequest } from '../../lib/quick-add/nutrition-quick-add-submit';
 import type { QuickAddCloseReason } from '../../lib/quick-add/quick-add-controller-model';
 import {
   finalizeGlucoseQuickAddSubmit,
@@ -49,7 +49,9 @@ export interface QuickAddHostProps {
   ) => Promise<void>;
   readonly onMedicationSubmit?: (entry: MedicationQuickAddEntry) => void;
   readonly onNoteSubmit?: (entry: NoteQuickAddEntry) => void;
-  readonly onNutritionSubmit?: (entry: NutritionQuickAddEntry) => void;
+  readonly onNutritionSubmit?: (
+    request: NutritionQuickAddSubmitRequest,
+  ) => Promise<void>;
   readonly onOpenChange: (open: boolean) => void;
   readonly onRequestOpen?: () => void;
   readonly open: boolean;
@@ -215,8 +217,16 @@ export function QuickAddHost({
     closeQuickAdd('success');
   };
 
-  const handleNutritionSubmit = (entry: NutritionQuickAddEntry) => {
-    onNutritionSubmit?.(entry);
+  const handleNutritionSubmit = async (
+    request: NutritionQuickAddSubmitRequest,
+  ) => {
+    const didPersist = await finalizeQuickAddSubmit(onNutritionSubmit, request);
+
+    if (!didPersist) {
+      return;
+    }
+
+    releaseAsyncSubmitPending();
     haptics.success();
     closeQuickAdd('success');
   };
@@ -269,6 +279,7 @@ export function QuickAddHost({
       <NutritionQuickAddForm
         onCancel={handleFormCancel}
         onSubmit={handleNutritionSubmit}
+        onSubmittingChange={handleAsyncSubmittingChange}
       />
     );
   }

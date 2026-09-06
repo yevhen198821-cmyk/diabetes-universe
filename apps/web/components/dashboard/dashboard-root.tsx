@@ -313,8 +313,10 @@ export function DashboardRoot() {
         onNoteSubmit={(entry) => {
           addEvent(createSemanticNoteTimelineEvent(entry));
         }}
-        onNutritionSubmit={(entry) => {
-          addEvent(createSemanticNutritionTimelineEvent(entry));
+        onNutritionSubmit={async ({ entry, eventId }) => {
+          await addEventAsync(
+            createSemanticNutritionTimelineEvent(entry, { id: eventId }),
+          );
         }}
         onOpenChange={handleQuickAddOpenChange}
         onClosed={handleQuickAddClosed}

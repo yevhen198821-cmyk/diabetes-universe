@@ -589,6 +589,10 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'quick-add.nutrition.notePlaceholder': 'Add a note',
   'quick-add.nutrition.removeItem': 'Remove item',
   'quick-add.nutrition.save': 'Save',
+  'quick-add.nutrition.saveError.description':
+    'The nutrition entry was not saved. Your values are still in the form. Try again.',
+  'quick-add.nutrition.saveError.title': 'Could not save nutrition entry',
+  'quick-add.nutrition.saving': 'Saving…',
   'quick-add.nutrition.timeLabel': 'Time',
   'quick-add.nutrition.title': 'Add nutrition',
   'quick-add.nutrition.totalCarbsLabel': 'Total carbohydrates',

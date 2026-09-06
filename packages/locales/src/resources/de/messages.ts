@@ -295,6 +295,11 @@ export const germanCanonicalMessages = defineApprovedMessages({
   'quick-add.nutrition.notePlaceholder': 'Notiz hinzufügen',
   'quick-add.nutrition.removeItem': 'Eintrag entfernen',
   'quick-add.nutrition.save': 'Speichern',
+  'quick-add.nutrition.saveError.description':
+    'Der Ernährungseintrag wurde nicht gespeichert. Ihre Werte sind noch im Formular. Versuchen Sie es erneut.',
+  'quick-add.nutrition.saveError.title':
+    'Ernährungseintrag konnte nicht gespeichert werden',
+  'quick-add.nutrition.saving': 'Speichern…',
   'quick-add.nutrition.timeLabel': 'Uhrzeit',
   'quick-add.nutrition.title': 'Ernährung hinzufügen',
   'quick-add.nutrition.totalCarbsLabel': 'Kohlenhydrate insgesamt',
