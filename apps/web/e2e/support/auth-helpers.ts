@@ -155,6 +155,12 @@ export async function signOutCurrentSession(page: Page) {
     .click();
 }
 
+export async function signOutFromAccount(page: Page) {
+  await page.goto('/account');
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page).toHaveURL(/\/auth$/);
+}
+
 export async function markCurrentSessionStale(page: Page) {
   const response = await page.request.post(
     '/api/auth/test/stale-current-session',

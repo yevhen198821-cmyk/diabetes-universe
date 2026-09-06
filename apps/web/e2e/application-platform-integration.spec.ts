@@ -1,5 +1,6 @@
 import { expect, test } from './support/test';
 
+import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 import {
   APPLICATION_PLATFORM_READY_SELECTOR,
   waitForApplicationReady,
@@ -9,7 +10,7 @@ test('dashboard to timeline client navigation preserves application ready root',
   page,
 }) => {
   await page.goto('/');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const readyRoot = page.locator(APPLICATION_PLATFORM_READY_SELECTOR);
   const mountProbe = await readyRoot.evaluate((element) => {
@@ -37,7 +38,7 @@ test('dashboard to timeline client navigation preserves timeline store state', a
   page,
 }) => {
   await page.goto('/');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const daySummary = page.getByRole('region', { name: 'Today' });
 

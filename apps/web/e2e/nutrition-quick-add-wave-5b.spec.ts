@@ -2,6 +2,7 @@ import { type Browser } from '@playwright/test';
 
 import { expect, test, type Page } from './support/test';
 
+import { readActiveTimelineStoredEvents } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
 interface RawNutritionEvent {
@@ -82,40 +83,19 @@ async function createLocalizedPage(browser: Browser, locale: string) {
 async function readLatestManualNutritionEvent(
   page: Page,
 ): Promise<RawNutritionEvent | null> {
-  return page.evaluate(async () => {
-    return new Promise<RawNutritionEvent | null>((resolve, reject) => {
-      const request = indexedDB.open('diabetes-universe-timeline');
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const database = request.result;
-        const transaction = database.transaction('timeline_events', 'readonly');
-        const getAll = transaction.objectStore('timeline_events').getAll();
+  const events = (await readActiveTimelineStoredEvents(
+    page,
+  )) as readonly RawNutritionEvent[];
+  const nutritionEvents = events
+    .filter(
+      (event): event is RawNutritionEvent =>
+        event?.kind === 'nutrition' && event?.source === 'manual',
+    )
+    .sort((left, right) =>
+      (left.occurredAt ?? '').localeCompare(right.occurredAt ?? ''),
+    );
 
-        getAll.onerror = () => {
-          database.close();
-          reject(getAll.error);
-        };
-        getAll.onsuccess = () => {
-          database.close();
-
-          const rows = (getAll.result ?? []) as readonly {
-            readonly event?: RawNutritionEvent;
-          }[];
-          const nutritionEvents = rows
-            .map((row) => row.event)
-            .filter(
-              (event): event is RawNutritionEvent =>
-                event?.kind === 'nutrition' && event?.source === 'manual',
-            )
-            .sort((left, right) =>
-              (left.occurredAt ?? '').localeCompare(right.occurredAt ?? ''),
-            );
-
-          resolve(nutritionEvents.at(-1) ?? null);
-        };
-      };
-    });
-  });
+  return nutritionEvents.at(-1) ?? null;
 }
 
 function assertCanonicalManualPayload(stored: RawNutritionEvent | null) {

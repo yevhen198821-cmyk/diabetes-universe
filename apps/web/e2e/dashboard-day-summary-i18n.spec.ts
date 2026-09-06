@@ -1,5 +1,6 @@
 import { expect, type Locator, test } from './support/test';
 
+import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 import {
   saveGlucoseQuickAdd,
@@ -14,7 +15,7 @@ test('dashboard day summary renders English labels without reminders placeholder
   page,
 }) => {
   await page.goto('/');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const daySummary = page.getByRole('region', { name: 'Today' });
 

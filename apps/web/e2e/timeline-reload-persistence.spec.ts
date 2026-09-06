@@ -2,6 +2,7 @@ import { expect, test } from './support/test';
 
 import {
   clearTimelineEventsInIndexedDb,
+  prepareCanonicalDemoTimelineFixture,
   waitForTimelineBootstrapComplete,
 } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
@@ -67,7 +68,10 @@ test('empty durable timeline does not reseed demo data after reload', async ({
   await page.goto('/timeline');
   await waitForApplicationReady(page);
   await waitForTimelineBootstrapComplete(page);
-  await expect(page.locator('#timeline-events-list')).toHaveCount(1);
+  await expect(
+    page.getByRole('heading', { name: 'No events yet' }),
+  ).toBeVisible();
+  await expect(page.locator('#timeline-events-list')).toHaveCount(0);
 
   await clearTimelineEventsInIndexedDb(page);
   await page.reload();
@@ -91,7 +95,7 @@ test('dashboard quick add insulin persists across page reload', async ({
   page,
 }) => {
   await page.goto('/');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await page.getByRole('button', { name: 'Quick add: Insulin' }).click();
   await page.getByRole('button', { name: /Insulin preparation/ }).click();

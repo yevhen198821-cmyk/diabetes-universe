@@ -1,5 +1,6 @@
 import { expect, test } from './support/test';
 
+import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 import {
   saveGlucoseQuickAdd,
@@ -10,7 +11,7 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
   page,
 }) => {
   await page.goto('/');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const lastGlucoseRegion = page.getByRole('region', { name: 'Last glucose' });
 

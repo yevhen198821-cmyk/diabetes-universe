@@ -5,7 +5,10 @@ import {
   selectGlucoseUnitIfRequired,
   saveGlucoseQuickAdd,
 } from './support/glucose-quick-add-helpers';
-import { prepareEmptyTimelineDashboardFixture } from './support/timeline-indexeddb-helpers';
+import {
+  prepareCanonicalDemoTimelineFixture,
+  prepareEmptyTimelineDashboardFixture,
+} from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
 async function configureTargetRangeForDashboard(page: Page) {
@@ -156,7 +159,7 @@ test('ready Last Glucose hero exposes full mobile contract at 360 and 390', asyn
     );
     await configureTargetRangeForDashboard(page);
     await page.goto('/');
-    await waitForApplicationReady(page);
+    await prepareCanonicalDemoTimelineFixture(page);
 
     const lastGlucoseRegion = page.getByRole('region', {
       name: 'Last glucose',

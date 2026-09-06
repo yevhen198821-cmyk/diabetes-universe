@@ -1,5 +1,6 @@
 import { expect, test } from './support/test';
 
+import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 import {
   saveGlucoseQuickAdd,
@@ -9,7 +10,7 @@ import {
 
 test('dashboard quick add updates shared timeline state', async ({ page }) => {
   await page.goto('/');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await expect(page).toHaveTitle(/Home \| Diabetes Universe/);
   await expect(
@@ -77,8 +78,7 @@ test('quick add insulin opens directly and updates dashboard', async ({
   page,
 }) => {
   await page.goto('/');
-
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const daySummary = page.getByRole('region', { name: 'Today' });
 
@@ -111,7 +111,7 @@ test('timeline groups demo events by day period and avoids mobile horizontal scr
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await expect(
     page.getByRole('heading', { level: 1, name: 'Timeline' }),
@@ -136,7 +136,7 @@ test('timeline search and filters combine without changing store', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const search = page.getByLabel('Search events');
 
@@ -164,7 +164,7 @@ test('timeline search and filters combine without changing store', async ({
   await expect(page.getByText('NovoRapid').first()).toBeVisible();
 
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
   await search.focus();
   await page.keyboard.type('glucose');
   await expect(search).toHaveValue('glucose');
@@ -174,7 +174,7 @@ test('timeline search and filters combine without changing store', async ({
 
 test('timeline quick add updates shared dashboard state', async ({ page }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await expect(page).toHaveTitle(/Timeline \| Diabetes Universe/);
   await expect(

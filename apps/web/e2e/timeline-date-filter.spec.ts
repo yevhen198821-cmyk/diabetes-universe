@@ -1,6 +1,6 @@
 import { expect, test, type Page } from './support/test';
 
-import { waitForApplicationReady } from './support/wait-for-application-ready';
+import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 
 function dateFilterSheet(page: Page) {
   return page.getByRole('dialog', { name: 'Select period' });
@@ -14,7 +14,7 @@ async function openDateFilterSheet(page: Page) {
 test('timeline defaults to last 30 days', async ({ page }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await expect(page.getByRole('button', { name: 'Date range' })).toContainText(
     'Last 30 days',
@@ -27,7 +27,7 @@ test('timeline date selector lists active window presets only', async ({
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await openDateFilterSheet(page);
 
@@ -52,7 +52,7 @@ test('timeline last 45 days selection filters within active window', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await openDateFilterSheet(page);
   await dateFilterSheet(page)
@@ -70,7 +70,7 @@ test('timeline combines last 45 days with category filter', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await openDateFilterSheet(page);
   await dateFilterSheet(page)
@@ -91,7 +91,7 @@ test('timeline clear filters preserves selected 45-day range', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await openDateFilterSheet(page);
   await dateFilterSheet(page)
@@ -118,7 +118,7 @@ test('timeline filtered empty result keeps clear filters action', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await page.getByLabel('Search events').fill('does-not-exist');
 
@@ -139,7 +139,7 @@ test('timeline date filter keeps mobile layout without horizontal overflow', asy
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await expect(page.getByRole('button', { name: 'Date range' })).toBeVisible();
 

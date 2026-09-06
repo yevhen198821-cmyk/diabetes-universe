@@ -1,6 +1,6 @@
 import { expect, test, type Page } from './support/test';
 
-import { waitForApplicationReady } from './support/wait-for-application-ready';
+import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 import {
   saveGlucoseQuickAdd,
   selectGlucoseUnitIfRequired,
@@ -19,7 +19,7 @@ test('timeline toolbar keeps filtered totals for the active window', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await expect(page.getByText('31 events')).toBeVisible();
   await expect(
@@ -31,7 +31,7 @@ test('timeline search keeps composable filtering with day-scoped list', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await page.getByLabel('Search events').fill('NovoRapid');
 
@@ -47,7 +47,7 @@ test('timeline filter reset restores default toolbar totals', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await page.getByRole('button', { name: 'Notes' }).click();
 
@@ -65,7 +65,7 @@ test('timeline delete and add update the selected day list', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await page.getByRole('button', { name: /Open event: NovoRapid/ }).click();
   await page.getByRole('button', { name: 'Delete' }).click();
@@ -92,7 +92,7 @@ test('timeline load more control stays hidden for day-scoped list without reposi
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const fab = page.locator('#timeline-mobile-quick-add-fab');
 

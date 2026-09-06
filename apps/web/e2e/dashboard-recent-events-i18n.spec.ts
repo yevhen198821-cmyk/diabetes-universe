@@ -1,5 +1,6 @@
 import { expect, type Locator, type Page, test } from './support/test';
 
+import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
 function recentEventsSection(page: Page): Locator {
@@ -12,7 +13,7 @@ test('dashboard recent events renders English chrome and syncs with timeline edi
   page,
 }) => {
   await page.goto('/');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const recentEvents = recentEventsSection(page);
 

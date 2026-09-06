@@ -5,6 +5,8 @@ import { expect, test, type Page } from './support/test';
 import { CANONICAL_DEMO_LOCAL_DAY_TIME } from '../testing/demo-reference-time';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 import {
+  prepareCanonicalDemoTimelineFixture,
+  readActiveTimelineStoredEventById,
   seedTimelineEventInIndexedDb,
   waitForTimelineBootstrapComplete,
 } from './support/timeline-indexeddb-helpers';
@@ -28,7 +30,7 @@ async function createLocalizedPage(browser: Browser, locale: string) {
 
 async function openInsulinDetail(page: Page, name: RegExp) {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const card = page.getByRole('button', { name }).first();
 
@@ -251,7 +253,7 @@ test('timeline search finds insulin by recorded snapshot and unmatched legacy te
   page,
 }) => {
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const search = page.getByLabel('Search events');
 
@@ -272,7 +274,7 @@ test('insulin semantic edit is localized in Russian without English chrome', asy
   const { context, page } = await createLocalizedPage(browser, 'ru-RU');
 
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
   await page
     .getByRole('button', { name: /NovoRapid/ })
     .first()
@@ -444,30 +446,10 @@ test('reverting to no recorded context after another choice preserves absence on
     context.getByRole('option', { name: 'No context recorded' }),
   ).toHaveCount(1);
 
-  const storedEvent = await page.evaluate(async (eventId) => {
-    return new Promise<Record<string, unknown> | null>((resolve, reject) => {
-      const request = indexedDB.open('diabetes-universe-timeline');
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        const database = request.result;
-        const transaction = database.transaction('timeline_events', 'readonly');
-        const getRequest = transaction
-          .objectStore('timeline_events')
-          .get(eventId);
-
-        getRequest.onerror = () => {
-          database.close();
-          reject(getRequest.error);
-        };
-        getRequest.onsuccess = () => {
-          database.close();
-          const record = getRequest.result as
-            { readonly event?: Record<string, unknown> } | undefined;
-          resolve(record?.event ?? null);
-        };
-      };
-    });
-  }, NO_CONTEXT_INSULIN_EVENT.id);
+  const storedEvent = await readActiveTimelineStoredEventById(
+    page,
+    NO_CONTEXT_INSULIN_EVENT.id,
+  );
 
   expect(storedEvent).not.toBeNull();
   expect(Object.hasOwn(storedEvent ?? {}, 'administrationContext')).toBe(false);
