@@ -95,8 +95,11 @@ Logout does not wipe other accounts' device-local data.
    IndexedDB is opened.
 2. Session fetch then opens the owned database, or stays `blocked` (empty
    in-memory) if a session exists without a valid `accountId`.
-3. The provider remounts on `key={ownershipKey}` so React cannot keep a
-   stale account repository or subscription.
+3. The provider remounts on `key={ownershipKey}` when the authenticated
+   account changes. Pending, blocked, and anonymous share one
+   `unauthenticated` key so first session resolve does not remount the
+   product tree. Authenticated A → B (or logout) still destroys the
+   previous account repository.
 4. The previous repository is closed on unmount.
 5. Timeline chrome exposes `data-timeline-ownership` (`pending` /
    `blocked` / `anonymous` / `authenticated`) without account IDs.

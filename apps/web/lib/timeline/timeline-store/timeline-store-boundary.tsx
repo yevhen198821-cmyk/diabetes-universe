@@ -27,9 +27,9 @@ export function TimelineStoreBoundary({
 }: TimelineStoreBoundaryProps) {
   const ownership = useTimelineLocalOwnership();
   const ownershipKey =
-    ownership.kind === 'anonymous' || ownership.kind === 'authenticated'
+    ownership.kind === 'authenticated'
       ? ownership.databaseName
-      : ownership.kind;
+      : 'unauthenticated';
 
   const repository = useMemo(() => {
     if (ownership.kind === 'anonymous' || ownership.kind === 'authenticated') {
