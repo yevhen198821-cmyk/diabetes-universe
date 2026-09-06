@@ -52,6 +52,31 @@ export interface TimelineUiLabels {
         readonly otherNameLabel: string;
         readonly preparationLabel: string;
       }>;
+      readonly nutrition: Readonly<{
+        readonly addItem: string;
+        readonly carbsLabel: string;
+        readonly editTitle: string;
+        readonly errors: Readonly<{
+          readonly carbsPrecision: string;
+          readonly carbsRange: string;
+          readonly dateRequired: string;
+          readonly itemCarbs: string;
+          readonly itemNameRequired: string;
+          readonly mealTypeRequired: string;
+          readonly timeRequired: string;
+        }>;
+        readonly itemCarbsLabel: string;
+        readonly itemNameLabel: string;
+        readonly itemsHeading: string;
+        readonly legacyMealGuidance: string;
+        readonly mealTypeLabel: string;
+        readonly mealTypePlaceholder: string;
+        readonly noteLabel: string;
+        readonly removeItem: string;
+        readonly saveErrorDescription: string;
+        readonly saveErrorTitle: string;
+        readonly saving: string;
+      }>;
       readonly note: string;
       readonly save: string;
       readonly time: string;
@@ -60,6 +85,14 @@ export interface TimelineUiLabels {
       readonly value: string;
     }>;
     readonly note: string;
+    readonly nutrition: Readonly<{
+      readonly carbohydrates: string;
+      readonly itemCarbs: string;
+      readonly itemCarbsPer100: string;
+      readonly itemWeight: string;
+      readonly items: string;
+      readonly mealType: string;
+    }>;
     readonly source: string;
   }>;
   readonly empty: Readonly<{
@@ -224,6 +257,85 @@ const TIMELINE_UI_TRANSLATION_KEYS = {
   ),
   detailFormInsulinPreparationLabel: asTranslationKey(
     'timeline.detail.form.insulin.preparationLabel',
+  ),
+  detailFormNutritionAddItem: asTranslationKey(
+    'timeline.detail.form.nutrition.addItem',
+  ),
+  detailFormNutritionCarbsLabel: asTranslationKey(
+    'timeline.detail.form.nutrition.carbsLabel',
+  ),
+  detailFormNutritionEditTitle: asTranslationKey(
+    'timeline.detail.form.nutrition.editTitle',
+  ),
+  detailFormNutritionErrorCarbsPrecision: asTranslationKey(
+    'timeline.detail.form.nutrition.errors.carbsPrecision',
+  ),
+  detailFormNutritionErrorCarbsRange: asTranslationKey(
+    'timeline.detail.form.nutrition.errors.carbsRange',
+  ),
+  detailFormNutritionErrorDateRequired: asTranslationKey(
+    'timeline.detail.form.nutrition.errors.dateRequired',
+  ),
+  detailFormNutritionErrorItemCarbs: asTranslationKey(
+    'timeline.detail.form.nutrition.errors.itemCarbs',
+  ),
+  detailFormNutritionErrorItemNameRequired: asTranslationKey(
+    'timeline.detail.form.nutrition.errors.itemNameRequired',
+  ),
+  detailFormNutritionErrorMealTypeRequired: asTranslationKey(
+    'timeline.detail.form.nutrition.errors.mealTypeRequired',
+  ),
+  detailFormNutritionErrorTimeRequired: asTranslationKey(
+    'timeline.detail.form.nutrition.errors.timeRequired',
+  ),
+  detailFormNutritionItemCarbsLabel: asTranslationKey(
+    'timeline.detail.form.nutrition.itemCarbsLabel',
+  ),
+  detailFormNutritionItemNameLabel: asTranslationKey(
+    'timeline.detail.form.nutrition.itemNameLabel',
+  ),
+  detailFormNutritionItemsHeading: asTranslationKey(
+    'timeline.detail.form.nutrition.itemsHeading',
+  ),
+  detailFormNutritionLegacyMealGuidance: asTranslationKey(
+    'timeline.detail.form.nutrition.legacyMealGuidance',
+  ),
+  detailFormNutritionMealTypeLabel: asTranslationKey(
+    'timeline.detail.form.nutrition.mealTypeLabel',
+  ),
+  detailFormNutritionMealTypePlaceholder: asTranslationKey(
+    'timeline.detail.form.nutrition.mealTypePlaceholder',
+  ),
+  detailFormNutritionNoteLabel: asTranslationKey(
+    'timeline.detail.form.nutrition.noteLabel',
+  ),
+  detailFormNutritionRemoveItem: asTranslationKey(
+    'timeline.detail.form.nutrition.removeItem',
+  ),
+  detailFormNutritionSaveErrorDescription: asTranslationKey(
+    'timeline.detail.form.nutrition.saveError.description',
+  ),
+  detailFormNutritionSaveErrorTitle: asTranslationKey(
+    'timeline.detail.form.nutrition.saveError.title',
+  ),
+  detailFormNutritionSaving: asTranslationKey(
+    'timeline.detail.form.nutrition.saving',
+  ),
+  detailNutritionCarbohydrates: asTranslationKey(
+    'timeline.detail.nutrition.carbohydrates',
+  ),
+  detailNutritionItemCarbs: asTranslationKey(
+    'timeline.detail.nutrition.itemCarbs',
+  ),
+  detailNutritionItemCarbsPer100: asTranslationKey(
+    'timeline.detail.nutrition.itemCarbsPer100',
+  ),
+  detailNutritionItemWeight: asTranslationKey(
+    'timeline.detail.nutrition.itemWeight',
+  ),
+  detailNutritionItems: asTranslationKey('timeline.detail.nutrition.items'),
+  detailNutritionMealType: asTranslationKey(
+    'timeline.detail.nutrition.mealType',
   ),
   detailFormNote: asTranslationKey('timeline.detail.form.note'),
   detailFormSave: asTranslationKey('timeline.detail.form.save'),
@@ -428,6 +540,94 @@ export function resolveTimelineUiLabels(
             TIMELINE_UI_TRANSLATION_KEYS.detailFormInsulinPreparationLabel,
           ),
         },
+        nutrition: {
+          addItem: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionAddItem,
+          ),
+          carbsLabel: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionCarbsLabel,
+          ),
+          editTitle: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionEditTitle,
+          ),
+          errors: {
+            carbsPrecision: translate(
+              localization,
+              TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionErrorCarbsPrecision,
+            ),
+            carbsRange: translate(
+              localization,
+              TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionErrorCarbsRange,
+            ),
+            dateRequired: translate(
+              localization,
+              TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionErrorDateRequired,
+            ),
+            itemCarbs: translate(
+              localization,
+              TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionErrorItemCarbs,
+            ),
+            itemNameRequired: translate(
+              localization,
+              TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionErrorItemNameRequired,
+            ),
+            mealTypeRequired: translate(
+              localization,
+              TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionErrorMealTypeRequired,
+            ),
+            timeRequired: translate(
+              localization,
+              TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionErrorTimeRequired,
+            ),
+          },
+          itemCarbsLabel: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionItemCarbsLabel,
+          ),
+          itemNameLabel: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionItemNameLabel,
+          ),
+          itemsHeading: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionItemsHeading,
+          ),
+          legacyMealGuidance: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionLegacyMealGuidance,
+          ),
+          mealTypeLabel: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionMealTypeLabel,
+          ),
+          mealTypePlaceholder: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionMealTypePlaceholder,
+          ),
+          noteLabel: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionNoteLabel,
+          ),
+          removeItem: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionRemoveItem,
+          ),
+          saveErrorDescription: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionSaveErrorDescription,
+          ),
+          saveErrorTitle: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionSaveErrorTitle,
+          ),
+          saving: translate(
+            localization,
+            TIMELINE_UI_TRANSLATION_KEYS.detailFormNutritionSaving,
+          ),
+        },
         note: translate(
           localization,
           TIMELINE_UI_TRANSLATION_KEYS.detailFormNote,
@@ -454,6 +654,32 @@ export function resolveTimelineUiLabels(
         ),
       },
       note: translate(localization, TIMELINE_UI_TRANSLATION_KEYS.detailNote),
+      nutrition: {
+        carbohydrates: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailNutritionCarbohydrates,
+        ),
+        itemCarbs: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailNutritionItemCarbs,
+        ),
+        itemCarbsPer100: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailNutritionItemCarbsPer100,
+        ),
+        itemWeight: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailNutritionItemWeight,
+        ),
+        items: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailNutritionItems,
+        ),
+        mealType: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailNutritionMealType,
+        ),
+      },
       source: translate(
         localization,
         TIMELINE_UI_TRANSLATION_KEYS.detailSource,

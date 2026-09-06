@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createTestTimelineInsulinEditCopy } from './testing/create-test-timeline-insulin-edit-copy.ts';
+import { createTestTimelineNutritionEditCopy } from './testing/create-test-timeline-nutrition-edit-copy.ts';
 import {
   createTimelineSemanticEventEditDraft,
   updateTimelineEventFromDraft,
@@ -60,9 +61,11 @@ const events = {
 };
 
 let copy;
+let nutritionCopy;
 
 test.before(async () => {
   copy = await createTestTimelineInsulinEditCopy();
+  nutritionCopy = createTestTimelineNutritionEditCopy();
 });
 
 function save(event, draftOverrides = {}) {
@@ -74,11 +77,16 @@ function save(event, draftOverrides = {}) {
     },
     event,
     now,
+    nutritionCopy,
   });
 }
 
-test('non-insulin kinds keep the generic string edit draft', () => {
+test('non-insulin non-nutrition kinds keep the generic string edit draft', () => {
   for (const [kind, event] of Object.entries(events)) {
+    if (kind === 'nutrition') {
+      continue;
+    }
+
     const draft = createTimelineSemanticEventEditDraft(event);
 
     assert.equal(draft.variant, 'generic', `${kind} stays generic`);
@@ -87,6 +95,14 @@ test('non-insulin kinds keep the generic string edit draft', () => {
     assert.equal(typeof draft.value, 'string');
     assert.equal(typeof draft.context, 'string');
   }
+});
+
+test('nutrition uses a dedicated edit draft', () => {
+  const draft = createTimelineSemanticEventEditDraft(events.nutrition);
+
+  assert.equal(draft.variant, 'nutrition');
+  assert.equal(draft.mealType, 'breakfast');
+  assert.equal(draft.origin, 'legacy_v1');
 });
 
 test('glucose edit still maps its localized context label back to the semantic value', () => {
@@ -122,11 +138,19 @@ test('medication edit still writes name, dose, unit, note, and free-text context
   assert.equal(result.event.context, 'Перед сном');
 });
 
-test('nutrition edit still maps the meal type title and carbohydrate value', () => {
-  const result = save(events.nutrition, { title: 'Обед', value: '55' });
+test('nutrition edit adopts legacy v1 to canonical v2 on save', () => {
+  const draft = createTimelineSemanticEventEditDraft(events.nutrition);
+  const result = save(events.nutrition, {
+    ...draft,
+    carbsEdited: true,
+    carbohydratesGrams: '55',
+    mealType: 'lunch',
+  });
 
   assert.equal(result.event.mealType, 'lunch');
   assert.equal(result.event.carbohydratesGrams, 55);
+  assert.equal(result.event.schemaVersion, 2);
+  assert.equal(result.event.id, events.nutrition.id);
 });
 
 test('activity edit still converts minutes to duration seconds', () => {
@@ -154,6 +178,12 @@ test('non-insulin kinds never gain insulin semantic fields', () => {
     assert.equal('administrationContext' in result.event, false);
     assert.equal(result.event.id, event.id);
     assert.equal(result.event.createdAt, event.createdAt);
+
+    if (kind === 'nutrition') {
+      assert.equal(result.event.schemaVersion, 2);
+      continue;
+    }
+
     assert.equal(result.event.schemaVersion, 1);
   }
 });

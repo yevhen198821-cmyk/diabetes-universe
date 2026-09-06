@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createTestTimelineInsulinEditCopy } from './testing/create-test-timeline-insulin-edit-copy.ts';
+import { createTestTimelineNutritionEditCopy } from './testing/create-test-timeline-nutrition-edit-copy.ts';
 import {
   createTimelineSemanticEventEditDraft,
   updateTimelineEventFromDraft,
@@ -75,6 +76,7 @@ function save(event, insulinOverrides = {}, draftOverrides = {}) {
     },
     event,
     now,
+    nutritionCopy: createTestTimelineNutritionEditCopy(),
   });
 }
 
@@ -344,6 +346,7 @@ test('a variant mismatch cannot silently write an insulin event', () => {
     },
     event: semanticInsulin,
     now,
+    nutritionCopy: createTestTimelineNutritionEditCopy(),
   });
 
   assert.equal(result.event, null);

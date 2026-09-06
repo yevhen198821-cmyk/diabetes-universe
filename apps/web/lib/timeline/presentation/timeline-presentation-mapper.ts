@@ -171,7 +171,7 @@ function mapNutritionPresentation(
   dependencies: TimelinePresentationDependencies,
 ) {
   const value = formatMedicalNumber(dependencies, event.carbohydratesGrams, {
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 20,
     minimumFractionDigits: 0,
   });
   const unit = dependencies.labels.units.nutritionCarbs;

@@ -19,7 +19,7 @@ Edit, API, or legacy adoption.
 | ------ | -------------------------------------------------------- | ---------------------------------- |
 | **6B** | Canonical/localized Nutrition Quick Add writes (v2)      | Durable save, semantic quarantine  |
 | **6C** | Durable save integrity + semantic persistence validation | Detail/Edit, API, adoption-on-edit |
-| **6D** | Nutrition Detail/Edit adoption-on-edit (planned)         | Medical API, food database         |
+| **6D** | Nutrition Detail/Edit adoption-on-edit                   | Medical API, food database         |
 
 ## What changed
 

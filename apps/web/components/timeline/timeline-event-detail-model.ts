@@ -14,12 +14,19 @@ import {
   type InsulinPresentationLabels,
 } from '../../lib/medical/insulin';
 import {
+  buildNutritionTimelineEventFromEditDraft,
+  createNutritionTimelineEventEditDraft,
+  type NutritionTimelineEditCopy,
+  type NutritionTimelineEventEditDraft,
+} from '../../lib/medical/nutrition/nutrition-timeline-edit-model';
+
+export type { NutritionTimelineEventEditDraft };
+import {
   createIsoDateTimeFromLocalDateAndTime,
   formatTimelineDisplayTime,
   getTimelineCalendarDateKey,
 } from '../../lib/timeline/timeline-date-time';
 import { mapQuickAddMedicationUnit } from '../../lib/timeline/semantic-creators/map-quick-add-medication-unit';
-import { mapQuickAddNutritionMealType } from '../../lib/timeline/semantic-creators/map-quick-add-nutrition-meal-type';
 
 interface TimelineEventEditDraftFields {
   readonly context: string;
@@ -61,10 +68,19 @@ export interface TimelineInsulinEventEditDraft {
 }
 
 export type TimelineEventEditDraft =
-  TimelineGenericEventEditDraft | TimelineInsulinEventEditDraft;
+  | TimelineGenericEventEditDraft
+  | TimelineInsulinEventEditDraft
+  | NutritionTimelineEventEditDraft;
 
 export type TimelineEventEditErrorField =
-  keyof TimelineEventEditDraftFields | 'dose' | 'otherName' | 'preparation';
+  | keyof TimelineEventEditDraftFields
+  | 'carbs'
+  | 'dose'
+  | 'itemCarbs'
+  | 'itemName'
+  | 'mealType'
+  | 'otherName'
+  | 'preparation';
 
 export type TimelineEventEditErrors = Partial<
   Record<TimelineEventEditErrorField, string>
@@ -85,6 +101,8 @@ export interface TimelineInsulinEditCopy {
   readonly labels: InsulinPresentationLabels;
 }
 
+export type TimelineNutritionEditCopy = NutritionTimelineEditCopy;
+
 const glucoseContextFormLabels: Readonly<
   Record<GlucoseMeasurementContext, string>
 > = {
@@ -93,14 +111,6 @@ const glucoseContextFormLabels: Readonly<
   bedtime: 'Перед сном',
   fasting: 'Натощак',
   other: 'Другое',
-};
-
-const nutritionMealTypeFormLabels: Readonly<Record<string, string>> = {
-  breakfast: 'Завтрак',
-  dinner: 'Ужин',
-  lunch: 'Обед',
-  other: 'Другое',
-  snack: 'Перекус',
 };
 
 const medicationUnitFormLabels: Readonly<
@@ -151,10 +161,6 @@ function resolveGlucoseContextFromEditDraft(
   return matchedEntry
     ? (matchedEntry[0] as GlucoseMeasurementContext)
     : undefined;
-}
-
-function resolveNutritionMealTypeLabel(mealType: string): string {
-  return nutritionMealTypeFormLabels[mealType] ?? mealType;
 }
 
 function resolveMedicationUnitLabel(unit: CanonicalUnitId): string {
@@ -228,16 +234,7 @@ export function createTimelineSemanticEventEditDraft(
         variant: 'generic',
       };
     case 'nutrition':
-      return {
-        context: '',
-        date,
-        note: event.note ?? '',
-        time,
-        title: resolveNutritionMealTypeLabel(event.mealType),
-        unit: '',
-        value: formatEditableNumber(event.carbohydratesGrams),
-        variant: 'generic',
-      };
+      return createNutritionTimelineEventEditDraft(event, date, time);
   }
 }
 
@@ -287,7 +284,7 @@ function resolveOccurredAt(draft: TimelineEventEditDraft): string | null {
 /** Semantic timeline events edited through the generic string draft. */
 export type TimelineGenericSemanticEvent = Exclude<
   SemanticTimelineEvent,
-  { kind: 'insulin' }
+  { kind: 'insulin' } | { kind: 'nutrition' }
 >;
 
 export type TimelineInsulinSemanticEvent = Extract<
@@ -505,42 +502,6 @@ export function updateSemanticTimelineEventFromDraft(
         },
       };
     }
-    case 'nutrition': {
-      const validation = validateNumber(draft, 500, 'Питание');
-
-      if (Object.keys(validation.errors).length > 0) {
-        return { errors: validation.errors, event: null };
-      }
-
-      if (draft.title.trim().length === 0) {
-        return { errors: { title: 'Укажите название.' }, event: null };
-      }
-
-      if (event.schemaVersion === 1) {
-        return {
-          errors: {},
-          event: {
-            ...event,
-            carbohydratesGrams: validation.parsed as number,
-            mealType: mapQuickAddNutritionMealType(draft.title),
-            note: draft.note.trim() || undefined,
-            occurredAt: nextOccurredAt,
-            updatedAt,
-          },
-        };
-      }
-
-      return {
-        errors: {},
-        event: {
-          ...event,
-          carbohydratesGrams: validation.parsed as number,
-          note: draft.note.trim() || undefined,
-          occurredAt: nextOccurredAt,
-          updatedAt,
-        },
-      };
-    }
   }
 }
 
@@ -552,6 +513,7 @@ export function updateTimelineEventFromDraft(input: {
   readonly draft: TimelineEventEditDraft;
   readonly event: SemanticTimelineEvent;
   readonly now?: Date;
+  readonly nutritionCopy: TimelineNutritionEditCopy;
 }): TimelineSemanticEditResult {
   const { copy, draft, event } = input;
 
@@ -562,6 +524,19 @@ export function updateTimelineEventFromDraft(input: {
 
     return updateInsulinTimelineEventFromDraft({
       copy,
+      draft,
+      event,
+      now: input.now,
+    });
+  }
+
+  if (event.kind === 'nutrition') {
+    if (draft.variant !== 'nutrition') {
+      return { errors: {}, event: null };
+    }
+
+    return buildNutritionTimelineEventFromEditDraft({
+      copy: input.nutritionCopy,
       draft,
       event,
       now: input.now,

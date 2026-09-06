@@ -46,6 +46,7 @@ export interface TimelineStoreValue {
   readonly replaceEvents: (events: readonly SemanticTimelineEvent[]) => void;
   readonly status: TimelineStoreStatus;
   readonly updateEvent: (event: SemanticTimelineEvent) => void;
+  readonly updateEventAsync: (event: SemanticTimelineEvent) => Promise<void>;
 }
 
 interface TimelineStoreProviderProps {
@@ -278,6 +279,17 @@ export function TimelineStoreProvider({
     [enqueueRepositoryMutation, timelineRepository],
   );
 
+  const updateEventAsync = useCallback(
+    (event: SemanticTimelineEvent) =>
+      enqueueRepositoryMutationAsync(
+        () => timelineRepository.updateEvent(event),
+        () => {
+          dispatch({ event, type: 'upsertEvent' });
+        },
+      ),
+    [enqueueRepositoryMutationAsync, timelineRepository],
+  );
+
   const deleteEvent = useCallback(
     (eventId: string) => {
       enqueueRepositoryMutation(
@@ -322,6 +334,7 @@ export function TimelineStoreProvider({
       replaceEvents,
       status: state.status,
       updateEvent,
+      updateEventAsync,
     }),
     [
       addEvent,
@@ -337,6 +350,7 @@ export function TimelineStoreProvider({
       state.historyLoadStatus,
       state.status,
       updateEvent,
+      updateEventAsync,
     ],
   );
 

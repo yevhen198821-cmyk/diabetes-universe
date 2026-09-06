@@ -154,6 +154,43 @@ export const germanCanonicalMessages = defineApprovedMessages({
   'timeline.detail.form.insulin.noRecordedContext': 'Kein Kontext erfasst',
   'timeline.detail.form.insulin.otherNameLabel': 'Präparatname',
   'timeline.detail.form.insulin.preparationLabel': 'Insulinpräparat',
+  'timeline.detail.form.nutrition.addItem': 'Lebensmittel hinzufügen',
+  'timeline.detail.form.nutrition.carbsLabel': 'Kohlenhydrate',
+  'timeline.detail.form.nutrition.editTitle': 'Ernährung bearbeiten',
+  'timeline.detail.form.nutrition.errors.carbsPrecision':
+    'Geben Sie höchstens zwei Dezimalstellen ein.',
+  'timeline.detail.form.nutrition.errors.carbsRange':
+    'Geben Sie Kohlenhydrate größer als 0 und höchstens 500 ein.',
+  'timeline.detail.form.nutrition.errors.dateRequired':
+    'Geben Sie ein Datum ein.',
+  'timeline.detail.form.nutrition.errors.itemCarbs':
+    'Geben Sie gültige Kohlenhydrate für das Lebensmittel ein.',
+  'timeline.detail.form.nutrition.errors.itemNameRequired':
+    'Geben Sie den Lebensmittelnamen ein.',
+  'timeline.detail.form.nutrition.errors.mealTypeRequired':
+    'Wählen Sie einen Mahlzeitentyp.',
+  'timeline.detail.form.nutrition.errors.timeRequired':
+    'Geben Sie eine Uhrzeit ein.',
+  'timeline.detail.form.nutrition.itemCarbsLabel':
+    'Kohlenhydrate des Lebensmittels',
+  'timeline.detail.form.nutrition.itemNameLabel': 'Lebensmittelname',
+  'timeline.detail.form.nutrition.itemsHeading': 'Lebensmittel',
+  'timeline.detail.form.nutrition.legacyMealGuidance':
+    'Wählen Sie vor dem Speichern dieses historischen Eintrags einen Mahlzeitentyp.',
+  'timeline.detail.form.nutrition.mealTypeLabel': 'Mahlzeitentyp',
+  'timeline.detail.form.nutrition.mealTypePlaceholder': 'Mahlzeitentyp wählen',
+  'timeline.detail.form.nutrition.noteLabel': 'Notiz',
+  'timeline.detail.form.nutrition.removeItem': 'Lebensmittel entfernen',
+  'timeline.detail.form.nutrition.saveError.description':
+    'Der Eintrag konnte nicht gespeichert werden. Prüfen Sie die Verbindung und versuchen Sie es erneut.',
+  'timeline.detail.form.nutrition.saveError.title': 'Speichern fehlgeschlagen',
+  'timeline.detail.form.nutrition.saving': 'Wird gespeichert…',
+  'timeline.detail.nutrition.carbohydrates': 'Kohlenhydrate',
+  'timeline.detail.nutrition.itemCarbs': 'Kohlenhydrate',
+  'timeline.detail.nutrition.itemCarbsPer100': 'Kohlenhydrate je 100 g',
+  'timeline.detail.nutrition.itemWeight': 'Gewicht',
+  'timeline.detail.nutrition.items': 'Lebensmittel',
+  'timeline.detail.nutrition.mealType': 'Mahlzeitentyp',
   'timeline.mealType.breakfast': 'Frühstück',
   'timeline.mealType.dinner': 'Abendessen',
   'timeline.mealType.lunch': 'Mittagessen',
