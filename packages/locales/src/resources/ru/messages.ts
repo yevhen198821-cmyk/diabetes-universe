@@ -280,6 +280,41 @@ export const russianCanonicalMessages = defineApprovedMessages({
   'timeline.detail.form.insulin.noRecordedContext': 'Контекст не записан',
   'timeline.detail.form.insulin.otherNameLabel': 'Название препарата',
   'timeline.detail.form.insulin.preparationLabel': 'Препарат инсулина',
+  'timeline.detail.form.nutrition.addItem': 'Добавить продукт',
+  'timeline.detail.form.nutrition.carbsLabel': 'Углеводы',
+  'timeline.detail.form.nutrition.editTitle': 'Редактировать питание',
+  'timeline.detail.form.nutrition.errors.carbsPrecision':
+    'Введите не больше двух знаков после запятой.',
+  'timeline.detail.form.nutrition.errors.carbsRange':
+    'Введите углеводы больше 0 и не более 500.',
+  'timeline.detail.form.nutrition.errors.dateRequired': 'Укажите дату.',
+  'timeline.detail.form.nutrition.errors.itemCarbs':
+    'Введите корректные углеводы продукта.',
+  'timeline.detail.form.nutrition.errors.itemNameRequired':
+    'Укажите название продукта.',
+  'timeline.detail.form.nutrition.errors.mealTypeRequired':
+    'Выберите тип приёма пищи.',
+  'timeline.detail.form.nutrition.errors.timeRequired': 'Укажите время.',
+  'timeline.detail.form.nutrition.itemCarbsLabel': 'Углеводы продукта',
+  'timeline.detail.form.nutrition.itemNameLabel': 'Название продукта',
+  'timeline.detail.form.nutrition.itemsHeading': 'Продукты',
+  'timeline.detail.form.nutrition.legacyMealGuidance':
+    'Выберите тип приёма пищи, прежде чем сохранить эту историческую запись.',
+  'timeline.detail.form.nutrition.mealTypeLabel': 'Тип приёма пищи',
+  'timeline.detail.form.nutrition.mealTypePlaceholder':
+    'Выберите тип приёма пищи',
+  'timeline.detail.form.nutrition.noteLabel': 'Заметка',
+  'timeline.detail.form.nutrition.removeItem': 'Удалить продукт',
+  'timeline.detail.form.nutrition.saveError.description':
+    'Запись не удалось сохранить. Проверьте соединение и попробуйте ещё раз.',
+  'timeline.detail.form.nutrition.saveError.title': 'Не удалось сохранить',
+  'timeline.detail.form.nutrition.saving': 'Сохранение…',
+  'timeline.detail.nutrition.carbohydrates': 'Углеводы',
+  'timeline.detail.nutrition.itemCarbs': 'Углеводы',
+  'timeline.detail.nutrition.itemCarbsPer100': 'Углеводы на 100 г',
+  'timeline.detail.nutrition.itemWeight': 'Вес',
+  'timeline.detail.nutrition.items': 'Продукты',
+  'timeline.detail.nutrition.mealType': 'Тип приёма пищи',
   'timeline.glucose.range.above': 'Выше вашего диапазона',
   'timeline.glucose.range.below': 'Ниже вашего диапазона',
   'timeline.glucose.range.currentBasis': 'Текущий целевой диапазон',
