@@ -100,6 +100,7 @@ export function TimelineShell() {
     loadMoreHistory,
     status,
     updateEvent,
+    updateEventAsync,
   } = useTimelineStore();
   const presentationDependencies = useTimelinePresentationDependencies();
   const presentationLocale = resolveTimelinePresentationLocale(
@@ -452,8 +453,12 @@ export function TimelineShell() {
     setDetailMode('view');
   };
 
-  const handleUpdateEvent = (updatedEvent: SemanticTimelineEvent) => {
-    updateEvent(updatedEvent);
+  const handleUpdateEvent = async (updatedEvent: SemanticTimelineEvent) => {
+    if (updatedEvent.kind === 'nutrition') {
+      await updateEventAsync(updatedEvent);
+    } else {
+      updateEvent(updatedEvent);
+    }
 
     const nextEvents = sortTimelineEventsNewestFirst(
       events.map((event) =>
