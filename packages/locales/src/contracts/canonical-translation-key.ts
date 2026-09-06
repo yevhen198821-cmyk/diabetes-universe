@@ -474,6 +474,7 @@ export const CANONICAL_TRANSLATION_KEYS = [
   'quick-add.glucose.saving',
   'quick-add.glucose.timeLabel',
   'quick-add.glucose.unitGate.description',
+  'quick-add.glucose.unitGate.sessionDescription',
   'quick-add.glucose.unitGate.title',
   'quick-add.glucose.unitMg',
   'quick-add.glucose.unitMmol',

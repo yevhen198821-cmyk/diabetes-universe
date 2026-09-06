@@ -116,7 +116,7 @@ Request order:
 
 1. server `correlationId` generation;
 2. production readiness gate (`beginMedicalApiRequest`);
-3. authentication/session;
+3. unauthenticated classification (`401`) when the gate is unavailable, otherwise authentication/session;
 4. subject resolution;
 5. rate-limit decision;
 6. validation / service / persistence.
@@ -129,7 +129,7 @@ Capabilities:
 | `UNAVAILABLE_MISSING_RATE_LIMITER` | Production or misconfigured distributed mode without approved backend                                                              |
 | `TEST_DEV_ONLY`                    | Non-production `disabled` or `test` modes                                                                                          |
 
-Production (`NODE_ENV=production`) without a configured distributed/shared rate limiter **must not serve medical traffic**. The gate returns `503 SERVICE_UNAVAILABLE` before authentication, subject provisioning, or persistence.
+Production (`NODE_ENV=production`) without a configured distributed/shared rate limiter **must not serve medical traffic**. Authenticated requests still receive `503 SERVICE_UNAVAILABLE` before subject provisioning or persistence. Unauthenticated requests are classified as `401 AUTH_REQUIRED` so local-first first-run surfaces (Glucose Quick Add) are not misreported as a settings-load failure. See [Hotfix — Glucose Quick Add Settings Availability](hotfix-glucose-settings-load-unavailable.md).
 
 Development/test may use `disabled` or `test` modes explicitly. Production never silently falls back to passthrough.
 
@@ -142,7 +142,7 @@ MEDICAL_RATE_LIMIT_BACKEND=<approved backend identifier>
 registered production distributed rate-limit adapter (registerMedicalApiRateLimitBackendAdapter)
 ```
 
-`isMedicalApiRateLimitAdapterRegistered()` is the narrow readiness signal exposed from the rate-limit module. Production `AVAILABLE` runtime capability is impossible without a registered adapter, even when env vars are configured. Missing adapter returns `503 SERVICE_UNAVAILABLE` at request entry before authentication, subject provisioning, or persistence.
+`isMedicalApiRateLimitAdapterRegistered()` is the narrow readiness signal exposed from the rate-limit module. Production `AVAILABLE` runtime capability is impossible without a registered adapter, even when env vars are configured. Missing adapter returns `503 SERVICE_UNAVAILABLE` for authenticated traffic before subject provisioning or persistence. Unauthenticated traffic is classified as `401 AUTH_REQUIRED`.
 
 Backend credentials (if required later) remain server-only placeholders — never `NEXT_PUBLIC_*`.
 

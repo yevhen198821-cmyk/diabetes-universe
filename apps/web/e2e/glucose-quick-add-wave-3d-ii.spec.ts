@@ -213,14 +213,14 @@ test.describe('Glucose Quick Add Wave 3D-II', () => {
 
     const dialog = page.getByRole('dialog', { name: 'Добавить глюкозу' });
     await expect(
-      dialog.getByRole('heading', { name: 'Glucose unit not configured' }),
+      dialog.getByRole('heading', { name: 'Choose glucose units' }),
     ).toBeVisible();
     await expect(page.getByLabel('Glucose level')).toBeDisabled();
     await expect(
       dialog.getByRole('link', { name: 'Open Diabetes settings' }),
     ).toBeVisible();
-    await expect(dialog.getByRole('button', { name: 'mmol/L' })).toHaveCount(0);
-    await expect(dialog.getByRole('button', { name: 'mg/dL' })).toHaveCount(0);
+    await expect(dialog.getByRole('button', { name: 'mmol/L' })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'mg/dL' })).toBeVisible();
   });
 
   test('mobile layout keeps glucose entry usable at 360px width', async ({

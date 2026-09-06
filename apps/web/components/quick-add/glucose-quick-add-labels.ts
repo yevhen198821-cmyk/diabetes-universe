@@ -38,8 +38,13 @@ export interface GlucoseQuickAddLabels {
   readonly settingsUnconfiguredDescription: string;
   readonly settingsUnconfiguredTitle: string;
   readonly timeLabel: string;
+  readonly unitGateDescription: string;
+  readonly unitGateSessionDescription: string;
+  readonly unitGateTitle: string;
   readonly unitMg: string;
   readonly unitMmol: string;
+  readonly unitRequiredError: string;
+  readonly unitSaving: string;
   readonly valueLabel: string;
   readonly valueOutOfRangeError: string;
 }
@@ -72,8 +77,17 @@ const KEYS = {
     'quick-add.glucose.settingsUnconfigured.title',
   ),
   timeLabel: asTranslationKey('quick-add.glucose.timeLabel'),
+  unitGateDescription: asTranslationKey(
+    'quick-add.glucose.unitGate.description',
+  ),
+  unitGateSessionDescription: asTranslationKey(
+    'quick-add.glucose.unitGate.sessionDescription',
+  ),
+  unitGateTitle: asTranslationKey('quick-add.glucose.unitGate.title'),
   unitMg: asTranslationKey('quick-add.glucose.unitMg'),
   unitMmol: asTranslationKey('quick-add.glucose.unitMmol'),
+  unitRequiredError: asTranslationKey('quick-add.glucose.unitRequiredError'),
+  unitSaving: asTranslationKey('quick-add.glucose.unitSaving'),
   valueLabel: asTranslationKey('quick-add.glucose.valueLabel'),
   valueOutOfRangeError: asTranslationKey(
     'quick-add.glucose.valueOutOfRangeError',
@@ -123,8 +137,16 @@ export function resolveGlucoseQuickAddLabels(
       KEYS.settingsUnconfiguredTitle,
     ),
     timeLabel: translate(localization, KEYS.timeLabel),
+    unitGateDescription: translate(localization, KEYS.unitGateDescription),
+    unitGateSessionDescription: translate(
+      localization,
+      KEYS.unitGateSessionDescription,
+    ),
+    unitGateTitle: translate(localization, KEYS.unitGateTitle),
     unitMg: translate(localization, KEYS.unitMg),
     unitMmol: translate(localization, KEYS.unitMmol),
+    unitRequiredError: translate(localization, KEYS.unitRequiredError),
+    unitSaving: translate(localization, KEYS.unitSaving),
     valueLabel: translate(localization, KEYS.valueLabel),
     valueOutOfRangeError: translate(localization, KEYS.valueOutOfRangeError),
   };

@@ -263,6 +263,8 @@ export const germanCanonicalMessages = defineApprovedMessages({
   'quick-add.glucose.timeLabel': 'Uhrzeit',
   'quick-add.glucose.unitGate.description':
     'Wählen Sie die Einheiten für die Glukoseeingabe. Diese Einstellung wird in den Diabetes-Einstellungen gespeichert.',
+  'quick-add.glucose.unitGate.sessionDescription':
+    'Wählen Sie, wie Sie Glukosewerte eingeben möchten. Diese Auswahl gilt nur für diese Sitzung und wird nicht als medizinische Einstellung gespeichert.',
   'quick-add.glucose.unitGate.title': 'Glukose-Einheiten wählen',
   'quick-add.glucose.unitMg': 'mg/dL',
   'quick-add.glucose.unitMmol': 'mmol/L',

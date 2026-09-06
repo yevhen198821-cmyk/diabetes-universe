@@ -24,7 +24,7 @@ import {
   medicalApiJsonResponse,
   type MedicalApiErrorCode,
 } from './medical-api-error';
-import { beginMedicalApiRequest } from './medical-api-request-entry';
+import { beginClassifiedMedicalApiRequest } from './medical-api-request-entry';
 import {
   getMedicalApiRateLimiter,
   type MedicalApiRateLimitInput,
@@ -87,7 +87,7 @@ async function prepareMedicalAdoptionHandler(
   | { ok: false; response: Response }
   | { ok: true; scope: AuthorizationScope; correlationId: string }
 > {
-  const begun = beginMedicalApiRequest(request);
+  const begun = await beginClassifiedMedicalApiRequest(request);
   if (!begun.ok) {
     return begun;
   }

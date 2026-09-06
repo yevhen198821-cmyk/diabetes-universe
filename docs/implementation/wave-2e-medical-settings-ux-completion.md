@@ -59,6 +59,10 @@ When `glucoseDisplayUnit` is unset:
 3. Authenticated users persist the choice through `PATCH /api/v1/medical/me/diabetes-settings`
 4. Unauthenticated demo users may choose a session-only unit without persisting
 
+The inline picker is wired in `glucose-quick-add-form.tsx` through
+`selectGlucoseDisplayUnit`. See
+[Hotfix — Glucose Quick Add Settings Availability](hotfix-glucose-settings-load-unavailable.md).
+
 Ambiguous numeric submission is blocked. Locale does not infer units.
 
 ## Integration surfaces

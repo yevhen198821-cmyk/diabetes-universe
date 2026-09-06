@@ -17,7 +17,7 @@ import {
   medicalApiErrorResponse,
   medicalApiJsonResponse,
 } from './medical-api-error';
-import { beginMedicalApiRequest } from './medical-api-request-entry';
+import { beginClassifiedMedicalApiRequest } from './medical-api-request-entry';
 import {
   getMedicalApiRateLimiter,
   setMedicalApiRateLimiterForTests,
@@ -85,7 +85,7 @@ async function prepareMedicalApiHandler(
   | { ok: false; response: Response }
   | { ok: true; scope: AuthorizationScope; correlationId: string }
 > {
-  const begun = beginMedicalApiRequest(request);
+  const begun = await beginClassifiedMedicalApiRequest(request);
   if (!begun.ok) {
     return begun;
   }
