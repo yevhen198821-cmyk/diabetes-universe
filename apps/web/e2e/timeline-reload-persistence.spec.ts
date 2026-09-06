@@ -68,7 +68,10 @@ test('empty durable timeline does not reseed demo data after reload', async ({
   await page.goto('/timeline');
   await waitForApplicationReady(page);
   await waitForTimelineBootstrapComplete(page);
-  await expect(page.locator('#timeline-events-list')).toHaveCount(1);
+  await expect(
+    page.getByRole('heading', { name: 'No events yet' }),
+  ).toBeVisible();
+  await expect(page.locator('#timeline-events-list')).toHaveCount(0);
 
   await clearTimelineEventsInIndexedDb(page);
   await page.reload();

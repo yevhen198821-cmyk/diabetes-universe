@@ -16,8 +16,8 @@ import { waitForApplicationReady } from './support/wait-for-application-ready';
 
 const ACCOUNT_A_EMAIL = 'remediation-0a-account-a@example.com';
 const ACCOUNT_B_EMAIL = 'remediation-0a-account-b@example.com';
-const ACCOUNT_A_MARKER = '11.17';
-const ACCOUNT_B_MARKER = '12.28';
+const ACCOUNT_A_MARKER = '9.1';
+const ACCOUNT_B_MARKER = '8.8';
 
 async function openOwnedDashboard(page: import('./support/test').Page) {
   await page.goto('/');
@@ -79,6 +79,11 @@ test.describe('Remediation 0A local Timeline account isolation', () => {
     await expect(
       page.locator('[data-timeline-ownership="authenticated"]'),
     ).toBeVisible();
+    await page.reload();
+    await openOwnedDashboard(page);
+    await expect(
+      page.locator('[data-timeline-ownership="authenticated"]'),
+    ).toBeVisible();
 
     await recordMarkerGlucose(page, ACCOUNT_A_MARKER);
     await expectLastGlucoseValue(page, ACCOUNT_A_MARKER);
@@ -122,6 +127,9 @@ test.describe('Remediation 0A local Timeline account isolation', () => {
   }) => {
     await signInWithMagicLink(page, request, ACCOUNT_A_EMAIL);
     await openOwnedDashboard(page);
+    await expect(
+      page.locator('[data-timeline-ownership="authenticated"]'),
+    ).toBeVisible();
     await recordMarkerGlucose(page, ACCOUNT_A_MARKER);
     await expectLastGlucoseValue(page, ACCOUNT_A_MARKER);
 

@@ -1,12 +1,13 @@
 import { expect, test } from './support/test';
 
+import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
 test('dashboard header renders localized English copy after platform readiness', async ({
   page,
 }) => {
   await page.goto('/');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await expect(
     page.getByRole('heading', { level: 1, name: 'Diabetes Universe' }),

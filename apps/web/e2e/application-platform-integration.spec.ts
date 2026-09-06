@@ -10,7 +10,7 @@ test('dashboard to timeline client navigation preserves application ready root',
   page,
 }) => {
   await page.goto('/');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const readyRoot = page.locator(APPLICATION_PLATFORM_READY_SELECTOR);
   const mountProbe = await readyRoot.evaluate((element) => {

@@ -1,6 +1,9 @@
 import { expect, test } from './support/test';
 
-import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
+import {
+  prepareCanonicalDemoTimelineFixture,
+  waitForTimelineOwnershipReady,
+} from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
 test('timeline loads events of the day map and day period groups', async ({
@@ -72,7 +75,8 @@ test('timeline night group appears only when night events exist', async ({
   page,
 }) => {
   await page.goto('/timeline');
-  await prepareCanonicalDemoTimelineFixture(page);
+  await waitForApplicationReady(page);
+  await waitForTimelineOwnershipReady(page);
 
   await expect(page.getByRole('heading', { name: 'Night' })).toHaveCount(0);
 });

@@ -1,5 +1,6 @@
 import { expect, test } from './support/test';
 
+import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
 const ENGLISH_HOME_CHROME = [
@@ -88,7 +89,7 @@ test('quick add category buttons open existing quick add forms', async ({
 
 test('today cards expose real-data mini chart summaries', async ({ page }) => {
   await page.goto('/');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await expect(
     page.getByRole('img', { name: /glucose readings today/i }),
@@ -110,7 +111,7 @@ test('ru-RU Home chrome stays fully localized without English dashboard strings'
   const page = await context.newPage();
 
   await page.goto('/');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   await expect(
     page.getByRole('heading', { name: 'Последняя глюкоза' }),
@@ -179,7 +180,7 @@ test('mobile home keeps scrollable content above the bottom navigation', async (
 }) => {
   await page.setViewportSize({ height: 844, width: 390 });
   await page.goto('/');
-  await waitForApplicationReady(page);
+  await prepareCanonicalDemoTimelineFixture(page);
 
   const recentEventsSection = page.locator('section', {
     has: page.getByRole('heading', { name: 'Recent events', level: 2 }),
