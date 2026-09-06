@@ -280,6 +280,17 @@ test('edit flow keeps zero migration diagnostics for semantic repository events'
         insulin: { ...draft.insulin, dose: '6', doseEdited: true },
       },
       event: semanticBefore,
+      nutritionCopy: {
+        errors: {
+          carbsPrecision: 'precision',
+          carbsRange: 'range',
+          dateRequired: 'date',
+          itemCarbs: 'item carbs',
+          itemNameRequired: 'item name',
+          mealTypeRequired: 'meal',
+          timeRequired: 'time',
+        },
+      },
     });
 
     await act(async () => {

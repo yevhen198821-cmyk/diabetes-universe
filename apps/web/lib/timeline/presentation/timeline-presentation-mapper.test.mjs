@@ -264,7 +264,7 @@ test('maps Nutrition v2 without requiring legacy mode or products', () => {
   );
 
   assert.equal(card.title, 'Breakfast');
-  assert.equal(card.value, '12');
+  assert.equal(card.value, '12.12');
   assert.equal(card.unit, 'g carbs');
   assert.equal(unspecified.title, 'Not specified');
 });
