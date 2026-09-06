@@ -1,6 +1,9 @@
 'use client';
 
-import { createInMemoryTimelineRepository } from '@diabetes-universe/timeline';
+import {
+  createInMemoryTimelineRepository,
+  type TimelineRepository,
+} from '@diabetes-universe/timeline';
 import { useEffect, useMemo, type ReactNode } from 'react';
 
 import { createWebTimelineRepository } from '../create-web-timeline-repository';
@@ -11,8 +14,12 @@ interface TimelineStoreBoundaryProps {
   readonly children: ReactNode;
 }
 
-function closeTimelineRepository(repository: { close?: () => void }): void {
-  repository.close?.();
+function closeTimelineRepository(repository: TimelineRepository): void {
+  const closable = repository as TimelineRepository & {
+    readonly close?: () => void;
+  };
+
+  closable.close?.();
 }
 
 export function TimelineStoreBoundary({

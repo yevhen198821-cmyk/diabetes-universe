@@ -212,7 +212,9 @@ async function selectLanguage(page: Page, locale: LocaleMatrix) {
 }
 
 async function readManualEvents(page: Page): Promise<readonly StoredEvent[]> {
-  return (await readActiveTimelineStoredEvents(page)) as StoredEvent[];
+  return (await readActiveTimelineStoredEvents(
+    page,
+  )) as unknown as StoredEvent[];
 }
 
 async function prepareEmptyTimeline(page: Page) {
