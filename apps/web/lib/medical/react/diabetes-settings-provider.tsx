@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -19,6 +20,7 @@ import {
   DiabetesSettingsClientError,
   type DiabetesSettingsResource,
 } from '../client/diabetes-settings-types';
+import { interpretDiabetesSettingsLoadFailure } from '../client/parse-diabetes-settings-resource';
 
 export type DiabetesSettingsLoadState = 'loading' | 'ready' | 'error';
 
@@ -31,6 +33,9 @@ export interface DiabetesSettingsContextValue {
     unit: GlucoseDisplayUnit,
   ) => Promise<DiabetesSettingsResource>;
   readonly refresh: () => Promise<void>;
+  readonly selectGlucoseDisplayUnit: (
+    unit: GlucoseDisplayUnit,
+  ) => Promise<void>;
   readonly settings: DiabetesSettingsResource | null;
   readonly updateSettingsFromMutation: (
     nextSettings: DiabetesSettingsResource,
@@ -55,81 +60,50 @@ export function DiabetesSettingsProvider({
     null,
   );
   const [error, setError] = useState<DiabetesSettingsClientError | null>(null);
+  const [sessionDisplayUnit, setSessionDisplayUnit] =
+    useState<GlucoseDisplayUnit | null>(null);
+  const requestIdRef = useRef(0);
 
   const refresh = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+    setLoadState('loading');
+    setError(null);
+
     try {
       const nextSettings = await fetchDiabetesSettings();
+
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
+
       setSettings(nextSettings);
       setError(null);
       setLoadState('ready');
     } catch (caughtError) {
-      if (
-        caughtError instanceof DiabetesSettingsClientError &&
-        caughtError.kind === 'unauthorized'
-      ) {
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
+
+      const interpreted = interpretDiabetesSettingsLoadFailure(caughtError);
+      if (interpreted.type === 'unconfigured') {
         setSettings(null);
         setError(null);
         setLoadState('ready');
         return;
       }
 
-      setError(
-        caughtError instanceof DiabetesSettingsClientError
-          ? caughtError
-          : new DiabetesSettingsClientError(
-              'network',
-              'Network request failed.',
-            ),
-      );
+      setError(interpreted.error);
       setLoadState('error');
     }
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    void (async () => {
-      try {
-        const nextSettings = await fetchDiabetesSettings();
-
-        if (cancelled) {
-          return;
-        }
-
-        setSettings(nextSettings);
-        setError(null);
-        setLoadState('ready');
-      } catch (caughtError) {
-        if (cancelled) {
-          return;
-        }
-
-        if (
-          caughtError instanceof DiabetesSettingsClientError &&
-          caughtError.kind === 'unauthorized'
-        ) {
-          setSettings(null);
-          setError(null);
-          setLoadState('ready');
-          return;
-        }
-
-        setError(
-          caughtError instanceof DiabetesSettingsClientError
-            ? caughtError
-            : new DiabetesSettingsClientError(
-                'network',
-                'Network request failed.',
-              ),
-        );
-        setLoadState('error');
-      }
-    })();
+    void refresh();
 
     return () => {
-      cancelled = true;
+      requestIdRef.current += 1;
     };
-  }, []);
+  }, [refresh]);
 
   const updateSettingsFromMutation = useCallback(
     (nextSettings: DiabetesSettingsResource) => {
@@ -153,6 +127,7 @@ export function DiabetesSettingsProvider({
         glucoseDisplayUnit: unit,
       });
       setSettings(updated);
+      setSessionDisplayUnit(null);
       setError(null);
       setLoadState('ready');
       return updated;
@@ -160,15 +135,32 @@ export function DiabetesSettingsProvider({
     [settings],
   );
 
+  const selectGlucoseDisplayUnit = useCallback(
+    async (unit: GlucoseDisplayUnit) => {
+      if (settings) {
+        await patchGlucoseDisplayUnit(unit);
+        return;
+      }
+
+      setSessionDisplayUnit(unit);
+      setError(null);
+      setLoadState('ready');
+    },
+    [patchGlucoseDisplayUnit, settings],
+  );
+
+  const resolvedDisplayUnit =
+    settings?.glucoseDisplayUnit ?? sessionDisplayUnit;
+
   const value = useMemo<DiabetesSettingsContextValue>(
     () => ({
       error,
-      glucoseDisplayUnit: settings?.glucoseDisplayUnit ?? null,
-      isUnconfigured:
-        loadState === 'ready' && settings?.glucoseDisplayUnit == null,
+      glucoseDisplayUnit: resolvedDisplayUnit,
+      isUnconfigured: loadState === 'ready' && resolvedDisplayUnit == null,
       loadState,
       patchGlucoseDisplayUnit,
       refresh,
+      selectGlucoseDisplayUnit,
       settings,
       updateSettingsFromMutation,
     }),
@@ -177,6 +169,8 @@ export function DiabetesSettingsProvider({
       loadState,
       patchGlucoseDisplayUnit,
       refresh,
+      resolvedDisplayUnit,
+      selectGlucoseDisplayUnit,
       settings,
       updateSettingsFromMutation,
     ],

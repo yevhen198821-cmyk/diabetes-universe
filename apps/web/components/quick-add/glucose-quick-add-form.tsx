@@ -1,5 +1,6 @@
 'use client';
 
+import type { GlucoseDisplayUnit } from '@diabetes-universe/medical-domain';
 import type { GlucoseMeasurementContext } from '@diabetes-universe/types';
 import {
   QuickAddFormActions,
@@ -66,8 +67,14 @@ export function GlucoseQuickAddForm({
     () => resolveGlucoseContextOptions(localization),
     [localization],
   );
-  const { glucoseDisplayUnit, isUnconfigured, loadState, refresh } =
-    useDiabetesSettings();
+  const {
+    glucoseDisplayUnit,
+    isUnconfigured,
+    loadState,
+    refresh,
+    selectGlucoseDisplayUnit,
+    settings,
+  } = useDiabetesSettings();
 
   const [formState, setFormState] =
     useState<GlucoseFormState>(createInitialState);
@@ -75,6 +82,8 @@ export function GlucoseQuickAddForm({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [contextSheetOpen, setContextSheetOpen] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [isSelectingUnit, setIsSelectingUnit] = useState(false);
+  const [unitError, setUnitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitIdentityRef = useRef(createGlucoseQuickAddSubmitIdentityState());
   const isSubmittingRef = useRef(false);
@@ -194,6 +203,23 @@ export function GlucoseQuickAddForm({
     }
   };
 
+  const handleSelectUnit = async (unit: GlucoseDisplayUnit) => {
+    if (isSelectingUnit || isSubmittingRef.current) {
+      return;
+    }
+
+    setIsSelectingUnit(true);
+    setUnitError(null);
+
+    try {
+      await selectGlucoseDisplayUnit(unit);
+    } catch {
+      setUnitError(labels.unitRequiredError);
+    } finally {
+      setIsSelectingUnit(false);
+    }
+  };
+
   return (
     <QuickAddFormLayout
       onSubmit={(event) => {
@@ -201,7 +227,13 @@ export function GlucoseQuickAddForm({
       }}
     >
       <QuickAddFormLayout.Body>
-        <div aria-busy={isSubmitting ? true : undefined}>
+        <div
+          aria-busy={
+            isSubmitting || isLoading || isRetrying || isSelectingUnit
+              ? true
+              : undefined
+          }
+        >
           {isSubmitting ? (
             <p
               className="text-sm text-slate-600"
@@ -212,16 +244,23 @@ export function GlucoseQuickAddForm({
             </p>
           ) : null}
 
-          {isLoading ? (
+          {isLoading || isRetrying ? (
             <p className="text-sm text-slate-600" role="status">
               {labels.loading}
             </p>
           ) : null}
 
-          {isSettingsError ? (
+          {isSelectingUnit ? (
+            <p className="text-sm text-slate-600" role="status">
+              {labels.unitSaving}
+            </p>
+          ) : null}
+
+          {isSettingsError || isRetrying ? (
             <section
               aria-labelledby="quick-add-glucose-settings-error-title"
               className="space-y-3"
+              role="alert"
             >
               <div className="space-y-1">
                 <h3
@@ -235,8 +274,9 @@ export function GlucoseQuickAddForm({
                 </p>
               </div>
               <button
-                className="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-                disabled={isRetrying}
+                aria-label={labels.settingsErrorRetry}
+                className="min-h-11 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-800 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={isRetrying || isLoading}
                 onClick={() => void handleRetrySettings()}
                 type="button"
               >
@@ -247,20 +287,49 @@ export function GlucoseQuickAddForm({
 
           {loadState === 'ready' && isUnconfigured ? (
             <section
-              aria-labelledby="quick-add-glucose-unconfigured-title"
+              aria-labelledby="quick-add-glucose-unit-gate-title"
               className="space-y-3"
             >
               <div className="space-y-1">
                 <h3
                   className="text-sm font-semibold text-slate-950"
-                  id="quick-add-glucose-unconfigured-title"
+                  id="quick-add-glucose-unit-gate-title"
                 >
-                  {labels.settingsUnconfiguredTitle}
+                  {labels.unitGateTitle}
                 </h3>
                 <p className="text-sm text-slate-600">
-                  {labels.settingsUnconfiguredDescription}
+                  {settings
+                    ? labels.unitGateDescription
+                    : labels.unitGateSessionDescription}
                 </p>
               </div>
+              <div
+                aria-label={labels.unitGateTitle}
+                className="grid grid-cols-2 gap-2"
+                role="group"
+              >
+                {(
+                  [
+                    { id: 'mmol_per_l', label: labels.unitMmol },
+                    { id: 'mg_per_dl', label: labels.unitMg },
+                  ] as const
+                ).map((option) => (
+                  <button
+                    className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={isSelectingUnit}
+                    key={option.id}
+                    onClick={() => void handleSelectUnit(option.id)}
+                    type="button"
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              {unitError ? (
+                <p className="text-sm text-rose-600" role="alert">
+                  {unitError}
+                </p>
+              ) : null}
               <a
                 className="inline-flex min-h-11 items-center rounded-xl border border-sky-500 bg-sky-50 px-4 text-sm font-semibold text-sky-900 transition hover:bg-sky-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
                 href="/account/diabetes"

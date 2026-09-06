@@ -52,6 +52,26 @@ test('production readiness bootstrap registers adapter and serves diabetes setti
   assert.ok(body.revision.length > 0);
 });
 
+test('production gate does not convert unauthenticated settings GET into load failure', async () => {
+  process.env.MEDICAL_API_PRODUCTION_GATE = '1';
+  process.env.MEDICAL_API_ENABLE_TEST_AUTH = '1';
+  delete process.env.MEDICAL_RATE_LIMIT_MODE;
+  delete process.env.MEDICAL_RATE_LIMIT_BACKEND;
+
+  const response = await handleGetDiabetesSettings(
+    new Request('http://localhost:3000/api/v1/medical/me/diabetes-settings', {
+      headers: {
+        [TEST_ACCOUNT_HEADER]: 'anonymous',
+      },
+    }),
+  );
+
+  assert.equal(response.status, 401);
+  const body = await response.json();
+  assert.equal(body.error.code, 'AUTH_REQUIRED');
+  assert.notEqual(body.error.code, 'SERVICE_UNAVAILABLE');
+});
+
 test('production readiness without distributed config remains blocked before persistence', async () => {
   process.env.MEDICAL_API_PRODUCTION_GATE = '1';
   process.env.MEDICAL_API_ENABLE_TEST_AUTH = '1';

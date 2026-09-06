@@ -522,6 +522,8 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'quick-add.glucose.timeLabel': 'Time',
   'quick-add.glucose.unitGate.description':
     'Choose how you want to enter glucose values. This preference is saved to your diabetes settings.',
+  'quick-add.glucose.unitGate.sessionDescription':
+    'Choose how you want to enter glucose values. This choice applies to this session only and is not stored as a medical preference.',
   'quick-add.glucose.unitGate.title': 'Choose glucose units',
   'quick-add.glucose.unitMg': 'mg/dL',
   'quick-add.glucose.unitMmol': 'mmol/L',

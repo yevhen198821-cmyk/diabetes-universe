@@ -224,6 +224,8 @@ export const ukrainianCanonicalMessages = defineApprovedMessages({
   'quick-add.glucose.timeLabel': 'Час',
   'quick-add.glucose.unitGate.description':
     'Оберіть одиниці для введення глюкози. Це налаштування зберігається в керуванні діабетом.',
+  'quick-add.glucose.unitGate.sessionDescription':
+    'Оберіть, як вводити значення глюкози. Цей вибір діє лише в цьому сеансі й не зберігається як медичне налаштування.',
   'quick-add.glucose.unitGate.title': 'Оберіть одиниці глюкози',
   'quick-add.glucose.unitMg': 'мг/дл',
   'quick-add.glucose.unitMmol': 'ммоль/л',

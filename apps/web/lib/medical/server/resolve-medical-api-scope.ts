@@ -8,7 +8,7 @@ import { medicalApiErrorResponse } from './medical-api-error';
 
 const TEST_ACCOUNT_HEADER = 'x-test-account-id';
 
-function resolvePrincipalForRequest(
+export function resolvePrincipalForRequest(
   request: Request,
 ): AuthenticatedPrincipal | null | undefined {
   const allowTestAuth =

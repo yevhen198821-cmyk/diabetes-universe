@@ -25,6 +25,8 @@ async function renderGlucoseForm({
   loadState = 'ready',
   error = null,
   onRefresh = async () => {},
+  onSelectGlucoseDisplayUnit,
+  settings,
 } = {}) {
   const runtime = await createTestPlatformRuntime({
     request: { acceptLanguage: 'en-GB', cookieTimeZone: 'Europe/London' },
@@ -48,6 +50,8 @@ async function renderGlucoseForm({
             glucoseDisplayUnit,
             loadState,
             onRefresh,
+            onSelectGlucoseDisplayUnit,
+            settings,
           },
           createElement(GlucoseQuickAddForm, {
             initialFocusRef,
@@ -139,7 +143,7 @@ test('settings loading does not show unconfigured gate', async () => {
     assert.match(document.body.textContent ?? '', /Loading glucose settings/);
     assert.doesNotMatch(
       document.body.textContent ?? '',
-      /Glucose unit not configured/,
+      /Glucose unit not configured|Choose glucose units/,
     );
     assert.equal(
       document.getElementById('quick-add-glucose-value')?.disabled,
@@ -150,13 +154,17 @@ test('settings loading does not show unconfigured gate', async () => {
   }
 });
 
-test('unconfigured state blocks entry and links to diabetes settings', async () => {
-  const view = await renderGlucoseForm({ glucoseDisplayUnit: null });
+test('unconfigured state blocks entry and shows unit gate', async () => {
+  const view = await renderGlucoseForm({
+    glucoseDisplayUnit: null,
+    settings: null,
+  });
 
   try {
+    assert.match(document.body.textContent ?? '', /Choose glucose units/);
     assert.match(
       document.body.textContent ?? '',
-      /Glucose unit not configured/,
+      /This choice applies to this session only/,
     );
     assert.equal(
       document.getElementById('quick-add-glucose-value')?.disabled,
@@ -165,6 +173,40 @@ test('unconfigured state blocks entry and links to diabetes settings', async () 
     const link = document.querySelector('a[href="/account/diabetes"]');
     assert.notEqual(link, null);
     assert.match(link?.textContent ?? '', /Open Diabetes settings/);
+    assert.notEqual(
+      [...document.querySelectorAll('button')].find(
+        (button) => button.textContent === 'mmol/L',
+      ),
+      undefined,
+    );
+  } finally {
+    await view.cleanup();
+  }
+});
+
+test('fresh-user session unit selection enables glucose entry', async () => {
+  const view = await renderGlucoseForm({
+    glucoseDisplayUnit: null,
+    settings: null,
+  });
+
+  try {
+    const mmolButton = [...document.querySelectorAll('button')].find(
+      (button) => button.textContent === 'mmol/L',
+    );
+    assert.notEqual(mmolButton, undefined);
+
+    await act(async () => {
+      mmolButton?.click();
+    });
+
+    const valueInput = document.getElementById('quick-add-glucose-value');
+    assert.equal(valueInput?.disabled, false);
+    assert.match(document.body.textContent ?? '', /mmol\/L/);
+    assert.doesNotMatch(
+      document.body.textContent ?? '',
+      /Could not load glucose settings/,
+    );
   } finally {
     await view.cleanup();
   }
@@ -193,16 +235,100 @@ test('settings error blocks entry and retry calls refresh', async () => {
       true,
     );
 
+    const errorSection = document.querySelector('[role="alert"]');
+    assert.notEqual(errorSection, null);
+
     const retryButton = [...document.querySelectorAll('button')].find(
       (button) => button.textContent?.includes('Retry'),
     );
     assert.notEqual(retryButton, undefined);
+    assert.equal(retryButton?.getAttribute('aria-label'), 'Retry');
 
     await act(async () => {
       retryButton?.click();
     });
 
     assert.equal(refreshCount, 1);
+  } finally {
+    await view.cleanup();
+  }
+});
+
+test('retry success enables glucose entry without reload', async () => {
+  let refreshCount = 0;
+  const view = await renderGlucoseForm({
+    error: new DiabetesSettingsClientError(
+      'network',
+      'Network request failed.',
+    ),
+    glucoseDisplayUnit: 'mmol_per_l',
+    loadState: 'error',
+    onRefresh: async () => {
+      refreshCount += 1;
+    },
+  });
+
+  try {
+    assert.equal(
+      document.getElementById('quick-add-glucose-value')?.disabled,
+      true,
+    );
+
+    const retryButton = [...document.querySelectorAll('button')].find(
+      (button) => button.getAttribute('aria-label') === 'Retry',
+    );
+
+    await act(async () => {
+      retryButton?.click();
+    });
+
+    assert.equal(refreshCount, 1);
+    assert.doesNotMatch(
+      document.body.textContent ?? '',
+      /Could not load glucose settings/,
+    );
+    assert.equal(
+      document.getElementById('quick-add-glucose-value')?.disabled,
+      false,
+    );
+  } finally {
+    await view.cleanup();
+  }
+});
+
+test('retry failure remains safely blocked', async () => {
+  const view = await renderGlucoseForm({
+    error: new DiabetesSettingsClientError(
+      'server',
+      'The medical API is temporarily unavailable.',
+    ),
+    loadState: 'error',
+    onRefresh: async () => {
+      throw new DiabetesSettingsClientError(
+        'server',
+        'The medical API is temporarily unavailable.',
+      );
+    },
+  });
+
+  try {
+    const retryButton = [...document.querySelectorAll('button')].find(
+      (button) => button.getAttribute('aria-label') === 'Retry',
+    );
+
+    await act(async () => {
+      retryButton?.click();
+    });
+
+    assert.match(
+      document.body.textContent ?? '',
+      /Could not load glucose settings/,
+    );
+    assert.equal(
+      document.getElementById('quick-add-glucose-value')?.disabled,
+      true,
+    );
+    assert.equal(retryButton?.disabled, false);
   } finally {
     await view.cleanup();
   }

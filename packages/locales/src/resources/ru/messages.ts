@@ -339,6 +339,8 @@ export const russianCanonicalMessages = defineApprovedMessages({
   'quick-add.glucose.timeLabel': 'Время',
   'quick-add.glucose.unitGate.description':
     'Выберите единицы для ввода глюкозы. Предпочтение сохраняется в настройках диабета.',
+  'quick-add.glucose.unitGate.sessionDescription':
+    'Выберите, как вводить значения глюкозы. Этот выбор действует только в текущем сеансе и не сохраняется как медицинская настройка.',
   'quick-add.glucose.unitGate.title': 'Выберите единицы глюкозы',
   'quick-add.glucose.unitMg': 'мг/дл',
   'quick-add.glucose.unitMmol': 'ммоль/л',

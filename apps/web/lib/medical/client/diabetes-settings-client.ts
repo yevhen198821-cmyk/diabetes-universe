@@ -8,6 +8,7 @@ import {
   type DiabetesSettingsResource,
   type GlucoseTargetProfileResource,
 } from './diabetes-settings-types';
+import { parseDiabetesSettingsResource } from './parse-diabetes-settings-resource';
 
 const DIABETES_SETTINGS_PATH = '/api/v1/medical/me/diabetes-settings';
 const GLUCOSE_TARGET_PROFILE_PATH = '/api/v1/medical/me/glucose-target-profile';
@@ -97,7 +98,14 @@ async function requestMedicalResource<T extends { revision: string }>(
     throw await readMedicalApiError(response);
   }
 
-  return (await response.json()) as T;
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw new DiabetesSettingsClientError(
+      'validation',
+      'Malformed diabetes settings response.',
+    );
+  }
 }
 
 function withIfMatch(revision: string, headers: HeadersInit = {}): HeadersInit {
@@ -108,10 +116,12 @@ function withIfMatch(revision: string, headers: HeadersInit = {}): HeadersInit {
 }
 
 export async function fetchDiabetesSettings(): Promise<DiabetesSettingsResource> {
-  return requestMedicalResource<DiabetesSettingsResource>(
+  const payload = await requestMedicalResource<DiabetesSettingsResource>(
     DIABETES_SETTINGS_PATH,
     { method: 'GET' },
   );
+
+  return parseDiabetesSettingsResource(payload);
 }
 
 export async function patchDiabetesSettings(
