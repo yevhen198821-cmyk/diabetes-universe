@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+import {
+  applyTimelineOwnershipSessionResolution,
+  type TimelineOwnershipSessionState,
+} from './apply-timeline-session-ownership';
 import { readTimelineSessionAccountResolution } from './read-timeline-local-session';
 import {
-  createAnonymousTimelineOwnership,
-  createAuthenticatedTimelineOwnership,
   resolveAnonymousOwnerKey,
   type TimelineLocalOwnership,
 } from './timeline-local-ownership';
@@ -16,12 +18,17 @@ function canUseBrowserStorage(): boolean {
   );
 }
 
+const INITIAL_OWNERSHIP_STATE: TimelineOwnershipSessionState = {
+  lastAuthenticatedAccountId: null,
+  ownership: { kind: 'pending' },
+};
+
 export function useTimelineLocalOwnership(): TimelineLocalOwnership {
-  const [ownership, setOwnership] = useState<TimelineLocalOwnership>({
-    kind: 'pending',
-  });
+  const [ownership, setOwnership] = useState(INITIAL_OWNERSHIP_STATE.ownership);
   const requestIdRef = useRef(0);
-  const lastAuthenticatedAccountIdRef = useRef<string | null>(null);
+  const stateRef = useRef<TimelineOwnershipSessionState>(
+    INITIAL_OWNERSHIP_STATE,
+  );
 
   useEffect(() => {
     if (!canUseBrowserStorage()) {
@@ -32,44 +39,20 @@ export function useTimelineLocalOwnership(): TimelineLocalOwnership {
       const requestId = requestIdRef.current + 1;
       requestIdRef.current = requestId;
       const resolution = await readTimelineSessionAccountResolution();
+      const next = applyTimelineOwnershipSessionResolution({
+        anonymousOwnerKey: resolveAnonymousOwnerKey(window.localStorage),
+        current: stateRef.current,
+        latestRequestId: requestIdRef.current,
+        requestId,
+        resolution,
+      });
 
-      if (requestIdRef.current !== requestId) {
+      if (next === stateRef.current) {
         return;
       }
 
-      if (resolution.status === 'indeterminate') {
-        if (lastAuthenticatedAccountIdRef.current) {
-          return;
-        }
-
-        setOwnership(
-          createAnonymousTimelineOwnership(
-            resolveAnonymousOwnerKey(window.localStorage),
-          ),
-        );
-        return;
-      }
-
-      if (resolution.status === 'blocked') {
-        lastAuthenticatedAccountIdRef.current = null;
-        setOwnership({ kind: 'blocked' });
-        return;
-      }
-
-      if (resolution.status === 'authenticated') {
-        lastAuthenticatedAccountIdRef.current = resolution.accountId;
-        setOwnership(
-          createAuthenticatedTimelineOwnership(resolution.accountId),
-        );
-        return;
-      }
-
-      lastAuthenticatedAccountIdRef.current = null;
-      setOwnership(
-        createAnonymousTimelineOwnership(
-          resolveAnonymousOwnerKey(window.localStorage),
-        ),
-      );
+      stateRef.current = next;
+      setOwnership(next.ownership);
     };
 
     const onResume = () => {

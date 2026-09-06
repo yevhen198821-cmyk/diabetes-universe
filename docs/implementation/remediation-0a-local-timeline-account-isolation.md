@@ -104,9 +104,22 @@ Logout does not wipe other accounts' device-local data.
 5. Timeline chrome exposes `data-timeline-ownership` (`pending` /
    `blocked` / `anonymous` / `authenticated`) without account IDs.
 
-First-load session fetch failure is treated as anonymous (local-first).
-Later indeterminate refetch while an authenticated account is already known
-keeps that account instead of dropping to anonymous.
+Session resolution is fail-closed:
+
+- successful `get-session` with `null` / no session → anonymous
+- successful valid session with `accountId` → authenticated
+- successful session present without `accountId` → blocked
+- network exception, HTTP 5xx, HTTP 429, or any other non-success →
+  indeterminate
+
+Generic `!response.ok` is never treated as logout.
+
+Indeterminate while an authenticated account is already known keeps that
+account namespace. First-load indeterminate stays `pending` (empty
+in-memory repository) and must not open anonymous IndexedDB until session
+state is positively resolved. A first-load auth-service outage therefore
+cannot expose browser-anonymous medical history to an actually
+authenticated user.
 
 A session user without `accountId` is blocked rather than falling back to
 email.
@@ -159,8 +172,14 @@ Logout:
 
 A stale-but-still-authenticated session (P6c fresh-auth gate) is still
 account A, so A's store remains attached. That is not a cross-account leak.
-When `get-session` is null or the session is revoked, ownership leaves A
-and A's records are not readable from the signed-out context.
+
+Auth-service HTTP 5xx, 429, unexpected non-success, or a network exception
+are indeterminate. They keep the last authenticated namespace and never
+open anonymous medical data.
+
+Only a successful `get-session` payload that is `null` / no session is a
+proven signed-out transition. Then ownership leaves A and A's records are
+not readable from the signed-out context.
 
 ## Multi-tab
 

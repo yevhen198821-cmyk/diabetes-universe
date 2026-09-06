@@ -6,6 +6,13 @@ export type TimelineSessionAccountResolution =
   | { readonly status: 'blocked' }
   | { readonly status: 'indeterminate' };
 
+/**
+ * Resolve Timeline ownership identity from Better Auth get-session.
+ *
+ * Only a successful 2xx payload that is null/no session is signed-out.
+ * HTTP 5xx, 429, other non-success, and network failures are indeterminate.
+ * Do not infer logout from generic !response.ok.
+ */
 export async function readTimelineSessionAccountResolution(
   fetchImpl: typeof fetch = fetch,
 ): Promise<TimelineSessionAccountResolution> {
@@ -16,7 +23,7 @@ export async function readTimelineSessionAccountResolution(
     });
 
     if (!response.ok) {
-      return { status: 'anonymous' };
+      return { status: 'indeterminate' };
     }
 
     const payload: unknown = await response.json();
