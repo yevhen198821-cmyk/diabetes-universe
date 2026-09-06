@@ -62,6 +62,10 @@ interface SemanticEventEnvelope {
 }
 ```
 
+Nutrition v2 Quick Add writes override envelope `schemaVersion` to `2` on
+`NutritionTimelineEventV2` only. Other kinds remain generation `1`. See
+[Nutrition Entity](./nutrition.md).
+
 Per-kind semantic payloads store canonical numeric values (for example
 `concentrationMmolPerL`, `doseUnits`, `carbohydratesGrams`) and
 `CanonicalUnitId` for medication doses. Presentation strings (`title`, `value`,

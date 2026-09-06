@@ -87,6 +87,14 @@ function isTimelineEventSource(value: unknown): value is TimelineEventSource {
   );
 }
 
+function hasValidSchemaVersion(value: Record<string, unknown>): boolean {
+  if (value.kind === 'nutrition' && value.schemaVersion === 2) {
+    return true;
+  }
+
+  return value.schemaVersion === 1;
+}
+
 function hasValidEnvelope(value: Record<string, unknown>): boolean {
   return (
     isNonEmptyString(value.id) &&
@@ -94,7 +102,7 @@ function hasValidEnvelope(value: Record<string, unknown>): boolean {
     isIsoTimestamp(value.occurredAt) &&
     isIsoTimestamp(value.createdAt) &&
     isIsoTimestamp(value.updatedAt) &&
-    value.schemaVersion === 1 &&
+    hasValidSchemaVersion(value) &&
     isTimelineEventSource(value.source)
   );
 }
@@ -113,6 +121,51 @@ function isNutritionProduct(value: unknown): value is NutritionProductSnapshot {
   );
 }
 
+function isOptionalPositiveFiniteNumber(value: unknown): boolean {
+  return value === undefined || (isFiniteNumber(value) && value > 0);
+}
+
+function isNutritionItemSnapshot(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    isNonEmptyString(value.itemId) &&
+    isNonEmptyString(value.name) &&
+    isFiniteNumber(value.carbohydratesGrams) &&
+    isOptionalPositiveFiniteNumber(value.weightGrams) &&
+    isOptionalPositiveFiniteNumber(value.carbsPer100Grams)
+  );
+}
+
+function hasValidNutritionV1Payload(value: Record<string, unknown>): boolean {
+  const products = value.products;
+
+  return (
+    (value.mode === 'manual' || value.mode === 'products') &&
+    isNonEmptyString(value.mealType) &&
+    isFiniteNumber(value.carbohydratesGrams) &&
+    (products === undefined ||
+      (Array.isArray(products) && products.every(isNutritionProduct))) &&
+    isOptionalString(value.note)
+  );
+}
+
+function hasValidNutritionV2Payload(value: Record<string, unknown>): boolean {
+  const items = value.items;
+
+  return (
+    isNonEmptyString(value.mealType) &&
+    isFiniteNumber(value.carbohydratesGrams) &&
+    (items === undefined ||
+      (Array.isArray(items) &&
+        items.length > 0 &&
+        items.every(isNutritionItemSnapshot))) &&
+    isOptionalString(value.note)
+  );
+}
+
 function hasValidKindPayload(value: Record<string, unknown>): boolean {
   switch (value.kind) {
     case 'glucose':
@@ -121,17 +174,10 @@ function hasValidKindPayload(value: Record<string, unknown>): boolean {
       return (
         isNonEmptyString(value.preparation) && isFiniteNumber(value.doseUnits)
       );
-    case 'nutrition': {
-      const products = value.products;
-      return (
-        (value.mode === 'manual' || value.mode === 'products') &&
-        isNonEmptyString(value.mealType) &&
-        isFiniteNumber(value.carbohydratesGrams) &&
-        (products === undefined ||
-          (Array.isArray(products) && products.every(isNutritionProduct))) &&
-        isOptionalString(value.note)
-      );
-    }
+    case 'nutrition':
+      return value.schemaVersion === 2
+        ? hasValidNutritionV2Payload(value)
+        : hasValidNutritionV1Payload(value);
     case 'medication':
       return (
         isOptionalString(value.medicationId) &&

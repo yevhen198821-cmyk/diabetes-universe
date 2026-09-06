@@ -24,7 +24,7 @@ Persisted Nutrition v1 (@diabetes-universe/types NutritionTimelineEvent)
 
 Canonical Nutrition v2 (@diabetes-universe/medical-domain)
         ↓
-Future 5B presentation / Quick Add adapter
+Wave 5B presentation / Quick Add adapter (new writes)
 ```
 
 | Package                             | Owns                                                                                         | Does not own                             |
@@ -89,5 +89,6 @@ scanner, or macro model.
 
 | Wave   | Scope                                                                | Status      |
 | ------ | -------------------------------------------------------------------- | ----------- |
-| **5B** | Canonical + localized Nutrition Quick Add; 500 g presentation policy | Not started |
-| Later  | Edit adoption, save integrity, API/OpenAPI, Timeline Detail          | Not started |
+| **5B** | Canonical + localized Nutrition Quick Add; 500 g presentation policy | Implemented |
+| **5C** | Persistence / save integrity                                         | Not started |
+| Later  | Edit adoption, API/OpenAPI, Timeline Detail                          | Not started |

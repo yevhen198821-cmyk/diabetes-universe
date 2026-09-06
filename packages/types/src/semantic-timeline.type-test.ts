@@ -162,6 +162,23 @@ const nutritionEvent: NutritionTimelineEvent = {
   carbohydratesGrams: 42,
 };
 
+const nutritionEventV2: NutritionTimelineEvent = {
+  ...baseEnvelope,
+  carbohydratesGrams: 12.12,
+  items: [
+    {
+      carbohydratesGrams: 12.12,
+      itemId: 'item-1',
+      name: 'Bread',
+    },
+  ],
+  kind: 'nutrition',
+  mealType: 'lunch',
+  schemaVersion: 2,
+};
+
+void nutritionEventV2;
+
 const medicationEvent: MedicationTimelineEvent = {
   ...baseEnvelope,
   kind: 'medication',

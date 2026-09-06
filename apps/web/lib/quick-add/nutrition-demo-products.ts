@@ -1,57 +1,102 @@
+import type { NutritionItemSnapshot } from '@diabetes-universe/types';
+
+import { calculateNutritionProductCarbs } from './format-nutrition';
+
+export const NUTRITION_DEMO_PRODUCT_IDS = [
+  'apple',
+  'banana',
+  'oatmealCooked',
+  'riceBoiled',
+  'potatoBoiled',
+  'wholegrainBread',
+  'milk',
+  'plainYogurt',
+] as const;
+
+export type NutritionDemoProductId =
+  (typeof NUTRITION_DEMO_PRODUCT_IDS)[number];
+
 export interface NutritionDemoProduct {
-  readonly id: string;
-  readonly name: string;
+  readonly id: NutritionDemoProductId;
+  /**
+   * Locale-independent historical snapshot written to
+   * `NutritionItemSnapshot.name`. This is not a product identity, not a
+   * catalogue lookup key, and not the localized UI label.
+   */
+  readonly canonicalSnapshotName: string;
   readonly carbsPer100Grams: number;
 }
 
+/**
+ * Presentation-only demo catalogue. IDs are not food-database identities
+ * and must not be persisted on canonical Nutrition v2 events.
+ */
 export const nutritionDemoProducts: readonly NutritionDemoProduct[] = [
   {
+    canonicalSnapshotName: 'Apple',
     carbsPer100Grams: 14,
     id: 'apple',
-    name: 'Яблоко',
   },
   {
+    canonicalSnapshotName: 'Banana',
     carbsPer100Grams: 23,
     id: 'banana',
-    name: 'Банан',
   },
   {
+    canonicalSnapshotName: 'Cooked oatmeal',
     carbsPer100Grams: 12,
-    id: 'oatmeal-cooked',
-    name: 'Овсянка готовая',
+    id: 'oatmealCooked',
   },
   {
+    canonicalSnapshotName: 'Boiled rice',
     carbsPer100Grams: 28,
-    id: 'rice-boiled',
-    name: 'Рис варёный',
+    id: 'riceBoiled',
   },
   {
+    canonicalSnapshotName: 'Boiled potato',
     carbsPer100Grams: 17,
-    id: 'potato-boiled',
-    name: 'Картофель варёный',
+    id: 'potatoBoiled',
   },
   {
+    canonicalSnapshotName: 'Wholegrain bread',
     carbsPer100Grams: 43,
-    id: 'wholegrain-bread',
-    name: 'Хлеб цельнозерновой',
+    id: 'wholegrainBread',
   },
   {
+    canonicalSnapshotName: 'Milk',
     carbsPer100Grams: 5,
     id: 'milk',
-    name: 'Молоко',
   },
   {
+    canonicalSnapshotName: 'Plain yogurt',
     carbsPer100Grams: 4,
-    id: 'plain-yogurt',
-    name: 'Йогурт без сахара',
+    id: 'plainYogurt',
   },
 ];
 
-export const nutritionDemoProductOptions: readonly string[] =
-  nutritionDemoProducts.map((product) => product.name);
-
-export function findNutritionDemoProductByName(
-  productName: string,
+export function findNutritionDemoProductById(
+  productId: string,
 ): NutritionDemoProduct | undefined {
-  return nutritionDemoProducts.find((product) => product.name === productName);
+  return nutritionDemoProducts.find((product) => product.id === productId);
+}
+
+/**
+ * Builds the locale-independent item snapshot written by demo Quick Add.
+ * Never copies UI catalogue labels or the presentation `id`.
+ */
+export function buildNutritionDemoItemWriteSnapshot(input: {
+  readonly itemId: string;
+  readonly product: NutritionDemoProduct;
+  readonly weightGrams: number;
+}): NutritionItemSnapshot {
+  return {
+    carbohydratesGrams: calculateNutritionProductCarbs(
+      input.weightGrams,
+      input.product.carbsPer100Grams,
+    ),
+    carbsPer100Grams: input.product.carbsPer100Grams,
+    itemId: input.itemId,
+    name: input.product.canonicalSnapshotName,
+    weightGrams: input.weightGrams,
+  };
 }

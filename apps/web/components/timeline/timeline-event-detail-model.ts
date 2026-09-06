@@ -516,12 +516,25 @@ export function updateSemanticTimelineEventFromDraft(
         return { errors: { title: 'Укажите название.' }, event: null };
       }
 
+      if (event.schemaVersion === 1) {
+        return {
+          errors: {},
+          event: {
+            ...event,
+            carbohydratesGrams: validation.parsed as number,
+            mealType: mapQuickAddNutritionMealType(draft.title),
+            note: draft.note.trim() || undefined,
+            occurredAt: nextOccurredAt,
+            updatedAt,
+          },
+        };
+      }
+
       return {
         errors: {},
         event: {
           ...event,
           carbohydratesGrams: validation.parsed as number,
-          mealType: mapQuickAddNutritionMealType(draft.title),
           note: draft.note.trim() || undefined,
           occurredAt: nextOccurredAt,
           updatedAt,

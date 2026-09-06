@@ -231,6 +231,44 @@ test('maps nutrition enum meal type via localization and preserves custom meal t
   assert.equal(customCard.title, 'Поздний перекус');
 });
 
+test('maps Nutrition v2 without requiring legacy mode or products', () => {
+  const card = mapTimelineEventCardPresentation(
+    {
+      carbohydratesGrams: 12.12,
+      createdAt: '2026-09-05T08:00:00.000Z',
+      id: 'nutrition-v2-card',
+      kind: 'nutrition',
+      mealType: 'breakfast',
+      occurredAt: '2026-09-05T08:00:00.000Z',
+      schemaVersion: 2,
+      source: 'manual',
+      updatedAt: '2026-09-05T08:00:00.000Z',
+    },
+    enGbDependencies,
+    '08:00',
+  );
+  const unspecified = mapTimelineEventCardPresentation(
+    {
+      carbohydratesGrams: 8,
+      createdAt: '2026-09-05T08:00:00.000Z',
+      id: 'nutrition-v2-unspecified',
+      kind: 'nutrition',
+      mealType: 'unspecified',
+      occurredAt: '2026-09-05T08:00:00.000Z',
+      schemaVersion: 2,
+      source: 'import',
+      updatedAt: '2026-09-05T08:00:00.000Z',
+    },
+    enGbDependencies,
+    '08:00',
+  );
+
+  assert.equal(card.title, 'Breakfast');
+  assert.equal(card.value, '12');
+  assert.equal(card.unit, 'g carbs');
+  assert.equal(unspecified.title, 'Not specified');
+});
+
 test('maps medication unit presentation from localized labels', () => {
   const card = mapTimelineEventCardPresentation(
     medicationEvent,

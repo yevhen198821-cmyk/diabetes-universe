@@ -165,6 +165,10 @@ export function resolveTimelinePresentationLabels(
         localization,
         asTranslationKey('timeline.mealType.snack'),
       ),
+      unspecified: translate(
+        localization,
+        asTranslationKey('timeline.mealType.unspecified'),
+      ),
     },
     noteFallbackTitle: translate(
       localization,

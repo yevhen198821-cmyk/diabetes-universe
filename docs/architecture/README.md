@@ -168,15 +168,16 @@ implementation gates, and product requirements.
 ## Recording verticals
 
 - [Wave 4A — Insulin Recording Architecture](insulin/wave-4a-insulin-recording-architecture.md)
-- [Wave 5A — Nutrition Semantic Architecture](nutrition/wave-5a-nutrition-semantic-architecture.md) — domain contract only; production Nutrition writes remain v1
+- [Wave 5A — Nutrition Semantic Architecture](nutrition/wave-5a-nutrition-semantic-architecture.md) — domain contract
+- [Wave 5B — Canonical + Localized Nutrition Quick Add](../implementation/wave-5b-canonical-localized-nutrition-quick-add.md) — new Quick Add writes v2; save integrity is Wave 5C
 
 ## Notes
 
 - Dashboard block localization (I18N-02A–02B5) is complete.
 - Insulin Quick Add form and insulin Timeline presentation are localized
-  (Wave 4C / 4B-II). The shared Quick Add action menu and shared picker chrome
-  still contain Russian hardcode; nutrition, medication, activity, and note Quick
-  Add remain incompletely migrated; UK/DE locale parity is still incomplete.
+  (Wave 4C / 4B-II). Nutrition Quick Add form and Nutrition action chrome are
+  localized (Wave 5B). The shared Quick Add action menu and other category
+  forms may still contain Russian hardcode.
 - Runtime locale switching is production-ready through Profile language
-  selection and the `du-web-locale` cookie. Shared Quick Add host chrome and
-  nutrition/activity/note forms still contain leftover Russian hardcode.
+  selection and the `du-web-locale` cookie. Shared Quick Add host chrome for
+  non-Nutrition categories may still contain leftover Russian hardcode.
