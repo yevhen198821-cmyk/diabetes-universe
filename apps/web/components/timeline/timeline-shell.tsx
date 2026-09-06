@@ -4,7 +4,6 @@ import type {
   ActivityQuickAddEntry,
   MedicationQuickAddEntry,
   NoteQuickAddEntry,
-  NutritionQuickAddEntry,
   SemanticTimelineEvent,
 } from '@diabetes-universe/types';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -26,6 +25,7 @@ import {
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
 import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
 import type { InsulinQuickAddSubmitRequest } from '../../lib/quick-add/insulin-quick-add-submit';
+import type { NutritionQuickAddSubmitRequest } from '../../lib/quick-add/nutrition-quick-add-submit';
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { createTimelineDayPeriodListModel } from './timeline-list-model';
@@ -515,8 +515,13 @@ export function TimelineShell() {
     );
   };
 
-  const handleNutritionSubmit = (entry: NutritionQuickAddEntry) => {
-    addEvent(createSemanticNutritionTimelineEvent(entry));
+  const handleNutritionSubmit = async ({
+    entry,
+    eventId,
+  }: NutritionQuickAddSubmitRequest) => {
+    await addEventAsync(
+      createSemanticNutritionTimelineEvent(entry, { id: eventId }),
+    );
   };
 
   const handleMedicationSubmit = (entry: MedicationQuickAddEntry) => {

@@ -169,7 +169,8 @@ implementation gates, and product requirements.
 
 - [Wave 4A — Insulin Recording Architecture](insulin/wave-4a-insulin-recording-architecture.md)
 - [Wave 5A — Nutrition Semantic Architecture](nutrition/wave-5a-nutrition-semantic-architecture.md) — domain contract
-- [Wave 5B — Canonical + Localized Nutrition Quick Add](../implementation/wave-5b-canonical-localized-nutrition-quick-add.md) — new Quick Add writes v2; save integrity is Wave 5C
+- [Wave 5B — Canonical + Localized Nutrition Quick Add](../implementation/wave-5b-canonical-localized-nutrition-quick-add.md) — new Quick Add writes v2; save integrity is Wave 6C
+- [Wave 6C — Nutrition Save Integrity + IndexedDB Semantic Validation](../implementation/wave-6c-nutrition-save-integrity-indexeddb-validation.md)
 
 ## Notes
 

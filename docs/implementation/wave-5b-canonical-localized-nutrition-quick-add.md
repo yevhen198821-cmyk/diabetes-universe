@@ -19,7 +19,7 @@ vertical.
 | ------ | ------------------------------------------------------------------ | ----------------------------------------------- |
 | **5A** | Canonical Nutrition v2 domain contract in `medical-domain`         | UI, persistence integrity, API, writers         |
 | **5B** | New Quick Add writes as v2 + localized presentation (four locales) | Save integrity, Edit/Detail, API, food database |
-| **5C** | Persistence / save integrity (await, retry, quarantine)            | Nutrition Edit adoption, Medical API            |
+| **6C** | Persistence / save integrity (await, retry, quarantine)            | Nutrition Edit adoption, Medical API            |
 
 ## What changed
 
@@ -129,8 +129,8 @@ integrity:
 - no retry identity
 - no semantic write quarantine
 
-Those belong to Wave 5C. Current Nutrition save remains fire-and-forget
-`addEvent`.
+Those belong to Wave 6C. Current Nutrition save awaits durable repository
+completion before success close.
 
 ## Architecture invariants
 

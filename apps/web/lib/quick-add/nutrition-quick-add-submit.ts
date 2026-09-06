@@ -12,6 +12,11 @@ import type {
 
 import { calculateNutritionProductCarbs } from './format-nutrition';
 
+export interface NutritionQuickAddSubmitRequest {
+  readonly entry: NutritionQuickAddEntry;
+  readonly eventId: string;
+}
+
 export const NUTRITION_QUICK_ADD_MEAL_TYPES = [
   'breakfast',
   'lunch',
@@ -153,4 +158,20 @@ export function prepareNutritionQuickAddSubmit(input: {
         : { note: domainResult.value.note }),
     },
   };
+}
+
+/**
+ * Stable serialization of the persisted Nutrition semantic payload used to
+ * decide whether a failed save retry reuses the same event identity.
+ */
+export function serializeNutritionQuickAddRetryPayload(
+  entry: NutritionQuickAddEntry,
+): string {
+  return JSON.stringify({
+    carbohydratesGrams: entry.carbohydratesGrams,
+    mealType: entry.mealType,
+    ...(entry.items === undefined ? {} : { items: entry.items }),
+    ...(entry.note === undefined ? {} : { note: entry.note }),
+    time: entry.time,
+  });
 }

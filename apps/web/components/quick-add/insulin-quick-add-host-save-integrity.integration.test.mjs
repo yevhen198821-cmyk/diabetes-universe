@@ -48,6 +48,17 @@ test('QuickAddHost releases async pending lock before success close for insulin'
   );
 });
 
+test('QuickAddHost releases async pending lock before success close for nutrition', () => {
+  assert.match(
+    hostSource,
+    /const handleNutritionSubmit = async[\s\S]*releaseAsyncSubmitPending\(\);[\s\S]*haptics\.success\(\);[\s\S]*closeQuickAdd\('success'\)/,
+  );
+  assert.match(
+    hostSource,
+    /onSubmittingChange=\{handleAsyncSubmittingChange\}/,
+  );
+});
+
 test('note quick add host dismiss is unaffected without async submit pending lock', async () => {
   const runtime = await createTestPlatformRuntime({
     request: { acceptLanguage: 'en-GB', cookieTimeZone: 'Europe/London' },

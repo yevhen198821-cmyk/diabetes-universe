@@ -418,7 +418,7 @@ Domain error codes are locale-neutral (`nutrition.carbohydrates.not_positive`,
 | ------ | ---------------------------------------------------------------------- | ----------------------------------------- |
 | **5A** | Domain contract, locale-neutral validators, architecture docs, tests   | UI, persistence, API, OpenAPI, writers    |
 | **5B** | Canonical + localized Nutrition Quick Add; presentation policy (500 g) | Food DB, API, save integrity, Edit/Detail |
-| **5C** | Persistence / save integrity                                           | Nutrition Edit adoption, Medical API      |
+| **6C** | Persistence / save integrity                                           | Nutrition Edit adoption, Medical API      |
 
 Wave 5A remains domain-only. New Quick Add v2 writes are documented in
 [Wave 5B](../../implementation/wave-5b-canonical-localized-nutrition-quick-add.md).

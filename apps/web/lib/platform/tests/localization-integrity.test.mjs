@@ -28,6 +28,7 @@ const MIGRATED_SURFACE_GLOBS = [
   'lib/quick-add/format-nutrition.ts',
   'lib/quick-add/nutrition-demo-products.ts',
   'lib/quick-add/nutrition-quick-add-submit.ts',
+  'lib/quick-add/nutrition-quick-add-submit-controller.ts',
   'lib/timeline/semantic-creators/create-semantic-nutrition-timeline-event.ts',
   'app/auth',
   'app/account',

@@ -407,6 +407,11 @@ export const russianCanonicalMessages = defineApprovedMessages({
   'quick-add.nutrition.notePlaceholder': 'Добавьте заметку',
   'quick-add.nutrition.removeItem': 'Удалить продукт',
   'quick-add.nutrition.save': 'Сохранить',
+  'quick-add.nutrition.saveError.description':
+    'Запись о питании не сохранена. Ваши значения остались в форме. Попробуйте ещё раз.',
+  'quick-add.nutrition.saveError.title':
+    'Не удалось сохранить запись о питании',
+  'quick-add.nutrition.saving': 'Сохранение…',
   'quick-add.nutrition.timeLabel': 'Время',
   'quick-add.nutrition.title': 'Добавить питание',
   'quick-add.nutrition.totalCarbsLabel': 'Всего углеводов',

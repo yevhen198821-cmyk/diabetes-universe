@@ -4,13 +4,13 @@ import type {
   ActivityQuickAddEntry,
   MedicationQuickAddEntry,
   NoteQuickAddEntry,
-  NutritionQuickAddEntry,
   QuickAddCategory,
 } from '@diabetes-universe/types';
 import { useRef, useState, type RefObject } from 'react';
 
 import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
 import type { InsulinQuickAddSubmitRequest } from '../../lib/quick-add/insulin-quick-add-submit';
+import type { NutritionQuickAddSubmitRequest } from '../../lib/quick-add/nutrition-quick-add-submit';
 import { QuickAddHost } from '../quick-add/quick-add-host';
 
 interface QuickAddRootProps {
@@ -25,7 +25,9 @@ interface QuickAddRootProps {
   ) => Promise<void>;
   readonly onMedicationSubmit?: (entry: MedicationQuickAddEntry) => void;
   readonly onNoteSubmit?: (entry: NoteQuickAddEntry) => void;
-  readonly onNutritionSubmit?: (entry: NutritionQuickAddEntry) => void;
+  readonly onNutritionSubmit?: (
+    request: NutritionQuickAddSubmitRequest,
+  ) => Promise<void>;
   readonly open?: boolean;
   readonly openCategory?: QuickAddCategory | null;
   readonly returnFocusRef?: RefObject<HTMLButtonElement | null>;

@@ -40,6 +40,9 @@ export interface NutritionQuickAddLabels {
   readonly notePlaceholder: string;
   readonly removeItem: string;
   readonly save: string;
+  readonly saveErrorDescription: string;
+  readonly saveErrorTitle: string;
+  readonly saving: string;
   readonly timeLabel: string;
   readonly title: string;
   readonly totalCarbsLabel: string;
@@ -93,6 +96,11 @@ export const NUTRITION_QUICK_ADD_TRANSLATION_KEYS = {
   notePlaceholder: asTranslationKey('quick-add.nutrition.notePlaceholder'),
   removeItem: asTranslationKey('quick-add.nutrition.removeItem'),
   save: asTranslationKey('quick-add.nutrition.save'),
+  saveErrorDescription: asTranslationKey(
+    'quick-add.nutrition.saveError.description',
+  ),
+  saveErrorTitle: asTranslationKey('quick-add.nutrition.saveError.title'),
+  saving: asTranslationKey('quick-add.nutrition.saving'),
   timeLabel: asTranslationKey('quick-add.nutrition.timeLabel'),
   title: asTranslationKey('quick-add.nutrition.title'),
   totalCarbsLabel: asTranslationKey('quick-add.nutrition.totalCarbsLabel'),
@@ -188,6 +196,9 @@ export function resolveNutritionQuickAddLabels(
     notePlaceholder: translate(localization, keys.notePlaceholder),
     removeItem: translate(localization, keys.removeItem),
     save: translate(localization, keys.save),
+    saveErrorDescription: translate(localization, keys.saveErrorDescription),
+    saveErrorTitle: translate(localization, keys.saveErrorTitle),
+    saving: translate(localization, keys.saving),
     timeLabel: translate(localization, keys.timeLabel),
     title: translate(localization, keys.title),
     totalCarbsLabel: translate(localization, keys.totalCarbsLabel),

@@ -1,9 +1,6 @@
 'use client';
 
-import type {
-  NutritionItemSnapshot,
-  NutritionQuickAddEntry,
-} from '@diabetes-universe/types';
+import type { NutritionItemSnapshot } from '@diabetes-universe/types';
 import {
   QuickAddFormActions,
   QuickAddFormLayout,
@@ -11,7 +8,7 @@ import {
   QuickAddTimeField,
 } from '@diabetes-universe/ui';
 import { ChevronDown, Plus, Trash2 } from 'lucide-react';
-import { useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useRef, useState, type FormEvent } from 'react';
 
 import {
   parseNutritionManualCarbsInput,
@@ -31,9 +28,15 @@ import {
   type NutritionDemoProductId,
 } from '../../lib/quick-add/nutrition-demo-products';
 import {
+  createNutritionQuickAddSubmitIdentityState,
+  persistPreparedNutritionQuickAddSubmit,
+  prepareNutritionQuickAddSubmitWithIdentity,
+  resetNutritionQuickAddSubmitIdentity,
+} from '../../lib/quick-add/nutrition-quick-add-submit-controller';
+import type { NutritionQuickAddSubmitRequest } from '../../lib/quick-add/nutrition-quick-add-submit';
+import {
   isNutritionQuickAddMealType,
   NUTRITION_QUICK_ADD_MEAL_TYPES,
-  prepareNutritionQuickAddSubmit,
   sumNutritionItemCarbohydrates,
   type NutritionQuickAddMealType,
 } from '../../lib/quick-add/nutrition-quick-add-submit';
@@ -52,7 +55,8 @@ type NutritionFormMode = 'manual' | 'items';
 
 interface NutritionQuickAddFormProps {
   readonly onCancel: () => void;
-  readonly onSubmit: (entry: NutritionQuickAddEntry) => void;
+  readonly onSubmit: (request: NutritionQuickAddSubmitRequest) => Promise<void>;
+  readonly onSubmittingChange?: (isSubmitting: boolean) => void;
 }
 
 interface NutritionItemRowState {
@@ -157,6 +161,7 @@ function buildItemSnapshot(
 export function NutritionQuickAddForm({
   onCancel,
   onSubmit,
+  onSubmittingChange,
 }: NutritionQuickAddFormProps) {
   const formatter = useFormatter();
   const localization = useLocalization();
@@ -171,6 +176,12 @@ export function NutritionQuickAddForm({
     null,
   );
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitIdentityRef = useRef(
+    createNutritionQuickAddSubmitIdentityState(),
+  );
+  const isSubmittingRef = useRef(false);
 
   const parsedManualCarbs = parseNutritionManualCarbsInput(
     formState.manualCarbs,
@@ -211,56 +222,96 @@ export function NutritionQuickAddForm({
   const selectedMealLabel = mealTypeSelected
     ? labels.mealTypes[formState.mealType]
     : labels.mealTypePlaceholder;
+  const controlsDisabled = isSubmitting;
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const setSubmittingState = (pending: boolean) => {
+    setIsSubmitting(pending);
+    onSubmittingChange?.(pending);
+  };
+
+  const resetSubmitIdentity = () => {
+    resetNutritionQuickAddSubmitIdentity(submitIdentityRef.current);
+  };
+
+  const noteFailedAttemptFieldEdit = () => {
+    setSaveError(null);
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSubmitError(null);
+
+    if (isSubmittingRef.current) {
+      return;
+    }
 
     if (!canSubmit || !mealTypeSelected) {
       return;
     }
 
     const note = formState.note.trim();
+    let prepared;
 
     if (formState.mode === 'manual' && parsedManualCarbs !== null) {
-      const prepared = prepareNutritionQuickAddSubmit({
-        carbohydratesGrams: parsedManualCarbs,
-        mealType: formState.mealType,
-        note,
-        time: formState.time,
+      prepared = prepareNutritionQuickAddSubmitWithIdentity({
+        identity: submitIdentityRef.current,
+        input: {
+          carbohydratesGrams: parsedManualCarbs,
+          mealType: formState.mealType,
+          note,
+          time: formState.time,
+        },
       });
-
-      if (!prepared.ok) {
-        setSubmitError(labels.carbsError);
-        return;
-      }
-
-      onSubmit(prepared.value);
+    } else if (formState.mode === 'items') {
+      prepared = prepareNutritionQuickAddSubmitWithIdentity({
+        identity: submitIdentityRef.current,
+        input: {
+          carbohydratesGrams: itemsTotalCarbs,
+          items: itemSnapshots,
+          mealType: formState.mealType,
+          note,
+          time: formState.time,
+        },
+      });
+    } else {
       return;
     }
 
-    if (formState.mode === 'items') {
-      const prepared = prepareNutritionQuickAddSubmit({
-        carbohydratesGrams: itemsTotalCarbs,
-        items: itemSnapshots,
-        mealType: formState.mealType,
-        note,
-        time: formState.time,
-      });
-
-      if (!prepared.ok) {
-        setSubmitError(labels.carbsError);
-        return;
-      }
-
-      onSubmit(prepared.value);
+    if (prepared.type === 'invalid') {
+      setSubmitError(labels.carbsError);
+      return;
     }
+
+    isSubmittingRef.current = true;
+    setSubmittingState(true);
+    setSubmitError(null);
+    setSaveError(null);
+    setMealSheetOpen(false);
+    setSelectedItemRowId(null);
+
+    const result = await persistPreparedNutritionQuickAddSubmit({
+      identity: submitIdentityRef.current,
+      onSubmit,
+      request: prepared.request,
+    });
+
+    if (result.type === 'error') {
+      setSaveError(labels.saveErrorDescription);
+    }
+
+    isSubmittingRef.current = false;
+    setSubmittingState(false);
   };
 
   const handleCancel = () => {
+    if (isSubmittingRef.current) {
+      return;
+    }
+
     setFormState(createInitialState());
     setSelectedItemRowId(null);
     setSubmitError(null);
+    setSaveError(null);
+    resetSubmitIdentity();
     onCancel();
   };
 
@@ -277,6 +328,10 @@ export function NutritionQuickAddForm({
   };
 
   const handleItemSelect = (productId: NutritionDemoProductId) => {
+    if (controlsDisabled) {
+      return;
+    }
+
     const product = findNutritionDemoProductById(productId);
 
     if (!product || !selectedItemRowId) {
@@ -288,366 +343,426 @@ export function NutritionQuickAddForm({
       carbsPer100Grams: product.carbsPer100Grams,
       demoProductId: product.id,
     });
+    noteFailedAttemptFieldEdit();
     setSelectedItemRowId(null);
   };
 
   return (
-    <QuickAddFormLayout onSubmit={handleSubmit}>
+    <QuickAddFormLayout
+      onSubmit={(event) => {
+        void handleSubmit(event);
+      }}
+    >
       <QuickAddFormLayout.Body>
-        {submitError ? (
-          <p className="text-sm text-rose-600" role="alert">
-            {submitError}
-          </p>
-        ) : null}
+        <div aria-busy={isSubmitting ? true : undefined}>
+          {isSubmitting ? (
+            <p
+              className="text-sm text-slate-600"
+              id="quick-add-nutrition-saving"
+              role="status"
+            >
+              {labels.saving}
+            </p>
+          ) : null}
 
-        <fieldset>
-          <legend className="sr-only">{labels.modeLegend}</legend>
-          <div className="grid grid-cols-2 rounded-2xl border border-slate-200 bg-slate-100 p-1">
-            {(
-              [
-                ['manual', labels.modeManual],
-                ['items', labels.modeItems],
-              ] as const
-            ).map(([mode, label]) => (
-              <label
-                className={`relative cursor-pointer rounded-xl px-3 py-2.5 text-center text-sm font-semibold transition focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-teal-700 ${
-                  formState.mode === mode
-                    ? 'bg-white text-slate-950 shadow-sm'
-                    : 'text-slate-600'
-                }`}
-                key={mode}
+          {saveError ? (
+            <section
+              aria-labelledby="quick-add-nutrition-save-error-title"
+              className="space-y-1"
+              role="alert"
+            >
+              <h3
+                className="text-sm font-semibold text-rose-700"
+                id="quick-add-nutrition-save-error-title"
               >
+                {labels.saveErrorTitle}
+              </h3>
+              <p
+                className="text-sm text-rose-600"
+                id="quick-add-nutrition-save-error-description"
+              >
+                {saveError}
+              </p>
+            </section>
+          ) : null}
+
+          {submitError ? (
+            <p className="text-sm text-rose-600" role="alert">
+              {submitError}
+            </p>
+          ) : null}
+
+          <fieldset>
+            <legend className="sr-only">{labels.modeLegend}</legend>
+            <div className="grid grid-cols-2 rounded-2xl border border-slate-200 bg-slate-100 p-1">
+              {(
+                [
+                  ['manual', labels.modeManual],
+                  ['items', labels.modeItems],
+                ] as const
+              ).map(([mode, label]) => (
+                <label
+                  className={`relative cursor-pointer rounded-xl px-3 py-2.5 text-center text-sm font-semibold transition focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-teal-700 ${
+                    formState.mode === mode
+                      ? 'bg-white text-slate-950 shadow-sm'
+                      : 'text-slate-600'
+                  }`}
+                  key={mode}
+                >
+                  <input
+                    checked={formState.mode === mode}
+                    className="sr-only"
+                    disabled={controlsDisabled}
+                    name="nutrition-entry-mode"
+                    onChange={() => {
+                      noteFailedAttemptFieldEdit();
+                      setFormState((current) => ({
+                        ...current,
+                        mode,
+                      }));
+                    }}
+                    type="radio"
+                    value={mode}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <div>
+            <span className={formLabel} id="quick-add-nutrition-meal-label">
+              {labels.mealTypeLabel}
+            </span>
+            <button
+              aria-haspopup="dialog"
+              aria-labelledby="quick-add-nutrition-meal-label quick-add-nutrition-meal-value"
+              className={`${formField} mt-2 flex items-center justify-between text-left font-medium ${
+                mealTypeSelected ? 'text-slate-950' : 'text-slate-400'
+              }`}
+              disabled={controlsDisabled}
+              onClick={() => setMealSheetOpen(true)}
+              type="button"
+            >
+              <span id="quick-add-nutrition-meal-value">
+                {selectedMealLabel}
+              </span>
+              <ChevronDown
+                aria-hidden="true"
+                className="text-slate-400"
+                size={18}
+              />
+            </button>
+          </div>
+
+          {formState.mode === 'manual' ? (
+            <div>
+              <label
+                className={formLabel}
+                htmlFor="quick-add-nutrition-manual-carbs"
+              >
+                {labels.carbsLabel}
+              </label>
+              <div className="relative mt-2">
                 <input
-                  checked={formState.mode === mode}
-                  className="sr-only"
-                  name="nutrition-entry-mode"
-                  onChange={() => {
+                  aria-describedby={
+                    manualCarbsInvalid
+                      ? 'quick-add-nutrition-manual-carbs-error'
+                      : undefined
+                  }
+                  aria-invalid={manualCarbsInvalid ? true : undefined}
+                  autoComplete="off"
+                  className={`${formField} pr-12 ${
+                    manualCarbsHasValue
+                      ? 'font-semibold text-slate-950'
+                      : 'text-slate-900'
+                  }`}
+                  disabled={controlsDisabled}
+                  enterKeyHint="done"
+                  id="quick-add-nutrition-manual-carbs"
+                  inputMode="decimal"
+                  name="manualCarbs"
+                  onChange={(event) => {
+                    setSubmitError(null);
+                    noteFailedAttemptFieldEdit();
                     setFormState((current) => ({
                       ...current,
-                      mode,
+                      manualCarbs: event.target.value,
                     }));
                   }}
-                  type="radio"
-                  value={mode}
+                  placeholder={labels.carbsPlaceholder}
+                  required={formState.mode === 'manual'}
+                  type="text"
+                  value={formState.manualCarbs}
                 />
-                {label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+                <span
+                  className={`pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium ${
+                    manualCarbsHasValue ? 'text-slate-500' : 'text-slate-400'
+                  }`}
+                >
+                  {labels.carbsUnit}
+                </span>
+              </div>
+              {manualCarbsInvalid ? (
+                <p
+                  className="mt-2 text-sm text-rose-600"
+                  id="quick-add-nutrition-manual-carbs-error"
+                  role="alert"
+                >
+                  {labels.carbsError}
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">
+                  {labels.itemsHeading}
+                </h3>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  {labels.itemsHelp}
+                </p>
+              </div>
 
-        <div>
-          <span className={formLabel} id="quick-add-nutrition-meal-label">
-            {labels.mealTypeLabel}
-          </span>
-          <button
-            aria-haspopup="dialog"
-            aria-labelledby="quick-add-nutrition-meal-label quick-add-nutrition-meal-value"
-            className={`${formField} mt-2 flex items-center justify-between text-left font-medium ${
-              mealTypeSelected ? 'text-slate-950' : 'text-slate-400'
-            }`}
-            onClick={() => setMealSheetOpen(true)}
-            type="button"
-          >
-            <span id="quick-add-nutrition-meal-value">{selectedMealLabel}</span>
-            <ChevronDown
-              aria-hidden="true"
-              className="text-slate-400"
-              size={18}
-            />
-          </button>
-        </div>
+              <div className="space-y-2">
+                {formState.itemRows.map((row, index) => {
+                  const rowCarbs = getItemRowCarbs(row);
+                  const weightHasValue = row.weight.trim().length > 0;
+                  const weightInvalid =
+                    weightHasValue &&
+                    parseNutritionManualDecimalInput(
+                      row.weight,
+                      MAX_ITEM_WEIGHT_GRAMS,
+                    ) === null;
+                  const itemAriaLabel = `${labels.itemAriaLabel} ${index + 1}`;
+                  const itemDisplayName = resolveItemRowDisplayName(
+                    row,
+                    labels,
+                  );
+                  const itemSelected = row.demoProductId.length > 0;
 
-        {formState.mode === 'manual' ? (
-          <div>
-            <label
-              className={formLabel}
-              htmlFor="quick-add-nutrition-manual-carbs"
-            >
-              {labels.carbsLabel}
-            </label>
-            <div className="relative mt-2">
-              <input
-                aria-describedby={
-                  manualCarbsInvalid
-                    ? 'quick-add-nutrition-manual-carbs-error'
-                    : undefined
+                  return (
+                    <section
+                      aria-label={itemAriaLabel}
+                      className="space-y-2 rounded-2xl bg-slate-50/80 p-3"
+                      key={row.id}
+                    >
+                      <div>
+                        <span
+                          className={formLabel}
+                          id={`quick-add-nutrition-item-${row.id}-label`}
+                        >
+                          {labels.itemLabel}
+                        </span>
+                        <button
+                          aria-describedby={
+                            row.carbsPer100Grams !== null
+                              ? `quick-add-nutrition-item-${row.id}-carbs`
+                              : undefined
+                          }
+                          aria-haspopup="dialog"
+                          aria-labelledby={`quick-add-nutrition-item-${row.id}-label quick-add-nutrition-item-${row.id}-value`}
+                          className={`mt-1.5 flex min-h-14 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 text-left text-sm font-medium transition hover:border-slate-300 focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:outline-none ${
+                            itemSelected ? 'text-slate-950' : 'text-slate-400'
+                          }`}
+                          disabled={controlsDisabled}
+                          onClick={() => setSelectedItemRowId(row.id)}
+                          type="button"
+                        >
+                          <span
+                            className="min-w-0 pr-3"
+                            id={`quick-add-nutrition-item-${row.id}-value`}
+                          >
+                            <span className="block truncate">
+                              {itemDisplayName}
+                            </span>
+                            {row.carbsPer100Grams !== null ? (
+                              <span
+                                className="mt-0.5 block truncate text-xs font-normal text-slate-500"
+                                id={`quick-add-nutrition-item-${row.id}-carbs`}
+                              >
+                                {formatNutritionCarbsPer100Grams(
+                                  row.carbsPer100Grams,
+                                  formatter,
+                                  labels.carbsPer100Label,
+                                )}
+                              </span>
+                            ) : null}
+                          </span>
+                          <ChevronDown
+                            aria-hidden="true"
+                            className="text-slate-400"
+                            size={18}
+                          />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-[minmax(0,1fr)_6.5rem] gap-2">
+                        <div>
+                          <label
+                            className={formLabel}
+                            htmlFor={`quick-add-nutrition-weight-${row.id}`}
+                          >
+                            {labels.weightLabel}
+                          </label>
+                          <div className="relative mt-1.5">
+                            <input
+                              aria-describedby={
+                                weightInvalid
+                                  ? `quick-add-nutrition-weight-${row.id}-error`
+                                  : undefined
+                              }
+                              aria-invalid={weightInvalid ? true : undefined}
+                              autoComplete="off"
+                              className={`${formField} bg-white pr-12 ${
+                                weightHasValue
+                                  ? 'font-semibold text-slate-950'
+                                  : 'text-slate-900'
+                              }`}
+                              disabled={controlsDisabled}
+                              enterKeyHint="done"
+                              id={`quick-add-nutrition-weight-${row.id}`}
+                              inputMode="decimal"
+                              name={`itemWeight-${row.id}`}
+                              onChange={(event) => {
+                                noteFailedAttemptFieldEdit();
+                                updateItemRow(row.id, {
+                                  weight: event.target.value,
+                                });
+                              }}
+                              placeholder={labels.weightPlaceholder}
+                              type="text"
+                              value={row.weight}
+                            />
+                            <span
+                              className={`pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium ${
+                                weightHasValue
+                                  ? 'text-slate-500'
+                                  : 'text-slate-400'
+                              }`}
+                            >
+                              {labels.carbsUnit}
+                            </span>
+                          </div>
+                          {weightInvalid ? (
+                            <p
+                              className="mt-2 text-sm text-rose-600"
+                              id={`quick-add-nutrition-weight-${row.id}-error`}
+                              role="alert"
+                            >
+                              {labels.weightError}
+                            </p>
+                          ) : null}
+                        </div>
+
+                        <div>
+                          <span className={formLabel}>
+                            {labels.itemCarbsLabel}
+                          </span>
+                          <p className="mt-1.5 flex h-11 items-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-950">
+                            {rowCarbs === null
+                              ? '—'
+                              : `${formatNutritionCarbs(rowCarbs, formatter)} ${labels.carbsUnit}`}
+                          </p>
+                        </div>
+                      </div>
+
+                      {formState.itemRows.length > 1 ? (
+                        <button
+                          className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2 text-sm font-semibold text-slate-500 transition hover:bg-rose-50 hover:text-rose-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+                          disabled={controlsDisabled}
+                          onClick={() => {
+                            noteFailedAttemptFieldEdit();
+                            setFormState((current) => ({
+                              ...current,
+                              itemRows: current.itemRows.filter(
+                                (itemRow) => itemRow.id !== row.id,
+                              ),
+                            }));
+                          }}
+                          type="button"
+                        >
+                          <Trash2 aria-hidden="true" size={16} />
+                          {labels.removeItem}
+                        </button>
+                      ) : null}
+                    </section>
+                  );
+                })}
+              </div>
+
+              <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                <span className="text-sm font-medium text-slate-600">
+                  {labels.totalCarbsLabel}
+                </span>
+                <span className="text-xl font-bold text-slate-950">
+                  {formatNutritionCarbs(itemsTotalCarbs, formatter)}{' '}
+                  {labels.carbsUnit}
+                </span>
+              </div>
+
+              <button
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={
+                  controlsDisabled || formState.itemRows.length >= MAX_ITEM_ROWS
                 }
-                aria-invalid={manualCarbsInvalid ? true : undefined}
-                autoComplete="off"
-                className={`${formField} pr-12 ${
-                  manualCarbsHasValue
-                    ? 'font-semibold text-slate-950'
-                    : 'text-slate-900'
-                }`}
-                enterKeyHint="done"
-                id="quick-add-nutrition-manual-carbs"
-                inputMode="decimal"
-                name="manualCarbs"
-                onChange={(event) => {
-                  setSubmitError(null);
+                onClick={() => {
+                  noteFailedAttemptFieldEdit();
                   setFormState((current) => ({
                     ...current,
-                    manualCarbs: event.target.value,
+                    itemRows: [...current.itemRows, createItemRow()],
                   }));
                 }}
-                placeholder={labels.carbsPlaceholder}
-                required={formState.mode === 'manual'}
-                type="text"
-                value={formState.manualCarbs}
-              />
-              <span
-                className={`pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium ${
-                  manualCarbsHasValue ? 'text-slate-500' : 'text-slate-400'
-                }`}
+                type="button"
               >
-                {labels.carbsUnit}
-              </span>
+                <Plus aria-hidden="true" size={16} />
+                {labels.addItem}
+              </button>
             </div>
-            {manualCarbsInvalid ? (
-              <p
-                className="mt-2 text-sm text-rose-600"
-                id="quick-add-nutrition-manual-carbs-error"
-                role="alert"
-              >
-                {labels.carbsError}
+          )}
+
+          <QuickAddTimeField
+            disabled={controlsDisabled}
+            id="quick-add-nutrition-time"
+            label={labels.timeLabel}
+            name="time"
+            onChange={(time) => {
+              noteFailedAttemptFieldEdit();
+              setFormState((current) => ({
+                ...current,
+                time,
+              }));
+            }}
+            required
+            value={formState.time}
+          />
+
+          <div>
+            <label className={formLabel} htmlFor="quick-add-nutrition-note">
+              {labels.noteLabel} ({labels.noteOptional})
+            </label>
+            <textarea
+              className={`${formField} mt-2 min-h-24 resize-none py-3`}
+              disabled={controlsDisabled}
+              id="quick-add-nutrition-note"
+              maxLength={NOTE_MAX_LENGTH}
+              name="note"
+              onChange={(event) => {
+                noteFailedAttemptFieldEdit();
+                setFormState((current) => ({
+                  ...current,
+                  note: event.target.value,
+                }));
+              }}
+              placeholder={labels.notePlaceholder}
+              value={formState.note}
+            />
+            {showNoteCounter ? (
+              <p className="mt-1 text-right text-xs text-slate-500">
+                {formState.note.length}/{NOTE_MAX_LENGTH}
               </p>
             ) : null}
           </div>
-        ) : (
-          <div className="space-y-3">
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900">
-                {labels.itemsHeading}
-              </h3>
-              <p className="mt-1 text-xs leading-5 text-slate-500">
-                {labels.itemsHelp}
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              {formState.itemRows.map((row, index) => {
-                const rowCarbs = getItemRowCarbs(row);
-                const weightHasValue = row.weight.trim().length > 0;
-                const weightInvalid =
-                  weightHasValue &&
-                  parseNutritionManualDecimalInput(
-                    row.weight,
-                    MAX_ITEM_WEIGHT_GRAMS,
-                  ) === null;
-                const itemAriaLabel = `${labels.itemAriaLabel} ${index + 1}`;
-                const itemDisplayName = resolveItemRowDisplayName(row, labels);
-                const itemSelected = row.demoProductId.length > 0;
-
-                return (
-                  <section
-                    aria-label={itemAriaLabel}
-                    className="space-y-2 rounded-2xl bg-slate-50/80 p-3"
-                    key={row.id}
-                  >
-                    <div>
-                      <span
-                        className={formLabel}
-                        id={`quick-add-nutrition-item-${row.id}-label`}
-                      >
-                        {labels.itemLabel}
-                      </span>
-                      <button
-                        aria-describedby={
-                          row.carbsPer100Grams !== null
-                            ? `quick-add-nutrition-item-${row.id}-carbs`
-                            : undefined
-                        }
-                        aria-haspopup="dialog"
-                        aria-labelledby={`quick-add-nutrition-item-${row.id}-label quick-add-nutrition-item-${row.id}-value`}
-                        className={`mt-1.5 flex min-h-14 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-2 text-left text-sm font-medium transition hover:border-slate-300 focus:border-teal-500 focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:outline-none ${
-                          itemSelected ? 'text-slate-950' : 'text-slate-400'
-                        }`}
-                        onClick={() => setSelectedItemRowId(row.id)}
-                        type="button"
-                      >
-                        <span
-                          className="min-w-0 pr-3"
-                          id={`quick-add-nutrition-item-${row.id}-value`}
-                        >
-                          <span className="block truncate">
-                            {itemDisplayName}
-                          </span>
-                          {row.carbsPer100Grams !== null ? (
-                            <span
-                              className="mt-0.5 block truncate text-xs font-normal text-slate-500"
-                              id={`quick-add-nutrition-item-${row.id}-carbs`}
-                            >
-                              {formatNutritionCarbsPer100Grams(
-                                row.carbsPer100Grams,
-                                formatter,
-                                labels.carbsPer100Label,
-                              )}
-                            </span>
-                          ) : null}
-                        </span>
-                        <ChevronDown
-                          aria-hidden="true"
-                          className="text-slate-400"
-                          size={18}
-                        />
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-[minmax(0,1fr)_6.5rem] gap-2">
-                      <div>
-                        <label
-                          className={formLabel}
-                          htmlFor={`quick-add-nutrition-weight-${row.id}`}
-                        >
-                          {labels.weightLabel}
-                        </label>
-                        <div className="relative mt-1.5">
-                          <input
-                            aria-describedby={
-                              weightInvalid
-                                ? `quick-add-nutrition-weight-${row.id}-error`
-                                : undefined
-                            }
-                            aria-invalid={weightInvalid ? true : undefined}
-                            autoComplete="off"
-                            className={`${formField} bg-white pr-12 ${
-                              weightHasValue
-                                ? 'font-semibold text-slate-950'
-                                : 'text-slate-900'
-                            }`}
-                            enterKeyHint="done"
-                            id={`quick-add-nutrition-weight-${row.id}`}
-                            inputMode="decimal"
-                            name={`itemWeight-${row.id}`}
-                            onChange={(event) => {
-                              updateItemRow(row.id, {
-                                weight: event.target.value,
-                              });
-                            }}
-                            placeholder={labels.weightPlaceholder}
-                            type="text"
-                            value={row.weight}
-                          />
-                          <span
-                            className={`pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium ${
-                              weightHasValue
-                                ? 'text-slate-500'
-                                : 'text-slate-400'
-                            }`}
-                          >
-                            {labels.carbsUnit}
-                          </span>
-                        </div>
-                        {weightInvalid ? (
-                          <p
-                            className="mt-2 text-sm text-rose-600"
-                            id={`quick-add-nutrition-weight-${row.id}-error`}
-                            role="alert"
-                          >
-                            {labels.weightError}
-                          </p>
-                        ) : null}
-                      </div>
-
-                      <div>
-                        <span className={formLabel}>
-                          {labels.itemCarbsLabel}
-                        </span>
-                        <p className="mt-1.5 flex h-11 items-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-950">
-                          {rowCarbs === null
-                            ? '—'
-                            : `${formatNutritionCarbs(rowCarbs, formatter)} ${labels.carbsUnit}`}
-                        </p>
-                      </div>
-                    </div>
-
-                    {formState.itemRows.length > 1 ? (
-                      <button
-                        className="inline-flex min-h-11 items-center gap-2 rounded-xl px-2 text-sm font-semibold text-slate-500 transition hover:bg-rose-50 hover:text-rose-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
-                        onClick={() => {
-                          setFormState((current) => ({
-                            ...current,
-                            itemRows: current.itemRows.filter(
-                              (itemRow) => itemRow.id !== row.id,
-                            ),
-                          }));
-                        }}
-                        type="button"
-                      >
-                        <Trash2 aria-hidden="true" size={16} />
-                        {labels.removeItem}
-                      </button>
-                    ) : null}
-                  </section>
-                );
-              })}
-            </div>
-
-            <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-              <span className="text-sm font-medium text-slate-600">
-                {labels.totalCarbsLabel}
-              </span>
-              <span className="text-xl font-bold text-slate-950">
-                {formatNutritionCarbs(itemsTotalCarbs, formatter)}{' '}
-                {labels.carbsUnit}
-              </span>
-            </div>
-
-            <button
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={formState.itemRows.length >= MAX_ITEM_ROWS}
-              onClick={() => {
-                setFormState((current) => ({
-                  ...current,
-                  itemRows: [...current.itemRows, createItemRow()],
-                }));
-              }}
-              type="button"
-            >
-              <Plus aria-hidden="true" size={16} />
-              {labels.addItem}
-            </button>
-          </div>
-        )}
-
-        <QuickAddTimeField
-          id="quick-add-nutrition-time"
-          label={labels.timeLabel}
-          name="time"
-          onChange={(time) => {
-            setFormState((current) => ({
-              ...current,
-              time,
-            }));
-          }}
-          required
-          value={formState.time}
-        />
-
-        <div>
-          <label className={formLabel} htmlFor="quick-add-nutrition-note">
-            {labels.noteLabel} ({labels.noteOptional})
-          </label>
-          <textarea
-            className={`${formField} mt-2 min-h-24 resize-none py-3`}
-            id="quick-add-nutrition-note"
-            maxLength={NOTE_MAX_LENGTH}
-            name="note"
-            onChange={(event) => {
-              setFormState((current) => ({
-                ...current,
-                note: event.target.value,
-              }));
-            }}
-            placeholder={labels.notePlaceholder}
-            value={formState.note}
-          />
-          {showNoteCounter ? (
-            <p className="mt-1 text-right text-xs text-slate-500">
-              {formState.note.length}/{NOTE_MAX_LENGTH}
-            </p>
-          ) : null}
         </div>
       </QuickAddFormLayout.Body>
 
@@ -655,16 +770,26 @@ export function NutritionQuickAddForm({
         <QuickAddFormActions
           cancelLabel={labels.cancel}
           inline
+          isSubmitting={isSubmitting}
           onCancel={handleCancel}
+          submitAriaDescribedBy={
+            isSubmitting
+              ? 'quick-add-nutrition-saving'
+              : saveError
+                ? 'quick-add-nutrition-save-error-description'
+                : undefined
+          }
           submitDisabled={!canSubmit}
           submitLabel={labels.save}
+          submittingLabel={labels.saving}
         />
       </QuickAddFormLayout.Footer>
 
-      {mealSheetOpen ? (
+      {mealSheetOpen && !controlsDisabled ? (
         <QuickAddOptionSheet<NutritionQuickAddMealType>
           onClose={() => setMealSheetOpen(false)}
           onSelect={(mealType) => {
+            noteFailedAttemptFieldEdit();
             setFormState((current) => ({
               ...current,
               mealType,
@@ -677,7 +802,7 @@ export function NutritionQuickAddForm({
         />
       ) : null}
 
-      {selectedItemRowId ? (
+      {selectedItemRowId && !controlsDisabled ? (
         <QuickAddOptionSheet<NutritionDemoProductId>
           onClose={() => setSelectedItemRowId(null)}
           onSelect={handleItemSelect}

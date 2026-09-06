@@ -291,6 +291,11 @@ export const ukrainianCanonicalMessages = defineApprovedMessages({
   'quick-add.nutrition.notePlaceholder': 'Додайте нотатку',
   'quick-add.nutrition.removeItem': 'Видалити продукт',
   'quick-add.nutrition.save': 'Зберегти',
+  'quick-add.nutrition.saveError.description':
+    'Запис про харчування не збережено. Ваші значення залишилися у формі. Спробуйте ще раз.',
+  'quick-add.nutrition.saveError.title':
+    'Не вдалося зберегти запис про харчування',
+  'quick-add.nutrition.saving': 'Збереження…',
   'quick-add.nutrition.timeLabel': 'Час',
   'quick-add.nutrition.title': 'Додати харчування',
   'quick-add.nutrition.totalCarbsLabel': 'Усього вуглеводів',
