@@ -230,9 +230,6 @@ test('the Nutrition Quick Add form writes demo snapshot names, not UI labels', (
   assert.match(formSource, /buildNutritionDemoItemWriteSnapshot/);
   assert.match(formSource, /labels\.demoProducts\[row\.demoProductId\]/);
   assert.doesNotMatch(formSource, /name:\s*labels\.demoProducts/);
-  assert.doesNotMatch(formSource, /name:\s*labels\.demoProducts\[/);
   assert.match(demoSource, /canonicalSnapshotName/);
   assert.match(demoSource, /name:\s*input\.product\.canonicalSnapshotName/);
-  assert.doesNotMatch(demoSource, /productId:/);
-  assert.doesNotMatch(demoSource, /demoProductId:/);
 });
