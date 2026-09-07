@@ -36,8 +36,6 @@ export function buildContentSecurityPolicy(
   }
   if (options.isDevelopment) {
     scriptSources.push("'unsafe-inline'", "'unsafe-eval'");
-  } else if (options.nonce) {
-    scriptSources.push("'strict-dynamic'");
   }
 
   const connectSources = ["'self'"];

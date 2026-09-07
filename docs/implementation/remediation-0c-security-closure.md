@@ -191,7 +191,7 @@ in `apps/web/proxy.ts` for every non-static route, including `/`,
 
 ```
 default-src 'self';
-script-src 'self' 'nonce-<per-request>' 'sha256-<theme-init-script>' 'strict-dynamic';
+script-src 'self' 'nonce-<per-request>' 'sha256-<theme-init-script>';
 style-src 'self' 'unsafe-inline';
 img-src 'self' data: blob: https:;
 font-src 'self';
@@ -217,12 +217,12 @@ Clickjacking protection is `frame-ancestors 'none'` plus `X-Frame-Options: DENY`
 
 ### Dev vs production
 
-| Item        | Development                                             | Production HTTPS                        |
-| ----------- | ------------------------------------------------------- | --------------------------------------- |
-| HSTS        | omitted                                                 | `max-age=15552000`                      |
-| script-src  | adds `'unsafe-inline' 'unsafe-eval'`; no strict-dynamic | nonce + theme hash + `'strict-dynamic'` |
-| connect-src | adds `ws:` / `wss:` for Next.js HMR                     | `'self'`                                |
-| Vercel live | added only when `VERCEL_ENV=preview`                    | not added                               |
+| Item        | Development                          | Production HTTPS              |
+| ----------- | ------------------------------------ | ----------------------------- |
+| HSTS        | omitted                              | `max-age=15552000`            |
+| script-src  | adds `'unsafe-inline' 'unsafe-eval'` | nonce + theme hash + `'self'` |
+| connect-src | adds `ws:` / `wss:` for Next.js HMR  | `'self'`                      |
+| Vercel live | added only when `VERCEL_ENV=preview` | not added                     |
 
 HSTS does not set `includeSubDomains` or `preload` because domain/subdomain
 ownership is not asserted here.
@@ -232,6 +232,9 @@ WebAuthn/passkeys and magic links stay same-origin (`connect-src 'self'`,
 
 ### Known CSP limitations
 
+- `'strict-dynamic'` is omitted. Next.js 16 does not nonce every runtime
+  script consistently, and a strict-dynamic policy can leave duplicate
+  hydrated UI. `'self'` plus per-request nonce remains.
 - `style-src 'unsafe-inline'` remains because a nonce/hash style policy
   would break Next.js/Tailwind inline styles.
 - `img-src https:` is broader than `'self'` so remote avatars work.

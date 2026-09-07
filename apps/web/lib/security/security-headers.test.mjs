@@ -17,7 +17,7 @@ test('production CSP includes hashed theme script, nonce, and clickjacking prote
   assert.match(csp, /default-src 'self'/);
   assert.match(csp, /script-src 'self' 'nonce-test-nonce'/);
   assert.equal(csp.includes(`'sha256-${THEME_INIT_SCRIPT_SHA256}'`), true);
-  assert.match(csp, /'strict-dynamic'/);
+  assert.doesNotMatch(csp, /'strict-dynamic'/);
   assert.match(csp, /frame-ancestors 'none'/);
   assert.match(csp, /object-src 'none'/);
   assert.doesNotMatch(csp, /script-src \*/);
@@ -34,7 +34,6 @@ test('development CSP allows Next.js tooling without wildcard script-src', () =>
   assert.match(csp, /unsafe-eval/);
   assert.match(csp, /unsafe-inline/);
   assert.match(csp, /connect-src 'self' ws: wss:/);
-  assert.doesNotMatch(csp, /'strict-dynamic'/);
   assert.doesNotMatch(csp, /script-src \*/);
 });
 
