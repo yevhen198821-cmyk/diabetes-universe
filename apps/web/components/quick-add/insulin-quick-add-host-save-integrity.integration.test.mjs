@@ -59,6 +59,21 @@ test('QuickAddHost releases async pending lock before success close for nutritio
   );
 });
 
+test('QuickAddHost awaits durable medication activity and note submits before success close', () => {
+  assert.match(
+    hostSource,
+    /const handleMedicationSubmit = async[\s\S]*finalizeQuickAddSubmit[\s\S]*releaseAsyncSubmitPending\(\);[\s\S]*haptics\.success\(\);[\s\S]*closeQuickAdd\('success'\)/,
+  );
+  assert.match(
+    hostSource,
+    /const handleActivitySubmit = async[\s\S]*finalizeQuickAddSubmit[\s\S]*releaseAsyncSubmitPending\(\);[\s\S]*haptics\.success\(\);[\s\S]*closeQuickAdd\('success'\)/,
+  );
+  assert.match(
+    hostSource,
+    /const handleNoteSubmit = async[\s\S]*finalizeQuickAddSubmit[\s\S]*releaseAsyncSubmitPending\(\);[\s\S]*haptics\.success\(\);[\s\S]*closeQuickAdd\('success'\)/,
+  );
+});
+
 test('note quick add host dismiss is unaffected without async submit pending lock', async () => {
   const runtime = await createTestPlatformRuntime({
     request: { acceptLanguage: 'en-GB', cookieTimeZone: 'Europe/London' },
