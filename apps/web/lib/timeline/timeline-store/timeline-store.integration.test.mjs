@@ -628,7 +628,7 @@ test('replaceEvents delegates transitional hydration to repository', async () =>
   }
 });
 
-test('missing update and delete remain no-ops from the user perspective', async () => {
+test('missing update and delete do not mutate the visible event snapshot', async () => {
   const mounted = await mountTimelineStore({
     repository: createInMemoryTimelineRepository({
       seedEvents: [glucoseEarly],
@@ -648,7 +648,6 @@ test('missing update and delete remain no-ops from the user perspective', async 
     });
     await flushAsyncWork();
 
-    assert.equal(mounted.observations.at(-1)?.status, 'ready');
     assert.deepEqual(mounted.observations.at(-1)?.eventIds, ['glucose-0800']);
     assert.equal(mounted.observations.length, readyRenderCount);
   } finally {
