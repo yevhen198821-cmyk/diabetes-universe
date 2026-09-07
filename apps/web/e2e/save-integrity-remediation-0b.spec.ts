@@ -49,7 +49,7 @@ test.describe('Remediation 0B Timeline save integrity', () => {
 
     await page.getByRole('button', { name: /Препарат/ }).click();
     await page.getByRole('button', { name: 'Метформин' }).click();
-    await page.getByLabel('Доза').fill('500');
+    await page.getByRole('textbox', { name: 'Доза' }).fill('500');
     await dialog.getByRole('button', { name: 'Сохранить' }).click();
 
     await expect(dialog).toBeHidden();
@@ -189,7 +189,7 @@ test.describe('Remediation 0B Timeline save integrity', () => {
 
     await page.getByRole('button', { name: /Препарат/ }).click();
     await page.getByRole('button', { name: 'Метформин' }).click();
-    await page.getByLabel('Доза').fill('500');
+    await page.getByRole('textbox', { name: 'Доза' }).fill('500');
     await installOneShotTimelineEventsWriteDelay(page, 750);
 
     const saveButton = dialog.getByRole('button', { name: 'Сохранить' });
