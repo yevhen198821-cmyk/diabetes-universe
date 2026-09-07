@@ -141,8 +141,9 @@ test.describe('Remediation 0B Timeline save integrity', () => {
     await page.getByLabel('Insulin dose').fill('6');
     await page.getByRole('button', { name: 'Save' }).click();
 
-    await expect(page.getByRole('dialog', { name: 'NovoRapid' })).toBeVisible();
-    await expect(page.getByText('6 U')).toBeVisible();
+    const detail = page.getByRole('dialog', { name: 'NovoRapid' });
+    await expect(detail).toBeVisible();
+    await expect(detail.getByText('6 U')).toBeVisible();
 
     await expect
       .poll(async () => {
@@ -171,7 +172,9 @@ test.describe('Remediation 0B Timeline save integrity', () => {
       .getByRole('button', { name: /Open event: NovoRapid/ })
       .first()
       .click();
-    await expect(page.getByText('6 U')).toBeVisible();
+    await expect(
+      page.getByRole('dialog', { name: 'NovoRapid' }).getByText('6 U'),
+    ).toBeVisible();
   });
 
   test('pending medication save blocks dismiss and double submit writes one record', async ({
