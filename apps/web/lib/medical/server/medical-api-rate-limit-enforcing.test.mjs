@@ -81,6 +81,15 @@ test('Vercel production rejects in-memory backends', () => {
     }),
     null,
   );
+  assert.equal(
+    isMemoryRateLimitBackendForbiddenInProduction({
+      MEDICAL_RATE_LIMIT_BACKEND: 'process-local',
+      NODE_ENV: 'production',
+      VERCEL: '1',
+      VERCEL_ENV: 'preview',
+    }),
+    false,
+  );
 });
 
 test('process-local production adapter is not unconditional allow', async () => {

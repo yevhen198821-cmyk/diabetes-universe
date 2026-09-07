@@ -12,14 +12,6 @@ import {
   createPostgresMedicalApiRateLimitSql,
 } from './medical-api-rate-limit-postgres-store';
 
-function isVercelRuntime(env: Record<string, string | undefined>): boolean {
-  return (
-    env.VERCEL === '1' ||
-    env.VERCEL_ENV === 'preview' ||
-    env.VERCEL_ENV === 'production'
-  );
-}
-
 function resolveRateLimitBackend(
   env: Record<string, string | undefined>,
 ): string {
@@ -40,7 +32,7 @@ export function isMemoryRateLimitBackendForbiddenInProduction(
   return (
     isMemoryBackend(resolveRateLimitBackend(env)) &&
     env.NODE_ENV === 'production' &&
-    isVercelRuntime(env) &&
+    env.VERCEL_ENV === 'production' &&
     env.AUTH_RUNTIME_ENV !== 'e2e'
   );
 }

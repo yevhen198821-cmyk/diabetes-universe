@@ -8,9 +8,11 @@ const REQUIRED_HEADERS = {
   'x-frame-options': 'DENY',
 } as const;
 
-async function expectSecurityHeaders(
-  response: import('@playwright/test').APIResponse,
-) {
+type HeaderReadable = {
+  headers(): Record<string, string>;
+};
+
+async function expectSecurityHeaders(response: HeaderReadable) {
   for (const [name, expected] of Object.entries(REQUIRED_HEADERS)) {
     const value = response.headers()[name];
     expect(value, name).toBeTruthy();

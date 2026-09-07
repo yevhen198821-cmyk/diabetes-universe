@@ -85,13 +85,15 @@ The existing `MedicalApiRateLimiter` contract is reused. No second subsystem.
 | `postgres` / `neon`                   | Shared Postgres fixed-window counters |
 | `process-local` / `memory`            | Enforcing in-process counters         |
 | `e2e-memory` + `AUTH_RUNTIME_ENV=e2e` | Enforcing in-process (Playwright)     |
-| `process-local` on Vercel prod        | **Rejected** (adapter not registered) |
+| `process-local` on Vercel production  | **Rejected** (adapter not registered) |
+| `process-local` on Vercel preview     | Allowed for preview diagnostics only  |
 | unknown identifier                    | Adapter not registered                |
 
 `postgres` / `neon` is the production backend. It reuses
-`MEDICAL_DATABASE_URL` and the existing `postgres` driver already depended
-on by `@diabetes-universe/medical-persistence`. No Redis/Upstash dependency
-was added.
+`MEDICAL_DATABASE_URL`. `@diabetes-universe/web` now depends on `postgres`
+directly so the production adapter can resolve the driver already used by
+`@diabetes-universe/medical-persistence`. No Redis/Upstash dependency was
+added.
 
 In-memory counters are not claimed as a distributed serverless limiter.
 Vercel production must set `MEDICAL_RATE_LIMIT_BACKEND=postgres` (or
