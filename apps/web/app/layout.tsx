@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import type { ReactNode } from 'react';
 
 import {
@@ -16,6 +17,7 @@ import {
   type ApplicationPlatformBootstrap,
 } from '../lib/platform/integration/server';
 
+import { SECURITY_NONCE_HEADER } from '../lib/security/security-headers';
 import { themeInitScript } from '../lib/theme/theme-config';
 
 import './globals.css';
@@ -81,11 +83,15 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   const bootstrap = createApplicationPlatformBootstrap(
     await createRequestPlatformRuntime(),
   );
+  const nonce = (await headers()).get(SECURITY_NONCE_HEADER) ?? undefined;
 
   return (
     <html lang={resolveDocumentLanguage(bootstrap)} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{ __html: themeInitScript }}
+        />
       </head>
       <body>
         <ApplicationRuntimeGate bootstrap={bootstrap}>
