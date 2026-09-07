@@ -161,12 +161,18 @@ Limiter outcomes (after gate + auth):
 | Outcome                  | HTTP | Code                  | When                                                             |
 | ------------------------ | ---- | --------------------- | ---------------------------------------------------------------- |
 | Quota exceeded           | 429  | `RATE_LIMITED`        | Shared limiter rejects request; includes `Retry-After`           |
-| Backend unavailable      | 503  | `SERVICE_UNAVAILABLE` | Distributed mode configured but no registered production adapter |
+| Backend unavailable      | 503  | `SERVICE_UNAVAILABLE` | Distributed adapter missing, or the enforcing store fails closed |
 | Infrastructure transient | 503  | `SERVICE_UNAVAILABLE` | DB/connectivity failures during handler execution                |
 
 Do not confuse quota exceeded (`429`) with limiter/infrastructure unavailable (`503`).
 
-No fake distributed implementation is registered by default. `registerMedicalApiRateLimitBackendAdapter()` is the integration point for a future shared limiter.
+Production auto-registers an enforcing adapter from `MEDICAL_RATE_LIMIT_BACKEND`:
+
+- `postgres` / `neon` — shared `medical_ops.rate_limit_windows` counters
+- `process-local` / `memory` — in-process counters (forbidden on Vercel production)
+- unknown identifiers are not registered
+
+See [Remediation 0C — Security Closure](remediation-0c-security-closure.md).
 
 ## Error mapping
 
@@ -254,17 +260,16 @@ Production-capable modes fail closed when required secrets are absent.
 - P12 conflict/tombstone feed runtime beyond P8 soft delete;
 - outbox dispatcher/consumer;
 - Timeline UI integration;
-- distributed rate limiting backend implementation;
-- production Neon deployment.
+- production Neon deployment of the medical database and rate-limit table.
 
 ## Known remaining production blockers
 
-- shared/distributed rate limiter **backend adapter** not implemented (`registerMedicalApiRateLimitBackendAdapter` integration point only);
+- production Neon must apply `0007` / `0008` rate-limit migrations before `postgres`/`neon` enforcement can succeed;
 - production medical database deployment and launch gate remain separate;
 - dedicated authenticated Playwright HTTP E2E for medical routes;
 - architecture/security/code re-audit required before lifecycle promotion beyond implementation candidate.
 
-Note: production gate now blocks accidental medical API exposure without rate-limit configuration; registering a real distributed limiter adapter remains required before production medical traffic can succeed end-to-end.
+Note: production gate blocks accidental medical API exposure without rate-limit configuration. The production adapter is now an enforcing limiter (Remediation 0C); it is not an unconditional allow.
 
 ## Lifecycle
 
