@@ -778,9 +778,7 @@ test('pending Account A save cannot appear in Account B after store remount', as
       { clock: fixedClock, id: 'note-a-pending' },
     );
 
-    const addAPromise = act(async () => {
-      await mountedA.currentStore.addEventAsync(eventA);
-    });
+    const addAPromise = mountedA.currentStore.addEventAsync(eventA);
 
     await mountedA.unmount();
 
