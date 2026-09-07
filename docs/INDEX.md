@@ -117,6 +117,7 @@
 - [P8 — Medical API Transport Implementation](implementation/p8-medical-api-transport.md) — routes merged; implementation candidate; production launch deferred
 - [Hotfix — Glucose Quick Add Settings Availability](implementation/hotfix-glucose-settings-load-unavailable.md) — production-gate first-run misclassification fixed; session unit gate restored
 - [Remediation 0A — Local Timeline Account Isolation](implementation/remediation-0a-local-timeline-account-isolation.md) — per-account IndexedDB ownership; production demo seed removed
+- [Remediation 0B — Timeline Save Integrity](implementation/remediation-0b-timeline-save-integrity.md) — Quick Add and edit success only after durable persistence
 - [P9 — Cloud Medical Persistence Implementation Design](architecture/backend/p9-cloud-medical-persistence-implementation-design.md) — Approved
 - [P9 — Medical Persistence Foundation Implementation](implementation/p9-medical-persistence-foundation.md) — implementation complete; PostgreSQL rehearsal validated; production deployment deferred
 - [P9 — Medical Persistence Readiness Runbook](implementation/p9-production-readiness-runbook.md) — rehearsal gate closed; production launch gate deferred

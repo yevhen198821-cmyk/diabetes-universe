@@ -29,6 +29,9 @@ export interface TimelineUiLabels {
     readonly deleteConfirm: Readonly<{
       readonly closeOverlay: string;
       readonly confirm: string;
+      readonly deleteErrorDescription: string;
+      readonly deleteErrorTitle: string;
+      readonly deleting: string;
       readonly description: string;
       readonly title: string;
     }>;
@@ -79,6 +82,9 @@ export interface TimelineUiLabels {
       }>;
       readonly note: string;
       readonly save: string;
+      readonly saveErrorDescription: string;
+      readonly saveErrorTitle: string;
+      readonly saving: string;
       readonly time: string;
       readonly title: string;
       readonly unit: string;
@@ -215,6 +221,15 @@ const TIMELINE_UI_TRANSLATION_KEYS = {
   detailDeleteConfirmConfirm: asTranslationKey(
     'timeline.detail.deleteConfirm.confirm',
   ),
+  detailDeleteConfirmDeleteErrorDescription: asTranslationKey(
+    'timeline.detail.deleteConfirm.deleteError.description',
+  ),
+  detailDeleteConfirmDeleteErrorTitle: asTranslationKey(
+    'timeline.detail.deleteConfirm.deleteError.title',
+  ),
+  detailDeleteConfirmDeleting: asTranslationKey(
+    'timeline.detail.deleteConfirm.deleting',
+  ),
   detailDeleteConfirmDescription: asTranslationKey(
     'timeline.detail.deleteConfirm.description',
   ),
@@ -339,6 +354,13 @@ const TIMELINE_UI_TRANSLATION_KEYS = {
   ),
   detailFormNote: asTranslationKey('timeline.detail.form.note'),
   detailFormSave: asTranslationKey('timeline.detail.form.save'),
+  detailFormSaveErrorDescription: asTranslationKey(
+    'timeline.detail.form.saveError.description',
+  ),
+  detailFormSaveErrorTitle: asTranslationKey(
+    'timeline.detail.form.saveError.title',
+  ),
+  detailFormSaving: asTranslationKey('timeline.detail.form.saving'),
   detailFormTime: asTranslationKey('timeline.detail.form.time'),
   detailFormTitle: asTranslationKey('timeline.detail.form.title'),
   detailFormUnit: asTranslationKey('timeline.detail.form.unit'),
@@ -468,6 +490,18 @@ export function resolveTimelineUiLabels(
         confirm: translate(
           localization,
           TIMELINE_UI_TRANSLATION_KEYS.detailDeleteConfirmConfirm,
+        ),
+        deleteErrorDescription: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailDeleteConfirmDeleteErrorDescription,
+        ),
+        deleteErrorTitle: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailDeleteConfirmDeleteErrorTitle,
+        ),
+        deleting: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailDeleteConfirmDeleting,
         ),
         description: translate(
           localization,
@@ -635,6 +669,18 @@ export function resolveTimelineUiLabels(
         save: translate(
           localization,
           TIMELINE_UI_TRANSLATION_KEYS.detailFormSave,
+        ),
+        saveErrorDescription: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailFormSaveErrorDescription,
+        ),
+        saveErrorTitle: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailFormSaveErrorTitle,
+        ),
+        saving: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailFormSaving,
         ),
         time: translate(
           localization,

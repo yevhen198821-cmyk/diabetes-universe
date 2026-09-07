@@ -1,30 +1,32 @@
 'use client';
 
-import type {
-  ActivityQuickAddEntry,
-  MedicationQuickAddEntry,
-  NoteQuickAddEntry,
-  QuickAddCategory,
-} from '@diabetes-universe/types';
+import type { QuickAddCategory } from '@diabetes-universe/types';
 import { useRef, useState, type RefObject } from 'react';
 
+import type { ActivityQuickAddSubmitRequest } from '../../lib/quick-add/activity-quick-add-submit';
 import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
 import type { InsulinQuickAddSubmitRequest } from '../../lib/quick-add/insulin-quick-add-submit';
+import type { MedicationQuickAddSubmitRequest } from '../../lib/quick-add/medication-quick-add-submit';
+import type { NoteQuickAddSubmitRequest } from '../../lib/quick-add/note-quick-add-submit';
 import type { NutritionQuickAddSubmitRequest } from '../../lib/quick-add/nutrition-quick-add-submit';
 import { QuickAddHost } from '../quick-add/quick-add-host';
 
 interface QuickAddRootProps {
   readonly floatingActionButtonClassName?: string;
   readonly onOpenChange?: (open: boolean) => void;
-  readonly onActivitySubmit?: (entry: ActivityQuickAddEntry) => void;
+  readonly onActivitySubmit?: (
+    request: ActivityQuickAddSubmitRequest,
+  ) => Promise<void>;
   readonly onGlucoseSubmit?: (
     request: GlucoseQuickAddSubmitRequest,
   ) => Promise<void>;
   readonly onInsulinSubmit?: (
     request: InsulinQuickAddSubmitRequest,
   ) => Promise<void>;
-  readonly onMedicationSubmit?: (entry: MedicationQuickAddEntry) => void;
-  readonly onNoteSubmit?: (entry: NoteQuickAddEntry) => void;
+  readonly onMedicationSubmit?: (
+    request: MedicationQuickAddSubmitRequest,
+  ) => Promise<void>;
+  readonly onNoteSubmit?: (request: NoteQuickAddSubmitRequest) => Promise<void>;
   readonly onNutritionSubmit?: (
     request: NutritionQuickAddSubmitRequest,
   ) => Promise<void>;

@@ -15,6 +15,7 @@ export function createSemanticMedicationTimelineEvent(
   entry: MedicationQuickAddEntry,
   options: {
     readonly clock?: SemanticTimelineClock;
+    readonly id?: string;
     readonly referenceDate?: Date;
   } = {},
 ): MedicationTimelineEvent {
@@ -40,7 +41,7 @@ export function createSemanticMedicationTimelineEvent(
     createdAt: now,
     dose: entry.dose,
     doseUnit,
-    id: createSemanticTimelineEventId('medication', entry.time),
+    id: options.id ?? createSemanticTimelineEventId('medication', entry.time),
     kind: 'medication',
     medicationId: entry.medication.id,
     medicationName: entry.medication.name.trim(),

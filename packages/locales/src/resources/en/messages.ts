@@ -438,6 +438,10 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'timeline.detail.delete': 'Delete',
   'timeline.detail.deleteConfirm.closeOverlay': 'Close delete confirmation',
   'timeline.detail.deleteConfirm.confirm': 'Delete',
+  'timeline.detail.deleteConfirm.deleteError.description':
+    'The event was not deleted. Try again.',
+  'timeline.detail.deleteConfirm.deleteError.title': 'Could not delete',
+  'timeline.detail.deleteConfirm.deleting': 'Deleting…',
   'timeline.detail.deleteConfirm.description': 'This action cannot be undone.',
   'timeline.detail.deleteConfirm.title': 'Delete event?',
   'timeline.detail.edit': 'Edit',
@@ -446,6 +450,10 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'timeline.detail.form.date': 'Date',
   'timeline.detail.form.note': 'Note',
   'timeline.detail.form.save': 'Save',
+  'timeline.detail.form.saveError.description':
+    'The event was not saved. Your values are still in the editor. Try again.',
+  'timeline.detail.form.saveError.title': 'Could not save',
+  'timeline.detail.form.saving': 'Saving…',
   'timeline.detail.form.time': 'Event time',
   'timeline.detail.form.title': 'Title',
   'timeline.detail.form.unit': 'Unit',
@@ -534,6 +542,10 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'timeline.units.nutritionCarbs': 'g carbs',
   'timeline.units.volumeMl': 'ml',
   'quick-add.button.label': 'Add event',
+  'quick-add.activity.saveError.description':
+    'The activity entry was not saved. Your values are still in the form. Try again.',
+  'quick-add.activity.saveError.title': 'Could not save activity entry',
+  'quick-add.activity.saving': 'Saving…',
   'quick-add.glucose.contextLabel': 'Measurement context',
   'quick-add.glucose.contextSheetTitle': 'Measurement context',
   'quick-add.glucose.addContext': 'Add context',
@@ -588,6 +600,14 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'quick-add.insulin.saveError.title': 'Could not save insulin entry',
   'quick-add.insulin.saving': 'Saving…',
   'quick-add.insulin.timeLabel': 'Time',
+  'quick-add.medication.saveError.description':
+    'The medication entry was not saved. Your values are still in the form. Try again.',
+  'quick-add.medication.saveError.title': 'Could not save medication entry',
+  'quick-add.medication.saving': 'Saving…',
+  'quick-add.note.saveError.description':
+    'The note was not saved. Your values are still in the form. Try again.',
+  'quick-add.note.saveError.title': 'Could not save note',
+  'quick-add.note.saving': 'Saving…',
   'quick-add.nutrition.addItem': 'Add another item',
   'quick-add.nutrition.cancel': 'Cancel',
   'quick-add.nutrition.carbsError':

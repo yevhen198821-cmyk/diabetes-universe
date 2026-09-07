@@ -571,7 +571,7 @@ test('updateEvent delegates to repository and refreshes from repository snapshot
   }
 });
 
-test('deleteEvent delegates to repository and refreshes from repository snapshot', async () => {
+test('deleteEventAsync delegates to repository and refreshes from repository snapshot', async () => {
   const mounted = await mountTimelineStore({
     repository: createInMemoryTimelineRepository({
       seedEvents: [glucoseEarly, insulinLater],
@@ -585,7 +585,7 @@ test('deleteEvent delegates to repository and refreshes from repository snapshot
     );
 
     await act(async () => {
-      mounted.currentStore.deleteEvent('glucose-0800');
+      await mounted.currentStore.deleteEventAsync('glucose-0800');
     });
     await waitFor(
       () => !mounted.observations.at(-1)?.eventIds.includes('glucose-0800'),
@@ -628,7 +628,7 @@ test('replaceEvents delegates transitional hydration to repository', async () =>
   }
 });
 
-test('missing update and delete remain no-ops from the user perspective', async () => {
+test('missing update and delete do not mutate the visible event snapshot', async () => {
   const mounted = await mountTimelineStore({
     repository: createInMemoryTimelineRepository({
       seedEvents: [glucoseEarly],
@@ -640,17 +640,14 @@ test('missing update and delete remain no-ops from the user perspective', async 
       () => mounted.observations.at(-1)?.status === 'ready',
       'ready state',
     );
-    const readyRenderCount = mounted.observations.length;
 
     await act(async () => {
       mounted.currentStore.updateEvent(semanticInsulinLater);
-      mounted.currentStore.deleteEvent('unknown');
+      await assert.rejects(mounted.currentStore.deleteEventAsync('unknown'));
     });
     await flushAsyncWork();
 
-    assert.equal(mounted.observations.at(-1)?.status, 'ready');
     assert.deepEqual(mounted.observations.at(-1)?.eventIds, ['glucose-0800']);
-    assert.equal(mounted.observations.length, readyRenderCount);
   } finally {
     await mounted.unmount();
   }

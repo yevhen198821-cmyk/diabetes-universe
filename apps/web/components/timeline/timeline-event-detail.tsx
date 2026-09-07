@@ -54,7 +54,7 @@ interface TimelineEventDetailProps {
   readonly event: SemanticTimelineEvent;
   readonly mode: TimelineEventDetailMode;
   readonly onClose: () => void;
-  readonly onDelete: (eventId: string) => void;
+  readonly onDelete: (eventId: string) => Promise<void>;
   readonly onModeChange: (mode: TimelineEventDetailMode) => void;
   readonly onUpdate: (event: SemanticTimelineEvent) => Promise<void> | void;
   readonly presentationDependencies: TimelinePresentationDependencies;
@@ -280,13 +280,13 @@ function TimelineEventEditForm({
     >
       {isSubmitting ? (
         <p className="text-text-secondary text-sm" role="status">
-          {labels.form.nutrition.saving}
+          {labels.form.saving}
         </p>
       ) : null}
       {saveError ? (
         <div className="bg-status-danger/10 rounded-xl p-3" role="alert">
           <p className="text-status-danger text-sm font-semibold">
-            {labels.form.nutrition.saveErrorTitle}
+            {labels.form.saveErrorTitle}
           </p>
           <p className="text-status-danger mt-1 text-sm">{saveError}</p>
         </div>
@@ -332,6 +332,7 @@ function TimelineEventEditForm({
 
       {draft.variant === 'insulin' ? (
         <TimelineInsulinEditFields
+          disabled={isSubmitting}
           errors={errors}
           labels={labels.form.insulin}
           legacyContextText={draft.legacyContextText}
@@ -354,6 +355,7 @@ function TimelineEventEditForm({
         />
       ) : (
         <TimelineGenericEditFields
+          disabled={isSubmitting}
           draft={draft}
           errors={errors}
           labels={labels}
@@ -379,11 +381,13 @@ function TimelineEventEditForm({
 }
 
 function TimelineGenericEditFields({
+  disabled = false,
   draft,
   errors,
   labels,
   onChange,
 }: {
+  readonly disabled?: boolean;
   readonly draft: TimelineGenericEventEditDraft;
   readonly errors: TimelineEventEditErrors;
   readonly labels: TimelineUiLabels['detail'];
@@ -410,6 +414,7 @@ function TimelineGenericEditFields({
           }
           aria-invalid={errors.title ? true : undefined}
           className={fieldClass}
+          disabled={disabled}
           id="timeline-edit-title"
           onChange={updateField('title')}
           value={draft.title}
@@ -428,6 +433,7 @@ function TimelineGenericEditFields({
             }
             aria-invalid={errors.value ? true : undefined}
             className={`${fieldClass} min-h-24 py-3`}
+            disabled={disabled}
             id="timeline-edit-value"
             onChange={updateField('value')}
             value={draft.value}
@@ -444,6 +450,7 @@ function TimelineGenericEditFields({
             }
             aria-invalid={errors.unit ? true : undefined}
             className={fieldClass}
+            disabled={disabled}
             id="timeline-edit-unit"
             onChange={updateField('unit')}
             value={draft.unit}
@@ -458,6 +465,7 @@ function TimelineGenericEditFields({
         </label>
         <input
           className={fieldClass}
+          disabled={disabled}
           id="timeline-edit-context"
           onChange={updateField('context')}
           value={draft.context}
@@ -470,6 +478,7 @@ function TimelineGenericEditFields({
         </label>
         <textarea
           className={`${fieldClass} min-h-24 py-3`}
+          disabled={disabled}
           id="timeline-edit-note"
           maxLength={500}
           onChange={updateField('note')}
@@ -526,7 +535,10 @@ export function TimelineEventDetail({
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSubmittingRef = useRef(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const isDeletingRef = useRef(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const nutritionPresentation =
     event.kind === 'nutrition'
       ? presentNutritionFromTimelineEvent({
@@ -545,11 +557,19 @@ export function TimelineEventDetail({
       : null;
 
   const closeIfIdle = () => {
-    if (isSubmittingRef.current) {
+    if (isSubmittingRef.current || isDeletingRef.current) {
       return;
     }
 
     onClose();
+  };
+  const closeDeleteIfIdle = () => {
+    if (isDeletingRef.current) {
+      return;
+    }
+
+    setDeleteOpen(false);
+    setDeleteError(null);
   };
   const sourcePresentation = resolveTimelineEventSourcePresentation(
     event.source,
@@ -565,7 +585,7 @@ export function TimelineEventDetail({
   );
 
   useDialogFocusTrap(!deleteOpen, dialogRef, closeIfIdle);
-  useDialogFocusTrap(deleteOpen, deleteDialogRef, () => setDeleteOpen(false));
+  useDialogFocusTrap(deleteOpen, deleteDialogRef, closeDeleteIfIdle);
 
   const handleSave = async () => {
     if (isSubmittingRef.current) {
@@ -585,34 +605,41 @@ export function TimelineEventDetail({
       return;
     }
 
-    if (result.event.kind === 'nutrition') {
-      isSubmittingRef.current = true;
-      setIsSubmitting(true);
-      setSaveError(null);
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
+    setSaveError(null);
 
-      try {
-        await onUpdate(result.event);
-        onModeChange('view');
-        haptics.success();
-      } catch {
-        setSaveError(uiLabels.detail.form.nutrition.saveErrorDescription);
-      } finally {
-        isSubmittingRef.current = false;
-        setIsSubmitting(false);
-      }
+    try {
+      await onUpdate(result.event);
+      onModeChange('view');
+      haptics.success();
+    } catch {
+      setSaveError(uiLabels.detail.form.saveErrorDescription);
+    } finally {
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
+    }
+  };
 
+  const handleDelete = async () => {
+    if (isDeletingRef.current) {
       return;
     }
 
-    await onUpdate(result.event);
-    onModeChange('view');
-    haptics.success();
-  };
+    isDeletingRef.current = true;
+    setIsDeleting(true);
+    setDeleteError(null);
 
-  const handleDelete = () => {
-    onDelete(event.id);
-    setDeleteOpen(false);
-    haptics.success();
+    try {
+      await onDelete(event.id);
+      setDeleteOpen(false);
+      haptics.success();
+    } catch {
+      setDeleteError(uiLabels.detail.deleteConfirm.deleteErrorDescription);
+    } finally {
+      isDeletingRef.current = false;
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -620,7 +647,7 @@ export function TimelineEventDetail({
       <button
         aria-label={uiLabels.detail.closeOverlay}
         className={overlayScrimClass}
-        disabled={isSubmitting}
+        disabled={isSubmitting || isDeleting}
         onClick={closeIfIdle}
         type="button"
       />
@@ -652,7 +679,7 @@ export function TimelineEventDetail({
           <button
             aria-label={uiLabels.detail.closeButton}
             className="border-border-default bg-surface text-text-secondary hover:border-border-strong hover:bg-surface-subtle focus-visible:outline-interactive-primary grid size-10 shrink-0 place-items-center rounded-xl border transition focus-visible:outline-2 focus-visible:outline-offset-2"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isDeleting}
             onClick={closeIfIdle}
             type="button"
           >
@@ -847,7 +874,10 @@ export function TimelineEventDetail({
             <div className="flex flex-col-reverse gap-3 sm:flex-row">
               <Button
                 className="bg-surface border border-rose-200 text-rose-700 hover:bg-rose-50"
-                onClick={() => setDeleteOpen(true)}
+                onClick={() => {
+                  setDeleteError(null);
+                  setDeleteOpen(true);
+                }}
                 type="button"
               >
                 {uiLabels.detail.delete}
@@ -872,10 +902,12 @@ export function TimelineEventDetail({
           <button
             aria-label={uiLabels.detail.deleteConfirm.closeOverlay}
             className="absolute inset-0 bg-slate-950/50"
-            onClick={() => setDeleteOpen(false)}
+            disabled={isDeleting}
+            onClick={closeDeleteIfIdle}
             type="button"
           />
           <section
+            aria-busy={isDeleting || undefined}
             aria-describedby={deleteDescriptionId}
             aria-labelledby={deleteTitleId}
             aria-modal="true"
@@ -896,16 +928,35 @@ export function TimelineEventDetail({
             >
               {uiLabels.detail.deleteConfirm.description}
             </p>
+            {isDeleting ? (
+              <p className="text-text-secondary mt-3 text-sm" role="status">
+                {uiLabels.detail.deleteConfirm.deleting}
+              </p>
+            ) : null}
+            {deleteError ? (
+              <div
+                className="bg-status-danger/10 mt-3 rounded-xl p-3"
+                role="alert"
+              >
+                <p className="text-status-danger text-sm font-semibold">
+                  {uiLabels.detail.deleteConfirm.deleteErrorTitle}
+                </p>
+                <p className="text-status-danger mt-1 text-sm">{deleteError}</p>
+              </div>
+            ) : null}
             <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <Button
                 className="border-border-default bg-surface text-text-primary hover:bg-surface-subtle border"
-                onClick={() => setDeleteOpen(false)}
+                disabled={isDeleting}
+                onClick={closeDeleteIfIdle}
                 type="button"
               >
                 {cancelLabel}
               </Button>
               <button
-                className="text-text-inverse min-h-11 rounded-xl bg-rose-600 px-5 text-sm font-semibold transition hover:bg-rose-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700"
+                aria-busy={isDeleting || undefined}
+                className="text-text-inverse min-h-11 rounded-xl bg-rose-600 px-5 text-sm font-semibold transition hover:bg-rose-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={isDeleting}
                 onClick={handleDelete}
                 type="button"
               >
