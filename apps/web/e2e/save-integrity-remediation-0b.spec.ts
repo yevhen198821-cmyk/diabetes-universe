@@ -301,10 +301,11 @@ test.describe('Remediation 0B Timeline save integrity', () => {
       name: 'Delete',
       exact: true,
     });
-    await Promise.all([deleteButton.click(), deleteButton.click()]);
+    await deleteButton.click();
 
     await expect(confirmation.getByRole('status')).toBeVisible();
     await expect(confirmation).toHaveAttribute('aria-busy', 'true');
+    await expect(deleteButton).toBeDisabled();
     await expect(
       confirmation.getByRole('button', { name: /Cancel|Отмена/i }),
     ).toBeDisabled();
