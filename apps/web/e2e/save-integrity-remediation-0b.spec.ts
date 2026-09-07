@@ -196,7 +196,7 @@ test.describe('Remediation 0B Timeline save integrity', () => {
     await installOneShotTimelineEventsWriteDelay(page, 750);
 
     const saveButton = dialog.getByRole('button', { name: 'Сохранить' });
-    await saveButton.click();
+    await Promise.all([saveButton.click(), saveButton.click()]);
     await expect(dialog.getByRole('status')).toBeVisible();
     await expect(dialog).toHaveAttribute('aria-busy', 'true');
 
@@ -206,7 +206,6 @@ test.describe('Remediation 0B Timeline save integrity', () => {
       dialog.getByRole('button', { name: /Cancel|Отмена/i }),
     ).toBeDisabled();
 
-    await saveButton.click();
     await expect(dialog).toBeHidden();
 
     const events = await readActiveTimelineStoredEvents(page);
