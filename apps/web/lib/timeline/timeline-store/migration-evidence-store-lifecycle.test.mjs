@@ -186,7 +186,7 @@ test('routine store delete does not leave migration evidence', async () => {
     await waitFor(() => mounted.currentStore.status === 'ready', 'ready state');
 
     await act(async () => {
-      mounted.currentStore.deleteEvent('glucose-0800');
+      await mounted.currentStore.deleteEventAsync('glucose-0800');
     });
     await waitFor(
       () =>

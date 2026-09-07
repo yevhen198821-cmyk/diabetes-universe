@@ -90,6 +90,10 @@ export const ukrainianCanonicalMessages = defineApprovedMessages({
   'timeline.detail.deleteConfirm.closeOverlay':
     'Закрити підтвердження видалення',
   'timeline.detail.deleteConfirm.confirm': 'Видалити',
+  'timeline.detail.deleteConfirm.deleteError.description':
+    'Подію не видалено. Спробуйте ще раз.',
+  'timeline.detail.deleteConfirm.deleteError.title': 'Не вдалося видалити',
+  'timeline.detail.deleteConfirm.deleting': 'Видалення…',
   'timeline.detail.deleteConfirm.description': 'Цю дію не можна скасувати.',
   'timeline.detail.deleteConfirm.title': 'Видалити подію?',
   'timeline.detail.edit': 'Редагувати',

@@ -86,6 +86,10 @@ export const germanCanonicalMessages = defineApprovedMessages({
   'timeline.detail.delete': 'Löschen',
   'timeline.detail.deleteConfirm.closeOverlay': 'Löschbestätigung schließen',
   'timeline.detail.deleteConfirm.confirm': 'Löschen',
+  'timeline.detail.deleteConfirm.deleteError.description':
+    'Das Ereignis wurde nicht gelöscht. Versuchen Sie es erneut.',
+  'timeline.detail.deleteConfirm.deleteError.title': 'Löschen fehlgeschlagen',
+  'timeline.detail.deleteConfirm.deleting': 'Löschen…',
   'timeline.detail.deleteConfirm.description':
     'Diese Aktion kann nicht rückgängig gemacht werden.',
   'timeline.detail.deleteConfirm.title': 'Ereignis löschen?',

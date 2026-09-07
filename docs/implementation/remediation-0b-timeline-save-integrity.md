@@ -10,9 +10,10 @@
 | Priority    | P1 data integrity / closed-beta blocker    |
 | Base SHA    | `e60033fd795f87274a6175a1c03f0829f001ed33` |
 
-This remediation closes F-02 and F-03. The UI must not report a successful
-medical-record mutation until the Timeline repository confirms durable
-persistence, including IndexedDB transaction completion.
+This remediation closes F-02, F-03, and the Timeline delete false-success
+defect. The UI must not report a successful medical-record mutation until the
+Timeline repository confirms durable persistence, including IndexedDB transaction
+completion.
 
 It does not change medical validation, OpenAPI, cloud sync, Family, devices,
 Nutrition 6E, or Remediation 0A ownership isolation.
@@ -61,6 +62,10 @@ Timeline edit (F-03):
 - activity
 - note
 - any other non-Nutrition editable kind routed through the shared editor
+
+Timeline delete:
+
+- all kinds opened in Timeline event detail
 
 ## Durable-save invariant
 
@@ -135,6 +140,25 @@ Edit failure:
 - displayed canonical event is not treated as saved
 - successful retry updates `updatedAt` using existing event semantics
 
+Delete failure:
+
+- delete confirmation stays open (or returns to a retryable error state)
+- event detail stays open
+- event remains visible in the timeline
+- localized delete error with `role=alert`
+- no success haptic
+- no detail close / focus return
+- retry targets the same `event.id`
+- reload still shows the event until a successful delete completes
+
+Delete pending:
+
+- confirm Delete disabled
+- cancel and backdrop/Escape dismiss blocked
+- outer detail close disabled
+- duplicate delete prevented in the confirmation UI
+- `role=status` / `aria-busy` with localized deleting text
+
 ## Interaction with Remediation 0A
 
 0A remains the ownership boundary:
@@ -150,16 +174,70 @@ Edit failure:
 started with. After remount, `isMountedRef` prevents applying that result
 into the next account's UI.
 
-A pending save started in Account A cannot appear in Account B.
+A pending save or delete started in Account A cannot appear in Account B.
+
+## Delete root cause (closed in this remediation)
+
+Before this fix, Timeline delete reported success immediately:
+
+1. `TimelineEventDetail.handleDelete` called sync `onDelete(event.id)`, closed
+   the confirmation dialog, and played a success haptic.
+2. `TimelineShell.handleDeleteEvent` called fire-and-forget `deleteEvent`,
+   cleared selection, closed detail, and returned focus.
+3. `TimelineStore.deleteEvent` queued repository deletion without awaiting
+   completion before updating UI state.
+
+A rejected IndexedDB delete could therefore look successful while the event
+remained durable.
+
+## Durable delete sequence
+
+Required production sequence:
+
+1. User confirms delete
+2. Delete confirmation enters pending (`Deleting…`)
+3. `TimelineEventDetail` awaits `onDelete(event.id)`
+4. `TimelineShell` awaits `deleteEventAsync(eventId)`
+5. Repository delete transaction completes with `applied`
+6. Store dispatches `removeEvent`
+7. Success haptic
+8. Delete confirmation closes
+9. Detail closes and focus returns
+
+`deleteEventAsync` reuses the existing serialized mutation queue via
+`enqueueRepositoryMutationAsync(...)` and `repository.deleteEvent(eventId)`.
+No second queue was introduced.
 
 ## Delete / replace audit
 
-`handleDelete` still calls sync `deleteEvent`, closes the detail, and plays
-a success haptic before durable delete completes. That is a user-visible
-false-success path.
+Sync `deleteEvent` was removed from the production store API. User-visible
+Timeline deletion now uses `deleteEventAsync` only.
 
-It is documented here and left out of this PR. `replaceEvents` is unused by
-these fixes and remains out of scope.
+`replaceEvents` remains unused by these fixes and out of scope.
+
+## Test evidence
+
+Store / unit:
+
+- `timeline-store-semantic-write.test.mjs` — `deleteEventAsync` resolve/reject,
+  remove-after-persistence, failed delete leaves event, account-isolation on
+  pending delete
+
+IndexedDB integration:
+
+- `timeline-indexeddb-save-integrity.integration.test.mjs` — rejected delete
+  keeps record, retry removes same id, reload after failure/success, account
+  isolation on pending delete
+
+UI integration:
+
+- `timeline-event-detail-save-integrity.integration.test.mjs` — pending delete
+  lock, rejection without haptic, successful retry, duplicate confirm blocked
+
+E2E:
+
+- `save-integrity-remediation-0b.spec.ts` — durable delete with reload proof,
+  pending delete dismiss lock with write-delay hook
 
 ## Explicit non-scope
 

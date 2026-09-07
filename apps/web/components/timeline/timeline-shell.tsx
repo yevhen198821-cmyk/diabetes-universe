@@ -88,7 +88,7 @@ export function TimelineShell() {
   );
   const {
     addEventAsync,
-    deleteEvent,
+    deleteEventAsync,
     error,
     events,
     hasMoreHistory,
@@ -487,8 +487,8 @@ export function TimelineShell() {
     }
   };
 
-  const handleDeleteEvent = (eventId: string) => {
-    deleteEvent(eventId);
+  const handleDeleteEvent = async (eventId: string) => {
+    await deleteEventAsync(eventId);
     setSelectedEventId(null);
     setDetailMode('view');
     focusTimelineHeading();

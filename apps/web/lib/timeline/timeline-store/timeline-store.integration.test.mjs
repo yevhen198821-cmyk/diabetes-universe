@@ -571,7 +571,7 @@ test('updateEvent delegates to repository and refreshes from repository snapshot
   }
 });
 
-test('deleteEvent delegates to repository and refreshes from repository snapshot', async () => {
+test('deleteEventAsync delegates to repository and refreshes from repository snapshot', async () => {
   const mounted = await mountTimelineStore({
     repository: createInMemoryTimelineRepository({
       seedEvents: [glucoseEarly, insulinLater],
@@ -585,7 +585,7 @@ test('deleteEvent delegates to repository and refreshes from repository snapshot
     );
 
     await act(async () => {
-      mounted.currentStore.deleteEvent('glucose-0800');
+      await mounted.currentStore.deleteEventAsync('glucose-0800');
     });
     await waitFor(
       () => !mounted.observations.at(-1)?.eventIds.includes('glucose-0800'),
@@ -644,7 +644,7 @@ test('missing update and delete remain no-ops from the user perspective', async 
 
     await act(async () => {
       mounted.currentStore.updateEvent(semanticInsulinLater);
-      mounted.currentStore.deleteEvent('unknown');
+      await assert.rejects(mounted.currentStore.deleteEventAsync('unknown'));
     });
     await flushAsyncWork();
 

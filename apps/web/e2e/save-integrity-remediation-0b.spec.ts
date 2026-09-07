@@ -216,4 +216,101 @@ test.describe('Remediation 0B Timeline save integrity', () => {
       ),
     ).toHaveLength(1);
   });
+
+  test('timeline note delete awaits IndexedDB and remains absent after reload', async ({
+    page,
+  }) => {
+    const noteText = 'Remediation 0B delete durability marker';
+
+    await page.goto('/timeline');
+    await prepareEmptyTimeline(page);
+    await openTimelineQuickAdd(page);
+
+    await page
+      .getByRole('button', { name: 'Заметка. Добавить запись' })
+      .click();
+    const quickAddDialog = page.getByRole('dialog', {
+      name: 'Добавить заметку',
+    });
+    await expect(quickAddDialog).toBeVisible();
+    await page.getByLabel('Текст заметки').fill(noteText);
+    await quickAddDialog.getByRole('button', { name: 'Сохранить' }).click();
+    await expect(page.getByText(noteText).first()).toBeVisible();
+
+    const storedBeforeDelete = await readActiveTimelineStoredEvents(page);
+    const noteEvent = storedBeforeDelete.find(
+      (event) => event.kind === 'note' && event.body === noteText,
+    );
+    expect(noteEvent?.id).toBeTruthy();
+
+    await page.getByText(noteText).first().click();
+    await expect(page.getByRole('dialog').filter({ hasText: noteText })).toBeVisible();
+    await page.getByRole('button', { name: 'Delete', exact: true }).click();
+
+    const confirmation = page.getByRole('dialog', { name: 'Delete event?' });
+    await expect(confirmation).toBeVisible();
+    await confirmation
+      .getByRole('button', { name: 'Delete', exact: true })
+      .click();
+
+    await expect(page.getByText(noteText)).toHaveCount(0);
+    await expect
+      .poll(async () => {
+        const events = await readActiveTimelineStoredEvents(page);
+        return events.some((event) => event.id === noteEvent?.id);
+      })
+      .toBe(false);
+
+    await page.reload();
+    await waitForApplicationReady(page);
+    await waitForTimelineOwnershipReady(page);
+
+    await expect(page.getByText(noteText)).toHaveCount(0);
+    const reloaded = await readActiveTimelineStoredEvents(page);
+    expect(reloaded.some((event) => event.id === noteEvent?.id)).toBe(false);
+  });
+
+  test('pending timeline delete blocks dismiss until durable completion', async ({
+    page,
+  }) => {
+    const noteText = 'Remediation 0B pending delete marker';
+
+    await page.goto('/timeline');
+    await prepareEmptyTimeline(page);
+    await openTimelineQuickAdd(page);
+
+    await page
+      .getByRole('button', { name: 'Заметка. Добавить запись' })
+      .click();
+    const quickAddDialog = page.getByRole('dialog', {
+      name: 'Добавить заметку',
+    });
+    await page.getByLabel('Текст заметки').fill(noteText);
+    await quickAddDialog.getByRole('button', { name: 'Сохранить' }).click();
+    await expect(page.getByText(noteText).first()).toBeVisible();
+
+    await page.getByText(noteText).first().click();
+    await page.getByRole('button', { name: 'Delete', exact: true }).click();
+    const confirmation = page.getByRole('dialog', { name: 'Delete event?' });
+    await expect(confirmation).toBeVisible();
+
+    await installOneShotTimelineEventsWriteDelay(page, 750);
+    const deleteButton = confirmation.getByRole('button', {
+      name: 'Delete',
+      exact: true,
+    });
+    await Promise.all([deleteButton.click(), deleteButton.click()]);
+
+    await expect(confirmation.getByRole('status')).toBeVisible();
+    await expect(confirmation).toHaveAttribute('aria-busy', 'true');
+    await expect(
+      confirmation.getByRole('button', { name: /Cancel|Отмена/i }),
+    ).toBeDisabled();
+    await page.keyboard.press('Escape');
+    await expect(confirmation).toBeVisible();
+    await expect(page.getByText(noteText).first()).toBeVisible();
+
+    await expect(confirmation).toBeHidden();
+    await expect(page.getByText(noteText)).toHaveCount(0);
+  });
 });

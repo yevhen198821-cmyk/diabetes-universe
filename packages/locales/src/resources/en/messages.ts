@@ -438,6 +438,10 @@ export const englishCanonicalMessages = defineApprovedMessages({
   'timeline.detail.delete': 'Delete',
   'timeline.detail.deleteConfirm.closeOverlay': 'Close delete confirmation',
   'timeline.detail.deleteConfirm.confirm': 'Delete',
+  'timeline.detail.deleteConfirm.deleteError.description':
+    'The event was not deleted. Try again.',
+  'timeline.detail.deleteConfirm.deleteError.title': 'Could not delete',
+  'timeline.detail.deleteConfirm.deleting': 'Deleting…',
   'timeline.detail.deleteConfirm.description': 'This action cannot be undone.',
   'timeline.detail.deleteConfirm.title': 'Delete event?',
   'timeline.detail.edit': 'Edit',

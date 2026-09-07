@@ -34,7 +34,7 @@ import {
 export interface TimelineStoreValue {
   readonly addEvent: (event: SemanticTimelineEvent) => void;
   readonly addEventAsync: (event: SemanticTimelineEvent) => Promise<void>;
-  readonly deleteEvent: (eventId: string) => void;
+  readonly deleteEventAsync: (eventId: string) => Promise<void>;
   readonly diagnostics: ReturnType<typeof createTimelineDiagnosticsFromState>;
   readonly error?: string;
   readonly events: readonly SemanticTimelineEvent[];
@@ -294,16 +294,15 @@ export function TimelineStoreProvider({
     [enqueueRepositoryMutationAsync, timelineRepository],
   );
 
-  const deleteEvent = useCallback(
-    (eventId: string) => {
-      enqueueRepositoryMutation(
+  const deleteEventAsync = useCallback(
+    (eventId: string) =>
+      enqueueRepositoryMutationAsync(
         () => timelineRepository.deleteEvent(eventId),
         () => {
           dispatch({ eventId, type: 'removeEvent' });
         },
-      );
-    },
-    [enqueueRepositoryMutation, timelineRepository],
+      ),
+    [enqueueRepositoryMutationAsync, timelineRepository],
   );
 
   const replaceEvents = useCallback(
@@ -327,7 +326,7 @@ export function TimelineStoreProvider({
     () => ({
       addEvent,
       addEventAsync,
-      deleteEvent,
+      deleteEventAsync,
       diagnostics,
       error: state.error,
       events: state.events,
@@ -343,7 +342,7 @@ export function TimelineStoreProvider({
     [
       addEvent,
       addEventAsync,
-      deleteEvent,
+      deleteEventAsync,
       diagnostics,
       loadMoreHistory,
       replaceEvents,

@@ -807,3 +807,255 @@ test('pending Account A save cannot appear in Account B after store remount', as
     }
   }
 });
+
+test('deleteEventAsync resolves after applied and rejects on repository failure', async () => {
+  const repository = createInMemoryTimelineRepository({ seedEvents: [] });
+  const mounted = await mountTimelineStore({ repository });
+
+  try {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const semanticEvent = createSemanticGlucoseTimelineEvent(
+      { time: '08:00', valueMmol: 6.4 },
+      { clock: fixedClock, id: 'glucose-0800-delete-id' },
+    );
+
+    await act(async () => {
+      await mounted.currentStore.addEventAsync(semanticEvent);
+    });
+
+    assert.equal(mounted.currentStore.events.length, 1);
+
+    await act(async () => {
+      await mounted.currentStore.deleteEventAsync('glucose-0800-delete-id');
+    });
+
+    assert.equal(mounted.currentStore.events.length, 0);
+    assert.equal(repository.getSnapshot().events.length, 0);
+
+    repository.deleteEvent = async () => {
+      throw new TimelineRepositoryError('TIMELINE_REPOSITORY_WRITE_FAILED');
+    };
+
+    await act(async () => {
+      await mounted.currentStore.addEventAsync(semanticEvent);
+    });
+
+    await act(async () => {
+      await assert.rejects(
+        mounted.currentStore.deleteEventAsync('glucose-0800-delete-id'),
+      );
+    });
+
+    assert.equal(mounted.currentStore.events.length, 1);
+    assert.equal(repository.getSnapshot().events.length, 1);
+  } finally {
+    await mounted.unmount();
+  }
+});
+
+test('deleteEventAsync dispatches remove only after persistence completes', async () => {
+  let releaseDelete = () => {};
+  const pendingDelete = new Promise((resolve) => {
+    releaseDelete = resolve;
+  });
+  const repository = createInMemoryTimelineRepository({ seedEvents: [] });
+  const originalDelete = repository.deleteEvent.bind(repository);
+  repository.deleteEvent = async (eventId) => {
+    await pendingDelete;
+    return originalDelete(eventId);
+  };
+  const mounted = await mountTimelineStore({ repository });
+
+  try {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const semanticEvent = createSemanticNoteTimelineEvent(
+      { text: 'Delete pending note', time: '12:00', title: 'Note' },
+      { clock: fixedClock, id: 'note-1200-delete-pending' },
+    );
+
+    await act(async () => {
+      await mounted.currentStore.addEventAsync(semanticEvent);
+    });
+
+    let deletePromise;
+    await act(async () => {
+      deletePromise = mounted.currentStore.deleteEventAsync(
+        'note-1200-delete-pending',
+      );
+    });
+
+    assert.equal(mounted.currentStore.events.length, 1);
+
+    releaseDelete();
+    await act(async () => {
+      await deletePromise;
+    });
+
+    assert.equal(mounted.currentStore.events.length, 0);
+  } finally {
+    await mounted.unmount();
+  }
+});
+
+test('rejected delete leaves the original durable record unchanged and retry removes same id', async () => {
+  let deleteCalls = 0;
+  const repository = createInMemoryTimelineRepository({ seedEvents: [] });
+  const originalDelete = repository.deleteEvent.bind(repository);
+  const mounted = await mountTimelineStore({ repository });
+
+  try {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const semanticEvent = createSemanticInsulinTimelineEvent(
+      {
+        administrationContext: 'before_meal',
+        doseUnits: 4,
+        preparation: 'NovoRapid',
+        preparationId: 'insulin.prep.aspart_novorapid',
+        time: '08:05',
+      },
+      { clock: fixedClock, id: 'insulin-0805-delete-id' },
+    );
+
+    await act(async () => {
+      await mounted.currentStore.addEventAsync(semanticEvent);
+    });
+
+    repository.deleteEvent = async (eventId) => {
+      deleteCalls += 1;
+
+      if (deleteCalls === 1) {
+        throw new TimelineRepositoryError('TIMELINE_REPOSITORY_WRITE_FAILED');
+      }
+
+      return originalDelete(eventId);
+    };
+
+    await act(async () => {
+      await assert.rejects(
+        mounted.currentStore.deleteEventAsync('insulin-0805-delete-id'),
+      );
+    });
+
+    assert.equal(mounted.currentStore.events.length, 1);
+    assert.equal(mounted.currentStore.events[0]?.id, 'insulin-0805-delete-id');
+    assert.equal(repository.getSnapshot().events.length, 1);
+
+    await act(async () => {
+      await mounted.currentStore.deleteEventAsync('insulin-0805-delete-id');
+    });
+
+    assert.equal(deleteCalls, 2);
+    assert.equal(mounted.currentStore.events.length, 0);
+    assert.equal(repository.getSnapshot().events.length, 0);
+  } finally {
+    await mounted.unmount();
+  }
+});
+
+test('deleteEventAsync rejects when repository returns a non-applied result', async () => {
+  const repository = createInMemoryTimelineRepository({ seedEvents: [] });
+  const mounted = await mountTimelineStore({ repository });
+
+  try {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const semanticEvent = createSemanticGlucoseTimelineEvent(
+      { time: '08:00', valueMmol: 6.4 },
+      { clock: fixedClock, id: 'glucose-0800-delete-reject' },
+    );
+
+    await act(async () => {
+      await mounted.currentStore.addEventAsync(semanticEvent);
+    });
+
+    repository.deleteEvent = async () => ({ status: 'not-found' });
+
+    await act(async () => {
+      await assert.rejects(
+        mounted.currentStore.deleteEventAsync('glucose-0800-delete-reject'),
+      );
+    });
+
+    assert.equal(mounted.currentStore.events.length, 1);
+    assert.equal(repository.getSnapshot().events.length, 1);
+  } finally {
+    await mounted.unmount();
+  }
+});
+
+test('pending Account A delete cannot appear in Account B after store remount', async () => {
+  let releaseA = () => {};
+  const pendingA = new Promise((resolve) => {
+    releaseA = resolve;
+  });
+  const accountARepository = createInMemoryTimelineRepository({
+    seedEvents: [],
+  });
+  const originalDeleteA = accountARepository.deleteEvent.bind(accountARepository);
+  accountARepository.deleteEvent = async (eventId) => {
+    await pendingA;
+    return originalDeleteA(eventId);
+  };
+  const accountBRepository = createInMemoryTimelineRepository({
+    seedEvents: [],
+  });
+
+  const mountedA = await mountTimelineStore({ repository: accountARepository });
+  let mountedB;
+
+  try {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const eventA = createSemanticNoteTimelineEvent(
+      { text: 'Account A delete target', time: '11:00', title: 'Delete me' },
+      { clock: fixedClock, id: 'note-a-delete-pending' },
+    );
+
+    await act(async () => {
+      await mountedA.currentStore.addEventAsync(eventA);
+    });
+
+    const deleteAPromise = mountedA.currentStore.deleteEventAsync(
+      'note-a-delete-pending',
+    );
+
+    await mountedA.unmount();
+
+    mountedB = await mountTimelineStore({
+      repository: accountBRepository,
+    });
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    releaseA();
+    await deleteAPromise.catch(() => {});
+
+    assert.equal(
+      accountARepository
+        .getSnapshot()
+        .events.some((event) => event.id === 'note-a-delete-pending'),
+      false,
+    );
+    assert.equal(mountedB.currentStore.events.length, 0);
+    assert.equal(accountBRepository.getSnapshot().events.length, 0);
+  } finally {
+    if (mountedB) {
+      await mountedB.unmount();
+    }
+  }
+});

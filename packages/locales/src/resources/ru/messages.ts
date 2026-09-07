@@ -213,6 +213,10 @@ export const russianCanonicalMessages = defineApprovedMessages({
   'timeline.detail.deleteConfirm.closeOverlay':
     'Закрыть подтверждение удаления',
   'timeline.detail.deleteConfirm.confirm': 'Удалить',
+  'timeline.detail.deleteConfirm.deleteError.description':
+    'Событие не удалено. Попробуйте ещё раз.',
+  'timeline.detail.deleteConfirm.deleteError.title': 'Не удалось удалить',
+  'timeline.detail.deleteConfirm.deleting': 'Удаление…',
   'timeline.detail.deleteConfirm.description': 'Это действие нельзя отменить.',
   'timeline.detail.deleteConfirm.title': 'Удалить событие?',
   'timeline.detail.edit': 'Редактировать',

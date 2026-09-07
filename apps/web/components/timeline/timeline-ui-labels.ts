@@ -29,6 +29,9 @@ export interface TimelineUiLabels {
     readonly deleteConfirm: Readonly<{
       readonly closeOverlay: string;
       readonly confirm: string;
+      readonly deleteErrorDescription: string;
+      readonly deleteErrorTitle: string;
+      readonly deleting: string;
       readonly description: string;
       readonly title: string;
     }>;
@@ -217,6 +220,15 @@ const TIMELINE_UI_TRANSLATION_KEYS = {
   ),
   detailDeleteConfirmConfirm: asTranslationKey(
     'timeline.detail.deleteConfirm.confirm',
+  ),
+  detailDeleteConfirmDeleteErrorDescription: asTranslationKey(
+    'timeline.detail.deleteConfirm.deleteError.description',
+  ),
+  detailDeleteConfirmDeleteErrorTitle: asTranslationKey(
+    'timeline.detail.deleteConfirm.deleteError.title',
+  ),
+  detailDeleteConfirmDeleting: asTranslationKey(
+    'timeline.detail.deleteConfirm.deleting',
   ),
   detailDeleteConfirmDescription: asTranslationKey(
     'timeline.detail.deleteConfirm.description',
@@ -478,6 +490,18 @@ export function resolveTimelineUiLabels(
         confirm: translate(
           localization,
           TIMELINE_UI_TRANSLATION_KEYS.detailDeleteConfirmConfirm,
+        ),
+        deleteErrorDescription: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailDeleteConfirmDeleteErrorDescription,
+        ),
+        deleteErrorTitle: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailDeleteConfirmDeleteErrorTitle,
+        ),
+        deleting: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailDeleteConfirmDeleting,
         ),
         description: translate(
           localization,
