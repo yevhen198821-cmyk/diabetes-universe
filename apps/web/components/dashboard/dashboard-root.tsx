@@ -60,12 +60,7 @@ export function DashboardRoot() {
       ),
     [glucosePresentation, referenceTime],
   );
-  const {
-    addEvent,
-    addEventAsync,
-    events,
-    status: timelineStatus,
-  } = useTimelineStore();
+  const { addEventAsync, events, status: timelineStatus } = useTimelineStore();
   const [quickAddState, setQuickAddState] = useState(
     createInitialQuickAddControllerState,
   );
@@ -294,8 +289,10 @@ export function DashboardRoot() {
         }
       />
       <QuickAddHost
-        onActivitySubmit={(entry) => {
-          addEvent(createSemanticActivityTimelineEvent(entry));
+        onActivitySubmit={async ({ entry, eventId }) => {
+          await addEventAsync(
+            createSemanticActivityTimelineEvent(entry, { id: eventId }),
+          );
         }}
         onGlucoseSubmit={async ({ entry, eventId }) => {
           await addEventAsync(
@@ -307,11 +304,15 @@ export function DashboardRoot() {
             createSemanticInsulinTimelineEvent(entry, { id: eventId }),
           );
         }}
-        onMedicationSubmit={(entry) => {
-          addEvent(createSemanticMedicationTimelineEvent(entry));
+        onMedicationSubmit={async ({ entry, eventId }) => {
+          await addEventAsync(
+            createSemanticMedicationTimelineEvent(entry, { id: eventId }),
+          );
         }}
-        onNoteSubmit={(entry) => {
-          addEvent(createSemanticNoteTimelineEvent(entry));
+        onNoteSubmit={async ({ entry, eventId }) => {
+          await addEventAsync(
+            createSemanticNoteTimelineEvent(entry, { id: eventId }),
+          );
         }}
         onNutritionSubmit={async ({ entry, eventId }) => {
           await addEventAsync(

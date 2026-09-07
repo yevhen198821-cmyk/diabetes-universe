@@ -1,11 +1,6 @@
 'use client';
 
-import type {
-  ActivityQuickAddEntry,
-  MedicationQuickAddEntry,
-  NoteQuickAddEntry,
-  SemanticTimelineEvent,
-} from '@diabetes-universe/types';
+import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import {
@@ -23,8 +18,11 @@ import {
   resolveTimelinePresentationLocale,
 } from '../../lib/timeline/presentation';
 import { useTimelineStore } from '../../lib/timeline/timeline-store';
+import type { ActivityQuickAddSubmitRequest } from '../../lib/quick-add/activity-quick-add-submit';
 import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
 import type { InsulinQuickAddSubmitRequest } from '../../lib/quick-add/insulin-quick-add-submit';
+import type { MedicationQuickAddSubmitRequest } from '../../lib/quick-add/medication-quick-add-submit';
+import type { NoteQuickAddSubmitRequest } from '../../lib/quick-add/note-quick-add-submit';
 import type { NutritionQuickAddSubmitRequest } from '../../lib/quick-add/nutrition-quick-add-submit';
 import { useFormatter } from '../../lib/platform/react/use-formatter';
 import { useLocalization } from '../../lib/platform/react/use-localization';
@@ -89,7 +87,6 @@ export function TimelineShell() {
     [formatter],
   );
   const {
-    addEvent,
     addEventAsync,
     deleteEvent,
     error,
@@ -99,7 +96,6 @@ export function TimelineShell() {
     historyLoadStatus,
     loadMoreHistory,
     status,
-    updateEvent,
     updateEventAsync,
   } = useTimelineStore();
   const presentationDependencies = useTimelinePresentationDependencies();
@@ -454,11 +450,7 @@ export function TimelineShell() {
   };
 
   const handleUpdateEvent = async (updatedEvent: SemanticTimelineEvent) => {
-    if (updatedEvent.kind === 'nutrition') {
-      await updateEventAsync(updatedEvent);
-    } else {
-      updateEvent(updatedEvent);
-    }
+    await updateEventAsync(updatedEvent);
 
     const nextEvents = sortTimelineEventsNewestFirst(
       events.map((event) =>
@@ -529,16 +521,31 @@ export function TimelineShell() {
     );
   };
 
-  const handleMedicationSubmit = (entry: MedicationQuickAddEntry) => {
-    addEvent(createSemanticMedicationTimelineEvent(entry));
+  const handleMedicationSubmit = async ({
+    entry,
+    eventId,
+  }: MedicationQuickAddSubmitRequest) => {
+    await addEventAsync(
+      createSemanticMedicationTimelineEvent(entry, { id: eventId }),
+    );
   };
 
-  const handleActivitySubmit = (entry: ActivityQuickAddEntry) => {
-    addEvent(createSemanticActivityTimelineEvent(entry));
+  const handleActivitySubmit = async ({
+    entry,
+    eventId,
+  }: ActivityQuickAddSubmitRequest) => {
+    await addEventAsync(
+      createSemanticActivityTimelineEvent(entry, { id: eventId }),
+    );
   };
 
-  const handleNoteSubmit = (entry: NoteQuickAddEntry) => {
-    addEvent(createSemanticNoteTimelineEvent(entry));
+  const handleNoteSubmit = async ({
+    entry,
+    eventId,
+  }: NoteQuickAddSubmitRequest) => {
+    await addEventAsync(
+      createSemanticNoteTimelineEvent(entry, { id: eventId }),
+    );
   };
 
   return (

@@ -1,20 +1,18 @@
 'use client';
 
-import type {
-  ActivityQuickAddEntry,
-  MedicationQuickAddEntry,
-  NoteQuickAddEntry,
-  QuickAddCategory,
-} from '@diabetes-universe/types';
+import type { QuickAddCategory } from '@diabetes-universe/types';
 import { haptics, QuickAddPanel } from '@diabetes-universe/ui';
 import type { ReactNode, RefObject } from 'react';
 import { useMemo, useRef, useState } from 'react';
 
 import { useLocalization } from '../../lib/platform/react/use-localization';
 import { quickAddActions } from '../../lib/quick-add/actions';
+import type { ActivityQuickAddSubmitRequest } from '../../lib/quick-add/activity-quick-add-submit';
 import type { GlucoseQuickAddSubmitRequest } from '../../lib/quick-add/glucose-quick-add-submit';
 import { canDismissQuickAddWhileSubmitPending } from '../../lib/quick-add/quick-add-submit-identity-model';
 import type { InsulinQuickAddSubmitRequest } from '../../lib/quick-add/insulin-quick-add-submit';
+import type { MedicationQuickAddSubmitRequest } from '../../lib/quick-add/medication-quick-add-submit';
+import type { NoteQuickAddSubmitRequest } from '../../lib/quick-add/note-quick-add-submit';
 import type { NutritionQuickAddSubmitRequest } from '../../lib/quick-add/nutrition-quick-add-submit';
 import type { QuickAddCloseReason } from '../../lib/quick-add/quick-add-controller-model';
 import {
@@ -39,7 +37,9 @@ import { FloatingActionButton } from '../timeline/floating-action-button';
 export interface QuickAddHostProps {
   readonly floatingActionButtonClassName?: string;
   readonly floatingActionButtonRef?: RefObject<HTMLButtonElement | null>;
-  readonly onActivitySubmit?: (entry: ActivityQuickAddEntry) => void;
+  readonly onActivitySubmit?: (
+    request: ActivityQuickAddSubmitRequest,
+  ) => Promise<void>;
   readonly onClosed?: (reason: QuickAddCloseReason) => void;
   readonly onGlucoseSubmit?: (
     request: GlucoseQuickAddSubmitRequest,
@@ -47,8 +47,10 @@ export interface QuickAddHostProps {
   readonly onInsulinSubmit?: (
     request: InsulinQuickAddSubmitRequest,
   ) => Promise<void>;
-  readonly onMedicationSubmit?: (entry: MedicationQuickAddEntry) => void;
-  readonly onNoteSubmit?: (entry: NoteQuickAddEntry) => void;
+  readonly onMedicationSubmit?: (
+    request: MedicationQuickAddSubmitRequest,
+  ) => Promise<void>;
+  readonly onNoteSubmit?: (request: NoteQuickAddSubmitRequest) => Promise<void>;
   readonly onNutritionSubmit?: (
     request: NutritionQuickAddSubmitRequest,
   ) => Promise<void>;
@@ -231,20 +233,45 @@ export function QuickAddHost({
     closeQuickAdd('success');
   };
 
-  const handleMedicationSubmit = (entry: MedicationQuickAddEntry) => {
-    onMedicationSubmit?.(entry);
+  const handleMedicationSubmit = async (
+    request: MedicationQuickAddSubmitRequest,
+  ) => {
+    const didPersist = await finalizeQuickAddSubmit(
+      onMedicationSubmit,
+      request,
+    );
+
+    if (!didPersist) {
+      return;
+    }
+
+    releaseAsyncSubmitPending();
     haptics.success();
     closeQuickAdd('success');
   };
 
-  const handleActivitySubmit = (entry: ActivityQuickAddEntry) => {
-    onActivitySubmit?.(entry);
+  const handleActivitySubmit = async (
+    request: ActivityQuickAddSubmitRequest,
+  ) => {
+    const didPersist = await finalizeQuickAddSubmit(onActivitySubmit, request);
+
+    if (!didPersist) {
+      return;
+    }
+
+    releaseAsyncSubmitPending();
     haptics.success();
     closeQuickAdd('success');
   };
 
-  const handleNoteSubmit = (entry: NoteQuickAddEntry) => {
-    onNoteSubmit?.(entry);
+  const handleNoteSubmit = async (request: NoteQuickAddSubmitRequest) => {
+    const didPersist = await finalizeQuickAddSubmit(onNoteSubmit, request);
+
+    if (!didPersist) {
+      return;
+    }
+
+    releaseAsyncSubmitPending();
     haptics.success();
     closeQuickAdd('success');
   };
@@ -289,6 +316,7 @@ export function QuickAddHost({
       <MedicationQuickAddForm
         onCancel={handleFormCancel}
         onSubmit={handleMedicationSubmit}
+        onSubmittingChange={handleAsyncSubmittingChange}
       />
     );
   }
@@ -298,6 +326,7 @@ export function QuickAddHost({
       <ActivityQuickAddForm
         onCancel={handleFormCancel}
         onSubmit={handleActivitySubmit}
+        onSubmittingChange={handleAsyncSubmittingChange}
       />
     );
   }
@@ -307,6 +336,7 @@ export function QuickAddHost({
       <NoteQuickAddForm
         onCancel={handleFormCancel}
         onSubmit={handleNoteSubmit}
+        onSubmittingChange={handleAsyncSubmittingChange}
       />
     );
   }

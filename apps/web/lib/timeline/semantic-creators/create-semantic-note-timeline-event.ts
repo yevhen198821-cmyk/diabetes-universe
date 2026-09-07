@@ -14,6 +14,7 @@ export function createSemanticNoteTimelineEvent(
   entry: NoteQuickAddEntry,
   options: {
     readonly clock?: SemanticTimelineClock;
+    readonly id?: string;
     readonly referenceDate?: Date;
   } = {},
 ): NoteTimelineEvent {
@@ -29,7 +30,7 @@ export function createSemanticNoteTimelineEvent(
   return {
     body,
     createdAt: now,
-    id: createSemanticTimelineEventId('note', entry.time),
+    id: options.id ?? createSemanticTimelineEventId('note', entry.time),
     kind: 'note',
     occurredAt,
     schemaVersion: 1,

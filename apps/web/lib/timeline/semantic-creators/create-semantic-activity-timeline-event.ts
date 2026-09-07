@@ -14,6 +14,7 @@ export function createSemanticActivityTimelineEvent(
   entry: ActivityQuickAddEntry,
   options: {
     readonly clock?: SemanticTimelineClock;
+    readonly id?: string;
     readonly referenceDate?: Date;
   } = {},
 ): ActivityTimelineEvent {
@@ -29,7 +30,7 @@ export function createSemanticActivityTimelineEvent(
     activityType: entry.activityType.trim(),
     createdAt: now,
     durationSeconds: entry.durationMinutes * 60,
-    id: createSemanticTimelineEventId('activity', entry.time),
+    id: options.id ?? createSemanticTimelineEventId('activity', entry.time),
     kind: 'activity',
     note: note || undefined,
     occurredAt,

@@ -221,6 +221,10 @@ export const russianCanonicalMessages = defineApprovedMessages({
   'timeline.detail.form.date': 'Дата',
   'timeline.detail.form.note': 'Заметка',
   'timeline.detail.form.save': 'Сохранить',
+  'timeline.detail.form.saveError.description':
+    'Событие не сохранено. Введённые значения остались в редакторе. Попробуйте ещё раз.',
+  'timeline.detail.form.saveError.title': 'Не удалось сохранить',
+  'timeline.detail.form.saving': 'Сохранение…',
   'timeline.detail.form.time': 'Время события',
   'timeline.detail.form.title': 'Название',
   'timeline.detail.form.unit': 'Единица',
@@ -350,6 +354,11 @@ export const russianCanonicalMessages = defineApprovedMessages({
   'timeline.dayPeriod.timeRange.morning': '06:00–11:59',
   'timeline.dayPeriod.timeRange.night': '00:00–05:59',
   'quick-add.button.label': 'Добавить событие',
+  'quick-add.activity.saveError.description':
+    'Запись об активности не сохранена. Введённые значения остались в форме. Попробуйте ещё раз.',
+  'quick-add.activity.saveError.title':
+    'Не удалось сохранить запись об активности',
+  'quick-add.activity.saving': 'Сохранение…',
   'quick-add.glucose.contextLabel': 'Контекст измерения',
   'quick-add.glucose.contextSheetTitle': 'Контекст измерения',
   'quick-add.glucose.addContext': 'Добавить контекст',
@@ -407,6 +416,15 @@ export const russianCanonicalMessages = defineApprovedMessages({
     'Не удалось сохранить запись об инсулине',
   'quick-add.insulin.saving': 'Сохранение…',
   'quick-add.insulin.timeLabel': 'Время',
+  'quick-add.medication.saveError.description':
+    'Запись о лекарстве не сохранена. Введённые значения остались в форме. Попробуйте ещё раз.',
+  'quick-add.medication.saveError.title':
+    'Не удалось сохранить запись о лекарстве',
+  'quick-add.medication.saving': 'Сохранение…',
+  'quick-add.note.saveError.description':
+    'Заметка не сохранена. Введённые значения остались в форме. Попробуйте ещё раз.',
+  'quick-add.note.saveError.title': 'Не удалось сохранить заметку',
+  'quick-add.note.saving': 'Сохранение…',
   'quick-add.nutrition.addItem': 'Добавить ещё продукт',
   'quick-add.nutrition.cancel': 'Отмена',
   'quick-add.nutrition.carbsError':

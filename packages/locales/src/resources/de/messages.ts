@@ -95,6 +95,10 @@ export const germanCanonicalMessages = defineApprovedMessages({
   'timeline.detail.form.date': 'Datum',
   'timeline.detail.form.note': 'Notiz',
   'timeline.detail.form.save': 'Speichern',
+  'timeline.detail.form.saveError.description':
+    'Das Ereignis wurde nicht gespeichert. Ihre Werte sind noch im Editor. Versuchen Sie es erneut.',
+  'timeline.detail.form.saveError.title': 'Speichern fehlgeschlagen',
+  'timeline.detail.form.saving': 'Speichern…',
   'timeline.detail.form.time': 'Ereigniszeit',
   'timeline.detail.form.title': 'Titel',
   'timeline.detail.form.unit': 'Einheit',
@@ -237,6 +241,11 @@ export const germanCanonicalMessages = defineApprovedMessages({
   'timeline.dayPeriod.timeRange.morning': '06:00–11:59',
   'timeline.dayPeriod.timeRange.night': '00:00–05:59',
   'quick-add.button.label': 'Ereignis hinzufügen',
+  'quick-add.activity.saveError.description':
+    'Der Aktivitätseintrag wurde nicht gespeichert. Ihre Werte sind noch im Formular. Versuchen Sie es erneut.',
+  'quick-add.activity.saveError.title':
+    'Aktivitätseintrag konnte nicht gespeichert werden',
+  'quick-add.activity.saving': 'Speichern…',
   'quick-add.glucose.contextLabel': 'Messkontext',
   'quick-add.glucose.contextSheetTitle': 'Messkontext',
   'quick-add.glucose.addContext': 'Kontext hinzufügen',
@@ -297,6 +306,15 @@ export const germanCanonicalMessages = defineApprovedMessages({
     'Insulineintrag konnte nicht gespeichert werden',
   'quick-add.insulin.saving': 'Speichern…',
   'quick-add.insulin.timeLabel': 'Zeit',
+  'quick-add.medication.saveError.description':
+    'Der Medikamenteneintrag wurde nicht gespeichert. Ihre Werte sind noch im Formular. Versuchen Sie es erneut.',
+  'quick-add.medication.saveError.title':
+    'Medikamenteneintrag konnte nicht gespeichert werden',
+  'quick-add.medication.saving': 'Speichern…',
+  'quick-add.note.saveError.description':
+    'Die Notiz wurde nicht gespeichert. Ihre Werte sind noch im Formular. Versuchen Sie es erneut.',
+  'quick-add.note.saveError.title': 'Notiz konnte nicht gespeichert werden',
+  'quick-add.note.saving': 'Speichern…',
   'quick-add.nutrition.addItem': 'Weiteren Eintrag hinzufügen',
   'quick-add.nutrition.cancel': 'Abbrechen',
   'quick-add.nutrition.carbsError':

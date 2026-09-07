@@ -26,6 +26,7 @@ export type TimelineInsulinEditLabels =
   TimelineUiLabels['detail']['form']['insulin'];
 
 interface TimelineInsulinEditFieldsProps {
+  readonly disabled?: boolean;
   readonly errors: TimelineEventEditErrors;
   readonly labels: TimelineInsulinEditLabels;
   /** Unmatched legacy `context` text preserved verbatim, when present. */
@@ -63,6 +64,7 @@ function InsulinFieldError({
 }
 
 export function TimelineInsulinEditFields({
+  disabled = false,
   errors,
   labels,
   legacyContextText,
@@ -114,6 +116,7 @@ export function TimelineInsulinEditFields({
         </label>
         <select
           className={selectClass}
+          disabled={disabled}
           id="timeline-edit-insulin-prep"
           onChange={(event) => handlePreparationChange(event.target.value)}
           value={selection.preparationId ?? ''}
@@ -154,6 +157,7 @@ export function TimelineInsulinEditFields({
             }
             aria-invalid={errors.otherName ? true : undefined}
             className={fieldClass}
+            disabled={disabled}
             id="timeline-edit-insulin-other-name"
             maxLength={120}
             onChange={(event) =>
@@ -178,6 +182,7 @@ export function TimelineInsulinEditFields({
           }
           aria-invalid={errors.dose ? true : undefined}
           className={fieldClass}
+          disabled={disabled}
           id="timeline-edit-insulin-dose"
           inputMode="decimal"
           onChange={(event) =>
@@ -207,6 +212,7 @@ export function TimelineInsulinEditFields({
         </label>
         <select
           className={selectClass}
+          disabled={disabled}
           id="timeline-edit-insulin-context"
           onChange={(event) => handleContextChange(event.target.value)}
           value={selection.administrationContext ?? ''}

@@ -1,6 +1,7 @@
 import { createSemanticTimelineEventId } from '../timeline/semantic-creators/create-semantic-timeline-event-id';
 
-export type QuickAddSubmitEventKind = 'glucose' | 'insulin' | 'nutrition';
+export type QuickAddSubmitEventKind =
+  'activity' | 'glucose' | 'insulin' | 'medication' | 'note' | 'nutrition';
 
 export interface QuickAddSubmitIdentityState {
   pendingEventId: string | null;

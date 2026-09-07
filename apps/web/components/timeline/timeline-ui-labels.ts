@@ -79,6 +79,9 @@ export interface TimelineUiLabels {
       }>;
       readonly note: string;
       readonly save: string;
+      readonly saveErrorDescription: string;
+      readonly saveErrorTitle: string;
+      readonly saving: string;
       readonly time: string;
       readonly title: string;
       readonly unit: string;
@@ -339,6 +342,13 @@ const TIMELINE_UI_TRANSLATION_KEYS = {
   ),
   detailFormNote: asTranslationKey('timeline.detail.form.note'),
   detailFormSave: asTranslationKey('timeline.detail.form.save'),
+  detailFormSaveErrorDescription: asTranslationKey(
+    'timeline.detail.form.saveError.description',
+  ),
+  detailFormSaveErrorTitle: asTranslationKey(
+    'timeline.detail.form.saveError.title',
+  ),
+  detailFormSaving: asTranslationKey('timeline.detail.form.saving'),
   detailFormTime: asTranslationKey('timeline.detail.form.time'),
   detailFormTitle: asTranslationKey('timeline.detail.form.title'),
   detailFormUnit: asTranslationKey('timeline.detail.form.unit'),
@@ -635,6 +645,18 @@ export function resolveTimelineUiLabels(
         save: translate(
           localization,
           TIMELINE_UI_TRANSLATION_KEYS.detailFormSave,
+        ),
+        saveErrorDescription: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailFormSaveErrorDescription,
+        ),
+        saveErrorTitle: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailFormSaveErrorTitle,
+        ),
+        saving: translate(
+          localization,
+          TIMELINE_UI_TRANSLATION_KEYS.detailFormSaving,
         ),
         time: translate(
           localization,

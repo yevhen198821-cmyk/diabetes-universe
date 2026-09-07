@@ -98,6 +98,10 @@ export const ukrainianCanonicalMessages = defineApprovedMessages({
   'timeline.detail.form.date': 'Дата',
   'timeline.detail.form.note': 'Нотатка',
   'timeline.detail.form.save': 'Зберегти',
+  'timeline.detail.form.saveError.description':
+    'Подію не збережено. Введені значення залишилися в редакторі. Спробуйте ще раз.',
+  'timeline.detail.form.saveError.title': 'Не вдалося зберегти',
+  'timeline.detail.form.saving': 'Збереження…',
   'timeline.detail.form.time': 'Час події',
   'timeline.detail.form.title': 'Назва',
   'timeline.detail.form.unit': 'Одиниця',
@@ -234,6 +238,11 @@ export const ukrainianCanonicalMessages = defineApprovedMessages({
   'timeline.dayPeriod.timeRange.morning': '06:00–11:59',
   'timeline.dayPeriod.timeRange.night': '00:00–05:59',
   'quick-add.button.label': 'Додати подію',
+  'quick-add.activity.saveError.description':
+    'Запис про активність не збережено. Введені значення залишилися у формі. Спробуйте ще раз.',
+  'quick-add.activity.saveError.title':
+    'Не вдалося зберегти запис про активність',
+  'quick-add.activity.saving': 'Збереження…',
   'quick-add.glucose.contextLabel': 'Контекст вимірювання',
   'quick-add.glucose.contextSheetTitle': 'Контекст вимірювання',
   'quick-add.glucose.addContext': 'Додати контекст',
@@ -291,6 +300,14 @@ export const ukrainianCanonicalMessages = defineApprovedMessages({
   'quick-add.insulin.saveError.title': 'Не вдалося зберегти запис про інсулін',
   'quick-add.insulin.saving': 'Збереження…',
   'quick-add.insulin.timeLabel': 'Час',
+  'quick-add.medication.saveError.description':
+    'Запис про ліки не збережено. Введені значення залишилися у формі. Спробуйте ще раз.',
+  'quick-add.medication.saveError.title': 'Не вдалося зберегти запис про ліки',
+  'quick-add.medication.saving': 'Збереження…',
+  'quick-add.note.saveError.description':
+    'Нотатку не збережено. Введені значення залишилися у формі. Спробуйте ще раз.',
+  'quick-add.note.saveError.title': 'Не вдалося зберегти нотатку',
+  'quick-add.note.saving': 'Збереження…',
   'quick-add.nutrition.addItem': 'Додати ще продукт',
   'quick-add.nutrition.cancel': 'Скасувати',
   'quick-add.nutrition.carbsError':
