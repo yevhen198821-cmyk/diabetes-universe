@@ -3,30 +3,51 @@ import { expect, test } from './support/test';
 import {
   clearTimelineEventsInIndexedDb,
   prepareCanonicalDemoTimelineFixture,
+  readActiveTimelineStoredEvents,
   waitForTimelineBootstrapComplete,
+  waitForTimelineOwnershipReady,
 } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
+
+async function prepareEmptyTimeline(page: import('./support/test').Page) {
+  await waitForApplicationReady(page);
+  await waitForTimelineOwnershipReady(page);
+  await waitForTimelineBootstrapComplete(page);
+  await clearTimelineEventsInIndexedDb(page);
+  await page.reload();
+  await waitForApplicationReady(page);
+  await waitForTimelineOwnershipReady(page);
+}
 
 test('timeline note persists across page reload', async ({ page }) => {
   const noteText = 'E2E reload persistence marker';
 
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareEmptyTimeline(page);
 
   await page.setViewportSize({ height: 844, width: 390 });
   await page.locator('#timeline-mobile-quick-add-fab').click();
   await page.getByRole('button', { name: 'Заметка. Добавить запись' }).click();
-  await expect(
-    page.getByRole('dialog', { name: 'Добавить заметку' }),
-  ).toBeVisible();
+  const dialog = page.getByRole('dialog', { name: 'Добавить заметку' });
+  await expect(dialog).toBeVisible();
 
   await page.getByLabel('Текст заметки').fill(noteText);
-  await page.getByRole('button', { name: 'Сохранить' }).click();
+  await dialog.getByRole('button', { name: 'Сохранить' }).click();
 
+  await expect(dialog).toBeHidden();
   await expect(page.getByText(noteText).first()).toBeVisible();
+  await expect
+    .poll(async () => {
+      const events = await readActiveTimelineStoredEvents(page);
+      return events.filter(
+        (event) => event.kind === 'note' && event.body === noteText,
+      ).length;
+    })
+    .toBe(1);
 
   await page.reload();
   await waitForApplicationReady(page);
+  await waitForTimelineOwnershipReady(page);
 
   await expect(page.getByText(noteText).first()).toBeVisible();
 });
@@ -37,14 +58,24 @@ test('deleted timeline note remains deleted across page reload', async ({
   const noteText = 'E2E delete persistence marker';
 
   await page.goto('/timeline');
-  await waitForApplicationReady(page);
+  await prepareEmptyTimeline(page);
 
   await page.setViewportSize({ height: 844, width: 390 });
   await page.locator('#timeline-mobile-quick-add-fab').click();
   await page.getByRole('button', { name: 'Заметка. Добавить запись' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Добавить заметку' });
   await page.getByLabel('Текст заметки').fill(noteText);
-  await page.getByRole('button', { name: 'Сохранить' }).click();
+  await dialog.getByRole('button', { name: 'Сохранить' }).click();
+  await expect(dialog).toBeHidden();
   await expect(page.getByText(noteText).first()).toBeVisible();
+  await expect
+    .poll(async () => {
+      const events = await readActiveTimelineStoredEvents(page);
+      return events.filter(
+        (event) => event.kind === 'note' && event.body === noteText,
+      ).length;
+    })
+    .toBe(1);
 
   await page.getByText(noteText).first().click();
   await page.getByRole('button', { name: 'Delete', exact: true }).click();
@@ -55,9 +86,18 @@ test('deleted timeline note remains deleted across page reload', async ({
     .click();
 
   await expect(page.getByText(noteText)).toHaveCount(0);
+  await expect
+    .poll(async () => {
+      const events = await readActiveTimelineStoredEvents(page);
+      return events.some(
+        (event) => event.kind === 'note' && event.body === noteText,
+      );
+    })
+    .toBe(false);
 
   await page.reload();
   await waitForApplicationReady(page);
+  await waitForTimelineOwnershipReady(page);
 
   await expect(page.getByText(noteText)).toHaveCount(0);
 });
