@@ -11,6 +11,7 @@ import {
   readMedicalAdoptionPrivilegesMigrationSql,
   readMedicalDiabetesSettingsPrivilegesMigrationSql,
   readMedicalFoundationMigrationSql,
+  readMedicalOpsRateLimitPrivilegesMigrationSql,
   readMedicalPrivilegesMigrationSql,
 } from '../database/medical-pglite-bootstrap-migrations.ts';
 
@@ -88,6 +89,15 @@ test('diabetes settings privilege migration grants table-specific medical_app ac
   assert.match(diabetesSettingsPrivilegesSql, /glucose_target_profiles/);
   assert.match(diabetesSettingsPrivilegesSql, /GRANT SELECT, INSERT, UPDATE/);
   assert.doesNotMatch(diabetesSettingsPrivilegesSql, /GRANT DELETE/);
+});
+
+test('rate-limit privilege migration grants table-specific medical_app access', () => {
+  const rateLimitPrivilegesSql =
+    readMedicalOpsRateLimitPrivilegesMigrationSql();
+
+  assert.match(rateLimitPrivilegesSql, /medical_ops\.rate_limit_windows/);
+  assert.match(rateLimitPrivilegesSql, /GRANT SELECT, INSERT, UPDATE/);
+  assert.doesNotMatch(rateLimitPrivilegesSql, /GRANT DELETE/);
 });
 
 test('adoption privilege migration grants table-specific medical_app access', () => {

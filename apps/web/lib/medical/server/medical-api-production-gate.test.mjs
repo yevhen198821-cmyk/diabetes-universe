@@ -107,7 +107,7 @@ test('production bootstrap auto-registers adapter when distributed backend is co
   process.env.MEDICAL_API_PRODUCTION_GATE = '1';
   process.env.MEDICAL_API_ENABLE_TEST_AUTH = '1';
   process.env.MEDICAL_RATE_LIMIT_MODE = 'distributed';
-  process.env.MEDICAL_RATE_LIMIT_BACKEND = 'approved-backend';
+  process.env.MEDICAL_RATE_LIMIT_BACKEND = 'process-local';
   registerMedicalApiRateLimitBackendAdapter(null);
   resetMedicalApiRateLimiterForTests();
   setMedicalApiRateLimiterForTests(null);
