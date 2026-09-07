@@ -72,7 +72,11 @@ test('rejected IndexedDB add is not durable and retry writes exactly one record'
   await deleteDatabase(databaseName);
 
   const inner = createWebTimelineRepository({ databaseName });
-  const hooks = { failNextAdd: true, failNextUpdate: false, failNextDelete: false };
+  const hooks = {
+    failNextAdd: true,
+    failNextUpdate: false,
+    failNextDelete: false,
+  };
   const repository = wrapWriteFailures(inner, hooks);
   const event = createSemanticMedicationTimelineEvent(
     {
@@ -119,7 +123,11 @@ test('rejected IndexedDB edit leaves the original record and retry updates the s
   await deleteDatabase(databaseName);
 
   const inner = createWebTimelineRepository({ databaseName });
-  const hooks = { failNextAdd: false, failNextUpdate: true, failNextDelete: false };
+  const hooks = {
+    failNextAdd: false,
+    failNextUpdate: true,
+    failNextDelete: false,
+  };
   const repository = wrapWriteFailures(inner, hooks);
   const original = createSemanticGlucoseTimelineEvent(
     { time: '08:00', valueMmol: 6.4 },

@@ -244,7 +244,9 @@ test.describe('Remediation 0B Timeline save integrity', () => {
     expect(noteEvent?.id).toBeTruthy();
 
     await page.getByText(noteText).first().click();
-    await expect(page.getByRole('dialog').filter({ hasText: noteText })).toBeVisible();
+    await expect(
+      page.getByRole('dialog').filter({ hasText: noteText }),
+    ).toBeVisible();
     await page.getByRole('button', { name: 'Delete', exact: true }).click();
 
     const confirmation = page.getByRole('dialog', { name: 'Delete event?' });

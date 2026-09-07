@@ -1002,7 +1002,8 @@ test('pending Account A delete cannot appear in Account B after store remount', 
   const accountARepository = createInMemoryTimelineRepository({
     seedEvents: [],
   });
-  const originalDeleteA = accountARepository.deleteEvent.bind(accountARepository);
+  const originalDeleteA =
+    accountARepository.deleteEvent.bind(accountARepository);
   accountARepository.deleteEvent = async (eventId) => {
     await pendingA;
     return originalDeleteA(eventId);

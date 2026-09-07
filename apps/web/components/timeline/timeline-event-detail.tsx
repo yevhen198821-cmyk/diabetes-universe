@@ -934,7 +934,10 @@ export function TimelineEventDetail({
               </p>
             ) : null}
             {deleteError ? (
-              <div className="bg-status-danger/10 mt-3 rounded-xl p-3" role="alert">
+              <div
+                className="bg-status-danger/10 mt-3 rounded-xl p-3"
+                role="alert"
+              >
                 <p className="text-status-danger text-sm font-semibold">
                   {uiLabels.detail.deleteConfirm.deleteErrorTitle}
                 </p>
