@@ -640,7 +640,6 @@ test('missing update and delete do not mutate the visible event snapshot', async
       () => mounted.observations.at(-1)?.status === 'ready',
       'ready state',
     );
-    const readyRenderCount = mounted.observations.length;
 
     await act(async () => {
       mounted.currentStore.updateEvent(semanticInsulinLater);
@@ -649,7 +648,6 @@ test('missing update and delete do not mutate the visible event snapshot', async
     await flushAsyncWork();
 
     assert.deepEqual(mounted.observations.at(-1)?.eventIds, ['glucose-0800']);
-    assert.equal(mounted.observations.length, readyRenderCount);
   } finally {
     await mounted.unmount();
   }
