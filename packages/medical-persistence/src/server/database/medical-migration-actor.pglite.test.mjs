@@ -68,8 +68,14 @@ async function createMedicalRoles(client) {
 
   await execSql(client, 'CREATE ROLE neondb_owner LOGIN');
   await execSql(client, 'CREATE ROLE arbitrary_role LOGIN');
-  await execSql(client, 'GRANT CREATE ON DATABASE postgres TO medical_deployer');
-  await execSql(client, 'GRANT CREATE ON DATABASE postgres TO medical_migrator');
+  await execSql(
+    client,
+    'GRANT CREATE ON DATABASE postgres TO medical_deployer',
+  );
+  await execSql(
+    client,
+    'GRANT CREATE ON DATABASE postgres TO medical_migrator',
+  );
 }
 
 async function grantHarnessOwnershipTransfer(client, actor) {

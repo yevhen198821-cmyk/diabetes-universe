@@ -24,10 +24,7 @@ test('medical persistence server barrel does not export PGlite bootstrap migrati
   assert.equal(source.includes('MEDICAL_FOUNDATION_MIGRATION_SQL'), false);
   assert.equal(source.includes('medical_deployer'), false);
   assert.equal(source.includes('MEDICAL_DEPLOYER_DATABASE_URL'), false);
-  assert.equal(
-    source.includes('is-approved-medical-migration-actor'),
-    false,
-  );
+  assert.equal(source.includes('is-approved-medical-migration-actor'), false);
 
   const persistenceServer = await import(persistenceServerIndex);
 

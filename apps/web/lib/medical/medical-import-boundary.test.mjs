@@ -84,7 +84,7 @@ test('boundary: apps/web source tree does not import medical persistence interna
         if (
           allowedServerComposition &&
           (pattern === 'MEDICAL_DATABASE_URL' ||
-            pattern === 'MEDICAL_MIGRATOR_DATABASE_URL'))
+            pattern === 'MEDICAL_MIGRATOR_DATABASE_URL')
         ) {
           continue;
         }

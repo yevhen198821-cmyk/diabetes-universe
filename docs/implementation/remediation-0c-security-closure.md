@@ -298,12 +298,12 @@ No other role is accepted.
 
 ### Role separation
 
-| Role | Purpose |
-| ---- | ------- |
-| `medical_app` | Runtime only. Approved `SELECT`/`INSERT`/`UPDATE`. No DDL. No role administration. Never a migration actor. |
-| `medical_deployer` | LOGIN deploy-only operator role. Runs approved migration DDL. Never used by application runtime, `apps/web`, Medical API, or Vercel runtime env. |
-| `medical_migrator` | Architectural migration-owner role. Remains accepted by the actor guard. Not converted into a runtime role. On current Neon production it is NOLOGIN and cannot be the connecting user. |
-| `medical_maintenance_owner` | Owns the approved `SECURITY DEFINER` purge function. Remains **NOLOGIN**. No persistent role membership is granted to deploy actors. |
+| Role                        | Purpose                                                                                                                                                                                 |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `medical_app`               | Runtime only. Approved `SELECT`/`INSERT`/`UPDATE`. No DDL. No role administration. Never a migration actor.                                                                             |
+| `medical_deployer`          | LOGIN deploy-only operator role. Runs approved migration DDL. Never used by application runtime, `apps/web`, Medical API, or Vercel runtime env.                                        |
+| `medical_migrator`          | Architectural migration-owner role. Remains accepted by the actor guard. Not converted into a runtime role. On current Neon production it is NOLOGIN and cannot be the connecting user. |
+| `medical_maintenance_owner` | Owns the approved `SECURITY DEFINER` purge function. Remains **NOLOGIN**. No persistent role membership is granted to deploy actors.                                                    |
 
 `medical_deployer` may own schemas/tables it creates. That is acceptable on
 Neon: the role is deploy-only, `medical_app` is not the owner and cannot

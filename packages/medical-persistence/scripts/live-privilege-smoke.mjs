@@ -39,7 +39,10 @@ try {
   `;
 
   assert(environment.medical_schema_exists, 'medical schema is missing');
-  assert(environment.medical_ops_schema_exists, 'medical_ops schema is missing');
+  assert(
+    environment.medical_ops_schema_exists,
+    'medical_ops schema is missing',
+  );
 
   const roles = await sql`
     SELECT rolname
@@ -64,10 +67,7 @@ try {
     roleLoginByName.medical_deployer === true,
     'medical_deployer must remain LOGIN',
   );
-  assert(
-    roleLoginByName.medical_app === true,
-    'medical_app must remain LOGIN',
-  );
+  assert(roleLoginByName.medical_app === true, 'medical_app must remain LOGIN');
   assert(
     roleLoginByName.medical_maintenance_owner === false,
     'medical_maintenance_owner unexpectedly has LOGIN',

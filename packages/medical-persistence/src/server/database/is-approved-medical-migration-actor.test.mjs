@@ -15,8 +15,14 @@ test('isApprovedMedicalMigrationActor rejects runtime, platform, and prefix role
   assert.equal(isApprovedMedicalMigrationActor('public'), false);
   assert.equal(isApprovedMedicalMigrationActor('PUBLIC'), false);
   assert.equal(isApprovedMedicalMigrationActor('medical_'), false);
-  assert.equal(isApprovedMedicalMigrationActor('medical_migrator_extra'), false);
-  assert.equal(isApprovedMedicalMigrationActor('medical_deployer_admin'), false);
+  assert.equal(
+    isApprovedMedicalMigrationActor('medical_migrator_extra'),
+    false,
+  );
+  assert.equal(
+    isApprovedMedicalMigrationActor('medical_deployer_admin'),
+    false,
+  );
   assert.equal(isApprovedMedicalMigrationActor('arbitrary_role'), false);
   assert.equal(isApprovedMedicalMigrationActor('postgres'), false);
   assert.equal(isApprovedMedicalMigrationActor(''), false);
