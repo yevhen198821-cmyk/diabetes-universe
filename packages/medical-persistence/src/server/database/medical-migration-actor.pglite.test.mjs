@@ -79,9 +79,8 @@ async function createMedicalRoles(client) {
 }
 
 async function grantHarnessOwnershipTransfer(client, actor) {
-  // PGlite/vanilla PostgreSQL still require membership to ALTER FUNCTION
-  // OWNER. Production 0001 no longer asserts or grants this membership.
-  // The harness supplies it only for the duration of the ownership transfer.
+  // PostgreSQL, including Neon, requires SET authority for ALTER FUNCTION OWNER.
+  // Model an administrator supplying it only during the deployment.
   await execSql(client, `GRANT medical_maintenance_owner TO ${actor}`);
 }
 
@@ -338,3 +337,26 @@ test('privilege scripts remain idempotent and keep medical_app least-privileged'
     await client.close();
   }
 });
+
+for (const actor of ['medical_migrator', 'medical_deployer']) {
+  test(`${actor} without ownership-transfer authority fails before privilege changes`, async () => {
+    const client = new PGlite();
+    try {
+      await createMedicalRoles(client);
+      await execSql(client, `SET ROLE ${actor}`);
+      await execSql(client, readMedicalFoundationMigrationSql());
+      await assert.rejects(
+        () => execSql(client, readMedicalPrivilegesMigrationSql()),
+        /Ownership-transfer prerequisite missing/,
+      );
+      await execSql(client, 'ROLLBACK');
+      const state = await queryOne(
+        client,
+        `SELECT has_schema_privilege('medical_maintenance_owner', 'medical', 'CREATE') AS can_create`,
+      );
+      assert.equal(state.can_create, false);
+    } finally {
+      await client.close();
+    }
+  });
+}

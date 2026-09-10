@@ -43,8 +43,8 @@ export function TimelineStoreBoundary({
       });
     }
 
-    return createUnavailableTimelineRepository();
-  }, [ownership]);
+    return createUnavailableTimelineRepository(retry);
+  }, [ownership, retry]);
 
   useEffect(() => {
     return () => {

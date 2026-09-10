@@ -310,7 +310,14 @@ Neon: the role is deploy-only, `medical_app` is not the owner and cannot
 `ALTER`/`DROP`, and `PUBLIC` remains revoked. The purge function is
 transferred with `ALTER FUNCTION ... OWNER TO medical_maintenance_owner`
 after a transactional `GRANT CREATE` / `REVOKE CREATE` on schema `medical`.
-`0001` no longer requires `SET ROLE` or persistent membership.
+`0001` does not execute `SET ROLE`, but PostgreSQL still requires the ability
+to set the new owner role for `ALTER FUNCTION ... OWNER TO`. Temporary schema
+`CREATE` alone is insufficient. The audit rehearsal on Neon confirmed
+`must be able to SET ROLE "medical_maintenance_owner"`. A platform administrator
+must arrange temporary transfer authority and remove it after deployment.
+If Neon does not allow that, this deployment path remains blocked.
+
+See [PostgreSQL ALTER FUNCTION requirements](https://www.postgresql.org/docs/18/sql-alterfunction.html).
 
 ### Operator bootstrap
 
@@ -334,7 +341,15 @@ memberships.
 
 ### Production deployment sequence
 
-Connect as `medical_deployer`, then apply the exact repo order:
+Before any migration, connect as `medical_deployer` and require this to return true:
+
+```sql
+SELECT pg_has_role(current_user, 'medical_maintenance_owner', 'SET');
+```
+
+If it returns false, stop and obtain platform-administrator assistance. Do not
+substitute the runtime role, omit owner transfer, or widen runtime privileges.
+Then apply the exact repo order:
 
 1. `0000_medical_foundation.sql`
 2. `0001_medical_privileges.sql`
@@ -366,7 +381,8 @@ MEDICAL_PRIVILEGE_SMOKE_DATABASE_URL="$MEDICAL_ADMIN_INSPECTION_DATABASE_URL" \
   pnpm --filter @diabetes-universe/medical-persistence db:smoke:privileges
 ```
 
-No role memberships are required before or after this sequence.
+No persistent memberships may remain after this sequence. Temporary SET
+authority during ownership transfer is required; the migration cannot bypass it.
 
 ### Post-migration privilege smoke
 

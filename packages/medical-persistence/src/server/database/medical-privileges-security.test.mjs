@@ -141,17 +141,16 @@ test('privilege migrations use the exact approved migration actor allowlist', ()
     assert.doesNotMatch(sql, /current_user <> 'medical_migrator'/);
     assert.doesNotMatch(sql, /neondb_owner/);
     assert.doesNotMatch(sql, /LIKE 'medical_/);
-    assert.doesNotMatch(sql, /pg_has_role/);
     assert.doesNotMatch(sql, /SET ROLE medical_maintenance_owner/);
   }
 });
 
-test('0001 transfers maintenance function ownership without SET ROLE membership', () => {
+test('0001 requires transfer authority in addition to the strict actor allowlist', () => {
   assert.match(
     privilegesSql,
     /ALTER FUNCTION medical\.purge_expired_idempotency_records\(integer\)\s+OWNER TO medical_maintenance_owner;/,
   );
-  assert.doesNotMatch(
+  assert.match(
     privilegesSql,
     /pg_has_role\(current_user, 'medical_maintenance_owner', 'SET'\)/,
   );

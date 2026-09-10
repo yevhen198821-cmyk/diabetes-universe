@@ -6,7 +6,7 @@
 --      (medical_migrator or medical_deployer);
 --   3. transfer SECURITY DEFINER function ownership with
 --      ALTER FUNCTION ... OWNER TO medical_maintenance_owner
---      (no SET ROLE / persistent role membership required);
+--      (requires temporary authority to SET ROLE to the new owner);
 --   4. never use medical_deployer or medical_migrator at request runtime.
 --
 -- Schema/table ownership stays with the approved actor that created the
@@ -46,6 +46,12 @@ BEGIN
     RAISE EXCEPTION
       '0001_medical_privileges.sql must execute as an approved medical migration actor (medical_migrator or medical_deployer); current_user is "%".',
       current_user;
+  END IF;
+  -- ALTER FUNCTION OWNER requires SET authority even without executing SET ROLE.
+  -- This is an additional prerequisite, never an alternative actor allowlist.
+  IF NOT pg_has_role(current_user, 'medical_maintenance_owner', 'SET') THEN
+    RAISE EXCEPTION
+      'Ownership-transfer prerequisite missing: approved actor must have temporary SET authority for medical_maintenance_owner. Stop deployment and obtain platform-admin support; do not widen runtime privileges.';
   END IF;
 END $verify_roles$;
 

@@ -3,7 +3,10 @@ import test from 'node:test';
 import { createUnavailableTimelineRepository } from './create-unavailable-timeline-repository.ts';
 
 test('unresolved ownership never reports successful medical writes', async () => {
-  const repository = createUnavailableTimelineRepository();
+  let retryRequests = 0;
+  const repository = createUnavailableTimelineRepository(() => {
+    retryRequests += 1;
+  });
   await repository.initialize();
   for (const operation of [
     () => repository.addEvent({ id: 'synthetic' }),
@@ -15,5 +18,6 @@ test('unresolved ownership never reports successful medical writes', async () =>
       code: 'TIMELINE_REPOSITORY_STORAGE_UNAVAILABLE',
     });
   }
+  assert.equal(retryRequests, 4);
   assert.deepEqual(repository.getSnapshot().events, []);
 });

@@ -39,8 +39,9 @@ for (const failure of ['500', '429', 'network'] as const) {
         body: 'null',
       }),
     );
-    // Focus refresh is also used when returning from a sign-in tab.
-    await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+    // Retrying inside the still-open form must recheck ownership even when
+    // the outer retry banner is behind the modal. The unresolved write rejects.
+    await dialog.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.locator('[data-timeline-ownership]')).toHaveAttribute(
       'data-timeline-ownership',
       'anonymous',

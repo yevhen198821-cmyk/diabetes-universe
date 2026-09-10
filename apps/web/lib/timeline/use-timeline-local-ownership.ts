@@ -87,6 +87,7 @@ export function useTimelineLocalOwnership(): {
     };
 
     window.addEventListener('focus', onResume);
+    window.addEventListener('online', onResume);
     document.addEventListener('visibilitychange', onResume);
     queueMicrotask(() => {
       void applyResolution();
@@ -95,6 +96,7 @@ export function useTimelineLocalOwnership(): {
     return () => {
       requestIdRef.current += 1;
       window.removeEventListener('focus', onResume);
+      window.removeEventListener('online', onResume);
       document.removeEventListener('visibilitychange', onResume);
     };
   }, [attempt]);

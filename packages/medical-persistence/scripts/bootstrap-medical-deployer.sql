@@ -32,5 +32,14 @@
 --    Do not convert it into a runtime role or give it LOGIN unless a
 --    future operator decision explicitly requires that.
 --
--- 7. Connect as medical_deployer and apply 0000 through 0008 in repo order.
+-- 7. Before any migration, have an authorized platform administrator arrange
+--    temporary SET authority for medical_maintenance_owner. ALTER FUNCTION OWNER
+--    requires this on PostgreSQL/Neon even if the script does not execute SET ROLE.
+--    If the platform cannot provide that authority, STOP; the current deployment
+--    path is blocked. Do not skip owner transfer or widen medical_app permissions.
+--    Verify on the deploy-only connection:
+--    SELECT pg_has_role(current_user, 'medical_maintenance_owner', 'SET');
+--    Require true, then remove that authority immediately after migration.
+--
+-- 8. Connect as medical_deployer and apply 0000 through 0008 in repo order.
 --    See docs/implementation/remediation-0c-security-closure.md.
