@@ -210,7 +210,7 @@ test('SECURITY DEFINER function is isolated from PUBLIC and owned by maintenance
     /GRANT CREATE ON SCHEMA medical TO medical_maintenance_owner;/,
   );
   const ownerTransferPosition = positionOf(
-    /OWNER TO medical_maintenance_owner/,
+    /ALTER FUNCTION medical\.purge_expired_idempotency_records\(integer\)\s+OWNER TO medical_maintenance_owner/,
   );
   const revokeCreatePosition = positionOf(
     /REVOKE CREATE ON SCHEMA medical FROM medical_maintenance_owner;/,
