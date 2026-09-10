@@ -210,3 +210,41 @@ test('capturing email delivery is limited to test runtimes', () => {
     true,
   );
 });
+
+for (const deployment of [
+  { VERCEL_ENV: 'production' },
+  { VERCEL_ENV: 'preview' },
+  { AUTH_RUNTIME_ENV: 'production' },
+]) {
+  test(`hosted auth never exposes fixtures or captures sign-in links: ${JSON.stringify(deployment)}`, () => {
+    const env = { ...pgliteE2eEnv, NODE_ENV: 'test', ...deployment };
+    assert.equal(isAuthE2eRuntime(env), false);
+    assert.equal(isExplicitAuthTestRuntime(env), false);
+    assert.equal(isAuthE2eFixtureEndpointEnabled(env), false);
+    assert.equal(
+      isCapturingEmailDeliveryAllowed({ databaseMode: 'pglite' }, env),
+      false,
+    );
+    assert.equal(
+      isCapturingEmailDeliveryAllowed({ databaseMode: 'postgres' }, env),
+      false,
+    );
+  });
+}
+for (const deployment of [
+  { VERCEL_ENV: 'production' },
+  { AUTH_RUNTIME_ENV: 'production' },
+]) {
+  test(`production cannot select ephemeral auth storage: ${JSON.stringify(deployment)}`, () => {
+    for (const flags of [
+      { AUTH_DATABASE_MODE: 'pglite' },
+      { AUTH_USE_PGLITE: 'true' },
+      { NODE_ENV: 'test' },
+    ]) {
+      assert.throws(
+        () => resolveAuthEnvironment({ ...flags, ...deployment }),
+        /Production auth requires PostgreSQL/,
+      );
+    }
+  });
+}
