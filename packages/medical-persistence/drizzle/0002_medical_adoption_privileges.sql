@@ -1,6 +1,6 @@
 -- P10 medical adoption privilege deployment (mandatory for production Neon).
 -- PGlite/local CI intentionally skips this script during test bootstrap.
--- Prerequisites: same as 0001_medical_privileges.sql.
+-- Prerequisites: same approved medical migration actor policy as 0001.
 
 BEGIN;
 
@@ -12,7 +12,8 @@ DECLARE
     'medical_outbox_worker',
     'medical_idempotency_maintenance',
     'medical_maintenance_owner',
-    'medical_migrator'
+    'medical_migrator',
+    'medical_deployer'
   ];
 BEGIN
   FOREACH role_name IN ARRAY required_roles
@@ -24,9 +25,14 @@ BEGIN
     END IF;
   END LOOP;
 
-  IF current_user <> 'medical_migrator' THEN
+  -- isApprovedMedicalMigrationActor(current_user)
+  -- Exact allowlist only: medical_migrator, medical_deployer.
+  IF NOT (
+    current_user = 'medical_migrator'
+    OR current_user = 'medical_deployer'
+  ) THEN
     RAISE EXCEPTION
-      '0002_medical_adoption_privileges.sql must execute as medical_migrator; current_user is "%".',
+      '0002_medical_adoption_privileges.sql must execute as an approved medical migration actor (medical_migrator or medical_deployer); current_user is "%".',
       current_user;
   END IF;
 END $verify_roles$;

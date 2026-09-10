@@ -1,0 +1,36 @@
+-- Operator/platform bootstrap for the production Neon deploy-only login role.
+--
+-- Do not run this from application request paths, Vercel runtime, apps/web,
+-- or Medical API code. Do not commit a password or connection string.
+--
+-- Store the generated secret only in the operator/CI secret store.
+-- Never set MEDICAL_DEPLOYER_DATABASE_URL on Vercel runtime env.
+
+-- 1. Generate a strong password out of band, for example:
+--    openssl rand -base64 32
+--
+-- 2. Connect as a Neon project administrator (not medical_app).
+--
+-- 3. Create the login role. Replace the placeholder; do not leave it in
+--    shell history or repository files.
+--
+-- CREATE ROLE medical_deployer
+--   LOGIN
+--   PASSWORD '<operator-generated-secret>';
+--
+-- 4. Grant deploy-only database CREATE so 0000/0007 can create schemas.
+--    Do not grant this to medical_app.
+--
+-- GRANT CREATE ON DATABASE neondb TO medical_deployer;
+--
+-- 5. Confirm medical_maintenance_owner remains NOLOGIN. Do not GRANT
+--    medical_maintenance_owner (or any other medical role) to
+--    medical_deployer as a persistent membership. Neon production also
+--    blocks GRANT membership for these platform-managed roles.
+--
+-- 6. Keep medical_migrator as the architectural migration-owner role.
+--    Do not convert it into a runtime role or give it LOGIN unless a
+--    future operator decision explicitly requires that.
+--
+-- 7. Connect as medical_deployer and apply 0000 through 0008 in repo order.
+--    See docs/implementation/remediation-0c-security-closure.md.

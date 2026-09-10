@@ -110,6 +110,19 @@ test('adoption privilege migration grants table-specific medical_app access', ()
   assert.doesNotMatch(adoptionPrivilegesSql, /GRANT ALL/);
 });
 
+const privilegeMigrationSqlArtifacts = [
+  privilegesSql,
+  adoptionPrivilegesSql,
+  adoptionItemStatesPrivilegesSql,
+  diabetesSettingsPrivilegesSql,
+  readMedicalOpsRateLimitPrivilegesMigrationSql(),
+];
+
+const approvedActorGuard = `IF NOT (
+    current_user = 'medical_migrator'
+    OR current_user = 'medical_deployer'
+  )`;
+
 test('privilege migration SQL is executable and fails closed without Neon roles', () => {
   assert.equal(readMedicalPrivilegesMigrationSql(), privilegesSql);
   assert.match(privilegesSql, /RAISE EXCEPTION/);
@@ -117,6 +130,34 @@ test('privilege migration SQL is executable and fails closed without Neon roles'
   assert.doesNotMatch(
     privilegesSql,
     /GRANT ALL ON SCHEMA medical TO medical_migrator/,
+  );
+});
+
+test('privilege migrations use the exact approved migration actor allowlist', () => {
+  for (const sql of privilegeMigrationSqlArtifacts) {
+    assert.match(sql, /medical_deployer/);
+    assert.match(sql, /isApprovedMedicalMigrationActor\(current_user\)/);
+    assert.equal(sql.includes(approvedActorGuard), true);
+    assert.doesNotMatch(sql, /current_user <> 'medical_migrator'/);
+    assert.doesNotMatch(sql, /neondb_owner/);
+    assert.doesNotMatch(sql, /LIKE 'medical_/);
+    assert.doesNotMatch(sql, /pg_has_role/);
+    assert.doesNotMatch(sql, /SET ROLE medical_maintenance_owner/);
+  }
+});
+
+test('0001 transfers maintenance function ownership without SET ROLE membership', () => {
+  assert.match(
+    privilegesSql,
+    /ALTER FUNCTION medical\.purge_expired_idempotency_records\(integer\)\s+OWNER TO medical_maintenance_owner;/,
+  );
+  assert.doesNotMatch(
+    privilegesSql,
+    /pg_has_role\(current_user, 'medical_maintenance_owner', 'SET'\)/,
+  );
+  assert.doesNotMatch(
+    privilegesSql,
+    /must temporarily be able to SET ROLE medical_maintenance_owner/,
   );
 });
 
@@ -271,6 +312,11 @@ test('production postgres database factory does not import PGlite bootstrap migr
     productionSource.includes(
       'CREATE TABLE IF NOT EXISTS medical.medical_subjects',
     ),
+    false,
+  );
+  assert.equal(productionSource.includes('medical_deployer'), false);
+  assert.equal(
+    productionSource.includes('MEDICAL_DEPLOYER_DATABASE_URL'),
     false,
   );
 

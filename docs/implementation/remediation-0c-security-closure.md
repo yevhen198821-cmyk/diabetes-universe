@@ -98,7 +98,9 @@ added.
 In-memory counters are not claimed as a distributed serverless limiter.
 Vercel production must set `MEDICAL_RATE_LIMIT_BACKEND=postgres` (or
 `neon`) and apply `0007_medical_ops_rate_limit.sql` plus
-`0008_medical_ops_rate_limit_privileges.sql` as `medical_migrator`.
+`0008_medical_ops_rate_limit_privileges.sql` as an approved medical
+migration actor (`medical_deployer` on current Neon production, or
+`medical_migrator` where that login path still exists).
 
 The request path never runs `CREATE TABLE`. `medical_app` has
 `SELECT, INSERT, UPDATE` only. A missing table fails closed (`503`).
@@ -240,6 +242,140 @@ WebAuthn/passkeys and magic links stay same-origin (`connect-src 'self'`,
 - `img-src https:` is broader than `'self'` so remote avatars work.
 - Vercel preview adds `https://vercel.live` to script/connect sources.
 - A report-only / hash-only style policy is out of scope.
+
+## Production Neon migration authority
+
+Current Neon production (`diabetes-universe-auth` / `main` / `neondb`)
+cannot execute the previous documented procedure.
+
+`medical_migrator` and the maintenance roles were created as **NOLOGIN**.
+Privilege migrations previously required:
+
+```
+current_user = 'medical_migrator'
+```
+
+and `0001` additionally required:
+
+```
+pg_has_role(current_user, 'medical_maintenance_owner', 'SET') = true
+```
+
+Neon blocks `GRANT` membership for these platform-managed roles even after
+`SET ROLE neon_superuser`. Observed production error:
+
+```
+permission denied to grant role "medical_migrator"
+SQLSTATE 42501
+```
+
+`neondb_owner` also cannot `SET ROLE medical_migrator`. The previous
+operator step that temporarily granted `medical_migrator` the ability to
+`SET ROLE medical_maintenance_owner` is therefore impossible on this Neon
+configuration and is **removed**.
+
+Runtime privileges are not weakened to work around that platform limit.
+
+### Approved migration actors
+
+Privilege migrations now use `isApprovedMedicalMigrationActor(current_user)`
+instead of hardcoding `current_user = 'medical_migrator'`.
+
+Exact allowlist only:
+
+- `medical_migrator`
+- `medical_deployer`
+
+Rejected by the guard:
+
+- `neondb_owner`
+- `medical_app`
+- `PUBLIC`
+- arbitrary environment-selected roles
+- any role that merely matches a `medical_` prefix
+
+No other role is accepted.
+
+### Role separation
+
+| Role | Purpose |
+| ---- | ------- |
+| `medical_app` | Runtime only. Approved `SELECT`/`INSERT`/`UPDATE`. No DDL. No role administration. Never a migration actor. |
+| `medical_deployer` | LOGIN deploy-only operator role. Runs approved migration DDL. Never used by application runtime, `apps/web`, Medical API, or Vercel runtime env. |
+| `medical_migrator` | Architectural migration-owner role. Remains accepted by the actor guard. Not converted into a runtime role. On current Neon production it is NOLOGIN and cannot be the connecting user. |
+| `medical_maintenance_owner` | Owns the approved `SECURITY DEFINER` purge function. Remains **NOLOGIN**. No persistent role membership is granted to deploy actors. |
+
+`medical_deployer` may own schemas/tables it creates. That is acceptable on
+Neon: the role is deploy-only, `medical_app` is not the owner and cannot
+`ALTER`/`DROP`, and `PUBLIC` remains revoked. The purge function is
+transferred with `ALTER FUNCTION ... OWNER TO medical_maintenance_owner`
+after a transactional `GRANT CREATE` / `REVOKE CREATE` on schema `medical`.
+`0001` no longer requires `SET ROLE` or persistent membership.
+
+### Operator bootstrap
+
+Create `medical_deployer` out of band. Do not create it from an app request
+path. See `packages/medical-persistence/scripts/bootstrap-medical-deployer.sql`.
+
+Requirements:
+
+- `LOGIN`
+- deploy-only
+- strong generated password (`openssl rand -base64 32` or equivalent)
+- grant deploy-only `CREATE` on database `neondb`
+- credentials stored only in the operator/CI secret store if later automated
+- **not** committed
+- **not** present in Vercel runtime env
+- **not** referenced by Medical API runtime or `apps/web`
+
+Do not make `medical_maintenance_owner` `LOGIN`. Do not leave schema
+`CREATE` on that role after deployment. Do not grant persistent
+memberships.
+
+### Production deployment sequence
+
+Connect as `medical_deployer`, then apply the exact repo order:
+
+1. `0000_medical_foundation.sql`
+2. `0001_medical_privileges.sql`
+3. `0002_medical_adoption.sql`
+4. `0002_medical_adoption_privileges.sql`
+5. `0003_medical_adoption_subject_resource_fk.sql`
+6. `0004_medical_adoption_item_states.sql`
+7. `0004_medical_adoption_item_states_privileges.sql`
+8. `0005_medical_diabetes_settings.sql`
+9. `0006_medical_diabetes_settings_privileges.sql`
+10. `0007_medical_ops_rate_limit.sql`
+11. `0008_medical_ops_rate_limit_privileges.sql`
+12. live privilege smoke
+
+```bash
+psql "$MEDICAL_DEPLOYER_DATABASE_URL" -f packages/medical-persistence/drizzle/0000_medical_foundation.sql
+psql "$MEDICAL_DEPLOYER_DATABASE_URL" -f packages/medical-persistence/drizzle/0001_medical_privileges.sql
+psql "$MEDICAL_DEPLOYER_DATABASE_URL" -f packages/medical-persistence/drizzle/0002_medical_adoption.sql
+psql "$MEDICAL_DEPLOYER_DATABASE_URL" -f packages/medical-persistence/drizzle/0002_medical_adoption_privileges.sql
+psql "$MEDICAL_DEPLOYER_DATABASE_URL" -f packages/medical-persistence/drizzle/0003_medical_adoption_subject_resource_fk.sql
+psql "$MEDICAL_DEPLOYER_DATABASE_URL" -f packages/medical-persistence/drizzle/0004_medical_adoption_item_states.sql
+psql "$MEDICAL_DEPLOYER_DATABASE_URL" -f packages/medical-persistence/drizzle/0004_medical_adoption_item_states_privileges.sql
+psql "$MEDICAL_DEPLOYER_DATABASE_URL" -f packages/medical-persistence/drizzle/0005_medical_diabetes_settings.sql
+psql "$MEDICAL_DEPLOYER_DATABASE_URL" -f packages/medical-persistence/drizzle/0006_medical_diabetes_settings_privileges.sql
+psql "$MEDICAL_DEPLOYER_DATABASE_URL" -f packages/medical-persistence/drizzle/0007_medical_ops_rate_limit.sql
+psql "$MEDICAL_DEPLOYER_DATABASE_URL" -f packages/medical-persistence/drizzle/0008_medical_ops_rate_limit_privileges.sql
+
+MEDICAL_PRIVILEGE_SMOKE_DATABASE_URL="$MEDICAL_ADMIN_INSPECTION_DATABASE_URL" \
+  pnpm --filter @diabetes-universe/medical-persistence db:smoke:privileges
+```
+
+No role memberships are required before or after this sequence.
+
+### Post-migration privilege smoke
+
+After deployment:
+
+- `medical_app`: `USAGE` on `medical` and `medical_ops`; table-specific runtime grants only; `SELECT`/`INSERT`/`UPDATE` on `medical_ops.rate_limit_windows`; no `CREATE`, no `ALTER`, no `DROP`, no role administration, no `DELETE` except where already approved
+- `medical_deployer`: unused at runtime
+- `PUBLIC`: no access to medical schemas, tables, or functions
+- `medical_maintenance_owner`: owns the purge function, remains `NOLOGIN`, has only approved function-support privileges, no leftover schema `CREATE`
 
 ## Explicit non-scope
 

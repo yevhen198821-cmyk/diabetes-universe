@@ -11,7 +11,8 @@ DECLARE
     'medical_outbox_worker',
     'medical_idempotency_maintenance',
     'medical_maintenance_owner',
-    'medical_migrator'
+    'medical_migrator',
+    'medical_deployer'
   ];
 BEGIN
   FOREACH role_name IN ARRAY required_roles
@@ -23,9 +24,14 @@ BEGIN
     END IF;
   END LOOP;
 
-  IF current_user <> 'medical_migrator' THEN
+  -- isApprovedMedicalMigrationActor(current_user)
+  -- Exact allowlist only: medical_migrator, medical_deployer.
+  IF NOT (
+    current_user = 'medical_migrator'
+    OR current_user = 'medical_deployer'
+  ) THEN
     RAISE EXCEPTION
-      '0008_medical_ops_rate_limit_privileges.sql must execute as medical_migrator; current_user is "%".',
+      '0008_medical_ops_rate_limit_privileges.sql must execute as an approved medical migration actor (medical_migrator or medical_deployer); current_user is "%".',
       current_user;
   END IF;
 END $verify_roles$;
@@ -35,5 +41,18 @@ REVOKE ALL ON TABLE medical_ops.rate_limit_windows FROM PUBLIC;
 
 GRANT USAGE ON SCHEMA medical_ops TO medical_app;
 GRANT SELECT, INSERT, UPDATE ON TABLE medical_ops.rate_limit_windows TO medical_app;
+
+-- Lock default privileges for the current approved actor on medical_ops only.
+DO $lock_default_privileges$
+BEGIN
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA medical_ops REVOKE ALL ON TABLES FROM PUBLIC',
+    current_user
+  );
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA medical_ops REVOKE ALL ON TABLES FROM medical_app',
+    current_user
+  );
+END $lock_default_privileges$;
 
 COMMIT;

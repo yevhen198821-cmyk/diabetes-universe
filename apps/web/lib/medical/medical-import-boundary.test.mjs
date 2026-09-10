@@ -17,6 +17,8 @@ const FORBIDDEN_PATTERNS = [
   '@diabetes-universe/medical-persistence',
   'MEDICAL_DATABASE_URL',
   'MEDICAL_MIGRATOR_DATABASE_URL',
+  'MEDICAL_DEPLOYER_DATABASE_URL',
+  'medical_deployer',
   'drizzle-orm/pg-core',
   'medical-schema',
 ];
@@ -82,7 +84,7 @@ test('boundary: apps/web source tree does not import medical persistence interna
         if (
           allowedServerComposition &&
           (pattern === 'MEDICAL_DATABASE_URL' ||
-            pattern === 'MEDICAL_MIGRATOR_DATABASE_URL')
+            pattern === 'MEDICAL_MIGRATOR_DATABASE_URL'))
         ) {
           continue;
         }
