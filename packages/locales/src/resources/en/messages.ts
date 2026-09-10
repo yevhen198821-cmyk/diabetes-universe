@@ -6,6 +6,9 @@ import { defineApprovedMessages } from '../../contracts/translation-resource';
  * This object is the source of truth for approved translation keys.
  */
 export const englishCanonicalMessages = defineApprovedMessages({
+  'timeline.storage.unavailable':
+    'Saving is unavailable while your session or device storage cannot be verified. Your entry has not been saved. Try again before continuing.',
+  'timeline.storage.retry': 'Try again',
   'account.security.sessions.back': 'Sign-in security',
   'account.security.sessions.confirmRevokeAll.confirm': 'Sign out everywhere',
   'account.security.sessions.confirmRevokeAll.description':

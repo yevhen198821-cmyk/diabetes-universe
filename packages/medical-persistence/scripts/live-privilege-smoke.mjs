@@ -20,6 +20,7 @@ const expectedRoles = [
   'medical_idempotency_maintenance',
   'medical_maintenance_owner',
   'medical_migrator',
+  'medical_deployer',
 ];
 
 const failures = [];
@@ -33,10 +34,15 @@ try {
     SELECT
       current_database() AS database_name,
       current_user AS current_user,
-      to_regnamespace('medical') IS NOT NULL AS medical_schema_exists
+      to_regnamespace('medical') IS NOT NULL AS medical_schema_exists,
+      to_regnamespace('medical_ops') IS NOT NULL AS medical_ops_schema_exists
   `;
 
   assert(environment.medical_schema_exists, 'medical schema is missing');
+  assert(
+    environment.medical_ops_schema_exists,
+    'medical_ops schema is missing',
+  );
 
   const roles = await sql`
     SELECT rolname
@@ -49,8 +55,27 @@ try {
     assert(roleNames.has(role), `required role is missing: ${role}`);
   }
 
+  const roleLogin = await sql`
+    SELECT rolname, rolcanlogin
+    FROM pg_roles
+    WHERE rolname IN ('medical_deployer', 'medical_maintenance_owner', 'medical_app')
+  `;
+  const roleLoginByName = Object.fromEntries(
+    roleLogin.map((row) => [row.rolname, row.rolcanlogin]),
+  );
+  assert(
+    roleLoginByName.medical_deployer === true,
+    'medical_deployer must remain LOGIN',
+  );
+  assert(roleLoginByName.medical_app === true, 'medical_app must remain LOGIN');
+  assert(
+    roleLoginByName.medical_maintenance_owner === false,
+    'medical_maintenance_owner unexpectedly has LOGIN',
+  );
+
   if (
     environment.medical_schema_exists &&
+    environment.medical_ops_schema_exists &&
     roleNames.size === expectedRoles.length
   ) {
     const [checks] = await sql`
@@ -65,6 +90,12 @@ try {
         has_table_privilege('medical_app', 'medical.medical_audit_events', 'SELECT') AS app_audit_select,
         has_table_privilege('medical_app', 'medical.medical_outbox_events', 'INSERT') AS app_outbox_insert,
         has_table_privilege('medical_app', 'medical.medical_outbox_events', 'SELECT') AS app_outbox_select,
+        has_schema_privilege('medical_app', 'medical_ops', 'USAGE') AS app_ops_usage,
+        has_schema_privilege('medical_app', 'medical_ops', 'CREATE') AS app_ops_create,
+        has_table_privilege('medical_app', 'medical_ops.rate_limit_windows', 'SELECT') AS app_rate_select,
+        has_table_privilege('medical_app', 'medical_ops.rate_limit_windows', 'INSERT') AS app_rate_insert,
+        has_table_privilege('medical_app', 'medical_ops.rate_limit_windows', 'UPDATE') AS app_rate_update,
+        has_table_privilege('medical_app', 'medical_ops.rate_limit_windows', 'DELETE') AS app_rate_delete,
         has_table_privilege('medical_outbox_worker', 'medical.medical_outbox_events', 'SELECT') AS worker_outbox_select,
         has_column_privilege('medical_outbox_worker', 'medical.medical_outbox_events', 'status', 'UPDATE') AS worker_status_update,
         has_column_privilege('medical_outbox_worker', 'medical.medical_outbox_events', 'published_at', 'UPDATE') AS worker_published_update,
@@ -77,6 +108,9 @@ try {
         has_table_privilege('medical_maintenance_owner', 'medical.medical_event_resources', 'SELECT') AS owner_event_select,
         has_schema_privilege('medical_maintenance_owner', 'medical', 'CREATE') AS owner_schema_create,
         pg_has_role('medical_migrator', 'medical_maintenance_owner', 'SET') AS migrator_can_set_maintenance_owner,
+        pg_has_role('medical_deployer', 'medical_maintenance_owner', 'SET') AS deployer_can_set_maintenance_owner,
+        has_schema_privilege('public', 'medical', 'USAGE') AS public_medical_usage,
+        has_schema_privilege('public', 'medical_ops', 'USAGE') AS public_ops_usage,
         has_function_privilege('public', 'medical.purge_expired_idempotency_records(integer)', 'EXECUTE') AS public_purge_execute
     `;
 
@@ -149,6 +183,30 @@ try {
     assert(
       !checks.migrator_can_set_maintenance_owner,
       'medical_migrator still has temporary maintenance-owner SET-role capability',
+    );
+    assert(
+      !checks.deployer_can_set_maintenance_owner,
+      'medical_deployer unexpectedly has maintenance-owner SET-role capability',
+    );
+    assert(checks.app_ops_usage, 'medical_app lacks medical_ops USAGE');
+    assert(
+      !checks.app_ops_create,
+      'medical_app unexpectedly has medical_ops CREATE',
+    );
+    assert(checks.app_rate_select, 'medical_app lacks rate-limit SELECT');
+    assert(checks.app_rate_insert, 'medical_app lacks rate-limit INSERT');
+    assert(checks.app_rate_update, 'medical_app lacks rate-limit UPDATE');
+    assert(
+      !checks.app_rate_delete,
+      'medical_app unexpectedly has rate-limit DELETE',
+    );
+    assert(
+      !checks.public_medical_usage,
+      'PUBLIC unexpectedly has medical schema USAGE',
+    );
+    assert(
+      !checks.public_ops_usage,
+      'PUBLIC unexpectedly has medical_ops USAGE',
     );
     assert(
       !checks.public_purge_execute,

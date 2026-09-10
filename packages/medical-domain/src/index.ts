@@ -1,3 +1,4 @@
+export { isCanonicalGlucoseConcentration } from './glucose/glucose-canonical-validation';
 export type {
   AccountSubjectRelationshipStatus,
   AccountSubjectRelationshipType,

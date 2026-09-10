@@ -1,5 +1,6 @@
 -- P9 medical persistence foundation (generated from approved architecture).
--- Apply with medical_migrator role in deployment/CI only.
+-- Apply as an approved medical migration actor (medical_migrator or
+-- medical_deployer) in deployment/CI only. Never use a runtime role.
 
 CREATE SCHEMA IF NOT EXISTS medical;
 

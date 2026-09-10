@@ -127,7 +127,7 @@ test('test environment with disabled rate limit allows requests', async () => {
   assert.equal(response.status, 200);
 });
 
-test('distributed mode without backend is not production ready', () => {
+test('distributed mode without backend is not production ready', async () => {
   const env = {
     NODE_ENV: 'production',
     MEDICAL_RATE_LIMIT_MODE: 'distributed',
@@ -136,7 +136,7 @@ test('distributed mode without backend is not production ready', () => {
   assert.equal(resolveMedicalApiRateLimitMode(env), 'distributed');
   assert.equal(isMedicalApiRateLimitProductionReady(env), false);
 
-  const decision = getMedicalApiRateLimiter(env).check({
+  const decision = await getMedicalApiRateLimiter(env).check({
     accountId: 'acct-prod',
     operation: 'read',
     path: '/api/v1/medical/me/medical-events',

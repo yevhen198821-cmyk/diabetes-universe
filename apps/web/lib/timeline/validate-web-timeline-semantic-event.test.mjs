@@ -182,7 +182,7 @@ test('web nutrition validator rejects invalid canonical v2 events', () => {
   );
 });
 
-test('composed semantic validator leaves non-nutrition kinds unchanged', () => {
+test('composed semantic validator accepts canonical glucose', () => {
   const validator = validateWebTimelineSemanticEvent;
 
   assert.equal(
@@ -195,8 +195,37 @@ test('composed semantic validator leaves non-nutrition kinds unchanged', () => {
       source: 'manual',
       unit: 'mmol/L',
       updatedAt: FIXED_NOW,
-      value: 5.6,
+      concentrationMmolPerL: 5.6,
     }),
     true,
   );
+});
+
+test('glucose persistence rejects impossible values instead of treating finite as valid', () => {
+  for (const concentrationMmolPerL of [
+    -5,
+    0,
+    0.09,
+    101,
+    NaN,
+    Infinity,
+    undefined,
+  ]) {
+    assert.equal(
+      validateWebTimelineSemanticEvent({
+        kind: 'glucose',
+        concentrationMmolPerL,
+      }),
+      false,
+    );
+  }
+  for (const concentrationMmolPerL of [0.1, 5.5, 40, 100]) {
+    assert.equal(
+      validateWebTimelineSemanticEvent({
+        kind: 'glucose',
+        concentrationMmolPerL,
+      }),
+      true,
+    );
+  }
 });

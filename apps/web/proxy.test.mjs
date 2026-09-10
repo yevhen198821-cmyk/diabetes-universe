@@ -26,3 +26,22 @@ test('proxy allows auth entry when a stale session cookie is still present', () 
 
   assert.equal(response.status, 200);
 });
+
+test('proxy attaches a nonce Content-Security-Policy on document responses', () => {
+  const response = proxy(new NextRequest('http://127.0.0.1:3010/'));
+  const csp = response.headers.get('content-security-policy') ?? '';
+
+  assert.equal(response.status, 200);
+  assert.match(csp, /default-src 'self'/);
+  assert.match(csp, /script-src 'self' 'nonce-/);
+  assert.match(csp, /frame-ancestors 'none'/);
+  assert.doesNotMatch(csp, /script-src \*/);
+});
+
+test('account redirect also carries clickjacking CSP', () => {
+  const response = proxy(new NextRequest('http://127.0.0.1:3010/account'));
+  const csp = response.headers.get('content-security-policy') ?? '';
+
+  assert.equal(response.status, 307);
+  assert.match(csp, /frame-ancestors 'none'/);
+});

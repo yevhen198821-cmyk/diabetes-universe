@@ -13,7 +13,9 @@ export interface MedicalApiRateLimitDecision {
 }
 
 export interface MedicalApiRateLimiter {
-  check(input: MedicalApiRateLimitInput): MedicalApiRateLimitDecision;
+  check(
+    input: MedicalApiRateLimitInput,
+  ): MedicalApiRateLimitDecision | Promise<MedicalApiRateLimitDecision>;
 }
 
 export type MedicalApiRateLimitMode = 'disabled' | 'test' | 'distributed';
