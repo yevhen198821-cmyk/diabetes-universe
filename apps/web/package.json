@@ -29,21 +29,21 @@
     "@diabetes-universe/timeline-web": "workspace:*",
     "@diabetes-universe/types": "workspace:*",
     "@diabetes-universe/ui": "workspace:*",
-    "better-auth": "1.7.2",
+    "better-auth": "1.7.3",
     "@tailwindcss/postcss": "^4.3.3",
-    "lucide-react": "^1.35.0",
-    "next": "^16.3.3",
+    "lucide-react": "^1.43.0",
+    "next": "^16.3.4",
     "postgres": "^3.4.9",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.5.0",
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.5",
+    "@types/react-dom": "^19.2.7",
     "fake-indexeddb": "^6.2.5",
-    "happy-dom": "^20.11.12",
-    "tsx": "^4.23.12"
+    "happy-dom": "^20.14.0",
+    "tsx": "^4.23.13"
   }
 }
