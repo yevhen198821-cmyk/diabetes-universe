@@ -5,7 +5,11 @@ let e2eRuntimeInitialized = false;
 export function ensureMedicalE2eRuntimeReady(
   env: Record<string, string | undefined> = process.env,
 ): void {
-  if (e2eRuntimeInitialized || env.AUTH_RUNTIME_ENV !== 'e2e') {
+  if (
+    e2eRuntimeInitialized ||
+    env.AUTH_RUNTIME_ENV !== 'e2e' ||
+    env.VERCEL_ENV === 'production'
+  ) {
     return;
   }
 

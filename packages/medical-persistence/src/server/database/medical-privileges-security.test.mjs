@@ -11,6 +11,7 @@ import {
   readMedicalAdoptionPrivilegesMigrationSql,
   readMedicalDiabetesSettingsPrivilegesMigrationSql,
   readMedicalFoundationMigrationSql,
+  readMedicalOpsRateLimitPrivilegesMigrationSql,
   readMedicalPrivilegesMigrationSql,
 } from '../database/medical-pglite-bootstrap-migrations.ts';
 
@@ -90,6 +91,15 @@ test('diabetes settings privilege migration grants table-specific medical_app ac
   assert.doesNotMatch(diabetesSettingsPrivilegesSql, /GRANT DELETE/);
 });
 
+test('rate-limit privilege migration grants table-specific medical_app access', () => {
+  const rateLimitPrivilegesSql =
+    readMedicalOpsRateLimitPrivilegesMigrationSql();
+
+  assert.match(rateLimitPrivilegesSql, /medical_ops\.rate_limit_windows/);
+  assert.match(rateLimitPrivilegesSql, /GRANT SELECT, INSERT, UPDATE/);
+  assert.doesNotMatch(rateLimitPrivilegesSql, /GRANT DELETE/);
+});
+
 test('adoption privilege migration grants table-specific medical_app access', () => {
   assert.equal(
     readMedicalAdoptionPrivilegesMigrationSql(),
@@ -100,6 +110,19 @@ test('adoption privilege migration grants table-specific medical_app access', ()
   assert.doesNotMatch(adoptionPrivilegesSql, /GRANT ALL/);
 });
 
+const privilegeMigrationSqlArtifacts = [
+  privilegesSql,
+  adoptionPrivilegesSql,
+  adoptionItemStatesPrivilegesSql,
+  diabetesSettingsPrivilegesSql,
+  readMedicalOpsRateLimitPrivilegesMigrationSql(),
+];
+
+const approvedActorGuard = `IF NOT (
+    current_user = 'medical_migrator'
+    OR current_user = 'medical_deployer'
+  )`;
+
 test('privilege migration SQL is executable and fails closed without Neon roles', () => {
   assert.equal(readMedicalPrivilegesMigrationSql(), privilegesSql);
   assert.match(privilegesSql, /RAISE EXCEPTION/);
@@ -107,6 +130,33 @@ test('privilege migration SQL is executable and fails closed without Neon roles'
   assert.doesNotMatch(
     privilegesSql,
     /GRANT ALL ON SCHEMA medical TO medical_migrator/,
+  );
+});
+
+test('privilege migrations use the exact approved migration actor allowlist', () => {
+  for (const sql of privilegeMigrationSqlArtifacts) {
+    assert.match(sql, /medical_deployer/);
+    assert.match(sql, /isApprovedMedicalMigrationActor\(current_user\)/);
+    assert.equal(sql.includes(approvedActorGuard), true);
+    assert.doesNotMatch(sql, /current_user <> 'medical_migrator'/);
+    assert.doesNotMatch(sql, /neondb_owner/);
+    assert.doesNotMatch(sql, /LIKE 'medical_/);
+    assert.doesNotMatch(sql, /SET ROLE medical_maintenance_owner/);
+  }
+});
+
+test('0001 requires transfer authority in addition to the strict actor allowlist', () => {
+  assert.match(
+    privilegesSql,
+    /ALTER FUNCTION medical\.purge_expired_idempotency_records\(integer\)\s+OWNER TO medical_maintenance_owner;/,
+  );
+  assert.match(
+    privilegesSql,
+    /pg_has_role\(current_user, 'medical_maintenance_owner', 'SET'\)/,
+  );
+  assert.doesNotMatch(
+    privilegesSql,
+    /must temporarily be able to SET ROLE medical_maintenance_owner/,
   );
 });
 
@@ -159,7 +209,7 @@ test('SECURITY DEFINER function is isolated from PUBLIC and owned by maintenance
     /GRANT CREATE ON SCHEMA medical TO medical_maintenance_owner;/,
   );
   const ownerTransferPosition = positionOf(
-    /OWNER TO medical_maintenance_owner/,
+    /ALTER FUNCTION medical\.purge_expired_idempotency_records\(integer\)\s+OWNER TO medical_maintenance_owner/,
   );
   const revokeCreatePosition = positionOf(
     /REVOKE CREATE ON SCHEMA medical FROM medical_maintenance_owner;/,
@@ -261,6 +311,11 @@ test('production postgres database factory does not import PGlite bootstrap migr
     productionSource.includes(
       'CREATE TABLE IF NOT EXISTS medical.medical_subjects',
     ),
+    false,
+  );
+  assert.equal(productionSource.includes('medical_deployer'), false);
+  assert.equal(
+    productionSource.includes('MEDICAL_DEPLOYER_DATABASE_URL'),
     false,
   );
 

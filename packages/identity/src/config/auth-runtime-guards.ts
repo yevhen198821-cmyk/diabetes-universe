@@ -35,12 +35,20 @@ export function isVercelAuthDeployment(
 export function isAuthE2eRuntime(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
-  return env.AUTH_RUNTIME_ENV === 'e2e';
+  return (
+    !isVercelAuthDeployment(env) &&
+    !isProductionAuthDeployment(env) &&
+    env.AUTH_RUNTIME_ENV === 'e2e'
+  );
 }
 
 export function isExplicitAuthTestRuntime(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
+  if (isVercelAuthDeployment(env) || isProductionAuthDeployment(env)) {
+    return false;
+  }
+
   if (env.AUTH_DATABASE_MODE === 'pglite') {
     return true;
   }
@@ -80,6 +88,10 @@ export function isCapturingEmailDeliveryAllowed(
   environment: AuthEnvironment,
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
+  if (isVercelAuthDeployment(env) || isProductionAuthDeployment(env)) {
+    return false;
+  }
+
   if (environment.databaseMode === 'pglite') {
     return true;
   }

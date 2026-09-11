@@ -1,11 +1,18 @@
 -- P9 medical privilege deployment (mandatory for production Neon).
 -- PGlite/local CI intentionally skips this script during test bootstrap.
 -- Prerequisites:
---   1. create all required Neon roles;
---   2. run this script as medical_migrator;
---   3. before execution, an operator temporarily grants medical_migrator SET-role
---      capability for medical_maintenance_owner so function ownership can be transferred;
---   4. revoke that temporary role membership immediately after this migration succeeds.
+--   1. create all required Neon roles, including LOGIN medical_deployer;
+--   2. run this script as an approved medical migration actor
+--      (medical_migrator or medical_deployer);
+--   3. transfer SECURITY DEFINER function ownership with
+--      ALTER FUNCTION ... OWNER TO medical_maintenance_owner
+--      (requires temporary authority to SET ROLE to the new owner);
+--   4. never use medical_deployer or medical_migrator at request runtime.
+--
+-- Schema/table ownership stays with the approved actor that created the
+-- objects (medical_deployer on current Neon production). That is acceptable:
+-- the actor is deploy-only, medical_app is not the owner and cannot
+-- ALTER/DROP, and PUBLIC remains revoked.
 
 BEGIN;
 
@@ -17,7 +24,8 @@ DECLARE
     'medical_outbox_worker',
     'medical_idempotency_maintenance',
     'medical_maintenance_owner',
-    'medical_migrator'
+    'medical_migrator',
+    'medical_deployer'
   ];
 BEGIN
   FOREACH role_name IN ARRAY required_roles
@@ -29,15 +37,21 @@ BEGIN
     END IF;
   END LOOP;
 
-  IF current_user <> 'medical_migrator' THEN
+  -- isApprovedMedicalMigrationActor(current_user)
+  -- Exact allowlist only: medical_migrator, medical_deployer.
+  IF NOT (
+    current_user = 'medical_migrator'
+    OR current_user = 'medical_deployer'
+  ) THEN
     RAISE EXCEPTION
-      '0001_medical_privileges.sql must execute as medical_migrator; current_user is "%".',
+      '0001_medical_privileges.sql must execute as an approved medical migration actor (medical_migrator or medical_deployer); current_user is "%".',
       current_user;
   END IF;
-
+  -- ALTER FUNCTION OWNER requires SET authority even without executing SET ROLE.
+  -- This is an additional prerequisite, never an alternative actor allowlist.
   IF NOT pg_has_role(current_user, 'medical_maintenance_owner', 'SET') THEN
     RAISE EXCEPTION
-      'medical_migrator must temporarily be able to SET ROLE medical_maintenance_owner for SECURITY DEFINER ownership transfer.';
+      'Ownership-transfer prerequisite missing: approved actor must have temporary SET authority for medical_maintenance_owner. Stop deployment and obtain platform-admin support; do not widen runtime privileges.';
   END IF;
 END $verify_roles$;
 
@@ -89,35 +103,59 @@ GRANT SELECT ON TABLE medical.medical_outbox_events TO medical_outbox_worker;
 GRANT UPDATE (status, published_at) ON TABLE medical.medical_outbox_events
   TO medical_outbox_worker;
 
--- medical_migrator is deploy/CI-only: objects are owned by the migrator connection user.
--- Do not grant blanket ALL ON SCHEMA to medical_migrator for runtime convenience.
-ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-  REVOKE ALL ON TABLES FROM PUBLIC;
-ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-  REVOKE ALL ON FUNCTIONS FROM PUBLIC;
-ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-  REVOKE ALL ON SEQUENCES FROM PUBLIC;
-ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-  REVOKE ALL ON TABLES FROM medical_app;
-ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-  REVOKE ALL ON FUNCTIONS FROM medical_app;
-ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-  REVOKE ALL ON TABLES FROM medical_outbox_worker;
-ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-  REVOKE ALL ON FUNCTIONS FROM medical_outbox_worker;
-ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-  REVOKE ALL ON TABLES FROM medical_idempotency_maintenance;
-ALTER DEFAULT PRIVILEGES FOR ROLE medical_migrator IN SCHEMA medical
-  REVOKE ALL ON FUNCTIONS FROM medical_idempotency_maintenance;
+-- Lock default privileges for the current approved actor only. Neon cannot
+-- GRANT membership, so medical_deployer cannot ALTER DEFAULT PRIVILEGES FOR
+-- ROLE medical_migrator (and the reverse). Do not grant blanket ALL ON SCHEMA
+-- to either deploy actor for runtime convenience.
+DO $lock_default_privileges$
+BEGIN
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA medical REVOKE ALL ON TABLES FROM PUBLIC',
+    current_user
+  );
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA medical REVOKE ALL ON FUNCTIONS FROM PUBLIC',
+    current_user
+  );
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA medical REVOKE ALL ON SEQUENCES FROM PUBLIC',
+    current_user
+  );
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA medical REVOKE ALL ON TABLES FROM medical_app',
+    current_user
+  );
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA medical REVOKE ALL ON FUNCTIONS FROM medical_app',
+    current_user
+  );
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA medical REVOKE ALL ON TABLES FROM medical_outbox_worker',
+    current_user
+  );
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA medical REVOKE ALL ON FUNCTIONS FROM medical_outbox_worker',
+    current_user
+  );
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA medical REVOKE ALL ON TABLES FROM medical_idempotency_maintenance',
+    current_user
+  );
+  EXECUTE format(
+    'ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA medical REVOKE ALL ON FUNCTIONS FROM medical_idempotency_maintenance',
+    current_user
+  );
+END $lock_default_privileges$;
 
 -- PostgreSQL requires the new function owner to have CREATE on the containing schema.
 -- Grant it only inside this transaction, transfer ownership, then immediately revoke it.
+-- No SET ROLE / persistent membership in medical_maintenance_owner is required.
 GRANT CREATE ON SCHEMA medical TO medical_maintenance_owner;
 ALTER FUNCTION medical.purge_expired_idempotency_records(integer)
   OWNER TO medical_maintenance_owner;
 REVOKE CREATE ON SCHEMA medical FROM medical_maintenance_owner;
 
--- PUBLIC execute was revoked by 0000 while the migrator owned the function and the ACL
+-- PUBLIC execute was revoked by 0000 while the migration actor owned the function and the ACL
 -- survives ownership transfer. Keep the explicit assertion in the live privilege smoke.
 
 COMMIT;

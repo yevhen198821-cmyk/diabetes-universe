@@ -1020,14 +1020,17 @@ components:
         Transport-safe semantic event payload without server-owned lifecycle
         fields. Insulin semantic writers use preparationId and
         administrationContext. Legacy insulin rows may omit those fields and
-        retain context. schemaVersion remains 1.
+        retain context. Nutrition supports canonical schemaVersion 2 and legacy
+        schemaVersion 1. All other kinds require schemaVersion 1. Nutrition v2
+        forbids legacy mode and products fields; carbohydratesGrams is the
+        historical total and is never recomputed from item snapshots.
       properties:
         occurredAt:
           type: string
           format: date-time
         schemaVersion:
           type: integer
-          enum: [1]
+          enum: [1, 2]
         source:
           type: string
           enum: [manual, device, import]
@@ -1061,6 +1064,59 @@ components:
           $ref: '#/components/schemas/InsulinPreparationId'
         administrationContext:
           $ref: '#/components/schemas/InsulinAdministrationContext'
+        mealType:
+          type: string
+          description: Nutrition v2 uses breakfast, lunch, dinner, snack, other, or unspecified.
+        carbohydratesGrams:
+          type: number
+          minimum: 0
+          maximum: 2000
+          description: Nutrition v2 requires greater than zero and at most 1000; legacy v1 accepts 0 through 2000.
+        mode:
+          type: string
+          description: Required for legacy nutrition v1; forbidden for v2.
+        products:
+          type: array
+          maxItems: 20
+          description: Legacy nutrition v1 only; forbidden for v2.
+          items:
+            type: object
+        items:
+          type: array
+          minItems: 1
+          maxItems: 20
+          description: Optional historical snapshots for nutrition v2 only.
+          items:
+            $ref: '#/components/schemas/NutritionItemSnapshot'
+        note:
+          type: string
+          maxLength: 4096
+    NutritionItemSnapshot:
+      type: object
+      additionalProperties: false
+      required: [itemId, name, carbohydratesGrams]
+      properties:
+        itemId:
+          type: string
+          minLength: 1
+          maxLength: 4096
+        name:
+          type: string
+          minLength: 1
+          maxLength: 4096
+        carbohydratesGrams:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          maximum: 1000
+        weightGrams:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+        carbsPer100Grams:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
     InsulinPreparationId:
       type: string
       description: >

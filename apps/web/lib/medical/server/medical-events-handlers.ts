@@ -21,10 +21,9 @@ import {
   medicalApiJsonResponse,
 } from './medical-api-error';
 import { beginClassifiedMedicalApiRequest } from './medical-api-request-entry';
+import { enforceMedicalApiRateLimit } from './medical-api-enforce-rate-limit';
 import {
-  getMedicalApiRateLimiter,
   setMedicalApiRateLimiterForTests,
-  type MedicalApiRateLimitInput,
   type MedicalApiRateLimiter,
 } from './medical-api-rate-limit';
 import { resolveMedicalApiScope } from './resolve-medical-api-scope';
@@ -39,48 +38,6 @@ import {
   validateUpdateRequestBody,
 } from './medical-api-validation';
 import { readBoundedRequestBody } from './read-bounded-request-body';
-
-function operationFromMethod(method: string): 'read' | 'mutation' {
-  return method === 'GET' || method === 'HEAD' ? 'read' : 'mutation';
-}
-
-function enforceRateLimit(
-  scopeAccountId: string,
-  request: Request,
-  correlationId: string,
-): Response | null {
-  const limiter = getMedicalApiRateLimiter();
-  const decision = limiter.check({
-    accountId: scopeAccountId,
-    operation: operationFromMethod(request.method),
-    path: new URL(request.url).pathname,
-  } satisfies MedicalApiRateLimitInput);
-
-  if (decision.outcome === 'allowed') {
-    return null;
-  }
-
-  if (decision.outcome === 'backend_unavailable') {
-    return medicalApiErrorResponse(
-      503,
-      'SERVICE_UNAVAILABLE',
-      'The medical API is temporarily unavailable.',
-      correlationId,
-    );
-  }
-
-  const retryAfterSeconds = decision.retryAfterSeconds ?? 60;
-  return medicalApiErrorResponse(
-    429,
-    'RATE_LIMITED',
-    'Too many requests. Retry later.',
-    correlationId,
-    null,
-    {
-      'Retry-After': String(retryAfterSeconds),
-    },
-  );
-}
 
 async function prepareMedicalApiHandler(
   request: Request,
@@ -100,7 +57,7 @@ async function prepareMedicalApiHandler(
 
   const { scope } = resolved.value;
   const correlationId = scope.correlationId;
-  const rateLimitResponse = enforceRateLimit(
+  const rateLimitResponse = await enforceMedicalApiRateLimit(
     scope.accountId,
     request,
     correlationId,

@@ -1,5 +1,6 @@
 import {
   classifyNutritionTimelineEvent,
+  isCanonicalGlucoseConcentration,
   INSULIN_PREPARATION_OTHER_ID,
   isInsulinAdministrationContext,
   isInsulinPreparationId,
@@ -81,6 +82,9 @@ export function validateWebTimelineNutritionEvent(
 export function validateWebTimelineSemanticEvent(
   event: SemanticTimelineEvent,
 ): boolean {
+  if (event.kind === 'glucose') {
+    return isCanonicalGlucoseConcentration(event.concentrationMmolPerL);
+  }
   if (!validateWebTimelineInsulinEvent(event)) {
     return false;
   }

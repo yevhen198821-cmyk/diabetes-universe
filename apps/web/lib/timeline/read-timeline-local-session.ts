@@ -19,6 +19,8 @@ export async function readTimelineSessionAccountResolution(
   try {
     const response = await fetchImpl('/api/auth/get-session', {
       credentials: 'include',
+      cache: 'no-store',
+      signal: AbortSignal.timeout(10_000),
       headers: { Accept: 'application/json' },
     });
 

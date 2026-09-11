@@ -75,3 +75,43 @@ test('production repository creation does not seed demo medical events', async (
 
   repository.close();
 });
+
+test('glucose outside canonical bounds is never durable in the web repository', async () => {
+  const databaseName = createAuthenticatedTimelineDatabaseName(
+    'acct-glucose-bounds',
+  );
+  const repository = createWebTimelineRepository({ databaseName });
+  await repository.initialize();
+  const sample = demoTimelineEvents.find((event) => event.kind === 'glucose');
+  assert.ok(sample);
+  for (const value of [-5, 0, 101]) {
+    await assert.rejects(() =>
+      repository.addEvent({
+        ...sample,
+        id: `invalid-${value}`,
+        concentrationMmolPerL: value,
+      }),
+    );
+  }
+  const valid = {
+    ...sample,
+    id: 'canonical-glucose',
+    concentrationMmolPerL: 5.5,
+  };
+  await repository.addEvent(valid);
+  await assert.rejects(() =>
+    repository.updateEvent({ ...valid, concentrationMmolPerL: -5 }),
+  );
+  repository.close();
+  const reopened = createWebTimelineRepository({ databaseName });
+  try {
+    await reopened.initialize();
+    const page = await reopened.queryEvents({
+      limit: 100,
+      order: 'occurredAt-desc',
+    });
+    assert.deepEqual(page.events, [valid]);
+  } finally {
+    reopened.close();
+  }
+});

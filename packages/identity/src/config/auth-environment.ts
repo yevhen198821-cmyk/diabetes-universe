@@ -5,6 +5,7 @@ import {
 import {
   assertProductionCapableEmailDelivery,
   isPreviewAuthDeployment,
+  isProductionAuthDeployment,
 } from './auth-runtime-guards';
 
 export class AuthConfigurationError extends Error {
@@ -57,10 +58,19 @@ function readOptionalString(value: string | undefined): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
+function assertLocalAuthDatabaseAllowed(env: NodeJS.ProcessEnv): void {
+  if (isProductionAuthDeployment(env)) {
+    throw new AuthConfigurationError(
+      'Production auth requires PostgreSQL; PGlite test flags are not allowed.',
+    );
+  }
+}
+
 function resolveDatabaseMode(env: NodeJS.ProcessEnv): AuthDatabaseMode {
   const explicitMode = env.AUTH_DATABASE_MODE?.trim();
 
   if (explicitMode === 'pglite') {
+    assertLocalAuthDatabaseAllowed(env);
     return 'pglite';
   }
 
@@ -73,6 +83,7 @@ function resolveDatabaseMode(env: NodeJS.ProcessEnv): AuthDatabaseMode {
   }
 
   if (env.NODE_ENV === 'test' || env.AUTH_USE_PGLITE === 'true') {
+    assertLocalAuthDatabaseAllowed(env);
     return 'pglite';
   }
 

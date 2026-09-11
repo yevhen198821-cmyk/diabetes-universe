@@ -9,6 +9,9 @@ import { englishCanonicalMessages } from '../en/messages';
  */
 export const germanCanonicalMessages = defineApprovedMessages({
   ...englishCanonicalMessages,
+  'timeline.storage.unavailable':
+    'Speichern ist nicht verfügbar: Sitzung oder Gerätespeicher konnten nicht geprüft werden. Der Eintrag wurde nicht gespeichert. Bitte erneut versuchen.',
+  'timeline.storage.retry': 'Erneut versuchen',
   'dashboard.navigation.account': 'Konto',
   'dashboard.navigation.home': 'Start',
   'dashboard.navigation.quickAdd': 'Ereignis hinzufügen',

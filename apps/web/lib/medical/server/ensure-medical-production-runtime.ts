@@ -3,7 +3,7 @@ import {
   isMedicalApiRateLimitProductionReady,
   registerMedicalApiRateLimitBackendAdapter,
 } from './medical-api-rate-limit';
-import { createProcessLocalMedicalApiRateLimitAdapter } from './medical-api-rate-limit-production-adapter';
+import { createProductionMedicalApiRateLimitAdapter } from './medical-api-rate-limit-production-adapter';
 
 let productionRuntimeInitialized = false;
 
@@ -23,9 +23,11 @@ export function ensureMedicalProductionRuntimeReady(
     return;
   }
 
-  registerMedicalApiRateLimitBackendAdapter(
-    createProcessLocalMedicalApiRateLimitAdapter(),
-  );
+  const adapter = createProductionMedicalApiRateLimitAdapter(env);
+  if (adapter) {
+    registerMedicalApiRateLimitBackendAdapter(adapter);
+  }
+
   productionRuntimeInitialized = true;
 }
 

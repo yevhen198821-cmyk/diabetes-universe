@@ -22,7 +22,9 @@ persistence foundation.
   - `@diabetes-universe/medical-persistence` — PostgreSQL `medical` schema,
     migrations, repositories, revision/CAS, idempotency, audit/outbox atomicity
   - `@diabetes-universe/medical-service` — subject provisioning and transactional
-    medical event create (server-side; not exposed via public web routes)
+    medical event CRUD, settings, and explicit local-data adoption
+  - Web transport under `/api/v1/medical/*` (authentication and production
+    readiness gates required; presence of routes does not prove live readiness)
 - Architecture, product, and developer documentation through the P7–P13 medical
   platform architecture wave
 
@@ -35,7 +37,8 @@ Design documentation exists for the following stages, but lifecycle approval var
 by stage and product/runtime implementation is **not** yet delivered in this
 repository:
 
-- **P10** — local medical data adoption (Draft; approval closure pending)
+- **P10** — local medical data adoption has API/service implementation;
+  production rollout and lifecycle approval still require verification
 - **P11** — offline sync (Approved)
 - **P12** — conflict / revision / tombstone architecture (Approved with normative clarifications)
 - **P13** — security, privacy, and production hardening architecture (Approved)
@@ -46,8 +49,6 @@ runtime behavior.
 
 ### Not yet implemented
 
-- Public medical API transport (`/api/v1/medical/*`)
-- Adoption runtime (P10)
 - Continuous offline sync runtime (P11)
 - Conflict / tombstone runtime (P12)
 - Outbox dispatcher / consumer
@@ -59,6 +60,10 @@ runtime behavior.
 - Marketplace, Community, and Recipes product runtimes (architecture placeholders
   only unless source code proves otherwise)
 - Native mobile applications
+
+See [release readiness](docs/project/roadmap.md) for observed launch blockers
+and [audit remediation](docs/implementation/audit-remediation-2026-09-10.md)
+for the current repair scope and verification evidence.
 
 ## Technology
 

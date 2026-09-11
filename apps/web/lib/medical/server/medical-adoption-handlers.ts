@@ -25,10 +25,7 @@ import {
   type MedicalApiErrorCode,
 } from './medical-api-error';
 import { beginClassifiedMedicalApiRequest } from './medical-api-request-entry';
-import {
-  getMedicalApiRateLimiter,
-  type MedicalApiRateLimitInput,
-} from './medical-api-rate-limit';
+import { enforceMedicalApiRateLimit } from './medical-api-enforce-rate-limit';
 import { MedicalApiValidationError } from './medical-api-validation';
 import {
   parseJsonBody as parseAdoptionJsonBody,
@@ -38,48 +35,6 @@ import {
 } from './medical-adoption-validation';
 import { resolveMedicalApiScope } from './resolve-medical-api-scope';
 import { readBoundedRequestBody } from './read-bounded-request-body';
-
-function operationFromMethod(method: string): 'read' | 'mutation' {
-  return method === 'GET' || method === 'HEAD' ? 'read' : 'mutation';
-}
-
-function enforceRateLimit(
-  scopeAccountId: string,
-  request: Request,
-  correlationId: string,
-): Response | null {
-  const limiter = getMedicalApiRateLimiter();
-  const decision = limiter.check({
-    accountId: scopeAccountId,
-    operation: operationFromMethod(request.method),
-    path: new URL(request.url).pathname,
-  } satisfies MedicalApiRateLimitInput);
-
-  if (decision.outcome === 'allowed') {
-    return null;
-  }
-
-  if (decision.outcome === 'backend_unavailable') {
-    return medicalApiErrorResponse(
-      503,
-      'SERVICE_UNAVAILABLE',
-      'The medical API is temporarily unavailable.',
-      correlationId,
-    );
-  }
-
-  const retryAfterSeconds = decision.retryAfterSeconds ?? 60;
-  return medicalApiErrorResponse(
-    429,
-    'RATE_LIMITED',
-    'Too many requests. Retry later.',
-    correlationId,
-    null,
-    {
-      'Retry-After': String(retryAfterSeconds),
-    },
-  );
-}
 
 async function prepareMedicalAdoptionHandler(
   request: Request,
@@ -99,7 +54,7 @@ async function prepareMedicalAdoptionHandler(
 
   const { scope } = resolved.value;
 
-  const rateLimited = enforceRateLimit(
+  const rateLimited = await enforceMedicalApiRateLimit(
     scope.accountId,
     request,
     begun.value.correlationId,

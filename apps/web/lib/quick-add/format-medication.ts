@@ -1,7 +1,7 @@
 import type { PlatformFormatter } from '@diabetes-universe/formatting';
 
 const MEDICATION_DOSE_PATTERN = /^\d+(?:[.,]\d+)?$/;
-const MAX_MEDICATION_DOSE = 100000;
+const MAX_MEDICATION_DOSE = 10000;
 
 export function parseMedicationDoseInput(raw: string): number | null {
   const trimmed = raw.trim();

@@ -9,6 +9,9 @@ import { englishCanonicalMessages } from '../en/messages';
  */
 export const ukrainianCanonicalMessages = defineApprovedMessages({
   ...englishCanonicalMessages,
+  'timeline.storage.unavailable':
+    'Збереження недоступне: не вдалося перевірити сесію або сховище пристрою. Запис не збережено. Спробуйте ще раз.',
+  'timeline.storage.retry': 'Спробувати ще раз',
   'dashboard.navigation.account': 'Профіль',
   'dashboard.navigation.home': 'Головна',
   'dashboard.navigation.quickAdd': 'Додати подію',

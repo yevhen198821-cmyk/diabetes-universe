@@ -85,7 +85,7 @@ export function MedicationQuickAddForm({
   const doseValidationError =
     doseError ??
     (hasDose && parsedDose === null
-      ? 'Введите дозу больше 0 и не более 100000'
+      ? 'Введите дозу больше 0 и не более 10000'
       : null);
   const canSubmit =
     formState.medication !== null &&
@@ -129,7 +129,7 @@ export function MedicationQuickAddForm({
 
     if (prepared.type === 'invalid') {
       if (prepared.field === 'dose') {
-        setDoseError('Введите дозу больше 0 и не более 100000');
+        setDoseError('Введите дозу больше 0 и не более 10000');
       }
 
       return;

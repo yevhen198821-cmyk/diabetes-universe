@@ -3,6 +3,7 @@ import type { AuthorizationScope } from '@diabetes-universe/medical-service/serv
 
 import { getAuthenticatedPrincipal } from '../../auth/get-authenticated-principal';
 import { getMedicalServiceBundle } from './get-medical-service-bundle';
+import { isMedicalApiTestAuthAllowed } from './is-medical-api-test-auth-allowed';
 import type { MedicalApiRequestContext } from './medical-api-request-entry';
 import { medicalApiErrorResponse } from './medical-api-error';
 
@@ -11,11 +12,7 @@ const TEST_ACCOUNT_HEADER = 'x-test-account-id';
 export function resolvePrincipalForRequest(
   request: Request,
 ): AuthenticatedPrincipal | null | undefined {
-  const allowTestAuth =
-    process.env.NODE_ENV === 'test' ||
-    process.env.MEDICAL_API_ENABLE_TEST_AUTH === '1';
-
-  if (!allowTestAuth) {
+  if (!isMedicalApiTestAuthAllowed()) {
     return undefined;
   }
 
@@ -99,3 +96,5 @@ export async function resolveMedicalApiScope(
 }
 
 export { TEST_ACCOUNT_HEADER };
+export { setAuthenticatedPrincipalForTests } from '../../auth/get-authenticated-principal';
+export { setMedicalApiTestAuthEnvForTests } from './is-medical-api-test-auth-allowed';

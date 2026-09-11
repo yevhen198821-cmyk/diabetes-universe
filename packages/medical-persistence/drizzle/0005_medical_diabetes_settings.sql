@@ -1,5 +1,6 @@
 -- Wave 2B diabetes settings foundation (additive).
--- Apply with medical_migrator role in deployment/CI only.
+-- Apply as an approved medical migration actor (medical_migrator or
+-- medical_deployer) in deployment/CI only. Never use a runtime role.
 
 CREATE TABLE IF NOT EXISTS medical.diabetes_settings (
   settings_id UUID PRIMARY KEY,

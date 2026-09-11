@@ -9,6 +9,9 @@ import { englishCanonicalMessages } from '../en/messages';
  */
 export const russianCanonicalMessages = defineApprovedMessages({
   ...englishCanonicalMessages,
+  'timeline.storage.unavailable':
+    'Сохранение недоступно: не удалось проверить сессию или хранилище устройства. Запись не сохранена. Повторите попытку.',
+  'timeline.storage.retry': 'Повторить попытку',
   'dashboard.header.brandLineAccent': 'Universe',
   'dashboard.header.brandLinePrimary': 'Diabetes',
   'dashboard.header.brandName': 'Diabetes Universe',

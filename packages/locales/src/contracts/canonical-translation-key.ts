@@ -2,6 +2,8 @@
  * Canonical translation keys derived from the approved English resource set.
  */
 export const CANONICAL_TRANSLATION_KEYS = [
+  'timeline.storage.unavailable',
+  'timeline.storage.retry',
   'account.security.sessions.back',
   'account.security.sessions.confirmRevokeAll.confirm',
   'account.security.sessions.confirmRevokeAll.description',

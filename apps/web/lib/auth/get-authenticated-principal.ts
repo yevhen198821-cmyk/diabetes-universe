@@ -8,7 +8,19 @@ import {
   isWebAuthConfigured,
 } from './get-web-identity-service';
 
+let authenticatedPrincipalOverride: AuthenticatedPrincipal | null | undefined;
+
+export function setAuthenticatedPrincipalForTests(
+  principal: AuthenticatedPrincipal | null | undefined,
+): void {
+  authenticatedPrincipalOverride = principal;
+}
+
 export async function getAuthenticatedPrincipal(): Promise<AuthenticatedPrincipal | null> {
+  if (authenticatedPrincipalOverride !== undefined) {
+    return authenticatedPrincipalOverride;
+  }
+
   if (!isWebAuthConfigured()) {
     return null;
   }

@@ -57,3 +57,11 @@ export function readMedicalDiabetesSettingsPrivilegesMigrationSql(): string {
     '0006_medical_diabetes_settings_privileges.sql',
   );
 }
+
+export function readMedicalOpsRateLimitMigrationSql(): string {
+  return readMedicalMigrationSql('0007_medical_ops_rate_limit.sql');
+}
+
+export function readMedicalOpsRateLimitPrivilegesMigrationSql(): string {
+  return readMedicalMigrationSql('0008_medical_ops_rate_limit_privileges.sql');
+}

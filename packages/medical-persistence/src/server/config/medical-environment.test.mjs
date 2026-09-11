@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 import { resolveMedicalEnvironment } from './medical-environment.ts';
@@ -48,4 +50,15 @@ test('postgres mode rejects weak revision token secrets at service creation', ()
     () => createRevisionTokenService(environment.revisionTokenSecret),
     WeakRevisionTokenSecretError,
   );
+});
+
+test('medical runtime environment does not read deploy-only credentials', () => {
+  const source = readFileSync(
+    fileURLToPath(new URL('./medical-environment.ts', import.meta.url)),
+    'utf8',
+  );
+
+  assert.equal(source.includes('MEDICAL_DEPLOYER_DATABASE_URL'), false);
+  assert.equal(source.includes('MEDICAL_MIGRATOR_DATABASE_URL'), false);
+  assert.equal(source.includes('medical_deployer'), false);
 });

@@ -3,6 +3,7 @@ import {
   isInsulinPreparationId,
   serverOwnedSemanticFieldNames,
   validateInsulinCanonicalDose,
+  validateNutritionTimelineEventV2,
   type MedicalEventResource,
 } from '@diabetes-universe/medical-domain';
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
@@ -114,6 +115,9 @@ export function validateSemanticEvent(
     'mealType',
     'carbohydratesGrams',
     'products',
+    ...(event.kind === 'nutrition' && event.schemaVersion === 2
+      ? ['items']
+      : []),
     'note',
     'medicationId',
     'medicationName',
@@ -134,9 +138,12 @@ export function validateSemanticEvent(
     );
   }
 
-  if (event.schemaVersion !== 1) {
+  if (
+    event.schemaVersion !== 1 &&
+    !(event.kind === 'nutrition' && event.schemaVersion === 2)
+  ) {
     throw new MedicalApiValidationError(
-      `${fieldPath}.schemaVersion must be 1.`,
+      `${fieldPath}.schemaVersion must be 1, or 2 for nutrition.`,
     );
   }
 
@@ -219,6 +226,10 @@ function validateKindSpecificFields(
       }
       return;
     case 'nutrition':
+      if (event.schemaVersion === 2) {
+        validateNutritionV2(event, fieldPath);
+        return;
+      }
       requireBoundedString(event, 'mode', `${fieldPath}.mode`);
       requireBoundedString(event, 'mealType', `${fieldPath}.mealType`);
       requireNumberInRange(
@@ -285,6 +296,47 @@ function validateKindSpecificFields(
       return;
     default:
       throw new MedicalApiValidationError(`${fieldPath}.kind is unsupported.`);
+  }
+}
+
+function validateNutritionV2(
+  event: Record<string, unknown>,
+  fieldPath: string,
+): void {
+  const result = validateNutritionTimelineEventV2(event);
+  if (!result.ok) {
+    throw new MedicalApiValidationError(`${fieldPath}: ${result.error}.`);
+  }
+  if (
+    event.note !== undefined &&
+    (event.note as string).length > MEDICAL_VALIDATION_BOUNDS.MAX_STRING_LENGTH
+  ) {
+    throw new MedicalApiValidationError(
+      `${fieldPath}.note exceeds maximum length.`,
+    );
+  }
+  if (Array.isArray(event.items)) {
+    if (event.items.length > MEDICAL_VALIDATION_BOUNDS.MAX_PRODUCTS_ARRAY) {
+      throw new MedicalApiValidationError(
+        `${fieldPath}.items exceeds maximum length.`,
+      );
+    }
+    for (const [index, item] of event.items.entries()) {
+      const record = item as Record<string, unknown>;
+      rejectUnknownTopLevelFields(record, [
+        'itemId',
+        'name',
+        'carbohydratesGrams',
+        'weightGrams',
+        'carbsPer100Grams',
+      ]);
+      requireBoundedString(
+        record,
+        'itemId',
+        `${fieldPath}.items[${index}].itemId`,
+      );
+      requireBoundedString(record, 'name', `${fieldPath}.items[${index}].name`);
+    }
   }
 }
 
