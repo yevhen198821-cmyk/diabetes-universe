@@ -20,7 +20,7 @@
     "test:openapi-diff": "node --test scripts/openapi-contract-diff.test.mjs scripts/openapi-baseline-resolution.test.mjs scripts/diabetes-settings-openapi-contract.test.mjs"
   },
   "devDependencies": {
-    "@apidevtools/swagger-parser": "^12.1.0",
+    "@apidevtools/swagger-parser": "^13.0.0",
     "js-yaml": "^5.4.1",
     "@playwright/test": "^1.62.1",
     "eslint": "^9.39.5",
