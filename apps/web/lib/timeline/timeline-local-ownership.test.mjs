@@ -15,6 +15,13 @@ import {
   resolveTimelineOwnershipFromSession,
 } from './timeline-local-ownership.ts';
 
+test('stable user id is accepted when Better Auth omits accountId', () => {
+  assert.equal(
+    readAccountIdFromSessionPayload({ user: { id: 'user-stable-id' } }),
+    'user-stable-id',
+  );
+});
+
 test('accountId is accepted and email is never used as ownership identity', () => {
   assert.equal(parseTimelineAccountId('acct-123'), 'acct-123');
   assert.equal(parseTimelineAccountId('  acct-123  '), 'acct-123');
