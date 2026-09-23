@@ -12,17 +12,29 @@ export interface ResendAuthEmailDeliveryOptions {
 
 export function createResendAuthEmailDelivery(
   options: ResendAuthEmailDeliveryOptions,
+  resend: Pick<Resend, 'emails'> = new Resend(options.apiKey),
 ): AuthEmailDelivery {
-  const resend = new Resend(options.apiKey);
-
   return {
     async sendMagicLinkEmail({ email, url }: MagicLinkEmailPayload) {
-      await resend.emails.send({
+      const { error } = await resend.emails.send({
         from: options.fromAddress,
         to: email,
         subject: 'Вход в Diabetes Universe',
         text: `Перейдите по ссылке, чтобы войти в Diabetes Universe:\n\n${url}\n\nСсылка действует ограниченное время. Если вы не запрашивали вход, просто проигнорируйте это письмо.`,
       });
+
+      if (error) {
+        // Resend reports API failures in the response instead of throwing.
+        // Never log the recipient, link, API key, or the provider's free-form message.
+        console.error('[auth-email] Resend rejected the magic link', {
+          category:
+            error.name === 'validation_error' ||
+            error.name === 'rate_limit_exceeded'
+              ? error.name
+              : 'provider_error',
+        });
+        throw new Error('Auth email delivery failed');
+      }
     },
   };
 }
