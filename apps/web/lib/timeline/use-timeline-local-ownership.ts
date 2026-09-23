@@ -30,9 +30,11 @@ const INITIAL_OWNERSHIP_STATE: TimelineOwnershipSessionState = {
 
 export function useTimelineLocalOwnership(): {
   readonly ownership: TimelineLocalOwnership;
+  readonly failureReason: string | null;
   readonly retry: () => void;
 } {
   const [attempt, setAttempt] = useState(0);
+  const [failureReason, setFailureReason] = useState<string | null>(null);
   const retry = useCallback(() => setAttempt((value) => value + 1), []);
   const [ownership, setOwnership] = useState(INITIAL_OWNERSHIP_STATE.ownership);
   const requestIdRef = useRef(0);
@@ -41,13 +43,13 @@ export function useTimelineLocalOwnership(): {
   );
 
   useEffect(() => {
-    if (!canUseBrowserStorage()) {
-      return;
-    }
-
     const applyResolution = async () => {
       const requestId = requestIdRef.current + 1;
       requestIdRef.current = requestId;
+      if (!canUseBrowserStorage()) {
+        setFailureReason('DEVICE_STORAGE_UNAVAILABLE');
+        return;
+      }
       const resolution = await readTimelineSessionAccountResolution();
       let anonymousOwnerKey: string;
       try {
@@ -63,9 +65,22 @@ export function useTimelineLocalOwnership(): {
             ownership: { kind: 'blocked' },
           };
           setOwnership(stateRef.current.ownership);
+          setFailureReason('DEVICE_STORAGE_UNAVAILABLE');
         }
         return;
       }
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
+
+      setFailureReason(
+        resolution.status === 'blocked'
+          ? 'SESSION_ACCOUNT_ID_MISSING'
+          : resolution.status === 'indeterminate'
+            ? 'SESSION_CHECK_FAILED'
+            : null,
+      );
+
       const next = applyTimelineOwnershipSessionResolution({
         anonymousOwnerKey,
         current: stateRef.current,
@@ -101,5 +116,5 @@ export function useTimelineLocalOwnership(): {
     };
   }, [attempt]);
 
-  return { ownership, retry };
+  return { ownership, failureReason, retry };
 }
