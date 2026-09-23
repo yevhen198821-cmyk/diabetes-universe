@@ -1,3 +1,5 @@
+import { eq } from 'drizzle-orm';
+
 import {
   GENERIC_AUTH_ERROR_MESSAGE,
   GENERIC_MAGIC_LINK_REQUEST_MESSAGE,
@@ -30,6 +32,7 @@ import {
   createAuthDatabase,
   type AuthDatabase,
 } from './database/create-auth-database';
+import { user as authUser } from './database/auth-schema';
 import { mapAuthenticatedPrincipal } from './map-auth-session';
 import { USER_AVATAR_MAX_UPLOAD_BYTES } from './avatar/avatar-constants';
 import { processAvatarImage } from './avatar/process-avatar-image';
@@ -319,10 +322,25 @@ async function createIdentityServiceInternal(
         return null;
       }
 
+      // Recover the canonical owner from the verified user's database row.
+      // Never substitute user.id: it would select a different local namespace.
+      let accountId = session.user.accountId?.trim();
+      if (!accountId) {
+        const rows = await database
+          .select({ accountId: authUser.accountId })
+          .from(authUser)
+          .where(eq(authUser.id, session.user.id))
+          .limit(1);
+        accountId = rows[0]?.accountId?.trim();
+        if (!accountId) {
+          throw new Error('CANONICAL_ACCOUNT_ID_UNAVAILABLE');
+        }
+      }
+
       return mapAuthenticatedPrincipal({
         expiresAt: session.session.expiresAt,
         id: session.session.id,
-        user: session.user,
+        user: { ...session.user, accountId },
         userId: session.user.id,
       });
     },
