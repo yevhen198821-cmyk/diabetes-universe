@@ -324,7 +324,7 @@ async function createIdentityServiceInternal(
 
       // Recover the canonical owner from the verified user's database row.
       // Never substitute user.id: it would select a different local namespace.
-      let accountId = session.user.accountId?.trim();
+      let accountId: string | undefined = session.user.accountId?.trim();
       if (!accountId) {
         const rows = await database
           .select({ accountId: authUser.accountId })
