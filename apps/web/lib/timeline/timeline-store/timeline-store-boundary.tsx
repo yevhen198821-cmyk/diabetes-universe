@@ -27,8 +27,10 @@ export function TimelineStoreBoundary({
 }: TimelineStoreBoundaryProps) {
   const { ownership, retry } = useTimelineLocalOwnership();
   const localization = useLocalization();
-  const unavailable =
-    ownership.kind === 'pending' || ownership.kind === 'blocked';
+  // A pending session is the normal initial state while get-session runs.
+  // Keep writes disabled, but only show the failure notice for a confirmed
+  // blocked state instead of flashing an error on every successful sign-in.
+  const unavailable = ownership.kind === 'blocked';
   const translate = (key: string) =>
     localization.translate({ key: key as TranslationKey }).value;
   const ownershipKey =
