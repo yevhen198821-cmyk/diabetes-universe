@@ -25,12 +25,11 @@ function closeTimelineRepository(repository: TimelineRepository): void {
 export function TimelineStoreBoundary({
   children,
 }: TimelineStoreBoundaryProps) {
-  const { ownership, retry } = useTimelineLocalOwnership();
+  const { ownership, failureReason, retry } = useTimelineLocalOwnership();
   const localization = useLocalization();
-  // A pending session is the normal initial state while get-session runs.
-  // Keep writes disabled, but only show the failure notice for a confirmed
-  // blocked state instead of flashing an error on every successful sign-in.
-  const unavailable = ownership.kind === 'blocked';
+  const unavailable =
+    ownership.kind === 'blocked' ||
+    (ownership.kind === 'pending' && failureReason !== null);
   const translate = (key: string) =>
     localization.translate({ key: key as TranslationKey }).value;
   const ownershipKey =
@@ -62,6 +61,7 @@ export function TimelineStoreBoundary({
           className="mx-auto my-4 max-w-3xl rounded-xl border border-amber-500/40 bg-amber-500/10 p-4"
         >
           <p>{translate('timeline.storage.unavailable')}</p>
+          {failureReason && <code>{failureReason}</code>}
           <button
             type="button"
             onClick={retry}

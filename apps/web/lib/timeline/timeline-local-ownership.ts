@@ -4,8 +4,7 @@ import { TIMELINE_INDEXEDDB_DATABASE_NAME } from '@diabetes-universe/timeline-we
  * Local Timeline ownership (Remediation 0A).
  *
  * Persistence identity is never an email address. Authenticated ownership is
- * derived from Better Auth `accountId`, falling back to its stable user id.
- * Anonymous ownership uses a
+ * derived from Better Auth `accountId`. Anonymous ownership uses a
  * browser-local opaque key. The legacy unscoped database name is never
  * opened as an owned medical store.
  */
@@ -90,15 +89,9 @@ export function readAccountIdFromSessionPayload(
   const record = user as {
     readonly accountId?: unknown;
     readonly email?: unknown;
-    readonly id?: unknown;
   };
 
-  // Better Auth may omit additional fields on an existing session response.
-  // The server uses the same stable user-id fallback for this case.
-  return (
-    parseTimelineAccountId(record.accountId) ??
-    parseTimelineAccountId(record.id)
-  );
+  return parseTimelineAccountId(record.accountId);
 }
 
 export function createAuthenticatedTimelineDatabaseName(
