@@ -344,7 +344,18 @@ async function createIdentityServiceInternal(
           },
           headers,
         });
-      } catch {
+      } catch (error) {
+        // Keep the public response generic while making failures visible to
+        // operators. Error messages can contain addresses, links, or secrets.
+        const name = error instanceof Error ? error.name : '';
+        console.error('[auth] Magic link request failed', {
+          category:
+            name === 'APIError' ||
+            name === 'PostgresError' ||
+            name === 'AuthConfigurationError'
+              ? name
+              : 'request_error',
+        });
         return {
           message: GENERIC_MAGIC_LINK_REQUEST_MESSAGE,
           status: 'sent',
