@@ -95,7 +95,10 @@ export function readAccountIdFromSessionPayload(
 
   // Better Auth may omit additional fields on an existing session response.
   // The server uses the same stable user-id fallback for this case.
-  return parseTimelineAccountId(record.accountId) ?? parseTimelineAccountId(record.id);
+  return (
+    parseTimelineAccountId(record.accountId) ??
+    parseTimelineAccountId(record.id)
+  );
 }
 
 export function createAuthenticatedTimelineDatabaseName(
