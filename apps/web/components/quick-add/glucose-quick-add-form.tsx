@@ -69,6 +69,7 @@ export function GlucoseQuickAddForm({
   );
   const {
     glucoseDisplayUnit,
+    error: settingsLoadError,
     isUnconfigured,
     loadState,
     refresh,
@@ -84,22 +85,31 @@ export function GlucoseQuickAddForm({
   const [isRetrying, setIsRetrying] = useState(false);
   const [isSelectingUnit, setIsSelectingUnit] = useState(false);
   const [unitError, setUnitError] = useState<string | null>(null);
+  const [localOnlyUnit, setLocalOnlyUnit] = useState<GlucoseDisplayUnit | null>(
+    null,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitIdentityRef = useRef(createGlucoseQuickAddSubmitIdentityState());
   const isSubmittingRef = useRef(false);
 
   const isLoading = loadState === 'loading';
   const isSettingsError = loadState === 'error';
+  const isLocalOnlyAvailable =
+    isSettingsError && settingsLoadError?.kind === 'unavailable';
+  const selectedUnit = isLocalOnlyAvailable
+    ? localOnlyUnit
+    : glucoseDisplayUnit;
   const canEnterValue =
-    loadState === 'ready' && !isUnconfigured && !isSettingsError;
+    (loadState === 'ready' && !isUnconfigured) ||
+    (isLocalOnlyAvailable && localOnlyUnit !== null);
   const hasValue = formState.value.trim().length > 0;
   const unitSuffix =
-    glucoseDisplayUnit === 'mg_per_dl'
+    selectedUnit === 'mg_per_dl'
       ? labels.unitMg
-      : glucoseDisplayUnit === 'mmol_per_l'
+      : selectedUnit === 'mmol_per_l'
         ? labels.unitMmol
         : '';
-  const inputMode = glucoseDisplayUnit === 'mg_per_dl' ? 'numeric' : 'decimal';
+  const inputMode = selectedUnit === 'mg_per_dl' ? 'numeric' : 'decimal';
   const selectedContextLabel = formState.context
     ? resolveGlucoseContextLabel(localization, formState.context)
     : null;
@@ -117,14 +127,14 @@ export function GlucoseQuickAddForm({
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!canEnterValue || !glucoseDisplayUnit || isSubmittingRef.current) {
+    if (!canEnterValue || !selectedUnit || isSubmittingRef.current) {
       return;
     }
 
     const prepared = prepareGlucoseQuickAddSubmit({
       canEnterValue,
       formState,
-      glucoseDisplayUnit,
+      glucoseDisplayUnit: selectedUnit,
       identity: submitIdentityRef.current,
       valueOutOfRangeMessage: labels.valueOutOfRangeError,
     });
@@ -212,7 +222,11 @@ export function GlucoseQuickAddForm({
     setUnitError(null);
 
     try {
-      await selectGlucoseDisplayUnit(unit);
+      if (isLocalOnlyAvailable) {
+        setLocalOnlyUnit(unit);
+      } else {
+        await selectGlucoseDisplayUnit(unit);
+      }
     } catch {
       setUnitError(labels.unitRequiredError);
     } finally {
@@ -270,7 +284,9 @@ export function GlucoseQuickAddForm({
                   {labels.settingsErrorTitle}
                 </h3>
                 <p className="text-sm text-slate-600">
-                  {labels.settingsErrorDescription}
+                  {isLocalOnlyAvailable
+                    ? labels.localOnlyDescription
+                    : labels.settingsErrorDescription}
                 </p>
               </div>
               <button
@@ -285,7 +301,7 @@ export function GlucoseQuickAddForm({
             </section>
           ) : null}
 
-          {loadState === 'ready' && isUnconfigured ? (
+          {(loadState === 'ready' && isUnconfigured) || isLocalOnlyAvailable ? (
             <section
               aria-labelledby="quick-add-glucose-unit-gate-title"
               className="space-y-3"
@@ -298,9 +314,11 @@ export function GlucoseQuickAddForm({
                   {labels.unitGateTitle}
                 </h3>
                 <p className="text-sm text-slate-600">
-                  {settings
-                    ? labels.unitGateDescription
-                    : labels.unitGateSessionDescription}
+                  {isLocalOnlyAvailable
+                    ? labels.localOnlyNotice
+                    : settings
+                      ? labels.unitGateDescription
+                      : labels.unitGateSessionDescription}
                 </p>
               </div>
               <div
@@ -330,12 +348,14 @@ export function GlucoseQuickAddForm({
                   {unitError}
                 </p>
               ) : null}
-              <a
-                className="inline-flex min-h-11 items-center rounded-xl border border-sky-500 bg-sky-50 px-4 text-sm font-semibold text-sky-900 transition hover:bg-sky-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
-                href="/account/diabetes"
-              >
-                {labels.settingsUnconfiguredAction}
-              </a>
+              {!isLocalOnlyAvailable ? (
+                <a
+                  className="inline-flex min-h-11 items-center rounded-xl border border-sky-500 bg-sky-50 px-4 text-sm font-semibold text-sky-900 transition hover:bg-sky-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                  href="/account/diabetes"
+                >
+                  {labels.settingsUnconfiguredAction}
+                </a>
+              ) : null}
             </section>
           ) : null}
 
@@ -388,9 +408,9 @@ export function GlucoseQuickAddForm({
                   }));
                 }}
                 placeholder={
-                  glucoseDisplayUnit === 'mg_per_dl'
+                  selectedUnit === 'mg_per_dl'
                     ? '120'
-                    : glucoseDisplayUnit === 'mmol_per_l'
+                    : selectedUnit === 'mmol_per_l'
                       ? '6.4'
                       : ''
                 }

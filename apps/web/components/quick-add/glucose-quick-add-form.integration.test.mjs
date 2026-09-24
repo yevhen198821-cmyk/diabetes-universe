@@ -25,6 +25,7 @@ async function renderGlucoseForm({
   loadState = 'ready',
   error = null,
   onRefresh = async () => {},
+  onSubmit = async () => {},
   onSelectGlucoseDisplayUnit,
   settings,
 } = {}) {
@@ -56,7 +57,7 @@ async function renderGlucoseForm({
           createElement(GlucoseQuickAddForm, {
             initialFocusRef,
             onCancel: () => {},
-            onSubmit: async () => {},
+            onSubmit,
           }),
         ),
       ),
@@ -249,6 +250,57 @@ test('settings error blocks entry and retry calls refresh', async () => {
     });
 
     assert.equal(refreshCount, 1);
+  } finally {
+    await view.cleanup();
+  }
+});
+
+test('503 requires explicit units and offers local entry without updating settings', async () => {
+  let settingsMutationCount = 0;
+  const view = await renderGlucoseForm({
+    error: new DiabetesSettingsClientError(
+      'unavailable',
+      'The medical API is temporarily unavailable.',
+    ),
+    loadState: 'error',
+    onSelectGlucoseDisplayUnit: () => {
+      settingsMutationCount += 1;
+    },
+  });
+
+  try {
+    const input = document.getElementById('quick-add-glucose-value');
+    assert.equal(input?.disabled, true);
+    assert.match(document.body.textContent ?? '', /stays in this browser only/);
+    const mmolButton = [...document.querySelectorAll('button')].find(
+      (button) => button.textContent === 'mmol/L',
+    );
+    assert.notEqual(mmolButton, undefined);
+    await act(async () => {
+      mmolButton?.click();
+    });
+    assert.equal(input?.disabled, false);
+    assert.equal(settingsMutationCount, 0);
+    assert.match(input?.getAttribute('inputmode') ?? '', /decimal/);
+  } finally {
+    await view.cleanup();
+  }
+});
+
+test('HTTP 500 does not offer local glucose entry', async () => {
+  const view = await renderGlucoseForm({
+    error: new DiabetesSettingsClientError('server', 'Unexpected failure.'),
+    loadState: 'error',
+  });
+  try {
+    assert.equal(
+      document.getElementById('quick-add-glucose-value')?.disabled,
+      true,
+    );
+    assert.doesNotMatch(
+      document.body.textContent ?? '',
+      /stays in this browser only/,
+    );
   } finally {
     await view.cleanup();
   }
