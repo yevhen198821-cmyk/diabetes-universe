@@ -1,7 +1,6 @@
 import {
   isMedicalApiRateLimitAdapterRegistered,
   isMedicalApiRateLimitProductionReady,
-  registerMedicalApiRateLimitBackendAdapter,
   resolveMedicalApiRateLimitMode,
 } from './medical-api-rate-limit';
 
