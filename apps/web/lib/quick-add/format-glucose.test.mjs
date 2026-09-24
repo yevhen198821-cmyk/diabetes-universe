@@ -88,4 +88,3 @@ test('glucose quick add does not duplicate conversion implementation', () => {
   assert.match(source, /convertGlucoseMgPerDlToMmolPerL/);
   assert.doesNotMatch(source, /18\.0182/);
 });
-
