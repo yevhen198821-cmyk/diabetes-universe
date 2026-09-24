@@ -477,6 +477,8 @@ export const CANONICAL_TRANSLATION_KEYS = [
   'quick-add.glucose.settingsUnconfigured.description',
   'quick-add.glucose.settingsUnconfigured.action',
   'quick-add.glucose.settingsError.title',
+  'quick-add.glucose.settingsError.localOnlyDescription',
+  'quick-add.glucose.settingsError.localOnlyNotice',
   'quick-add.glucose.settingsError.description',
   'quick-add.glucose.settingsError.retry',
   'quick-add.glucose.save',

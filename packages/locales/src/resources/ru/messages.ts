@@ -379,6 +379,10 @@ export const russianCanonicalMessages = defineApprovedMessages({
   'quick-add.glucose.settingsUnconfigured.action': 'Открыть настройки диабета',
   'quick-add.glucose.settingsError.title':
     'Не удалось загрузить настройки глюкозы',
+  'quick-add.glucose.settingsError.localOnlyDescription':
+    'Медицинские настройки временно недоступны. Можно записать глюкозу на этом устройстве, выбрав единицы вручную.',
+  'quick-add.glucose.settingsError.localOnlyNotice':
+    'Запись останется только в этом браузере. Облачное резервное копирование недоступно. Выбор единиц действует только в этой форме.',
   'quick-add.glucose.settingsError.description':
     'Ввод глюкозы недоступен, пока настройки не будут загружены.',
   'quick-add.glucose.settingsError.retry': 'Повторить',
