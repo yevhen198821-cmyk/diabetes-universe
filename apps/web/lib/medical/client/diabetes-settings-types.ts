@@ -28,6 +28,7 @@ export interface GlucoseTargetProfileResource {
 export type DiabetesSettingsClientErrorKind =
   | 'network'
   | 'unauthorized'
+  | 'unavailable'
   | 'validation'
   | 'revision_conflict'
   | 'precondition_required'

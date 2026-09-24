@@ -25,6 +25,10 @@ export function readMedicalApiErrorKind(
     return 'validation';
   }
 
+  if (status === 503) {
+    return 'unavailable';
+  }
+
   if (status >= 500) {
     return 'server';
   }

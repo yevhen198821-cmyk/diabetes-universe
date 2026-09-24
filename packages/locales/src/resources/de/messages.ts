@@ -267,6 +267,10 @@ export const germanCanonicalMessages = defineApprovedMessages({
     'Diabetes-Einstellungen öffnen',
   'quick-add.glucose.settingsError.title':
     'Glukose-Einstellungen konnten nicht geladen werden',
+  'quick-add.glucose.settingsError.localOnlyDescription':
+    'Die medizinischen Einstellungen sind vorübergehend nicht verfügbar. Sie können den Glukosewert auf diesem Gerät erfassen, wenn Sie die Einheit selbst wählen.',
+  'quick-add.glucose.settingsError.localOnlyNotice':
+    'Der Wert bleibt nur in diesem Browser. Ein Cloud-Backup ist nicht verfügbar. Die Einheitenwahl gilt nur für dieses Formular.',
   'quick-add.glucose.settingsError.description':
     'Glukoseeingabe ist nicht verfügbar, bis die Einstellungen geladen werden können.',
   'quick-add.glucose.settingsError.retry': 'Erneut versuchen',

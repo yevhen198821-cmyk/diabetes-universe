@@ -560,6 +560,10 @@ export const englishCanonicalMessages = defineApprovedMessages({
     'Set your glucose display unit in Diabetes settings before entering a value.',
   'quick-add.glucose.settingsUnconfigured.action': 'Open Diabetes settings',
   'quick-add.glucose.settingsError.title': 'Could not load glucose settings',
+  'quick-add.glucose.settingsError.localOnlyDescription':
+    'Medical settings are temporarily unavailable. You can record glucose on this device after choosing units manually.',
+  'quick-add.glucose.settingsError.localOnlyNotice':
+    'The reading stays in this browser only. Cloud backup is unavailable. Your unit choice applies only to this form.',
   'quick-add.glucose.settingsError.description':
     'Glucose entry is unavailable until settings can be loaded.',
   'quick-add.glucose.settingsError.retry': 'Retry',

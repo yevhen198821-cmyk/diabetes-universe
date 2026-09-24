@@ -264,6 +264,10 @@ export const ukrainianCanonicalMessages = defineApprovedMessages({
     'Відкрити налаштування діабету',
   'quick-add.glucose.settingsError.title':
     'Не вдалося завантажити налаштування глюкози',
+  'quick-add.glucose.settingsError.localOnlyDescription':
+    'Медичні налаштування тимчасово недоступні. Можна записати глюкозу на цьому пристрої, обравши одиниці вручну.',
+  'quick-add.glucose.settingsError.localOnlyNotice':
+    'Запис залишиться лише в цьому браузері. Хмарне резервне копіювання недоступне. Вибір одиниць діє лише в цій формі.',
   'quick-add.glucose.settingsError.description':
     'Введення глюкози недоступне, доки налаштування не будуть завантажені.',
   'quick-add.glucose.settingsError.retry': 'Повторити',
