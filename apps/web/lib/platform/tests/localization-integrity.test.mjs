@@ -357,7 +357,7 @@ test('migrated surfaces do not introduce ad-hoc locale formatting', async () => 
     }
 
     const matches = source.match(AD_HOC_FORMATTING_PATTERN) ?? [];
-    const disallowed = matches.filter((_match) => {
+    const disallowed = matches.filter(() => {
       if (relative.endsWith('lib/timeline/timeline-date-time.ts')) {
         return !source.includes(DETERMINISTIC_CALENDAR);
       }
