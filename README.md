@@ -80,7 +80,7 @@ for live verification, migration blockers, recovery evidence and remaining work.
 
 ## Requirements
 
-- Node.js 22 or later
+- Node.js 22.12.0 or later
 - pnpm 10.33.3
 
 Enable the package manager through Corepack if pnpm is unavailable:

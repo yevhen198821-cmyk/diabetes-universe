@@ -40,7 +40,7 @@ workspaces.
 | Area               | Standard                   |
 | ------------------ | -------------------------- |
 | Package manager    | pnpm 10.33.3               |
-| Node.js            | 22 or later                |
+| Node.js            | 22.12.0 or later           |
 | Task orchestration | Turborepo (`turbo.json`)   |
 | Applications       | `apps/`                    |
 | Shared packages    | `packages/`                |
