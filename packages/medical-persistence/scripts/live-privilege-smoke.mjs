@@ -1,4 +1,15 @@
 import postgres from 'postgres';
+import { neon } from '@neondatabase/serverless';
+import {
+  medicalRoleProfile,
+  bindMedicalRoles,
+  roleSecurityFailure,
+} from './medical-role-profile.mjs';
+
+const profile = medicalRoleProfile(process.env.MEDICAL_ROLE_PROFILE);
+const actualRole = (name) => profile[name] ?? name;
+const canonicalRole = (name) =>
+  Object.entries(profile).find(([, actual]) => actual === name)?.[0] ?? name;
 
 const connectionString = process.env.MEDICAL_PRIVILEGE_SMOKE_DATABASE_URL;
 
@@ -7,12 +18,29 @@ if (!connectionString) {
   process.exit(2);
 }
 
-const sql = postgres(connectionString, {
-  max: 1,
-  prepare: false,
-  idle_timeout: 2,
-  connect_timeout: 10,
-});
+const transport = process.env.MEDICAL_SQL_TRANSPORT ?? 'postgres';
+if (!['postgres', 'neon-http'].includes(transport))
+  throw new Error('Unknown SQL transport');
+const client =
+  transport === 'neon-http'
+    ? neon(connectionString)
+    : postgres(connectionString, {
+        max: 1,
+        prepare: false,
+        idle_timeout: 2,
+        connect_timeout: 10,
+      });
+
+// Bind only fixed runtime/maintenance roles. Never rewrite migration actor guards.
+function sql(strings, ...values) {
+  const bound = Object.assign(
+    strings.map((part) => bindMedicalRoles(part, profile)),
+    {
+      raw: strings.raw.map((part) => bindMedicalRoles(part, profile)),
+    },
+  );
+  return client(bound, ...values);
+}
 
 const expectedRoles = [
   'medical_app',
@@ -21,7 +49,15 @@ const expectedRoles = [
   'medical_maintenance_owner',
   'medical_migrator',
   'medical_deployer',
-];
+]
+  .filter(
+    (role) =>
+      !(
+        process.env.MEDICAL_ROLE_PROFILE === 'neon-sql' &&
+        role === 'medical_migrator'
+      ),
+  )
+  .map(actualRole);
 
 const failures = [];
 
@@ -45,12 +81,23 @@ try {
   );
 
   const roles = await sql`
-    SELECT rolname
-    FROM pg_roles
+    SELECT r.rolname, r.rolsuper, r.rolcreaterole, r.rolcreatedb, r.rolbypassrls,
+      EXISTS (
+        SELECT 1 FROM pg_roles privileged
+        WHERE privileged.oid <> r.oid
+          AND (privileged.rolsuper OR privileged.rolcreaterole OR privileged.rolcreatedb
+               OR privileged.rolbypassrls OR privileged.rolname = 'neon_superuser')
+          AND (pg_has_role(r.oid, privileged.oid, 'USAGE') OR pg_has_role(r.oid, privileged.oid, 'SET'))
+      ) AS can_assume_privileged_role
+    FROM pg_roles r
     WHERE rolname = ANY(${expectedRoles})
     ORDER BY rolname
   `;
   const roleNames = new Set(roles.map((row) => row.rolname));
+  for (const role of roles) {
+    const failure = roleSecurityFailure(role);
+    assert(!failure, failure);
+  }
   for (const role of expectedRoles) {
     assert(roleNames.has(role), `required role is missing: ${role}`);
   }
@@ -61,7 +108,7 @@ try {
     WHERE rolname IN ('medical_deployer', 'medical_maintenance_owner', 'medical_app')
   `;
   const roleLoginByName = Object.fromEntries(
-    roleLogin.map((row) => [row.rolname, row.rolcanlogin]),
+    roleLogin.map((row) => [canonicalRole(row.rolname), row.rolcanlogin]),
   );
   assert(
     roleLoginByName.medical_deployer === true,
@@ -229,7 +276,7 @@ try {
     assert(functionSecurity, 'purge function is missing');
     if (functionSecurity) {
       assert(
-        functionSecurity.owner_name === 'medical_maintenance_owner',
+        functionSecurity.owner_name === actualRole('medical_maintenance_owner'),
         'purge function has wrong owner',
       );
       assert(
@@ -254,5 +301,5 @@ try {
     );
   }
 } finally {
-  await sql.end({ timeout: 1 });
+  if (transport === 'postgres') await client.end({ timeout: 1 });
 }
