@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@10.33.3",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.12.0"
   },
   "scripts": {
     "build": "turbo run build",
@@ -20,14 +20,14 @@
     "test:openapi-diff": "node --test scripts/openapi-contract-diff.test.mjs scripts/openapi-baseline-resolution.test.mjs scripts/diabetes-settings-openapi-contract.test.mjs"
   },
   "devDependencies": {
-    "@apidevtools/swagger-parser": "^12.1.0",
-    "js-yaml": "^5.4.1",
-    "@playwright/test": "^1.62.1",
+    "@apidevtools/swagger-parser": "^13.0.0",
+    "js-yaml": "^5.4.2",
+    "@playwright/test": "^1.63.0",
     "eslint": "^9.39.5",
-    "eslint-config-next": "^16.3.2",
-    "prettier": "^3.9.6",
+    "eslint-config-next": "^16.3.6",
+    "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
-    "turbo": "^2.10.12",
+    "turbo": "^2.11.4",
     "typescript": "^6.0.3"
   }
 }

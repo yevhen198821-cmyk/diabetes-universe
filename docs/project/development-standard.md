@@ -78,6 +78,6 @@ architecture review, not ad hoc implementation changes.
 ## Notes
 
 - Local development starts with `pnpm dev`.
-- Node.js 22 or later and pnpm 10.33.3 are required.
+- Node.js 22.12.0 or later and pnpm 10.33.3 are required.
 - Product safety and trust constraints remain defined in the
   [Product Bible](../product-bible/README.md).
