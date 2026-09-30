@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import Link from 'next/link';
 
 import type { AppBuildMetadata } from '../../lib/app/app-metadata';
 import { ProductBrandLogo } from '../brand/product-brand-logo';
@@ -140,18 +141,24 @@ export function ProfileAboutPanel({
           comingSoonLabel={labels.comingSoonBadge}
           title={labels.page.rows.privacyPolicy}
         />
-        <ProfileAboutComingSoonRow
-          comingSoonLabel={labels.comingSoonBadge}
-          title={labels.page.rows.dataManagement}
-        />
-        <ProfileAboutComingSoonRow
-          comingSoonLabel={labels.comingSoonBadge}
-          title={labels.page.rows.dataExport}
-        />
-        <ProfileAboutComingSoonRow
-          comingSoonLabel={labels.comingSoonBadge}
-          title={labels.page.rows.accountDeletion}
-        />
+        <Link
+          href="/data"
+          className="block min-h-11 rounded-lg border p-3 underline"
+        >
+          {labels.page.rows.dataManagement}
+        </Link>
+        <Link
+          href="/data"
+          className="block min-h-11 rounded-lg border p-3 underline"
+        >
+          {labels.page.rows.dataExport}
+        </Link>
+        <Link
+          href="/support"
+          className="block min-h-11 rounded-lg border p-3 underline"
+        >
+          {labels.page.rows.accountDeletion}
+        </Link>
       </ProfileAboutSection>
 
       <ProfileAboutSection title={labels.page.sections.legal}>
@@ -170,18 +177,24 @@ export function ProfileAboutPanel({
       </ProfileAboutSection>
 
       <ProfileAboutSection title={labels.page.sections.help}>
-        <ProfileAboutComingSoonRow
-          comingSoonLabel={labels.comingSoonBadge}
-          title={labels.page.rows.supportCenter}
-        />
-        <ProfileAboutComingSoonRow
-          comingSoonLabel={labels.comingSoonBadge}
-          title={labels.page.rows.contactSupport}
-        />
-        <ProfileAboutComingSoonRow
-          comingSoonLabel={labels.comingSoonBadge}
-          title={labels.page.rows.reportIssue}
-        />
+        <Link
+          href="/support"
+          className="block min-h-11 rounded-lg border p-3 underline"
+        >
+          {labels.page.rows.supportCenter}
+        </Link>
+        <Link
+          href="/support"
+          className="block min-h-11 rounded-lg border p-3 underline"
+        >
+          {labels.page.rows.contactSupport}
+        </Link>
+        <Link
+          href="/support"
+          className="block min-h-11 rounded-lg border p-3 underline"
+        >
+          {labels.page.rows.reportIssue}
+        </Link>
       </ProfileAboutSection>
 
       {metadata.version || metadata.buildLabel ? (

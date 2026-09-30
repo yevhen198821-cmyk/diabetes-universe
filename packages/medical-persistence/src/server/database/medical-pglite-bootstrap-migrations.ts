@@ -10,6 +10,9 @@ const drizzleDirectory = join(
 function readMedicalMigrationSql(filename: string): string {
   return readFileSync(join(drizzleDirectory, filename), 'utf8');
 }
+export function readMedicalSyncMigrationSql(): string {
+  return readMedicalMigrationSql('0009_medical_sync.sql');
+}
 
 /**
  * PGlite/local test bootstrap migrations loaded from drizzle/*.sql.

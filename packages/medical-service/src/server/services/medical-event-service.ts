@@ -12,6 +12,11 @@ import {
   type MedicalEventResourcePatch,
   MedicalResourceNotFoundError,
   MedicalRevisionConflictError,
+  projectEventKind,
+  projectEventObservedAt,
+  projectSchemaVersion,
+  projectSourceLabel,
+  toServerSemanticEvent,
 } from '@diabetes-universe/medical-domain';
 import type { MedicalEnvironment } from '@diabetes-universe/medical-persistence/server';
 import {
@@ -191,14 +196,33 @@ export function createMedicalEventService(
           const resource = await txEventRepository.getByResourceId(
             input.scope.subjectId,
             existing.resultResourceId,
+            { includeDeletedForReplay: true },
           );
 
           if (!resource) {
             throw new Error('Idempotency record references missing resource.');
           }
 
+          // The fingerprint has already authenticated the original payload.
+          // Reconstruct the create outcome from that payload and immutable
+          // creation metadata, even if the live resource changed or was deleted.
+          // Replay acknowledges the original operation; it never restores data.
+          const semanticEvent = toServerSemanticEvent(input.semanticEvent);
           return {
-            resource,
+            resource: {
+              ...resource,
+              lifecycleState: 'active',
+              revision: existing.resultRevision,
+              semanticEvent,
+              eventObservedAt:
+                projectEventObservedAt(semanticEvent).toISOString(),
+              eventKind: projectEventKind(semanticEvent),
+              schemaVersion: projectSchemaVersion(semanticEvent),
+              sourceLabel: projectSourceLabel(semanticEvent),
+              updatedAt: resource.createdAt,
+              deletedAt: null,
+              updatedByAccountId: resource.createdByAccountId,
+            },
             etagToken: existing.resultEtagToken,
             httpStatus: existing.storedHttpStatus,
             replayed: true,
@@ -274,6 +298,15 @@ export function createMedicalEventService(
         throw new MedicalResourceNotFoundError('Medical resource not found.');
       }
 
+      await createMedicalAuditRepository(database).insert({
+        actorAccountId: scope.accountId,
+        subjectId: scope.subjectId,
+        action: 'medical_event.read',
+        resourceType: 'medical_event',
+        resourceId,
+        outcome: 'success',
+        correlationId: scope.correlationId,
+      });
       return {
         resource,
         etagToken: toEtag(resource),
@@ -344,6 +377,16 @@ export function createMedicalEventService(
         );
       }
 
+      await createMedicalAuditRepository(database).insert({
+        actorAccountId: input.scope.accountId,
+        subjectId: input.scope.subjectId,
+        action: 'medical_event.list',
+        resourceType: 'medical_event',
+        resourceId: null,
+        outcome: 'success',
+        correlationId: input.scope.correlationId,
+        detail: { count: pageRows.length },
+      });
       return {
         items: pageRows,
         etagTokens,

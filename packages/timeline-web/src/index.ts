@@ -58,6 +58,17 @@ export {
   type TimelineAdoptionOrchestratorResult,
 } from './adoption/timeline-adoption-orchestrator';
 export {
+  exportTimelineLocalData,
+  deleteTimelineLocalData,
+} from './persistence/indexeddb/timeline-local-data';
+export { runTimelineLocalAdoption } from './adoption/run-timeline-local-adoption';
+export {
+  enableTimelineSync,
+  runTimelineSync,
+  readTimelineSyncState,
+  type TimelineSyncTransport,
+} from './sync/timeline-sync-orchestrator';
+export {
   scanTimelineForAdoption,
   createSourceNamespace,
   toAdoptionAcknowledgement,

@@ -124,7 +124,7 @@ export class TimelineAdoptionOrchestrator {
       sourcePlatform: this.sourcePlatform,
       sourceAppVersion: this.sourceAppVersion,
       sourceSchemaMin: 1,
-      sourceSchemaMax: 1,
+      sourceSchemaMax: 2,
       eligibleCount: eligible.length,
     });
 

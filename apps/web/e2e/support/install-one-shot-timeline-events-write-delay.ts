@@ -16,7 +16,7 @@ declare global {
 
 /**
  * Installs a one-shot delay on the next `timeline_events` readwrite IndexedDB
- * transaction only. The hook removes itself before the delayed transaction
+ * transaction, including its atomic sync metadata/acknowledgement stores. The hook removes itself before the delayed transaction
  * starts so auth, bootstrap, clearing, and unrelated stores are unaffected.
  */
 export async function installOneShotTimelineEventsWriteDelay(
@@ -33,8 +33,14 @@ export async function installOneShotTimelineEventsWriteDelay(
 
         return (
           mode === 'readwrite' &&
-          names.length === 1 &&
-          names[0] === timelineEventsStore
+          names.includes(timelineEventsStore) &&
+          names.every((name) =>
+            [
+              timelineEventsStore,
+              'timeline_metadata',
+              'timeline_adoption_acknowledgements',
+            ].includes(name),
+          )
         );
       };
 

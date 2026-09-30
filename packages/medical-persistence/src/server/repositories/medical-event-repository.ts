@@ -36,6 +36,7 @@ export interface MedicalEventRepository {
   getByResourceId(
     subjectId: string,
     resourceId: string,
+    options?: { readonly includeDeletedForReplay: boolean },
   ): Promise<MedicalEventResource | null>;
   listKeyset(query: KeysetListQuery): Promise<readonly MedicalEventResource[]>;
   insert(
@@ -60,7 +61,7 @@ export function createMedicalEventRepository(
   database: MedicalDatabase,
 ): MedicalEventRepository {
   return {
-    async getByResourceId(subjectId, resourceId) {
+    async getByResourceId(subjectId, resourceId, options) {
       const rows = await database
         .select()
         .from(medicalEventResources)
@@ -68,7 +69,9 @@ export function createMedicalEventRepository(
           and(
             eq(medicalEventResources.subjectId, subjectId),
             eq(medicalEventResources.resourceId, resourceId),
-            eq(medicalEventResources.lifecycleState, 'active'),
+            options?.includeDeletedForReplay
+              ? undefined
+              : eq(medicalEventResources.lifecycleState, 'active'),
           ),
         )
         .limit(1);

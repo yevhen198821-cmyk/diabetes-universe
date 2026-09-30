@@ -39,7 +39,7 @@ import {
 } from './medical-api-validation';
 import { readBoundedRequestBody } from './read-bounded-request-body';
 
-async function prepareMedicalApiHandler(
+export async function prepareMedicalApiHandler(
   request: Request,
 ): Promise<
   | { ok: false; response: Response }
@@ -253,7 +253,10 @@ function parseIfMatchHeader(value: string | null): string {
   return trimmed;
 }
 
-function mapMedicalApiError(error: unknown, correlationId: string): Response {
+export function mapMedicalApiError(
+  error: unknown,
+  correlationId: string,
+): Response {
   if (error instanceof MedicalApiValidationError) {
     const status = error.message === 'Request body is too large.' ? 413 : 422;
     const code = status === 413 ? 'REQUEST_TOO_LARGE' : 'VALIDATION_FAILED';
