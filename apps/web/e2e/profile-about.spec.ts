@@ -29,7 +29,13 @@ test('profile about row navigates to the about screen', async ({
   await expect(page.getByText('Version: 0.0.0')).toHaveCount(0);
   await expect(page.getByText('Medical information')).toBeVisible();
   await expect(page.getByText('Privacy and data')).toBeVisible();
-  await expect(page.getByText('Coming later')).toHaveCount(10);
+  await expect(page.getByText('Coming later')).toHaveCount(4);
+  await expect(
+    page.getByRole('link', { name: 'Export data', exact: true }),
+  ).toHaveAttribute('href', '/data');
+  await expect(
+    page.getByRole('link', { name: 'Support centre', exact: true }),
+  ).toHaveAttribute('href', '/support');
 });
 
 test('about screen stays inside profile shell with account navigation', async ({

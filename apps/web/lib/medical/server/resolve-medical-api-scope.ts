@@ -66,6 +66,21 @@ export async function resolveMedicalApiScope(
     };
   }
 
+  // An explicit transfer may have started before an account switch. This header
+  // is a mismatch guard, never an authority to select the request's principal.
+  const expectedAccount = request.headers.get('x-du-expected-account-id');
+  if (expectedAccount !== null && expectedAccount !== principal.accountId) {
+    return {
+      ok: false,
+      response: medicalApiErrorResponse(
+        401,
+        'AUTH_REQUIRED',
+        'The signed-in account changed. Start again.',
+        correlationId,
+      ),
+    };
+  }
+
   const bundle = await getMedicalServiceBundle();
   const relationship = await bundle.subjectService.findActiveSelfRelationship(
     principal.accountId,

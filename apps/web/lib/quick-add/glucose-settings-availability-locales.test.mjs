@@ -9,6 +9,8 @@ import { ukrainianCanonicalMessages } from '../../../../packages/locales/src/res
 const KEYS = [
   'quick-add.glucose.loading',
   'quick-add.glucose.settingsError.title',
+  'quick-add.glucose.settingsError.localOnlyDescription',
+  'quick-add.glucose.settingsError.localOnlyNotice',
   'quick-add.glucose.settingsError.description',
   'quick-add.glucose.settingsError.retry',
   'quick-add.glucose.unitGate.title',

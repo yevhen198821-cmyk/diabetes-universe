@@ -10,7 +10,6 @@ import {
   resetMedicalServiceBundleForTests,
 } from './get-medical-service-bundle.ts';
 import {
-  getMedicalApiRateLimiter,
   resetMedicalApiRateLimiterForTests,
   setMedicalApiRateLimiterForTests,
 } from './medical-api-rate-limit.ts';

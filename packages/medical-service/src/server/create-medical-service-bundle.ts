@@ -9,9 +9,11 @@ import {
 import { createMedicalAdoptionService } from './services/medical-adoption-service';
 import { createMedicalDiabetesSettingsService } from './services/medical-diabetes-settings-service';
 import { createMedicalEventService } from './services/medical-event-service';
+import { createMedicalSyncService } from './services/medical-sync-service';
 import { createMedicalSubjectService } from './services/medical-subject-service';
 
 export interface MedicalServiceBundle {
+  readonly syncService: ReturnType<typeof createMedicalSyncService>;
   readonly database: MedicalDatabase;
   readonly subjectService: ReturnType<typeof createMedicalSubjectService>;
   readonly eventService: ReturnType<typeof createMedicalEventService>;
@@ -28,6 +30,7 @@ export async function createMedicalServiceBundle(
   const subjectRepository = createMedicalSubjectRepository(database);
 
   return {
+    syncService: createMedicalSyncService(database, environment),
     database,
     subjectService: createMedicalSubjectService(subjectRepository),
     eventService: createMedicalEventService(database, environment),

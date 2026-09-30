@@ -47,7 +47,7 @@ test('glucose quick add blocks value entry until settings are ready and configur
   );
   assert.match(
     glucoseFormSource,
-    /if \(!canEnterValue \|\| !glucoseDisplayUnit \|\| isSubmittingRef\.current\)/,
+    /if \(!canEnterValue \|\| !selectedUnit \|\| isSubmittingRef\.current\)/,
   );
 });
 

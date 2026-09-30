@@ -7,7 +7,9 @@ test('unresolved ownership never reports successful medical writes', async () =>
   const repository = createUnavailableTimelineRepository(() => {
     retryRequests += 1;
   });
-  await repository.initialize();
+  await assert.rejects(() => repository.initialize(), {
+    code: 'TIMELINE_REPOSITORY_STORAGE_UNAVAILABLE',
+  });
   for (const operation of [
     () => repository.addEvent({ id: 'synthetic' }),
     () => repository.updateEvent({ id: 'synthetic' }),

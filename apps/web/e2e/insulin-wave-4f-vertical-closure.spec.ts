@@ -81,13 +81,6 @@ async function readInsulinEventById(
   )) as RawInsulinEvent | null;
 }
 
-async function openInsulinQuickAdd(page: Page) {
-  await page.goto('/');
-  await waitForApplicationReady(page);
-  await page.getByRole('button', { name: 'Quick add: Insulin' }).click();
-  await expect(page.getByRole('textbox', { name: DOSE_LABEL })).toBeVisible();
-}
-
 async function prepareEmptyTimeline(page: Page) {
   await waitForApplicationReady(page);
   await waitForTimelineBootstrapComplete(page);

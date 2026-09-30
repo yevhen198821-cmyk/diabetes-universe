@@ -11,6 +11,7 @@ import {
 } from '@diabetes-universe/timeline';
 import type { SemanticTimelineEvent } from '@diabetes-universe/types';
 import type { IDBPDatabase } from 'idb';
+import { enqueueTimelineSyncIntent } from '../../sync/timeline-sync-local';
 
 import { createIndexedDbTimelineEventRecord } from './timeline-indexeddb-record';
 import type { TimelineIndexedDbConnection } from './timeline-indexeddb-connection';
@@ -180,10 +181,15 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
     try {
       const record = createIndexedDbTimelineEventRecord(event, this.#now());
       const transaction = this.#database!.transaction(
-        TIMELINE_INDEXEDDB_STORES.events,
+        [
+          TIMELINE_INDEXEDDB_STORES.events,
+          TIMELINE_INDEXEDDB_STORES.metadata,
+          TIMELINE_INDEXEDDB_STORES.adoptionAcknowledgements,
+        ],
         'readwrite',
       );
       transaction.objectStore(TIMELINE_INDEXEDDB_STORES.events).put(record);
+      await enqueueTimelineSyncIntent(transaction, event.id, 'upsert', event);
       await transaction.done;
 
       return { status: 'applied' };
@@ -204,7 +210,11 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
 
     try {
       const transaction = this.#database!.transaction(
-        TIMELINE_INDEXEDDB_STORES.events,
+        [
+          TIMELINE_INDEXEDDB_STORES.events,
+          TIMELINE_INDEXEDDB_STORES.metadata,
+          TIMELINE_INDEXEDDB_STORES.adoptionAcknowledgements,
+        ],
         'readwrite',
       );
       const store = transaction.objectStore(TIMELINE_INDEXEDDB_STORES.events);
@@ -216,6 +226,7 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
       }
 
       store.put(createIndexedDbTimelineEventRecord(event, this.#now()));
+      await enqueueTimelineSyncIntent(transaction, event.id, 'upsert', event);
       await transaction.done;
 
       return { status: 'applied' };
@@ -235,7 +246,11 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
 
     try {
       const transaction = this.#database!.transaction(
-        TIMELINE_INDEXEDDB_STORES.events,
+        [
+          TIMELINE_INDEXEDDB_STORES.events,
+          TIMELINE_INDEXEDDB_STORES.metadata,
+          TIMELINE_INDEXEDDB_STORES.adoptionAcknowledgements,
+        ],
         'readwrite',
       );
       const store = transaction.objectStore(TIMELINE_INDEXEDDB_STORES.events);
@@ -247,6 +262,12 @@ export class IndexedDbTimelineRepository implements TimelineRepository {
       }
 
       store.delete(eventId);
+      await enqueueTimelineSyncIntent(
+        transaction,
+        eventId,
+        'delete',
+        existing.event,
+      );
       await transaction.done;
 
       return { status: 'applied' };

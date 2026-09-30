@@ -60,6 +60,13 @@ async function readMedicalApiError(
     );
   }
 
+  if (response.status === 503) {
+    return new DiabetesSettingsClientError(
+      'unavailable',
+      'The medical API is temporarily unavailable.',
+    );
+  }
+
   if (response.status === 422 || code === 'VALIDATION_FAILED') {
     return new DiabetesSettingsClientError('validation', 'Validation failed.');
   }

@@ -34,6 +34,8 @@ export interface GlucoseQuickAddLabels {
   readonly settingsErrorDescription: string;
   readonly settingsErrorRetry: string;
   readonly settingsErrorTitle: string;
+  readonly localOnlyDescription: string;
+  readonly localOnlyNotice: string;
   readonly settingsUnconfiguredAction: string;
   readonly settingsUnconfiguredDescription: string;
   readonly settingsUnconfiguredTitle: string;
@@ -67,6 +69,12 @@ const KEYS = {
   ),
   settingsErrorRetry: asTranslationKey('quick-add.glucose.settingsError.retry'),
   settingsErrorTitle: asTranslationKey('quick-add.glucose.settingsError.title'),
+  localOnlyDescription: asTranslationKey(
+    'quick-add.glucose.settingsError.localOnlyDescription',
+  ),
+  localOnlyNotice: asTranslationKey(
+    'quick-add.glucose.settingsError.localOnlyNotice',
+  ),
   settingsUnconfiguredAction: asTranslationKey(
     'quick-add.glucose.settingsUnconfigured.action',
   ),
@@ -124,6 +132,8 @@ export function resolveGlucoseQuickAddLabels(
     ),
     settingsErrorRetry: translate(localization, KEYS.settingsErrorRetry),
     settingsErrorTitle: translate(localization, KEYS.settingsErrorTitle),
+    localOnlyDescription: translate(localization, KEYS.localOnlyDescription),
+    localOnlyNotice: translate(localization, KEYS.localOnlyNotice),
     settingsUnconfiguredAction: translate(
       localization,
       KEYS.settingsUnconfiguredAction,

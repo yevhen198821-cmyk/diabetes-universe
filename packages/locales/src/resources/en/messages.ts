@@ -6,6 +6,55 @@ import { defineApprovedMessages } from '../../contracts/translation-resource';
  * This object is the source of truth for approved translation keys.
  */
 export const englishCanonicalMessages = defineApprovedMessages({
+  'account.support.title': 'Support',
+  'account.support.operator': 'Operator: Resulto, Poland.',
+  'account.support.description':
+    'Describe the problem, when it occurred, your browser and device. Do not attach health records to an ordinary email.',
+  'account.support.dataRequests':
+    'For account deletion or a full data access request, contact Resulto. Support will confirm identity and the scope before taking action. Local deletion on the data page does not delete the account or cloud copies.',
+
+  'timeline.storage.syncEnabled':
+    'Cloud sync is enabled. Changes are checked regularly while this app is open.',
+  'timeline.storage.syncPending':
+    'Some changes are waiting to sync. Keep a local export as a backup.',
+  'timeline.storage.syncProblem':
+    'Sync needs attention. Local changes are retained; no conflicting change is overwritten automatically.',
+  'timeline.storage.syncConsentDescription':
+    'First finish transferring local history. Sync sends future changes to your account and receives changes from other devices.',
+  'timeline.storage.syncConsent':
+    'I agree to enable cloud sync for this profile.',
+  'timeline.storage.enableSync': 'Enable sync',
+  'timeline.storage.syncEnableError':
+    'Sync was not enabled. Finish the transfer and check that cloud storage is available.',
+
+  'timeline.storage.deleteDescription':
+    'Delete only this profile’s Timeline data from this browser. Export first if you need a copy. Your account, cloud copies and other profiles are not deleted. Close other tabs if deletion is waiting.',
+  'timeline.storage.deleteConsent':
+    'I understand that this browser’s local history will be deleted.',
+  'timeline.storage.deleteLocal': 'Delete local history',
+
+  'timeline.storage.transferDescription':
+    'Copy local history to your signed-in account. This is a one-time transfer; later changes are still local. If cloud storage is unavailable, no success will be reported.',
+  'timeline.storage.transferConsent':
+    'I agree to transfer this profile’s local health history to my account.',
+  'timeline.storage.transfer': 'Transfer to my account',
+  'timeline.storage.transferring': 'Transferring…',
+  'timeline.storage.transferCompleted':
+    'Transfer completed. Local history is retained. Continuous sync is not active.',
+  'timeline.storage.transferFailed':
+    'Transfer did not complete. Your local history is retained. Try again; confirmed records will not be duplicated.',
+
+  'timeline.storage.title': 'Data and storage',
+  'timeline.storage.localNotice':
+    'Your Timeline is saved only in this browser. Cloud backup and device sync are not active.',
+  'timeline.storage.manage': 'Manage data',
+  'timeline.storage.export': 'Export this browser’s data',
+  'timeline.storage.exportDescription':
+    'The JSON file includes this profile’s local history and recovery records, including quarantined entries. It does not include cloud data. It contains private health data; keep it somewhere you trust.',
+  'timeline.storage.exporting': 'Exporting…',
+  'timeline.storage.exportError':
+    'Export failed. Your data has not been changed. Try again.',
+
   'timeline.storage.unavailable':
     'Saving is unavailable while your session or device storage cannot be verified. Your entry has not been saved. Try again before continuing.',
   'timeline.storage.retry': 'Try again',
@@ -560,6 +609,10 @@ export const englishCanonicalMessages = defineApprovedMessages({
     'Set your glucose display unit in Diabetes settings before entering a value.',
   'quick-add.glucose.settingsUnconfigured.action': 'Open Diabetes settings',
   'quick-add.glucose.settingsError.title': 'Could not load glucose settings',
+  'quick-add.glucose.settingsError.localOnlyDescription':
+    'Medical settings are temporarily unavailable. You can record glucose on this device after choosing units manually.',
+  'quick-add.glucose.settingsError.localOnlyNotice':
+    'The reading stays in this browser only. Cloud backup is unavailable. Your unit choice applies only to this form.',
   'quick-add.glucose.settingsError.description':
     'Glucose entry is unavailable until settings can be loaded.',
   'quick-add.glucose.settingsError.retry': 'Retry',

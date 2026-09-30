@@ -9,6 +9,55 @@ import { englishCanonicalMessages } from '../en/messages';
  */
 export const germanCanonicalMessages = defineApprovedMessages({
   ...englishCanonicalMessages,
+  'account.support.title': 'Hilfe',
+  'account.support.operator': 'Betreiber: Resulto, Polen.',
+  'account.support.description':
+    'Beschreibe das Problem, den Zeitpunkt, Browser und Gerät. Füge einer normalen E-Mail keine Gesundheitsunterlagen bei.',
+  'account.support.dataRequests':
+    'Für Kontolöschung oder vollständige Datenauskunft kontaktiere Resulto. Vor Maßnahmen bestätigt der Support Identität und Umfang. Lokale Löschung auf der Datenseite löscht weder Konto noch Cloud-Kopien.',
+
+  'timeline.storage.syncEnabled':
+    'Cloud-Synchronisierung ist aktiv. Änderungen werden regelmäßig geprüft, solange die App geöffnet ist.',
+  'timeline.storage.syncPending':
+    'Einige Änderungen warten auf Synchronisierung. Bewahre einen lokalen Export als Sicherung auf.',
+  'timeline.storage.syncProblem':
+    'Synchronisierung erfordert Aufmerksamkeit. Lokale Änderungen bleiben erhalten; Konflikte werden nicht automatisch überschrieben.',
+  'timeline.storage.syncConsentDescription':
+    'Schließe zuerst die Übertragung des lokalen Verlaufs ab. Sync sendet spätere Änderungen in dein Konto und empfängt Änderungen anderer Geräte.',
+  'timeline.storage.syncConsent':
+    'Ich stimme der Cloud-Synchronisierung dieses Profils zu.',
+  'timeline.storage.enableSync': 'Synchronisierung aktivieren',
+  'timeline.storage.syncEnableError':
+    'Synchronisierung wurde nicht aktiviert. Übertragung abschließen und Cloud-Speicher prüfen.',
+
+  'timeline.storage.deleteDescription':
+    'Nur Tagebuchdaten dieses Profils aus diesem Browser löschen. Exportiere sie zuerst, wenn du eine Kopie brauchst. Konto, Cloud-Kopien und andere Profile werden nicht gelöscht. Schließe andere Tabs, falls die Löschung wartet.',
+  'timeline.storage.deleteConsent':
+    'Ich verstehe, dass der lokale Verlauf dieses Browsers gelöscht wird.',
+  'timeline.storage.deleteLocal': 'Lokalen Verlauf löschen',
+
+  'timeline.storage.transferDescription':
+    'Lokalen Verlauf in dein angemeldetes Konto kopieren. Dies ist eine einmalige Übertragung; spätere Änderungen bleiben lokal. Ohne verfügbaren Cloud-Speicher wird kein Erfolg gemeldet.',
+  'timeline.storage.transferConsent':
+    'Ich stimme der Übertragung des lokalen Gesundheitsverlaufs dieses Profils in mein Konto zu.',
+  'timeline.storage.transfer': 'In mein Konto übertragen',
+  'timeline.storage.transferring': 'Übertragung läuft…',
+  'timeline.storage.transferCompleted':
+    'Übertragung abgeschlossen. Der lokale Verlauf bleibt erhalten. Kontinuierliche Synchronisierung ist nicht aktiv.',
+  'timeline.storage.transferFailed':
+    'Übertragung nicht abgeschlossen. Der lokale Verlauf bleibt erhalten. Erneut versuchen; bestätigte Einträge werden nicht dupliziert.',
+
+  'timeline.storage.title': 'Daten und Speicherung',
+  'timeline.storage.localNotice':
+    'Dein Tagebuch wird nur in diesem Browser gespeichert. Cloud-Sicherung und Gerätesynchronisierung sind nicht aktiv.',
+  'timeline.storage.manage': 'Daten verwalten',
+  'timeline.storage.export': 'Daten dieses Browsers exportieren',
+  'timeline.storage.exportDescription':
+    'Die JSON-Datei enthält den lokalen Verlauf dieses Profils und Wiederherstellungsdaten, einschließlich Einträgen in Quarantäne. Cloud-Daten sind nicht enthalten. Die Datei enthält private Gesundheitsdaten; bewahre sie sicher auf.',
+  'timeline.storage.exporting': 'Export läuft…',
+  'timeline.storage.exportError':
+    'Export fehlgeschlagen. Deine Daten wurden nicht verändert. Bitte erneut versuchen.',
+
   'timeline.storage.unavailable':
     'Speichern ist nicht verfügbar: Sitzung oder Gerätespeicher konnten nicht geprüft werden. Der Eintrag wurde nicht gespeichert. Bitte erneut versuchen.',
   'timeline.storage.retry': 'Erneut versuchen',
@@ -267,6 +316,10 @@ export const germanCanonicalMessages = defineApprovedMessages({
     'Diabetes-Einstellungen öffnen',
   'quick-add.glucose.settingsError.title':
     'Glukose-Einstellungen konnten nicht geladen werden',
+  'quick-add.glucose.settingsError.localOnlyDescription':
+    'Die medizinischen Einstellungen sind vorübergehend nicht verfügbar. Sie können den Glukosewert auf diesem Gerät erfassen, wenn Sie die Einheit selbst wählen.',
+  'quick-add.glucose.settingsError.localOnlyNotice':
+    'Der Wert bleibt nur in diesem Browser. Ein Cloud-Backup ist nicht verfügbar. Die Einheitenwahl gilt nur für dieses Formular.',
   'quick-add.glucose.settingsError.description':
     'Glukoseeingabe ist nicht verfügbar, bis die Einstellungen geladen werden können.',
   'quick-add.glucose.settingsError.retry': 'Erneut versuchen',

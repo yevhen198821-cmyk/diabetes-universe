@@ -15,6 +15,13 @@ import {
   resolveTimelineOwnershipFromSession,
 } from './timeline-local-ownership.ts';
 
+test('a user id alone must not select a different account database', () => {
+  assert.equal(
+    readAccountIdFromSessionPayload({ user: { id: 'user-id' } }),
+    null,
+  );
+});
+
 test('accountId is accepted and email is never used as ownership identity', () => {
   assert.equal(parseTimelineAccountId('acct-123'), 'acct-123');
   assert.equal(parseTimelineAccountId('  acct-123  '), 'acct-123');

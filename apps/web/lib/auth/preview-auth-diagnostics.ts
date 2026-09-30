@@ -13,7 +13,6 @@ import { probeAuthDatabaseHealth } from '@diabetes-universe/identity/server';
 import { getAuthenticatedPrincipal } from './get-authenticated-principal';
 import {
   getWebAuthConfigurationDiagnostic,
-  isWebAuthConfigured,
   isWebPasskeyConfigured,
 } from './get-web-identity-service';
 import { normalizeAuthRequestHeaders } from './normalize-auth-request-headers';

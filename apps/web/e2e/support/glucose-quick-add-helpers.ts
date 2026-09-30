@@ -68,10 +68,7 @@ export async function ensureGlucoseDisplayUnitConfigured(
   }
 }
 
-export async function selectGlucoseUnitIfRequired(
-  page: Page,
-  _unitLabel: 'mmol/L' | 'mg/dL' = 'mmol/L',
-): Promise<void> {
+export async function selectGlucoseUnitIfRequired(page: Page): Promise<void> {
   const valueInput = page.getByLabel(
     /Glucose level|Уровень глюкозы|Рівень глюкози|Glukosewert/i,
   );
