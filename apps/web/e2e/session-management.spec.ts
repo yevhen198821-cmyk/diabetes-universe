@@ -80,8 +80,8 @@ test.describe('P6c session management', () => {
   test('revoked session navigates to auth without proxy redirect loop', async ({
     browser,
     request,
-  }) => {
-    const email = 'p6c-revoked-navigation@example.com';
+  }, testInfo) => {
+    const email = `p6c-revoked-navigation-${testInfo.repeatEachIndex}@example.com`;
     const contextA = await createLocalizedAuthContext(
       browser,
       CHROME_MAC_USER_AGENT,
@@ -104,6 +104,13 @@ test.describe('P6c session management', () => {
       .getByRole('dialog')
       .getByRole('button', { name: 'End session', exact: true })
       .click();
+
+    // The confirmation click only submits the server action. Wait for its
+    // result before navigating with the session that is being revoked.
+    await expect(
+      pageA.getByText('No other active sessions were found.'),
+    ).toBeVisible();
+    await expect(pageA.getByText('Current session')).toBeVisible();
 
     await expectUnauthenticatedViaNavigation(pageB);
     await pageB.goto('/auth');
