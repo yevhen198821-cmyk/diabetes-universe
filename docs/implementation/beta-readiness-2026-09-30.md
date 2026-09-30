@@ -3,33 +3,35 @@
 ## Current decision
 
 Medical production beta remains blocked. This change supplies reviewable runtime
-code and recovery evidence; it does not certify or deploy the medical backend.
+code and recovery evidence. Medical schemas are now installed on Neon, but
+application activation and beta certification remain outstanding. See the
+[production installation evidence](medical-neon-production-runbook.md).
 Operator supplied by the owner: Resulto, Poland. Support:
 [resulto.universe@gmail.com](mailto:resulto.universe@gmail.com).
 A company registration/address, approved privacy notice and terms remain necessary.
 
 ## Live observations
 
-- Vercel production deployment `dpl_756NjYF1C5B3F9hppBuPATvSMVCN` was READY,
-  serving main commit `e1dc374559ff528953254bac3d706409e7338d68`.
+- Vercel production deployment `dpl_DAX7wthQkkaVc39j236YCk2cTf48` was READY,
+  serving main commit `523aa8b2dda1939dfddc84ddf53f8ec7b8f51567`.
 - `https://diabetes-universe-web.vercel.app/api/auth/get-session` returned 200/null
   without a session. Anonymous medical reads returned 401 `AUTH_REQUIRED` with
   private/no-store. Successful production login, authenticated CRUD and session
   revocation were **not** verified. A working anonymous gate does not prove them.
 - Owner-selected Neon project `hidden-wave-09272295`, main
-  `br-soft-night-audxwvre`, contained public authentication tables but no `medical`
-  schema. The owner confirmed there is no separate medical project. The medical backend
-  has not been deployed in the supplied Neon project.
-- `medical_deployer` was absent. `neondb_owner` was not superuser and had no
-  membership/SET authority for the medical roles. Existing privilege migration
-  explicitly requires an approved migration actor and temporary SET authority for
-  `medical_maintenance_owner`. Do not widen `medical_app` or skip privilege SQL.
-- Rehearsal-branch privilege preflight also showed `medical_migrator` cannot SET
-  `medical_maintenance_owner`. `medical_app` has CREATEROLE/CREATEDB and inherited
-  membership/SET in `neon_superuser`; this is not a least-privilege runtime role.
-  All inspected login roles inherit that provider role without ADMIN OPTION.
-  A table grant script alone does not remove this authority. Platform administration
-  must provision a restricted runtime role and supported ownership-transfer path.
+  `br-soft-night-audxwvre`, now has `medical` and `medical_ops`: all 13 migrations
+  were applied atomically as the exact approved actor `medical_deployer`.
+  New SQL-created `du_medical_*` roles avoid the provider authority inherited by
+  the existing API-created roles. Production role/ACL checks, eight catalog checks,
+  and synthetic create/update/soft-delete/sync with complete rollback passed.
+  Auth counts remained one user/nine sessions; medical tables remain empty.
+- The original managed `medical_app`/`medical_migrator` roles remain unsafe choices
+  for application runtime. The new `du_medical_app` has no administrative attributes
+  or role memberships. Deploy-only temporary maintenance authority was removed;
+  the role creator retains non-inheritable/non-SET operator ADMIN authority for
+  rotation. No actor guards were bypassed or broadened.
+- Vercel configuration access and successful authenticated production API checks
+  remain outstanding; a passing Neon check does not prove application activation.
 - Point-in-time retention was 21,600 seconds (six hours); no automatic snapshot
   schedule was configured on the selected main branch.
 
@@ -91,23 +93,22 @@ finalize a restore over production during a rehearsal.
 ## Repeatable role preflight
 
 Run the read-only [preflight SQL](../../scripts/sql/medical-runtime-preflight.sql)
-against the target with an approved connection. On the isolated Neon rehearsal
-branch all five checks failed: schema, required roles, restricted runtime attributes,
-restricted role membership and migration ownership-transfer authority. The script
-queries only platform catalogs. Passing it is a prerequisite, not a substitute for
-the table-grant/DDL denial matrix or authenticated API checks.
+with `du.medical_role_profile=neon-sql` and the default `runtime` phase. All eight
+catalog checks now pass on the production medical schema. The phase matters:
+post-installation must reject retained temporary ownership-transfer access. Run the
+profile-aware role/ACL smoke too. These checks do not prove authenticated API isolation.
 
 ## Safe rollout sequence
 
 1. Confirm the exact production auth and medical connection targets without copying
-   credentials into logs, PRs or chat. Obtain the existing approved migration actor
-   and ownership-transfer authority from the database/platform administrator.
+   credentials into logs, PRs or chat. Use the installed SQL-created runtime role
+   and the operator-only deployment path in the new installation runbook.
 2. Apply the ordered foundation/adoption/settings/rate-limit migrations and their
    privilege scripts on the isolated rehearsal branch, then `0009_medical_sync.sql`
    and `0010_medical_sync_privileges.sql`. A final deployment grants the runtime role
    only the table-specific privileges. Runtime must not use deploy/owner roles.
-3. Verify as `medical_app`: normal API works; DDL, direct audit modification,
-   unauthorized DELETE, cross-subject reads and privileged maintenance are denied.
+3. Verify as `du_medical_app`: DDL, direct audit modification and unauthorized
+   hard DELETE are denied. Check cross-account authorization through the API.
    Verify the trigger and outcome writes under this role, not PGlite owner alone.
 4. Deploy with sync disabled, confirm auth, real distributed rate limiting,
    synthetic account isolation and API no-store. Rehearse adoption with interruption,
@@ -141,8 +142,8 @@ launch with a support email alone as the erasure mechanism.
 
 ## Remaining launch blockers
 
-- Approved production migration actor, exact target configuration and live runtime
-  privilege tests; authenticated production end-to-end verification.
+- Vercel activation with the restricted medical connection; authenticated production
+  end-to-end verification. The Neon schema/role installation is completed.
 - Complete read/denial audit coverage, restricted audit review/retention and alerting.
 - Verified account-wide erasure, downstream/backup suppression and tracked requests.
 - Approved privacy/terms and operator legal identity/address.

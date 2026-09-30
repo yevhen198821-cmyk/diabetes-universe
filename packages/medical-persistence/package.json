@@ -12,7 +12,9 @@
     "db:generate": "drizzle-kit generate",
     "db:smoke:privileges": "node ./scripts/live-privilege-smoke.mjs",
     "test": "node --no-warnings --experimental-strip-types --import ./scripts/test-register.mjs --test 'src/**/*.test.mjs'",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:deploy:initial": "node ./scripts/deploy-neon-medical.mjs",
+    "db:smoke:lifecycle": "node ./scripts/live-lifecycle-smoke.mjs"
   },
   "dependencies": {
     "@diabetes-universe/medical-domain": "workspace:*",

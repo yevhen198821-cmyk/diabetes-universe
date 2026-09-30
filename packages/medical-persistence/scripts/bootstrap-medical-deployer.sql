@@ -1,4 +1,10 @@
 -- Operator/platform bootstrap for the production Neon deploy-only login role.
+-- LEGACY standard-name reference. The installed Neon project now uses SQL-created
+-- du_medical_* bindings. Do not run this template against that installed branch:
+-- follow docs/implementation/medical-neon-production-runbook.md and the atomic
+-- deploy-neon-medical.mjs initial installer on a fresh target instead.
+-- The platform-managed-role membership restriction below does not apply to new
+-- SQL-created roles; the creator retains ADMIN with INHERIT/SET false.
 --
 -- Do not run this from application request paths, Vercel runtime, apps/web,
 -- or Medical API code. Do not commit a password or connection string.
