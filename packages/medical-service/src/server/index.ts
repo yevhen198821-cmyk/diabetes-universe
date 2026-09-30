@@ -1,4 +1,5 @@
 export type { AuthorizationScope } from './types/authorization-scope';
+export type { SyncMutation } from './services/medical-sync-service';
 export {
   createMedicalServiceBundle,
   closeMedicalServiceBundle,

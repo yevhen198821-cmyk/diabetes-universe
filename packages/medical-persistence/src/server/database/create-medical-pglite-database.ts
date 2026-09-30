@@ -11,6 +11,7 @@ import {
   readMedicalDiabetesSettingsMigrationSql,
   readMedicalFoundationMigrationSql,
   readMedicalOpsRateLimitMigrationSql,
+  readMedicalSyncMigrationSql,
 } from './medical-pglite-bootstrap-migrations';
 import { medicalSchema } from './medical-schema';
 
@@ -40,6 +41,7 @@ async function ensurePgliteMedicalSchema(pgliteClient: PGlite): Promise<void> {
       )
       .then(() => pgliteClient.exec(readMedicalDiabetesSettingsMigrationSql()))
       .then(() => pgliteClient.exec(readMedicalOpsRateLimitMigrationSql()))
+      .then(() => pgliteClient.exec(readMedicalSyncMigrationSql()))
       .then(() => undefined);
   }
 

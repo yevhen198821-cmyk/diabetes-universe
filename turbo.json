@@ -10,8 +10,7 @@
         "BETTER_AUTH_SECRET",
         "RESEND_API_KEY",
         "AUTH_EMAIL_FROM",
-        "MEDICAL_DATABASE_URL",
-        "MEDICAL_REVISION_TOKEN_SECRET"
+        "MEDICAL_*"
       ]
     },
     "dev": {

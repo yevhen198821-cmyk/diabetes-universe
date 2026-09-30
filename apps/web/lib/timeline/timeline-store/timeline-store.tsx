@@ -128,6 +128,17 @@ export function TimelineStoreProvider({
     };
   }, [dispatchReadySnapshot, dispatchRepositoryError, timelineRepository]);
 
+  useEffect(() => {
+    const refresh = () => {
+      operationQueueRef.current = operationQueueRef.current
+        .then(dispatchReadySnapshot)
+        .catch(dispatchRepositoryError);
+    };
+    window.addEventListener('du:timeline-sync-applied', refresh);
+    return () =>
+      window.removeEventListener('du:timeline-sync-applied', refresh);
+  }, [dispatchReadySnapshot, dispatchRepositoryError]);
+
   const enqueueRepositoryMutationAsync = useCallback(
     (
       mutation: () => Promise<TimelineRepositoryMutationResult>,

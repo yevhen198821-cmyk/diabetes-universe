@@ -60,7 +60,10 @@ export async function scanTimelineForAdoption(
         continue;
       }
 
-      if (event.schemaVersion !== 1) {
+      if (
+        event.schemaVersion !== 1 &&
+        !(event.kind === 'nutrition' && event.schemaVersion === 2)
+      ) {
         results.push({
           localEventId,
           classification: 'unsupported',
