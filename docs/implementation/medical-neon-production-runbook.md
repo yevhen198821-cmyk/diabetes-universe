@@ -1,8 +1,9 @@
 # Medical Neon installation and evidence: 2026-09-30
 
-The medical schemas are installed on production Neon. The production application
-has **not yet been verified against them**: Vercel environment access and a real
-authenticated end-to-end check remain outstanding. This is not beta approval.
+The medical schemas are installed on production Neon, and Vercel uses the restricted
+application connection. A genuine email login and its authenticated medical database
+access are confirmed. Full authenticated CRUD, account isolation and two-device
+synchronization remain outstanding. This is not beta approval.
 
 ## Target and completed checks
 
@@ -24,8 +25,9 @@ authenticated end-to-end check remain outstanding. This is not beta approval.
   subjects/events/sync changes. Counts matched the before-installation auth counts.
   Personal records and credentials were not printed.
 
-Database checks do not establish production login, session revocation, API audit
-coverage, adoption, two-device synchronization, or cross-account API isolation.
+The rollback database checks alone do not establish production login, session
+revocation, API audit coverage, adoption, two-device synchronization, or
+cross-account API isolation. Separate live login evidence is recorded below.
 Subject authorization is enforced by the API; these tables do not implement
 per-account PostgreSQL RLS. A schema grant is not an account-isolation test.
 
@@ -112,24 +114,47 @@ The temporary `deployment` phase expects ownership-transfer authority; the final
 `runtime` phase requires it to be removed. Do not leave the deployment phase set
 when certifying post-installation access.
 
-## Application activation still required
+## Production application activation and email login
 
-Inspect the production Vercel project's actual connection targets first. Keep
-`DATABASE_URL` for authentication separate from `MEDICAL_DATABASE_URL`. Set the
-latter to the generated `du_medical_app` connection, never the owner/deployer URI.
-Medical configuration requires:
+Vercel project `diabetes-universe-web`, Resulto team, now serves merged main commit
+`916d0dc92ebbd154d32fab843d07ee8a1c95e3f8` on deployment
+`dpl_8ezpKsfAV5cXEvug1pAT6NxGx8iT` (READY), with the canonical alias
+[diabetes-universe-web.vercel.app](https://diabetes-universe-web.vercel.app).
+The owner completed CLI device authentication. Production-only environment values
+were installed; existing preview values and authentication secrets were preserved.
 
-- `MEDICAL_DATABASE_MODE=postgres`;
-- independent strong `MEDICAL_REVISION_TOKEN_SECRET` and `MEDICAL_LIST_CURSOR_SECRET`;
-- `MEDICAL_RATE_LIMIT_MODE=distributed`, `MEDICAL_RATE_LIMIT_BACKEND=postgres`;
-- adoption/sync feature flags initially disabled pending authenticated qualification.
+- `MEDICAL_DATABASE_URL` uses `du_medical_app`; authentication retains its separate
+  `DATABASE_URL`. Neither owner nor deployment credentials were added to runtime.
+- `MEDICAL_DATABASE_MODE=postgres`, `MEDICAL_RATE_LIMIT_MODE=distributed` and
+  `MEDICAL_RATE_LIMIT_BACKEND=postgres` are configured.
+- Independent strong revision-token and list-cursor secrets are stored as Sensitive
+  Vercel values, rather than exposed Config values.
+- `MEDICAL_ADOPTION_ENABLED=false` and `MEDICAL_SYNC_ENABLED=false` remain in place
+  pending authenticated adoption/sync qualification and resolution of launch blockers.
 
-Never set `MEDICAL_DEPLOYER_DATABASE_URL` or the bootstrap URL on Vercel runtime.
-Production cannot use E2E authentication fixtures or a process-local rate limiter.
-Perform real login, CRUD/retry, cross-account denial, session revocation, adoption
-and two-device sync checks before enabling the corresponding flags for a cohort.
-The connected Vercel tool currently supplies no environment-management operation;
-CLI device authentication by the owner is necessary to complete this part.
+Anonymous medical reads returned 401 `AUTH_REQUIRED` with private/no-store;
+supplying a forged E2E account header did not authenticate them. Anonymous auth
+session reads returned 200/null. These checks alone do not exercise the database.
+
+A real magic-link login was requested only for owner-authorized addresses. The
+support address was rejected by Resend with `validation_error`. The second request,
+to the Resend owner's address, produced no delivery rejection. A read-only aggregate
+check then confirmed that address was verified, a fresh real session existed, and
+an active medical account/subject relationship had been provisioned by authenticated
+application access. PostgreSQL rate-limit windows also appeared. No session token,
+magic link, credential or clinical payload was read or printed. This verifies live
+authentication and access to the configured medical backend, not a complete API
+create/update/delete, revocation or cross-account isolation scenario.
+
+The current sender is `onboarding@resend.dev`: Resend's test sender is restricted to
+the Resend account owner. Public beta login requires a verified sending domain and
+a valid `AUTH_EMAIL_FROM` address on that domain. The generic check-email screen
+alone does not confirm delivery. Do not distribute the test-sender configuration
+as a working public registration flow.
+
+Perform authenticated CRUD/retry, cross-account denial, session revocation, adoption
+and two-device sync checks before enabling the corresponding flags. Production
+cannot use E2E authentication fixtures or a process-local rate limiter.
 
 ## Recovery evidence and limits
 
@@ -142,26 +167,39 @@ CLI device authentication by the owner is necessary to complete this part.
   was preserved. The copied branch passed role/ACL smoke. Use the final rehearsal
   branch for current installer/rotation tests; the earlier experiment revoked its
   creator ADMIN memberships and must not be used as the deployment template.
-- The existing auth-only snapshot `snap-hidden-smoke-auh90mbm` and its earlier
-  restore branch `br-plain-unit-au0rwpjq` are retained.
-- Neon rejected a second root snapshot with `snapshots limit exceeded` and a
-  rehearsal snapshot with `not allowed to snapshot non-root branch`.
+- With the owner's explicit authorization, the sole old auth-only snapshot
+  `snap-hidden-smoke-auh90mbm` was replaced with the full production snapshot
+  `snap-soft-band-auzhmnc1`, named `medical-production-20260930`, created
+  `2026-09-30T23:41:13Z` from `br-soft-night-audxwvre`.
+- That snapshot was restored into a **new** branch `br-frosty-queen-auyiv84q`, named
+  `medical-snapshot-restore-20260930`, with finalization false. All 13 migration
+  records, auth counts (one user/nine sessions), medical schemas and restricted
+  role/ACL checks matched. The restricted application connection passed synthetic
+  create/update/soft-delete/sync rollback smoke on the restored branch too.
+- At snapshot capture, medical subjects/events/sync changes were empty. Populated
+  deletion-marker preservation was demonstrated by the earlier branch-copy test;
+  it must not be attributed to this empty medical snapshot. The earlier auth-only
+  restore branch `br-plain-unit-au0rwpjq` remains available for inspection.
 
-Copying a branch proves state/role propagation, not restoration from an independent
-medical snapshot, application reconnect, or a measured RTO. The production branch
-was not replaced or promoted. Six-hour PITR and the existing single manual snapshot
-do not establish a monitored automatic backup policy. Choose a supported retention
-and backup plan, then rehearse medical snapshot/PITR recovery with authenticated
-checks. Backups must honor an erasure suppression ledger before reopening access.
+The production branch was not replaced or promoted. These checks verify an actual
+medical schema snapshot restoration and restricted-role lifecycle behavior; they
+exclude authenticated application reconnect and a measured end-to-end RTO. The
+six-hour PITR window and one manual snapshot do not establish a monitored automatic
+backup policy. Record business RPO/RTO, select supported retention and scheduling,
+monitor backup failures, and rehearse authenticated application reconnect. Backups
+must honor an erasure suppression ledger before reopening access.
 Account-wide erasure and that ledger are still missing; event soft-delete retains
 clinical payload. See the [beta blockers](beta-readiness-2026-09-30.md).
 
 ## Repository verification
 
-The updated full unit/integration suite passed 2,144 of 2,145 tests; one external
-identity PostgreSQL test was skipped locally because `AUTH_TEST_POSTGRES_URL` was
-not set. The new installation tests verify atomic schema/role rollback, runtime
-permission denial, actor-guard preservation and rejection of administrative role
-attributes/memberships. Typecheck, ESLint, formatting and Markdown links passed.
-The CI workflow additionally supplies real PostgreSQL for the external auth test,
-builds the application and runs the browser suite.
+[PR #171](https://github.com/yevhen198821-cmyk/diabetes-universe/pull/171) merged the
+restricted-role installer and verification scripts. Both its CI run and the merged
+main run passed: 2,145 unit/integration tests (including real PostgreSQL identity
+coverage), 211 browser scenarios, build, typecheck, ESLint, formatting, Markdown
+links and OpenAPI checks. Main CI run:
+[36792049628](https://github.com/yevhen198821-cmyk/diabetes-universe/actions/runs/36792049628).
+The new installation tests verify atomic schema/role rollback, runtime permission
+denial, actor-guard preservation and rejection of administrative role attributes
+and memberships. These automated scenarios are separate from live production
+verification; they do not remove the remaining beta blockers.
