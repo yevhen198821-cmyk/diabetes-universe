@@ -314,7 +314,7 @@ class SerializedMutationRepository {
   }
 }
 
-async function mountTimelineStore({ repository } = {}) {
+async function mountTimelineStore({ repository, enabled = true } = {}) {
   setupIntegrationDom();
 
   const observations = [];
@@ -345,7 +345,7 @@ async function mountTimelineStore({ repository } = {}) {
     root.render(
       createElement(
         TimelineStoreProvider,
-        { repository },
+        { repository, enabled },
         createElement(StoreProbe),
       ),
     );
@@ -360,6 +360,17 @@ async function mountTimelineStore({ repository } = {}) {
       return currentStore;
     },
     observations,
+    async rerender(nextRepository, nextEnabled) {
+      await act(async () => {
+        root.render(
+          createElement(
+            TimelineStoreProvider,
+            { repository: nextRepository, enabled: nextEnabled },
+            createElement(StoreProbe),
+          ),
+        );
+      });
+    },
     async unmount() {
       await act(async () => {
         root.unmount();
@@ -764,4 +775,48 @@ test('async initialization completion does not render after unmount', async () =
 
   assert.equal(mounted.observations.length, 1);
   assert.equal(mounted.observations[0].status, 'loading');
+});
+
+test('unresolved owner cannot publish an empty ready snapshot or react to sync refresh', async () => {
+  let unavailableReads = 0;
+  const unavailable = {
+    initialize: async () => {
+      unavailableReads++;
+    },
+    queryEvents: async () => {
+      unavailableReads++;
+      return { events: [] };
+    },
+  };
+  const mounted = await mountTimelineStore({
+    repository: unavailable,
+    enabled: false,
+  });
+  try {
+    await flushAsyncWork();
+    window.dispatchEvent(new window.Event('du:timeline-sync-applied'));
+    await flushAsyncWork();
+    assert.equal(unavailableReads, 0);
+    assert.equal(mounted.currentStore.status, 'loading');
+    const owned = new DeferredInitializeRepository([glucoseEarly]);
+    await mounted.rerender(owned, true);
+    assert.equal(mounted.currentStore.status, 'loading');
+    owned.initializeDeferred.resolve();
+    await waitFor(
+      () => mounted.currentStore.status === 'ready',
+      'owned history loaded',
+    );
+    assert.deepEqual(
+      mounted.currentStore.events.map((event) => event.id),
+      [glucoseEarly.id],
+    );
+    assert.equal(
+      mounted.observations.some(
+        (state) => state.status === 'ready' && state.events.length === 0,
+      ),
+      false,
+    );
+  } finally {
+    await mounted.unmount();
+  }
 });

@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { expect, test } from './support/test';
 
 import { signInWithMagicLink } from './support/auth-helpers';
+import { waitForTimelineOwnershipReady } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 
 const AVATAR_FIXTURE_PATH = join(
@@ -20,6 +21,7 @@ test('profile avatar upload, replace, persistence, and removal', async ({
   await signInWithMagicLink(page, request, 'profile-avatar-flow@example.com');
   await page.goto('/account');
   await waitForApplicationReady(page);
+  await waitForTimelineOwnershipReady(page);
 
   await page
     .getByRole('button', { name: 'Change profile photo', exact: true })
@@ -39,6 +41,7 @@ test('profile avatar upload, replace, persistence, and removal', async ({
 
   await page.reload();
   await waitForApplicationReady(page);
+  await waitForTimelineOwnershipReady(page);
   await expect(profileAvatarImage(page)).toBeVisible();
 
   await page
@@ -67,6 +70,7 @@ test('profile avatar rejects invalid file type in dialog', async ({
   );
   await page.goto('/account');
   await waitForApplicationReady(page);
+  await waitForTimelineOwnershipReady(page);
 
   await page
     .getByRole('button', { name: 'Change profile photo', exact: true })
@@ -85,15 +89,23 @@ test('profile avatar rejects invalid file type in dialog', async ({
 test('profile avatar upload works on mobile viewport', async ({
   page,
   request,
-}) => {
+}, testInfo) => {
   await page.setViewportSize({ width: 360, height: 800 });
-  await signInWithMagicLink(page, request, 'profile-avatar-mobile@example.com');
+  await signInWithMagicLink(
+    page,
+    request,
+    `profile-avatar-mobile-${testInfo.repeatEachIndex}@example.com`,
+  );
   await page.goto('/account');
   await waitForApplicationReady(page);
+  await waitForTimelineOwnershipReady(page);
 
   await page
     .getByRole('button', { name: 'Change profile photo', exact: true })
     .click();
+  await expect(
+    page.getByRole('dialog', { name: 'Profile photo' }),
+  ).toBeVisible();
   await page.locator('input[type="file"]').setInputFiles(AVATAR_FIXTURE_PATH);
   await page.getByRole('button', { name: 'Save photo', exact: true }).click();
 
