@@ -39,8 +39,8 @@ repository:
 
 - **P10** — local medical data adoption has API/service implementation;
   production rollout and lifecycle approval still require verification
-- **P11** — offline sync (Approved)
-- **P12** — conflict / revision / tombstone architecture (Approved with normative clarifications)
+- **P11** — offline sync: durable local queue and server change feed implemented, opt-in and server gated; production qualification pending
+- **P12** — revision checks and tombstone delivery implemented; user conflict resolution and retention still pending
 - **P13** — security, privacy, and production hardening architecture (Approved)
 
 See [Architecture Overview](docs/architecture/README.md) for authoritative lifecycle
@@ -49,8 +49,7 @@ runtime behavior.
 
 ### Not yet implemented
 
-- Continuous offline sync runtime (P11)
-- Conflict / tombstone runtime (P12)
+- Production-qualified conflict resolution, cursor retention and tombstone compaction
 - Outbox dispatcher / consumer
 - Complete production medical launch controls (production PostgreSQL provider
   selection, backup/PITR/RPO/RTO, live privilege enforcement on launch target,
@@ -64,6 +63,12 @@ runtime behavior.
 See [release readiness](docs/project/roadmap.md) for observed launch blockers
 and [audit remediation](docs/implementation/audit-remediation-2026-09-10.md)
 for the current repair scope and verification evidence.
+
+Local storage, JSON export and explicit local deletion are available at `/data`.
+Support is available at `/support` (Resulto, Poland; resulto.universe@gmail.com).
+Neither local deletion nor an email request automatically erases cloud data.
+See [beta readiness evidence and operations](docs/implementation/beta-readiness-2026-09-30.md)
+for live verification, migration blockers, recovery evidence and remaining work.
 
 ## Technology
 

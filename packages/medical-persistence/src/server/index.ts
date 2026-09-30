@@ -10,6 +10,10 @@ export {
 } from './database/create-medical-database';
 export { medicalSchema } from './database/medical-schema';
 export {
+  createMedicalSyncRepository,
+  type SyncOutcome,
+} from './repositories/medical-sync-repository';
+export {
   createMedicalSubjectRepository,
   type MedicalSubjectRepository,
 } from './repositories/medical-subject-repository';

@@ -3,7 +3,7 @@ import {
   type TimelineRepository,
 } from '@diabetes-universe/timeline';
 
-/** An unresolved owner may render empty reads, but must never accept writes. */
+/** Unresolved ownership cannot publish a ready history or accept writes. */
 export function createUnavailableTimelineRepository(
   onWriteAttempt?: () => void,
 ): TimelineRepository {
@@ -15,7 +15,11 @@ export function createUnavailableTimelineRepository(
   };
 
   return {
-    initialize: async () => {},
+    initialize: async () => {
+      throw new TimelineRepositoryError(
+        'TIMELINE_REPOSITORY_STORAGE_UNAVAILABLE',
+      );
+    },
     getSnapshot: () => ({ events: [] }),
     getById: async () => null,
     queryEvents: async () => ({ events: [] }),

@@ -19,7 +19,7 @@ for (const failure of ['500', '429', 'network'] as const) {
       'pending',
     );
     await page
-      .getByRole('button', { name: 'Add glucose', exact: true })
+      .getByRole('button', { name: 'Quick add: Glucose', exact: true })
       .click();
     const dialog = page.getByRole('dialog', { name: 'Добавить глюкозу' });
     await dialog
