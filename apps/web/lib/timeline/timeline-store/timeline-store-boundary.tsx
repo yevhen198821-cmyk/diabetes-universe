@@ -34,6 +34,8 @@ export function TimelineStoreBoundary({
     (ownership.kind === 'pending' && failureReason !== null);
   const translate = (key: string) =>
     localization.translate({ key: key as TranslationKey }).value;
+  const ownerResolved =
+    ownership.kind === 'anonymous' || ownership.kind === 'authenticated';
   const ownershipKey =
     ownership.kind === 'authenticated'
       ? ownership.databaseName
@@ -81,7 +83,11 @@ export function TimelineStoreBoundary({
             </button>
           </section>
         )}
-        <TimelineStoreProvider key={ownershipKey} repository={repository}>
+        <TimelineStoreProvider
+          key={ownershipKey}
+          repository={repository}
+          enabled={ownerResolved || unavailable}
+        >
           {children}
         </TimelineStoreProvider>
       </div>

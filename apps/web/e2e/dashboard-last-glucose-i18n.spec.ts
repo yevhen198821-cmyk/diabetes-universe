@@ -1,5 +1,11 @@
 import { expect, test } from './support/test';
 
+declare global {
+  interface Window {
+    __emptyGlucoseFlashed?: boolean;
+  }
+}
+
 import { prepareCanonicalDemoTimelineFixture } from './support/timeline-indexeddb-helpers';
 import { waitForApplicationReady } from './support/wait-for-application-ready';
 import {
@@ -77,4 +83,54 @@ test('dashboard last glucose renders English labels and syncs with timeline edit
       exact: true,
     }),
   ).toBeVisible();
+});
+
+test('refresh keeps saved glucose loading until profile resolution without flashing the empty CTA', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await prepareCanonicalDemoTimelineFixture(page);
+  const region = page.getByRole('region', { name: 'Last glucose' });
+  await expect(region.getByText('7.3', { exact: true })).toBeVisible();
+  await page.addInitScript(() => {
+    window.__emptyGlucoseFlashed = false;
+    new MutationObserver(() => {
+      if (
+        Array.from(document.querySelectorAll('button')).some(
+          (button) => button.textContent?.trim() === 'Add glucose',
+        )
+      )
+        window.__emptyGlucoseFlashed = true;
+    }).observe(document, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+  });
+  let release!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/api/auth/get-session*', async (route) => {
+    await pending;
+    await route.continue();
+  });
+  try {
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await waitForApplicationReady(page);
+    await expect(
+      page.locator('[data-timeline-ownership="pending"]'),
+    ).toBeVisible();
+    await expect(region.getByRole('status')).toHaveText(
+      'Loading last glucose measurement',
+    );
+    await expect(
+      region.getByRole('button', { name: 'Add glucose', exact: true }),
+    ).toHaveCount(0);
+    release();
+    await expect(region.getByText('7.3', { exact: true })).toBeVisible();
+    expect(await page.evaluate(() => window.__emptyGlucoseFlashed)).toBe(false);
+  } finally {
+    release();
+  }
 });

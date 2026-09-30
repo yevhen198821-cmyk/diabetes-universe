@@ -49,6 +49,7 @@ export interface TimelineStoreValue {
 }
 
 interface TimelineStoreProviderProps {
+  readonly enabled?: boolean;
   readonly children: ReactNode;
   readonly repository: TimelineRepository;
 }
@@ -65,6 +66,7 @@ function resolveTimelineStoreErrorCode(error: unknown): TimelineStoreErrorCode {
 
 export function TimelineStoreProvider({
   children,
+  enabled = true,
   repository: repositoryOverride,
 }: TimelineStoreProviderProps) {
   const isMountedRef = useRef(false);
@@ -105,6 +107,11 @@ export function TimelineStoreProvider({
 
   useEffect(() => {
     isMountedRef.current = true;
+    if (!enabled) {
+      return () => {
+        isMountedRef.current = false;
+      };
+    }
     dispatch({ type: 'setLoading' });
 
     const initializeOperation = operationQueueRef.current
@@ -126,9 +133,15 @@ export function TimelineStoreProvider({
     return () => {
       isMountedRef.current = false;
     };
-  }, [dispatchReadySnapshot, dispatchRepositoryError, timelineRepository]);
+  }, [
+    enabled,
+    dispatchReadySnapshot,
+    dispatchRepositoryError,
+    timelineRepository,
+  ]);
 
   useEffect(() => {
+    if (!enabled) return;
     const refresh = () => {
       operationQueueRef.current = operationQueueRef.current
         .then(dispatchReadySnapshot)
@@ -137,7 +150,7 @@ export function TimelineStoreProvider({
     window.addEventListener('du:timeline-sync-applied', refresh);
     return () =>
       window.removeEventListener('du:timeline-sync-applied', refresh);
-  }, [dispatchReadySnapshot, dispatchRepositoryError]);
+  }, [enabled, dispatchReadySnapshot, dispatchRepositoryError]);
 
   const enqueueRepositoryMutationAsync = useCallback(
     (
