@@ -80,6 +80,10 @@ export function TestDiabetesSettingsProvider({
         ...(resolvedSettings ?? createTestSettings(unit)),
         glucoseDisplayUnit: unit,
       }),
+      patchSettings: async (patch) => ({
+        ...(resolvedSettings ?? createTestSettings(glucoseDisplayUnit)),
+        ...patch,
+      }),
       refresh: async () => {
         setRefreshOutcome({ error: null, loadState: 'loading' });
 

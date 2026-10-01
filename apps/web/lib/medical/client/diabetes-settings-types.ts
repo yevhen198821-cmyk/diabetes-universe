@@ -15,6 +15,11 @@ export interface DiabetesSettingsResource {
   readonly revision: string;
 }
 
+export interface DiabetesSettingsPatch {
+  readonly glucoseDisplayUnit?: GlucoseDisplayUnit;
+  readonly diabetesType?: DiabetesTypeClassification;
+}
+
 export interface GlucoseTargetProfileResource {
   readonly configured: boolean;
   readonly profileId: string | null;

@@ -371,3 +371,114 @@ test('bottom navigation remains active on diabetes management route', async ({
       .getByRole('link', { name: 'Account' }),
   ).toHaveAttribute('aria-current', 'page');
 });
+
+test('unit and type share a save boundary and use the latest revision', async ({
+  page,
+  request,
+}) => {
+  await page.unroute('**/api/v1/medical/me/diabetes-settings');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signInWithMagicLink(
+    page,
+    request,
+    'profile-diabetes-serial-save@example.com',
+  );
+  await page.goto('/account/diabetes');
+  await waitForApplicationReady(page);
+  const unit = page.getByRole('button', { name: 'mmol/L', exact: true });
+  const type = page.getByRole('combobox', {
+    name: 'Diabetes type',
+    exact: true,
+  });
+  await expect(unit).toBeEnabled();
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/api/v1/medical/me/diabetes-settings', async (route) => {
+    if (route.request().method() === 'PATCH') await gate;
+    await route.continue();
+  });
+  const firstResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes('/diabetes-settings') &&
+      response.request().method() === 'PATCH',
+  );
+  await unit.click();
+  try {
+    await expect(unit).toBeDisabled();
+    await expect(type).toBeDisabled();
+  } finally {
+    release();
+  }
+  expect((await firstResponse).status()).toBe(200);
+  await expect(type).toBeEnabled();
+  const secondResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes('/diabetes-settings') &&
+      response.request().method() === 'PATCH',
+  );
+  await type.selectOption('type_2');
+  expect((await secondResponse).status()).toBe(200);
+  await expect(type).toHaveValue('type_2');
+  await expect(unit).toHaveAttribute('aria-pressed', 'true');
+  await expect(
+    page.getByText('Settings were changed elsewhere.', { exact: false }),
+  ).toHaveCount(0);
+});
+
+test('remote conflicts preserve remote values and old warnings clear on the next edit', async ({
+  page,
+  request,
+}) => {
+  await page.unroute('**/api/v1/medical/me/diabetes-settings');
+  await signInWithMagicLink(
+    page,
+    request,
+    'profile-diabetes-remote-save@example.com',
+  );
+  await page.goto('/account/diabetes');
+  await waitForApplicationReady(page);
+  const unit = page.getByRole('button', { name: 'mmol/L', exact: true });
+  const type = page.getByRole('combobox', {
+    name: 'Diabetes type',
+    exact: true,
+  });
+  await expect(unit).toBeEnabled();
+  const path = '/api/v1/medical/me/diabetes-settings';
+  const current = await page.request.get(path);
+  expect(current.status()).toBe(200);
+  const snapshot = await current.json();
+  const remote = await page.request.patch(path, {
+    headers: { 'If-Match': snapshot.revision },
+    data: { diabetesType: { category: 'type_1', source: 'self_reported' } },
+  });
+  expect(remote.status()).toBe(200);
+  const conflict = page.waitForResponse(
+    (response) =>
+      response.url().includes('/diabetes-settings') &&
+      response.request().method() === 'PATCH',
+  );
+  await unit.click();
+  expect((await conflict).status()).toBe(412);
+  await expect(
+    page.getByText(
+      'Settings were changed elsewhere. The latest values have been loaded.',
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(type).toHaveValue('type_1');
+  await expect(unit).toHaveAttribute('aria-pressed', 'false');
+  const retry = page.waitForResponse(
+    (response) =>
+      response.url().includes('/diabetes-settings') &&
+      response.request().method() === 'PATCH',
+  );
+  await type.selectOption('type_2');
+  expect((await retry).status()).toBe(200);
+  await expect(type).toHaveValue('type_2');
+  await expect(
+    page.getByText('Settings were changed elsewhere.', { exact: false }),
+  ).toHaveCount(0);
+  await expect(unit).toHaveAttribute('aria-pressed', 'false');
+});

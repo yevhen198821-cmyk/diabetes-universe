@@ -18,6 +18,7 @@ import {
 } from '../client/diabetes-settings-client';
 import {
   DiabetesSettingsClientError,
+  type DiabetesSettingsPatch,
   type DiabetesSettingsResource,
 } from '../client/diabetes-settings-types';
 import { interpretDiabetesSettingsLoadFailure } from '../client/parse-diabetes-settings-resource';
@@ -31,6 +32,9 @@ export interface DiabetesSettingsContextValue {
   readonly loadState: DiabetesSettingsLoadState;
   readonly patchGlucoseDisplayUnit: (
     unit: GlucoseDisplayUnit,
+  ) => Promise<DiabetesSettingsResource>;
+  readonly patchSettings: (
+    patch: DiabetesSettingsPatch,
   ) => Promise<DiabetesSettingsResource>;
   readonly refresh: () => Promise<void>;
   readonly selectGlucoseDisplayUnit: (
@@ -63,6 +67,8 @@ export function DiabetesSettingsProvider({
   const [sessionDisplayUnit, setSessionDisplayUnit] =
     useState<GlucoseDisplayUnit | null>(null);
   const requestIdRef = useRef(0);
+  const settingsRef = useRef<DiabetesSettingsResource | null>(null);
+  const mutationQueueRef = useRef<Promise<void>>(Promise.resolve());
 
   const applyLoadResult = useCallback(
     (requestId: number, result: Promise<DiabetesSettingsResource>) => {
@@ -72,6 +78,7 @@ export function DiabetesSettingsProvider({
             return;
           }
 
+          settingsRef.current = nextSettings;
           setSettings(nextSettings);
           setError(null);
           setLoadState('ready');
@@ -83,6 +90,7 @@ export function DiabetesSettingsProvider({
 
           const interpreted = interpretDiabetesSettingsLoadFailure(caughtError);
           if (interpreted.type === 'unconfigured') {
+            settingsRef.current = null;
             setSettings(null);
             setError(null);
             setLoadState('ready');
@@ -114,6 +122,9 @@ export function DiabetesSettingsProvider({
 
   const updateSettingsFromMutation = useCallback(
     (nextSettings: DiabetesSettingsResource) => {
+      // A GET started before this write must not replace its new revision.
+      requestIdRef.current += 1;
+      settingsRef.current = nextSettings;
       setSettings(nextSettings);
       setError(null);
       setLoadState('ready');
@@ -121,25 +132,54 @@ export function DiabetesSettingsProvider({
     [],
   );
 
+  const patchSettings = useCallback(
+    (patch: DiabetesSettingsPatch) => {
+      const expectedSubjectId = settingsRef.current?.subjectId;
+      const result = mutationQueueRef.current.then(async () => {
+        const current = settingsRef.current;
+        if (!current) {
+          throw new DiabetesSettingsClientError(
+            'server',
+            'Diabetes settings are not loaded.',
+          );
+        }
+
+        if (current.subjectId !== expectedSubjectId) {
+          throw new DiabetesSettingsClientError(
+            'unauthorized',
+            'The signed-in account changed.',
+          );
+        }
+
+        const updated = await patchDiabetesSettings(current.revision, patch);
+        if (settingsRef.current?.subjectId !== expectedSubjectId) {
+          throw new DiabetesSettingsClientError(
+            'unauthorized',
+            'The signed-in account changed.',
+          );
+        }
+        updateSettingsFromMutation(updated);
+        return updated;
+      });
+
+      // Keep subsequent edits usable after a failed write; never retry a
+      // genuine remote revision conflict automatically.
+      mutationQueueRef.current = result.then(
+        () => {},
+        () => {},
+      );
+      return result;
+    },
+    [updateSettingsFromMutation],
+  );
+
   const patchGlucoseDisplayUnit = useCallback(
     async (unit: GlucoseDisplayUnit) => {
-      if (!settings) {
-        throw new DiabetesSettingsClientError(
-          'server',
-          'Diabetes settings are not loaded.',
-        );
-      }
-
-      const updated = await patchDiabetesSettings(settings.revision, {
-        glucoseDisplayUnit: unit,
-      });
-      setSettings(updated);
+      const updated = await patchSettings({ glucoseDisplayUnit: unit });
       setSessionDisplayUnit(null);
-      setError(null);
-      setLoadState('ready');
       return updated;
     },
-    [settings],
+    [patchSettings],
   );
 
   const selectGlucoseDisplayUnit = useCallback(
@@ -166,6 +206,7 @@ export function DiabetesSettingsProvider({
       isUnconfigured: loadState === 'ready' && resolvedDisplayUnit == null,
       loadState,
       patchGlucoseDisplayUnit,
+      patchSettings,
       refresh,
       selectGlucoseDisplayUnit,
       settings,
@@ -175,6 +216,7 @@ export function DiabetesSettingsProvider({
       error,
       loadState,
       patchGlucoseDisplayUnit,
+      patchSettings,
       refresh,
       resolvedDisplayUnit,
       selectGlucoseDisplayUnit,
