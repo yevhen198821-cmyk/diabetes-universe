@@ -3,8 +3,9 @@
 ## Current decision
 
 Medical production beta remains blocked. This change supplies reviewable runtime
-code and recovery evidence. Medical schemas are now installed on Neon, but
-application activation and beta certification remain outstanding. See the
+code and recovery evidence. Medical schemas are installed on Neon, the restricted
+Vercel connection is active, and a genuine email login reached the medical backend.
+Full authenticated lifecycle qualification and beta certification remain outstanding. See the
 [production installation evidence](medical-neon-production-runbook.md).
 Operator supplied by the owner: Resulto, Poland. Support:
 [resulto.universe@gmail.com](mailto:resulto.universe@gmail.com).
@@ -12,42 +13,54 @@ A company registration/address, approved privacy notice and terms remain necessa
 
 ## Live observations
 
-- Vercel production deployment `dpl_DAX7wthQkkaVc39j236YCk2cTf48` was READY,
-  serving main commit `523aa8b2dda1939dfddc84ddf53f8ec7b8f51567`.
+- Vercel production deployment `dpl_8ezpKsfAV5cXEvug1pAT6NxGx8iT` was READY,
+  serving main commit `916d0dc92ebbd154d32fab843d07ee8a1c95e3f8`.
 - `https://diabetes-universe-web.vercel.app/api/auth/get-session` returned 200/null
   without a session. Anonymous medical reads returned 401 `AUTH_REQUIRED` with
-  private/no-store. Successful production login, authenticated CRUD and session
-  revocation were **not** verified. A working anonymous gate does not prove them.
+  private/no-store. A forged E2E account header did not bypass production auth.
+  A genuine owner-authorized email login established a verified user and a fresh
+  session; authenticated access provisioned a medical subject relationship and
+  PostgreSQL rate-limit windows. Full authenticated CRUD, cross-account isolation
+  and session revocation remain unverified.
 - Owner-selected Neon project `hidden-wave-09272295`, main
   `br-soft-night-audxwvre`, now has `medical` and `medical_ops`: all 13 migrations
   were applied atomically as the exact approved actor `medical_deployer`.
   New SQL-created `du_medical_*` roles avoid the provider authority inherited by
   the existing API-created roles. Production role/ACL checks, eight catalog checks,
   and synthetic create/update/soft-delete/sync with complete rollback passed.
-  Auth counts remained one user/nine sessions; medical tables remain empty.
+  Installation preserved the then-existing one auth user/nine sessions and empty
+  medical tables. The later real login created a session and medical relationship.
 - The original managed `medical_app`/`medical_migrator` roles remain unsafe choices
   for application runtime. The new `du_medical_app` has no administrative attributes
   or role memberships. Deploy-only temporary maintenance authority was removed;
   the role creator retains non-inheritable/non-SET operator ADMIN authority for
   rotation. No actor guards were bypassed or broadened.
-- Vercel configuration access and successful authenticated production API checks
-  remain outstanding; a passing Neon check does not prove application activation.
+- Production Vercel now uses the restricted app role, independent Sensitive HMAC
+  secrets and PostgreSQL distributed limiting. Preview values were preserved.
+  Adoption and sync flags remain disabled pending qualification.
+- Resend rejected the support-address login request, while login to the Resend
+  owner succeeded. The current test sender `onboarding@resend.dev` requires a
+  verified sending domain and a valid sender before public beta registration.
 - Point-in-time retention was 21,600 seconds (six hours); no automatic snapshot
   schedule was configured on the selected main branch.
 
 ## Recovery rehearsal
 
-A manual main-branch snapshot `snap-hidden-smoke-auh90mbm`
-(`beta-readiness-2026-09-30`, 19:21:39 UTC) was restored into the **new** branch
-`br-plain-unit-au0rwpjq` (`beta-restore-rehearsal-2026-09-30`), with finalization
-false. Production compute/name/default branch were not switched.
-Both main and restored branch had one auth user, nine session rows, and no medical
-schema. Schema inspection and aggregate counts matched; no personal records were
-printed. This confirms snapshot restoration of the existing authentication database.
-It does not validate medical recovery, application reconnect, full integrity,
-security after restore, or an end-to-end RTO.
-An additional isolated migration rehearsal branch is `br-purple-night-aul8fdd3`.
-Rehearsal branches are retained for inspection, not deleted automatically.
+With the owner's explicit approval, the auth-only snapshot
+`snap-hidden-smoke-auh90mbm` was replaced by full production snapshot
+`snap-soft-band-auzhmnc1` (`medical-production-20260930`, 23:41:13 UTC).
+It was restored into a **new** branch `br-frosty-queen-auyiv84q`
+(`medical-snapshot-restore-20260930`), with finalization false. Production was not
+switched. The restore preserved all 13 medical migration records and one auth
+user/nine sessions. Role/ACL checks and restricted-runtime synthetic lifecycle
+smoke passed. Medical tables were empty at snapshot capture, so this does not prove
+recovery of populated clinical history, authenticated reconnect or end-to-end RTO.
+
+An earlier isolated synthetic branch copy preserved a deleted event at revision 2,
+its sync sequence 2 and deletion marker. This is separate branch-copy evidence.
+Pre-installation, rehearsal and restored branches are retained for inspection.
+Exact branch IDs and verification limits are in the
+[production runbook](medical-neon-production-runbook.md).
 
 Before beta, select and record a business RPO/RTO, configure a supported automatic
 backup schedule and retention, monitor failures, and rehearse the medical database
@@ -142,8 +155,10 @@ launch with a support email alone as the erasure mechanism.
 
 ## Remaining launch blockers
 
-- Vercel activation with the restricted medical connection; authenticated production
-  end-to-end verification. The Neon schema/role installation is completed.
+- Full authenticated production CRUD/retry, session revocation, account isolation,
+  adoption and two-device sync qualification. Schema installation, restricted-role
+  activation and real owner login are completed.
+- A verified email sending domain and production sender for public registration.
 - Complete read/denial audit coverage, restricted audit review/retention and alerting.
 - Verified account-wide erasure, downstream/backup suppression and tracked requests.
 - Approved privacy/terms and operator legal identity/address.
@@ -155,15 +170,10 @@ launch with a support email alone as the erasure mechanism.
 
 ## Verification evidence for this change
 
-The unit/integration suite contained 2,141 tests: 2,140 passed and one external
-identity PostgreSQL test was skipped because AUTH_TEST_POSTGRES_URL was not set.
-The affected locale suites were rerun after the support namespace correction.
-Typecheck, ESLint, Prettier, production build, Markdown links, OpenAPI schema,
-OpenAPI compatibility against origin/main and 21 OpenAPI contract tests passed.
-Browser inspection covered local data, support and the home page.
-The full browser suite initially passed 201 scenarios; three tests exposed a
-single-store-only delay hook that no longer intercepted atomic event/queue writes,
-and six dependent serial scenarios were not run. The hook now delays the complete
-atomic write. All 16 scenarios in the affected files and local-data/profile checks
-passed on rerun, including the three failures and six skipped dependents. Across
-the full run and this rerun, all 210 distinct browser scenarios have a passing result.
+PR #171 and its merged main CI passed all 2,145 unit/integration tests, including
+real PostgreSQL identity coverage, and 211 browser scenarios. Typecheck, ESLint,
+Prettier, build, Markdown links and OpenAPI checks also passed. Main CI evidence:
+[run 36792049628](https://github.com/yevhen198821-cmyk/diabetes-universe/actions/runs/36792049628).
+Production database checks, real login and restore evidence are documented in the
+[installation runbook](medical-neon-production-runbook.md); they have a narrower
+scope than complete beta certification.
