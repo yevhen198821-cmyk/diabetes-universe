@@ -13,7 +13,6 @@ import { SessionConfirmDialog } from '../auth/session-confirm-dialog';
 import {
   deleteGlucoseTargetProfile,
   fetchGlucoseTargetProfile,
-  patchDiabetesSettings,
   putGlucoseTargetProfile,
 } from '../../lib/medical/client/diabetes-settings-client';
 import {
@@ -105,7 +104,7 @@ export function ProfileDiabetesManagementPanel() {
     loadState: settingsLoadState,
     refresh: refreshSettings,
     settings,
-    updateSettingsFromMutation,
+    patchSettings,
   } = useDiabetesSettings();
 
   const [targetLoadState, setTargetLoadState] = useState<LoadState>('loading');
@@ -239,7 +238,7 @@ export function ProfileDiabetesManagementPanel() {
   async function handleUnitChange(nextUnit: GlucoseDisplayUnit) {
     if (
       !settings ||
-      unitSaveState === 'saving' ||
+      settingsSaving ||
       settings.glucoseDisplayUnit === nextUnit
     ) {
       return;
@@ -247,13 +246,14 @@ export function ProfileDiabetesManagementPanel() {
 
     setUnitSaveState('saving');
     setUnitSaveError(null);
+    setTypeSaveState('idle');
+    setTypeSaveError(null);
     setBannerError(null);
 
     try {
-      const updated = await patchDiabetesSettings(settings.revision, {
+      await patchSettings({
         glucoseDisplayUnit: nextUnit,
       });
-      updateSettingsFromMutation(updated);
       setUnitSaveState('saved');
     } catch (error) {
       const message = await handleMutationError(error);
@@ -263,7 +263,7 @@ export function ProfileDiabetesManagementPanel() {
   }
 
   async function handleDiabetesTypeChange(nextCategory: DiabetesTypeCategory) {
-    if (!settings || typeSaveState === 'saving') {
+    if (!settings || settingsSaving) {
       return;
     }
 
@@ -274,13 +274,14 @@ export function ProfileDiabetesManagementPanel() {
 
     setTypeSaveState('saving');
     setTypeSaveError(null);
+    setUnitSaveState('idle');
+    setUnitSaveError(null);
     setBannerError(null);
 
     try {
-      const updated = await patchDiabetesSettings(settings.revision, {
+      await patchSettings({
         diabetesType: classification,
       });
-      updateSettingsFromMutation(updated);
       setOtherDescriptorDraft(null);
       setTypeSaveState('saved');
     } catch (error) {
@@ -394,6 +395,9 @@ export function ProfileDiabetesManagementPanel() {
     { id: 'unknown', label: labels.diabetesType.unknown },
   ];
 
+  const settingsSaving =
+    unitSaveState === 'saving' || typeSaveState === 'saving';
+
   return (
     <div className={`${profileCardClassName} space-y-5 p-6`}>
       <header className="space-y-2">
@@ -472,7 +476,7 @@ export function ProfileDiabetesManagementPanel() {
                         ? profileThemeControlActiveClassName
                         : profileThemeControlInactiveClassName
                     }`}
-                    disabled={unitSaveState === 'saving'}
+                    disabled={settingsSaving}
                     key={option.id}
                     onClick={() => void handleUnitChange(option.id)}
                     type="button"
@@ -520,7 +524,7 @@ export function ProfileDiabetesManagementPanel() {
               </span>
               <select
                 className="focus-visible:outline-interactive-primary text-text-primary border-border-default bg-surface-subtle min-h-11 w-full rounded-xl border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/10 dark:bg-slate-950/40"
-                disabled={typeSaveState === 'saving'}
+                disabled={settingsSaving}
                 onChange={(event) =>
                   void handleDiabetesTypeChange(
                     event.target.value as DiabetesTypeCategory,
@@ -543,7 +547,7 @@ export function ProfileDiabetesManagementPanel() {
                 </span>
                 <input
                   className="focus-visible:outline-interactive-primary text-text-primary border-border-default bg-surface-subtle min-h-11 w-full rounded-xl border px-3 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-white/10 dark:bg-slate-950/40"
-                  disabled={typeSaveState === 'saving'}
+                  disabled={settingsSaving}
                   maxLength={256}
                   onBlur={() => void handleOtherDescriptorBlur()}
                   onChange={(event) =>
