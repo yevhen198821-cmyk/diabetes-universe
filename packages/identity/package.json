@@ -14,17 +14,17 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@better-auth/drizzle-adapter": "1.7.6",
-    "@better-auth/passkey": "1.7.6",
-    "better-auth": "1.7.6",
-    "drizzle-orm": "0.45.3",
+    "@better-auth/drizzle-adapter": "1.7.7",
+    "@better-auth/passkey": "1.7.7",
+    "better-auth": "1.7.7",
+    "drizzle-orm": "0.45.4",
     "postgres": "^3.4.9",
-    "resend": "6.29.0",
-    "sharp": "^0.35.4"
+    "resend": "6.32.1",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
-    "@types/node": "^26.6.2",
+    "@types/node": "^26.6.5",
     "drizzle-kit": "0.31.11"
   }
 }
