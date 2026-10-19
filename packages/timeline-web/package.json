@@ -13,9 +13,9 @@
   "dependencies": {
     "@diabetes-universe/timeline": "workspace:*",
     "@diabetes-universe/types": "workspace:*",
-    "idb": "^8.0.3"
+    "idb": "^8.0.4"
   },
   "devDependencies": {
-    "fake-indexeddb": "^6.2.5"
+    "fake-indexeddb": "^6.2.6"
   }
 }
